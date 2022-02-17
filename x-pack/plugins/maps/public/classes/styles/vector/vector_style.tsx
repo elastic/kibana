@@ -6,11 +6,16 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
-import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
+import React, { CSSProperties, ReactElement } from 'react';
+import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
+import {
+  getDefaultStaticProperties,
+  LABEL_STYLES,
+  LINE_STYLES,
+  POLYGON_STYLES,
+} from './vector_style_defaults';
 import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
@@ -25,7 +30,7 @@ import {
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { isOnlySingleFeatureType } from './style_util';
+import { isOnlySingleFeatureType, getHasLabel } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -63,6 +68,7 @@ import {
   StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
+  TileMetaFeature,
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
@@ -89,11 +95,12 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
-  pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
-  isTimeAware: () => boolean;
-  getIcon: () => ReactElement<any>;
+  getIsPointsOnly(): boolean;
+  isTimeAware(): boolean;
+  getPrimaryColor(): string;
+  getIcon(showIncompleteIndicator: boolean): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
-  renderLegendDetails: () => ReactElement<any>;
+  renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
   setFeatureStateAndStyleProps: (
     featureCollection: FeatureCollection,
@@ -255,9 +262,9 @@ export class VectorStyle implements IVectorStyle {
     mapColors: string[]
   ) {
     const originalProperties = this.getRawProperties();
-    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
-      originalProperties
-    ) as VECTOR_STYLES[]).filter((key) => {
+    const invalidStyleNames: VECTOR_STYLES[] = (
+      Object.keys(originalProperties) as VECTOR_STYLES[]
+    ).filter((key) => {
       const dynamicOptions = getDynamicOptions(originalProperties, key);
       if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
         return false;
@@ -478,7 +485,7 @@ export class VectorStyle implements IVectorStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={this._layer}
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         onIsTimeAwareChange={onIsTimeAwareChange}
         isTimeAware={this.isTimeAware()}
@@ -488,9 +495,49 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest) {
-    const features = _.get(sourceDataRequest.getData(), 'features', []);
+  async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
+    const supportedShapeTypes = await this._source.getSupportedShapeTypes();
+    const styleMeta: StyleMetaDescriptor = {
+      geometryTypes: {
+        isPointsOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
+        isLinesOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
+        isPolygonsOnly:
+          supportedShapeTypes.length === 1 &&
+          supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
+      },
+      fieldMeta: {},
+    };
 
+    const dynamicProperties = this.getDynamicPropertiesArray();
+    if (dynamicProperties.length === 0 || !metaFeatures) {
+      // no additional meta data to pull from source data request.
+      return styleMeta;
+    }
+
+    dynamicProperties.forEach((dynamicProperty) => {
+      const name = dynamicProperty.getFieldName();
+      if (!styleMeta.fieldMeta[name]) {
+        styleMeta.fieldMeta[name] = { categories: [] };
+      }
+      styleMeta.fieldMeta[name].categories =
+        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
+
+      const ordinalStyleMeta =
+        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
+      if (ordinalStyleMeta) {
+        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+      }
+    });
+
+    return styleMeta;
+  }
+
+  async pluckStyleMetaFromSourceDataRequest(
+    sourceDataRequest: DataRequest
+  ): Promise<StyleMetaDescriptor> {
+    const features = _.get(sourceDataRequest.getData(), 'features', []);
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const hasFeatureType = {
       [VECTOR_SHAPE_TYPE.POINT]: false,
@@ -548,21 +595,20 @@ export class VectorStyle implements IVectorStyle {
       return styleMeta;
     }
 
-    dynamicProperties.forEach((dynamicProperty) => {
-      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
-      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
-      const name = dynamicProperty.getFieldName();
-      if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = {};
+    dynamicProperties.forEach(
+      (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
+        const name = dynamicProperty.getFieldName();
+        if (!styleMeta.fieldMeta[name]) {
+          styleMeta.fieldMeta[name] = { categories: [] };
+        }
+        styleMeta.fieldMeta[name].categories =
+          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
+        if (ordinalStyleMeta) {
+          styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        }
       }
-      if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-      }
-
-      if (ordinalStyleMeta) {
-        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
-      }
-    });
+    );
 
     return styleMeta;
   }
@@ -592,7 +638,7 @@ export class VectorStyle implements IVectorStyle {
     ) as Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   }
 
-  _getIsPointsOnly = () => {
+  getIsPointsOnly = () => {
     return this._styleMeta.isPointsOnly();
   };
 
@@ -653,8 +699,17 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIcon = () => {
+  getPrimaryColor() {
+    const primaryColorKey = this._getIsLinesOnly()
+      ? VECTOR_STYLES.LINE_COLOR
+      : VECTOR_STYLES.FILL_COLOR;
+    return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
+  }
+
+  getIcon(showIncompleteIndicator: boolean) {
     const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this.getIsPointsOnly();
+
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -674,21 +729,36 @@ export class VectorStyle implements IVectorStyle {
           'grey'
         );
 
+    const borderStyle: CSSProperties = showIncompleteIndicator
+      ? {
+          borderColor: this.getPrimaryColor(),
+          borderStyle: 'dashed',
+          borderWidth: '1px',
+        }
+      : {};
+
     return (
       <VectorIcon
-        isPointsOnly={this._getIsPointsOnly()}
+        borderStyle={borderStyle}
+        isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
         strokeColor={strokeColor}
         fillColor={fillColor}
       />
     );
-  };
+  }
 
   _getLegendDetailStyleProperties = () => {
+    const hasLabel = getHasLabel(this._labelStyleProperty);
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
       const styleName = styleProperty.getStyleName();
       if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
+        return false;
+      }
+
+      if (!hasLabel && LABEL_STYLES.includes(styleName)) {
+        // do not render legend for label styles when there is no label
         return false;
       }
 
@@ -712,7 +782,7 @@ export class VectorStyle implements IVectorStyle {
     return (
       <VectorStyleLegend
         styles={this._getLegendDetailStyleProperties()}
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         symbolId={this._getSymbolId()}
       />
@@ -813,8 +883,6 @@ export class VectorStyle implements IVectorStyle {
     mbMap: MbMap;
     textLayerId: string;
   }) {
-    mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
-    mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
@@ -833,12 +901,9 @@ export class VectorStyle implements IVectorStyle {
   }) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
-    this._iconStyleProperty.syncIconWithMb(
-      symbolLayerId,
-      mbMap,
-      this._iconSizeStyleProperty.getIconPixelSize()
-    );
+    this._iconStyleProperty.syncIconWithMb(symbolLayerId, mbMap);
     // icon-color is only supported on SDF icons.
     this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
     this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);

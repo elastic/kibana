@@ -9,7 +9,7 @@ import { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import '../../../../common/mock/match_media';
 import '../../../../common/mock/formatted_relative';
@@ -26,6 +26,15 @@ import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+    useSelector: () => jest.fn(),
+  };
+});
 
 describe('#getCommonColumns', () => {
   let mockResults: OpenTimelineResult[];

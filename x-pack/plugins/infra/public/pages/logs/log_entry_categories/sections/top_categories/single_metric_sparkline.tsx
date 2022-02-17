@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Chart, Settings, AreaSeries } from '@elastic/charts';
+import { Chart, Settings, AreaSeries, ScaleType, TooltipType } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
 import { TimeRange } from '../../../../../../common/time';
 
 interface TimeSeriesPoint {
@@ -33,6 +34,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   timeRange: TimeRange;
 }> = ({ metric, timeRange }) => {
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
+  const timeZone = useKibanaTimeZoneSetting();
 
   const theme = useMemo(
     () => [
@@ -53,13 +55,14 @@ export const SingleMetricSparkline: React.FunctionComponent<{
 
   return (
     <Chart size={sparklineSize}>
-      <Settings showLegend={false} theme={theme} tooltip="none" xDomain={xDomain} />
+      <Settings showLegend={false} theme={theme} tooltip={TooltipType.None} xDomain={xDomain} />
       <AreaSeries
-        data={metric}
         id="metric"
+        data={metric}
         xAccessor={timestampAccessor}
-        xScaleType="time"
+        xScaleType={ScaleType.Time}
         yAccessors={valueAccessor}
+        timeZone={timeZone}
       />
     </Chart>
   );

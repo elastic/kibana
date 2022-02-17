@@ -8,8 +8,9 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { Space } from '../../../../common';
 
 interface Props {
   getActiveSpace: () => Promise<Space>;

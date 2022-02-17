@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ITermJoinSource } from './term_join_source';
+export type { ITermJoinSource } from './term_join_source';

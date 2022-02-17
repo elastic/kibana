@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,
@@ -79,8 +79,9 @@ export function getRichDetectors(
       byField,
       overField,
       partitionField,
-      excludeFrequent: d.exclude_frequent || null,
-      description: d.detector_description || null,
+      excludeFrequent: d.exclude_frequent ?? null,
+      description: d.detector_description ?? null,
+      useNull: d.use_null ?? null,
     };
   });
 }
@@ -257,15 +258,19 @@ export function convertToMultiMetricJob(
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashJobForCloning(jobCreator, true, true);
-
   navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, true);
-
   navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+}
+
+export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+  jobCreator.createdBy = null;
+  stashJobForCloning(jobCreator, true, false);
+  navigateToPath('/jobs/new_job');
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
@@ -309,6 +314,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.CATEGORIZATION:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
         defaultMessage: 'Categorization',
+      });
+    case JOB_TYPE.RARE:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
+        defaultMessage: 'Rare',
       });
     default:
       return '';

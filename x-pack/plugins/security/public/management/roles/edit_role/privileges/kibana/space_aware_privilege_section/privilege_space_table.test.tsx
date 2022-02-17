@@ -9,7 +9,7 @@ import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { KibanaFeature } from '../../../../../../../../features/public';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
@@ -739,6 +739,21 @@ describe('global base read', () => {
         { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
       ]);
     });
+  });
+});
+
+describe('global and reserved', () => {
+  it('base all, reserved_foo', () => {
+    const props = buildProps([
+      { spaces: ['*'], base: ['all'], feature: {} },
+      { spaces: ['*'], base: [], feature: {}, _reserved: ['foo'] },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['*'], privileges: { summary: 'Foo', overridden: false } },
+      { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
+    ]);
   });
 });
 

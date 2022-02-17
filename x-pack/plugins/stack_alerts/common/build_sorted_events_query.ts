@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { ESSearchRequest } from '../../../../typings/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ESSearchRequest } from '../../../../src/core/types/elasticsearch';
 
 interface BuildSortedEventsQueryOpts {
-  aggs?: Record<string, estypes.AggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
   track_total_hits: boolean | number;
   index: estypes.Indices;
   size: number;

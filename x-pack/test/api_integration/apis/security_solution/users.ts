@@ -11,6 +11,7 @@ import {
   Direction,
   NetworkUsersFields,
   FlowTarget,
+  NetworkUsersStrategyResponse,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -22,16 +23,21 @@ const IP = '0.0.0.0';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
+
   describe('Users', () => {
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/users'));
-      after(() => esArchiver.unload('auditbeat/users'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/users')
+      );
 
       it('Ensure data is returned from auditbeat', async () => {
-        const { body: users } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const users = await bsearch.send<NetworkUsersStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkQueries.users,
             sourceId: 'default',
             timerange: {
@@ -51,19 +57,16 @@ export default function ({ getService }: FtrProviderContext) {
               querySize: 10,
             },
             inspect: false,
-            /* We need a very long timeout to avoid returning just partial data.
-             ** https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/search/search.ts#L18
-             */
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(users.edges.length).to.be(1);
         expect(users.totalCount).to.be(1);
-        expect(users.edges[0].node.user!.id).to.eql(['0']);
-        expect(users.edges[0].node.user!.name).to.be('root');
-        expect(users.edges[0].node.user!.groupId).to.eql(['0']);
-        expect(users.edges[0].node.user!.groupName).to.eql(['root']);
-        expect(users.edges[0].node.user!.count).to.be(1);
+        expect(users.edges[0].node.user?.id).to.eql(['0']);
+        expect(users.edges[0].node.user?.name).to.be('root');
+        expect(users.edges[0].node.user?.groupId).to.eql(['0']);
+        expect(users.edges[0].node.user?.groupName).to.eql(['root']);
+        expect(users.edges[0].node.user?.count).to.be(1);
       });
     });
   });

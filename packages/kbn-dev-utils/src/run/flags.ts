@@ -9,6 +9,7 @@
 import getopts from 'getopts';
 
 import { RunOptions } from './run';
+import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '../tooling_log/log_levels';
 
 export interface Flags {
   verbose: boolean;
@@ -52,12 +53,18 @@ export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = 
   };
 }
 
-export function getFlags(argv: string[], flagOptions: RunOptions['flags'] = {}): Flags {
+export function getFlags(
+  argv: string[],
+  flagOptions: RunOptions['flags'] = {},
+  defaultLogLevel: string = DEFAULT_LOG_LEVEL
+): Flags {
   const unexpectedNames = new Set<string>();
+
+  const logLevelFlags = LOG_LEVEL_FLAGS.map((f) => f.name).filter((f) => f !== defaultLogLevel);
 
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
     string: flagOptions.string,
-    boolean: [...(flagOptions.boolean || []), 'verbose', 'quiet', 'silent', 'debug', 'help'],
+    boolean: [...(flagOptions.boolean || []), ...logLevelFlags, 'help'],
     alias: {
       ...flagOptions.alias,
       v: 'verbose',

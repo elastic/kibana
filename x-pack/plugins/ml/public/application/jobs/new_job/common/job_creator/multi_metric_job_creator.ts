@@ -17,7 +17,7 @@ import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { isSparseDataJob } from './util/general';
 
 export class MultiMetricJobCreator extends JobCreator {
@@ -27,11 +27,7 @@ export class MultiMetricJobCreator extends JobCreator {
 
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
     this._wizardInitialized$.next(true);

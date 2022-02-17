@@ -20,12 +20,18 @@ export const createReactOverlays = (services: KibanaServices): KibanaReactOverla
 
   const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) => {
     checkCoreService();
-    return services.overlays!.openFlyout(toMountPoint(<>{node}</>), options);
+    return services.overlays!.openFlyout(
+      toMountPoint(<>{node}</>, { theme$: services.theme?.theme$ }),
+      options
+    );
   };
 
   const openModal: KibanaReactOverlays['openModal'] = (node, options?) => {
     checkCoreService();
-    return services.overlays!.openModal(toMountPoint(<>{node}</>), options);
+    return services.overlays!.openModal(
+      toMountPoint(<>{node}</>, { theme$: services.theme?.theme$ }),
+      options
+    );
   };
 
   const overlays: KibanaReactOverlays = {

@@ -13,9 +13,11 @@ import {
   GenericOperationDefinition,
   OperationType,
   renameOperationsMapping,
+  BaseIndexPatternColumn,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
+import { hasField } from '../pure_utils';
 
 export { operationDefinitionMap } from './definitions';
 /**
@@ -61,6 +63,37 @@ export function getSortScoreByPriority(
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
 }
 
+export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColumn) {
+  if (!hasField(targetColumn)) {
+    return [];
+  }
+  return (
+    operationDefinitionMap[targetColumn.operationType]?.getCurrentFields?.(targetColumn) ?? [
+      targetColumn.sourceField,
+    ]
+  );
+}
+
+export function getOperationHelperForMultipleFields(operationType: string) {
+  return operationDefinitionMap[operationType]?.getParamsForMultipleFields;
+}
+
+export function hasOperationSupportForMultipleFields(
+  indexPattern: IndexPattern,
+  targetColumn: BaseIndexPatternColumn,
+  sourceColumn?: BaseIndexPatternColumn,
+  field?: IndexPatternField
+) {
+  return Boolean(
+    operationDefinitionMap[targetColumn.operationType]?.canAddNewField?.({
+      targetColumn,
+      sourceColumn,
+      field,
+      indexPattern,
+    })
+  );
+}
+
 /**
  * Returns all `OperationType`s that can build a column using `buildColumn` based on the
  * passed in field.
@@ -93,7 +126,7 @@ export function isDocumentOperation(type: string) {
   return documentOperations.has(type);
 }
 
-type OperationFieldTuple =
+export type OperationFieldTuple =
   | {
       type: 'field';
       operationType: OperationType;
@@ -105,6 +138,10 @@ type OperationFieldTuple =
     }
   | {
       type: 'fullReference';
+      operationType: OperationType;
+    }
+  | {
+      type: 'managedReference';
       operationType: OperationType;
     };
 
@@ -138,7 +175,11 @@ type OperationFieldTuple =
  * ]
  * ```
  */
-export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
+export function getAvailableOperationsByMetadata(
+  indexPattern: IndexPattern,
+  // For consistency in testing
+  customOperationDefinitionMap?: Record<string, GenericOperationDefinition>
+) {
   const operationByMetadata: Record<
     string,
     { operationMetaData: OperationMetadata; operations: OperationFieldTuple[] }
@@ -161,36 +202,49 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
     }
   };
 
-  operationDefinitions.sort(getSortScoreByPriority).forEach((operationDefinition) => {
-    if (operationDefinition.input === 'field') {
-      indexPattern.fields.forEach((field) => {
+  (customOperationDefinitionMap
+    ? Object.values(customOperationDefinitionMap)
+    : operationDefinitions
+  )
+    .sort(getSortScoreByPriority)
+    .forEach((operationDefinition) => {
+      if (operationDefinition.input === 'field') {
+        indexPattern.fields.forEach((field) => {
+          addToMap(
+            {
+              type: 'field',
+              operationType: operationDefinition.type,
+              field: field.name,
+            },
+            operationDefinition.getPossibleOperationForField(field)
+          );
+        });
+      } else if (operationDefinition.input === 'none') {
         addToMap(
           {
-            type: 'field',
+            type: 'none',
             operationType: operationDefinition.type,
-            field: field.name,
           },
-          operationDefinition.getPossibleOperationForField(field)
+          operationDefinition.getPossibleOperation()
         );
-      });
-    } else if (operationDefinition.input === 'none') {
-      addToMap(
-        {
-          type: 'none',
-          operationType: operationDefinition.type,
-        },
-        operationDefinition.getPossibleOperation()
-      );
-    } else if (operationDefinition.input === 'fullReference') {
-      const validOperation = operationDefinition.getPossibleOperation(indexPattern);
-      if (validOperation) {
-        addToMap(
-          { type: 'fullReference', operationType: operationDefinition.type },
-          validOperation
-        );
+      } else if (operationDefinition.input === 'fullReference') {
+        const validOperation = operationDefinition.getPossibleOperation(indexPattern);
+        if (validOperation) {
+          addToMap(
+            { type: 'fullReference', operationType: operationDefinition.type },
+            validOperation
+          );
+        }
+      } else if (operationDefinition.input === 'managedReference') {
+        const validOperation = operationDefinition.getPossibleOperation();
+        if (validOperation) {
+          addToMap(
+            { type: 'managedReference', operationType: operationDefinition.type },
+            validOperation
+          );
+        }
       }
-    }
-  });
+    });
 
   return Object.values(operationByMetadata);
 }

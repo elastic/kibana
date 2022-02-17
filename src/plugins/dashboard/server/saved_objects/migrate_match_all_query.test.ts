@@ -9,7 +9,7 @@
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
-const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
 describe('migrate match_all query', () => {
   test('should migrate obsolete match_all query', () => {

@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import styled from 'styled-components';
 import * as i18n from '../translations';
 
@@ -54,7 +54,7 @@ export const ToolTipFooterComponent = ({
               onClick={previousFeature}
               iconType="arrowLeft"
               aria-label="Next"
-              disabled={featureIndex <= 0}
+              isDisabled={featureIndex <= 0}
             />
             <EuiButtonIcon
               data-test-subj={'next-feature-button'}
@@ -62,7 +62,7 @@ export const ToolTipFooterComponent = ({
               onClick={nextFeature}
               iconType="arrowRight"
               aria-label="Next"
-              disabled={featureIndex >= totalFeatures - 1}
+              isDisabled={featureIndex >= totalFeatures - 1}
             />
           </span>
         </EuiFlexItem>

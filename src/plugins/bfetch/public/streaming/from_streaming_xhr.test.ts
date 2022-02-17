@@ -9,14 +9,14 @@
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 const createXhr = (): XMLHttpRequest =>
-  (({
+  ({
     abort: () => {},
     onprogress: () => {},
     onreadystatechange: () => {},
     readyState: 0,
     responseText: '',
-    status: 0,
-  } as unknown) as XMLHttpRequest);
+    status: 200,
+  } as unknown as XMLHttpRequest);
 
 test('returns observable', () => {
   const xhr = createXhr();
@@ -149,6 +149,36 @@ test('errors observable if request returns with error', () => {
   xhr.onreadystatechange!({} as any);
 
   expect(complete).toHaveBeenCalledTimes(0);
+  expect(error).toHaveBeenCalledTimes(1);
+  expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
+  expect(error.mock.calls[0][0].message).toMatchInlineSnapshot(
+    `"Batch request failed with status 400"`
+  );
+});
+
+test('does not emit when gets error response', () => {
+  const xhr = createXhr();
+  const observable = fromStreamingXhr(xhr);
+
+  const next = jest.fn();
+  const complete = jest.fn();
+  const error = jest.fn();
+  observable.subscribe({
+    next,
+    complete,
+    error,
+  });
+
+  (xhr as any).responseText = 'error';
+  (xhr as any).status = 400;
+  xhr.onprogress!({} as any);
+
+  expect(next).toHaveBeenCalledTimes(0);
+
+  (xhr as any).readyState = 4;
+  xhr.onreadystatechange!({} as any);
+
+  expect(next).toHaveBeenCalledTimes(0);
   expect(error).toHaveBeenCalledTimes(1);
   expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
   expect(error.mock.calls[0][0].message).toMatchInlineSnapshot(

@@ -7,51 +7,68 @@
 
 import { apiService } from './utils';
 import { FetchJourneyStepsParams } from '../actions/journey';
+import { Ping, PingType } from '../../../common/runtime_types/ping/ping';
 import {
-  Ping,
+  FailedStepsApiResponse,
+  FailedStepsApiResponseType,
+  ScreenshotBlockDoc,
+  ScreenshotImageBlob,
+  ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
-} from '../../../common/runtime_types';
+} from '../../../common/runtime_types/ping/synthetics';
+import { API_URLS } from '../../../common/constants';
+
+export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
+  return apiService.post<ScreenshotBlockDoc[]>(API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
+    hashes: params,
+  });
+}
 
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
-  return (await apiService.get(
-    `/api/uptime/journey/${params.checkGroup}`,
+  return apiService.get(
+    `/internal/uptime/journey/${params.checkGroup}`,
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
-  )) as SyntheticsJourneyApiResponse;
+  );
 }
 
 export async function fetchJourneysFailedSteps({
   checkGroups,
 }: {
   checkGroups: string[];
-}): Promise<SyntheticsJourneyApiResponse> {
-  return (await apiService.get(
-    `/api/uptime/journeys/failed_steps`,
-    { checkGroups },
-    SyntheticsJourneyApiResponseType
-  )) as SyntheticsJourneyApiResponse;
+}): Promise<FailedStepsApiResponse> {
+  return apiService.get(API_URLS.JOURNEY_FAILED_STEPS, { checkGroups }, FailedStepsApiResponseType);
 }
 
-export async function fetchLastSuccessfulStep({
+export async function fetchLastSuccessfulCheck({
   monitorId,
   timestamp,
   stepIndex,
+  location,
 }: {
   monitorId: string;
   timestamp: string;
   stepIndex: number;
+  location?: string;
 }): Promise<Ping> {
-  return (await apiService.get(`/api/uptime/synthetics/step/success/`, {
-    monitorId,
-    timestamp,
-    stepIndex,
-  })) as Ping;
+  return await apiService.get(
+    API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
+    {
+      monitorId,
+      timestamp,
+      stepIndex,
+      location,
+    },
+    PingType
+  );
 }
 
-export async function getJourneyScreenshot(imgSrc: string) {
+export async function getJourneyScreenshot(
+  imgSrc: string
+): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   try {
     const imgRequest = new Request(imgSrc);
 
@@ -61,16 +78,22 @@ export async function getJourneyScreenshot(imgSrc: string) {
       return null;
     }
 
-    const imgBlob = await response.blob();
-
+    const contentType = response.headers.get('content-type');
     const stepName = response.headers.get('caption-name');
-    const maxSteps = response.headers.get('max-steps');
-
-    return {
-      stepName,
-      maxSteps: Number(maxSteps ?? 0),
-      src: URL.createObjectURL(imgBlob),
-    };
+    const maxSteps = Number(response.headers.get('max-steps') ?? 0);
+    if (contentType?.indexOf('application/json') !== -1) {
+      return {
+        stepName,
+        maxSteps,
+        ref: await response.json(),
+      };
+    } else {
+      return {
+        stepName,
+        maxSteps,
+        src: URL.createObjectURL(await response.blob()),
+      };
+    }
   } catch (e) {
     return null;
   }

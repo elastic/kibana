@@ -16,9 +16,9 @@ savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  savedObj | <code>SavedObjectSanitizedDoc</code> |  |
+|  savedObj | SavedObjectSanitizedDoc | The saved object to be converted to raw ES format. |
 
 <b>Returns:</b>
 
-`SavedObjectsRawDoc`
+SavedObjectsRawDoc
 

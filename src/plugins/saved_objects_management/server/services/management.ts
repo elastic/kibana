@@ -44,4 +44,8 @@ export class SavedObjectsManagement {
   public getNamespaceType(savedObject: SavedObject) {
     return this.registry.getType(savedObject.type)?.namespaceType;
   }
+
+  public isHidden(savedObject: SavedObject) {
+    return this.registry.getType(savedObject.type)?.hidden ?? false;
+  }
 }

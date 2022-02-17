@@ -7,7 +7,7 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,6 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
 
@@ -24,7 +23,7 @@ import { SourcesView } from './sources_view';
 
 describe('PrivateSources', () => {
   const mockValues = {
-    account: { canCreatePersonalSources: false, groups: [] },
+    account: { canCreatePrivateSources: false, groups: [] },
     dataLoading: false,
     contentSources: [],
     privateContentSources: [],
@@ -43,22 +42,15 @@ describe('PrivateSources', () => {
     expect(wrapper.find(SourcesView)).toHaveLength(1);
   });
 
-  it('renders Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<PrivateSources />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('renders only shared sources section when canCreatePersonalSources is false', () => {
+  it('renders only organizational sources section when canCreatePrivateSources is false', () => {
     setMockValues({ ...mockValues });
     const wrapper = shallow(<PrivateSources />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(1);
   });
 
-  it('renders both shared and private sources sections when canCreatePersonalSources is true', () => {
-    setMockValues({ ...mockValues, account: { canCreatePersonalSources: true, groups: [] } });
+  it('renders both organizational and private sources sections when canCreatePrivateSources is true', () => {
+    setMockValues({ ...mockValues, account: { canCreatePrivateSources: true, groups: [] } });
     const wrapper = shallow(<PrivateSources />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(2);
@@ -69,7 +61,7 @@ describe('PrivateSources', () => {
       ...mockValues,
       privateContentSources: ['source1', 'source2'],
       hasPlatinumLicense: false,
-      account: { canCreatePersonalSources: true, groups: [] },
+      account: { canCreatePrivateSources: true, groups: [] },
     });
     const wrapper = shallow(<PrivateSources />);
 
@@ -79,7 +71,7 @@ describe('PrivateSources', () => {
   it('renders an action button when user can add private sources', () => {
     setMockValues({
       ...mockValues,
-      account: { canCreatePersonalSources: true, groups: [] },
+      account: { canCreatePrivateSources: true, groups: [] },
       serviceTypes: [{ configured: true }],
     });
     const wrapper = shallow(<PrivateSources />);
@@ -90,7 +82,7 @@ describe('PrivateSources', () => {
   it('renders empty prompts if no sources are available', () => {
     setMockValues({
       ...mockValues,
-      account: { canCreatePersonalSources: true, groups: [] },
+      account: { canCreatePrivateSources: true, groups: [] },
     });
     const wrapper = shallow(<PrivateSources />);
 
@@ -100,7 +92,7 @@ describe('PrivateSources', () => {
   it('renders SourcesTable if sources are available', () => {
     setMockValues({
       ...mockValues,
-      account: { canCreatePersonalSources: true, groups: [] },
+      account: { canCreatePrivateSources: true, groups: [] },
       contentSources: ['1', '2'],
       privateContentSources: ['1', '2'],
     });

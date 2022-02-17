@@ -24,6 +24,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -37,7 +38,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -85,35 +88,49 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
             className="euiSpacer euiSpacer--l"
           />
           <div
-            className="euiEmptyPrompt"
+            className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
           >
-            <span
-              color="subdued"
-              data-euiicon-type="vector"
-              size="xxl"
-            />
             <div
-              className="euiSpacer euiSpacer--s"
-            />
-            <span
-              className="euiTextColor euiTextColor--subdued"
+              className="euiEmptyPrompt__main"
             >
-              <h2
-                className="euiTitle euiTitle--small"
-              >
-                Add new elements
-              </h2>
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-              <div
-                className="euiText euiText--medium"
+                className="euiEmptyPrompt__icon"
               >
-                <p>
-                  Group and save workpad elements to create new elements
-                </p>
+                <span
+                  color="subdued"
+                  data-euiicon-type="vector"
+                  size="xxl"
+                />
               </div>
-            </span>
+              <div
+                className="euiEmptyPrompt__content"
+              >
+                <div
+                  className="euiEmptyPrompt__contentInner"
+                >
+                  <h2
+                    className="euiTitle euiTitle--small"
+                  >
+                    Add new elements
+                  </h2>
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    style={Object {}}
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p>
+                        Group and save workpad elements to create new elements
+                      </p>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -172,6 +189,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -185,7 +203,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -239,7 +259,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -291,7 +311,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -308,6 +327,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -319,7 +339,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -336,6 +355,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />
@@ -348,7 +368,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -400,7 +420,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -417,6 +436,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -428,7 +448,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -445,6 +464,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />
@@ -457,7 +477,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -509,7 +529,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -526,6 +545,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -537,7 +557,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -554,6 +573,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />
@@ -620,6 +640,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
       <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
+        color="inherit"
         data-euiicon-type="cross"
         size="m"
       />
@@ -633,7 +654,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -702,7 +725,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--hasShadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -754,7 +777,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -771,6 +793,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
                       />
@@ -782,7 +805,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 >
                   <span
                     className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -799,6 +821,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
+                        color="inherit"
                         data-euiicon-type="trash"
                         size="m"
                       />

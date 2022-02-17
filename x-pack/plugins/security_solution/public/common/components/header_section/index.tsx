@@ -39,53 +39,76 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  headerFilters?: string | React.ReactNode;
   height?: number;
   id?: string;
+  isInspectDisabled?: boolean;
   split?: boolean;
+  stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
   growLeftSplit?: boolean;
+  inspectMultiple?: boolean;
+  hideSubtitle?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  headerFilters,
   height,
   id,
+  isInspectDisabled,
   split,
+  stackHeader,
   subtitle,
   title,
   titleSize = 'm',
   tooltip,
   growLeftSplit = true,
+  inspectMultiple = false,
+  hideSubtitle = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup
+      alignItems={stackHeader ? undefined : 'center'}
+      direction={stackHeader ? 'column' : 'row'}
+      gutterSize="s"
+    >
       <EuiFlexItem grow={growLeftSplit}>
-        <EuiFlexGroup alignItems="center" responsive={false}>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size={titleSize}>
-              <h2 data-test-subj="header-section-title">
-                {title}
+              <h4 data-test-subj="header-section-title">
+                <span className="eui-textBreakNormal">{title}</span>
                 {tooltip && (
                   <>
                     {' '}
                     <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
                   </>
                 )}
-              </h2>
+              </h4>
             </EuiTitle>
 
-            <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
+            {!hideSubtitle && (
+              <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
+            )}
           </EuiFlexItem>
 
           {id && (
             <EuiFlexItem grow={false}>
-              <InspectButton queryId={id} inspectIndex={0} title={title} />
+              <InspectButton
+                isDisabled={isInspectDisabled}
+                queryId={id}
+                multiple={inspectMultiple}
+                title={title}
+              />
             </EuiFlexItem>
           )}
+
+          {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
 

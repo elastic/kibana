@@ -31,14 +31,13 @@ describe('Search service', () => {
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       const bfetch = bfetchPluginMock.createSetupContract();
-      const setup = searchService.setup(mockCoreSetup, ({
+      const setup = searchService.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
         bfetch,
         expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
-      } as unknown) as SearchServiceSetupDependencies);
+      } as unknown as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
-      expect(setup).toHaveProperty('__enhance');
       expect(setup).toHaveProperty('sessionsClient');
       expect(setup).toHaveProperty('session');
     });

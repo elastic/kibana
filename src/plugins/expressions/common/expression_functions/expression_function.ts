@@ -10,10 +10,13 @@ import { identity } from 'lodash';
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { ExpressionValue } from '../expression_types/types';
-import { ExecutionContext } from '../execution';
 import { ExpressionAstFunction } from '../ast';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState, SerializableState } from '../../../kibana_utils/common';
+import {
+  MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
+  PersistableState,
+} from '../../../kibana_utils/common';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**
@@ -36,7 +39,11 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   /**
    * Function to run function (context, args)
    */
-  fn: (input: ExpressionValue, params: Record<string, any>, handlers: object) => ExpressionValue;
+  fn: (
+    input: ExpressionValue,
+    params: Record<string, unknown>,
+    handlers: object
+  ) => ExpressionValue;
 
   /**
    * A short help text.
@@ -56,18 +63,17 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   disabled: boolean;
   telemetry: (
     state: ExpressionAstFunction['arguments'],
-    telemetryData: Record<string, any>
-  ) => Record<string, any>;
-  extract: (
-    state: ExpressionAstFunction['arguments']
-  ) => { state: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
+    telemetryData: Record<string, unknown>
+  ) => Record<string, unknown>;
+  extract: (state: ExpressionAstFunction['arguments']) => {
+    state: ExpressionAstFunction['arguments'];
+    references: SavedObjectReference[];
+  };
   inject: (
     state: ExpressionAstFunction['arguments'],
     references: SavedObjectReference[]
   ) => ExpressionAstFunction['arguments'];
-  migrations: {
-    [key: string]: (state: SerializableState) => SerializableState;
-  };
+  migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {
     const {
@@ -89,8 +95,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.name = name;
     this.type = type;
     this.aliases = aliases || [];
-    this.fn = (input, params, handlers) =>
-      Promise.resolve(fn(input, params, handlers as ExecutionContext));
+    this.fn = fn as ExpressionFunction['fn'];
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
     this.disabled = disabled || false;
@@ -100,13 +105,12 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.migrations = migrations || {};
 
     for (const [key, arg] of Object.entries(args || {})) {
-      this.args[key] = new ExpressionFunctionParameter(key, arg);
+      this.args[key as keyof typeof args] = new ExpressionFunctionParameter(key, arg);
     }
   }
 
   accepts = (type: string): boolean => {
     // If you don't tell us input types, we'll assume you don't care what you get.
-    if (!this.inputTypes) return true;
-    return this.inputTypes.indexOf(type) > -1;
+    return this.inputTypes?.includes(type) ?? true;
   };
 }

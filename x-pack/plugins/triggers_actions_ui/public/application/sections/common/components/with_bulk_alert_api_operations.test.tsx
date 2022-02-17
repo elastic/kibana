@@ -10,7 +10,7 @@ import { shallow, mount } from 'enzyme';
 import uuid from 'uuid';
 import { withBulkAlertOperations, ComponentOpts } from './with_bulk_alert_api_operations';
 import * as alertApi from '../../../lib/alert_api';
-import { Alert } from '../../../../types';
+import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -36,6 +36,7 @@ describe('with_bulk_alert_api_operations', () => {
       expect(typeof props.deleteAlert).toEqual('function');
       expect(typeof props.loadAlert).toEqual('function');
       expect(typeof props.loadAlertTypes).toEqual('function');
+      expect(typeof props.resolveRule).toEqual('function');
       return <div />;
     };
 
@@ -46,7 +47,7 @@ describe('with_bulk_alert_api_operations', () => {
   // single alert
   it('muteAlert calls the muteAlert api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ muteAlert, alert }: ComponentOpts & { alert: Alert }) => {
+    const ComponentToExtend = ({ muteAlert, alert }: ComponentOpts & { alert: Rule }) => {
       return <button onClick={() => muteAlert(alert)}>{'call api'}</button>;
     };
 
@@ -61,7 +62,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('unmuteAlert calls the unmuteAlert api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ unmuteAlert, alert }: ComponentOpts & { alert: Alert }) => {
+    const ComponentToExtend = ({ unmuteAlert, alert }: ComponentOpts & { alert: Rule }) => {
       return <button onClick={() => unmuteAlert(alert)}>{'call api'}</button>;
     };
 
@@ -76,7 +77,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('enableAlert calls the muteAlerts api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ enableAlert, alert }: ComponentOpts & { alert: Alert }) => {
+    const ComponentToExtend = ({ enableAlert, alert }: ComponentOpts & { alert: Rule }) => {
       return <button onClick={() => enableAlert(alert)}>{'call api'}</button>;
     };
 
@@ -91,7 +92,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('disableAlert calls the disableAlert api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ disableAlert, alert }: ComponentOpts & { alert: Alert }) => {
+    const ComponentToExtend = ({ disableAlert, alert }: ComponentOpts & { alert: Rule }) => {
       return <button onClick={() => disableAlert(alert)}>{'call api'}</button>;
     };
 
@@ -106,7 +107,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('deleteAlert calls the deleteAlert api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ deleteAlert, alert }: ComponentOpts & { alert: Alert }) => {
+    const ComponentToExtend = ({ deleteAlert, alert }: ComponentOpts & { alert: Rule }) => {
       return <button onClick={() => deleteAlert(alert)}>{'call api'}</button>;
     };
 
@@ -122,7 +123,7 @@ describe('with_bulk_alert_api_operations', () => {
   // bulk alerts
   it('muteAlerts calls the muteAlerts api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ muteAlerts, alerts }: ComponentOpts & { alerts: Alert[] }) => {
+    const ComponentToExtend = ({ muteAlerts, alerts }: ComponentOpts & { alerts: Rule[] }) => {
       return <button onClick={() => muteAlerts(alerts)}>{'call api'}</button>;
     };
 
@@ -137,7 +138,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('unmuteAlerts calls the unmuteAlerts api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ unmuteAlerts, alerts }: ComponentOpts & { alerts: Alert[] }) => {
+    const ComponentToExtend = ({ unmuteAlerts, alerts }: ComponentOpts & { alerts: Rule[] }) => {
       return <button onClick={() => unmuteAlerts(alerts)}>{'call api'}</button>;
     };
 
@@ -152,7 +153,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('enableAlerts calls the muteAlertss api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ enableAlerts, alerts }: ComponentOpts & { alerts: Alert[] }) => {
+    const ComponentToExtend = ({ enableAlerts, alerts }: ComponentOpts & { alerts: Rule[] }) => {
       return <button onClick={() => enableAlerts(alerts)}>{'call api'}</button>;
     };
 
@@ -171,7 +172,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('disableAlerts calls the disableAlerts api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ disableAlerts, alerts }: ComponentOpts & { alerts: Alert[] }) => {
+    const ComponentToExtend = ({ disableAlerts, alerts }: ComponentOpts & { alerts: Rule[] }) => {
       return <button onClick={() => disableAlerts(alerts)}>{'call api'}</button>;
     };
 
@@ -189,7 +190,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('deleteAlerts calls the deleteAlerts api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({ deleteAlerts, alerts }: ComponentOpts & { alerts: Alert[] }) => {
+    const ComponentToExtend = ({ deleteAlerts, alerts }: ComponentOpts & { alerts: Rule[] }) => {
       return <button onClick={() => deleteAlerts(alerts)}>{'call api'}</button>;
     };
 
@@ -204,10 +205,7 @@ describe('with_bulk_alert_api_operations', () => {
 
   it('loadAlert calls the loadAlert api', () => {
     const { http } = useKibanaMock().services;
-    const ComponentToExtend = ({
-      loadAlert,
-      alertId,
-    }: ComponentOpts & { alertId: Alert['id'] }) => {
+    const ComponentToExtend = ({ loadAlert, alertId }: ComponentOpts & { alertId: Rule['id'] }) => {
       return <button onClick={() => loadAlert(alertId)}>{'call api'}</button>;
     };
 
@@ -218,6 +216,21 @@ describe('with_bulk_alert_api_operations', () => {
 
     expect(alertApi.loadAlert).toHaveBeenCalledTimes(1);
     expect(alertApi.loadAlert).toHaveBeenCalledWith({ alertId, http });
+  });
+
+  it('resolveRule calls the resolveRule api', () => {
+    const { http } = useKibanaMock().services;
+    const ComponentToExtend = ({ resolveRule, ruleId }: ComponentOpts & { ruleId: Rule['id'] }) => {
+      return <button onClick={() => resolveRule(ruleId)}>{'call api'}</button>;
+    };
+
+    const ExtendedComponent = withBulkAlertOperations(ComponentToExtend);
+    const ruleId = uuid.v4();
+    const component = mount(<ExtendedComponent ruleId={ruleId} />);
+    component.find('button').simulate('click');
+
+    expect(alertApi.resolveRule).toHaveBeenCalledTimes(1);
+    expect(alertApi.resolveRule).toHaveBeenCalledWith({ ruleId, http });
   });
 
   it('loadAlertTypes calls the loadAlertTypes api', () => {
@@ -235,7 +248,7 @@ describe('with_bulk_alert_api_operations', () => {
   });
 });
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

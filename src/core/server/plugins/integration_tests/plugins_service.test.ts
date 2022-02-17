@@ -7,7 +7,7 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
@@ -20,12 +20,12 @@ import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
-import { AsyncPlugin } from '../types';
+import { AsyncPlugin, PluginType } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
-  const environmentSetup = environmentServiceMock.createSetupContract();
+  const environmentPreboot = environmentServiceMock.createPrebootContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -38,9 +38,11 @@ describe('PluginsService', () => {
       requiredBundles = [],
       optionalPlugins = [],
       kibanaVersion = '7.0.0',
+      type = PluginType.standard,
       configPath = [path],
       server = true,
       ui = true,
+      owner = { name: 'foo' },
     }: {
       path?: string;
       disabled?: boolean;
@@ -49,9 +51,11 @@ describe('PluginsService', () => {
       requiredBundles?: string[];
       optionalPlugins?: string[];
       kibanaVersion?: string;
+      type?: PluginType;
       configPath?: ConfigPath;
       server?: boolean;
       ui?: boolean;
+      owner?: { name: string };
     }
   ): PluginWrapper => {
     return new PluginWrapper({
@@ -61,11 +65,13 @@ describe('PluginsService', () => {
         version,
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         kibanaVersion,
+        type,
         requiredPlugins,
         requiredBundles,
         optionalPlugins,
         server,
         ui,
+        owner,
       },
       opaqueId: Symbol(id),
       initializerContext: { logger } as any,
@@ -150,7 +156,10 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover({ environment: environmentSetup });
+    await pluginsService.discover({ environment: environmentPreboot });
+
+    const prebootDeps = coreMock.createInternalPreboot();
+    await pluginsService.preboot(prebootDeps);
 
     const setupDeps = coreMock.createInternalSetup();
     await pluginsService.setup(setupDeps);

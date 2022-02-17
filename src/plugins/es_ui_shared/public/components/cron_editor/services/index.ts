@@ -7,10 +7,5 @@
  */
 
 export { cronExpressionToParts, cronPartsToExpression } from './cron';
-export {
-  getOrdinalValue,
-  getDayName,
-  getMonthName,
-  DayOrdinal,
-  MonthOrdinal,
-} from './humanized_numbers';
+export type { DayOrdinal, MonthOrdinal } from './humanized_numbers';
+export { getOrdinalValue, getDayName, getMonthName } from './humanized_numbers';

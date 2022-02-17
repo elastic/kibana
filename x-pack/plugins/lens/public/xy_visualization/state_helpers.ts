@@ -6,8 +6,9 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import { SeriesType, visualizationTypes, XYLayerConfig, YConfig, ValidLayer } from './types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
+import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
+import { visualizationTypes } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -15,6 +16,18 @@ export function isHorizontalSeries(seriesType: SeriesType) {
     seriesType === 'bar_horizontal_stacked' ||
     seriesType === 'bar_horizontal_percentage_stacked'
   );
+}
+
+export function isPercentageSeries(seriesType: SeriesType) {
+  return (
+    seriesType === 'bar_percentage_stacked' ||
+    seriesType === 'bar_horizontal_percentage_stacked' ||
+    seriesType === 'area_percentage_stacked'
+  );
+}
+
+export function isStackedChart(seriesType: SeriesType) {
+  return seriesType.includes('stacked');
 }
 
 export function isHorizontalChart(layers: Array<{ seriesType: SeriesType }>) {

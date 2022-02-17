@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
@@ -89,6 +88,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
       new Set<string>()
     );
 
+    // @ts-expect-error influencers is optional
     const normalizedInfluencers: estypes.Field[] = Array.isArray(influencers)
       ? influencers
       : [influencers];
@@ -152,9 +152,10 @@ export function calculateModelMemoryLimitProvider(
     allowMMLGreaterThanMax = false,
     datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
-    const { body: info } = await mlClient.info<MlInfoResponse>();
+    const info = await mlClient.info();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
-    const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
+    const effectiveMaxModelMemoryLimit =
+      info.limits.effective_max_model_memory_limit?.toUpperCase();
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
       analysisConfig,
@@ -166,7 +167,7 @@ export function calculateModelMemoryLimitProvider(
       datafeedConfig
     );
 
-    const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({
+    const body = await mlClient.estimateModelMemory({
       body: {
         analysis_config: analysisConfig,
         overall_cardinality: overallCardinality,
@@ -180,13 +181,13 @@ export function calculateModelMemoryLimitProvider(
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
     if (allowMMLGreaterThanMax === false) {
-      // @ts-expect-error
+      // @ts-expect-error numeral missing value
       const mmlBytes = numeral(estimatedModelMemoryLimit).value();
       if (maxModelMemoryLimit !== undefined) {
-        // @ts-expect-error
+        // @ts-expect-error numeral missing value
         const maxBytes = numeral(maxModelMemoryLimit).value();
         if (mmlBytes > maxBytes) {
-          // @ts-expect-error
+          // @ts-expect-error numeral missing value
           modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
           mmlCappedAtMax = true;
         }
@@ -195,10 +196,10 @@ export function calculateModelMemoryLimitProvider(
       // if we've not already capped the estimated mml at the hard max server setting
       // ensure that the estimated mml isn't greater than the effective max mml
       if (mmlCappedAtMax === false && effectiveMaxModelMemoryLimit !== undefined) {
-        // @ts-expect-error
+        // @ts-expect-error numeral missing value
         const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
         if (mmlBytes > effectiveMaxMmlBytes) {
-          // @ts-expect-error
+          // @ts-expect-error numeral missing value
           modelMemoryLimit = `${Math.floor(effectiveMaxMmlBytes / numeral('1MB').value())}MB`;
         }
       }

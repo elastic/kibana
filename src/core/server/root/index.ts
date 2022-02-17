@@ -34,10 +34,20 @@ export class Root {
     this.server = new Server(rawConfigProvider, env, this.loggingSystem);
   }
 
-  public async setup() {
+  public async preboot() {
     try {
       this.server.setupCoreConfig();
       await this.setupLogging();
+      this.log.debug('prebooting root');
+      return await this.server.preboot();
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
+  }
+
+  public async setup() {
+    try {
       this.log.debug('setting up root');
       return await this.server.setup();
     } catch (e) {

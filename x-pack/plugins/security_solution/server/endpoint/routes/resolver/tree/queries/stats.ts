@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/utility-types';
 import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { NodeID, TimeRange } from '../utils/index';
 
@@ -123,13 +123,13 @@ export class StatsQuery {
     }
 
     // leaving unknown here because we don't actually need the hits part of the body
-    const response = await client.asCurrentUser.search({
+    const body = await client.asCurrentUser.search({
       body: this.query(nodes),
       index: this.indexPatterns,
     });
 
-    // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-    return response.body.aggregations?.ids?.buckets.reduce(
+    // @ts-expect-error declare aggegations type explicitly
+    return body.aggregations?.ids?.buckets.reduce(
       (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
         ...cummulative,
         [bucket.key]: StatsQuery.getEventStats(bucket),

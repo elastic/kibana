@@ -14,12 +14,12 @@ import {
   SavedObjectReference,
 } from 'kibana/public';
 import {
-  DataPublicPluginStart,
-  IIndexPattern,
-  IndexPatternsContract,
+  IndexPattern,
   ISearchSource,
-  SearchSourceFields,
+  ISearchStart,
+  SerializedSearchSourceFields,
 } from '../../data/public';
+import { DataViewsContract } from '../../data_views/public';
 
 /** @deprecated */
 export interface SavedObject {
@@ -34,7 +34,7 @@ export interface SavedObject {
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | IIndexPattern>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
   id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
@@ -43,7 +43,7 @@ export interface SavedObject {
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: ISearchSource;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   showInRecentlyAccessed: boolean;
   title: string;
   unresolvedIndexPatternReference?: SavedObjectReference;
@@ -63,8 +63,8 @@ export interface SavedObjectCreationOpts {
 
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
+  dataViews: DataViewsContract;
+  search: ISearchStart;
   chrome: ChromeStart;
   overlays: OverlayStart;
 }
@@ -82,7 +82,7 @@ export interface SavedObjectConfig {
   injectReferences?: <T extends SavedObject>(object: T, references: SavedObjectReference[]) => void;
   id?: string;
   init?: () => void;
-  indexPattern?: IIndexPattern;
+  indexPattern?: IndexPattern;
   mapping?: Record<string, any>;
   migrationVersion?: Record<string, any>;
   path?: string;

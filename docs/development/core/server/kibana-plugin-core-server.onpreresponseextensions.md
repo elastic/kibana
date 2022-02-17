@@ -16,5 +16,5 @@ export interface OnPreResponseExtensions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [headers](./kibana-plugin-core-server.onpreresponseextensions.headers.md) | <code>ResponseHeaders</code> | additional headers to attach to the response |
+|  [headers?](./kibana-plugin-core-server.onpreresponseextensions.headers.md) | ResponseHeaders | <i>(Optional)</i> additional headers to attach to the response |
 

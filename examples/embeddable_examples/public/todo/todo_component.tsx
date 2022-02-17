@@ -41,7 +41,7 @@ function wrapSearchTerms(task: string, search?: string) {
 
 export function TodoEmbeddableComponentInner({ input: { icon, title, task, search } }: Props) {
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="none" data-render-complete="true">
       <EuiFlexItem grow={false}>
         {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title || task} size="l" />}
       </EuiFlexItem>

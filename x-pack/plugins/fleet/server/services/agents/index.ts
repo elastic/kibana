@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export * from './acks';
-export * from './events';
-export * from './checkin';
-export * from './enroll';
 export * from './unenroll';
 export * from './upgrade';
 export * from './status';
@@ -16,5 +12,6 @@ export * from './crud';
 export * from './update';
 export * from './actions';
 export * from './reassign';
-export * from './authenticate';
 export * from './setup';
+export { AgentServiceImpl } from './agent_service';
+export type { AgentClient, AgentService } from './agent_service';

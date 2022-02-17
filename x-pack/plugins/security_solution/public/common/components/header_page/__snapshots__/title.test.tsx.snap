@@ -4,16 +4,21 @@ exports[`Title it renders 1`] = `
 <EuiTitle
   size="l"
 >
-  <h1
+  <Header
     data-test-subj="header-page-title"
   >
-    Test title
-     
-    <StyledEuiBetaBadge
+    <TitleWrapper>
+      <TruncatableText
+        tooltipContent="Test title"
+      >
+        Test title
+      </TruncatableText>
+    </TitleWrapper>
+    <EuiBetaBadge
       label="Beta"
       tooltipContent="Test tooltip"
       tooltipPosition="bottom"
     />
-  </h1>
+  </Header>
 </EuiTitle>
 `;

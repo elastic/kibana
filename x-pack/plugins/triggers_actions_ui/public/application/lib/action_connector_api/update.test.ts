@@ -15,9 +15,9 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
-    const id = '123';
+    const id = '12/3';
     const apiResponse = {
-      connector_type_id: 'test',
+      connector_type_id: 'te/st',
       is_preconfigured: false,
       name: 'My test',
       config: {},
@@ -27,7 +27,7 @@ describe('updateActionConnector', () => {
     http.put.mockResolvedValueOnce(apiResponse);
 
     const connector: ActionConnectorWithoutId<{}, {}> = {
-      actionTypeId: 'test',
+      actionTypeId: 'te/st',
       isPreconfigured: false,
       name: 'My test',
       config: {},
@@ -39,7 +39,7 @@ describe('updateActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/connector/123",
+        "/api/actions/connector/12%2F3",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },

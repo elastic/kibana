@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`scaling form should disable clusters option when clustering is not supported 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Scaling"
+        id="xpack.maps.esSearch.scaleTitle"
+        values={Object {}}
+      />
+      <ScalingDocumenationPopover
+        clustersOptionLabel="Show clusters when results exceed 10,000"
+        limitOptionLabel="Limit results to 10,000"
+        maxResultWindow="10,000"
+        mvtOptionLabel="Use vector tiles"
+      />
+    </h5>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <div>
+      <EuiRadio
+        checked={false}
+        id="MVT"
+        label="Use vector tiles"
+        onChange={[Function]}
+      />
+      <EuiToolTip
+        content="Simulated clustering disabled"
+        delay="regular"
+        display="inlineBlock"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="CLUSTERS"
+          label="Show clusters when results exceed 10,000"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10,000"
+        onChange={[Function]}
+      />
+    </div>
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={true}
+      compressed={true}
+      label="Dynamically filter for data in the visible map area"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`scaling form should render 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Scaling"
+        id="xpack.maps.esSearch.scaleTitle"
+        values={Object {}}
+      />
+      <ScalingDocumenationPopover
+        clustersOptionLabel="Show clusters when results exceed 10,000"
+        limitOptionLabel="Limit results to 10,000"
+        maxResultWindow="10,000"
+        mvtOptionLabel="Use vector tiles"
+      />
+    </h5>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <div>
+      <EuiRadio
+        checked={false}
+        id="MVT"
+        label="Use vector tiles"
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        disabled={false}
+        id="CLUSTERS"
+        label="Show clusters when results exceed 10,000"
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10,000"
+        onChange={[Function]}
+      />
+    </div>
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={true}
+      compressed={true}
+      label="Dynamically filter for data in the visible map area"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</Fragment>
+`;

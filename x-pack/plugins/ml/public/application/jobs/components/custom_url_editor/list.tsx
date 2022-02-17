@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
@@ -160,6 +160,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
             }
             isInvalid={isInvalidLabel}
             error={invalidLabelError}
+            data-test-subj="mlJobEditCustomUrlItemLabel"
           >
             <EuiFieldText
               value={label}
@@ -239,6 +240,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
                 aria-label={i18n.translate('xpack.ml.customUrlEditorList.testCustomUrlAriaLabel', {
                   defaultMessage: 'Test custom URL',
                 })}
+                data-test-subj="mlJobEditTestCustomUrlButton"
               />
             </EuiToolTip>
           </EuiFormRow>
@@ -264,6 +266,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
                     defaultMessage: 'Delete custom URL',
                   }
                 )}
+                data-test-subj={`mlJobEditDeleteCustomUrlButton_${index}`}
               />
             </EuiToolTip>
           </EuiFormRow>

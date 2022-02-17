@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { PagerDutyActionConnector } from '.././types';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
@@ -33,6 +33,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
 
@@ -61,6 +63,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -86,9 +90,38 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      secrets: {
+        routingKey: 'test',
+      },
+      id: 'test',
+      actionTypeId: '.pagerduty',
+      isMissingSecrets: true,
+      name: 'pagerduty',
+      config: {
+        apiUrl: 'http:\\test',
+      },
+    } as PagerDutyActionConnector;
+    const wrapper = mountWithIntl(
+      <PagerDutyActionConnectorFields
+        action={actionConnector}
+        errors={{ index: [], routingKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 });

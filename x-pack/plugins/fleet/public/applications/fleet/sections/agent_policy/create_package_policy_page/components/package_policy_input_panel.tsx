@@ -8,7 +8,7 @@
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,12 +83,13 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
 
     // Errors state
-    const errorCount = countValidationErrors(inputValidationResults);
+    const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
-    const hasInputStreams = useMemo(() => packageInputStreams.length > 0, [
-      packageInputStreams.length,
-    ]);
+    const hasInputStreams = useMemo(
+      () => packageInputStreams.length > 0,
+      [packageInputStreams.length]
+    );
     const inputStreams = useMemo(
       () =>
         packageInputStreams
@@ -120,6 +121,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               checked={packagePolicyInput.enabled}
+              disabled={packagePolicyInput.keep_enabled}
               onChange={(e) => {
                 const enabled = e.target.checked;
                 updatePackagePolicyInput({
@@ -191,7 +193,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               packageInputVars={packageInput.vars}
               packagePolicyInput={packagePolicyInput}
               updatePackagePolicyInput={updatePackagePolicyInput}
-              inputVarsValidationResults={{ vars: inputValidationResults.vars }}
+              inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
               forceShowErrors={forceShowErrors}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
@@ -236,7 +238,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![packagePolicyInputStream!.data_stream!.dataset]
+                    inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
                   }
                   forceShowErrors={forceShowErrors}
                 />

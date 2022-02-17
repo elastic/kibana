@@ -12,7 +12,11 @@ import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
+import {
+  getPutPayloadSchema,
+  transformPutPayloadToElasticsearchRole,
+  validateKibanaPrivileges,
+} from './model';
 
 const roleGrantsSubFeaturePrivileges = (
   features: KibanaFeature[],
@@ -62,28 +66,36 @@ export function definePutRolesRoutes({
       const { name } = request.params;
 
       try {
-        const {
-          body: rawRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole(
-          { name: request.params.name },
-          { ignore: [404] }
-        );
+        const [features, rawRoles] = await Promise.all([
+          getFeatures(),
+          context.core.elasticsearch.client.asCurrentUser.security.getRole(
+            { name: request.params.name },
+            { ignore: [404] }
+          ),
+        ]);
+
+        const { validationErrors } = validateKibanaPrivileges(features, request.body.kibana);
+        if (validationErrors.length) {
+          return response.badRequest({
+            body: {
+              message: `Role cannot be updated due to validation errors: ${JSON.stringify(
+                validationErrors
+              )}`,
+            },
+          });
+        }
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
           authz.applicationName,
-          // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications`.
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
-        const [features] = await Promise.all([
-          getFeatures(),
-          context.core.elasticsearch.client.asCurrentUser.security.putRole({
-            name: request.params.name,
-            // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
-            body,
-          }),
-        ]);
+        await context.core.elasticsearch.client.asCurrentUser.security.putRole({
+          name: request.params.name,
+          // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
+          body,
+        });
 
         if (roleGrantsSubFeaturePrivileges(features, request.body)) {
           getFeatureUsageService().recordSubFeaturePrivilegeUsage();

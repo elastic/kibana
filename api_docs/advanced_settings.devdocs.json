@@ -1,0 +1,355 @@
+{
+  "id": "advancedSettings",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "advancedSettings",
+        "id": "def-public.ComponentRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "ComponentRegistry",
+        "description": [],
+        "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.ComponentRegistry.componentType",
+            "type": "Object",
+            "tags": [],
+            "label": "componentType",
+            "description": [],
+            "signature": [
+              "{ [key: string]: Id; }"
+            ],
+            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.ComponentRegistry.defaultRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultRegistry",
+            "description": [],
+            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.defaultRegistry.advanced_settings_page_title",
+                "type": "Function",
+                "tags": [],
+                "label": "advanced_settings_page_title",
+                "description": [],
+                "signature": [
+                  "() => JSX.Element"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": []
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.defaultRegistry.advanced_settings_page_subtitle",
+                "type": "Function",
+                "tags": [],
+                "label": "advanced_settings_page_subtitle",
+                "description": [],
+                "signature": [
+                  "() => null"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": []
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.defaultRegistry.advanced_settings_page_footer",
+                "type": "Function",
+                "tags": [],
+                "label": "advanced_settings_page_footer",
+                "description": [],
+                "signature": [
+                  "() => null"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.ComponentRegistry.registry",
+            "type": "Object",
+            "tags": [],
+            "label": "registry",
+            "description": [],
+            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "deprecated": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.ComponentRegistry.setup",
+            "type": "Object",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.setup.componentType",
+                "type": "Object",
+                "tags": [],
+                "label": "componentType",
+                "description": [],
+                "signature": [
+                  "{ [key: string]: Id; }"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.setup.register",
+                "type": "Function",
+                "tags": [],
+                "label": "register",
+                "description": [
+                  "/**\n     * Attempts to register the provided component, with the ability to optionally allow\n     * the component to override an existing one.\n     *\n     * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.\n     *\n     * @param id the id of the component to register\n     * @param component the component\n     * @param allowOverride (default: false) - optional flag to allow this component to override a previously registered component\n     */"
+                ],
+                "signature": [
+                  "(id: Id, component: RegistryComponent, allowOverride?: boolean) => void"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.ComponentRegistry.setup.register.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "Id"
+                    ],
+                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.ComponentRegistry.setup.register.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "component",
+                    "description": [],
+                    "signature": [
+                      "RegistryComponent"
+                    ],
+                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.ComponentRegistry.setup.register.$3",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "allowOverride",
+                    "description": [],
+                    "signature": [
+                      "boolean"
+                    ],
+                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.ComponentRegistry.start",
+            "type": "Object",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.start.componentType",
+                "type": "Object",
+                "tags": [],
+                "label": "componentType",
+                "description": [],
+                "signature": [
+                  "{ [key: string]: Id; }"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "advancedSettings",
+                "id": "def-public.ComponentRegistry.start.get",
+                "type": "Function",
+                "tags": [],
+                "label": "get",
+                "description": [
+                  "/**\n     * Retrieve a registered component by its ID.\n     * If the component does not exist, then an exception is thrown.\n     *\n     * @param id the ID of the component to retrieve\n     */"
+                ],
+                "signature": [
+                  "(id: Id) => RegistryComponent"
+                ],
+                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.ComponentRegistry.start.get.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "Id"
+                    ],
+                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "advancedSettings",
+        "id": "def-public.LazyField",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyField",
+        "description": [
+          "\nExports the field component as a React.lazy component. We're explicitly naming it lazy here\nso any plugin that would import that can clearly see it's lazy loaded and can only be used\ninside a suspense context."
+        ],
+        "signature": [
+          "React.ExoticComponent<FieldProps & React.RefAttributes<",
+          "Field",
+          ">> & { readonly _result: typeof ",
+          "Field",
+          "; }"
+        ],
+        "path": "src/plugins/advanced_settings/public/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.LazyField.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "advancedSettings",
+      "id": "def-public.AdvancedSettingsSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AdvancedSettingsSetup",
+      "description": [],
+      "path": "src/plugins/advanced_settings/public/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "advancedSettings",
+          "id": "def-public.AdvancedSettingsSetup.component",
+          "type": "Object",
+          "tags": [],
+          "label": "component",
+          "description": [],
+          "signature": [
+            "{ componentType: { [key: string]: Id; }; register: (id: Id, component: RegistryComponent, allowOverride?: boolean) => void; }"
+          ],
+          "path": "src/plugins/advanced_settings/public/types.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "advancedSettings",
+      "id": "def-public.AdvancedSettingsStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AdvancedSettingsStart",
+      "description": [],
+      "path": "src/plugins/advanced_settings/public/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "advancedSettings",
+          "id": "def-public.AdvancedSettingsStart.component",
+          "type": "Object",
+          "tags": [],
+          "label": "component",
+          "description": [],
+          "signature": [
+            "{ componentType: { [key: string]: Id; }; get: (id: Id) => RegistryComponent; }"
+          ],
+          "path": "src/plugins/advanced_settings/public/types.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

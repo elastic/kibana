@@ -13,11 +13,16 @@ export const BACK_TO_DETECTIONS = i18n.translate(
     defaultMessage: 'Back to detections',
   }
 );
+export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
+    defaultMessage: 'Tooltip for column: {columnName}',
+    values: { columnName },
+  });
 
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
   {
-    defaultMessage: 'Import rule',
+    defaultMessage: 'Import rules',
   }
 );
 
@@ -44,8 +49,30 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Detection rules',
+  defaultMessage: 'Rules',
 });
+
+export const EXPERIMENTAL_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOn',
+  {
+    defaultMessage: 'Technical preview: On',
+  }
+);
+
+export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
+  {
+    defaultMessage:
+      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
+  }
+);
+
+export const EXPERIMENTAL_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
+  {
+    defaultMessage: 'Technical preview: Off',
+  }
+);
 
 export const ADD_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addPageTitle',
@@ -58,6 +85,50 @@ export const EDIT_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.editPageTitle',
   {
     defaultMessage: 'Edit',
+  }
+);
+
+export const FEATURE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.tourTitle',
+  {
+    defaultMessage: "What's new",
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepDescription',
+  {
+    defaultMessage:
+      'The experimental rules table view allows for advanced sorting and filtering capabilities.',
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepTitle',
+  {
+    defaultMessage: 'Step 1',
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepNextButtonTitle',
+  {
+    defaultMessage: 'Ok, got it',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepTitle',
+  {
+    defaultMessage: 'Step 2',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
+  {
+    defaultMessage:
+      'You can now bulk update index patterns and tags for multiple custom rules at once.',
   }
 );
 
@@ -89,10 +160,297 @@ export const INACTIVE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedTitle',
+export const BULK_ACTION_ENABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enableTitle',
   {
-    defaultMessage: 'Activate selected',
+    defaultMessage: 'Enable',
+  }
+);
+
+export const BULK_ACTION_DISABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disableTitle',
+  {
+    defaultMessage: 'Disable',
+  }
+);
+
+export const BULK_ACTION_EXPORT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.exportTitle',
+  {
+    defaultMessage: 'Export',
+  }
+);
+
+export const BULK_ACTION_DUPLICATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const BULK_ACTION_DELETE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteTitle',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const BULK_ACTION_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.indexPatternsTitle',
+  {
+    defaultMessage: 'Index patterns',
+  }
+);
+
+export const BULK_ACTION_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.tagsTitle',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
+export const BULK_ACTION_ADD_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPatternsTitle',
+  {
+    defaultMessage: 'Add index patterns',
+  }
+);
+
+export const BULK_ACTION_DELETE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteIndexPatternsTitle',
+  {
+    defaultMessage: 'Delete index patterns',
+  }
+);
+
+export const BULK_ACTION_ADD_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addTagsTitle',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_ACTION_DELETE_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteTagsTitle',
+  {
+    defaultMessage: 'Delete tags',
+  }
+);
+
+export const BULK_ACTION_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
+  {
+    defaultMessage: 'Options',
+  }
+);
+
+export const BULK_EDIT_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditSuccessToastTitle',
+  {
+    defaultMessage: 'Rules changes updated',
+  }
+);
+
+export const BULK_EDIT_SUCCESS_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditSuccessToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'You’ve successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.',
+    }
+  );
+
+export const BULK_EDIT_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle',
+  {
+    defaultMessage: 'Rules updates are in progress',
+  }
+);
+
+export const BULK_EDIT_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} updating.',
+    }
+  );
+
+export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastNotifyButtonLabel',
+  {
+    defaultMessage: `Notify me when done`,
+  }
+);
+
+export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
+  {
+    defaultMessage: 'Rule updates failed',
+  }
+);
+
+export const BULK_EDIT_ERROR_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to update.',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    {
+      values: { elasticRulesCount },
+      defaultMessage:
+        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+  {
+    defaultMessage: 'Edit custom rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
+  {
+    defaultMessage:
+      'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
+  {
+    defaultMessage:
+      'Delete default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxLabel',
+  {
+    defaultMessage: 'Add index patterns for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.indexPatternsRequiredErrorMessage',
+  {
+    defaultMessage: 'A minimum of one index pattern is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsTitle',
+  {
+    defaultMessage: 'Add index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Overwrite all selected rules index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxLabel',
+  {
+    defaultMessage: 'Delete index patterns for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsTitle',
+  {
+    defaultMessage: 'Delete index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxHelpText',
+  {
+    defaultMessage:
+      'Add one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsComboboxHelpText',
+  {
+    defaultMessage:
+      'Delete one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxLabel',
+  {
+    defaultMessage: 'Add tags for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_TAGS_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.tagsComoboxRequiredErrorMessage',
+  {
+    defaultMessage: 'A minimum of one tag is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsTitle',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Overwrite all selected rules tags',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsComboboxLabel',
+  {
+    defaultMessage: 'Delete tags for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsTitle',
+  {
+    defaultMessage: 'Delete tags',
   }
 );
 
@@ -101,46 +459,18 @@ export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}',
+      defaultMessage: 'Error enabling {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
-
-export const BATCH_ACTION_DEACTIVATE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedTitle',
-  {
-    defaultMessage: 'Deactivate selected',
-  }
-);
 
 export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}',
+      defaultMessage: 'Error disabling {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
-
-export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.exportSelectedTitle',
-  {
-    defaultMessage: 'Export selected',
-  }
-);
-
-export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
-  {
-    defaultMessage: 'Duplicate selected',
-  }
-);
-
-export const BATCH_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedTitle',
-  {
-    defaultMessage: 'Delete selected',
-  }
-);
 
 export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
@@ -165,13 +495,13 @@ export const EXPORT_FILENAME = i18n.translate(
   }
 );
 
-export const SUCCESSFULLY_EXPORTED_RULES = (totalRules: number) =>
+export const SUCCESSFULLY_EXPORTED_RULES = (exportedRules: number, totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedRulesTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedXofYRulesTitle',
     {
-      values: { totalRules },
+      values: { totalRules, exportedRules },
       defaultMessage:
-        'Successfully exported {totalRules, plural, =0 {all rules} =1 {{totalRules} rule} other {{totalRules} rules}}',
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
     }
   );
 
@@ -201,6 +531,19 @@ export const SHOWING_RULES = (totalRules: number) =>
     values: { totalRules },
     defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
+
+export const SELECT_ALL_RULES = (totalRules: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectAllRulesTitle', {
+    values: { totalRules },
+    defaultMessage: 'Select all {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+  });
+
+export const CLEAR_SELECTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.clearSelectionTitle',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);
 
 export const SELECTED_RULES = (selectedRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle', {
@@ -250,6 +593,13 @@ export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
   {
     defaultMessage: 'Error duplicating rule',
+  }
+);
+
+export const BULK_ACTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription',
+  {
+    defaultMessage: 'Failed to execute bulk action',
   }
 );
 
@@ -330,10 +680,10 @@ export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
   }
 );
 
-export const COLUMN_ACTIVATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.activateTitle',
+export const COLUMN_ENABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
-    defaultMessage: 'Activated',
+    defaultMessage: 'Enabled',
   }
 );
 
@@ -344,6 +694,13 @@ export const COLUMN_INDEXING_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimesTooltip',
+  {
+    defaultMessage: 'Total time spent indexing alerts during last Rule execution',
+  }
+);
+
 export const COLUMN_QUERY_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimes',
   {
@@ -351,17 +708,17 @@ export const COLUMN_QUERY_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
+  {
+    defaultMessage: 'Total time spent querying source indices during last Rule execution',
+  }
+);
+
 export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
     defaultMessage: 'Last Gap (if any)',
-  }
-);
-
-export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastLookBackDate',
-  {
-    defaultMessage: 'Last Look-Back Date',
   }
 );
 
@@ -512,14 +869,15 @@ export const DELETE = i18n.translate(
 export const IMPORT_RULE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',
   {
-    defaultMessage: 'Import rule',
+    defaultMessage: 'Import',
   }
 );
 
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select a Security rule (as exported from the Detection Engine view) to import',
+    defaultMessage:
+      'Select rules to import. Associated rule actions and exceptions can be included.',
   }
 );
 
@@ -533,7 +891,7 @@ export const INITIAL_PROMPT_TEXT = i18n.translate(
 export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
   {
-    defaultMessage: 'Automatically overwrite saved objects with the same rule ID',
+    defaultMessage: 'Overwrite existing detection rules with conflicting "rule_id"',
   }
 );
 
@@ -547,19 +905,21 @@ export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
     }
   );
 
-export const IMPORT_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
-  {
-    defaultMessage: 'Failed to import rules',
-  }
-);
+export const IMPORT_FAILED = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Failed to import {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
 
-export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+export const IMPORT_FAILED_DETAILED = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
     {
-      values: { ruleId, statusCode, message },
-      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+      values: { message },
+      defaultMessage: '{message}',
     }
   );
 
@@ -581,6 +941,35 @@ export const REFRESH_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
   {
     defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
+  }
+);
+
+export const DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
+
+export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const DELETE_CONFIRMATION_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
+  {
+    defaultMessage:
+      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 

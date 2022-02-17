@@ -24,6 +24,10 @@ import {
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
+  DEFINITION_DETAILS,
+  INDEX_PATTERNS_DETAILS,
+  DETAILS_TITLE,
+  DETAILS_DESCRIPTION,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -32,7 +36,7 @@ export const activatesRule = () => {
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_update').then(({ response }) => {
-    cy.wrap(response!.statusCode).should('eql', 200);
+    cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
 
@@ -58,7 +62,7 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
   closeFieldsBrowser();
 };
 
-export const openExceptionModalFromRuleSettings = () => {
+export const openExceptionFlyoutFromRuleSettings = () => {
   cy.get(ADD_EXCEPTIONS_BTN).click();
   cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(FIELD_INPUT).should('be.visible');
@@ -94,14 +98,25 @@ export const removeException = () => {
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
-export const waitForTheRuleToBeExecuted = async () => {
-  let status = '';
-  while (status !== 'succeeded') {
+export const waitForTheRuleToBeExecuted = () => {
+  cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click({ force: true });
-    status = await cy.get(RULE_STATUS).invoke('text').promisify();
-  }
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
+  });
 };
 
 export const goBackToAllRulesTable = () => {
   cy.get(BACK_TO_RULES).click();
+};
+
+export const getDetails = (title: string) =>
+  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+
+export const hasIndexPatterns = (indexPatterns: string) => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
 };

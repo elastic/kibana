@@ -15,11 +15,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('saved_object_tagging usage collector data', () => {
     beforeEach(async () => {
-      await esArchiver.load('usage_collection');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('usage_collection');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection'
+      );
     });
 
     /*
@@ -36,11 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
      *   - vis-3: ref to tag-3
      */
     it('collects the expected data', async () => {
-      const telemetryStats = (await usageAPI.getTelemetryStats({
+      const [{ stats: telemetryStats }] = (await usageAPI.getTelemetryStats({
         unencrypted: true,
+        refreshCache: true,
       })) as any;
 
-      const taggingStats = telemetryStats[0].stack_stats.kibana.plugins.saved_objects_tagging;
+      const taggingStats = telemetryStats.stack_stats.kibana.plugins.saved_objects_tagging;
       expect(taggingStats).to.eql({
         usedTags: 4,
         taggedObjects: 5,

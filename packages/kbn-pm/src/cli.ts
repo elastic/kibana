@@ -75,7 +75,7 @@ export async function run(argv: string[]) {
     },
     default: {
       cache: true,
-      'force-install': true,
+      'force-install': false,
       offline: false,
       validate: true,
     },

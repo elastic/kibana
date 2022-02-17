@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getColumns } from './anomalies_table_columns';
 
@@ -152,7 +152,10 @@ export class AnomaliesTableInternal extends Component {
     const result = {
       pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
       pageSize: page && page.size !== undefined ? page.size : tableState.pageSize,
-      sortField: sort && sort.field !== undefined ? sort.field : tableState.sortField,
+      sortField:
+        sort && sort.field !== undefined && typeof sort.field === 'string'
+          ? sort.field
+          : tableState.sortField,
       sortDirection:
         sort && sort.direction !== undefined ? sort.direction : tableState.sortDirection,
     };

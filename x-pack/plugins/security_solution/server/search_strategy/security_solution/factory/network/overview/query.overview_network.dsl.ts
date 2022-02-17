@@ -6,7 +6,7 @@
  */
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { NetworkOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 export const buildOverviewNetworkQuery = ({
@@ -28,9 +28,9 @@ export const buildOverviewNetworkQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {

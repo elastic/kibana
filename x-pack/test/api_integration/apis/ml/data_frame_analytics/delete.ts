@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('DELETE data_frame/analytics', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createJobs(testJobConfigs);
     });
@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          await ml.api.createIndices(destinationIndex);
+          await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
         });
 
@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         before(async () => {
           // Mimic real job by creating target index & index pattern after DFA job is created
-          await ml.api.createIndices(destinationIndex);
+          await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
           await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
         });

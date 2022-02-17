@@ -8,8 +8,9 @@
 
 import { defaultsDeep } from 'lodash';
 
-import { VisParams } from '../types';
-import { VisTypeDefinition, VisTypeOptions, VisGroups } from './types';
+import type { VisParams } from '../types';
+import type { VisTypeDefinition, VisTypeOptions } from './types';
+import { VisGroups } from './vis_groups_enum';
 import { Schemas } from './schemas';
 
 const defaultOptions: VisTypeOptions = {
@@ -26,6 +27,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly description;
   public readonly note;
   public readonly getSupportedTriggers;
+  public readonly navigateToLens;
   public readonly icon;
   public readonly image;
   public readonly stage;
@@ -42,6 +44,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly updateVisTypeOnParamsChange;
   public readonly schemas;
 
   constructor(opts: VisTypeDefinition<TVisParams>) {
@@ -53,6 +56,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.description = opts.description ?? '';
     this.note = opts.note ?? '';
     this.getSupportedTriggers = opts.getSupportedTriggers;
+    this.navigateToLens = opts.navigateToLens;
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
@@ -70,6 +74,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
+    this.updateVisTypeOnParamsChange = opts.updateVisTypeOnParamsChange;
 
     this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
   }

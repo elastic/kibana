@@ -14,3 +14,9 @@ export interface Privileges {
   hasAllPrivileges: boolean;
   missingPrivileges: MissingPrivileges;
 }
+
+export interface Error {
+  error: string;
+  cause?: string[];
+  message?: string;
+}

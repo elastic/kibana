@@ -5,29 +5,42 @@
  * 2.0.
  */
 
+import path from 'path';
 import { createHash } from 'crypto';
-import { deflate } from 'zlib';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { validate } from '../../../../common/validate';
+import type {
+  Entry,
+  EntryNested,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
-  InternalArtifactSchema,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
+import { OperatingSystem } from '../../../../common/endpoint/types';
+import { ExceptionListClient } from '../../../../../lists/server';
+import {
+  InternalArtifactCompleteSchema,
   TranslatedEntry,
-  WrappedTranslatedExceptionList,
-  wrappedTranslatedExceptionList,
-  TranslatedEntryNestedEntry,
-  translatedEntryNestedEntry,
+  TranslatedPerformantEntries,
+  translatedPerformantEntries as translatedPerformantEntriesType,
   translatedEntry as translatedEntryType,
+  translatedEntryMatchAnyMatcher,
   TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
-  translatedEntryMatchAnyMatcher,
+  TranslatedEntryMatchWildcard,
+  TranslatedEntryMatchWildcardMatcher,
+  translatedEntryMatchWildcardMatcher,
+  TranslatedEntryNestedEntry,
+  translatedEntryNestedEntry,
   TranslatedExceptionListItem,
-  internalArtifactCompleteSchema,
-  InternalArtifactCompleteSchema,
+  WrappedTranslatedExceptionList,
+  wrappedTranslatedExceptionList,
 } from '../../schemas';
+import { hasSimpleExecutableName } from '../../../../common/endpoint/service/trusted_apps/validations';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -51,33 +64,15 @@ export async function buildArtifact(
   };
 }
 
-export async function maybeCompressArtifact(
-  uncompressedArtifact: InternalArtifactSchema
-): Promise<InternalArtifactSchema> {
-  const compressedArtifact = { ...uncompressedArtifact };
-  if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
-    const compressedArtifactBody = await compressExceptionList(
-      Buffer.from(uncompressedArtifact.body, 'base64')
-    );
-    compressedArtifact.body = compressedArtifactBody.toString('base64');
-    compressedArtifact.encodedSize = compressedArtifactBody.byteLength;
-    compressedArtifact.compressionAlgorithm = 'zlib';
-    compressedArtifact.encodedSha256 = createHash('sha256')
-      .update(compressedArtifactBody)
-      .digest('hex');
-  }
-  return compressedArtifact;
-}
-
-export function isCompressed(artifact: InternalArtifactSchema) {
-  return artifact.compressionAlgorithm === 'zlib';
-}
-
 export async function getFilteredEndpointExceptionList(
   eClient: ExceptionListClient,
   schemaVersion: string,
   filter: string,
-  listId: typeof ENDPOINT_LIST_ID | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+  listId:
+    | typeof ENDPOINT_LIST_ID
+    | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+    | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
+    | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
@@ -142,6 +137,43 @@ export async function getEndpointTrustedAppsList(
   );
 }
 
+export async function getEndpointEventFiltersList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string,
+  policyId?: string
+): Promise<WrappedTranslatedExceptionList> {
+  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
+    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
+  })`;
+
+  return getFilteredEndpointExceptionList(
+    eClient,
+    schemaVersion,
+    `${osFilter} and ${policyFilter}`,
+    ENDPOINT_EVENT_FILTERS_LIST_ID
+  );
+}
+
+export async function getHostIsolationExceptionsList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string,
+  policyId?: string
+): Promise<WrappedTranslatedExceptionList> {
+  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
+    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
+  })`;
+
+  return getFilteredEndpointExceptionList(
+    eClient,
+    schemaVersion,
+    `${osFilter} and ${policyFilter}`,
+    ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
+  );
+}
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
@@ -168,14 +200,38 @@ export function translateToEndpointExceptions(
   }
 }
 
-function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
+function getMatcherFunction({
+  field,
+  matchAny,
+  os,
+}: {
+  field: string;
+  matchAny?: boolean;
+  os: ExceptionListItemSchema['os_types'][number];
+}): TranslatedEntryMatcher {
   return matchAny
     ? field.endsWith('.caseless')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
     : field.endsWith('.caseless')
-    ? 'exact_caseless'
+    ? os === 'linux'
+      ? 'exact_cased'
+      : 'exact_caseless'
     : 'exact_cased';
+}
+
+function getMatcherWildcardFunction({
+  field,
+  os,
+}: {
+  field: string;
+  os: ExceptionListItemSchema['os_types'][number];
+}): TranslatedEntryMatchWildcardMatcher {
+  return field.endsWith('.caseless')
+    ? os === 'linux'
+      ? 'wildcard_cased'
+      : 'wildcard_caseless'
+    : 'wildcard_cased';
 }
 
 function normalizeFieldName(field: string): string {
@@ -187,31 +243,84 @@ function translateItem(
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
   const itemSet = new Set();
-  return {
-    type: item.type,
-    entries: item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
-      const translatedEntry = translateEntry(schemaVersion, entry);
-      if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
-        const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
-        if (!itemSet.has(itemHash)) {
-          translatedEntries.push(translatedEntry);
-          itemSet.add(itemHash);
+  const getEntries = (): TranslatedExceptionListItem['entries'] => {
+    return item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
+      const translatedEntry = translateEntry(schemaVersion, entry, item.os_types[0]);
+
+      if (translatedEntry !== undefined) {
+        if (translatedEntryType.is(translatedEntry)) {
+          const itemHash = createHash('sha256')
+            .update(JSON.stringify(translatedEntry))
+            .digest('hex');
+          if (!itemSet.has(itemHash)) {
+            translatedEntries.push(translatedEntry);
+            itemSet.add(itemHash);
+          }
+        }
+        if (translatedPerformantEntriesType.is(translatedEntry)) {
+          translatedEntry.forEach((tpe) => {
+            const itemHash = createHash('sha256').update(JSON.stringify(tpe)).digest('hex');
+            if (!itemSet.has(itemHash)) {
+              translatedEntries.push(tpe);
+              itemSet.add(itemHash);
+            }
+          });
         }
       }
+
       return translatedEntries;
-    }, []),
+    }, []);
   };
+
+  return {
+    type: item.type,
+    entries: getEntries(),
+  };
+}
+
+function appendProcessNameEntry({
+  wildcardProcessEntry,
+  entry,
+  os,
+}: {
+  wildcardProcessEntry: TranslatedEntryMatchWildcard;
+  entry: {
+    field: string;
+    operator: 'excluded' | 'included';
+    type: 'wildcard';
+    value: string;
+  };
+  os: ExceptionListItemSchema['os_types'][number];
+}): TranslatedPerformantEntries {
+  const entries: TranslatedPerformantEntries = [
+    wildcardProcessEntry,
+    {
+      field: normalizeFieldName('process.name'),
+      operator: entry.operator,
+      type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
+        TranslatedEntryMatcher,
+        'exact_caseless' | 'exact_cased'
+      >,
+      value: os === 'windows' ? path.win32.basename(entry.value) : path.posix.basename(entry.value),
+    },
+  ].reduce<TranslatedPerformantEntries>((p, c) => {
+    p.push(c);
+    return p;
+  }, []);
+
+  return entries;
 }
 
 function translateEntry(
   schemaVersion: string,
-  entry: Entry | EntryNested
-): TranslatedEntry | undefined {
+  entry: Entry | EntryNested,
+  os: ExceptionListItemSchema['os_types'][number]
+): TranslatedEntry | TranslatedPerformantEntries | undefined {
   switch (entry.type) {
     case 'nested': {
       const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
         (entries, nestedEntry) => {
-          const translatedEntry = translateEntry(schemaVersion, nestedEntry);
+          const translatedEntry = translateEntry(schemaVersion, nestedEntry, os);
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);
           }
@@ -226,7 +335,7 @@ function translateEntry(
       };
     }
     case 'match': {
-      const matcher = getMatcherFunction(entry.field);
+      const matcher = getMatcherFunction({ field: entry.field, os });
       return translatedEntryMatchMatcher.is(matcher)
         ? {
             field: normalizeFieldName(entry.field),
@@ -237,7 +346,7 @@ function translateEntry(
         : undefined;
     }
     case 'match_any': {
-      const matcher = getMatcherFunction(entry.field, true);
+      const matcher = getMatcherFunction({ field: entry.field, matchAny: true, os });
       return translatedEntryMatchAnyMatcher.is(matcher)
         ? {
             field: normalizeFieldName(entry.field),
@@ -247,17 +356,38 @@ function translateEntry(
           }
         : undefined;
     }
-  }
-}
+    case 'wildcard': {
+      const wildcardMatcher = getMatcherWildcardFunction({ field: entry.field, os });
+      const translatedEntryWildcardMatcher =
+        translatedEntryMatchWildcardMatcher.is(wildcardMatcher);
 
-export async function compressExceptionList(buffer: Buffer): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    deflate(buffer, function (err, buf) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buf);
-      }
-    });
-  });
+      const buildEntries = () => {
+        if (translatedEntryWildcardMatcher) {
+          // default process.executable entry
+          const wildcardProcessEntry: TranslatedEntryMatchWildcard = {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: wildcardMatcher,
+            value: entry.value,
+          };
+
+          const hasExecutableName = hasSimpleExecutableName({
+            os: os as OperatingSystem,
+            type: entry.type,
+            value: entry.value,
+          });
+          if (hasExecutableName) {
+            // when path has a full executable name
+            // append a process.name entry based on os
+            // `exact_cased` for linux and `exact_caseless` for others
+            return appendProcessNameEntry({ entry, os, wildcardProcessEntry });
+          } else {
+            return wildcardProcessEntry;
+          }
+        }
+      };
+
+      return buildEntries();
+    }
+  }
 }

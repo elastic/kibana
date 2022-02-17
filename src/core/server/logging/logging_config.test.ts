@@ -9,7 +9,18 @@
 import { LoggingConfig, config } from './logging_config';
 
 test('`schema` creates correct schema with defaults.', () => {
-  expect(config.schema.validate({})).toMatchSnapshot();
+  expect(config.schema.validate({})).toMatchInlineSnapshot(`
+    Object {
+      "appenders": Map {},
+      "loggers": Array [],
+      "root": Object {
+        "appenders": Array [
+          "default",
+        ],
+        "level": "info",
+      },
+    }
+  `);
 });
 
 test('`schema` throws if `root` logger does not have appenders configured.', () => {
@@ -19,17 +30,19 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
         appenders: [],
       },
     })
-  ).toThrowErrorMatchingSnapshot();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[root.appenders]: array size is [0], but cannot be smaller than [1]"`
+  );
 });
 
-test('`schema` throws if `root` logger does not have "default" appender configured.', () => {
+test('`schema` does not throw if `root` logger does not have "default" appender configured.', () => {
   expect(() =>
     config.schema.validate({
       root: {
         appenders: ['console'],
       },
     })
-  ).toThrowErrorMatchingSnapshot();
+  ).not.toThrow();
 });
 
 test('`getParentLoggerContext()` returns correct parent context name.', () => {
@@ -157,7 +170,9 @@ test('fails if loggers use unknown appenders.', () => {
     ],
   });
 
-  expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingSnapshot();
+  expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingInlineSnapshot(
+    `"Logger \\"some.nested.context\\" contains unsupported appender key \\"unknown\\"."`
+  );
 });
 
 describe('extend', () => {

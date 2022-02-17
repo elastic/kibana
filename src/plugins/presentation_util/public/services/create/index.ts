@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
-
 import { PluginServiceRegistry } from './registry';
 
 export { PluginServiceRegistry } from './registry';
-export { PluginServiceProvider, PluginServiceProviders } from './provider';
-export {
+export type { PluginServiceProviders } from './provider';
+export { PluginServiceProvider } from './provider';
+export type {
   PluginServiceFactory,
   KibanaPluginServiceFactory,
   KibanaPluginServiceParams,
 } from './factory';
+
+type ServiceHooks<Services> = { [K in keyof Services]: { useService: () => Services[K] } };
 
 /**
  * `PluginServices` is a top-level class for specifying and accessing services within a plugin.
@@ -70,13 +71,27 @@ export class PluginServices<Services> {
   /**
    * Return a map of React Hooks that can be used in React components.
    */
-  getHooks(): { [K in keyof Services]: { useService: () => Services[K] } } {
+  getHooks(): ServiceHooks<Services> {
     const registry = this.getRegistry();
     const providers = registry.getServiceProviders();
 
-    // @ts-expect-error Need to fix this; the type isn't fully understood when inferred.
-    return mapValues(providers, (provider) => ({
-      useService: provider.getUseServiceHook(),
-    }));
+    const providerNames = Object.keys(providers) as Array<keyof typeof providers>;
+
+    return providerNames.reduce((acc, providerName) => {
+      acc[providerName] = { useService: providers[providerName].getServiceReactHook() };
+      return acc;
+    }, {} as ServiceHooks<Services>);
+  }
+
+  getServices(): Services {
+    const registry = this.getRegistry();
+    const providers = registry.getServiceProviders();
+
+    const providerNames = Object.keys(providers) as Array<keyof typeof providers>;
+
+    return providerNames.reduce((acc, providerName) => {
+      acc[providerName] = providers[providerName].getService();
+      return acc;
+    }, {} as Services);
   }
 }

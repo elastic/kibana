@@ -7,6 +7,7 @@
  */
 
 export { coreDeprecationProvider } from './deprecation';
+export { ensureValidConfiguration } from './ensure_valid_configuration';
 
 export {
   ConfigService,
@@ -24,10 +25,10 @@ export type {
   ConfigPath,
   CliArgs,
   ConfigDeprecation,
+  ConfigDeprecationContext,
   AddConfigDeprecation,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
   EnvironmentMode,
   PackageInfo,
-  LegacyObjectToConfigAdapter,
 } from '@kbn/config';

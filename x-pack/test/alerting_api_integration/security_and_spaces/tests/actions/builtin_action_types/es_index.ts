@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -13,7 +13,7 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
 // eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es: Client = getService('es');
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
@@ -43,6 +43,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'An index action',
         connector_type_id: '.index',
+        is_missing_secrets: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -59,6 +60,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_missing_secrets: false,
         name: 'An index action',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
@@ -84,6 +86,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'An index action with index config',
         connector_type_id: '.index',
+        is_missing_secrets: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -102,6 +105,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'An index action with index config',
         connector_type_id: '.index',
+        is_missing_secrets: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -185,7 +189,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result.status).to.eql('ok');
 
-      const items = await getTestIndexItems(es);
+      const items: any[] = await getTestIndexItems(es);
       expect(items.length).to.eql(2);
       let passed1 = false;
       let passed2 = false;
@@ -264,7 +268,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
   });
 }
 
-async function getTestIndexItems(es: any) {
+async function getTestIndexItems(es: Client) {
   const result = await es.search({
     index: ES_TEST_INDEX_NAME,
   });

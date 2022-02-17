@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AuthenticatedUser } from '../../common/model';
 
@@ -100,7 +100,7 @@ export class SecurityNavControl extends Component<Props, State> {
       (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
 
     const buttonContents = authenticatedUser ? (
-      <EuiAvatar name={username} size="s" />
+      <EuiAvatar name={username} size="s" data-test-subj="userMenuAvatar" />
     ) : (
       <EuiLoadingSpinner size="m" />
     );

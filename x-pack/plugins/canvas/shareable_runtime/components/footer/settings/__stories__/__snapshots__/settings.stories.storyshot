@@ -37,6 +37,7 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="gear"
               size="m"
             />
@@ -85,6 +86,7 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
             <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="gear"
               size="m"
             />

@@ -38,4 +38,5 @@ export {
   logstashPipelineRoute,
   logstashClusterPipelineIdsRoute,
 } from './logstash';
+export { entSearchOverviewRoute } from './enterprise_search';
 export * from './setup';

@@ -51,17 +51,13 @@ const result = {
 
 const callAs = {
   ml: {
-    getJobs: jest.fn(() =>
-      Promise.resolve({
-        body: { jobs },
-      })
-    ),
+    getJobs: jest.fn(() => Promise.resolve({ jobs })),
   },
 };
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
 describe('ML - job initialization', () => {
   describe('createJobSpaceOverrides', () => {

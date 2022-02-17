@@ -16,7 +16,7 @@ import { imageUpload } from './image_upload';
 // @ts-expect-error untyped local
 import { number } from './number';
 import { numberFormatInitializer } from './number_format';
-import { palette } from './palette';
+import { palette, stopsPalette } from './palette';
 // @ts-expect-error untyped local
 import { percentage } from './percentage';
 // @ts-expect-error untyped local
@@ -31,6 +31,8 @@ import { string } from './string';
 import { textarea } from './textarea';
 // @ts-expect-error untyped local
 import { toggle } from './toggle';
+import { visdimension } from './vis_dimension';
+import { colorPicker } from './color_picker';
 
 import { SetupInitializer } from '../../plugin';
 
@@ -41,6 +43,7 @@ export const args = [
   imageUpload,
   number,
   palette,
+  stopsPalette,
   percentage,
   range,
   select,
@@ -48,6 +51,8 @@ export const args = [
   string,
   textarea,
   toggle,
+  visdimension,
+  colorPicker,
 ];
 
 export const initializers = [dateFormatInitializer, numberFormatInitializer];

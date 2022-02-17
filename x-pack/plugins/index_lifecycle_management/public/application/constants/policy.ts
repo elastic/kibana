@@ -16,7 +16,7 @@ export const defaultIndexPriority = {
 
 export const defaultRolloverAction: RolloverAction = {
   max_age: '30d',
-  max_size: '50gb',
+  max_primary_shard_size: '50gb',
 };
 
 export const defaultPolicy: SerializedPolicy = {

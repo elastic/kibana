@@ -1,0 +1,27 @@
+format_version: 1.0.0
+name: package_policy_upgrade
+title: Tests package policy upgrades
+description: This is a test package for upgrading package policies
+version: 0.6.0-restructure-policy-templates
+categories: []
+release: beta
+type: integration
+license: basic
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+policy_templates:
+  - name: package_policy_upgrade_new
+    title: Package Policy Upgrade New
+    description: Test Package for Upgrading Package Policies
+    inputs:
+      - type: test_input_new
+        title: Test Input New
+        description: Test Input New
+        enabled: true
+      - type: test_input_new_2
+        title: Test Input New 2
+        description: Test Input New 2
+        enabled: true

@@ -11,11 +11,11 @@ Array [
     "apm": undefined,
     "beats": Object {
       "beats": Object {
-        "total": null,
+        "total": 0,
         "types": Array [],
       },
-      "bytesSent": null,
-      "totalEvents": null,
+      "bytesSent": 0,
+      "totalEvents": 0,
     },
     "ccs": "proddy1",
     "cluster_name": "Custom name",
@@ -29,25 +29,7 @@ Array [
             "deleted": 0,
           },
           "shards": Object {
-            "index": Object {
-              "primaries": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-              "replication": Object {
-                "avg": 0,
-                "max": 0,
-                "min": 0,
-              },
-              "shards": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-            },
             "primaries": 1,
-            "replication": 0,
             "total": 1,
           },
           "store": Object {
@@ -60,7 +42,6 @@ Array [
           },
           "fs": Object {
             "available_in_bytes": 224468717568,
-            "free_in_bytes": 228403855360,
             "total_in_bytes": 499963170816,
           },
           "jvm": Object {
@@ -75,6 +56,7 @@ Array [
       },
       "logs": undefined,
     },
+    "enterpriseSearch": undefined,
     "isCcrEnabled": undefined,
     "isPrimary": true,
     "isSupported": true,
@@ -115,11 +97,11 @@ Array [
     "apm": undefined,
     "beats": Object {
       "beats": Object {
-        "total": null,
+        "total": 0,
         "types": Array [],
       },
-      "bytesSent": null,
-      "totalEvents": null,
+      "bytesSent": 0,
+      "totalEvents": 0,
     },
     "ccs": undefined,
     "cluster_name": "monitoring-one",
@@ -133,25 +115,7 @@ Array [
             "deleted": 1,
           },
           "shards": Object {
-            "index": Object {
-              "primaries": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-              "replication": Object {
-                "avg": 0,
-                "max": 0,
-                "min": 0,
-              },
-              "shards": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-            },
             "primaries": 6,
-            "replication": 0,
             "total": 6,
           },
           "store": Object {
@@ -164,7 +128,6 @@ Array [
           },
           "fs": Object {
             "available_in_bytes": 224468783104,
-            "free_in_bytes": 228403920896,
             "total_in_bytes": 499963170816,
           },
           "jvm": Object {
@@ -179,6 +142,7 @@ Array [
       },
       "logs": undefined,
     },
+    "enterpriseSearch": undefined,
     "isCcrEnabled": undefined,
     "isPrimary": false,
     "isSupported": true,
@@ -224,11 +188,11 @@ Array [
     "apm": undefined,
     "beats": Object {
       "beats": Object {
-        "total": null,
+        "total": 0,
         "types": Array [],
       },
-      "bytesSent": null,
-      "totalEvents": null,
+      "bytesSent": 0,
+      "totalEvents": 0,
     },
     "ccs": "proddy1",
     "cluster_name": "Custom name",
@@ -242,25 +206,7 @@ Array [
             "deleted": 0,
           },
           "shards": Object {
-            "index": Object {
-              "primaries": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-              "replication": Object {
-                "avg": 0,
-                "max": 0,
-                "min": 0,
-              },
-              "shards": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-            },
             "primaries": 1,
-            "replication": 0,
             "total": 1,
           },
           "store": Object {
@@ -273,7 +219,6 @@ Array [
           },
           "fs": Object {
             "available_in_bytes": 224468717568,
-            "free_in_bytes": 228403855360,
             "total_in_bytes": 499963170816,
           },
           "jvm": Object {
@@ -288,6 +233,7 @@ Array [
       },
       "logs": undefined,
     },
+    "enterpriseSearch": undefined,
     "isCcrEnabled": undefined,
     "isPrimary": false,
     "isSupported": true,
@@ -328,11 +274,11 @@ Array [
     "apm": undefined,
     "beats": Object {
       "beats": Object {
-        "total": null,
+        "total": 0,
         "types": Array [],
       },
-      "bytesSent": null,
-      "totalEvents": null,
+      "bytesSent": 0,
+      "totalEvents": 0,
     },
     "ccs": undefined,
     "cluster_name": "monitoring-one",
@@ -346,25 +292,7 @@ Array [
             "deleted": 1,
           },
           "shards": Object {
-            "index": Object {
-              "primaries": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-              "replication": Object {
-                "avg": 0,
-                "max": 0,
-                "min": 0,
-              },
-              "shards": Object {
-                "avg": 1,
-                "max": 1,
-                "min": 1,
-              },
-            },
             "primaries": 6,
-            "replication": 0,
             "total": 6,
           },
           "store": Object {
@@ -377,7 +305,6 @@ Array [
           },
           "fs": Object {
             "available_in_bytes": 224468783104,
-            "free_in_bytes": 228403920896,
             "total_in_bytes": 499963170816,
           },
           "jvm": Object {
@@ -392,6 +319,7 @@ Array [
       },
       "logs": undefined,
     },
+    "enterpriseSearch": undefined,
     "isCcrEnabled": undefined,
     "isPrimary": false,
     "isSupported": true,

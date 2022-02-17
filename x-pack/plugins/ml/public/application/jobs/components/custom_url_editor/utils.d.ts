@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/common';
+import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { TimeRangeType } from './constants';
@@ -34,7 +34,7 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings: any): boole
 export function getNewCustomUrlDefaults(
   job: Job,
   dashboards: any[],
-  indexPatterns: IIndexPattern[]
+  dataViews: DataViewListItem[]
 ): CustomUrlSettings;
 export function getQueryEntityFieldNames(job: Job): string[];
 export function isValidCustomUrlSettings(

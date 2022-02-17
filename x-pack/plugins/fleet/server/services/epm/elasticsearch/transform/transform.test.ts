@@ -18,9 +18,9 @@ jest.mock('./common', () => {
   };
 });
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import type { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { errors } from '@elastic/elasticsearch';
+import type { SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { Installation, RegistryPackage } from '../../../../types';
@@ -31,11 +31,13 @@ import { savedObjectsClientMock } from '../../../../../../../../src/core/server/
 import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { appContextService } from '../../../app_context';
 
-import { getAsset } from './common';
+import { getESAssetMetadata } from '../meta';
+
 import { installTransform } from './install';
+import { getAsset } from './common';
 
 describe('test transform install', () => {
-  let esClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -50,7 +52,7 @@ describe('test transform install', () => {
   });
 
   test('can install new versions and removes older version', async () => {
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -61,9 +63,9 @@ describe('test transform install', () => {
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
@@ -82,7 +84,7 @@ describe('test transform install', () => {
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
       .mockReturnValueOnce(Buffer.from('{"content": "data"}', 'utf8'))
       .mockReturnValueOnce(Buffer.from('{"content": "data"}', 'utf8'));
@@ -91,31 +93,29 @@ describe('test transform install', () => {
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: {
           installed_es: previousInstallation.installed_es,
         },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
-      ({
+      {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -148,14 +148,15 @@ describe('test transform install', () => {
             path: 'metadata_current',
           },
         ],
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       [
         'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create()
     );
 
     expect(esClient.transform.getTransform.mock.calls).toEqual([
@@ -195,19 +196,21 @@ describe('test transform install', () => {
       ],
     ]);
 
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
+
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -275,18 +278,18 @@ describe('test transform install', () => {
   });
 
   test('can install new version and when no older version', async () => {
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
       Buffer.from('{"content": "data"}', 'utf8')
     );
@@ -294,16 +297,16 @@ describe('test transform install', () => {
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: { installed_es: [] },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     await installTransform(
-      ({
+      {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -322,18 +325,21 @@ describe('test transform install', () => {
             path: 'metadata_current',
           },
         ],
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create()
     );
+
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -360,46 +366,44 @@ describe('test transform install', () => {
   });
 
   test('can removes older version when no new install in package', async () => {
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [
         {
           id: 'endpoint.metadata-current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: { installed_es: currentInstallation.installed_es },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
-      ({
+      {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -432,10 +436,11 @@ describe('test transform install', () => {
             path: 'metadata_current',
           },
         ],
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       [],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create()
     );
 
     expect(esClient.transform.getTransform.mock.calls).toEqual([
@@ -489,18 +494,18 @@ describe('test transform install', () => {
   });
 
   test('ignore already exists error if saved object and ES transforms are out of sync', async () => {
-    const previousInstallation: Installation = ({
+    const previousInstallation: Installation = {
       installed_es: [],
-    } as unknown) as Installation;
+    } as unknown as Installation;
 
-    const currentInstallation: Installation = ({
+    const currentInstallation: Installation = {
       installed_es: [
         {
           id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
-    } as unknown) as Installation;
+    } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
       Buffer.from('{"content": "data"}', 'utf8')
     );
@@ -508,17 +513,17 @@ describe('test transform install', () => {
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    (getInstallationObject as jest.MockedFunction<
-      typeof getInstallationObject
-    >).mockReturnValueOnce(
-      Promise.resolve(({
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
         attributes: { installed_es: [] },
-      } as unknown) as SavedObject<Installation>)
+      } as unknown as SavedObject<Installation>)
     );
 
     esClient.transport.request.mockImplementationOnce(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(
-        new ResponseError(
+        new errors.ResponseError(
           elasticsearchClientMock.createApiResponse({
             statusCode: 400,
             body: { error: { type: 'resource_already_exists_exception' } },
@@ -528,7 +533,7 @@ describe('test transform install', () => {
     );
 
     await installTransform(
-      ({
+      {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -547,18 +552,21 @@ describe('test transform install', () => {
             path: 'metadata_current',
           },
         ],
-      } as unknown) as RegistryPackage,
+      } as unknown as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create()
     );
+
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);

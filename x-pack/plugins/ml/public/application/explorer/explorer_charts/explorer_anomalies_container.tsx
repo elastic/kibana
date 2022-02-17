@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 // @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,
   TableSeverity,
 } from '../../components/controls/select_severity/select_severity';
-import type { UrlGeneratorContract } from '../../../../../../../src/plugins/share/public';
 import type { TimeBuckets } from '../../util/time_buckets';
 import type { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
+import type { MlLocator } from '../../../../common/types/locator';
+import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
@@ -27,10 +28,12 @@ interface ExplorerAnomaliesContainerProps {
   showCharts: boolean;
   severity: TableSeverity;
   setSeverity: (severity: TableSeverity) => void;
-  mlUrlGenerator: UrlGeneratorContract<'ML_APP_URL_GENERATOR'>;
+  mlLocator: MlLocator;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
+  showSelectedInterval?: boolean;
+  chartsService: ChartsPluginStart;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -47,28 +50,18 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   showCharts,
   severity,
   setSeverity,
-  mlUrlGenerator,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
+  showSelectedInterval,
+  chartsService,
 }) => {
   return (
     <>
-      <EuiFlexGroup
-        id={id}
-        direction="row"
-        gutterSize="l"
-        responsive={true}
-        className="ml-anomalies-controls"
-      >
-        <EuiFlexItem grow={false} style={{ width: '170px' }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-              defaultMessage: 'Severity threshold',
-            })}
-          >
-            <SelectSeverityUI severity={severity} onChange={setSeverity} />
-          </EuiFormRow>
+      <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
+        <EuiFlexItem grow={false}>
+          <SelectSeverityUI severity={severity} onChange={setSeverity} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -91,11 +84,13 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             {...{
               ...chartsData,
               severity: severity.val,
-              mlUrlGenerator,
+              mlLocator,
               timeBuckets,
               timefilter,
               onSelectEntity,
               tooManyBucketsCalloutMsg,
+              showSelectedInterval,
+              chartsService,
             }}
           />
         )}

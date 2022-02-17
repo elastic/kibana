@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
 
 import type { DataStream } from '../../types';
-import { KibanaAssetType, KibanaSavedObjectType } from '../../../common';
+import { KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';
-import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
 interface ESDataStreamInfo {
   name: string;
@@ -33,7 +33,7 @@ interface ESDataStreamInfo {
   };
   status: string;
   template: string;
-  ilm_policy: string;
+  ilm_policy?: string;
   hidden: boolean;
 }
 
@@ -45,6 +45,7 @@ interface ESDataStreamStats {
 }
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
@@ -54,12 +55,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
   try {
     // Get matching data streams, their stats, and package SOs
     const [
-      {
-        body: { data_streams: dataStreamsInfo },
-      },
-      {
-        body: { data_streams: dataStreamStats },
-      },
+      { data_streams: dataStreamsInfo },
+      { data_streams: dataStreamStats },
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
@@ -78,6 +75,46 @@ export const getListHandler: RequestHandler = async (context, request, response)
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
 
+    // Get dashboard information for all packages
+    const dashboardIdsByPackageName = packageSavedObjects.saved_objects.reduce<
+      Record<string, string[]>
+    >((allDashboards, pkgSavedObject) => {
+      const dashboards: string[] = [];
+      (pkgSavedObject.attributes?.installed_kibana || []).forEach((o) => {
+        if (o.type === KibanaSavedObjectType.dashboard) {
+          dashboards.push(o.id);
+        }
+      });
+      allDashboards[pkgSavedObject.id] = dashboards;
+      return allDashboards;
+    }, {});
+    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+      title?: string;
+    }>(
+      Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
+        dashboardIds.map((id) => ({
+          id,
+          type: KibanaSavedObjectType.dashboard,
+          fields: ['title'],
+        }))
+      )
+    );
+    // Ignore dashboards not found
+    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
+      if (so.error) {
+        if (so.error.statusCode === 404) {
+          return false;
+        }
+        throw so.error;
+      }
+      return true;
+    });
+
+    const allDashboardSavedObjectsById = keyBy(
+      allDashboardSavedObjects,
+      (dashboardSavedObject) => dashboardSavedObject.id
+    );
+
     // Query additional information for each data stream
     const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
       const dataStream = dataStreams[dataStreamName];
@@ -88,24 +125,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
         type: '',
         package: dataStream._meta?.package?.name || '',
         package_version: '',
-        last_activity_ms: dataStream.maximum_timestamp,
+        last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
         dashboards: [],
       };
 
       // Query backing indices to extract data stream dataset, namespace, and type values
-      const {
-        body: {
-          // @ts-expect-error @elastic/elasticsearch aggregations are not typed
-          aggregations: { dataset, namespace, type },
-        },
-      } = await esClient.search({
-        index: dataStream.indices.map((index) => index.index_name),
+      const { aggregations: dataStreamAggs } = await esClient.search({
+        index: dataStream.name,
         body: {
           size: 0,
           query: {
             bool: {
-              must: [
+              filter: [
                 {
                   exists: {
                     field: 'data_stream.namespace',
@@ -120,6 +152,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
             },
           },
           aggs: {
+            maxIngestedTimestamp: {
+              max: {
+                field: 'event.ingested',
+              },
+            },
             dataset: {
               terms: {
                 field: 'data_stream.dataset',
@@ -142,10 +179,26 @@ export const getListHandler: RequestHandler = async (context, request, response)
         },
       });
 
-      // Set values from backing indices query
-      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
-      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
-      dataStreamResponse.type = type.buckets[0]?.key || '';
+      const { maxIngestedTimestamp } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsRateAggregate
+      >;
+      const { dataset, namespace, type } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
+      >;
+
+      // some integrations e.g custom logs don't have event.ingested
+      if (maxIngestedTimestamp?.value) {
+        dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
+      }
+
+      dataStreamResponse.dataset =
+        (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.namespace =
+        (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.type =
+        (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;
@@ -158,19 +211,23 @@ export const getListHandler: RequestHandler = async (context, request, response)
         // - and we didn't pick the metadata in an earlier iteration of this map()
         if (!packageMetadata[pkgName]) {
           // then pick the dashboards from the package saved object
-          const dashboards =
-            pkgSavedObject.attributes?.installed_kibana?.filter(
-              (o) => o.type === KibanaSavedObjectType.dashboard
-            ) || [];
-          // and then pick the human-readable titles from the dashboard saved objects
-          const enhancedDashboards = await getEnhancedDashboards(
-            context.core.savedObjects.client,
-            dashboards
-          );
+          const packageDashboardIds = dashboardIdsByPackageName[pkgName] || [];
+          const packageDashboards = packageDashboardIds.reduce<
+            Array<{ id: string; title: string }>
+          >((dashboards, dashboardId) => {
+            const dashboard = allDashboardSavedObjectsById[dashboardId];
+            if (dashboard) {
+              dashboards.push({
+                id: dashboard.id,
+                title: dashboard.attributes.title || dashboard.id,
+              });
+            }
+            return dashboards;
+          }, []);
 
           packageMetadata[pkgName] = {
             version: pkgSavedObject.attributes?.version || '',
-            dashboards: enhancedDashboards,
+            dashboards: packageDashboards,
           };
         }
 
@@ -183,7 +240,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       return dataStreamResponse;
     });
 
-    // Return final data streams objects sorted by last activity, decending
+    // Return final data streams objects sorted by last activity, descending
     // After filtering out data streams that are missing dataset/namespace/type fields
     body.data_streams = (await Promise.all(dataStreamPromises))
       .filter(({ dataset, namespace, type }) => dataset && namespace && type)
@@ -194,22 +251,4 @@ export const getListHandler: RequestHandler = async (context, request, response)
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
-};
-
-const getEnhancedDashboards = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  dashboards: any[]
-) => {
-  const dashboardsPromises = dashboards.map(async (db) => {
-    const dbSavedObject: any = await getKibanaSavedObject(
-      savedObjectsClient,
-      KibanaAssetType.dashboard,
-      db.id
-    );
-    return {
-      id: db.id,
-      title: dbSavedObject.attributes?.title || db.id,
-    };
-  });
-  return await Promise.all(dashboardsPromises);
 };

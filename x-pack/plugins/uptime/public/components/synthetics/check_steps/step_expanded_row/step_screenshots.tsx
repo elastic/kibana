@@ -8,12 +8,13 @@
 import moment from 'moment';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
-import { Ping } from '../../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../../common/runtime_types/ping/synthetics';
+import { Ping } from '../../../../../common/runtime_types/ping/ping';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useFetcher } from '../../../../../../observability/public';
-import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
+import { fetchLastSuccessfulCheck } from '../../../../state/api/journey';
 import { ScreenshotLink } from './screenshot_link';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
@@ -24,21 +25,24 @@ const Label = euiStyled.div`
 `;
 
 interface Props {
-  step: Ping;
+  step: JourneyStep;
 }
 
 export const StepScreenshots = ({ step }: Props) => {
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
-  const { data: lastSuccessfulStep } = useFetcher(() => {
+  const { data } = useFetcher(() => {
     if (!isSucceeded) {
-      return fetchLastSuccessfulStep({
-        timestamp: step.timestamp,
+      return fetchLastSuccessfulCheck({
+        timestamp: step['@timestamp'],
         monitorId: step.monitor.id,
         stepIndex: step.synthetics?.step?.index!,
+        location: step.observer?.geo?.name,
       });
     }
-  }, [step.docId, step.timestamp]);
+  }, [step._id, step['@timestamp']]);
+
+  const lastSuccessfulCheck: Ping | undefined = data;
 
   return (
     <EuiFlexGroup>
@@ -59,26 +63,28 @@ export const StepScreenshots = ({ step }: Props) => {
         </Label>
         <StepScreenshotDisplay
           checkGroup={step.monitor.check_group}
-          screenshotExists={step.synthetics?.screenshotExists}
+          isScreenshotRef={Boolean(step.synthetics?.isScreenshotRef)}
+          isFullScreenshot={Boolean(step.synthetics?.isFullScreenshot)}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
           lazyLoad={false}
         />
         <EuiSpacer size="xs" />
-        <Label>{getShortTimeStamp(moment(step.timestamp))}</Label>
+        <Label>{getShortTimeStamp(moment(step['@timestamp']))}</Label>
       </EuiFlexItem>
-      {!isSucceeded && lastSuccessfulStep?.monitor && (
+      {!isSucceeded && lastSuccessfulCheck?.monitor && (
         <EuiFlexItem>
-          <ScreenshotLink lastSuccessfulStep={lastSuccessfulStep} />
+          <ScreenshotLink lastSuccessfulCheck={lastSuccessfulCheck} />
           <StepScreenshotDisplay
-            checkGroup={lastSuccessfulStep.monitor.check_group}
-            screenshotExists={true}
-            stepIndex={lastSuccessfulStep.synthetics?.step?.index}
-            stepName={lastSuccessfulStep.synthetics?.step?.name}
+            checkGroup={lastSuccessfulCheck.monitor.check_group}
+            isScreenshotRef={Boolean(lastSuccessfulCheck.synthetics?.isScreenshotRef)}
+            isFullScreenshot={Boolean(lastSuccessfulCheck.synthetics?.isFullScreenshot)}
+            stepIndex={step.synthetics?.step?.index}
+            stepName={step.synthetics?.step?.name}
             lazyLoad={false}
           />
           <EuiSpacer size="xs" />
-          <Label>{getShortTimeStamp(moment(lastSuccessfulStep.timestamp))}</Label>
+          <Label>{getShortTimeStamp(moment(lastSuccessfulCheck.timestamp))}</Label>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

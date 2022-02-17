@@ -56,6 +56,9 @@ $mlAnnotationRectDefaultFillOpacity: .05;
 
   fill: $euiColorFullShade;
   transition: fill $euiAnimSpeedFast;
+
+  user-select: none;
+
 }
 
 .mlAnnotationText-isBlur {

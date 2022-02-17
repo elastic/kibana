@@ -8,6 +8,46 @@
 import * as t from 'io-ts';
 
 import {
+  Actions,
+  DefaultActionsArray,
+  DefaultFromString,
+  DefaultIntervalString,
+  DefaultMaxSignalsNumber,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+  DefaultThreatArray,
+  DefaultThrottleNull,
+  DefaultToString,
+  From,
+  machine_learning_job_id,
+  risk_score,
+  RiskScoreMapping,
+  threat_index,
+  items_per_search,
+  concurrent_searches,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+  threat_indicator_path,
+  Threats,
+  type,
+  language,
+  severity,
+  SeverityMapping,
+  ThrottleOrNull,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+
+import {
+  DefaultVersionNumber,
+  Version,
+  DefaultStringArray,
+  DefaultBooleanTrue,
+  OnlyFalseAllowed,
+} from '@kbn/securitysolution-io-ts-types';
+import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
   description,
   anomaly_threshold,
   filters,
@@ -18,26 +58,15 @@ import {
   timeline_id,
   timeline_title,
   meta,
-  machine_learning_job_id,
-  risk_score,
-  MaxSignals,
   name,
-  severity,
   Tags,
   To,
-  type,
-  Threats,
   threshold,
-  ThrottleOrNull,
   note,
-  Version,
   References,
-  Actions,
   Enabled,
   FalsePositives,
-  From,
   Interval,
-  language,
   query,
   rule_id,
   id,
@@ -50,39 +79,8 @@ import {
   rule_name_override,
   timestamp_override,
   Author,
-  RiskScoreMapping,
-  SeverityMapping,
   event_category_override,
 } from '../common/schemas';
-import {
-  threat_index,
-  items_per_search,
-  concurrent_searches,
-  threat_query,
-  threat_filters,
-  threat_mapping,
-  threat_language,
-  threat_indicator_path,
-} from '../types/threat_mapping';
-
-import {
-  DefaultStringArray,
-  DefaultActionsArray,
-  DefaultBooleanTrue,
-  DefaultFromString,
-  DefaultIntervalString,
-  DefaultMaxSignalsNumber,
-  DefaultToString,
-  DefaultThreatArray,
-  DefaultThrottleNull,
-  DefaultVersionNumber,
-  OnlyFalseAllowed,
-  DefaultStringBooleanFalse,
-  DefaultListArray,
-  ListArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
-} from '../types';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -202,17 +200,6 @@ export type ImportRulesSchemaDecoded = Omit<
   exceptions_list: ListArray;
   rule_id: RuleId;
   immutable: false;
-};
-
-export const importRulesQuerySchema = t.exact(
-  t.partial({
-    overwrite: DefaultStringBooleanFalse,
-  })
-);
-
-export type ImportRulesQuerySchema = t.TypeOf<typeof importRulesQuerySchema>;
-export type ImportRulesQuerySchemaDecoded = Omit<ImportRulesQuerySchema, 'overwrite'> & {
-  overwrite: boolean;
 };
 
 export const importRulesPayloadSchema = t.exact(

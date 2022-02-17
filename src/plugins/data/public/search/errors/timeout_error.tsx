@@ -13,7 +13,6 @@ import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
 
 export enum TimeoutErrorMode {
-  UPGRADE,
   CONTACT,
   CHANGE,
 }
@@ -31,11 +30,6 @@ export class SearchTimeoutError extends KbnError {
 
   private getMessage() {
     switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        return i18n.translate('data.search.upgradeLicense', {
-          defaultMessage:
-            'Your query has timed out. With our free Basic tier, your queries never time out.',
-        });
       case TimeoutErrorMode.CONTACT:
         return i18n.translate('data.search.timeoutContactAdmin', {
           defaultMessage:
@@ -51,11 +45,6 @@ export class SearchTimeoutError extends KbnError {
 
   private getActionText() {
     switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        return i18n.translate('data.search.upgradeLicenseActionText', {
-          defaultMessage: 'Upgrade now',
-        });
-        break;
       case TimeoutErrorMode.CHANGE:
         return i18n.translate('data.search.timeoutIncreaseSettingActionText', {
           defaultMessage: 'Edit setting',
@@ -66,9 +55,6 @@ export class SearchTimeoutError extends KbnError {
 
   private onClick(application: ApplicationStart) {
     switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        application.navigateToUrl('https://www.elastic.co/subscriptions');
-        break;
       case TimeoutErrorMode.CHANGE:
         application.navigateToApp('management', {
           path: `/kibana/settings`,

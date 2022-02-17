@@ -6,10 +6,8 @@
  */
 
 import React, { createContext } from 'react';
-import { useParams } from 'react-router-dom';
 import { Annotation } from '../../../common/annotations';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { useUrlParams } from '../url_params_context/use_url_params';
 
 export const AnnotationsContext = createContext({ annotations: [] } as {
   annotations: Annotation[];
@@ -19,30 +17,35 @@ const INITIAL_STATE = { annotations: [] };
 
 export function AnnotationsContextProvider({
   children,
+  environment,
+  start,
+  end,
+  serviceName,
 }: {
   children: React.ReactNode;
+  environment: string;
+  start: string;
+  end: string;
+  serviceName?: string;
 }) {
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const {
-    urlParams: { environment, start, end },
-  } = useUrlParams();
-
   const { data = INITIAL_STATE } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /api/apm/services/{serviceName}/annotation/search',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                start,
+                end,
+              },
             },
-            query: {
-              environment,
-              start,
-              end,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [environment, start, end, serviceName]

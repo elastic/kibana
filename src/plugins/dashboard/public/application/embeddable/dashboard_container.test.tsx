@@ -9,10 +9,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { findTestSubject, nextTick } from '@kbn/test/jest';
+import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 import { KibanaContextProvider } from '../../services/kibana_react';
@@ -38,18 +38,26 @@ import {
 } from '../../../../../core/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
+import { getStubPluginServices } from '../../../../presentation_util/public';
+
+const presentationUtil = getStubPluginServices();
+const theme = coreMock.createStart().theme;
 
 const options: DashboardContainerServices = {
+  // TODO: clean up use of any
   application: {} as any,
   embeddable: {} as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
+  screenshotMode: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   http: coreMock.createStart().http,
+  theme,
+  presentationUtil,
 };
 
 beforeEach(() => {
@@ -233,17 +241,20 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <EmbeddablePanel
-          embeddable={embeddable}
-          getActions={() => Promise.resolve([])}
-          getAllEmbeddableFactories={(() => []) as any}
-          getEmbeddableFactory={(() => null) as any}
-          notifications={{} as any}
-          application={options.application}
-          overlays={{} as any}
-          inspector={inspector}
-          SavedObjectFinder={() => null}
-        />
+        <presentationUtil.ContextProvider>
+          <EmbeddablePanel
+            embeddable={embeddable}
+            getActions={() => Promise.resolve([])}
+            getAllEmbeddableFactories={(() => []) as any}
+            getEmbeddableFactory={(() => null) as any}
+            notifications={{} as any}
+            application={options.application}
+            overlays={{} as any}
+            inspector={inspector}
+            SavedObjectFinder={() => null}
+            theme={theme}
+          />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );

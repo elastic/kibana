@@ -5,23 +5,93 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import semverSatisfies from 'semver/functions/satisfies';
+import semverGt from 'semver/functions/gt';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
 import {
-  extractPanelsReferences,
-  injectPanelsReferences,
-} from './embeddable/embeddable_references';
-import { SavedDashboardPanel730ToLatest } from './types';
+  DashboardContainerControlGroupInput,
+  DashboardContainerStateWithType,
+  DashboardPanelState,
+  RawControlGroupAttributes,
+} from './types';
 import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
+import {
+  convertPanelStateToSavedDashboardPanel,
+  convertSavedDashboardPanelToPanelState,
+} from './embeddable/embeddable_saved_object_converters';
+import { SavedDashboardPanel } from './types';
+import { CONTROL_GROUP_TYPE } from '../../controls/common';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
-
 export interface SavedObjectAttributesAndReferences {
   attributes: SavedObjectAttributes;
   references: SavedObjectReference[];
+}
+
+const isPre730Panel = (panel: Record<string, string>): boolean => {
+  return 'version' in panel ? semverGt('7.3.0', panel.version) : true;
+};
+
+function dashboardAttributesToState(attributes: SavedObjectAttributes): {
+  state: DashboardContainerStateWithType;
+  panels: SavedDashboardPanel[];
+} {
+  let inputPanels = [] as SavedDashboardPanel[];
+  if (typeof attributes.panelsJSON === 'string') {
+    inputPanels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
+  }
+
+  let controlGroupInput: DashboardContainerControlGroupInput | undefined;
+  if (attributes.controlGroupInput) {
+    const rawControlGroupInput =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (rawControlGroupInput.panelsJSON && typeof rawControlGroupInput.panelsJSON === 'string') {
+      const controlGroupPanels = JSON.parse(rawControlGroupInput.panelsJSON);
+      if (controlGroupPanels && typeof controlGroupPanels === 'object') {
+        controlGroupInput = {
+          ...rawControlGroupInput,
+          type: CONTROL_GROUP_TYPE,
+          panels: controlGroupPanels,
+        };
+      }
+    }
+  }
+
+  return {
+    panels: inputPanels,
+    state: {
+      id: attributes.id as string,
+      controlGroupInput,
+      type: 'dashboard',
+      panels: inputPanels.reduce<Record<string, DashboardPanelState>>((current, panel, index) => {
+        const panelIndex = panel.panelIndex || `${index}`;
+        current[panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+        return current;
+      }, {}),
+    },
+  };
+}
+
+function panelStatesToPanels(
+  panelStates: DashboardContainerStateWithType['panels'],
+  originalPanels: SavedDashboardPanel[]
+): SavedDashboardPanel[] {
+  return Object.entries(panelStates).map(([id, panelState]) => {
+    // Find matching original panel to get the version
+    let originalPanel = originalPanels.find((p) => p.panelIndex === id);
+
+    if (!originalPanel) {
+      // Maybe original panel doesn't have a panel index and it's just straight up based on it's index
+      const numericId = parseInt(id, 10);
+      originalPanel = isNaN(numericId) ? originalPanel : originalPanels[numericId];
+    }
+
+    return convertPanelStateToSavedDashboardPanel(
+      panelState,
+      originalPanel?.version ? originalPanel.version : ''
+    );
+  });
 }
 
 export function extractReferences(
@@ -31,65 +101,42 @@ export function extractReferences(
   if (typeof attributes.panelsJSON !== 'string') {
     return { attributes, references };
   }
-  const panelReferences: SavedObjectReference[] = [];
-  let panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
 
-  const isPre730Panel = (panel: Record<string, string>): boolean => {
-    return 'version' in panel ? semverSatisfies(panel.version, '<7.3') : true;
-  };
-
-  const hasPre730Panel = panels.some(isPre730Panel);
-
-  /**
-   * `extractPanelsReferences` only knows how to reliably handle "latest" panels
-   * It is possible that `extractReferences` is run on older dashboard SO with older panels,
-   * for example, when importing a saved object using saved object UI `extractReferences` is called BEFORE any server side migrations are run.
-   *
-   * In this case we skip running `extractPanelsReferences` on such object.
-   * We also know that there is nothing to extract
-   * (First possible entity to be extracted by this mechanism is a dashboard drilldown since 7.11)
-   */
-  if (!hasPre730Panel) {
-    const extractedReferencesResult = extractPanelsReferences(
-      // it is ~safe~ to cast to `SavedDashboardPanel730ToLatest` because above we've checked that there are only >=7.3 panels
-      (panels as unknown) as SavedDashboardPanel730ToLatest[],
-      deps
-    );
-
-    panels = (extractedReferencesResult.map((res) => res.panel) as unknown) as Array<
-      Record<string, string>
-    >;
-    extractedReferencesResult.forEach((res) => {
-      panelReferences.push(...res.references);
-    });
+  const { panels, state } = dashboardAttributesToState(attributes);
+  if (!Array.isArray(panels)) {
+    return { attributes, references };
   }
 
-  // TODO: This extraction should be done by EmbeddablePersistableStateService
-  // https://github.com/elastic/kibana/issues/82830
-  panels.forEach((panel, i) => {
-    if (!panel.type) {
-      throw new Error(`"type" attribute is missing from panel "${i}"`);
-    }
-    if (!panel.id) {
-      // Embeddables are not required to be backed off a saved object.
-      return;
-    }
-    panel.panelRefName = `panel_${i}`;
-    panelReferences.push({
-      name: `panel_${i}`,
-      type: panel.type,
-      id: panel.id,
-    });
-    delete panel.type;
-    delete panel.id;
-  });
+  if ((panels as unknown as Array<Record<string, string>>).some(isPre730Panel)) {
+    return pre730ExtractReferences({ attributes, references }, deps);
+  }
+
+  const missingTypeIndex = panels.findIndex((panel) => panel.type === undefined);
+  if (missingTypeIndex >= 0) {
+    throw new Error(`"type" attribute is missing from panel "${missingTypeIndex}"`);
+  }
+
+  const { references: extractedReferences, state: rawExtractedState } =
+    deps.embeddablePersistableStateService.extract(state);
+  const extractedState = rawExtractedState as DashboardContainerStateWithType;
+
+  const extractedPanels = panelStatesToPanels(extractedState.panels, panels);
+
+  const newAttributes = {
+    ...attributes,
+    panelsJSON: JSON.stringify(extractedPanels),
+  } as SavedObjectAttributes;
+
+  if (extractedState.controlGroupInput) {
+    newAttributes.controlGroupInput = {
+      ...(attributes.controlGroupInput as SavedObjectAttributes),
+      panelsJSON: JSON.stringify(extractedState.controlGroupInput.panels),
+    };
+  }
 
   return {
-    references: [...references, ...panelReferences],
-    attributes: {
-      ...attributes,
-      panelsJSON: JSON.stringify(panels),
-    },
+    references: [...references, ...extractedReferences],
+    attributes: newAttributes,
   };
 }
 
@@ -107,33 +154,69 @@ export function injectReferences(
   if (typeof attributes.panelsJSON !== 'string') {
     return attributes;
   }
-  let panels = JSON.parse(attributes.panelsJSON);
+  const parsedPanels = JSON.parse(attributes.panelsJSON);
   // Same here, prevent failing saved object import if ever panels aren't an array.
-  if (!Array.isArray(panels)) {
+  if (!Array.isArray(parsedPanels)) {
     return attributes;
   }
 
-  // TODO: This injection should be done by EmbeddablePersistableStateService
-  // https://github.com/elastic/kibana/issues/82830
-  panels.forEach((panel) => {
-    if (!panel.panelRefName) {
+  const { panels, state } = dashboardAttributesToState(attributes);
+
+  const injectedState = deps.embeddablePersistableStateService.inject(
+    state,
+    references
+  ) as DashboardContainerStateWithType;
+  const injectedPanels = panelStatesToPanels(injectedState.panels, panels);
+
+  const newAttributes = {
+    ...attributes,
+    panelsJSON: JSON.stringify(injectedPanels),
+  } as SavedObjectAttributes;
+
+  if (injectedState.controlGroupInput) {
+    newAttributes.controlGroupInput = {
+      ...(attributes.controlGroupInput as SavedObjectAttributes),
+      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
+    };
+  }
+
+  return newAttributes;
+}
+
+function pre730ExtractReferences(
+  { attributes, references = [] }: SavedObjectAttributesAndReferences,
+  deps: ExtractDeps
+): SavedObjectAttributesAndReferences {
+  if (typeof attributes.panelsJSON !== 'string') {
+    return { attributes, references };
+  }
+  const panelReferences: SavedObjectReference[] = [];
+  const panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
+
+  panels.forEach((panel, i) => {
+    if (!panel.type) {
+      throw new Error(`"type" attribute is missing from panel "${i}"`);
+    }
+    if (!panel.id) {
+      // Embeddables are not required to be backed off a saved object.
       return;
     }
-    const reference = references.find((ref) => ref.name === panel.panelRefName);
-    if (!reference) {
-      // Throw an error since "panelRefName" means the reference exists within
-      // "references" and in this scenario we have bad data.
-      throw new Error(`Could not find reference "${panel.panelRefName}"`);
-    }
-    panel.id = reference.id;
-    panel.type = reference.type;
-    delete panel.panelRefName;
+
+    panel.panelRefName = `panel_${i}`;
+    panelReferences.push({
+      name: `panel_${i}`,
+      type: panel.type,
+      id: panel.id,
+    });
+    delete panel.type;
+    delete panel.id;
   });
 
-  panels = injectPanelsReferences(panels, references, deps);
-
   return {
-    ...attributes,
-    panelsJSON: JSON.stringify(panels),
+    references: [...references, ...panelReferences],
+    attributes: {
+      ...attributes,
+      panelsJSON: JSON.stringify(panels),
+    },
   };
 }

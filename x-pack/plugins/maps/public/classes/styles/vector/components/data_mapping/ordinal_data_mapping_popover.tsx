@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
@@ -79,9 +79,9 @@ interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
   onChange: (updatedOptions: DynamicOptions) => void;
-  switchDisabled: boolean;
   dataMappingFunction: DATA_MAPPING_FUNCTION;
   supportedDataMappingFunctions: DATA_MAPPING_FUNCTION[];
+  supportsFieldMetaFromLocalData: boolean;
 }
 
 export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -168,8 +168,8 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               })}
               checked={props.fieldMetaOptions.isEnabled}
               onChange={onIsEnabledChange}
+              disabled={!props.supportsFieldMetaFromLocalData}
               compressed
-              disabled={props.switchDisabled}
             />{' '}
             <EuiToolTip
               content={

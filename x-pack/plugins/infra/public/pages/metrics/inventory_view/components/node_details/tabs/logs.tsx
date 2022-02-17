@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import useThrottle from 'react-use/lib/useThrottle';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -16,7 +17,7 @@ import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../observability/public';
 import { getNodeLogsUrl } from '../../../../../link_to';
 
 const TabComponent = (props: TabProps) => {
@@ -24,18 +25,21 @@ const TabComponent = (props: TabProps) => {
   const endTimestamp = props.currentTime;
   const startTimestamp = endTimestamp - 60 * 60 * 1000; // 60 minutes
   const { nodeType } = useWaffleOptionsContext();
-  const { options, node } = props;
+  const { node } = props;
+
+  const throttledTextQuery = useThrottle(textQuery, textQueryThrottleInterval);
 
   const filter = useMemo(() => {
-    let query = options.fields
-      ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-      : ``;
+    const query = [
+      `${findInventoryFields(nodeType).id}: "${node.id}"`,
+      ...(throttledTextQuery !== '' ? [throttledTextQuery] : []),
+    ].join(' and ');
 
-    if (textQuery) {
-      query += ` and message: ${textQuery}`;
-    }
-    return query;
-  }, [options, nodeType, node.id, textQuery]);
+    return {
+      language: 'kuery',
+      query,
+    };
+  }, [nodeType, node.id, throttledTextQuery]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -89,3 +93,5 @@ export const LogsTab = {
   }),
   content: TabComponent,
 };
+
+const textQueryThrottleInterval = 1000; // milliseconds

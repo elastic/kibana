@@ -16,5 +16,5 @@ export interface RouteValidatorOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [unsafe](./kibana-plugin-core-server.routevalidatoroptions.unsafe.md) | <code>{</code><br/><code>        params?: boolean;</code><br/><code>        query?: boolean;</code><br/><code>        body?: boolean;</code><br/><code>    }</code> | Set the <code>unsafe</code> config to avoid running some additional internal \*safe\* validations on top of your custom validation |
+|  [unsafe?](./kibana-plugin-core-server.routevalidatoroptions.unsafe.md) | { params?: boolean; query?: boolean; body?: boolean; } | <i>(Optional)</i> Set the <code>unsafe</code> config to avoid running some additional internal \*safe\* validations on top of your custom validation |
 

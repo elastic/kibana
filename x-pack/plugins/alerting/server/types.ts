@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlertInstance } from './alert_instance';
-import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
+import { PublicAlert } from './alert';
+import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { AlertsClient } from './alerts_client';
+import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
@@ -32,8 +32,11 @@ import {
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
+  SanitizedRuleConfig,
+  RuleMonitoring,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
+import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -43,9 +46,10 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
-  getAlertsClient: () => AlertsClient;
-  listTypes: AlertTypeRegistry['list'];
+  getRulesClient: () => RulesClient;
+  listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  areApiKeysEnabled: () => Promise<boolean>;
 }
 
 /**
@@ -70,9 +74,12 @@ export interface AlertServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+  };
+  shouldWriteAlerts: () => boolean;
+  shouldStopExecution: () => boolean;
+  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<
@@ -83,17 +90,24 @@ export interface AlertExecutorOptions<
   ActionGroupIds extends string = never
 > {
   alertId: string;
+  executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
+  rule: SanitizedRuleConfig;
   spaceId: string;
   namespace?: string;
   name: string;
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
+}
+
+export interface RuleParamsAndRefs<Params extends AlertTypeParams> {
+  references: SavedObjectReference[];
+  params: Params;
 }
 
 export type ExecutorType<
@@ -109,8 +123,9 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
-export interface AlertType<
+export interface RuleType<
   Params extends AlertTypeParams = never,
+  ExtractedParams extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
@@ -143,9 +158,17 @@ export interface AlertType<
     params?: ActionVariable[];
   };
   minimumLicenseRequired: LicenseType;
+  useSavedObjectReferences?: {
+    extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
+    injectReferences: (params: ExtractedParams, references: SavedObjectReference[]) => Params;
+  };
+  isExportable: boolean;
+  defaultScheduleInterval?: string;
+  minimumScheduleInterval?: string;
+  ruleTaskTimeout?: string;
+  cancelAlertsOnRuleTimeout?: boolean;
 }
-
-export type UntypedAlertType = AlertType<
+export type UntypedRuleType = RuleType<
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -166,9 +189,11 @@ export interface AlertMeta extends SavedObjectAttributes {
 // note that the `error` property is "null-able", as we're doing a partial
 // update on the alert when we update this data, but need to ensure we
 // delete any previous error if the current status has no error
-export interface RawAlertExecutionStatus extends SavedObjectAttributes {
+export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
   lastExecutionDate: string;
+  lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
     message: string;
@@ -178,12 +203,28 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
 export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
   Partial<Omit<Alert<Params>, 'id'>>;
 
-export interface RawAlert extends SavedObjectAttributes {
+export interface AlertWithLegacyId<Params extends AlertTypeParams = never> extends Alert<Params> {
+  legacyId: string | null;
+}
+
+export type SanitizedRuleWithLegacyId<Params extends AlertTypeParams = never> = Omit<
+  AlertWithLegacyId<Params>,
+  'apiKey'
+>;
+
+export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = Pick<
+  AlertWithLegacyId<Params>,
+  'id'
+> &
+  Partial<Omit<AlertWithLegacyId<Params>, 'id'>>;
+
+export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
-  alertTypeId: string;
+  alertTypeId: string; // this cannot be renamed since it is in the saved object
   consumer: string;
+  legacyId: string | null;
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
@@ -199,11 +240,12 @@ export interface RawAlert extends SavedObjectAttributes {
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
-  executionStatus: RawAlertExecutionStatus;
+  executionStatus: RawRuleExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type AlertInfoParams = Pick<
-  RawAlert,
+  RawRule,
   | 'params'
   | 'throttle'
   | 'notifyWhen'
@@ -238,4 +280,4 @@ export interface InvalidatePendingApiKey {
   createdAt: string;
 }
 
-export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;
+export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;

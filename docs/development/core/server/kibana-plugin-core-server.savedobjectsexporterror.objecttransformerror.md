@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportError.objectTransformError() method
 
-Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error
+Error returned when a [export transform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error
 
 <b>Signature:</b>
 
@@ -16,10 +16,10 @@ static objectTransformError(objects: SavedObject[], cause: Error): SavedObjectsE
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObject[]</code> |  |
-|  cause | <code>Error</code> |  |
+|  objects | SavedObject\[\] |  |
+|  cause | Error |  |
 
 <b>Returns:</b>
 
-`SavedObjectsExportError`
+SavedObjectsExportError
 

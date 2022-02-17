@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -39,7 +39,7 @@ export const SavedViewCreateModal = ({ close, save, isInvalid }: Props) => {
   }, [includeTime, save, viewName]);
 
   return (
-    <EuiModal onClose={close}>
+    <EuiModal onClose={close} data-test-subj="savedViews-createModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage

@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiFlexGroup,
@@ -22,7 +22,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import { DashboardPicker, DashboardPickerProps } from './dashboard_picker';
+import DashboardPicker, { DashboardPickerProps } from './dashboard_picker';
 
 import './saved_object_save_modal_dashboard.scss';
 

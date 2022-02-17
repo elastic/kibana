@@ -6,7 +6,7 @@
  */
 
 export const mappings = {
-  dynamic: 'strict' as const,
+  dynamic: 'strict',
   properties: {
     annotation: {
       properties: {
@@ -45,4 +45,4 @@ export const mappings = {
       },
     },
   },
-};
+} as const;

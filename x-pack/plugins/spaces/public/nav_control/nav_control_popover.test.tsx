@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../spaces_manager';
@@ -24,7 +24,7 @@ describe('NavControlPopover', () => {
 
     const wrapper = shallow(
       <NavControlPopover
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
@@ -57,7 +57,7 @@ describe('NavControlPopover', () => {
 
     const wrapper = mountWithIntl(
       <NavControlPopover
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}

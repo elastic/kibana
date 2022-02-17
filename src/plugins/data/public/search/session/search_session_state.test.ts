@@ -7,7 +7,7 @@
  */
 
 import { createSessionStateContainer, SearchSessionState } from './search_session_state';
-import { SearchSessionSavedObject } from './sessions_client';
+import type { SearchSessionSavedObject } from './sessions_client';
 import { SearchSessionStatus } from '../../../common';
 
 const mockSavedObject: SearchSessionSavedObject = {
@@ -16,7 +16,7 @@ const mockSavedObject: SearchSessionSavedObject = {
   attributes: {
     name: 'my_name',
     appId: 'my_app_id',
-    urlGeneratorId: 'my_url_generator_id',
+    locatorId: 'my_url_generator_id',
     idMapping: {},
     sessionId: 'session_id',
     touched: new Date().toISOString(),
@@ -24,6 +24,7 @@ const mockSavedObject: SearchSessionSavedObject = {
     expires: new Date().toISOString(),
     status: SearchSessionStatus.COMPLETE,
     persisted: true,
+    version: '8.0.0',
   },
   references: [],
 };

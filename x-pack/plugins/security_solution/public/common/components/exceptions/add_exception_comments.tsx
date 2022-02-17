@@ -17,7 +17,7 @@ import {
   EuiCommentProps,
   EuiText,
 } from '@elastic/eui';
-import { Comment } from '../../../shared_imports';
+import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
 import { useCurrentUser } from '../../lib/kibana';
 import { getFormattedComments } from './helpers';
@@ -32,7 +32,7 @@ const COMMENT_ACCORDION_BUTTON_CLASS_NAME = 'exceptionCommentAccordionButton';
 
 const MyAvatar = styled(EuiAvatar)`
   ${({ theme }) => css`
-    margin-right: ${theme.eui.paddingSizes.m};
+    margin-right: ${theme.eui.paddingSizes.s};
   `}
 `;
 
@@ -106,7 +106,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>
           <MyAvatar
-            name={currentUser !== null ? currentUser.username.toUpperCase() ?? '' : ''}
+            name={currentUser != null ? currentUser.username.toUpperCase() ?? '' : ''}
             size="l"
           />
         </EuiFlexItem>

@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('creation_saved_search', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -32,6 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteSavedSearches();
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
@@ -229,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
+          await transform.testExecution.logTestStep('displays the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 
@@ -279,6 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

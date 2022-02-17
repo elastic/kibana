@@ -15,13 +15,12 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['common', 'maps']);
 
   describe('check Elastic Maps Server', function () {
     before(async function () {
       await PageObjects.maps.loadSavedMap('EMS Test');
-      await find.clickByButtonText('Dismiss');
+      await PageObjects.common.dismissBanner();
       await browser.setScreenshotSize(1000, 1000);
     });
 

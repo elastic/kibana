@@ -9,9 +9,8 @@
 import moment, { Moment } from 'moment';
 import React, { FC } from 'react';
 
-import { LineAnnotation, AnnotationDomainTypes, LineAnnotationStyle } from '@elastic/charts';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import { LineAnnotation, AnnotationDomainType, LineAnnotationStyle } from '@elastic/charts';
+import { euiLightVars as lightEuiTheme, euiDarkVars as darkEuiTheme } from '@kbn/ui-theme';
 
 interface CurrentTimeProps {
   isDarkMode: boolean;
@@ -46,7 +45,7 @@ export const CurrentTime: FC<CurrentTimeProps> = ({ isDarkMode, domainEnd }) => 
     <LineAnnotation
       id="__current-time__"
       hideTooltips
-      domainType={AnnotationDomainTypes.XDomain}
+      domainType={AnnotationDomainType.XDomain}
       dataValues={lineAnnotationData}
       style={lineAnnotationStyle}
     />

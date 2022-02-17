@@ -29,6 +29,15 @@ interface Manifest {
   server: boolean;
   kibanaVersion: string;
   version: string;
+  owner: {
+    // Internally, this should be a team name.
+    name: string;
+    // All internally owned plugins should have a github team specified that can be pinged in issues, or used to look up
+    // members who can be asked questions regarding the plugin.
+    githubTeam?: string;
+  };
+  // TODO: make required.
+  description?: string;
   serviceFolders: readonly string[];
   requiredPlugins: readonly string[];
   optionalPlugins: readonly string[];
@@ -54,6 +63,12 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
     throw new TypeError('expected new platform plugin manifest to have a string version');
   }
 
+  if (!manifest.owner || typeof manifest.owner.name !== 'string') {
+    throw new TypeError(
+      `Expected plugin ${manifest.id} manifest to have an owner with name specified (${manifestPath})`
+    );
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     manifestPath,
@@ -66,6 +81,8 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       version: manifest.version,
       kibanaVersion: manifest.kibanaVersion || manifest.version,
       serviceFolders: manifest.serviceFolders || [],
+      owner: manifest.owner,
+      description: manifest.description,
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),

@@ -10,7 +10,7 @@ import type { CoreSetup } from 'src/core/server';
 import type { SpacesServiceStart } from '../spaces_service';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
-import { migrateToKibana660 } from './migrations';
+import { spaceMigrations, usageStatsMigrations } from './migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
 
 interface SetupDeps {
@@ -26,7 +26,7 @@ export class SpacesSavedObjectsService {
       namespaceType: 'agnostic',
       mappings: SpacesSavedObjectMappings,
       migrations: {
-        '6.6.0': migrateToKibana660,
+        '6.6.0': spaceMigrations.migrateTo660,
       },
     });
 
@@ -35,6 +35,9 @@ export class SpacesSavedObjectsService {
       hidden: true,
       namespaceType: 'agnostic',
       mappings: UsageStatsMappings,
+      migrations: {
+        '7.14.1': usageStatsMigrations.migrateTo7141,
+      },
     });
 
     core.savedObjects.addClientWrapper(

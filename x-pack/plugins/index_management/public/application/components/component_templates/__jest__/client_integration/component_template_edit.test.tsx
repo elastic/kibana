@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../../../../test/global_mocks';
 import { setupEnvironment } from './helpers';
 import { setup, ComponentTemplateEditTestBed } from './helpers/component_template_edit.helpers';
 
@@ -23,15 +24,6 @@ jest.mock('@elastic/eui', () => {
         data-test-subj="mockComboBox"
         onChange={(syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),
@@ -82,13 +74,15 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/84906
-  describe.skip('form payload', () => {
+  describe('form payload', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions, component, form } = testBed;
 
       await act(async () => {
         form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
         actions.clickNextButton();
       });
 

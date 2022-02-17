@@ -6,11 +6,13 @@
  */
 
 import { useEffect, useState } from 'react';
+import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
-import { isSecurityAppError } from '../../../../common/utils/api';
+import { useAlertsPrivileges } from './use_alerts_privileges';
 
 type Func = () => Promise<void>;
 
@@ -35,7 +37,10 @@ export const useSignalIndex = (): ReturnSignalIndex => {
     signalIndexMappingOutdated: null,
     createDeSignalIndex: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
+  const { hasIndexRead } = useAlertsPrivileges();
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
@@ -63,7 +68,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
             createDeSignalIndex: createIndex,
           });
           if (isSecurityAppError(error) && error.body.status_code !== 404) {
-            errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIGNAL_GET_NAME_FAILURE });
           }
         }
       }
@@ -93,7 +98,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
               signalIndexMappingOutdated: null,
               createDeSignalIndex: createIndex,
             });
-            errorToToaster({ title: i18n.SIGNAL_POST_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIGNAL_POST_FAILURE });
           }
         }
       }
@@ -102,12 +107,18 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       }
     };
 
-    fetchData();
+    if (hasIndexRead) {
+      fetchData();
+    } else {
+      // Skip data fetching as the current user doesn't have enough priviliges.
+      // Attempt to get the signal index will result in 500 error.
+      setLoading(false);
+    }
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [dispatchToaster]);
+  }, [addError, hasIndexRead, ruleRegistryEnabled]);
 
   return { loading, ...signalIndex };
 };

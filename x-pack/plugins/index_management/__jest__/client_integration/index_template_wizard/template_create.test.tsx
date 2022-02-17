@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../test/global_mocks';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -31,15 +32,6 @@ jest.mock('@elastic/eui', () => {
         data-test-subj="mockComboBox"
         onChange={(syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),
@@ -90,6 +82,7 @@ describe('<TemplateCreate />', () => {
     jest.useFakeTimers();
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
+    httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
 
     // disable all react-beautiful-dnd development warnings
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -101,7 +94,7 @@ describe('<TemplateCreate />', () => {
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
 
-  describe('on component mount', () => {
+  describe('composable index template', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
@@ -115,6 +108,11 @@ describe('<TemplateCreate />', () => {
       expect(find('pageTitle').text()).toEqual('Create template');
     });
 
+    test('renders no deprecation warning', async () => {
+      const { exists } = testBed;
+      expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
+    });
+
     test('should not let the user go to the next step with invalid fields', async () => {
       const { find, actions, component } = testBed;
 
@@ -126,6 +124,26 @@ describe('<TemplateCreate />', () => {
       component.update();
 
       expect(find('nextButton').props().disabled).toEqual(true);
+    });
+  });
+
+  describe('legacy index template', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(true);
+      });
+    });
+
+    test('should set the correct page title', () => {
+      const { exists, find } = testBed;
+
+      expect(exists('pageTitle')).toBe(true);
+      expect(find('pageTitle').text()).toEqual('Create legacy template');
+    });
+
+    test('renders deprecation warning', async () => {
+      const { exists } = testBed;
+      expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(true);
     });
   });
 
@@ -148,6 +166,11 @@ describe('<TemplateCreate />', () => {
 
         expect(exists('stepComponents')).toBe(true);
         expect(find('stepTitle').text()).toEqual('Component templates (optional)');
+      });
+
+      it(`doesn't render the deprecated legacy index template warning`, () => {
+        const { exists } = testBed;
+        expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
       });
 
       it('should list the available component templates', () => {
@@ -274,7 +297,7 @@ describe('<TemplateCreate />', () => {
     });
 
     describe('mappings (step 4)', () => {
-      beforeEach(async () => {
+      const navigateToMappingsStep = async () => {
         const { actions } = testBed;
         // Logistics
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -282,6 +305,10 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepTwo();
         // Index settings
         await actions.completeStepThree('{}');
+      };
+
+      beforeEach(async () => {
+        await navigateToMappingsStep();
       });
 
       it('should set the correct page title', () => {
@@ -314,6 +341,43 @@ describe('<TemplateCreate />', () => {
         actions.deleteMappingsFieldAt(0);
 
         expect(find('fieldsListItem').length).toBe(1);
+      });
+
+      describe('plugin parameters', () => {
+        const selectMappingsEditorTab = async (
+          tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced'
+        ) => {
+          const tabIndex = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
+          const tabElement = testBed.find('mappingsEditor.formTab').at(tabIndex);
+          await act(async () => {
+            tabElement.simulate('click');
+          });
+          testBed.component.update();
+        };
+
+        test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
+          const { exists } = testBed;
+          // Navigate to the advanced configuration
+          await selectMappingsEditorTab('advanced');
+
+          expect(exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(false);
+        });
+
+        test('should render the _size parameter if the mapper size plugin is installed', async () => {
+          httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
+
+          await act(async () => {
+            testBed = await setup();
+          });
+          testBed.component.update();
+          await navigateToMappingsStep();
+
+          await selectMappingsEditorTab('advanced');
+
+          expect(testBed.exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(
+            true
+          );
+        });
       });
     });
 

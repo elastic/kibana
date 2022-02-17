@@ -12,7 +12,7 @@ import {
   EmbeddableAnomalyChartsContainerProps,
 } from './embeddable_anomaly_charts_container';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import { CoreStart } from 'kibana/public';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
@@ -90,7 +90,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
       id: 'test-explorer-charts-embeddable',
     } as Partial<AnomalyChartsEmbeddableInput>);
 
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
+    trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
 
     const mlStartMock = createMlStartDepsMock();
     mlStartMock.uiActions.getTrigger.mockReturnValue(trigger);
@@ -110,7 +110,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
       ]);
     });
 
-    services = ([
+    services = [
       coreStartMock,
       mlStartMock,
       {
@@ -118,7 +118,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         anomalyExplorerChartsService: createAnomalyExplorerChartsServiceMock(),
         mlResultsService: createMlResultsServiceMock(),
       },
-    ] as unknown) as EmbeddableAnomalyChartsContainerProps['services'];
+    ] as unknown as EmbeddableAnomalyChartsContainerProps['services'];
   });
 
   test('should render explorer charts with a valid embeddable input', async () => {
@@ -149,9 +149,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
       defaultOptions
     );
 
-    const calledWith = ((ExplorerAnomaliesContainer as unknown) as jest.Mock<
-      typeof ExplorerAnomaliesContainer
-    >).mock.calls[0][0];
+    const calledWith = (
+      ExplorerAnomaliesContainer as unknown as jest.Mock<typeof ExplorerAnomaliesContainer>
+    ).mock.calls[0][0];
 
     expect(calledWith).toMatchSnapshot();
   });

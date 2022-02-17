@@ -1,0 +1,28 @@
+---
+id: kibTroubleshooting
+slug: /kibana-dev-docs/getting-started/troubleshooting
+title: Troubleshooting
+summary: A collection of tips for working around strange issues.
+date: 2021-09-08
+tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
+---
+
+### Typescript issues
+
+When switching branches, sometimes the TypeScript cache can get mixed up and show some invalid errors. If you run into TypeScript issues (invalid errors, or if it's taking too long to build types), here a few things to try.
+
+1. Build TypeScript references with the clean command.
+
+```
+node scripts/build_ts_refs --clean
+```
+
+2. Restore your repository to a totally fresh state by running `git clean`
+
+```
+# dry-run the clean to see what will be deleted
+git clean -fdxn -e /config -e /.vscode
+
+# review the files which will be deleted, consider adding some more excludes (-e)
+# re-run without the dry-run (-n) flag to actually delete the files
+```

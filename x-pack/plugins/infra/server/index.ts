@@ -8,7 +8,9 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { config, InfraConfig, InfraServerPlugin, InfraPluginSetup } from './plugin';
 
-export { config, InfraConfig, InfraPluginSetup };
+export type { InfraConfig, InfraPluginSetup };
+export { config };
+export type { InfraRequestHandlerContext } from './types';
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);

@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -17,6 +17,7 @@ import { EuiFieldText } from '@elastic/eui';
 
 import { ContentSection } from '../../../components/shared/content_section';
 
+import { BrandingSection } from './branding_section';
 import { Customize } from './customize';
 
 describe('Customize', () => {
@@ -32,6 +33,7 @@ describe('Customize', () => {
     const wrapper = shallow(<Customize />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(1);
+    expect(wrapper.find(BrandingSection)).toHaveLength(2);
   });
 
   it('handles input change', () => {

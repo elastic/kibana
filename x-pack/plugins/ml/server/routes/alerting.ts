@@ -7,10 +7,13 @@
 
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
-import { alertingServiceProvider } from '../lib/alerts/alerting_service';
 import { mlAnomalyDetectionAlertPreviewRequest } from './schemas/alerting_schema';
+import type { SharedServices } from '../shared_services';
 
-export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
+export function alertingRoutes(
+  { router, routeGuard }: RouteInitialization,
+  sharedServicesProviders: SharedServices
+) {
   /**
    * @apiGroup Alerting
    *
@@ -30,9 +33,12 @@ export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client, context }) => {
       try {
-        const alertingService = alertingServiceProvider(mlClient, client.asInternalUser);
+        const alertingService = sharedServicesProviders.alertingServiceProvider(
+          context.core.savedObjects.client,
+          request
+        );
 
         const result = await alertingService.preview(request.body);
 

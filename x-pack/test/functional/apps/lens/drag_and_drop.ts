@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
 
   describe('lens drag and drop tests', () => {
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Unique count of @message.raw [2]',
         ]);
       });
-      it('should duplicate the column when dragging to empty dimension in the same group', async () => {
+      it('should move duplicated column to non-compatible dimension group', async () => {
         await PageObjects.lens.dragDimensionToDimension(
           'lnsXY_yDimensionPanel > lns-dimensionTrigger',
           'lnsXY_xDimensionPanel > lns-empty-dimension'
@@ -160,6 +160,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
           'Top values of @message.raw'
+        );
+      });
+
+      it('should combine breakdown dimension with the horizontal one', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldToWorkspace('clientip');
+        await PageObjects.lens.dragFieldToWorkspace('@message.raw');
+
+        await PageObjects.lens.dragDimensionToExtraDropType(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 1 other'
+        );
+      });
+
+      it('should combine field to existing horizontal dimension', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldToWorkspace('clientip');
+
+        await PageObjects.lens.dragFieldToExtraDropType(
+          '@message.raw',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 1 other'
+        );
+      });
+
+      it('should combine two multi terms dimensions', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldToWorkspace('clientip');
+
+        await PageObjects.lens.dragFieldToExtraDropType(
+          '@message.raw',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+
+        await PageObjects.lens.dragFieldToDimensionTrigger(
+          '@message.raw',
+          'lnsXY_splitDimensionPanel > lns-empty-dimension'
+        );
+        await PageObjects.lens.dragFieldToExtraDropType(
+          'geo.src',
+          'lnsXY_splitDimensionPanel',
+          'combine'
+        );
+        await PageObjects.lens.dragDimensionToExtraDropType(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 2 others'
         );
       });
     });
@@ -269,8 +328,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('overwrite existing time dimension if one exists already', async () => {
+        await PageObjects.lens.searchField('utc');
         await PageObjects.lens.dragFieldToWorkspace('utc_time');
         await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.searchField('client');
         await PageObjects.lens.dragFieldToWorkspace('clientip');
         await PageObjects.lens.waitForVisualization();
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([

@@ -35,7 +35,6 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { ANNOTATION_EVENT_USER } from '../../../common/constants/annotations';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -385,12 +384,9 @@ export function getViewBySwimlaneOptions({
   };
 }
 
-export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
-  const jobIds =
-    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map((d) => d.id);
-  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
+export function loadOverallAnnotations(selectedJobs, interval, bounds) {
+  const jobIds = selectedJobs.map((d) => d.id);
+  const timeRange = getSelectionTimeRange(undefined, interval, bounds);
 
   return new Promise((resolve) => {
     ml.annotations
@@ -399,12 +395,6 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-        fields: [
-          {
-            field: 'event',
-            missing: ANNOTATION_EVENT_USER,
-          },
-        ],
       })
       .toPromise()
       .then((resp) => {
@@ -412,7 +402,6 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
           const errorMessage = extractErrorMessage(resp.error);
           return resolve({
             annotationsData: [],
-            aggregations: {},
             error: errorMessage !== '' ? errorMessage : undefined,
           });
         }
@@ -434,14 +423,66 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
               d.key = (i + 1).toString();
               return d;
             }),
-          aggregations: resp.aggregations,
         });
       })
       .catch((resp) => {
         const errorMessage = extractErrorMessage(resp);
         return resolve({
           annotationsData: [],
-          aggregations: {},
+          error: errorMessage !== '' ? errorMessage : undefined,
+        });
+      });
+  });
+}
+
+export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
+  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
+
+  return new Promise((resolve) => {
+    ml.annotations
+      .getAnnotations$({
+        jobIds,
+        earliestMs: timeRange.earliestMs,
+        latestMs: timeRange.latestMs,
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+      })
+      .toPromise()
+      .then((resp) => {
+        if (resp.error !== undefined || resp.annotations === undefined) {
+          const errorMessage = extractErrorMessage(resp.error);
+          return resolve({
+            annotationsData: [],
+            totalCount: 0,
+            error: errorMessage !== '' ? errorMessage : undefined,
+          });
+        }
+
+        const annotationsData = [];
+        jobIds.forEach((jobId) => {
+          const jobAnnotations = resp.annotations[jobId];
+          if (jobAnnotations !== undefined) {
+            annotationsData.push(...jobAnnotations);
+          }
+        });
+
+        return resolve({
+          annotationsData: annotationsData
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = (i + 1).toString();
+              return d;
+            }),
+          totalCount: resp.totalCount,
+        });
+      })
+      .catch((resp) => {
+        const errorMessage = extractErrorMessage(resp);
+        return resolve({
+          annotationsData: [],
+          totalCount: 0,
           error: errorMessage !== '' ? errorMessage : undefined,
         });
       });
@@ -532,65 +573,6 @@ export async function loadAnomaliesTableData(
       .catch((resp) => {
         console.log('Explorer - error loading data for anomalies table:', resp);
         reject();
-      });
-  });
-}
-
-// track the request to be able to ignore out of date requests
-// and avoid race conditions ending up with the wrong charts.
-let requestCount = 0;
-export async function loadDataForCharts(
-  mlResultsService,
-  jobIds,
-  earliestMs,
-  latestMs,
-  influencers = [],
-  selectedCells,
-  influencersFilterQuery,
-  // choose whether or not to keep track of the request that could be out of date
-  // in Anomaly Explorer this is being used to ignore any request that are out of date
-  // but in embeddables, we might have multiple requests coming from multiple different panels
-  takeLatestOnly = true
-) {
-  return new Promise((resolve) => {
-    // Just skip doing the request when this function
-    // is called without the minimum required data.
-    if (
-      selectedCells === undefined &&
-      influencers.length === 0 &&
-      influencersFilterQuery === undefined
-    ) {
-      resolve([]);
-    }
-
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
-
-    // Load the top anomalies (by record_score) which will be displayed in the charts.
-    mlResultsService
-      .getRecordsForInfluencer(
-        jobIds,
-        influencers,
-        0,
-        earliestMs,
-        latestMs,
-        500,
-        influencersFilterQuery
-      )
-      .then((resp) => {
-        // Ignore this response if it's returned by an out of date promise
-        if (takeLatestOnly && newRequestCount < requestCount) {
-          resolve([]);
-        }
-
-        if (
-          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
-          influencersFilterQuery !== undefined
-        ) {
-          resolve(resp.records);
-        }
-
-        resolve([]);
       });
   });
 }

@@ -9,7 +9,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
+
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('ExceptionsViewerHeader', () => {
   it('it renders all disabled if "isInitLoading" is true', () => {
@@ -39,6 +40,22 @@ describe('ExceptionsViewerHeader', () => {
         .at(0)
         .prop('disabled')
     ).toBeTruthy();
+  });
+
+  // This occurs if user does not have sufficient privileges
+  it('it does not display add exception button if no list types available', () => {
+    const wrapper = mount(
+      <ExceptionsViewerHeader
+        supportedListTypes={[]}
+        isInitLoading={false}
+        detectionsListItems={0}
+        endpointListItems={0}
+        onFilterChange={jest.fn()}
+        onAddExceptionClick={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"]').exists()).toBeFalsy();
   });
 
   it('it displays toggles and add exception popover when more than one list type available', () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { performance } from 'perf_hooks';
 import { Observable } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
 import { ClaimOwnershipResult } from '../queries/task_claiming';
@@ -57,7 +56,6 @@ export async function fillPool(
   converter: (taskInstance: ConcreteTaskInstance) => TaskManagerRunner,
   run: (tasks: TaskManagerRunner[]) => Promise<TaskPoolRunResult>
 ): Promise<TimedFillPoolResult> {
-  performance.mark('fillPool.start');
   return new Promise((resolve, reject) => {
     const stopTaskTimer = startTaskTimer();
     const augmentTimingTo = (
@@ -76,12 +74,6 @@ export async function fillPool(
             res,
             async ({ docs, stats }) => {
               if (!docs.length) {
-                performance.mark('fillPool.bailNoTasks');
-                performance.measure(
-                  'fillPool.activityDurationUntilNoTasks',
-                  'fillPool.start',
-                  'fillPool.bailNoTasks'
-                );
                 return asOk({ result: TaskPoolRunResult.NoTaskWereRan, stats });
               }
               return asOk(
@@ -106,20 +98,12 @@ export async function fillPool(
               ({ result, stats }) => {
                 switch (result) {
                   case TaskPoolRunResult.RanOutOfCapacity:
-                    performance.mark('fillPool.bailExhaustedCapacity');
-                    performance.measure(
-                      'fillPool.activityDurationUntilExhaustedCapacity',
-                      'fillPool.start',
-                      'fillPool.bailExhaustedCapacity'
-                    );
                     return augmentTimingTo(FillPoolResult.RanOutOfCapacity, stats);
                   case TaskPoolRunResult.RunningAtCapacity:
-                    performance.mark('fillPool.cycle');
                     return augmentTimingTo(FillPoolResult.RunningAtCapacity, stats);
                   case TaskPoolRunResult.NoTaskWereRan:
                     return augmentTimingTo(FillPoolResult.NoTasksClaimed, stats);
                   default:
-                    performance.mark('fillPool.cycle');
                     return augmentTimingTo(FillPoolResult.PoolFilled, stats);
                 }
               },

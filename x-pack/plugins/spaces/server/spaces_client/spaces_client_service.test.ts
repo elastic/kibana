@@ -101,7 +101,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger);
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const wrapper = (Symbol() as unknown) as ISpacesClient;
+      const wrapper = Symbol() as unknown as ISpacesClient;
 
       const clientWrapper = jest.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);
@@ -129,7 +129,7 @@ describe('SpacesClientService', () => {
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
-      const wrapper = (Symbol() as unknown) as ISpacesClient;
+      const wrapper = Symbol() as unknown as ISpacesClient;
 
       const clientWrapper = jest.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);

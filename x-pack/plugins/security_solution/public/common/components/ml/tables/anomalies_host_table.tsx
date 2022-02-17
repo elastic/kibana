@@ -75,12 +75,12 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
           )}`}
           title={i18n.ANOMALIES}
           tooltip={i18n.TOOLTIP}
+          isInspectDisabled={skip}
         />
 
         <BasicTable
           // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
           columns={columns}
-          // @ts-expect-error ...which leads to `networks` not "matching" the columns
           items={hosts}
           pagination={pagination}
           sorting={sorting}

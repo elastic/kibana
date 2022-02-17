@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 import { useKibana, useBasePath } from '../../../common/lib/kibana';
@@ -39,7 +39,7 @@ export const IndexPatternsMissingPromptComponent = () => {
                 ),
                 beats: (
                   <a
-                    href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/beats/libbeat/${docLinks.DOC_LINK_VERSION}/getting-started.html`}
+                    href={`${docLinks.links.libbeat.getStarted}`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -62,7 +62,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
-          href={`${kibanaBasePath}/management/kibana/indexPatterns`}
+          href={`${kibanaBasePath}/management/kibana/dataViews`}
           color="primary"
           target="_blank"
           fill

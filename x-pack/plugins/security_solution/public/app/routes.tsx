@@ -10,7 +10,7 @@ import React, { FC, memo, useEffect } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
-import { AppLeaveHandler } from '../../../../../src/core/public';
+import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
 import { AppAction } from '../common/store/actions';
@@ -21,9 +21,15 @@ interface RouterProps {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const PageRouterComponent: FC<RouterProps> = ({ children, history, onAppLeave }) => {
+const PageRouterComponent: FC<RouterProps> = ({
+  children,
+  history,
+  onAppLeave,
+  setHeaderActionMenu,
+}) => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -42,7 +48,9 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history, onAppLeave })
         <RouteCapture>
           <Switch>
             <Route path="/">
-              <HomePage onAppLeave={onAppLeave}>{children}</HomePage>
+              <HomePage onAppLeave={onAppLeave} setHeaderActionMenu={setHeaderActionMenu}>
+                {children}
+              </HomePage>
             </Route>
             <Route>
               <NotFoundPage />

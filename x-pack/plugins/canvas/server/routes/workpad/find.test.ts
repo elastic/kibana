@@ -10,13 +10,13 @@ import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'sr
 import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 describe('Find workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;

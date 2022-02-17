@@ -6,11 +6,20 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useTags, ReturnTags } from './use_tags';
 
 jest.mock('./api');
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useTags', () => {
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnTags>(() => useTags());

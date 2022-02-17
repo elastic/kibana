@@ -8,7 +8,6 @@
 import { TypeOf, schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   importBufferSize: schema.number({ defaultValue: 1000, min: 1 }),
   importTimeout: schema.duration({
     defaultValue: '5m',
@@ -22,6 +21,7 @@ export const ConfigSchema = schema.object({
   }),
   listIndex: schema.string({ defaultValue: '.lists' }),
   listItemIndex: schema.string({ defaultValue: '.items' }),
+  maxExceptionsImportSize: schema.number({ defaultValue: 10000, min: 1 }),
   maxImportPayloadBytes: schema.number({ defaultValue: 9000000, min: 1 }),
 });
 

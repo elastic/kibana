@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import { buildEsQuery, Filter, Query } from '@kbn/es-query';
+import { JsonValue } from '@kbn/utility-types';
 import { noop } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-
-import { LogEntryCursor } from '../../../common/log_entry';
-
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { LogEntryCursor } from '../../../common/log_entry';
 import { useLogSource } from '../../containers/logs/log_source';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
-
-import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
-import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
-import { Query } from '../../../../../../src/plugins/data/common';
+import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
+import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
+import { LogStreamErrorBoundary } from './log_stream_error_boundary';
+
+interface LogStreamPluginDeps {
+  data: DataPublicPluginStart;
+}
 
 const PAGE_THRESHOLD = 2;
 
@@ -53,25 +57,39 @@ type LogColumnDefinition =
   | MessageColumnDefinition
   | FieldColumnDefinition;
 
-export interface LogStreamProps {
+export interface LogStreamProps extends LogStreamContentProps {
+  height?: string | number;
+}
+
+interface LogStreamContentProps {
   sourceId?: string;
   startTimestamp: number;
   endTimestamp: number;
   query?: string | Query | BuiltEsQuery;
+  filters?: Filter[];
   center?: LogEntryCursor;
   highlight?: string;
-  height?: string | number;
   columns?: LogColumnDefinition[];
 }
 
-export const LogStream: React.FC<LogStreamProps> = ({
+export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
+  return (
+    <LogStreamContainer style={{ height }}>
+      <LogStreamErrorBoundary resetOnChange={[contentProps.query]}>
+        <LogStreamContent {...contentProps} />
+      </LogStreamErrorBoundary>
+    </LogStreamContainer>
+  );
+};
+
+export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   sourceId = 'default',
   startTimestamp,
   endTimestamp,
   query,
+  filters,
   center,
   highlight,
-  height = '400px',
   columns,
 }) => {
   const customColumns = useMemo(
@@ -80,25 +98,45 @@ export const LogStream: React.FC<LogStreamProps> = ({
   );
 
   // source boilerplate
-  const { services } = useKibana();
-  if (!services?.http?.fetch) {
+  const { services } = useKibana<LogStreamPluginDeps>();
+  if (!services?.http?.fetch || !services?.data?.indexPatterns) {
     throw new Error(
       `<LogStream /> cannot access kibana core services.
 
 Ensure the component is mounted within kibana-react's <KibanaContextProvider> hierarchy.
-Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/README.md"
+Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/README.md"
 `
     );
   }
 
+  const kibanaQuerySettings = useKibanaQuerySettings();
+
   const {
+    derivedIndexPattern,
+    isLoading: isLoadingSource,
+    loadSource,
     sourceConfiguration,
-    loadSourceConfiguration,
-    isLoadingSourceConfiguration,
   } = useLogSource({
     sourceId,
     fetch: services.http.fetch,
+    indexPatternsService: services.data.indexPatterns,
   });
+
+  const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
+    if (typeof query === 'object' && 'bool' in query) {
+      return mergeBoolQueries(
+        query,
+        buildEsQuery(derivedIndexPattern, [], filters ?? [], kibanaQuerySettings)
+      );
+    } else {
+      return buildEsQuery(
+        derivedIndexPattern,
+        coerceToQueries(query),
+        filters ?? [],
+        kibanaQuerySettings
+      );
+    }
+  }, [derivedIndexPattern, filters, kibanaQuerySettings, query]);
 
   // Internal state
   const {
@@ -109,12 +147,12 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     hasMoreAfter,
     hasMoreBefore,
     isLoadingMore,
-    isReloading,
+    isReloading: isLoadingEntries,
   } = useLogStream({
     sourceId,
     startTimestamp,
     endTimestamp,
-    query,
+    query: parsedQuery,
     center,
     columns: customColumns,
   });
@@ -133,12 +171,10 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     [entries]
   );
 
-  const parsedHeight = typeof height === 'number' ? `${height}px` : height;
-
   // Component lifetime
   useEffect(() => {
-    loadSourceConfiguration();
-  }, [loadSourceConfiguration]);
+    loadSource();
+  }, [loadSource]);
 
   useEffect(() => {
     fetchEntries();
@@ -165,37 +201,34 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   );
 
   return (
-    <LogStreamContent height={parsedHeight}>
-      <ScrollableLogTextStreamView
-        target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
-        columnConfigurations={columnConfigurations}
-        items={streamItems}
-        scale="medium"
-        wrap={true}
-        isReloading={isLoadingSourceConfiguration || isReloading}
-        isLoadingMore={isLoadingMore}
-        hasMoreBeforeStart={hasMoreBefore}
-        hasMoreAfterEnd={hasMoreAfter}
-        isStreaming={false}
-        jumpToTarget={noop}
-        reportVisibleInterval={handlePagination}
-        reloadItems={fetchEntries}
-        highlightedItem={highlight ?? null}
-        currentHighlightKey={null}
-        startDateExpression={''}
-        endDateExpression={''}
-        updateDateRange={noop}
-        startLiveStreaming={noop}
-        hideScrollbar={false}
-      />
-    </LogStreamContent>
+    <ScrollableLogTextStreamView
+      target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
+      columnConfigurations={columnConfigurations}
+      items={streamItems}
+      scale="medium"
+      wrap={true}
+      isReloading={isLoadingSource || isLoadingEntries}
+      isLoadingMore={isLoadingMore}
+      hasMoreBeforeStart={hasMoreBefore}
+      hasMoreAfterEnd={hasMoreAfter}
+      isStreaming={false}
+      jumpToTarget={noop}
+      reportVisibleInterval={handlePagination}
+      reloadItems={fetchEntries}
+      highlightedItem={highlight ?? null}
+      currentHighlightKey={null}
+      startDateExpression={''}
+      endDateExpression={''}
+      updateDateRange={noop}
+      startLiveStreaming={noop}
+      hideScrollbar={false}
+    />
   );
 };
 
-const LogStreamContent = euiStyled.div<{ height: string }>`
+const LogStreamContainer = euiStyled.div`
   display: flex;
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  height: ${(props) => props.height};
 `;
 
 function convertLogColumnDefinitionToLogSourceColumnDefinition(
@@ -221,6 +254,27 @@ function convertLogColumnDefinitionToLogSourceColumnDefinition(
     }
   });
 }
+
+const mergeBoolQueries = (firstQuery: BuiltEsQuery, secondQuery: BuiltEsQuery): BuiltEsQuery => ({
+  bool: {
+    must: [...firstQuery.bool.must, ...secondQuery.bool.must],
+    filter: [...firstQuery.bool.filter, ...secondQuery.bool.filter],
+    should: [...firstQuery.bool.should, ...secondQuery.bool.should],
+    must_not: [...firstQuery.bool.must_not, ...secondQuery.bool.must_not],
+  },
+});
+
+const coerceToQueries = (value: undefined | string | Query): Query[] => {
+  if (value == null) {
+    return [];
+  } else if (typeof value === 'string') {
+    return [{ language: 'kuery', query: value }];
+  } else if ('language' in value && 'query' in value) {
+    return [value];
+  }
+
+  return [];
+};
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

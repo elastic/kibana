@@ -13,6 +13,7 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -31,25 +32,26 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 export function UptimeSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
   const history = useHistory();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
     () => {
       if (bucketSize) {
-        return getDataHandler('uptime')?.fetchData({
+        return getDataHandler('synthetics')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },
@@ -58,7 +60,7 @@ export function UptimeSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.uptime?.hasData) {
+  if (!hasDataMap.synthetics?.hasData) {
     return null;
   }
 
@@ -72,17 +74,17 @@ export function UptimeSection({ bucketSize }: Props) {
   const { appLink, stats, series } = data || {};
 
   const downColor = theme.eui.euiColorVis2;
-  const upColor = theme.eui.euiColorLightShade;
+  const upColor = theme.eui.euiColorMediumShade;
 
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.uptime.title', {
-        defaultMessage: 'Uptime',
+        defaultMessage: 'Monitors',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.uptime.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show monitors',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}
@@ -123,7 +125,7 @@ export function UptimeSection({ bucketSize }: Props) {
       {/* Chart section */}
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
           showLegend={false}
           legendPosition={Position.Right}

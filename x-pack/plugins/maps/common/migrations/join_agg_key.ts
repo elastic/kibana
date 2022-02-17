@@ -62,10 +62,17 @@ export function migrateJoinAggKey({
     return attributes;
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (
-      layerDescriptor.type === LAYER_TYPE.VECTOR ||
+      // can not use LAYER_TYPE because LAYER_TYPE.VECTOR does not exist >8.1
+      layerDescriptor.type === 'VECTOR' ||
       layerDescriptor.type === LAYER_TYPE.BLENDED_VECTOR
     ) {
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;

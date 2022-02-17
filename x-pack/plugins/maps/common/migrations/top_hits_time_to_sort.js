@@ -19,7 +19,13 @@ export function topHitsTimeToSort({ attributes }) {
     return attributes;
   }
 
-  const layerList = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
       if (_.has(layerDescriptor, 'sourceDescriptor.topHitsTimeField')) {

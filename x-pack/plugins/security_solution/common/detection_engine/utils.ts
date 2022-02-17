@@ -7,22 +7,21 @@
 
 import { isEmpty } from 'lodash';
 
-import {
-  CreateExceptionListItemSchema,
+import type {
   EntriesArray,
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../shared_imports';
-import { Type, JobStatus } from './schemas/common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import { Threshold, ThresholdNormalized } from './schemas/common';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
-};
-
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
 };
 
 export const hasNestedEntry = (entries: EntriesArray): boolean => {
@@ -52,8 +51,16 @@ export const normalizeThresholdField = (
     ? thresholdField
     : isEmpty(thresholdField)
     ? []
-    : [thresholdField!];
+    : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      [thresholdField!];
 };
 
-export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
-  value === 'partial failure' ? 'warning' : value != null ? value : null;
+export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
+  return {
+    ...threshold,
+    field: normalizeThresholdField(threshold.field),
+  };
+};
+
+export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];

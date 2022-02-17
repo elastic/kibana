@@ -5,7 +5,7 @@
   ],
   "description": "Looks for compiler activity by a user context which does not normally run compilers. This can be the result of ad-hoc software changes or unauthorized software deployment. This can also be due to local privilege elevation via locally run exploits or malware activity.",
   "false_positives": [
-    "Uncommon compiler activity can be due to an engineer running a local build on a prod or staging instance in the course of troubleshooting or fixing a software issue."
+    "Uncommon compiler activity can be due to an engineer running a local build on a production or staging instance in the course of troubleshooting or fixing a software issue."
   ],
   "from": "now-45m",
   "interval": "15m",
@@ -23,5 +23,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

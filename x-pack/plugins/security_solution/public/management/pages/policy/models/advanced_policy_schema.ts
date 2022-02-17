@@ -585,6 +585,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.fileaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'Report limited file access (read) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.registryaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registryaccess',
+      {
+        defaultMessage:
+          'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.diagnostic.enabled',
     first_supported_version: '7.11',
     documentation: i18n.translate(
@@ -645,6 +667,209 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.mbr',
       {
         defaultMessage: "A value of 'false' disables Ransomware MBR protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ransomware.canary',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
+      {
+        defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
+      {
+        defaultMessage:
+          'Enable shellcode injection detection as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.quarantine',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.quarantine',
+      {
+        defaultMessage:
+          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_collect_sample',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected shellcode regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.memory_protection.shellcode_enhanced_pe_parsing',
+      {
+        defaultMessage:
+          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.etw',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
+      {
+        defaultMessage: 'Enable collection of ETW events. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.diagnostic.rollback_telemetry_enabled',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.rollback_telemetry_enabled',
+      {
+        defaultMessage: 'Enable diagnostic rollback telemetry. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.network_extension.enable_content_filtering',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_content_filtering',
+      {
+        defaultMessage:
+          'Enable or disable the network content filter, this will enable/disable network eventing. Host isolation will fail if this option is disabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.network_extension.enable_packet_filtering',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_packet_filtering',
+      {
+        defaultMessage:
+          'Enable or disable the network packet filter. Host isolation will fail if this option is disabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_trampoline_detection',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_trampoline_detection',
+      {
+        defaultMessage:
+          'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
       }
     ),
   },

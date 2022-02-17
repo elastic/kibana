@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
 import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
+import { parseInterval } from '../utils';
 import { ThreatMatchNamedQuery } from './types';
 
 /**
@@ -75,6 +78,7 @@ export const combineResults = (
   lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
+  warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
 });
 
@@ -100,6 +104,7 @@ export const combineConcurrentResults = (
         lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
+        warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
       };
     },
@@ -112,6 +117,7 @@ export const combineConcurrentResults = (
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
+      warningMessages: [],
     }
   );
 
@@ -143,3 +149,21 @@ export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQu
 
 export const extractNamedQueries = (hit: SignalSourceHit): ThreatMatchNamedQuery[] =>
   hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
+
+export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {
+  const intervalDuration = parseInterval(interval);
+
+  if (intervalDuration == null) {
+    throw new Error(
+      `Unable to parse rule interval (${interval}); stopping rule execution since allotted duration is undefined.`
+    );
+  }
+
+  const executionEnd = moment().add(intervalDuration);
+  return () => {
+    if (moment().isAfter(executionEnd)) {
+      const message = `Current rule execution has exceeded its allotted interval (${interval}) and has been stopped.`;
+      throw new Error(message);
+    }
+  };
+};

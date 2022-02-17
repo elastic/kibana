@@ -16,11 +16,11 @@ import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
-  alertParams: GeoContainmentAlertParams;
+  ruleParams: GeoContainmentAlertParams;
   errors: IErrorObject;
   boundaryIndexPattern: IIndexPattern;
   boundaryNameField?: string;
@@ -35,7 +35,7 @@ interface KibanaDeps {
 }
 
 export const BoundaryIndexExpression: FunctionComponent<Props> = ({
-  alertParams,
+  ruleParams,
   errors,
   boundaryIndexPattern,
   boundaryNameField,
@@ -48,7 +48,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { http } = useKibana<KibanaDeps>().services;
   const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
-  const { boundaryGeoField } = alertParams;
+  const { boundaryGeoField } = ruleParams;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nothingSelected: IFieldType = {
     name: '<nothing selected>',
@@ -162,7 +162,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
 
   return (
     <ExpressionWithPopover
-      defaultValue={'Select an index pattern and geo shape field'}
+      defaultValue={'Select a data view and geo shape field'}
       value={boundaryIndexPattern.title}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.indexLabel', {

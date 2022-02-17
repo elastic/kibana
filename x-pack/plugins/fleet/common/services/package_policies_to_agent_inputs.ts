@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
+
 import type { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
 
 export const storedPackagePoliciesToAgentInputs = (
-  packagePolicies: PackagePolicy[]
+  packagePolicies: PackagePolicy[],
+  outputId: string = DEFAULT_OUTPUT.name
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -30,11 +33,7 @@ export const storedPackagePoliciesToAgentInputs = (
         data_stream: {
           namespace: packagePolicy.namespace || 'default',
         },
-        use_output: DEFAULT_OUTPUT.name,
-        ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
-          acc[key] = value;
-          return acc;
-        }, {} as { [k: string]: any }),
+        use_output: outputId,
         ...(input.compiled_input || {}),
         ...(input.streams.length
           ? {
@@ -55,6 +54,15 @@ export const storedPackagePoliciesToAgentInputs = (
             }
           : {}),
       };
+
+      // deeply merge the input.config values with the full policy input
+      merge(
+        fullInput,
+        Object.entries(input.config || {}).reduce(
+          (acc, [key, { value }]) => ({ ...acc, [key]: value }),
+          {}
+        )
+      );
 
       if (packagePolicy.package) {
         fullInput.meta = {

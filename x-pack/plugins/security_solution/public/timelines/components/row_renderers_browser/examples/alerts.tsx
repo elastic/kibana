@@ -26,6 +26,7 @@ const AlertsExampleComponent: React.FC = () => {
       {alertsRowRenderer.renderRow({
         browserFields: {},
         data: mockEndpointProcessExecutionMalwarePreventionAlert,
+        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

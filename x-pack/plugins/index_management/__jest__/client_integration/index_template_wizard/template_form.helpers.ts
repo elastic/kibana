@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
+import { TestBed, SetupFunc } from '@kbn/test-jest-helpers';
 import { TemplateDeserialized } from '../../../common';
 
 interface MappingField {
@@ -18,7 +18,7 @@ interface MappingField {
 // Look at the return type of formSetup and form a union between that type and the TestBed type.
 // This way we an define the formSetup return object and use that to dynamically define our type.
 export type TemplateFormTestBed = TestBed<TemplateFormTestSubjects> &
-  UnwrapPromise<ReturnType<typeof formSetup>>;
+  Awaited<ReturnType<typeof formSetup>>;
 
 export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   const testBed = await initTestBed();
@@ -206,7 +206,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       if (settings) {
-        find('mockCodeEditor').simulate('change', {
+        find('settingsEditor').simulate('change', {
           jsonString: settings,
         }); // Using mocked EuiCodeEditor
       }
@@ -241,7 +241,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     if (aliases) {
       await act(async () => {
-        find('mockCodeEditor').simulate('change', {
+        find('aliasesEditor').simulate('change', {
           jsonString: aliases,
         }); // Using mocked EuiCodeEditor
       });
@@ -306,6 +306,7 @@ export type TestSubjects =
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
+  | 'legacyIndexTemplateDeprecationWarning'
   | 'mappingsEditorFieldEdit'
   | 'mockCodeEditor'
   | 'mockComboBox'
@@ -336,4 +337,8 @@ export type TestSubjects =
   | 'templateFormContainer'
   | 'testingEditor'
   | 'versionField'
-  | 'versionField.input';
+  | 'aliasesEditor'
+  | 'settingsEditor'
+  | 'versionField.input'
+  | 'mappingsEditor.formTab'
+  | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle';

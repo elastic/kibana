@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }) {
     it('should fetch layer data when layer is made visible', async () => {
       await PageObjects.maps.toggleLayerVisibility('logstash');
       const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('6');
+      expect(hits).to.equal('5');
     });
   });
 }

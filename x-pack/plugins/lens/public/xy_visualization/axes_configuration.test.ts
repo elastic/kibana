@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LayerArgs } from './types';
+import { LayerArgs } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 
@@ -220,6 +221,7 @@ describe('axes_configuration', () => {
 
   const sampleLayer: LayerArgs = {
     layerId: 'first',
+    layerType: layerTypes.DATA,
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],

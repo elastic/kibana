@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -20,12 +20,13 @@ import type {
 import type { EntityField, EntityFieldOperation } from '../../../common/util/anomaly_utils';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
+import { MlLocatorParams } from '../../../common/types/locator';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -55,19 +56,14 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
-  const [
-    { uiSettings },
-    {
-      data: dataServices,
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-      uiActions,
-    },
-  ] = services;
+  const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
+    services;
   const { timefilter } = dataServices.query.timefilter;
 
-  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
+  const mlLocator = useMemo(
+    () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
+    [share]
+  );
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -88,7 +84,11 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     });
   }, [severity, selectedEntities]);
 
-  const { chartsData, isLoading: isExplorerLoading, error } = useAnomalyChartsInputResolver(
+  const {
+    chartsData,
+    isLoading: isExplorerLoading,
+    error,
+  } = useAnomalyChartsInputResolver(
     embeddableInput,
     onInputChange,
     refresh,
@@ -98,9 +98,11 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   );
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      setChartWidth(e.width);
+      if (Math.abs(chartWidth - e.width) > 20) {
+        setChartWidth(e.width);
+      }
     }, RESIZE_THROTTLE_TIME_MS),
-    []
+    [chartWidth]
   );
 
   if (error) {
@@ -177,10 +179,12 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               chartsData={chartsData}
               severity={severity}
               setSeverity={setSeverity}
-              mlUrlGenerator={mlUrlGenerator}
+              mlLocator={mlLocator}
               timeBuckets={timeBuckets}
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
+              showSelectedInterval={false}
+              chartsService={chartsService}
             />
           )}
         </div>

@@ -14,6 +14,7 @@ import { map, takeUntil } from 'rxjs/operators';
 
 import type { CoreStart } from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserMenuLink } from './nav_control_component';
@@ -31,12 +32,12 @@ interface StartDeps {
 
 export interface SecurityNavControlServiceStart {
   /**
-   * Returns an Observable of the array of user menu links registered by other plugins
+   * Returns an Observable of the array of user menu links (the links that show up under the user's Avatar in the UI) registered by other plugins
    */
   getUserMenuLinks$: () => Observable<UserMenuLink[]>;
 
   /**
-   * Registers the provided user menu links to be displayed in the user menu in the global nav
+   * Registers the provided user menu links to be displayed in the user menu (the links that show up under the user's Avatar in the UI).
    */
   addUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
 }
@@ -110,8 +111,9 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(
-    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application'>
+    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application' | 'theme'>
   ) {
+    const { theme$ } = core.theme;
     const currentUserPromise = this.authc.getCurrentUser();
     core.chrome.navControls.registerRight({
       order: 2000,
@@ -126,7 +128,9 @@ export class SecurityNavControlService {
         };
         ReactDOM.render(
           <I18nContext>
-            <SecurityNavControl {...props} />
+            <KibanaThemeProvider theme$={theme$}>
+              <SecurityNavControl {...props} />
+            </KibanaThemeProvider>
           </I18nContext>,
           el
         );

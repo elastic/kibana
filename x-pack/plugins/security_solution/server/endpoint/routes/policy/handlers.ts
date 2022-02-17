@@ -25,7 +25,7 @@ export const getHostPolicyResponseHandler = function (): RequestHandler<
     const doc = await getPolicyResponseByAgentId(
       policyIndexPattern,
       request.query.agentId,
-      context.core.elasticsearch.legacy.client
+      context.core.elasticsearch.client
     );
 
     if (doc) {
@@ -39,11 +39,10 @@ export const getHostPolicyResponseHandler = function (): RequestHandler<
 export const getAgentPolicySummaryHandler = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<undefined, TypeOf<typeof GetAgentPolicySummaryRequestSchema.query>, undefined> {
-  return async (context, request, response) => {
+  return async (_, request, response) => {
     const result = await getAgentPolicySummary(
       endpointAppContext,
-      context.core.savedObjects.client,
-      context.core.elasticsearch.client.asCurrentUser,
+      request,
       request.query.package_name,
       request.query?.policy_id || undefined
     );

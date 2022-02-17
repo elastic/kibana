@@ -8,35 +8,40 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup, ThemeServiceStart } from 'src/core/public';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
-import { JobId, JobSummary, JobSummarySet, ReportDocument } from '../../common/types';
+import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {
   getFailureToast,
   getGeneralErrorToast,
   getSuccessToast,
   getWarningFormulasToast,
   getWarningMaxSizeToast,
-} from '../components';
+} from '../notifier';
+import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 
 function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
 }
 
-function getReportStatus(src: ReportDocument): JobSummary {
+function getReportStatus(src: Job): JobSummary {
   return {
-    id: src._id,
-    status: src._source.status,
-    title: src._source.payload.title,
-    jobtype: src._source.jobtype,
-    maxSizeReached: src._source.output?.max_size_reached,
-    csvContainsFormulas: src._source.output?.csv_contains_formulas,
+    id: src.id,
+    status: src.status,
+    title: src.title,
+    jobtype: src.prettyJobTypeName ?? src.jobtype,
+    maxSizeReached: src.max_size_reached,
+    csvContainsFormulas: src.csv_contains_formulas,
   };
 }
 
 export class ReportingNotifierStreamHandler {
-  constructor(private notifications: NotificationsSetup, private apiClient: ReportingAPIClient) {}
+  constructor(
+    private notifications: NotificationsSetup,
+    private apiClient: ReportingAPIClient,
+    private theme: ThemeServiceStart
+  ) {}
 
   /*
    * Use Kibana Toast API to show our messages
@@ -53,7 +58,8 @@ export class ReportingNotifierStreamHandler {
             getWarningFormulasToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink
+              this.apiClient.getDownloadLink,
+              this.theme
             )
           );
         } else if (job.maxSizeReached) {
@@ -61,21 +67,27 @@ export class ReportingNotifierStreamHandler {
             getWarningMaxSizeToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink
+              this.apiClient.getDownloadLink,
+              this.theme
             )
           );
         } else {
           this.notifications.toasts.addSuccess(
-            getSuccessToast(job, this.apiClient.getManagementLink, this.apiClient.getDownloadLink)
+            getSuccessToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink,
+              this.theme
+            )
           );
         }
       }
 
       // no download link available
       for (const job of failedJobs) {
-        const { content } = await this.apiClient.getContent(job.id);
+        const errorText = await this.apiClient.getError(job.id);
         this.notifications.toasts.addDanger(
-          getFailureToast(content, job, this.apiClient.getManagementLink)
+          getFailureToast(errorText, job, this.apiClient.getManagementLink, this.theme)
         );
       }
       return { completed: completedJobs, failed: failedJobs };
@@ -90,17 +102,14 @@ export class ReportingNotifierStreamHandler {
    */
   public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobSummarySet> {
     return Rx.from(this.apiClient.findForJobIds(storedJobs)).pipe(
-      map((jobs: ReportDocument[]) => {
+      map((jobs) => {
         const completedJobs: JobSummary[] = [];
         const failedJobs: JobSummary[] = [];
         const pending: JobId[] = [];
 
         // add side effects to storage
         for (const job of jobs) {
-          const {
-            _id: jobId,
-            _source: { status: jobStatus },
-          } = job;
+          const { id: jobId, status: jobStatus } = job;
           if (storedJobs.includes(jobId)) {
             if (jobStatus === JOB_STATUSES.COMPLETED || jobStatus === JOB_STATUSES.WARNINGS) {
               completedJobs.push(getReportStatus(job));
@@ -122,7 +131,8 @@ export class ReportingNotifierStreamHandler {
             i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
               defaultMessage: 'Could not check Reporting job status!',
             }),
-            err
+            err,
+            this.theme
           )
         ); // prettier-ignore
         window.console.error(err);

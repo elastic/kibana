@@ -18,7 +18,13 @@ import {
 } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs/operators';
-import { runOptimizer, OptimizerConfig, logOptimizerState, OptimizerUpdate } from '@kbn/optimizer';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  logOptimizerProgress,
+  OptimizerUpdate,
+} from '@kbn/optimizer';
 
 export interface Options {
   enabled: boolean;
@@ -107,14 +113,27 @@ export class Optimizer {
       },
     ]);
 
-    this.run$ = runOptimizer(config).pipe(
-      logOptimizerState(log, config),
-      tap(({ state }) => {
-        this.phase$.next(state.phase);
-        this.ready$.next(state.phase === 'success' || state.phase === 'issue');
-      }),
-      ignoreElements()
-    );
+    this.run$ = new Rx.Observable<void>((subscriber) => {
+      subscriber.add(
+        runOptimizer(config)
+          .pipe(
+            logOptimizerProgress(log),
+            logOptimizerState(log, config),
+            tap(({ state }) => {
+              this.phase$.next(state.phase);
+              this.ready$.next(state.phase === 'success' || state.phase === 'issue');
+            }),
+            ignoreElements()
+          )
+          .subscribe(subscriber)
+      );
+
+      // complete state subjects when run$ completes
+      subscriber.add(() => {
+        this.phase$.complete();
+        this.ready$.complete();
+      });
+    });
   }
 
   getPhase$() {

@@ -5,85 +5,90 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, ThreatRuleAttributes } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
+import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
 export const threatMatchExecutor = async ({
-  rule,
-  tuples,
+  completeRule,
+  tuple,
   listClient,
   exceptionItems,
   services,
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
+  experimentalFeatures,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
-  rule: SavedObject<ThreatRuleAttributes>;
-  tuples: RuleRangeTuple[];
+  completeRule: CompleteRule<ThreatRuleParams>;
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
-  const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
-  return createThreatSignals({
-    tuples,
-    threatMapping: ruleParams.threatMapping,
-    query: ruleParams.query,
-    inputIndex,
-    type: ruleParams.type,
-    filters: ruleParams.filters ?? [],
-    language: ruleParams.language,
-    name: rule.attributes.name,
-    savedId: ruleParams.savedId,
-    services,
-    exceptionItems,
-    listClient,
-    logger,
-    eventsTelemetry,
-    alertId: rule.id,
-    outputIndex: ruleParams.outputIndex,
-    params: ruleParams,
-    searchAfterSize,
-    actions: rule.attributes.actions,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    interval: rule.attributes.schedule.interval,
-    updatedAt: rule.updated_at ?? '',
-    enabled: rule.attributes.enabled,
-    refresh,
-    tags: rule.attributes.tags,
-    throttle: rule.attributes.throttle,
-    threatFilters: ruleParams.threatFilters ?? [],
-    threatQuery: ruleParams.threatQuery,
-    threatLanguage: ruleParams.threatLanguage,
-    buildRuleMessage,
-    threatIndex: ruleParams.threatIndex,
-    threatIndicatorPath: ruleParams.threatIndicatorPath,
-    concurrentSearches: ruleParams.concurrentSearches ?? 1,
-    itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+  const ruleParams = completeRule.ruleParams;
+
+  return withSecuritySpan('threatMatchExecutor', async () => {
+    const inputIndex = await getInputIndex({
+      experimentalFeatures,
+      services,
+      version,
+      index: ruleParams.index,
+    });
+    return createThreatSignals({
+      alertId: completeRule.alertId,
+      buildRuleMessage,
+      bulkCreate,
+      completeRule,
+      concurrentSearches: ruleParams.concurrentSearches ?? 1,
+      eventsTelemetry,
+      exceptionItems,
+      filters: ruleParams.filters ?? [],
+      inputIndex,
+      itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+      language: ruleParams.language,
+      listClient,
+      logger,
+      outputIndex: ruleParams.outputIndex,
+      query: ruleParams.query,
+      savedId: ruleParams.savedId,
+      searchAfterSize,
+      services,
+      threatFilters: ruleParams.threatFilters ?? [],
+      threatIndex: ruleParams.threatIndex,
+      threatIndicatorPath: ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH,
+      threatLanguage: ruleParams.threatLanguage,
+      threatMapping: ruleParams.threatMapping,
+      threatQuery: ruleParams.threatQuery,
+      tuple,
+      type: ruleParams.type,
+      wrapHits,
+    });
   });
 };

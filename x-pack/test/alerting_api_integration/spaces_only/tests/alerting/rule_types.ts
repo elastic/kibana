@@ -42,7 +42,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         },
         producer: 'alertsFixture',
         minimum_license_required: 'basic',
+        is_exportable: true,
         enabled_in_license: true,
+        rule_task_timeout: '5m',
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
@@ -126,7 +128,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           },
           producer: 'alertsFixture',
           minimumLicenseRequired: 'basic',
+          isExportable: true,
           enabledInLicense: true,
+          ruleTaskTimeout: '5m',
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });

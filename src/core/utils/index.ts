@@ -7,3 +7,5 @@
  */
 
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
+export { APP_WRAPPER_CLASS } from './app_wrapper_class';
+export { EUI_STYLES_GLOBAL } from './meta';

@@ -40,7 +40,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     },
 
     async selectSourceForIndexBasedDataVisualizer(sourceName: string) {
-      await this.selectSource(sourceName, 'mlPageIndexDataVisualizer');
+      await this.selectSource(sourceName, 'dataVisualizerIndexPage');
     },
   };
 }

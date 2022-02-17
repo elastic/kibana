@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { parseDuration, getDurationNumberInItsUnit, getDurationUnitValue } from './parse_duration';
+import {
+  parseDuration,
+  formatDuration,
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from './parse_duration';
 
 test('parses seconds', () => {
   const result = parseDuration('10s');
@@ -35,6 +40,38 @@ test('throws error when the format is invalid', () => {
 
 test('throws error when suffix is missing', () => {
   expect(() => parseDuration('1000')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"1000\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+});
+
+test('formats seconds', () => {
+  const result = formatDuration('10s');
+  expect(result).toEqual('10 sec');
+});
+
+test('formats minutes', () => {
+  const result = formatDuration('10m');
+  expect(result).toEqual('10 min');
+});
+
+test('formats hours', () => {
+  const result = formatDuration('10h');
+  expect(result).toEqual('10 hr');
+});
+
+test('formats days', () => {
+  const result = formatDuration('10d');
+  expect(result).toEqual('10 day');
+});
+
+test('format throws error when the format is invalid', () => {
+  expect(() => formatDuration('10x')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"10x\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+});
+
+test('format throws error when suffix is missing', () => {
+  expect(() => formatDuration('1000')).toThrowErrorMatchingInlineSnapshot(
     `"Invalid duration \\"1000\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
   );
 });

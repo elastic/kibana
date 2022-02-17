@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
@@ -18,8 +20,8 @@ import {
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { userLoginEvent } from '../audit';
+import type { AuditServiceSetup } from '../audit';
+import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -46,6 +48,15 @@ import {
 import { Tokens } from './tokens';
 
 /**
+ * List of query string parameters used to pass various authentication related metadata that should
+ * be stripped away from URL as soon as they are no longer needed.
+ */
+const AUTH_METADATA_QUERY_STRING_PARAMETERS = [
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+];
+
+/**
  * The shape of the login attempt.
  */
 export interface ProviderLoginAttempt {
@@ -67,7 +78,6 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
@@ -77,6 +87,17 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  getServerBaseURL: () => string;
+}
+
+/** @internal */
+interface InvalidateSessionValueParams {
+  /** Request instance. */
+  request: KibanaRequest;
+  /** Value of the existing session, if any. */
+  sessionValue: SessionValue | null;
+  /** If enabled, skips writing a `user_logout` audit event for this session. */
+  skipAuditEvent?: boolean;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -186,25 +207,30 @@ export class Authenticator {
   /**
    * Session instance.
    */
-  private readonly session = this.options.session;
+  private readonly session: AuthenticatorOptions['session'];
 
   /**
    * Internal authenticator logger.
    */
-  private readonly logger = this.options.loggers.get('authenticator');
+  private readonly logger: Logger;
 
   /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param options Authenticator options.
    */
   constructor(private readonly options: Readonly<AuthenticatorOptions>) {
+    this.session = this.options.session;
+    this.logger = this.options.loggers.get('authenticator');
+
     const providerCommonOptions = {
       client: this.options.clusterClient,
       basePath: this.options.basePath,
+      getRequestOriginalURL: this.getRequestOriginalURL.bind(this),
       tokens: new Tokens({
         client: this.options.clusterClient.asInternalUser,
         logger: this.options.loggers.get('tokens'),
       }),
+      getServerBaseURL: this.options.getServerBaseURL,
     };
 
     this.providers = new Map(
@@ -309,6 +335,9 @@ export class Authenticator {
           const auditLogger = this.options.audit.asScoped(request);
           auditLogger.log(
             userLoginEvent({
+              // We must explicitly specify the sessionId for login events because we just created the session, so
+              // it won't automatically get included in the audit event from the request context.
+              sessionId: sessionUpdateResult?.value?.sid,
               authenticationResult,
               authenticationProvider: providerName,
               authenticationType: provider.type,
@@ -336,27 +365,33 @@ export class Authenticator {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
-    const suggestedProviderName =
-      existingSessionValue?.provider.name ??
-      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
-
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
-      this.logger.debug('Redirecting request to Login Selector.');
+      const providerNameSuggestedByHint = request.url.searchParams.get(
+        AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
+      );
+      this.logger.debug(
+        `Redirecting request to Login Selector (provider hint: ${
+          providerNameSuggestedByHint ?? 'n/a'
+        }).`
+      );
       return AuthenticationResult.redirectTo(
         `${
           this.options.basePath.serverBasePath
         }/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
           `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
         )}${
-          suggestedProviderName && !existingSessionValue
+          providerNameSuggestedByHint
             ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                suggestedProviderName
+                providerNameSuggestedByHint
               )}`
             : ''
         }`
       );
     }
 
+    const suggestedProviderName =
+      existingSessionValue?.provider.name ??
+      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
@@ -385,6 +420,34 @@ export class Authenticator {
   }
 
   /**
+   * Tries to reauthenticate request with the existing session.
+   * @param request Request instance.
+   */
+  async reauthenticate(request: KibanaRequest) {
+    assertRequest(request);
+
+    const existingSessionValue = await this.getSessionValue(request);
+    if (!existingSessionValue) {
+      this.logger.warn('Session is no longer available and cannot be re-authenticated.');
+      return AuthenticationResult.notHandled();
+    }
+
+    // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
+    // available then `getSessionValue` should have returned `null`.
+    const provider = this.providers.get(existingSessionValue.provider.name)!;
+    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    if (!authenticationResult.notHandled()) {
+      await this.updateSessionValue(request, {
+        provider: existingSessionValue.provider,
+        authenticationResult,
+        existingSessionValue,
+      });
+    }
+
+    return authenticationResult;
+  }
+
+  /**
    * Deauthenticates current request.
    * @param request Request instance.
    */
@@ -396,7 +459,7 @@ export class Authenticator {
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
-      await this.invalidateSessionValue(request);
+      await this.invalidateSessionValue({ request, sessionValue });
 
       // Provider name may be passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it.
@@ -419,7 +482,9 @@ export class Authenticator {
       }
     }
 
-    return DeauthenticationResult.notHandled();
+    // If none of the configured providers could perform a logout, we should redirect user to the
+    // default logout location.
+    return DeauthenticationResult.redirectTo(this.getLoggedOutURL(request));
   }
 
   /**
@@ -444,12 +509,33 @@ export class Authenticator {
       accessAgreementAcknowledged: true,
     });
 
-    this.options.legacyAuditLogger.accessAgreementAcknowledged(
-      currentUser.username,
-      existingSessionValue.provider
+    const auditLogger = this.options.audit.asScoped(request);
+    auditLogger.log(
+      accessAgreementAcknowledgedEvent({
+        username: currentUser.username,
+        provider: existingSessionValue.provider,
+      })
     );
 
     this.options.featureUsageService.recordPreAccessAgreementUsage();
+  }
+
+  getRequestOriginalURL(
+    request: KibanaRequest,
+    additionalQueryStringParameters?: Array<[string, string]>
+  ) {
+    const originalURLSearchParams = [
+      ...[...request.url.searchParams.entries()].filter(
+        ([key]) => !AUTH_METADATA_QUERY_STRING_PARAMETERS.includes(key)
+      ),
+      ...(additionalQueryStringParameters ?? []),
+    ];
+
+    return `${this.options.basePath.get(request)}${request.url.pathname}${
+      originalURLSearchParams.length > 0
+        ? `?${new URLSearchParams(originalURLSearchParams).toString()}`
+        : ''
+    }`;
   }
 
   /**
@@ -522,7 +608,7 @@ export class Authenticator {
       this.logger.warn(
         `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
       );
-      await this.invalidateSessionValue(request);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
 
@@ -556,7 +642,7 @@ export class Authenticator {
     // attempt didn't fail.
     if (authenticationResult.shouldClearState()) {
       this.logger.debug('Authentication provider requested to invalidate existing session.');
-      await this.invalidateSessionValue(request);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
 
@@ -570,7 +656,7 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
-        await this.invalidateSessionValue(request);
+        await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       }
       return null;
     }
@@ -608,17 +694,21 @@ export class Authenticator {
       this.logger.debug(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-      await this.invalidateSessionValue(request);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-      await this.invalidateSessionValue(request);
+      await this.invalidateSessionValue({
+        request,
+        sessionValue: existingSessionValue,
+        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fullly authenticated session
+      });
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.debug('Username has changed, existing session will be invalidated.');
-      await this.invalidateSessionValue(request);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     }
 
@@ -653,9 +743,22 @@ export class Authenticator {
 
   /**
    * Invalidates session value associated with the specified request.
-   * @param request Request instance.
    */
-  private async invalidateSessionValue(request: KibanaRequest) {
+  private async invalidateSessionValue({
+    request,
+    sessionValue,
+    skipAuditEvent,
+  }: InvalidateSessionValueParams) {
+    if (sessionValue && !skipAuditEvent) {
+      const auditLogger = this.options.audit.asScoped(request);
+      auditLogger.log(
+        userLogoutEvent({
+          username: sessionValue.username,
+          provider: sessionValue.provider,
+        })
+      );
+    }
+
     await this.session.invalidate(request, { match: 'current' });
   }
 
@@ -762,9 +865,10 @@ export class Authenticator {
   /**
    * Creates a logged out URL for the specified request and provider.
    * @param request Request that initiated logout.
-   * @param providerType Type of the provider that handles logout.
+   * @param providerType Type of the provider that handles logout. If not specified, then the first
+   * provider in the chain (default) is assumed.
    */
-  private getLoggedOutURL(request: KibanaRequest, providerType: string) {
+  private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();
@@ -780,7 +884,12 @@ export class Authenticator {
 
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
-    return this.options.config.authc.selector.enabled || shouldProviderUseLoginForm(providerType)
+    return this.options.config.authc.selector.enabled ||
+      (providerType
+        ? shouldProviderUseLoginForm(providerType)
+        : this.options.config.authc.sortedProviders.length > 0
+        ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
+        : false)
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }

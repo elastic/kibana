@@ -22,13 +22,14 @@ import {
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
-  exportExceptionListRoute,
+  exportExceptionsRoute,
   exportListItemRoute,
   findEndpointListItemRoute,
   findExceptionListItemRoute,
   findExceptionListRoute,
   findListItemRoute,
   findListRoute,
+  importExceptionsRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
@@ -39,6 +40,7 @@ import {
   readListItemRoute,
   readListRoute,
   readPrivilegesRoute,
+  summaryExceptionListRoute,
   updateEndpointListItemRoute,
   updateExceptionListItemRoute,
   updateExceptionListRoute,
@@ -71,13 +73,16 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   readListIndexRoute(router);
   deleteListIndexRoute(router);
 
+  // exceptions import/export
+  exportExceptionsRoute(router);
+  importExceptionsRoute(router, config);
+
   // exception lists
   createExceptionListRoute(router);
   readExceptionListRoute(router);
   updateExceptionListRoute(router);
   deleteExceptionListRoute(router);
   findExceptionListRoute(router);
-  exportExceptionListRoute(router);
 
   // exception list items
   createExceptionListItemRoute(router);
@@ -95,4 +100,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   updateEndpointListItemRoute(router);
   deleteEndpointListItemRoute(router);
   findEndpointListItemRoute(router);
+
+  // exception list items summary
+  summaryExceptionListRoute(router);
 };

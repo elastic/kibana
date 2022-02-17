@@ -15,6 +15,7 @@ import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
 import { CategorizationView } from './components/categorization_view';
+import { RareView } from './components/rare_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
@@ -22,34 +23,39 @@ import {
   isPopulationJobCreator,
   isCategorizationJobCreator,
   isAdvancedJobCreator,
+  isRareJobCreator,
 } from '../../../common/job_creator';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
+  const [selectionValid, setSelectionValid] = useState(false);
 
   useEffect(() => {
-    setNextActive(jobValidator.isPickFieldsStepValid);
-  }, [jobValidatorUpdated]);
+    setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
+  }, [jobValidatorUpdated, selectionValid]);
 
   return (
     <Fragment>
       {isCurrentStep && (
         <Fragment>
           {isSingleMetricJobCreator(jobCreator) && (
-            <SingleMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <SingleMetricView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isMultiMetricJobCreator(jobCreator) && (
-            <MultiMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <MultiMetricView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isPopulationJobCreator(jobCreator) && (
-            <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <PopulationView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isAdvancedJobCreator(jobCreator) && (
-            <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <AdvancedView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isCategorizationJobCreator(jobCreator) && (
-            <CategorizationView isActive={isCurrentStep} setCanProceed={setNextActive} />
+            <CategorizationView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
+          )}
+          {isRareJobCreator(jobCreator) && (
+            <RareView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           <WizardNav
             previous={() =>

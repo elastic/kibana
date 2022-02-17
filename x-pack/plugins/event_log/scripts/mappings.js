@@ -17,6 +17,20 @@ exports.EcsCustomPropertyMappings = {
         type: 'keyword',
         ignore_above: 1024,
       },
+      // task specific fields
+      task: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          scheduled: {
+            type: 'date',
+          },
+          schedule_delay: {
+            type: 'long',
+          },
+        },
+      },
       // alerting specific fields
       alerting: {
         properties: {
@@ -35,6 +49,45 @@ exports.EcsCustomPropertyMappings = {
           status: {
             type: 'keyword',
             ignore_above: 1024,
+          },
+        },
+      },
+      alert: {
+        properties: {
+          rule: {
+            properties: {
+              execution: {
+                properties: {
+                  uuid: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  status: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  status_order: {
+                    type: 'long',
+                  },
+                  metrics: {
+                    properties: {
+                      number_of_triggered_actions: {
+                        type: 'long',
+                      },
+                      total_indexing_duration_ms: {
+                        type: 'long',
+                      },
+                      total_search_duration_ms: {
+                        type: 'long',
+                      },
+                      execution_gap_duration_s: {
+                        type: 'long',
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -60,7 +113,18 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          type_id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
         },
+      },
+      space_ids: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+      version: {
+        type: 'version',
       },
     },
   },
@@ -87,4 +151,10 @@ exports.EcsPropertiesToGenerate = [
 /**
  * These properties can have multiple values (are arrays in the generated event schema).
  */
-exports.EcsEventLogMultiValuedProperties = ['tags', 'event.category', 'event.type', 'rule.author'];
+exports.EcsEventLogMultiValuedProperties = [
+  'tags',
+  'event.category',
+  'event.type',
+  'rule.author',
+  'kibana.space_ids',
+];

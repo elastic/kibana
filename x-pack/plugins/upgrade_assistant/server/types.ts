@@ -6,15 +6,22 @@
  */
 
 import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
-import { CloudSetup } from '../../cloud/server';
-import { CredentialStore } from './lib/reindexing/credential_store';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { SecurityPluginStart } from '../../security/server';
+import { CredentialStore } from './lib/reindexing/credential_store';
+import { handleEsError } from './shared_imports';
 
 export interface RouteDependencies {
   router: IRouter;
   credentialStore: CredentialStore;
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
+  getSecurityPlugin: () => SecurityPluginStart | undefined;
   licensing: LicensingPluginSetup;
-  cloud?: CloudSetup;
+  lib: {
+    handleEsError: typeof handleEsError;
+  };
+  config: {
+    isSecurityEnabled: () => boolean;
+  };
 }

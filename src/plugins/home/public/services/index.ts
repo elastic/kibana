@@ -22,7 +22,9 @@ export { TutorialService } from './tutorials';
 export type {
   TutorialVariables,
   TutorialServiceSetup,
-  TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from './tutorials';
+
+export { AddDataService } from './add_data';
+export type { AddDataServiceSetup, AddDataTab } from './add_data';

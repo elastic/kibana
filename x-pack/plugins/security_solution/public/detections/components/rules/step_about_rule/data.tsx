@@ -7,10 +7,10 @@
 
 import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 
-import { Severity } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as I18n from './translations';
 
 export interface SeverityOptionItem {

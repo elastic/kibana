@@ -8,11 +8,12 @@
 import React from 'react';
 import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
+import { TermsIndexPatternColumn } from './operations';
 
 interface IndexPatternPickerOption {
   label: string;
@@ -160,7 +161,7 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',
@@ -215,12 +216,11 @@ describe('Layer Data Panel', () => {
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
-    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(
-      instance
-    ).map((option: IndexPatternPickerOption) =>
-      option.label === selectedLabel
-        ? { ...option, checked: 'on' }
-        : { ...option, checked: undefined }
+    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(instance).map(
+      (option: IndexPatternPickerOption) =>
+        option.label === selectedLabel
+          ? { ...option, checked: 'on' }
+          : { ...option, checked: undefined }
     );
     return getIndexPatternPickerList(instance).prop('onChange')!(options);
   }

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import type { MlClient } from '../../lib/ml_client';
 
-// import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
-
-export interface Filter {
-  filter_id: string;
-  description?: string;
-  items: string[];
-}
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Filter, FilterStats } from '../../../common/types/filters';
 
 export interface FormFilter {
   filterId: string;
+  description?: string;
+  addItems?: string[];
+  removeItems?: string[];
+}
+
+export interface UpdateFilter {
   description?: string;
   addItems?: string[];
   removeItems?: string[];
@@ -35,13 +35,6 @@ export interface FilterRequest {
 interface FilterUsage {
   jobs: string[];
   detectors: string[];
-}
-
-interface FilterStats {
-  filter_id: string;
-  description?: string;
-  item_count: number;
-  used_by: FilterUsage;
 }
 
 interface FiltersInUse {
@@ -71,18 +64,13 @@ export class FilterManager {
         this._mlClient.getFilters({ filter_id: filterId }),
       ]);
 
-      if (
-        results[FILTERS] &&
-        (results[FILTERS].body as estypes.GetFiltersResponse).filters.length
-      ) {
+      if (results[FILTERS] && (results[FILTERS] as estypes.MlGetFiltersResponse).filters.length) {
         let filtersInUse: FiltersInUse = {};
-        if (results[JOBS] && (results[JOBS].body as estypes.GetJobsResponse).jobs) {
-          filtersInUse = this.buildFiltersInUse(
-            (results[JOBS].body as estypes.GetJobsResponse).jobs
-          );
+        if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
+          filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
         }
 
-        const filter = (results[FILTERS].body as estypes.GetFiltersResponse).filters[0];
+        const filter = (results[FILTERS] as estypes.MlGetFiltersResponse).filters[0];
         return {
           ...filter,
           used_by: filtersInUse[filter.filter_id],
@@ -98,7 +86,7 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const { body } = await this._mlClient.getFilters({ size: 1000 });
+      const body = await this._mlClient.getFilters({ size: 1000 });
       return body.filters;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -115,8 +103,8 @@ export class FilterManager {
 
       // Build a map of filter_ids against jobs and detectors using that filter.
       let filtersInUse: FiltersInUse = {};
-      if (results[JOBS] && (results[JOBS].body as estypes.GetJobsResponse).jobs) {
-        filtersInUse = this.buildFiltersInUse((results[JOBS].body as estypes.GetJobsResponse).jobs);
+      if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
+        filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
       }
 
       // For each filter, return just
@@ -125,8 +113,8 @@ export class FilterManager {
       //  item_count
       //  jobs using the filter
       const filterStats: FilterStats[] = [];
-      if (results[FILTERS] && (results[FILTERS].body as estypes.GetFiltersResponse).filters) {
-        (results[FILTERS].body as estypes.GetFiltersResponse).filters.forEach((filter: Filter) => {
+      if (results[FILTERS] && (results[FILTERS] as estypes.MlGetFiltersResponse).filters) {
+        (results[FILTERS] as estypes.MlGetFiltersResponse).filters.forEach((filter: Filter) => {
           const stats: FilterStats = {
             filter_id: filter.filter_id,
             description: filter.description,
@@ -147,14 +135,13 @@ export class FilterManager {
     const { filterId, ...body } = filter;
     try {
       // Returns the newly created filter.
-      const { body: resp } = await this._mlClient.putFilter({ filter_id: filterId, body });
-      return resp;
+      return await this._mlClient.putFilter({ filter_id: filterId, body });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
-  async updateFilter(filterId: string, filter: FormFilter) {
+  async updateFilter(filterId: string, filter: UpdateFilter) {
     try {
       const body: FilterRequest = { filter_id: filterId };
       if (filter.description !== undefined) {
@@ -168,7 +155,7 @@ export class FilterManager {
       }
 
       // Returns the newly updated filter.
-      const { body: resp } = await this._mlClient.updateFilter({
+      const resp = await this._mlClient.updateFilter({
         filter_id: filterId,
         body,
       });
@@ -179,8 +166,7 @@ export class FilterManager {
   }
 
   async deleteFilter(filterId: string) {
-    const { body } = await this._mlClient.deleteFilter({ filter_id: filterId });
-    return body;
+    return await this._mlClient.deleteFilter({ filter_id: filterId });
   }
 
   buildFiltersInUse(jobsList: Job[]) {

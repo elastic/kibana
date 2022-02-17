@@ -7,13 +7,13 @@
  */
 
 import { find } from 'lodash';
-import { IResponseAggConfig } from './lib/get_response_agg_config_class';
+import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 export const getPercentileValue = <TAggConfig extends IResponseAggConfig>(
   agg: TAggConfig,
   bucket: any
 ) => {
-  const { values } = bucket[agg.parentId];
+  const { values } = bucket[agg.parentId] ?? {};
 
   const percentile: any = find(values, ({ key }) => key === agg.key);
 

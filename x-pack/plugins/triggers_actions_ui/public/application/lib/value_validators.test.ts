@@ -13,7 +13,7 @@ import {
   getAlertWithInvalidatedFields,
 } from './value_validators';
 import uuid from 'uuid';
-import { Alert, UserConfiguredActionConnector } from '../../types';
+import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -156,8 +156,8 @@ describe('getConnectorWithInvalidatedFields', () => {
 });
 
 describe('getAlertWithInvalidatedFields', () => {
-  test('set nulls to all required undefined fields in alert', () => {
-    const alert: Alert = {
+  test('sets to null all fields that are required but undefined in alert', () => {
+    const alert: Rule = {
       params: {},
       consumer: 'test',
       schedule: {
@@ -169,15 +169,41 @@ describe('getAlertWithInvalidatedFields', () => {
       enabled: false,
       mutedInstanceIds: [],
     } as any;
-    const baseAlertErrors = { name: ['Name is required.'] };
-    const actionsErrors = {};
+    const baseAlertErrors = {
+      name: ['Name is required.'],
+      alertTypeId: ['Rule type is required.'],
+    };
+    const actionsErrors: IErrorObject[] = [];
     const paramsErrors = {};
     getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
     expect(alert.name).toBeNull();
+    expect(alert.alertTypeId).toBeNull();
   });
 
-  test('set nulls to all required undefined fields in alert params', () => {
-    const alert: Alert = {
+  test('does not set to null any fields that are required and defined but invalid in alert', () => {
+    const alert: Rule = {
+      name: 'test',
+      id: '123',
+      params: {},
+      consumer: '@@@@',
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = { consumer: ['Consumer is invalid.'] };
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = {};
+    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(alert.consumer).toEqual('@@@@');
+  });
+
+  test('set to null all fields that are required but undefined in alert params', () => {
+    const alert: Rule = {
       name: 'test',
       alertTypeId: '.threshold',
       id: '123',
@@ -204,18 +230,23 @@ describe('getAlertWithInvalidatedFields', () => {
       updatedBy: '',
     };
     const baseAlertErrors = {};
-    const actionsErrors = {};
-    const paramsErrors = { index: ['Index is required.'] };
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = { index: ['Index is required.'], timeField: ['Time field is required.'] };
     getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
     expect(alert.params.index).toBeNull();
+    expect(alert.params.timeField).toBeNull();
   });
 
-  test('do not set nulls to the invalid fields with values in the connector properties, config and secrets', () => {
-    const alert: Alert = {
+  test('does not set to null any fields that are required and defined but invalid in alert params', () => {
+    const alert: Rule = {
       name: 'test',
+      alertTypeId: '.threshold',
       id: '123',
-      params: {},
-      consumer: '@@@@',
+      params: {
+        aggField: 'foo',
+        termSize: 'big',
+      },
+      consumer: 'test',
       schedule: {
         interval: '1m',
       },
@@ -224,16 +255,31 @@ describe('getAlertWithInvalidatedFields', () => {
       muteAll: false,
       enabled: false,
       mutedInstanceIds: [],
-    } as any;
-    const baseAlertErrors = { consumer: ['Consumer is invalid.'] };
-    const actionsErrors = {};
-    const paramsErrors = {};
+      createdBy: '',
+      apiKeyOwner: '',
+      createdAt: new Date(),
+      executionStatus: {
+        status: 'ok',
+        lastExecutionDate: new Date(),
+      },
+      notifyWhen: 'onActionGroupChange',
+      throttle: '',
+      updatedAt: new Date(),
+      updatedBy: '',
+    };
+    const baseAlertErrors = {};
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = {
+      aggField: ['Aggregation field is invalid.'],
+      termSize: ['Term size is invalid.'],
+    };
     getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect(alert.consumer).toEqual('@@@@');
+    expect(alert.params.aggField).toEqual('foo');
+    expect(alert.params.termSize).toEqual('big');
   });
 
-  test('if complex alert action fields which is required is set to nulls if it is undefined', () => {
-    const alert: Alert = {
+  test('set to null all fields that are required but undefined in alert actions', () => {
+    const alert: Rule = {
       name: 'test',
       alertTypeId: '.threshold',
       id: '123',
@@ -271,9 +317,70 @@ describe('getAlertWithInvalidatedFields', () => {
       updatedBy: '',
     };
     const baseAlertErrors = {};
-    const actionsErrors = { '123': { 'incident.field.name': ['Name is required.'] } };
+    const actionsErrors = [{ 'incident.field.name': ['Name is required.'] }];
     const paramsErrors = {};
     getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
     expect((alert.actions[0].params as any).incident.field.name).toBeNull();
+  });
+
+  test('validates multiple alert actions with the same connector id', () => {
+    const alert: Rule = {
+      name: 'test',
+      alertTypeId: '.threshold',
+      id: '123',
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: '1m',
+      },
+      actions: [
+        {
+          actionTypeId: 'test',
+          group: 'qwer',
+          id: '123',
+          params: {
+            incident: {
+              field: {},
+            },
+          },
+        },
+        {
+          actionTypeId: 'test',
+          group: 'qwer',
+          id: '123',
+          params: {
+            incident: {
+              field: {
+                name: 'myIncident',
+              },
+            },
+          },
+        },
+      ],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+      createdBy: '',
+      apiKeyOwner: '',
+      createdAt: new Date(),
+      executionStatus: {
+        status: 'ok',
+        lastExecutionDate: new Date(),
+      },
+      notifyWhen: 'onActionGroupChange',
+      throttle: '',
+      updatedAt: new Date(),
+      updatedBy: '',
+    };
+    const baseAlertErrors = {};
+    const actionsErrors = [
+      { 'incident.field.name': ['Name is required.'] },
+      { 'incident.field.name': ['Name is invalid.'] },
+    ];
+    const paramsErrors = {};
+    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
+    expect((alert.actions[0].params as any).incident.field.name).toBeNull();
+    expect((alert.actions[1].params as any).incident.field.name).toEqual('myIncident');
   });
 });

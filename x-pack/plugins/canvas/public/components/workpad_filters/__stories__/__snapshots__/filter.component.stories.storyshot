@@ -1,0 +1,435 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
+<div
+  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+>
+  <dl
+    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
+  >
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Type
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        exactly
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Column
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        project
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Value
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        kibana
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Filter group
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Group 1
+      </div>
+    </dd>
+  </dl>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadFilters/FilterComponent with component field 1`] = `
+<div
+  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+>
+  <dl
+    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
+  >
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Type
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        exactly
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Column
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        project
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Value
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiText euiText--medium"
+        >
+          <span
+            className="euiTextColor euiTextColor--success"
+            style={Object {}}
+          >
+            <h3>
+              kibana
+            </h3>
+          </span>
+        </div>
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Filter group
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Group 1
+      </div>
+    </dd>
+  </dl>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter fields 1`] = `
+<div
+  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+>
+  <dl
+    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
+  >
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Type
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        exactly
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Column
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        project
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Value
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        kibana
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Filter group
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Group 1
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Custom Field
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Some unknown field
+      </div>
+    </dd>
+  </dl>
+</div>
+`;

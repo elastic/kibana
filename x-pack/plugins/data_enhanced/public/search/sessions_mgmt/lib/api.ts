@@ -11,18 +11,23 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import {
   ISessionsClient,
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { ACTION } from '../components/actions';
-import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
+import {
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
+} from '../types';
 import { SessionsConfigSchema } from '..';
 
-type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
+type LocatorsStart = SharePluginStart['url']['locators'];
 
-function getActions(status: SearchSessionStatus) {
+function getActions(status: UISearchSessionState) {
   const actions: ACTION[] = [];
   actions.push(ACTION.INSPECT);
   actions.push(ACTION.RENAME);
@@ -30,66 +35,91 @@ function getActions(status: SearchSessionStatus) {
     actions.push(ACTION.EXTEND);
     actions.push(ACTION.DELETE);
   }
+
+  if (status === SearchSessionStatus.EXPIRED) {
+    actions.push(ACTION.DELETE);
+  }
+
   return actions;
 }
 
-async function getUrlFromState(
-  urls: UrlGeneratorsStart,
-  urlGeneratorId: string,
-  state: Record<string, unknown>
-) {
-  let url = '/';
+/**
+ * Status we display on mgtm UI might be different from the one inside the saved object
+ * @param status
+ */
+function getUIStatus(session: PersistedSearchSessionSavedObjectAttributes): UISearchSessionState {
+  const isSessionExpired = () => {
+    const curTime = moment();
+    return curTime.diff(moment(session.expires), 'ms') > 0;
+  };
+
+  switch (session.status) {
+    case SearchSessionStatus.COMPLETE:
+    case SearchSessionStatus.IN_PROGRESS:
+      return isSessionExpired() ? SearchSessionStatus.EXPIRED : session.status;
+  }
+
+  return session.status;
+}
+
+function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
   try {
-    url = await urls.getUrlGenerator(urlGeneratorId).createUrl(state);
+    const locator = locators.get(locatorId);
+    return locator?.getRedirectUrl(state);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Could not create URL from restoreState');
     // eslint-disable-next-line no-console
     console.error(err);
   }
-  return url;
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
-  savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
-): Promise<UISession> => {
-  const {
-    name,
-    appId,
-    created,
-    expires,
-    status,
-    urlGeneratorId,
-    initialState,
-    restoreState,
-  } = savedObject.attributes;
+const mapToUISession =
+  (locators: LocatorsStart, config: SessionsConfigSchema) =>
+  async (
+    savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
+  ): Promise<UISession> => {
+    const {
+      name,
+      appId,
+      created,
+      expires,
+      locatorId,
+      initialState,
+      restoreState,
+      idMapping,
+      version,
+    } = savedObject.attributes;
 
-  const actions = getActions(status);
+    const status = getUIStatus(savedObject.attributes);
+    const actions = getActions(status);
 
-  // TODO: initialState should be saved without the searchSessionID
-  if (initialState) delete initialState.searchSessionId;
-  // derive the URL and add it in
-  const reloadUrl = await getUrlFromState(urls, urlGeneratorId, initialState);
-  const restoreUrl = await getUrlFromState(urls, urlGeneratorId, restoreState);
+    // TODO: initialState should be saved without the searchSessionID
+    if (initialState) delete initialState.searchSessionId;
+    // derive the URL and add it in
+    const reloadUrl = await getUrlFromState(locators, locatorId, initialState);
+    const restoreUrl = await getUrlFromState(locators, locatorId, restoreState);
 
-  return {
-    id: savedObject.id,
-    name,
-    appId,
-    created,
-    expires,
-    status,
-    actions,
-    restoreUrl,
-    reloadUrl,
-    initialState,
-    restoreState,
+    return {
+      id: savedObject.id,
+      name,
+      appId,
+      created,
+      expires,
+      status,
+      actions,
+      restoreUrl: restoreUrl!,
+      reloadUrl: reloadUrl!,
+      initialState,
+      restoreState,
+      numSearches: Object.keys(idMapping).length,
+      version,
+    };
   };
-};
 
 interface SearchSessionManagementDeps {
-  urls: UrlGeneratorsStart;
+  locators: LocatorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
   usageCollector?: SearchUsageCollector;
@@ -140,7 +170,7 @@ export class SearchSessionsMgmtAPI {
         const savedObjects = result.saved_objects as Array<
           SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
-        return await Promise.all(savedObjects.map(mapToUISession(this.deps.urls, this.config)));
+        return await Promise.all(savedObjects.map(mapToUISession(this.deps.locators, this.config)));
       }
     } catch (err) {
       // eslint-disable-next-line no-console

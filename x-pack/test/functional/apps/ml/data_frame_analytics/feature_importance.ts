@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/93188
-  describe.skip('total feature importance panel and decision path popover', function () {
+  describe('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -27,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       return [
         {
           suiteTitle: 'binary classification job',
-          archive: 'ml/ihp_outlier',
+          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_binary_${timestamp}`,
@@ -64,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
                 training_percent: 35,
                 prediction_field_name: 'CentralAir_prediction',
                 num_top_classes: -1,
+                max_trees: 10,
               },
             },
             model_memory_limit: '60mb',
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'multi class classification job',
-          archive: 'ml/ihp_outlier',
+          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_fi_multi_${timestamp}`,
@@ -109,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
                 training_percent: 35,
                 prediction_field_name: 'heatingqc',
                 num_top_classes: -1,
+                max_trees: 10,
               },
             },
             model_memory_limit: '60mb',
@@ -117,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'regression job',
-          archive: 'ml/egs_regression',
+          archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
           indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_fi_reg_${timestamp}`,
@@ -140,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
                 dependent_variable: 'stab',
                 num_top_feature_importance_values: 5,
                 training_percent: 35,
+                max_trees: 10,
               },
             },
             analyzed_fields: {
@@ -181,6 +183,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      for (const testData of testDataList) {
+        await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
+      }
     });
 
     for (const testData of testDataList) {
@@ -189,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
+          await ml.testResources.createIndexPatternIfNeeded(testData.job.dest!.index as string);
           await ml.dataFrameAnalyticsTable.openResultsView(testData.job.id as string);
         });
 
@@ -204,9 +210,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display the feature importance decision path in the data grid', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathChartElementsExists();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
       });
     }

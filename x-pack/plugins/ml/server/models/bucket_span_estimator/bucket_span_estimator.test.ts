@@ -12,15 +12,19 @@ import { BucketSpanEstimatorData } from '../../../common/types/job_service';
 
 import { estimateBucketSpanFactory } from './bucket_span_estimator';
 
+jest.mock('../../lib/log', () => ({
+  mlLog: { warn: jest.fn() },
+}));
+
 const callAs = {
   search: () => Promise.resolve({ body: {} }),
   cluster: { getSettings: () => Promise.resolve({ body: {} }) },
 };
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
 // mock configuration to be passed to the estimator
 const formConfig: BucketSpanEstimatorData = {

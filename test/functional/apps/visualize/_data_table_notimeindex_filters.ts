@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const vizName1 = 'Visualization DataTable w/o time filter';
 
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
@@ -69,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         // hover and click on cell to filter
-        await PageObjects.visChart.filterOnTableCell(1, 2);
+        await PageObjects.visChart.filterOnTableCell(0, 1);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

@@ -38,11 +38,8 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const {
-    esQuery,
-    thresholdComparator,
-    threshold,
-  }: EsQueryAlertParams = anyParams as EsQueryAlertParams;
+  const { esQuery, thresholdComparator, threshold }: EsQueryAlertParams =
+    anyParams as EsQueryAlertParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {

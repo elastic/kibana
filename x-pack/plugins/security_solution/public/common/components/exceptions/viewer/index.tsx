@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
+import type {
+  ExceptionListTypeEnum,
+  ExceptionListItemSchema,
+  ExceptionListIdentifiers,
+  UseExceptionListItemsSuccess,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
+import { useUserData } from '../../../../../public/detections/components/user_info';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
-import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
-import {
-  useExceptionListItems,
-  ExceptionListIdentifiers,
-  ExceptionListTypeEnum,
-  ExceptionListItemSchema,
-  UseExceptionListItemsSuccess,
-  useApi,
-} from '../../../../../public/lists_plugin_deps';
+import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
+
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
-import { EditExceptionModal } from '../edit_exception_modal';
-import { AddExceptionModal } from '../add_exception_modal';
+import { EditExceptionFlyout } from '../edit_exception_flyout';
+import { AddExceptionFlyout } from '../add_exception_flyout';
 
 const initialState: State = {
   filterOptions: { filter: '', tags: [] },
@@ -73,17 +74,18 @@ const ExceptionsViewerComponent = ({
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const onDispatchToaster = useCallback(
-    ({ title, color, iconType }) => (): void => {
-      dispatchToaster({
-        type: 'addToaster',
-        toast: {
-          id: uuid.v4(),
-          title,
-          color,
-          iconType,
-        },
-      });
-    },
+    ({ title, color, iconType }) =>
+      (): void => {
+        dispatchToaster({
+          type: 'addToaster',
+          toast: {
+            id: uuid.v4(),
+            title,
+            color,
+            iconType,
+          },
+        });
+      },
     [dispatchToaster]
   );
   const [
@@ -104,6 +106,17 @@ const ExceptionsViewerComponent = ({
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState });
   const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
+  const [supportedListTypes, setSupportedListTypes] = useState<ExceptionListTypeEnum[]>([]);
+
+  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+
+  useEffect((): void => {
+    if (!canUserCRUD || !hasIndexWrite) {
+      setSupportedListTypes([]);
+    } else {
+      setSupportedListTypes(availableListTypes);
+    }
+  }, [availableListTypes, canUserCRUD, hasIndexWrite]);
 
   const setExceptions = useCallback(
     ({
@@ -141,7 +154,7 @@ const ExceptionsViewerComponent = ({
   });
 
   const setCurrentModal = useCallback(
-    (modalName: ViewerModalName): void => {
+    (modalName: ViewerFlyoutName): void => {
       dispatch({
         type: 'updateModalOpen',
         modalName,
@@ -233,7 +246,7 @@ const ExceptionsViewerComponent = ({
         type: 'updateExceptionListTypeToEdit',
         exceptionListType: type,
       });
-      setCurrentModal('addModal');
+      setCurrentModal('addException');
     },
     [setCurrentModal]
   );
@@ -246,7 +259,7 @@ const ExceptionsViewerComponent = ({
         exception,
       });
 
-      setCurrentModal('editModal');
+      setCurrentModal('editException');
     },
     [setCurrentModal, exceptionListsMeta]
   );
@@ -321,10 +334,10 @@ const ExceptionsViewerComponent = ({
 
   return (
     <>
-      {currentModal === 'editModal' &&
+      {currentModal === 'editException' &&
         exceptionToEdit != null &&
         exceptionListTypeToEdit != null && (
-          <EditExceptionModal
+          <EditExceptionFlyout
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
@@ -336,8 +349,8 @@ const ExceptionsViewerComponent = ({
           />
         )}
 
-      {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
-        <AddExceptionModal
+      {currentModal === 'addException' && exceptionListTypeToEdit != null && (
+        <AddExceptionFlyout
           ruleName={ruleName}
           ruleIndices={ruleIndices}
           ruleId={ruleId}
@@ -355,7 +368,7 @@ const ExceptionsViewerComponent = ({
 
         <ExceptionsViewerHeader
           isInitLoading={isInitLoading}
-          supportedListTypes={availableListTypes}
+          supportedListTypes={supportedListTypes}
           detectionsListItems={totalDetectionsItems}
           endpointListItems={totalEndpointItems}
           onFilterChange={handleFilterChange}
@@ -373,6 +386,7 @@ const ExceptionsViewerComponent = ({
         />
 
         <ExceptionsViewerItems
+          disableActions={!canUserCRUD || !hasIndexWrite}
           showEmpty={showEmpty}
           showNoResults={showNoResults}
           isInitLoading={isInitLoading}

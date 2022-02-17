@@ -5,13 +5,42 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
-import { ComponentStrings } from '../../../i18n';
+import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { State } from '../../../types';
 
-const { ElementConfig: strings } = ComponentStrings;
+const strings = {
+  getFailedLabel: () =>
+    i18n.translate('xpack.canvas.elementConfig.failedLabel', {
+      defaultMessage: 'Failed',
+      description:
+        'The label for the total number of elements in a workpad that have thrown an error or failed to load',
+    }),
+  getLoadedLabel: () =>
+    i18n.translate('xpack.canvas.elementConfig.loadedLabel', {
+      defaultMessage: 'Loaded',
+      description: 'The label for the number of elements in a workpad that have loaded',
+    }),
+  getProgressLabel: () =>
+    i18n.translate('xpack.canvas.elementConfig.progressLabel', {
+      defaultMessage: 'Progress',
+      description: 'The label for the percentage of elements that have finished loading',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.elementConfig.title', {
+      defaultMessage: 'Element status',
+      description:
+        '"Elements" refers to the individual text, images, or visualizations that you can add to a Canvas workpad',
+    }),
+  getTotalLabel: () =>
+    i18n.translate('xpack.canvas.elementConfig.totalLabel', {
+      defaultMessage: 'Total',
+      description: 'The label for the total number of elements in a workpad',
+    }),
+};
 
 interface Props {
   elementStats: State['transient']['elementStats'];

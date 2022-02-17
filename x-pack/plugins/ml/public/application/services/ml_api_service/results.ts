@@ -6,13 +6,21 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import { GetStoppedPartitionResult } from '../../../../common/types/results';
+import {
+  GetStoppedPartitionResult,
+  GetDatafeedResultsChartDataResult,
+} from '../../../../common/types/results';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import { PartitionFieldsConfig } from '../../../../common/types/storage';
+import {
+  ESSearchRequest,
+  ESSearchResponse,
+} from '../../../../../../../src/core/types/elasticsearch';
+import { MLAnomalyDoc } from '../../../../common/types/anomalies';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -109,18 +117,18 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch(query: any, jobIds: string[]) {
+  anomalySearch(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http<any>({
+    return httpService.http<ESSearchResponse<MLAnomalyDoc>>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
       body,
     });
   },
 
-  anomalySearch$(query: any, jobIds: string[]) {
+  anomalySearch$(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http$<any>({
+    return httpService.http$<ESSearchResponse<MLAnomalyDoc>>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
       body,
@@ -137,6 +145,19 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
     return httpService.http<GetStoppedPartitionResult>({
       path: `${basePath()}/results/category_stopped_partitions`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getDatafeedResultChartData(jobId: string, start: number, end: number) {
+    const body = JSON.stringify({
+      jobId,
+      start,
+      end,
+    });
+    return httpService.http<GetDatafeedResultsChartDataResult>({
+      path: `${basePath()}/results/datafeed_results_chart`,
       method: 'POST',
       body,
     });

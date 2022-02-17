@@ -21,9 +21,6 @@ describe('getContextFactory', () => {
 
     expect(coreStart.savedObjects.getTypeRegistry).toHaveBeenCalledTimes(1);
 
-    expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalledWith(request);
-
     const soClient = coreStart.savedObjects.getScopedClient.mock.results[0].value;
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledTimes(1);
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith(soClient);
@@ -34,7 +31,6 @@ describe('getContextFactory', () => {
     expect(context).toEqual({
       core: {
         savedObjects: expect.any(Object),
-        elasticsearch: expect.any(Object),
         uiSettings: expect.any(Object),
         capabilities: expect.any(Object),
       },

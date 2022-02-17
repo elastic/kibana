@@ -11,7 +11,7 @@
 
 import React, { memo, useMemo, Fragment, HTMLAttributes } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
@@ -60,7 +60,7 @@ export const EventDetail = memo(function EventDetail({
   const event = useSelector(selectors.currentRelatedEventData);
 
   return isLoading ? (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelLoading />
     </StyledPanel>
   ) : event ? (
@@ -71,7 +71,7 @@ export const EventDetail = memo(function EventDetail({
       eventType={eventType}
     />
   ) : (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelContentError translatedErrorMessage={eventDetailRequestError} />
     </StyledPanel>
   );
@@ -105,7 +105,7 @@ const EventDetailContents = memo(function ({
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel data-test-subj="resolver:panel:event-detail">
+    <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         nodeID={nodeID}
         nodeName={nodeName}

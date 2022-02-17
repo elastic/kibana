@@ -6,10 +6,14 @@
  */
 
 import { filterInstalledRules, getRulesToUpdate, mergeExceptionLists } from './get_rules_to_update';
-import { getResult } from '../routes/__mocks__/request_responses';
+import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe('get_rules_to_update', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('get_rules_to_update - %s', (_, isRuleRegistryEnabled) => {
   describe('get_rules_to_update', () => {
     test('should return empty array if both rule sets are empty', () => {
       const update = getRulesToUpdate([], []);
@@ -21,7 +25,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-2';
       installedRule.params.version = 1;
       const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
@@ -33,7 +37,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-1';
       installedRule.params.version = 2;
       const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
@@ -45,7 +49,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-1';
       installedRule.params.version = 1;
       const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
@@ -57,7 +61,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-1';
       installedRule.params.version = 1;
       installedRule.params.exceptionsList = [];
@@ -71,12 +75,12 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [];
 
-      const installedRule2 = getResult();
+      const installedRule2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule2.params.ruleId = 'rule-2';
       installedRule2.params.version = 1;
       installedRule2.params.exceptionsList = [];
@@ -94,12 +98,12 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem2.rule_id = 'rule-2';
       ruleFromFileSystem2.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [];
 
-      const installedRule2 = getResult();
+      const installedRule2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule2.params.ruleId = 'rule-2';
       installedRule2.params.version = 1;
       installedRule2.params.exceptionsList = [];
@@ -124,7 +128,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [];
@@ -146,7 +150,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -178,7 +182,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -200,7 +204,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -227,7 +231,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem2.rule_id = 'rule-2';
       ruleFromFileSystem2.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -238,7 +242,7 @@ describe('get_rules_to_update', () => {
           type: 'endpoint',
         },
       ];
-      const installedRule2 = getResult();
+      const installedRule2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule2.params.ruleId = 'rule-2';
       installedRule2.params.version = 1;
       installedRule2.params.exceptionsList = [
@@ -277,7 +281,7 @@ describe('get_rules_to_update', () => {
         },
       ];
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -289,7 +293,7 @@ describe('get_rules_to_update', () => {
         },
       ];
 
-      const installedRule2 = getResult();
+      const installedRule2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule2.params.ruleId = 'rule-2';
       installedRule2.params.version = 1;
       installedRule2.params.exceptionsList = [
@@ -319,7 +323,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-2';
       installedRule.params.version = 1;
       const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
@@ -331,7 +335,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-1';
       installedRule.params.version = 2;
       const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
@@ -343,7 +347,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 1;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-1';
       installedRule.params.version = 1;
       const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
@@ -355,7 +359,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem.rule_id = 'rule-1';
       ruleFromFileSystem.version = 2;
 
-      const installedRule = getResult();
+      const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule.params.ruleId = 'rule-1';
       installedRule.params.version = 1;
       installedRule.params.exceptionsList = [];
@@ -379,7 +383,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [];
@@ -401,7 +405,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -433,7 +437,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [
@@ -455,7 +459,7 @@ describe('get_rules_to_update', () => {
       ruleFromFileSystem1.rule_id = 'rule-1';
       ruleFromFileSystem1.version = 2;
 
-      const installedRule1 = getResult();
+      const installedRule1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       installedRule1.params.ruleId = 'rule-1';
       installedRule1.params.version = 1;
       installedRule1.params.exceptionsList = [

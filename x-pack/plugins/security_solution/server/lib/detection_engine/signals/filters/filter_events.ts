@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FilterEventsOptions } from './types';
 
 /**
@@ -16,7 +16,7 @@ import { FilterEventsOptions } from './types';
 export const filterEvents = <T>({
   events,
   fieldAndSetTuples,
-}: FilterEventsOptions<T>): Array<estypes.Hit<T>> => {
+}: FilterEventsOptions<T>): Array<estypes.SearchHit<T>> => {
   return events.filter((item) => {
     return fieldAndSetTuples
       .map((tuple) => {

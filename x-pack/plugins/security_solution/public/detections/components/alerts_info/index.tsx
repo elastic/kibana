@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useState, useEffect } from 'react';
 
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
@@ -27,7 +27,9 @@ export const useAlertInfo = ({ ruleId = null }: AlertInfo): Return => {
     <EuiLoadingSpinner size="m" />
   );
 
-  const { loading, data: alerts } = useQueryAlerts<unknown, Aggs>(buildLastAlertsQuery(ruleId));
+  const { loading, data: alerts } = useQueryAlerts<unknown, Aggs>({
+    query: buildLastAlertsQuery(ruleId),
+  });
 
   useEffect(() => {
     if (alerts != null) {

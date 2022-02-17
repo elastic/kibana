@@ -1,4 +1,4 @@
-title: SearchResult
+title: Search result
 type: object
 properties:
   description:

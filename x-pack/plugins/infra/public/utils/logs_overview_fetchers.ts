@@ -6,12 +6,13 @@
  */
 
 import { encode } from 'rison-node';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
-import { DEFAULT_SOURCE_ID } from '../../common/constants';
+import { DEFAULT_SOURCE_ID, TIMESTAMP_FIELD } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
 import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
+import { resolveLogSourceConfiguration } from '../../common/log_sources';
 
 interface StatsAggregation {
   buckets: Array<{
@@ -29,7 +30,6 @@ interface StatsAggregation {
 
 interface LogParams {
   index: string;
-  timestampField: string;
 }
 
 type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
@@ -54,10 +54,14 @@ export function getLogsOverviewDataFetcher(
       core.http.fetch
     );
 
+    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+      sourceConfiguration.data.configuration,
+      startPlugins.data.indexPatterns
+    );
+
     const { stats, series } = await fetchLogsOverview(
       {
-        index: sourceConfiguration.data.configuration.logAlias,
-        timestampField: sourceConfiguration.data.configuration.fields.timestamp,
+        index: resolvedLogSourceConfiguration.indices,
       },
       params,
       data
@@ -111,7 +115,7 @@ async function fetchLogsOverview(
 function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
   return {
     range: {
-      [logParams.timestampField]: {
+      [TIMESTAMP_FIELD]: {
         gt: new Date(params.absoluteTime.start).toISOString(),
         lte: new Date(params.absoluteTime.end).toISOString(),
         format: 'strict_date_optional_time',
@@ -131,8 +135,8 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
       aggs: {
         series: {
           date_histogram: {
-            field: logParams.timestampField,
-            fixed_interval: params.bucketSize,
+            field: TIMESTAMP_FIELD,
+            fixed_interval: params.intervalString,
           },
         },
       },

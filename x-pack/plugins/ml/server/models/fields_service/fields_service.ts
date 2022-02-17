@@ -45,7 +45,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     fieldNames: string[],
     datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const { body } = await asCurrentUser.fieldCaps({
+    const body = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
@@ -180,12 +180,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       ...runtimeMappings,
     };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       body,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -194,7 +191,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
-      // @ts-expect-error fix search aggregation response
+      // @ts-expect-error incorrect search response type
       obj[field] = (aggregations[field] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
@@ -225,9 +222,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       size: 0,
       body: {
@@ -250,14 +245,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     });
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
-      // @ts-expect-error fix search aggregation response
+      // @ts-expect-error incorrect search response type
       obj.start.epoch = aggregations.earliest.value;
-      // @ts-expect-error fix search aggregation response
+      // @ts-expect-error incorrect search response type
       obj.start.string = aggregations.earliest.value_as_string;
 
-      // @ts-expect-error fix search aggregation response
+      // @ts-expect-error incorrect search response type
       obj.end.epoch = aggregations.latest.value;
-      // @ts-expect-error fix search aggregation response
+      // @ts-expect-error incorrect search response type
       obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
@@ -402,12 +397,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       },
     };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       body,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -416,7 +408,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
-      // @ts-expect-error fix search aggregation response
+      // @ts-expect-error incorrect search response type
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });

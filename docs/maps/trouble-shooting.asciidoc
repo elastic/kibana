@@ -21,18 +21,18 @@ image::maps/images/inspector.png[]
 === Solutions to common problems
 
 [float]
-==== Index not listed when adding layer
+==== Data view not listed when adding layer
 
 * Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-  ** Run `GET myIndexPatternTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexPatternTitle` and `myGeoFieldName` with your index pattern title and geospatial field name.
+  ** Run `GET myIndexName/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexName` and `myGeoFieldName` with your index and geospatial field name.
   ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
-* Verify your geospatial data is correctly mapped in your <<managing-fields, Kibana index pattern>>.
-  ** Open your index pattern in <<management, Stack Management>>.
+* Verify your geospatial data is correctly mapped in your <<managing-fields, data view>>.
+  ** Open your data view in <<management, Stack Management>>.
   ** Ensure your geospatial field type is `geo_point` or `geo_shape`.
   ** Ensure your geospatial field is searchable and aggregatable.
   ** If your geospatial field type does not match your Elasticsearch mapping, click the *Refresh* button to refresh the field list from Elasticsearch.
-* Index patterns with thousands of fields can exceed the default maximum payload size.
-Increase <<settings, `server.maxPayloadBytes`>> for large index patterns.
+* Data views with thousands of fields can exceed the default maximum payload size.
+Increase <<settings, `server.maxPayload`>> for large data views.
 
 [float]
 ==== Features are not displayed
@@ -44,14 +44,10 @@ Increase <<settings, `server.maxPayloadBytes`>> for large index patterns.
 * Ensure fill color and border color are distinguishable from map tiles. It's hard to see white features on a white background.
 
 [float]
-==== Tiles are not displayed
-
-* Ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
-* Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
+==== Elastic Maps Service basemaps are not displayed
+*Maps* uses tile and vector data from Elastic Maps Service by default. See <<maps-connect-to-ems, Connect to Elastic Maps Service>> for more info.
 
 [float]
-==== Coordinate and region map visualizations not available in New Visualization menu
-
-Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a
-choice in the New Visualization menu because you can create these maps in the Maps app.
-If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
+==== Custom tiles are not displayed
+* When using a custom tile service, ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your {kib} domain have permission to access your tile server domain.
+* Ensure custom vector and tile services have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.

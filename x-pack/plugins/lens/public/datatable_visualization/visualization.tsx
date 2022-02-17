@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
-import { I18nProvider } from '@kbn/i18n/react';
+import { Ast } from '@kbn/interpreter';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DatatableColumn } from 'src/plugins/expressions/public';
-import {
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -19,37 +21,32 @@ import {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
-
-export interface ColumnState {
-  columnId: string;
-  width?: number;
-  hidden?: boolean;
-  isTransposed?: boolean;
-  // These flags are necessary to transpose columns and map them back later
-  // They are set automatically and are not user-editable
-  transposable?: boolean;
-  originalColumnId?: string;
-  originalName?: string;
-  bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
-  alignment?: 'left' | 'right' | 'center';
-}
-
-export interface SortingState {
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
-}
-
+import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
+import { LayerType, layerTypes } from '../../common';
+import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import type { ColumnState, SortingState } from '../../common/expressions';
+import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
+  layerType: LayerType;
   sorting?: SortingState;
+  fitRowToContent?: boolean;
+  paging?: PagingState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
 });
 
-export const datatableVisualization: Visualization<DatatableVisualizationState> = {
+export const getDatatableVisualization = ({
+  paletteService,
+  theme,
+}: {
+  paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
+}): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
   visualizationTypes: [
@@ -58,8 +55,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       icon: LensIconChartDatatable,
       label: visualizationLabel,
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
-        defaultMessage: 'Tabular and single value',
+        defaultMessage: 'Tabular',
       }),
+      sortPriority: 5,
     },
   ],
 
@@ -87,11 +85,14 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
 
   switchVisualizationType: (_, state) => state,
 
-  initialize(frame, state) {
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
+
+  initialize(addNewLayer, state) {
     return (
       state || {
         columns: [],
-        layerId: frame.addNewLayer(),
+        layerId: addNewLayer(),
+        layerType: layerTypes.DATA,
       }
     );
   },
@@ -106,7 +107,8 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     if (
       keptLayerIds.length > 1 ||
       (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-      (state && table.changeType === 'unchanged')
+      (state && table.changeType === 'unchanged') ||
+      table.columns.some((col) => col.operation.isStaticValue)
     ) {
       return [];
     }
@@ -151,6 +153,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         state: {
           ...(state || {}),
           layerId: table.layerId,
+          layerType: layerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
             isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
@@ -182,7 +185,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         {
           groupId: 'rows',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
-            defaultMessage: 'Split rows',
+            defaultMessage: 'Rows',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
             defaultMessage:
@@ -209,7 +212,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         {
           groupId: 'columns',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Split columns',
+            defaultMessage: 'Columns',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:
@@ -238,10 +241,21 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({
-              columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
-            })),
+            .map((accessor) => {
+              const columnConfig = columnMap[accessor];
+              const stops = columnConfig.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+
+              return {
+                columnId: accessor,
+                triggerIcon: columnConfig.hidden
+                  ? 'invisible'
+                  : hasColoring
+                  ? 'colorBy'
+                  : undefined,
+                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
+              };
+            }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           required: true,
@@ -283,11 +297,30 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   },
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <TableDimensionEditor {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TableDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
+  },
+
+  getSupportedLayers() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.datatable.addLayer', {
+          defaultMessage: 'Visualization',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
@@ -319,28 +352,56 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           arguments: {
             title: [title || ''],
             description: [description || ''],
-            columns: columns.map((column) => ({
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_datatable_column',
-                  arguments: {
-                    columnId: [column.columnId],
-                    hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
-                    width: typeof column.width === 'undefined' ? [] : [column.width],
-                    isTransposed:
-                      typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
-                    transposable: [
-                      !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
-                    ],
-                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
+            columns: columns.map((column) => {
+              const paletteParams = {
+                ...column.palette?.params,
+                // rewrite colors and stops as two distinct arguments
+                colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+                stops:
+                  column.palette?.params?.name === 'custom'
+                    ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                    : [],
+                reverse: false, // managed at UI level
+              };
+              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
+
+              const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
+              const canColor =
+                datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
+
+              return {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: 'lens_datatable_column',
+                    arguments: {
+                      columnId: [column.columnId],
+                      hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                      width: typeof column.width === 'undefined' ? [] : [column.width],
+                      isTransposed:
+                        typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                      transposable: [
+                        !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                      ],
+                      alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
+                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
+                      palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
+                      summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
+                      summaryLabel: hasNoSummaryRow
+                        ? []
+                        : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                      sortingHint: sortingHint ? [sortingHint] : [],
+                    },
                   },
-                },
-              ],
-            })),
+                ],
+              };
+            }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
+            fitRowToContent: [state.fitRowToContent ?? false],
+            pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },
       ],
@@ -349,6 +410,17 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
 
   getErrorMessages(state) {
     return undefined;
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DataTableToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   onEditAction(state, event) {
@@ -362,10 +434,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           },
         };
       case 'toggle':
+        const toggleColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === toggleColumnId) {
               return {
                 ...column,
                 hidden: !column.hidden,
@@ -377,10 +450,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         };
       case 'resize':
         const targetWidth = event.data.width;
+        const resizeColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === resizeColumnId) {
               return {
                 ...column,
                 width: targetWidth,
@@ -390,11 +464,19 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             }
           }),
         };
+      case 'pagesize':
+        return {
+          ...state,
+          paging: {
+            enabled: state.paging?.enabled || false,
+            size: event.data.size,
+          },
+        };
       default:
         return state;
     }
   },
-};
+});
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,

@@ -7,22 +7,23 @@
 
 import uuid from 'uuid';
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import AlertAdd, { AlertAddProps } from './alert_add';
+import AlertAdd from './alert_add';
 import { createAlert } from '../../lib/alert_api';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
-  Alert,
+  Rule,
+  AlertAddProps,
   AlertFlyoutCloseReason,
   ConnectorValidationResult,
   GenericValidationResult,
   ValidationResult,
 } from '../../../types';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -43,13 +44,8 @@ jest.mock('../../../common/lib/health_api', () => ({
 }));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-const delay = (wait: number = 1000) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, wait);
-  });
 
 export const TestExpression: FunctionComponent<any> = () => {
   return (
@@ -67,8 +63,9 @@ describe('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(
-    initialValues?: Partial<Alert>,
-    onClose: AlertAddProps['onClose'] = jest.fn()
+    initialValues?: Partial<Rule>,
+    onClose: AlertAddProps['onClose'] = jest.fn(),
+    defaultScheduleInterval?: string
   ) {
     const mocks = coreMock.createSetup();
     const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
@@ -83,6 +80,7 @@ describe('alert_add', () => {
           },
         ],
         defaultActionGroupId: 'testActionGroup',
+        defaultScheduleInterval,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         producer: ALERTS_FEATURE_ID,
@@ -118,7 +116,7 @@ describe('alert_add', () => {
       hasPermanentEncryptionKey: true,
     });
 
-    const alertType = {
+    const ruleType = {
       id: 'my-alert-type',
       iconClass: 'test',
       description: 'test',
@@ -126,7 +124,7 @@ describe('alert_add', () => {
       validate: (): ValidationResult => {
         return { errors: {} };
       },
-      alertParamsExpression: TestExpression,
+      ruleParamsExpression: TestExpression,
       requiresAppContext: false,
     };
 
@@ -134,20 +132,20 @@ describe('alert_add', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-        return {};
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
       },
-      validateParams: (): GenericValidationResult<unknown> => {
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
-        return validationResult;
+        return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
     });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    alertTypeRegistry.list.mockReturnValue([alertType]);
-    alertTypeRegistry.get.mockReturnValue(alertType);
-    alertTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
+    ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
@@ -160,7 +158,7 @@ describe('alert_add', () => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
+        ruleTypeRegistry={ruleTypeRegistry}
         metadata={{ test: 'some value', fields: ['test'] }}
       />
     );
@@ -175,7 +173,6 @@ describe('alert_add', () => {
   it('renders alert add flyout', async () => {
     const onClose = jest.fn();
     await setup({}, onClose);
-    await delay(1000);
 
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
@@ -204,8 +201,6 @@ describe('alert_add', () => {
       },
       onClose
     );
-
-    await delay(1000);
 
     expect(wrapper.find('input#alertName').props().value).toBe('Simple status alert');
 
@@ -242,9 +237,28 @@ describe('alert_add', () => {
 
     expect(onClose).toHaveBeenCalledWith(AlertFlyoutCloseReason.SAVED);
   });
+
+  it('should enforce any default inteval', async () => {
+    await setup({ alertTypeId: 'my-alert-type' }, jest.fn(), '3h');
+
+    // Wait for handlers to fire
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const intervalInputUnit = wrapper
+      .find('[data-test-subj="intervalInputUnit"]')
+      .first()
+      .getElement().props.value;
+    const intervalInput = wrapper.find('[data-test-subj="intervalInput"]').first().getElement()
+      .props.value;
+    expect(intervalInputUnit).toBe('h');
+    expect(intervalInput).toBe(3);
+  });
 });
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

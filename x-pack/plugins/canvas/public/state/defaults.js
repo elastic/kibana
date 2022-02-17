@@ -6,7 +6,7 @@
  */
 
 import { getId } from '../lib/get_id';
-import { DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
+import { DEFAULT_WORKPAD_CSS, DEFAULT_GROUP_BY_FIELD } from '../../common/lib/constants';
 
 export const getDefaultElement = () => {
   return {
@@ -86,3 +86,15 @@ export const getDefaultWorkpad = () => {
     isWriteable: true,
   };
 };
+
+export const getExportedWorkpad = () => {
+  const workpad = getDefaultWorkpad();
+  return {
+    id: workpad.id,
+    attributes: workpad,
+  };
+};
+
+export const getDefaultSidebar = () => ({
+  groupFiltersByOption: DEFAULT_GROUP_BY_FIELD,
+});

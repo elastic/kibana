@@ -170,7 +170,7 @@ describe('StatefulEditDataProvider', () => {
   });
 
   test('it renders the current value when the type of value is an array', () => {
-    const reallyAnArray = ([value] as unknown) as string;
+    const reallyAnArray = [value] as unknown as string;
 
     const wrapper = mount(
       <TestProviders>

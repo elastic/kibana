@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { TransformAPIProvider } from './api';
 import { TransformEditFlyoutProvider } from './edit_flyout';
+import { TransformDiscoverProvider } from './discover';
 import { TransformManagementProvider } from './management';
 import { TransformNavigationProvider } from './navigation';
 import { TransformSecurityCommonProvider } from './security_common';
@@ -22,6 +23,7 @@ import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
+  const discover = TransformDiscoverProvider(context);
   const editFlyout = TransformEditFlyoutProvider(context);
   const management = TransformManagementProvider(context);
   const navigation = TransformNavigationProvider(context);
@@ -35,6 +37,7 @@ export function TransformProvider(context: FtrProviderContext) {
 
   return {
     api,
+    discover,
     editFlyout,
     management,
     navigation,

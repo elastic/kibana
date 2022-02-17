@@ -8,7 +8,7 @@ Watches are helpful for analyzing mission-critical and business-critical
 streaming data. For example, you might watch application logs for performance
 outages or audit access logs for security threats.
 
-To get started, open then main menu,
+To get started, open the main menu,
 then click *Stack Management > Watcher*.
 With this UI, you can:
 
@@ -43,7 +43,7 @@ and either of these watcher roles:
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
 
-To manage roles, open then main menu, then click *Stack Management > Roles*, or use the
+To manage roles, open the main menu, then click *Stack Management > Roles*, or use the
 <<role-management-api, Kibana Role Management API>>. Watches are shared between
 all users with the same role.
 
@@ -123,9 +123,6 @@ in {es} for this example to work.
 you want to send the message when the condition is met.
 
 . Enter a subject and body for the email.
-+
-[role="screenshot"]
-image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Action for threshold alert"]
 
 . To test the action before saving the watch, click *Send test email*.
 +

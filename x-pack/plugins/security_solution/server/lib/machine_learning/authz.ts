@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server/';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { ILicense } from '../../../../licensing/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SetupPlugins } from '../../plugin';
@@ -16,8 +17,6 @@ import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_a
 import { isMlRule } from '../../../common/machine_learning/helpers';
 import { Validation } from './validation';
 import { cache } from './cache';
-import { Type } from '../../../common/detection_engine/schemas/common/schemas';
-
 export interface MlAuthz {
   validateRuleType: (type: Type) => Promise<Validation>;
 }

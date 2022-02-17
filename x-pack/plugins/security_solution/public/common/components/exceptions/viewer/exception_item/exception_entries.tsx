@@ -15,6 +15,7 @@ import {
   EuiHideFor,
   EuiBadge,
   EuiBadgeGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -26,7 +27,12 @@ import * as i18n from '../../translations';
 import { FormattedEntry } from '../../types';
 
 const MyEntriesDetails = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSize};
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSize} ${theme.eui.euiSizeL} ${theme.eui.euiSizeL} ${theme.eui.euiSizeXS};
+    &&& {
+      margin-left: 0;
+    }
+  `}
 `;
 
 const MyEditButton = styled(EuiButton)`
@@ -46,8 +52,9 @@ const MyRemoveButton = styled(EuiButton)`
 `;
 
 const MyAndOrBadgeContainer = styled(EuiFlexItem)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeXL};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSizeXL} ${theme.eui.euiSize} ${theme.eui.euiSizeS} 0;
+  `}
 `;
 
 const MyActionButton = styled(EuiFlexItem)`
@@ -68,14 +75,14 @@ const ValueBadgeGroup = styled(EuiBadgeGroup)`
 
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
-  disableDelete: boolean;
+  disableActions: boolean;
   onDelete: () => void;
   onEdit: () => void;
 }
 
 const ExceptionEntriesComponent = ({
   entries,
-  disableDelete,
+  disableActions,
   onDelete,
   onEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
@@ -132,13 +139,18 @@ const ExceptionEntriesComponent = ({
               </ValueBadgeGroup>
             );
           } else {
-            return values ?? getEmptyValue();
+            return values ? (
+              <EuiToolTip content={values} anchorClassName="eui-textTruncate">
+                <span>{values}</span>
+              </EuiToolTip>
+            ) : (
+              getEmptyValue()
+            );
           }
         },
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [entries]
+    []
   );
 
   return (
@@ -168,32 +180,32 @@ const ExceptionEntriesComponent = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            <MyActionButton grow={false}>
-              <MyEditButton
-                size="s"
-                color="primary"
-                onClick={onEdit}
-                isDisabled={disableDelete}
-                data-test-subj="exceptionsViewerEditBtn"
-              >
-                {i18n.EDIT}
-              </MyEditButton>
-            </MyActionButton>
-            <MyActionButton grow={false}>
-              <MyRemoveButton
-                size="s"
-                color="danger"
-                onClick={onDelete}
-                isLoading={disableDelete}
-                data-test-subj="exceptionsViewerDeleteBtn"
-              >
-                {i18n.REMOVE}
-              </MyRemoveButton>
-            </MyActionButton>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {!disableActions && (
+          <EuiFlexItem grow={1}>
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+              <MyActionButton grow={false}>
+                <MyEditButton
+                  size="s"
+                  color="primary"
+                  onClick={onEdit}
+                  data-test-subj="exceptionsViewerEditBtn"
+                >
+                  {i18n.EDIT}
+                </MyEditButton>
+              </MyActionButton>
+              <MyActionButton grow={false}>
+                <MyRemoveButton
+                  size="s"
+                  color="danger"
+                  onClick={onDelete}
+                  data-test-subj="exceptionsViewerDeleteBtn"
+                >
+                  {i18n.REMOVE}
+                </MyRemoveButton>
+              </MyActionButton>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </MyEntriesDetails>
   );

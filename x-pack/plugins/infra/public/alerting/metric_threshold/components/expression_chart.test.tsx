@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { DataViewBase } from '@kbn/es-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
-import { MetricExpression } from '../types';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import React from 'react';
+import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Aggregators, Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
 
 const mockStartServices = mockCoreMock.createStart();
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -40,7 +39,7 @@ jest.mock('../hooks/use_metrics_explorer_chart_data', () => ({
 
 describe('ExpressionChart', () => {
   async function setup(expression: MetricExpression, filterQuery?: string, groupBy?: string) {
-    const derivedIndexPattern: IIndexPattern = {
+    const derivedIndexPattern: DataViewBase = {
       title: 'metricbeat-*',
       fields: [],
     };
@@ -54,13 +53,6 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-        fields: {
-          timestamp: '@timestamp',
-          container: 'container.id',
-          host: 'host.name',
-          pod: 'kubernetes.pod.uid',
-          tiebreaker: '_doc',
-        },
         anomalyThreshold: 20,
       },
     };

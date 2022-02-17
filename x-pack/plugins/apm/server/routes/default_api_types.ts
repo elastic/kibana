@@ -6,18 +6,20 @@
  */
 
 import * as t from 'io-ts';
-import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
+
+export { environmentRt } from '../../common/environment_rt';
 
 export const rangeRt = t.type({
   start: isoToEpochRt,
   end: isoToEpochRt,
 });
 
+export const offsetRt = t.partial({ offset: t.string });
+
 export const comparisonRangeRt = t.partial({
   comparisonStart: isoToEpochRt,
   comparisonEnd: isoToEpochRt,
 });
 
-export const environmentRt = t.partial({ environment: t.string });
-
-export const kueryRt = t.partial({ kuery: t.string });
+export const kueryRt = t.type({ kuery: t.string });

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Vis } from '../../../../visualizations/public';
 import OptionsTab, { OptionsTabProps } from './options_tab';
@@ -17,7 +17,7 @@ describe('OptionsTab', () => {
   let props: OptionsTabProps;
 
   beforeEach(() => {
-    props = ({
+    props = {
       vis: {} as Vis,
       stateParams: {
         updateFiltersOnChange: false,
@@ -25,7 +25,7 @@ describe('OptionsTab', () => {
         pinFilters: false,
       },
       setValue: jest.fn(),
-    } as unknown) as OptionsTabProps;
+    } as unknown as OptionsTabProps;
   });
 
   it('should renders OptionsTab', () => {

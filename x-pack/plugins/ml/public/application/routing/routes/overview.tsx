@@ -20,7 +20,7 @@ import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capab
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { useTimefilter } from '../../contexts/kibana';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
@@ -28,7 +28,12 @@ export const overviewRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'overview',
   path: '/overview',
+  title: i18n.translate('xpack.ml.overview.overviewLabel', {
+    defaultMessage: 'Overview',
+  }),
+  enableDatePicker: true,
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -36,15 +41,15 @@ export const overviewRouteFactory = (
       text: i18n.translate('xpack.ml.overview.overviewLabel', {
         defaultMessage: 'Overview',
       }),
-      onClick: breadcrumbOnClickFactory('/overview', navigateToPath),
     },
   ],
+  'data-test-subj': 'mlPageOverview',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, {
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
     checkFullLicense,
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,
@@ -63,6 +68,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 };
 
 export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  id: '',
   path: '/',
   render: () => <Page />,
   breadcrumbs: [],

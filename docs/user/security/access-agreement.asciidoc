@@ -2,14 +2,16 @@
 [[xpack-security-access-agreement]]
 === Access agreement
 
-Some work environments require you to acknowledge and accept an agreement before you can access {kib}, which can contain sensitive information. The agreement text supports Markdown format and can be specified using the `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
+Access agreement is a https://www.elastic.co/subscriptions[subscription feature] that requires users to acknowledge and accept an
+agreement before accessing {kib}. The agreement text supports Markdown format and can be specified using the
+`xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
 
 [NOTE]
 ============================================================================
 You need to acknowledge the access agreement only once per session, and {kib} reports the acknowledgement in the audit logs.
 ============================================================================
 
-Here is how your `kibana.yml` can look like if you define an access agreement:
+Here is an example of defining an access agreement in `kibana.yml`:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -17,11 +19,14 @@ xpack.security.authc.providers:
   basic.basic1:
     order: 0
     accessAgreement:
-      message: "**You are accessing a system with a sensitive information** \n\n
-                  By logging in, you acknowledge that (shortened ...)"
+      message: |
+        **You are accessing a system with sensitive information**
+
+        By logging in, you acknowledge that information system usage
+        ...(shortened)
 --------------------------------------------------------------------------------
 
 When you authenticate using `basic.basic1`, you'll see the following agreement that you must acknowledge before you can access {kib}:
 
 [role="screenshot"]
-image::user/security/images/access-agreement.png["Access Agreement UI"]
+image::images/access-agreement.png["Access Agreement UI"]

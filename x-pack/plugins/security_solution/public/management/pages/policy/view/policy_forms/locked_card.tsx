@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
@@ -30,24 +30,21 @@ const LockedPolicyDiv = styled.div`
   }
 `;
 
-export const LockedPolicyCard = memo(() => {
+export const LockedPolicyCard = memo(({ title }: { title: string }) => {
   return (
     <LockedPolicyDiv>
       <EuiCard
         data-test-subj="lockedPolicyCard"
-        betaBadgeLabel={i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
-          defaultMessage: 'Platinum',
-        })}
+        betaBadgeProps={{
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
+            defaultMessage: 'Platinum',
+          }),
+        }}
         isDisabled={true}
         icon={<EuiIcon size="xl" type="lock" />}
         title={
           <h3>
-            <strong>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.ransomware"
-                defaultMessage="Ransomware"
-              />
-            </strong>
+            <strong>{title}</strong>
           </h3>
         }
         description={false}
@@ -67,8 +64,8 @@ export const LockedPolicyCard = memo(() => {
             <EuiFlexItem>
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.lockedCard"
-                  defaultMessage="To turn on Ransomware protection, you must upgrade your license to Platinum, start a
+                  id="xpack.securitySolution.endpoint.policy.details.lockedCardUpgradeMessage"
+                  defaultMessage="To turn on this protection, you must upgrade your license to Platinum, start a
               free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                   values={{
                     cloudDeploymentLink: (

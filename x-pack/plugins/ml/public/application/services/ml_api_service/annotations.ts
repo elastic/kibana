@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  Annotation,
-  FieldToBucket,
-  GetAnnotationsResponse,
-} from '../../../../common/types/annotations';
+import { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
 
@@ -19,9 +15,8 @@ export const annotations = {
     earliestMs: number;
     latestMs: number;
     maxAnnotations: number;
-    fields: FieldToBucket[];
-    detectorIndex: number;
-    entities: any[];
+    detectorIndex?: number;
+    entities?: any[];
   }) {
     const body = JSON.stringify(obj);
     return http$<GetAnnotationsResponse>({
@@ -36,7 +31,6 @@ export const annotations = {
     earliestMs: number | null;
     latestMs: number | null;
     maxAnnotations: number;
-    fields?: FieldToBucket[];
     detectorIndex?: number;
     entities?: any[];
   }) {

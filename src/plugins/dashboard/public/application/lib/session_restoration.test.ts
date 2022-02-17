@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { createSessionRestorationDataProvider } from './session_restoration';
-import { getAppStateDefaults } from './get_app_state_defaults';
 import { getSavedDashboardMock } from '../test_helpers';
-import { SavedObjectTagDecoratorTypeGuard } from '../../../../saved_objects_tagging_oss/public';
-import { ViewMode } from '../../services/embeddable';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { createSessionRestorationDataProvider, savedObjectToDashboardState } from '.';
 
 describe('createSessionRestorationDataProvider', () => {
   const mockDataPlugin = dataPluginMock.createStartContract();
+  const version = '8.0.0';
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
+    kibanaVersion: version,
     data: mockDataPlugin,
     getAppState: () =>
-      getAppStateDefaults(
-        ViewMode.VIEW,
-        getSavedDashboardMock(),
-        ((() => false) as unknown) as SavedObjectTagDecoratorTypeGuard
-      ),
+      savedObjectToDashboardState({
+        version,
+        showWriteControls: true,
+        usageCollection: undefined,
+        savedObjectsTagging: undefined,
+        savedDashboard: getSavedDashboardMock(),
+      }),
     getDashboardTitle: () => 'Dashboard',
     getDashboardId: () => 'Id',
   });
@@ -33,7 +34,7 @@ describe('createSessionRestorationDataProvider', () => {
       (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
         () => searchSessionId
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.searchSessionId).toBeUndefined();
       expect(restoreState.searchSessionId).toBe(searchSessionId);
     });
@@ -47,13 +48,13 @@ describe('createSessionRestorationDataProvider', () => {
       (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockImplementation(
         () => absoluteTime
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
     });
 
     test('restoreState has refreshInterval paused', async () => {
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.refreshInterval).toBeUndefined();
       expect(restoreState.refreshInterval?.pause).toBe(true);
     });

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { LogRetentionOptions } from './types';
 
@@ -29,6 +33,11 @@ describe('LogRetentionLogic', () => {
       enabled: true,
       retention_policy: { is_default: true, min_age_days: 180 },
     },
+    crawler: {
+      disabled_at: null,
+      enabled: true,
+      retention_policy: { is_default: true, min_age_days: 180 },
+    },
   };
 
   const TYPICAL_CLIENT_LOG_RETENTION = {
@@ -38,6 +47,11 @@ describe('LogRetentionLogic', () => {
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
     },
     api: {
+      disabledAt: null,
+      enabled: true,
+      retentionPolicy: { isDefault: true, minAgeDays: 180 },
+    },
+    crawler: {
       disabledAt: null,
       enabled: true,
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
@@ -142,6 +156,11 @@ describe('LogRetentionLogic', () => {
               enabled: true,
               retentionPolicy: null,
             },
+            crawler: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
           });
 
           expect(LogRetentionLogic.values).toEqual({
@@ -153,6 +172,11 @@ describe('LogRetentionLogic', () => {
                 retentionPolicy: null,
               },
               analytics: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
+              crawler: {
                 disabledAt: null,
                 enabled: true,
                 retentionPolicy: null,
@@ -192,7 +216,7 @@ describe('LogRetentionLogic', () => {
 
         LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
 
-        expect(http.put).toHaveBeenCalledWith('/api/app_search/log_settings', {
+        expect(http.put).toHaveBeenCalledWith('/internal/app_search/log_settings', {
           body: JSON.stringify({
             analytics: {
               enabled: true,
@@ -316,7 +340,7 @@ describe('LogRetentionLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/log_settings');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/log_settings');
         expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
           TYPICAL_CLIENT_LOG_RETENTION
         );

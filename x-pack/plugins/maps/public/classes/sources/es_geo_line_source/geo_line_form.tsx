@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SingleFieldSelect } from '../../../components/single_field_select';
@@ -15,7 +15,7 @@ import { getTermsFields } from '../../../index_pattern_util';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   onSortFieldChange: (fieldName: string) => void;
   onSplitFieldChange: (fieldName: string) => void;
   sortField: string;
@@ -64,7 +64,12 @@ export function GeoLineForm(props: Props) {
           onChange={onSortFieldChange}
           fields={props.indexPattern.fields.filter((field) => {
             const isSplitField = props.splitField ? field.name === props.splitField : false;
-            return !isSplitField && field.sortable && !indexPatterns.isNestedField(field);
+            return (
+              !isSplitField &&
+              field.sortable &&
+              !indexPatterns.isNestedField(field) &&
+              ['number', 'date'].includes(field.type)
+            );
           })}
           isClearable={false}
         />

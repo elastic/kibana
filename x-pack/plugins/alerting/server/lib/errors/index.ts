@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ErrorThatHandlesItsOwnResponse } from './types';
+import { ErrorThatHandlesItsOwnResponse, ElasticsearchError } from './types';
+import { getEsErrorMessage } from './es_error_parser';
 
 export function isErrorThatHandlesItsOwnResponse(
   e: ErrorThatHandlesItsOwnResponse
@@ -13,5 +14,7 @@ export function isErrorThatHandlesItsOwnResponse(
   return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
 }
 
-export { ErrorThatHandlesItsOwnResponse };
-export { AlertTypeDisabledError, AlertTypeDisabledReason } from './alert_type_disabled';
+export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
+export { getEsErrorMessage };
+export type { AlertTypeDisabledReason } from './alert_type_disabled';
+export { AlertTypeDisabledError } from './alert_type_disabled';

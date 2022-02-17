@@ -10,15 +10,15 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Fetch Node.js rules
 http_archive(
   name = "build_bazel_rules_nodejs",
-  sha256 = "dd7ea7efda7655c218ca707f55c3e1b9c68055a70c31a98f264b3445bc8f4cb1",
-  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.2.3/rules_nodejs-3.2.3.tar.gz"],
+  sha256 = "8a7c981217239085f78acc9898a1f7ba99af887c1996ceb3b4504655383a2c3c",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.0.0/rules_nodejs-4.0.0.tar.gz"],
 )
 
 # Now that we have the rules let's import from them to complete the work
 load("@build_bazel_rules_nodejs//:index.bzl", "check_rules_nodejs_version", "node_repositories", "yarn_install")
 
 # Assure we have at least a given rules_nodejs version
-check_rules_nodejs_version(minimum_version_string = "3.2.3")
+check_rules_nodejs_version(minimum_version_string = "4.0.0")
 
 # Setup the Node.js toolchain for the architectures we want to support
 #
@@ -27,13 +27,14 @@ check_rules_nodejs_version(minimum_version_string = "3.2.3")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "14.16.0-darwin_amd64": ("node-v14.16.0-darwin-x64.tar.gz", "node-v14.16.0-darwin-x64", "14ec767e376d1e2e668f997065926c5c0086ec46516d1d45918af8ae05bd4583"),
-    "14.16.0-linux_arm64": ("node-v14.16.0-linux-arm64.tar.xz", "node-v14.16.0-linux-arm64", "440489a08bfd020e814c9e65017f58d692299ac3f150c8e78d01abb1104c878a"),
-    "14.16.0-linux_s390x": ("node-v14.16.0-linux-s390x.tar.xz", "node-v14.16.0-linux-s390x", "335348e46f45284b6356416ef58f85602d2dee99094588b65900f6c8839df77e"),
-    "14.16.0-linux_amd64": ("node-v14.16.0-linux-x64.tar.xz", "node-v14.16.0-linux-x64", "2e079cf638766fedd720d30ec8ffef5d6ceada4e8b441fc2a093cb9a865f4087"),
-    "14.16.0-windows_amd64": ("node-v14.16.0-win-x64.zip", "node-v14.16.0-win-x64", "716045c2f16ea10ca97bd04cf2e5ef865f9c4d6d677a9bc25e2ea522b594af4f"),
+    "16.13.2-darwin_amd64": ("node-v16.13.2-darwin-x64.tar.gz", "node-v16.13.2-darwin-x64", "900a952bb77533d349e738ff8a5179a4344802af694615f36320a888b49b07e6"),
+    "16.13.2-darwin_arm64": ("node-v16.13.2-darwin-arm64.tar.gz", "node-v16.13.2-darwin-arm64", "09d300008ad58792c12622a5eafdb14c931587bb88713df4df64cdf4ff2188d1"),
+    "16.13.2-linux_arm64": ("node-v16.13.2-linux-arm64.tar.xz", "node-v16.13.2-linux-arm64", "a3cf8e4e9fbea27573eee6da84720bf7227ddd22842b842d48049d6dfe55fb03"),
+    "16.13.2-linux_s390x": ("node-v16.13.2-linux-s390x.tar.xz", "node-v16.13.2-linux-s390x", "c4ba46fc19366f7377d28a60a98f741bfa38045d7924306244c51d1660afcc8d"),
+    "16.13.2-linux_amd64": ("node-v16.13.2-linux-x64.tar.xz", "node-v16.13.2-linux-x64", "7f5e9a42d6e86147867d35643c7b1680c27ccd45db85666fc52798ead5e74421"),
+    "16.13.2-windows_amd64": ("node-v16.13.2-win-x64.zip", "node-v16.13.2-win-x64", "107e3ece84b7fa1e80b3bdf03181d395246c7867e27b17b6d7e6fa9c7932b467"),
   },
-  node_version = "14.16.0",
+  node_version = "16.13.2",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],
@@ -52,9 +53,6 @@ node_repositories(
 # NOTE: FORCE_COLOR env var forces colors on non tty mode
 yarn_install(
   name = "npm",
-  environment = {
-    "FORCE_COLOR": "True",
-  },
   package_json = "//:package.json",
   yarn_lock = "//:yarn.lock",
   data = [
@@ -62,6 +60,7 @@ yarn_install(
     "//:preinstall_check.js",
     "//:node_modules/.yarn-integrity",
   ],
+  exports_directories_only = True,
   symlink_node_modules = True,
   quiet = False,
   frozen_lockfile = False,

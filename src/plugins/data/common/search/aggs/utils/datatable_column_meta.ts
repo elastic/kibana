@@ -7,7 +7,7 @@
  */
 
 import { DatatableColumn } from 'src/plugins/expressions/common';
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern } from '../../..';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { AggTypesRegistryStart } from '../agg_types_registry';
 import { IAggType } from '../agg_type';

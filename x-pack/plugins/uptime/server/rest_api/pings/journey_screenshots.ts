@@ -6,42 +6,55 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isRefResult, isFullScreenshot } from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
+import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
+
+function getSharedHeaders(stepName: string, totalSteps: number) {
+  return {
+    'cache-control': 'max-age=600',
+    'caption-name': stepName,
+    'max-steps': String(totalSteps),
+  };
+}
 
 export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/journey/screenshot/{checkGroup}/{stepIndex}',
+  path: API_URLS.JOURNEY_SCREENSHOT,
   validate: {
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
-      _inspect: schema.maybe(schema.boolean()),
-    }),
-    query: schema.object({
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    const result = await libs.requests.getJourneyScreenshot({
+    const result: ScreenshotReturnTypesUnion | null = await libs.requests.getJourneyScreenshot({
       uptimeEsClient,
       checkGroup,
       stepIndex,
     });
 
-    if (result === null || !result.blob) {
-      return response.notFound();
+    if (isFullScreenshot(result) && typeof result.synthetics?.blob !== 'undefined') {
+      return response.ok({
+        body: Buffer.from(result.synthetics.blob, 'base64'),
+        headers: {
+          'content-type': result.synthetics.blob_mime || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
+          ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
+        },
+      });
+    } else if (isRefResult(result)) {
+      return response.ok({
+        body: {
+          screenshotRef: result,
+        },
+        headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps),
+      });
     }
-    return response.ok({
-      body: Buffer.from(result.blob, 'base64'),
-      headers: {
-        'content-type': 'image/png',
-        'cache-control': 'max-age=600',
-        'caption-name': result.stepName,
-        'max-steps': result.totalSteps,
-      },
-    });
+
+    return response.notFound();
   },
 });

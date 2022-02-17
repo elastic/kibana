@@ -8,12 +8,7 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-
-export interface Error {
-  error: string;
-  cause?: string[];
-  message?: string;
-}
+import { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;

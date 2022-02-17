@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiTableActionsColumnType,
@@ -21,15 +21,22 @@ import {
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiIcon,
 } from '@elastic/eui';
 
-import { TransformId } from '../../../../../../common/types/transform';
+import {
+  isLatestTransform,
+  isPivotTransform,
+  TransformId,
+} from '../../../../../../common/types/transform';
 import { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 const STATE_COLOR = {
   aborting: 'warning',
   failed: 'danger',
@@ -37,6 +44,7 @@ const STATE_COLOR = {
   started: 'primary',
   stopped: 'hollow',
   stopping: 'hollow',
+  waiting: 'hollow',
 } as const;
 
 export const getTaskStateBadge = (
@@ -89,7 +97,9 @@ export const useColumns = (
   const columns: [
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -135,6 +145,59 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       scope: 'row',
+      render: (transformId, item) => {
+        if (!isManagedTransform(item)) return transformId;
+        return (
+          <>
+            {transformId}
+            &nbsp;
+            <EuiToolTip
+              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+                defaultMessage:
+                  'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+              })}
+            >
+              <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+                {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+                  defaultMessage: 'Managed',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          </>
+        );
+      },
+    },
+    {
+      id: 'alertRule',
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.transform.transformList.alertingRules.screenReaderDescription"
+              defaultMessage="This column displays an icon when there are alert rules associated with a transform"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
+      width: '30px',
+      render: (item) => {
+        return Array.isArray(item.alerting_rules) ? (
+          <EuiToolTip
+            position="bottom"
+            content={
+              <FormattedMessage
+                id="xpack.transform.transformList.alertingRules.tooltipContent"
+                defaultMessage="Transform has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
+                values={{ rulesCount: item.alerting_rules.length }}
+              />
+            }
+          >
+            <EuiIcon type="bell" />
+          </EuiToolTip>
+        ) : (
+          <span />
+        );
+      },
     },
     {
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,
@@ -142,6 +205,27 @@ export const useColumns = (
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
       truncateText: true,
+    },
+    {
+      name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
+      'data-test-subj': 'transformListColumnType',
+      sortable: (item: TransformListRow) => item.mode,
+      truncateText: true,
+      render(item: TransformListRow) {
+        let transformType = i18n.translate('xpack.transform.type.unknown', {
+          defaultMessage: 'unknown',
+        });
+        if (isPivotTransform(item.config) === true) {
+          transformType = i18n.translate('xpack.transform.type.pivot', { defaultMessage: 'pivot' });
+        }
+        if (isLatestTransform(item.config) === true) {
+          transformType = i18n.translate('xpack.transform.type.latest', {
+            defaultMessage: 'latest',
+          });
+        }
+        return <EuiBadge color="hollow">{transformType}</EuiBadge>;
+      },
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.transform.status', { defaultMessage: 'Status' }),
@@ -202,13 +286,15 @@ export const useColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {/* If not stopped or failed show the animated progress bar */}
+                  {/* If not stopped, failed or waiting show the animated progress bar */}
                   {item.stats.state !== TRANSFORM_STATE.STOPPED &&
+                    item.stats.state !== TRANSFORM_STATE.WAITING &&
                     item.stats.state !== TRANSFORM_STATE.FAILED && (
                       <EuiProgress color="primary" size="m" />
                     )}
-                  {/* If stopped or failed show an empty (0%) progress bar */}
+                  {/* If stopped, failed or waiting show an empty (0%) progress bar */}
                   {(item.stats.state === TRANSFORM_STATE.STOPPED ||
+                    item.stats.state === TRANSFORM_STATE.WAITING ||
                     item.stats.state === TRANSFORM_STATE.FAILED) && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}

@@ -15,6 +15,8 @@ import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
+jest.mock('../../lib/kibana');
+
 describe('DroppableWrapper', () => {
   const mount = useMountAppended();
 

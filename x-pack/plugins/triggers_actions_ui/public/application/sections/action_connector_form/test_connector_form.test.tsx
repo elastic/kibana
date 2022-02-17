@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
 import {
@@ -16,7 +16,7 @@ import {
 } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
@@ -53,12 +53,12 @@ const actionType = {
   id: 'my-action-type',
   iconClass: 'test',
   selectMessage: 'test',
-  validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-    return {};
+  validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+    return Promise.resolve({});
   },
-  validateParams: (): GenericValidationResult<unknown> => {
+  validateParams: (): Promise<GenericValidationResult<unknown>> => {
     const validationResult = { errors: {} };
-    return validationResult;
+    return Promise.resolve(validationResult);
   },
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,

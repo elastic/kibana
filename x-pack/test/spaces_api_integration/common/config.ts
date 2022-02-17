@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -44,10 +44,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,
       },
 
-      esArchiver: {
-        directory: path.join(__dirname, 'fixtures', 'es_archiver'),
-      },
-
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,
@@ -65,7 +61,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

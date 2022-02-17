@@ -1,0 +1,66 @@
+[[data-views-runtime-field-api-upsert]]
+=== Upsert runtime field API
+++++
+<titleabbrev>Upsert runtime field</titleabbrev>
+++++
+
+experimental[] Create or update an existing runtime field
+
+
+[[data-views-runtime-field-upsert-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/data_views/data_view/<data_view_id>/runtime_field`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field`
+
+
+[[data-views-runtime-field-upsert-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`data_view_id`::
+(Required, string) The ID of the data view.
+
+
+[[data-views-runtime-field-upsert-body]]
+==== Request body
+
+`name`:: (Required, string) The name for a new runtime field or a name of an existing runtime field.
+
+`runtimeField`:: (Required, object) The runtime field definition object.
+
+
+
+[[data-views-runtime-field-upsert-example]]
+==== Examples
+
+Create or update an existing runtime field on a data view:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/data_views/data_view/<data_view_id>/runtime_field
+{
+  "name": "runtimeFoo",
+  "runtimeField": {
+     "type": "long",
+     "script": {
+        "source": "emit(doc["foo"].value)"
+      }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns created or updated runtime field object array and updated data view object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view": {...},
+    "fields": [...]
+}
+--------------------------------------------------
+

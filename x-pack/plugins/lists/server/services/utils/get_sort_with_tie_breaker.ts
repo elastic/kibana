@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-
-import { SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortFieldOrUndefined, SortOrderOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getSortWithTieBreaker = ({
   sortField,

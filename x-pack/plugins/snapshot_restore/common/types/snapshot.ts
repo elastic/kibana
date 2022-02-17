@@ -52,6 +52,7 @@ export interface SnapshotDetails {
 export interface SnapshotDetailsEs {
   snapshot: string;
   uuid: string;
+  repository: string;
   version_id: number;
   version: string;
   indices: string[];
@@ -67,6 +68,10 @@ export interface SnapshotDetailsEs {
   duration_in_millis: number;
   failures: any[];
   shards: SnapshotDetailsShardsStatusEs;
+  feature_states: Array<{
+    feature_name: string;
+    indices: string[];
+  }>;
   metadata?: {
     policy: string;
     [key: string]: any;

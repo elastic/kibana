@@ -73,7 +73,11 @@ export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Data
           if (i === 0) {
             // first row, assume header values
             row.forEach((colName: string) =>
-              acc.columns.push({ name: colName.trim(), type: 'string' })
+              acc.columns.push({
+                id: colName.trim(),
+                name: colName.trim(),
+                meta: { type: 'string' },
+              })
             );
           } else {
             // any other row is a data row

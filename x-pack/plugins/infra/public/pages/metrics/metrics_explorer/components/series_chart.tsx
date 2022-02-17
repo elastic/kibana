@@ -21,6 +21,7 @@ import {
   MetricsExplorerOptionsMetric,
   MetricsExplorerChartType,
 } from '../hooks/use_metrics_explorer_options';
+import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 import { getMetricId } from './helpers/get_metric_id';
 
 type NumberOrString = string | number;
@@ -42,6 +43,7 @@ export const MetricExplorerSeriesChart = (props: Props) => {
 };
 
 export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opacity }: Props) => {
+  const timezone = useKibanaTimeZoneSetting();
   const color = (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0);
 
   const yAccessors = Array.isArray(id)
@@ -78,11 +80,13 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opac
       stackAccessors={stack ? ['timestamp'] : void 0}
       areaSeriesStyle={seriesAreaStyle}
       color={color}
+      timeZone={timezone}
     />
   );
 };
 
 export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) => {
+  const timezone = useKibanaTimeZoneSetting();
   const color = (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0);
 
   const yAccessors = Array.isArray(id)
@@ -113,6 +117,7 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
       stackAccessors={stack ? ['timestamp'] : void 0}
       barSeriesStyle={seriesBarStyle}
       color={color}
+      timeZone={timezone}
     />
   );
 };

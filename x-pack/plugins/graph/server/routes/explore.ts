@@ -49,13 +49,11 @@ export function registerExploreRoute({
         try {
           return response.ok({
             body: {
-              resp: (
-                await esClient.asCurrentUser.transport.request({
-                  path: '/' + encodeURIComponent(request.body.index) + '/_graph/explore',
-                  body: request.body.query,
-                  method: 'POST',
-                })
-              ).body,
+              resp: await esClient.asCurrentUser.transport.request({
+                path: '/' + encodeURIComponent(request.body.index) + '/_graph/explore',
+                body: request.body.query,
+                method: 'POST',
+              }),
             },
           });
         } catch (error) {
@@ -67,6 +65,7 @@ export function registerExploreRoute({
                 cause.reason.includes('No support for examining floating point') ||
                 cause.reason.includes('Sample diversifying key must be a single valued-field') ||
                 cause.reason.includes('Failed to parse query') ||
+                cause.reason.includes('Text fields are not optimised for operations') ||
                 cause.type === 'parsing_exception'
               );
             });

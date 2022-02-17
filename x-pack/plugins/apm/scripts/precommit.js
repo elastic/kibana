@@ -23,22 +23,13 @@ const tsconfig = useOptimizedTsConfig
   ? resolve(root, 'tsconfig.json')
   : resolve(root, 'x-pack/plugins/apm/tsconfig.json');
 
+const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
+
 const tasks = new Listr(
   [
     {
-      title: 'Jest',
-      task: () =>
-        execa(
-          'node',
-          [
-            resolve(__dirname, './jest.js'),
-            '--reporters',
-            resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
-            '--collect-coverage',
-            'false',
-          ],
-          execaOpts
-        ),
+      title: 'Lint',
+      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
     },
     {
       title: 'Typescript',
@@ -49,30 +40,47 @@ const tasks = new Listr(
             resolve(
               __dirname,
               useOptimizedTsConfig
-                ? './optimize-tsconfig.js'
-                : './unoptimize-tsconfig.js'
+                ? './optimize_tsconfig.js'
+                : './unoptimize_tsconfig.js'
             ),
           ],
           execaOpts
         ).then(() =>
-          execa(
-            require.resolve('typescript/bin/tsc'),
-            [
-              '--project',
-              tsconfig,
-              '--pretty',
-              ...(useOptimizedTsConfig ? ['--noEmit'] : []),
-            ],
-            execaOpts
-          )
+          Promise.all([
+            execa(
+              require.resolve('typescript/bin/tsc'),
+              ['--project', tsconfig, '--pretty', '--noEmit'],
+              execaOpts
+            ),
+            execa(
+              require.resolve('typescript/bin/tsc'),
+              ['--project', testTsconfig, '--pretty', '--noEmit'],
+              execaOpts
+            ),
+          ])
         ),
     },
     {
-      title: 'Lint',
-      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
+      title: 'Jest',
+      task: () =>
+        execa(
+          'node',
+          [
+            resolve(__dirname, '../../../../scripts/jest.js'),
+            '--config',
+            resolve(__dirname, '../jest.config.js'),
+            '--reporters',
+            resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
+            '--collect-coverage',
+            'false',
+            '--maxWorkers',
+            4,
+          ],
+          execaOpts
+        ),
     },
   ],
-  { exitOnError: true, concurrent: true }
+  { exitOnError: true, concurrent: false }
 );
 
 tasks.run().catch((error) => {

@@ -37,7 +37,7 @@ interface LegacyStatusOverall {
 
 type LegacyStatusState = 'green' | 'yellow' | 'red';
 type LegacyStatusIcon = 'danger' | 'warning' | 'success';
-type LegacyStatusUiColor = 'secondary' | 'warning' | 'danger';
+type LegacyStatusUiColor = 'success' | 'warning' | 'danger';
 
 interface LegacyStateAttr {
   id: LegacyStatusState;
@@ -95,7 +95,7 @@ const serviceStatusToHttpComponent = (
   since: string
 ): StatusComponentHttp => ({
   id: serviceName,
-  message: status.summary,
+  message: [status.summary, status.detail].filter(Boolean).join(' '),
   since,
   ...serviceStatusAttrs(status),
 });
@@ -141,7 +141,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
       defaultMessage: 'Green',
     }),
     icon: 'success',
-    uiColor: 'secondary',
+    uiColor: 'success',
     nickname: 'Looking good',
   },
 });

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import { Query } from '../../..';
-import { QueryStringContract } from '../../../query/query_string';
+import type { QueryStringContract } from '../../../query/query_string';
 
 interface UseQueryStringProps {
   query?: Query;
@@ -36,5 +36,13 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     };
   }, [props.queryStringManager]);
 
-  return { query };
+  const stableQuery = useMemo(
+    () => ({
+      language: query.language,
+      query: query.query,
+    }),
+    [query.language, query.query]
+  );
+
+  return { query: stableQuery };
 };

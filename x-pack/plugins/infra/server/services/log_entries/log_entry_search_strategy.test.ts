@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
@@ -18,12 +19,17 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import {
+  createIndexPatternMock,
+  createIndexPatternsStartMock,
+} from '../../../common/dependency_mocks/index_patterns';
+import { InfraSource } from '../../../common/source_configuration/source_configuration';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
-import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
@@ -59,7 +65,33 @@ describe('LogEntry search strategy', () => {
       .toPromise();
 
     expect(sourcesMock.getSourceConfiguration).toHaveBeenCalled();
-    expect(esSearchStrategyMock.search).toHaveBeenCalled();
+    expect(esSearchStrategyMock.search).toHaveBeenCalledWith(
+      {
+        params: expect.objectContaining({
+          index: 'log-indices-*',
+          body: expect.objectContaining({
+            query: {
+              ids: {
+                values: ['LOG_ENTRY_ID'],
+              },
+            },
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("runtime value")',
+                },
+              },
+            },
+          }),
+          terminate_after: 1,
+          track_total_hits: false,
+        }),
+      },
+      expect.anything(),
+      expect.anything()
+    );
     expect(response.id).toEqual(expect.any(String));
     expect(response.isRunning).toBe(true);
   });
@@ -79,7 +111,6 @@ describe('LogEntry search strategy', () => {
             {
               _id: 'HIT_ID',
               _index: 'HIT_INDEX',
-              _type: '_doc',
               _score: 0,
               _source: null,
               fields: {
@@ -164,7 +195,7 @@ describe('LogEntry search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(ResponseError);
+    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {
@@ -197,24 +228,22 @@ describe('LogEntry search strategy', () => {
   });
 });
 
-const createSourceConfigurationMock = () => ({
+const createSourceConfigurationMock = (): InfraSource => ({
   id: 'SOURCE_ID',
   origin: 'stored' as const,
   configuration: {
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
-    logAlias: 'log-indices-*',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'test-index-pattern',
+    },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
     logColumns: [],
     fields: {
-      pod: 'POD_FIELD',
-      host: 'HOST_FIELD',
-      container: 'CONTAINER_FIELD',
       message: ['MESSAGE_FIELD'],
-      timestamp: 'TIMESTAMP_FIELD',
-      tiebreaker: 'TIEBREAKER_FIELD',
     },
     anomalyThreshold: 20,
   },
@@ -227,7 +256,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
         return of(esSearchResponse);
       } else {
         return throwError(
-          new ResponseError({
+          new errors.ResponseError({
             body: {},
             headers: {},
             meta: {} as any,
@@ -248,6 +277,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
+  request: httpServerMock.createKibanaRequest(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
@@ -256,4 +286,34 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
+  indexPatterns: createIndexPatternsStartMock(0, [
+    createIndexPatternMock({
+      id: 'test-index-pattern',
+      title: 'log-indices-*',
+      timeFieldName: '@timestamp',
+      type: undefined,
+      fields: [
+        {
+          name: 'event.dataset',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'runtime_field',
+          type: 'string',
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
+            },
+          },
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    }),
+  ]),
 });

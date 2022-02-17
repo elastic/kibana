@@ -6,8 +6,10 @@
  */
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import { MetricState } from './types';
+import type { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { LensIconChartMetric } from '../assets/chart_metric';
+import { supportedTypes } from './visualization';
 
 /**
  * Generate suggestions for the metric chart.
@@ -25,7 +27,9 @@ export function getSuggestions({
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.columns.length !== 1 ||
-    table.columns[0].operation.dataType !== 'number'
+    table.columns[0].operation.isBucketed ||
+    !supportedTypes.has(table.columns[0].operation.dataType) ||
+    table.columns[0].operation.isStaticValue
   ) {
     return [];
   }
@@ -49,6 +53,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricSt
     state: {
       layerId: table.layerId,
       accessor: col.columnId,
+      layerType: layerTypes.DATA,
     },
   };
 }

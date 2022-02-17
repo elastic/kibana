@@ -42,9 +42,9 @@ function getOptions(
   const aggConfig = aggConfigs.aggs[0];
   const param = aggConfig.type.params.find((p) => p.type === 'field');
   const filteredIndexPatternFields = param
-    ? ((param as unknown) as FieldParamType)
+    ? (param as unknown as FieldParamType)
         .getAvailableFields(aggConfig)
-        // runtimeMappings may already include runtime fields defined by the index pattern
+        // runtimeMappings may already include runtime fields defined by the data view
         .filter((ip) => ip.runtimeField === undefined)
     : [];
 
@@ -148,9 +148,10 @@ export function useLatestFunctionConfig(
     return latest ? { latest } : undefined;
   }, [config]);
 
-  const validationStatus = useMemo(() => validateLatestConfig(requestPayload?.latest), [
-    requestPayload?.latest,
-  ]);
+  const validationStatus = useMemo(
+    () => validateLatestConfig(requestPayload?.latest),
+    [requestPayload?.latest]
+  );
 
   return {
     config,

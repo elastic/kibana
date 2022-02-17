@@ -22,7 +22,8 @@ interface SetupDeps {
 }
 
 export class SavedObjectTaggingPlugin
-  implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
+  implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}>
+{
   private tagClient?: TagsClient;
   private tagCache?: TagsCache;
   private assignmentService?: TagAssignmentService;
@@ -66,7 +67,7 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start({ http, application, overlays }: CoreStart) {
+  public start({ http, application, overlays, theme }: CoreStart) {
     this.tagCache = new TagsCache({
       refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
@@ -90,6 +91,7 @@ export class SavedObjectTaggingPlugin
         client: this.tagClient,
         capabilities: getTagsCapabilities(application.capabilities),
         overlays,
+        theme,
       }),
     };
   }

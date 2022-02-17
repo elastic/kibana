@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { has } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -20,12 +18,17 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { HostDetailsLink, NetworkDetailsLink } from '../../../common/components/links';
+import {
+  HostDetailsLink,
+  NetworkDetailsLink,
+  UserDetailsLink,
+} from '../../../common/components/links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 
@@ -109,7 +112,11 @@ const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
     [type, dispatch]
   );
 
-  const columns = useMemo(() => getAuthenticationColumnsCurated(type), [type]);
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  const columns = useMemo(
+    () => getAuthenticationColumnsCurated(type, usersEnabled),
+    [type, usersEnabled]
+  );
 
   return (
     <PaginatedTable
@@ -138,22 +145,23 @@ AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
 
 export const AuthenticationTable = React.memo(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (): AuthTableColumns => [
+const getAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
   {
     name: i18n.USER,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.user.name,
         attrName: 'user.name',
         idPrefix: `authentications-table-${node._id}-userName`,
+        render: (item) => (usersEnabled ? <UserDetailsLink userName={item} /> : <>{item}</>),
       }),
   },
   {
     name: i18n.SUCCESSES,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) => {
       const id = escapeDataProviderId(
         `authentications-table-${node._id}-node-successes-${node.successes}`
@@ -191,7 +199,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.FAILURES,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) => {
       const id = escapeDataProviderId(
         `authentications-table-${node._id}-failures-${node.failures}`
@@ -229,10 +237,10 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
-      has('lastSuccess.timestamp', node) && node.lastSuccess!.timestamp != null ? (
-        <FormattedRelativePreferenceDate value={node.lastSuccess!.timestamp} />
+      has('lastSuccess.timestamp', node) && node.lastSuccess?.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastSuccess?.timestamp} />
       ) : (
         getEmptyTagValue()
       ),
@@ -240,7 +248,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_SUCCESSFUL_SOURCE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastSuccess?.source?.ip || null,
@@ -252,7 +260,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_SUCCESSFUL_DESTINATION,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastSuccess?.host?.name ?? null,
@@ -264,10 +272,10 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_FAILED_TIME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
-      has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
-        <FormattedRelativePreferenceDate value={node.lastFailure!.timestamp} />
+      has('lastFailure.timestamp', node) && node.lastFailure?.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastFailure?.timestamp} />
       ) : (
         getEmptyTagValue()
       ),
@@ -275,7 +283,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_FAILED_SOURCE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastFailure?.source?.ip || null,
@@ -287,7 +295,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_FAILED_DESTINATION,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastFailure?.host?.name || null,
@@ -299,9 +307,10 @@ const getAuthenticationColumns = (): AuthTableColumns => [
 ];
 
 export const getAuthenticationColumnsCurated = (
-  pageType: hostsModel.HostsType
+  pageType: hostsModel.HostsType,
+  usersEnabled: boolean
 ): AuthTableColumns => {
-  const columns = getAuthenticationColumns();
+  const columns = getAuthenticationColumns(usersEnabled);
 
   // Columns to exclude from host details pages
   if (pageType === hostsModel.HostsType.details) {

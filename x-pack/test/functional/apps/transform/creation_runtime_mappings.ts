@@ -8,6 +8,9 @@
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { HistogramCharts } from '../../services/transform/wizard';
+
 import {
   GroupByEntry,
   isLatestTransformTestData,
@@ -30,9 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
       script: "emit(doc['responsetime'].value * 2.0)",
     },
   };
+
   describe('creation with runtime mappings', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
@@ -41,25 +45,68 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
-    // Only testing that histogram charts are available for runtime fields here
-    const histogramCharts = [
+    const histogramCharts: HistogramCharts = [
+      {
+        // Skipping colorStats assertion for this chart,
+        // results can be quite different on each run because of sampling.
+        chartAvailable: true,
+        id: '@timestamp',
+      },
+      {
+        chartAvailable: true,
+        id: '@version',
+        legend: '1 category',
+        colorStats: [
+          { color: '#000000', percentage: 10 },
+          { color: '#54B399', percentage: 90 },
+        ],
+      },
+      {
+        chartAvailable: true,
+        id: 'airline',
+        legend: '19 categories',
+        colorStats: [
+          { color: '#000000', percentage: 49 },
+          { color: '#54B399', percentage: 50 },
+        ],
+      },
+      {
+        chartAvailable: true,
+        id: 'responsetime',
+        colorStats: [
+          // below 10% threshold
+          // { color: '#54B399', percentage: 5 },
+          { color: '#000000', percentage: 95 },
+        ],
+      },
       {
         chartAvailable: true,
         id: 'rt_airline_lower',
         legend: '19 categories',
         colorStats: [
-          { key: '#000000', value: 48 },
-          { key: '#54B399', value: 41 },
+          { color: '#000000', percentage: 49 },
+          { color: '#54B399', percentage: 50 },
         ],
       },
       {
         chartAvailable: true,
         id: 'rt_responsetime_x_2',
         colorStats: [
-          { key: '#54B399', value: 5 },
-          { key: '#000000', value: 95 },
+          // below 10% threshold
+          // { color: '#54B399', percentage: 5 },
+          { color: '#000000', percentage: 95 },
+        ],
+      },
+      {
+        chartAvailable: true,
+        id: 'type',
+        legend: '1 category',
+        colorStats: [
+          { color: '#000000', percentage: 10 },
+          { color: '#54B399', percentage: 90 },
         ],
       },
     ];
@@ -353,7 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
+          await transform.testExecution.logTestStep('displays the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 

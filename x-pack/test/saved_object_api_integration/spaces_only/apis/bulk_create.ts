@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { bulkCreateTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/bulk_create';
@@ -70,8 +70,32 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
-    CASES.NEW_EACH_SPACE_OBJ,
-    CASES.NEW_ALL_SPACES_OBJ,
+    {
+      ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
+      initialNamespaces: ['x', 'y'],
+      ...fail400(), // cannot be created in multiple spaces
+    },
+    CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
+    {
+      ...CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
+      initialNamespaces: [ALL_SPACES_ID],
+      ...fail400(), // cannot be created in multiple spaces
+    },
+    CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
+    CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
+    CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+    // We test the alias conflict preflight check error case twice; once by checking the alias with "find" and once by using "bulk-get".
+    {
+      ...CASES.ALIAS_CONFLICT_OBJ,
+      initialNamespaces: ['*'],
+      ...fail409(),
+      fail409Param: 'aliasConflictAllSpaces', // first try fails because an alias exists in space_x and space_1 (but not space_y because that alias is disabled)
+    },
+    {
+      ...CASES.ALIAS_CONFLICT_OBJ,
+      ...(spaceId === SPACE_1_ID ? { ...fail409(), fail409Param: 'aliasConflictSpace1' } : {}), // second try fails if this is space_1 because an alias exists in space_1
+      expectedNamespaces,
+    },
   ];
 };
 

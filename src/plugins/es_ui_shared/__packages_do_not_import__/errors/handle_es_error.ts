@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { ApiError } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
 import { getEsCause } from './es_error_parser';
 
 interface EsErrorHandlerParams {
-  error: ApiError;
+  error: errors.ElasticsearchClientError;
   response: KibanaResponseFactory;
   handleCustomError?: () => IKibanaResponse<any>;
 }
 
-/*
+/**
  * For errors returned by the new elasticsearch js client.
+ *
+ * @throws If "error" is not an error from the elasticsearch client this handler will throw "error".
  */
 export const handleEsError = ({
   error,
@@ -32,16 +33,18 @@ export const handleEsError = ({
       return handleCustomError();
     }
 
-    const { statusCode, body } = error as ResponseError;
+    const { statusCode, body } = error as errors.ResponseError;
     return response.customError({
-      statusCode,
+      statusCode: statusCode!,
       body: {
-        message: body.error?.reason,
+        message:
+          // We use || instead of ?? as the switch here because reason could be an empty string
+          body?.error?.reason || body?.error?.caused_by?.reason || error.message || 'Unknown error',
         attributes: {
           // The full original ES error object
-          error: body.error,
+          error: body?.error,
           // We assume that this is an ES error object with a nested caused by chain if we can see the "caused_by" field at the top-level
-          causes: body.error?.caused_by ? getEsCause(body.error) : undefined,
+          causes: body?.error?.caused_by ? getEsCause(body.error) : undefined,
         },
       },
     });

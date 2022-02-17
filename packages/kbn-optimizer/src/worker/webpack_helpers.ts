@@ -151,6 +151,17 @@ export function isConcatenatedModule(module: any): module is WebpackConcatenated
   return module?.constructor?.name === 'ConcatenatedModule';
 }
 
+/** module replacing imports for DLL referenced */
+export interface WebpackDelegatedModule {
+  type: string;
+  id: number;
+  dependencies: unknown[];
+}
+
+export function isDelegatedModule(module: any): module is WebpackDelegatedModule {
+  return module?.constructor?.name === 'DelegatedModule';
+}
+
 export function getModulePath(module: WebpackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);

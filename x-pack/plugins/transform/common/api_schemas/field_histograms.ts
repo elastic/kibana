@@ -16,7 +16,7 @@ export const fieldHistogramsRequestSchema = schema.object({
   query: schema.any(),
   /** The fields to return histogram data. */
   fields: schema.arrayOf(schema.any()),
-  /** Optional runtime mappings */
+  /** Optional runtime fields */
   runtimeMappings: runtimeMappingsSchema,
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),

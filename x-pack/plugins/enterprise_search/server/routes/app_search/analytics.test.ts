@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerAnalyticsRoutes } from './analytics';
 
 describe('analytics routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/analytics/queries', () => {
+  describe('GET /internal/app_search/engines/{engineName}/analytics/queries', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/analytics/queries',
+        path: '/internal/app_search/engines/{engineName}/analytics/queries',
       });
 
       registerAnalyticsRoutes({
@@ -62,14 +62,14 @@ describe('analytics routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{engineName}/analytics/queries/{query}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/analytics/queries/{query}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/analytics/queries/{query}',
+        path: '/internal/app_search/engines/{engineName}/analytics/queries/{query}',
       });
 
       registerAnalyticsRoutes({

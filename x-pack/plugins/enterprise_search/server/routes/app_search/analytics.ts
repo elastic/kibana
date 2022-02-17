@@ -25,7 +25,7 @@ export function registerAnalyticsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/analytics/queries',
+      path: '/internal/app_search/engines/{engineName}/analytics/queries',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -40,7 +40,7 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/analytics/queries/{query}',
+      path: '/internal/app_search/engines/{engineName}/analytics/queries/{query}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

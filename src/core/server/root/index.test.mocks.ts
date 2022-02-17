@@ -25,6 +25,7 @@ jest.doMock('@kbn/config', () => ({
 
 export const mockServer = {
   setupCoreConfig: jest.fn(),
+  preboot: jest.fn(),
   setup: jest.fn(),
   stop: jest.fn(),
   configService,

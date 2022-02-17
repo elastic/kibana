@@ -7,6 +7,7 @@
  */
 
 import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { Subscription } from 'rxjs';
 import React from 'react';
 import type {
@@ -31,15 +32,63 @@ export type IApplicationUsageTracker = Pick<
   'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
 >;
 
+/** Public's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {
+  /** Component helpers to track usage collection in the UI **/
   components: {
+    /**
+     * The context provider to wrap the application if planning to use
+     * {@link TrackApplicationView} somewhere inside the app.
+     *
+     * @example
+     * ```typescript jsx
+     * class MyPlugin implements Plugin {
+     *   ...
+     *   public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+     *     const ApplicationUsageTrackingProvider = plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+     *
+     *     core.application.register({
+     *       id,
+     *       title,
+     *       ...,
+     *       mount: async (params: AppMountParameters) => {
+     *         ReactDOM.render(
+     *           <ApplicationUsageTrackingProvider> // Set the tracking context provider at the App level
+     *             <I18nProvider>
+     *               <App />
+     *             </I18nProvider>
+     *           </ApplicationUsageTrackingProvider>,
+     *           element
+     *         );
+     *         return () => ReactDOM.unmountComponentAtNode(element);
+     *       },
+     *     });
+     *   }
+     *   ...
+     * }
+     * ```
+     */
     ApplicationUsageTrackingProvider: React.FC;
   };
-  reportUiCounter: Reporter['reportUiCounter'];
+
+  /** Report whenever a UI event occurs for UI counters to report it **/
+  reportUiCounter: (
+    appName: string,
+    type: UiCounterMetricType,
+    eventNames: string | string[],
+    count?: number
+  ) => void;
 }
 
+/** Public's start APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionStart {
-  reportUiCounter: Reporter['reportUiCounter'];
+  /** Report whenever a UI event occurs for UI counters to report it **/
+  reportUiCounter: (
+    appName: string,
+    type: UiCounterMetricType,
+    eventNames: string | string[],
+    count?: number
+  ) => void;
 }
 
 export function isUnauthenticated(http: HttpSetup) {

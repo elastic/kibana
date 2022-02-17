@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+
 import { NarrowDateRange } from '../../../common/components/ml/types';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HostsTableType, HostsType } from '../../store/model';
@@ -44,7 +45,7 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
 };
 
 export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
-  filterQuery: string;
+  filterQuery?: string;
   pageFilters?: Filter[];
 };
 

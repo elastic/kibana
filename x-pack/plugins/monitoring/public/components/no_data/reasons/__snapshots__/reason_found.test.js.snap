@@ -26,17 +26,13 @@ Array [
   >
     <p>
       We checked the cluster settings and found that 
-      <span>
-        <code>
-          xpack.monitoring.collection.interval
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.collection.interval
+      </code>
        is set to 
-      <span>
-        <code>
-          -1
-        </code>
-      </span>
+      <code>
+        -1
+      </code>
       .
     </p>
     <p>
@@ -101,59 +97,43 @@ Array [
   >
     <p>
       We checked the 
-      <span>
-        <code>
-          node001foo
-        </code>
-      </span>
+      <code>
+        node001foo
+      </code>
        settings for 
-      <span>
-        <code>
-          xpack.monitoring.exporters
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.exporters
+      </code>
       , and found the reason: 
-      <span>
-        <code>
-          myMonitoringClusterExporter1
-        </code>
-      </span>
+      <code>
+        myMonitoringClusterExporter1
+      </code>
       .
     </p>
     <p>
       Using monitoring exporters to ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
-      <span>
-        <code>
-          xpack.monitoring.exporters
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.exporters
+      </code>
        configuration, or the 
-      <span>
-        <code>
-          xpack.monitoring.elasticsearch
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.elasticsearch
+      </code>
        settings in 
-      <span>
-        <code>
-          kibana.yml
-        </code>
-      </span>
+      <code>
+        kibana.yml
+      </code>
       .
     </p>
     <p>
       Check that the intended exporters are enabled for sending statistics to the monitoring cluster, and that the monitoring cluster host matches the 
-      <span>
-        <code>
-          xpack.monitoring.elasticsearch
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.elasticsearch
+      </code>
        setting in 
-      <span>
-        <code>
-          kibana.yml
-        </code>
-      </span>
+      <code>
+        kibana.yml
+      </code>
        to see monitoring data in this instance of Kibana.
     </p>
   </div>,
@@ -268,23 +248,17 @@ Array [
   >
     <p>
       We checked the node001foo settings and found that 
-      <span>
-        <code>
-          xpack.monitoring.enabled
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.enabled
+      </code>
        is set to 
-      <span>
-        <code>
-          false
-        </code>
-      </span>
+      <code>
+        false
+      </code>
        set, which disables monitoring. Removing the 
-      <span>
-        <code>
-          xpack.monitoring.enabled: false
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.enabled: false
+      </code>
        setting from your configuration will put the default into effect and enable Monitoring.
     </p>
   </div>,

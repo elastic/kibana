@@ -12,7 +12,7 @@ import React from 'react';
 import { NoIndices } from '../../../components/empty_states/no_indices';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../observability/public';
 
 export const LogsPageNoIndicesContent = () => {
   const {
@@ -22,8 +22,8 @@ export const LogsPageNoIndicesContent = () => {
   const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;
 
   const tutorialLinkProps = useLinkProps({
-    app: 'home',
-    hash: '/tutorial_directory/logging',
+    app: 'integrations',
+    hash: '/browse',
   });
 
   return (

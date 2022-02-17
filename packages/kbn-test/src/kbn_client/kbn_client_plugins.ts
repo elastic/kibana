@@ -8,26 +8,15 @@
 
 import { KbnClientStatus } from './kbn_client_status';
 
-const PLUGIN_STATUS_ID = /^plugin:(.+?)@/;
-
 export class KbnClientPlugins {
   constructor(private readonly status: KbnClientStatus) {}
   /**
    * Get a list of plugin ids that are enabled on the server
    */
   public async getEnabledIds() {
-    const pluginIds: string[] = [];
     const apiResp = await this.status.get();
 
-    for (const status of apiResp.status.statuses) {
-      if (status.id) {
-        const match = status.id.match(PLUGIN_STATUS_ID);
-        if (match) {
-          pluginIds.push(match[1]);
-        }
-      }
-    }
-
-    return pluginIds;
+    // Status may not be available at the `preboot` stage.
+    return Object.keys(apiResp.status?.plugins ?? {});
   }
 }

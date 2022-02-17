@@ -13,9 +13,6 @@ const OutputBaseSchema = {
   name: schema.string(),
   type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
   hosts: schema.maybe(schema.arrayOf(schema.string())),
-  api_key: schema.maybe(schema.string()),
-  fleet_enroll_username: schema.maybe(schema.string()),
-  fleet_enroll_password: schema.maybe(schema.string()),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   config_yaml: schema.maybe(schema.string()),
 };

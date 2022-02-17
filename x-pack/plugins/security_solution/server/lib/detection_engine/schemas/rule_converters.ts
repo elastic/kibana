@@ -6,20 +6,42 @@
  */
 
 import uuid from 'uuid';
-import { InternalRuleCreate, InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
-import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
+
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
+import {
+  InternalRuleCreate,
+  RuleParams,
+  TypeSpecificRuleParams,
+  BaseRuleParams,
+} from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
+import { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
-import { RuleActions } from '../rule_actions/types';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
-import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import { transformTags } from '../routes/rules/utils';
+import {
+  transformFromAlertThrottle,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+  transformActions,
+} from '../rules/utils';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import { mergeRuleExecutionSummary } from '../rule_execution_log';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -87,14 +109,14 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query,
         filters: params.filters,
         savedId: params.saved_id,
-        threshold: params.threshold,
+        threshold: normalizeThresholdObject(params.threshold),
       };
     }
     case 'machine_learning': {
       return {
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
-        machineLearningJobId: params.machine_learning_job_id,
+        machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
       };
     }
     default: {
@@ -105,14 +127,15 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
 
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient
+  siemClient: AppClient,
+  isRuleRegistryEnabled: boolean
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
     tags: addTags(input.tags ?? [], newRuleId, false),
-    alertTypeId: SIGNALS_ID,
+    alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[input.type] : SIGNALS_ID,
     consumer: SERVER_APP_ID,
     params: {
       author: input.author ?? [],
@@ -137,6 +160,7 @@ export const convertCreateAPIToInternalSchema = (
       timestampOverride: input.timestamp_override,
       to: input.to ?? 'now',
       references: input.references ?? [],
+      namespace: input.namespace,
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
@@ -144,9 +168,9 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? true,
-    actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
+    throttle: transformToAlertThrottle(input.throttle),
+    notifyWhen: transformToNotifyWhen(input.throttle),
   };
 };
 
@@ -176,6 +200,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         threat_mapping: params.threatMapping,
         threat_language: params.threatLanguage,
         threat_index: params.threatIndex,
+        threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
       };
@@ -208,10 +233,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        threshold: {
-          ...params.threshold,
-          field: normalizeThresholdField(params.threshold.field),
-        },
+        threshold: params.threshold,
       };
     }
     case 'machine_learning': {
@@ -227,47 +249,69 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
   }
 };
 
-export const internalRuleToAPIResponse = (
-  rule: InternalRuleResponse,
-  ruleActions: RuleActions
-): FullResponseSchema => {
+// TODO: separate out security solution defined common params from Alerting framework common params
+// so we can explicitly specify the return type of this function
+export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
   return {
+    description: params.description,
+    risk_score: params.riskScore,
+    severity: params.severity,
+    building_block_type: params.buildingBlockType,
+    namespace: params.namespace,
+    note: params.note,
+    license: params.license,
+    output_index: params.outputIndex,
+    timeline_id: params.timelineId,
+    timeline_title: params.timelineTitle,
+    meta: params.meta,
+    rule_name_override: params.ruleNameOverride,
+    timestamp_override: params.timestampOverride,
+    author: params.author,
+    false_positives: params.falsePositives,
+    from: params.from,
+    rule_id: params.ruleId,
+    max_signals: params.maxSignals,
+    risk_score_mapping: params.riskScoreMapping,
+    severity_mapping: params.severityMapping,
+    threat: params.threat,
+    to: params.to,
+    references: params.references,
+    version: params.version,
+    exceptions_list: params.exceptionsList,
+    immutable: params.immutable,
+  };
+};
+
+export const internalRuleToAPIResponse = (
+  rule: SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams>,
+  ruleExecutionSummary?: RuleExecutionSummary | null,
+  legacyRuleActions?: LegacyRuleActions | null
+): FullResponseSchema => {
+  const mergedExecutionSummary = mergeRuleExecutionSummary(rule, ruleExecutionSummary ?? null);
+  const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
+    (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
+  return {
+    // saved object properties
+    outcome: isResolvedRule(rule) ? rule.outcome : undefined,
+    alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
+    // Alerting framework params
     id: rule.id,
-    immutable: rule.params.immutable,
-    updated_at: rule.updatedAt,
-    updated_by: rule.updatedBy,
-    created_at: rule.createdAt,
-    created_by: rule.createdBy,
+    updated_at: rule.updatedAt.toISOString(),
+    updated_by: rule.updatedBy ?? 'elastic',
+    created_at: rule.createdAt.toISOString(),
+    created_by: rule.createdBy ?? 'elastic',
     name: rule.name,
-    tags: rule.tags,
+    tags: transformTags(rule.tags),
     interval: rule.schedule.interval,
     enabled: rule.enabled,
-    throttle: ruleActions.ruleThrottle,
-    actions: ruleActions.actions,
-    description: rule.params.description,
-    risk_score: rule.params.riskScore,
-    severity: rule.params.severity,
-    building_block_type: rule.params.buildingBlockType,
-    note: rule.params.note,
-    license: rule.params.license,
-    output_index: rule.params.outputIndex,
-    timeline_id: rule.params.timelineId,
-    timeline_title: rule.params.timelineTitle,
-    meta: rule.params.meta,
-    rule_name_override: rule.params.ruleNameOverride,
-    timestamp_override: rule.params.timestampOverride,
-    author: rule.params.author ?? [],
-    false_positives: rule.params.falsePositives,
-    from: rule.params.from,
-    rule_id: rule.params.ruleId,
-    max_signals: rule.params.maxSignals,
-    risk_score_mapping: rule.params.riskScoreMapping ?? [],
-    severity_mapping: rule.params.severityMapping ?? [],
-    threat: rule.params.threat,
-    to: rule.params.to,
-    references: rule.params.references,
-    version: rule.params.version,
-    exceptions_list: rule.params.exceptionsList ?? [],
+    // Security solution shared rule params
+    ...commonParamsCamelToSnake(rule.params),
+    // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
+    // Actions
+    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
+    actions: transformActions(rule.actions, legacyRuleActions),
+    // Execution summary
+    execution_summary: mergedExecutionSummary ?? undefined,
   };
 };

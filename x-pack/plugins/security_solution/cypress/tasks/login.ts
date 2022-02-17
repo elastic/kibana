@@ -9,7 +9,9 @@ import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
+import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -55,23 +57,53 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param route string route to visit
  */
 export const getUrlWithRoute = (role: ROLES, route: string) => {
+  const url = Cypress.config().baseUrl;
+  const kibana = new URL(String(url));
   const theUrl = `${Url.format({
     auth: `${role}:changeme`,
     username: role,
     password: 'changeme',
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
+    protocol: kibana.protocol.replace(':', ''),
+    hostname: kibana.hostname,
+    port: kibana.port,
   } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
   cy.log(`origin: ${theUrl}`);
   return theUrl;
+};
+
+interface User {
+  username: string;
+  password: string;
+}
+
+/**
+ * Builds a URL with basic auth using the passed in user.
+ *
+ * @param user the user information to build the basic auth with
+ * @param route string route to visit
+ */
+export const constructUrlWithUser = (user: User, route: string) => {
+  const url = Cypress.config().baseUrl;
+  const kibana = new URL(String(url));
+  const hostname = kibana.hostname;
+  const username = user.username;
+  const password = user.password;
+  const protocol = kibana.protocol.replace(':', '');
+  const port = kibana.port;
+
+  const path = `${route.startsWith('/') ? '' : '/'}${route}`;
+  const strUrl = `${protocol}://${username}:${password}@${hostname}:${port}${path}`;
+  const builtUrl = new URL(strUrl);
+
+  cy.log(`origin: ${builtUrl.href}`);
+  return builtUrl.href;
 };
 
 export const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
   ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-  KIBANA_URL: Cypress.env('KIBANA_URL'),
+  KIBANA_URL: Cypress.config().baseUrl,
 });
 
 export const postRoleAndUser = (role: ROLES) => {
@@ -99,6 +131,23 @@ export const deleteRoleAndUser = (role: ROLES) => {
   // delete the role
   cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
     env,
+  });
+};
+
+export const loginWithUser = (user: User) => {
+  cy.request({
+    body: {
+      providerType: 'basic',
+      providerName: 'basic',
+      currentURL: '/',
+      params: {
+        username: user.username,
+        password: user.password,
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    method: 'POST',
+    url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
   });
 };
 
@@ -215,11 +264,66 @@ const loginViaConfig = () => {
 };
 
 /**
+ * Get the configured auth details that were used to spawn cypress
+ *
+ * @returns the default Elasticsearch username and password for this environment
+ */
+export const getEnvAuth = (): User => {
+  if (credentialsProvidedByEnvironment()) {
+    return {
+      username: Cypress.env(ELASTICSEARCH_USERNAME),
+      password: Cypress.env(ELASTICSEARCH_PASSWORD),
+    };
+  } else {
+    let user: User = { username: '', password: '' };
+    cy.readFile(KIBANA_DEV_YML_PATH).then((devYml) => {
+      const config = yaml.safeLoad(devYml);
+      user = { username: config.elasticsearch.username, password: config.elasticsearch.password };
+    });
+
+    return user;
+  }
+};
+
+/**
+ * Saves in localStorage rules feature tour config with deactivated option
+ * It prevents tour to appear during tests and cover UI elements
+ * @param window - browser's window object
+ */
+const disableRulesFeatureTour = (window: Window) => {
+  const tourConfig = {
+    isTourActive: false,
+  };
+  window.localStorage.setItem(
+    RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY,
+    JSON.stringify(tourConfig)
+  );
+};
+
+/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string, role?: ROLES) => {
+export const loginAndWaitForPage = (
+  url: string,
+  role?: ROLES,
+  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void
+) => {
   login(role);
+  cy.visit(
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    {
+      onBeforeLoad(win) {
+        if (onBeforeLoadCallback) {
+          onBeforeLoadCallback(win);
+        }
+        disableRulesFeatureTour(win);
+      },
+    }
+  );
+  cy.get('[data-test-subj="headerGlobalNav"]');
+};
+export const waitForPage = (url: string) => {
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
@@ -228,7 +332,17 @@ export const loginAndWaitForPage = (url: string, role?: ROLES) => {
 
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
+  loginWithUser(user);
+  cy.visit(constructUrlWithUser(user, url), {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
@@ -236,12 +350,28 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
-  cy.visit(role ? getUrlWithRoute(role, route) : route);
+  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
+};
+
+export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
+  loginAndWaitForPage(hostDetailsUrl(hostName));
+  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
+};
+
+export const loginAndWaitForUsersDetailsPage = (userName = 'bob') => {
+  loginAndWaitForPage(userDetailsUrl(userName));
+  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const logout = () => {
+  cy.visit(LOGOUT_URL);
 };

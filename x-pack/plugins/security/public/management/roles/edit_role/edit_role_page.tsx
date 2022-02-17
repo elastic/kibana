@@ -23,7 +23,7 @@ import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Capabilities,
@@ -34,13 +34,12 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from 'src/core/public';
-import type { IndexPatternsContract } from 'src/plugins/data/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { DataViewsContract } from 'src/plugins/data/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeature } from '../../../../../features/common';
 import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space } from '../../../../../spaces/public';
+import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
@@ -70,7 +69,7 @@ import { RoleValidator } from './validate_role';
 interface Props {
   action: 'edit' | 'clone';
   roleName?: string;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -102,13 +101,13 @@ function useRunAsUsers(
 }
 
 function useIndexPatternsTitles(
-  indexPatterns: IndexPatternsContract,
+  dataViews: DataViewsContract,
   fatalErrors: FatalErrorsSetup,
   notifications: NotificationsStart
 ) {
   const [indexPatternsTitles, setIndexPatternsTitles] = useState<string[] | null>(null);
   useEffect(() => {
-    indexPatterns
+    dataViews
       .getTitles()
       .catch((err: IHttpFetchError) => {
         // If user doesn't have access to the index patterns they still should be able to create new
@@ -116,6 +115,8 @@ function useIndexPatternsTitles(
         if (err.response?.status === 403) {
           notifications.toasts.addDanger({
             title: i18n.translate('xpack.security.management.roles.noIndexPatternsPermission', {
+              // Note: we are attempting to fetch data views (a Kibana construct), but we are using those to render a list of usable index
+              // patterns (an Elasticsearch construct) for the user. This error message reflects what is shown on the UI.
               defaultMessage: 'You need permission to access the list of available index patterns.',
             }),
           });
@@ -125,8 +126,8 @@ function useIndexPatternsTitles(
         fatalErrors.add(err);
         throw err;
       })
-      .then(setIndexPatternsTitles);
-  }, [fatalErrors, indexPatterns, notifications]);
+      .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
+  }, [fatalErrors, dataViews, notifications]);
 
   return indexPatternsTitles;
 }
@@ -185,10 +186,8 @@ function useRole(
             privileges: [],
           };
 
-          const {
-            allowRoleDocumentLevelSecurity,
-            allowRoleFieldLevelSecurity,
-          } = license.getFeatures();
+          const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } =
+            license.getFeatures();
 
           if (allowRoleFieldLevelSecurity) {
             emptyOption.field_security = {
@@ -227,7 +226,7 @@ function useRole(
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
-    http.get('/api/spaces/space').then(
+    http.get<Space[]>('/api/spaces/space').then(
       (fetchedSpaces) => setSpaces({ enabled: true, list: fetchedSpaces }),
       (err: IHttpFetchError) => {
         // Spaces plugin can be disabled and hence this endpoint can be unavailable.
@@ -256,13 +255,12 @@ function useFeatures(
         // possible that a user with `manage_security` will attempt to visit the role management page without the
         // correct Kibana privileges. If that's the case, then they receive a partial view of the role, and the UI does
         // not allow them to make changes to that role's kibana privileges. When this user visits the edit role page,
-        // this API endpoint will throw a 404, which causes view to fail completely. So we instead attempt to detect the
-        // 404 here, and respond in a way that still allows the UI to render itself.
-        const unauthorizedForFeatures = err.response?.status === 404;
+        // this API endpoint will throw a 403, which causes view to fail completely. So we instead attempt to detect the
+        // 403 here, and respond in a way that still allows the UI to render itself.
+        const unauthorizedForFeatures = err.response?.status === 403;
         if (unauthorizedForFeatures) {
           return [] as KibanaFeature[];
         }
-
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
@@ -275,7 +273,7 @@ function useFeatures(
 
 export const EditRolePage: FunctionComponent<Props> = ({
   userAPIClient,
-  indexPatterns,
+  dataViews,
   rolesAPIClient,
   indicesAPIClient,
   privilegesAPIClient,
@@ -296,10 +294,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
-
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
-  const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
+  const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
@@ -376,7 +373,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getRoleName = () => {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
           label={
             <FormattedMessage
@@ -441,7 +438,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <KibanaPrivilegesRegion
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces.list}
-          spacesEnabled={spaces.enabled}
           uiCapabilities={uiCapabilities}
           canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
@@ -526,7 +522,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
+        await rolesAPIClient.saveRole({ role });
       } catch (error) {
         notifications.toasts.addDanger(
           error?.body?.message ??
@@ -571,24 +567,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
     backToRoleList();
   };
 
-  const description = spaces.enabled ? (
-    <FormattedMessage
-      id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-      defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.security.management.editRole.setPrivilegesToKibanaDescription"
-      defaultMessage="Set privileges on your Elasticsearch data and control access to Kibana."
-    />
-  );
-
   return (
     <div className="editRolePage">
       <EuiForm {...formError}>
         {getFormTitle()}
         <EuiSpacer />
-        <EuiText size="s">{description}</EuiText>
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
+            defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+          />
+        </EuiText>
         {isRoleReserved && (
           <Fragment>
             <EuiSpacer size="s" />

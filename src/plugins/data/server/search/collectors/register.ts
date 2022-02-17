@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
 
@@ -22,15 +21,12 @@ export interface ReportedUsage {
   averageDuration: number | null;
 }
 
-export async function registerUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  context: PluginInitializerContext
-) {
+export function registerUsageCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
   try {
     const collector = usageCollection.makeUsageCollector<ReportedUsage>({
       type: 'search',
       isReady: () => true,
-      fetch: fetchProvider(context.config.legacy.globalConfig$),
+      fetch: fetchProvider(kibanaIndex),
       schema: {
         successCount: { type: 'long' },
         errorCount: { type: 'long' },

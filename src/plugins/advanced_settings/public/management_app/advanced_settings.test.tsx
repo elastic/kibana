@@ -9,7 +9,7 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test/jest';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import dedent from 'dedent';
 import {
   PublicUiSettingsParams,
@@ -18,7 +18,11 @@ import {
 } from '../../../../core/public';
 import { FieldSetting } from './types';
 import { AdvancedSettings } from './advanced_settings';
-import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  docLinksServiceMock,
+  themeServiceMock,
+} from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 import { Search } from './components/search';
 
@@ -59,7 +63,6 @@ function mockConfig() {
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
     getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),
-    overrideLocalDefault: (key: string, value: any) => {},
     getUpdate$: () =>
       new Observable<{
         key: string;
@@ -252,6 +255,7 @@ describe('AdvancedSettings', () => {
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -274,6 +278,7 @@ describe('AdvancedSettings', () => {
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -300,6 +305,7 @@ describe('AdvancedSettings', () => {
           dockLinks={docLinksServiceMock.createStartContract().links}
           uiSettings={mockConfig().core.uiSettings}
           componentRegistry={new ComponentRegistry().start}
+          theme={themeServiceMock.createStartContract().theme$}
         />
       );
 

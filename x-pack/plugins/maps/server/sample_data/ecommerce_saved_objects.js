@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { emsWorldLayerId } from '../../common/constants';
 
 const layerList = [
   {
@@ -14,6 +15,7 @@ const layerList = [
     sourceDescriptor: {
       type: 'EMS_TMS',
       isAutoSelect: true,
+      lightModeDefault: 'road_map_desaturated',
     },
     visible: true,
     style: {},
@@ -29,7 +31,7 @@ const layerList = [
     alpha: 1,
     sourceDescriptor: {
       type: 'EMS_FILE',
-      id: 'world_countries',
+      id: emsWorldLayerId,
       tooltipProperties: ['name', 'iso2'],
     },
     visible: true,

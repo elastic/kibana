@@ -18,7 +18,7 @@ import { RuleAlertType } from './types';
 export const getRulesToUpdate = (
   rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
   installedRules: RuleAlertType[]
-): AddPrepackagedRulesSchemaDecoded[] => {
+) => {
   return rulesFromFileSystem
     .filter((ruleFromFileSystem) => filterInstalledRules(ruleFromFileSystem, installedRules))
     .map((ruleFromFileSystem) => mergeExceptionLists(ruleFromFileSystem, installedRules));

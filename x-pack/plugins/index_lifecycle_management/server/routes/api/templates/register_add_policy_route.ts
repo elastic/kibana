@@ -20,7 +20,7 @@ async function getLegacyIndexTemplate(
   templateName: string
 ): Promise<LegacyTemplateSerialized | undefined> {
   const response = await client.indices.getTemplate({ name: templateName });
-  return response.body[templateName];
+  return response[templateName];
 }
 
 async function getIndexTemplate(
@@ -39,7 +39,7 @@ async function getIndexTemplate(
     options
   );
 
-  const { index_templates: templates } = response.body as {
+  const { index_templates: templates } = response as {
     index_templates: TemplateFromEs[];
   };
   return templates.find((template) => template.name === templateName)?.index_template;
@@ -80,6 +80,7 @@ async function updateIndexTemplate(
   if (isLegacy) {
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
+  // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
   return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
 }
 

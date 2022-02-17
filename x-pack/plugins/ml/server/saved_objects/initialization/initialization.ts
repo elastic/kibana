@@ -25,7 +25,7 @@ export function jobSavedObjectsInitializationFactory(
   security: SecurityPluginSetup | undefined,
   spacesEnabled: boolean
 ) {
-  const client = (core.elasticsearch.client as unknown) as IScopedClusterClient;
+  const client = core.elasticsearch.client as unknown as IScopedClusterClient;
 
   /**
    * Check whether ML saved objects exist.
@@ -68,9 +68,11 @@ export function jobSavedObjectsInitializationFactory(
   }
 
   async function _needsInitializing(savedObjectsClient: SavedObjectsClientContract) {
-    if (await _jobSavedObjectsExist(savedObjectsClient)) {
+    if (false && (await _jobSavedObjectsExist(savedObjectsClient))) {
       // at least one ml saved object exists
       // this has been initialized before
+      // this check is currently disabled to allow the initialization to run
+      // on every kibana restart
       return false;
     }
 
@@ -104,10 +106,8 @@ export function jobSavedObjectsInitializationFactory(
     // });
     // return body.count > 0;
 
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ count: number }>();
-    const { body: dfaJobs } = await client.asInternalUser.ml.getDataFrameAnalytics<{
-      count: number;
-    }>();
+    const adJobs = await client.asInternalUser.ml.getJobs();
+    const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
     return adJobs.count > 0 || dfaJobs.count > 0;
   }
 

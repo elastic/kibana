@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IScopedSearchSessionsClient } from './types';
+import moment from 'moment';
+import type { IScopedSearchSessionsClient } from './types';
+import { SearchSessionsConfigSchema } from '../../../config';
 
 export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
   IScopedSearchSessionsClient<T>
@@ -22,5 +24,12 @@ export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
     cancel: jest.fn(),
     extend: jest.fn(),
     delete: jest.fn(),
+    getConfig: jest.fn(
+      () =>
+        ({
+          defaultExpiration: moment.duration('1', 'w'),
+          enabled: true,
+        } as unknown as SearchSessionsConfigSchema)
+    ),
   };
 }

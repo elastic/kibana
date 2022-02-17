@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the creation of a group in AWS Identity and Access Management (IAM). Groups specify permissions for multiple users. Any user in a group automatically has the permissions that are assigned to the group.",
   "false_positives": [
-    "A group may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Group creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "A group may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Group creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS IAM Group Creation",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:CreateGroup and event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:CreateGroup and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iam/create-group.html",
     "https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateGroup.html"
@@ -58,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

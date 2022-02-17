@@ -9,7 +9,7 @@ import { get, sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyboardAccessible } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
 
 const generateQueryAndLink = (data) => {
@@ -31,8 +31,16 @@ function sortByName(item) {
 
 export class Assigned extends React.Component {
   createShard = (shard) => {
-    const type = shard.primary ? 'primary' : 'replica';
-    const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
+    const type = get(shard, 'shard.primary', shard.primary) ? 'primary' : 'replica';
+    const key = `${get(shard, 'index.name', shard.index)}.${get(
+      shard,
+      'node.name',
+      shard.node
+    )}.${type}.${get(shard, 'shard.state', shard.state)}.${get(
+      shard,
+      'shard.number',
+      shard.shard
+    )}`;
     return <Shard shard={shard} key={key} />;
   };
 
@@ -54,21 +62,12 @@ export class Assigned extends React.Component {
       }
     }
 
-    // TODO: redesign for shard allocation, possibly giving shard display the
-    // ability to use the euiLink CSS class (blue link text instead of white link text)
-    // Disabling eslint because EuiKeyboardAccessible does it for us
-    /* eslint-disable jsx-a11y/click-events-have-key-events */
-    const name = (
-      <EuiKeyboardAccessible>
-        <a href={generateQueryAndLink(data)}>
-          <span>{data.name}</span>
-        </a>
-      </EuiKeyboardAccessible>
-    );
-    /* eslint-enable jsx-a11y/click-events-have-key-events */
+    // TODO: redesign for shard allocation
+    const name = <EuiLink href={generateQueryAndLink(data)}>{data.name}</EuiLink>;
     const master =
       data.node_type === 'master' ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
+
     return (
       <EuiFlexItem
         grow={false}

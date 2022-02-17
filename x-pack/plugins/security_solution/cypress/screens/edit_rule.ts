@@ -6,5 +6,5 @@
  */
 
 export const EDIT_SUBMIT_BUTTON = '[data-test-subj="ruleEditSubmitButton"]';
-export const KIBANA_LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
+export const BACK_TO_RULE_DETAILS = '[data-test-subj="ruleEditBackToRuleDetails"]';
 export const KIBANA_LOADING_COMPLETE_INDICATOR = '[data-test-subj="globalLoadingIndicator-hidden"]';

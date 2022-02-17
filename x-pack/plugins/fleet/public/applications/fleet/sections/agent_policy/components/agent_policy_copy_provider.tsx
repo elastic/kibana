@@ -8,7 +8,7 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../types';
 import { sendCopyAgentPolicy, useStartServices } from '../../../hooks';
@@ -34,7 +34,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
     onSuccess = () => undefined
   ) => {
     if (!agentPolicyToCopy) {
-      throw new Error('No agent policy specified to copy');
+      throw new Error('No agent policy specified to duplicate');
     }
     setIsModalOpen(true);
     setAgentPolicy(agentPolicyToCopy);
@@ -58,33 +58,33 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
   const copyAgentPolicy = async () => {
     setIsLoading(true);
     try {
-      const { data } = await sendCopyAgentPolicy(agentPolicy!.id, newAgentPolicy!);
+      const { data, error } = await sendCopyAgentPolicy(agentPolicy!.id, newAgentPolicy!);
 
-      if (data) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.copyAgentPolicy.successNotificationTitle', {
-            defaultMessage: 'Agent policy copied',
-          })
-        );
-        if (onSuccessCallback.current) {
-          onSuccessCallback.current(data.item);
-        }
-      } else {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.copyAgentPolicy.failureNotificationTitle', {
-            defaultMessage: "Error copying agent policy '{id}'",
-            values: { id: agentPolicy!.id },
-          })
-        );
+      if (error) {
+        throw error;
       }
-    } catch (e) {
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error copying agent policy',
+
+      if (!data) {
+        throw new Error('Error duplicating agent policy: no data');
+      }
+
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.copyAgentPolicy.successNotificationTitle', {
+          defaultMessage: 'Agent policy duplicated',
         })
       );
+      closeModal();
+      if (onSuccessCallback.current) {
+        onSuccessCallback.current(data.item);
+      }
+    } catch (e) {
+      setIsLoading(false);
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle', {
+          defaultMessage: 'Error duplicating agent policy',
+        }),
+      });
     }
-    closeModal();
   };
 
   const renderModal = () => {
@@ -98,7 +98,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           <span className="eui-textBreakWord">
             <FormattedMessage
               id="xpack.fleet.copyAgentPolicy.confirmModal.copyPolicyTitle"
-              defaultMessage="Copy '{name}' agent policy"
+              defaultMessage="Duplicate '{name}' agent policy"
               values={{
                 name: agentPolicy.name,
               }}
@@ -116,7 +116,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
         confirmButtonText={
           <FormattedMessage
             id="xpack.fleet.copyAgentPolicy.confirmModal.confirmButtonLabel"
-            defaultMessage="Copy policy"
+            defaultMessage="Duplicate policy"
           />
         }
         confirmButtonDisabled={isLoading || !newAgentPolicy.name.trim()}

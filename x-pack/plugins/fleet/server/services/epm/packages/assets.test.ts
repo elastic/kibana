@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InstallablePackage } from '../../../types';
+import type { PackageInfo } from '../../../types';
 
 import { getArchiveFilelist } from '../archive/cache';
 
@@ -43,7 +43,7 @@ const tests = [
       name: 'coredns',
       version: '1.0.1',
     },
-    // Non existant dataset
+    // Non existent dataset
     dataset: 'foo',
     filter: (path: string) => {
       return true;
@@ -66,7 +66,7 @@ const tests = [
 test('testGetAssets', () => {
   for (const value of tests) {
     // as needed to pretend it is an InstallablePackage
-    const assets = getAssets(value.package as InstallablePackage, value.filter, value.dataset);
+    const assets = getAssets(value.package as PackageInfo, value.filter, value.dataset);
     expect(assets).toStrictEqual(value.expected);
   }
 });

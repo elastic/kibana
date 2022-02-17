@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
+import { Maybe } from '../../../search_strategy/common';
 
 import { unionWithNullType } from '../../../utility_types';
 
@@ -28,6 +29,12 @@ export const SavedPinnedEventRuntimeType = runtimeTypes.intersection([
 ]);
 
 export interface SavedPinnedEvent extends runtimeTypes.TypeOf<typeof SavedPinnedEventRuntimeType> {}
+
+/**
+ * This type represents a pinned event type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type PinnedEventWithoutExternalRefs = Omit<SavedPinnedEvent, 'timelineId'>;
 
 /**
  * Note Saved object type with metadata
@@ -58,3 +65,27 @@ export const PinnedEventToReturnSavedObjectRuntimeType = runtimeTypes.intersecti
 
 export interface PinnedEventSavedObject
   extends runtimeTypes.TypeOf<typeof PinnedEventToReturnSavedObjectRuntimeType> {}
+
+export interface PinnedEvent {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  pinnedEventId: string;
+
+  eventId?: Maybe<string>;
+
+  timelineId?: Maybe<string>;
+
+  timelineVersion?: Maybe<string>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
+
+  updated?: Maybe<number>;
+
+  updatedBy?: Maybe<string>;
+
+  version?: Maybe<string>;
+}

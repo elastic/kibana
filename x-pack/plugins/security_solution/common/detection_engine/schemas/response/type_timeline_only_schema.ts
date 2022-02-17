@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 
-import { timeline_id, type } from '../common/schemas';
+import { type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { timeline_id } from '../common/schemas';
 
 /**
  * Special schema type that is only the type and the timeline_id.

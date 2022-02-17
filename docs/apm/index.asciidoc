@@ -4,8 +4,7 @@
 
 [partintro]
 --
-The APM app in {kib} is provided with the basic license.
-It allows you to monitor your software services and applications in real-time;
+The APM app in {kib} allows you to monitor your software services and applications in real-time;
 visualize detailed performance information on your services,
 identify and analyze errors,
 and monitor host-level and agent-specific metrics like JVM and Go runtime metrics.
@@ -24,6 +23,8 @@ For each incoming request and each application error,
 you can also see contextual information such as the request header, user information,
 system values, or custom data that you manually attached to the request.
 --
+
+:beat_kib_app: APM and User Experience
 
 include::set-up.asciidoc[]
 

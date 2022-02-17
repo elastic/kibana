@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import ConnectorAddFlyout from './connector_add_flyout';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -198,12 +198,12 @@ function createActionType() {
     id: `my-action-type-${++count}`,
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
   });

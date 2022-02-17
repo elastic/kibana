@@ -18,6 +18,8 @@ import { processOptions, displayHelp } from './args';
 export async function startServersCli(defaultConfigPath) {
   await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPath);
-    await startServers(options);
+    await startServers({
+      ...options,
+    });
   });
 }

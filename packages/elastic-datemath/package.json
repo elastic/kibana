@@ -3,10 +3,8 @@
   "version": "5.0.3",
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",
-  "main": "./target/index.js",
-  "types": "./target/index.d.ts",
-  "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build"
+  "main": "./target_node/index.js",
+  "peerDependencies": {
+    "moment": "^2.24.0"
   }
 }

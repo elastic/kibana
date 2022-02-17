@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, useReducer, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useReducer, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -20,18 +20,21 @@ import {
   EuiPortal,
   EuiCallOut,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeRegistryContract,
-  Alert,
+  Rule,
   AlertFlyoutCloseReason,
-  AlertTypeRegistryContract,
+  AlertEditProps,
+  IErrorObject,
+  RuleType,
 } from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm } from './alert_form';
+import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
-import { updateAlert } from '../../lib/alert_api';
+import { updateAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
@@ -39,25 +42,15 @@ import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasAlertChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
-export interface AlertEditProps<MetaData = Record<string, any>> {
-  initialAlert: Alert;
-  alertTypeRegistry: AlertTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  metadata?: MetaData;
-}
-
 export const AlertEdit = ({
   initialAlert,
   onClose,
   reloadAlerts,
   onSave,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
+  ...props
 }: AlertEditProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
@@ -65,25 +58,51 @@ export const AlertEdit = ({
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
-  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
-    false
-  );
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
+    useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
+    props.ruleType
+  );
 
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const setAlert = (value: Alert) => {
+  const setAlert = (value: Rule) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
-  const alertType = alertTypeRegistry.get(alert.alertTypeId);
+  const alertType = ruleTypeRegistry.get(alert.alertTypeId);
 
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
-    alert as Alert,
-    actionTypeRegistry,
-    alertType
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getAlertActionErrors(alert as Rule, actionTypeRegistry);
+      setAlertActionsErrors([...res]);
+      setIsLoading(false);
+    })();
+  }, [alert, actionTypeRegistry]);
+
+  useEffect(() => {
+    if (!props.ruleType && !serverRuleType) {
+      (async () => {
+        const serverRuleTypes = await loadAlertTypes({ http });
+        for (const _serverRuleType of serverRuleTypes) {
+          if (alertType.id === _serverRuleType.id) {
+            setServerRuleType(_serverRuleType);
+          }
+        }
+      })();
+    }
+  }, [props.ruleType, alertType.id, serverRuleType, http]);
+
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+    alert as Rule,
+    alertType,
+    serverRuleType
   );
 
   const checkForChangesAndCloseFlyout = () => {
@@ -94,9 +113,13 @@ export const AlertEdit = ({
     }
   };
 
-  async function onSaveAlert(): Promise<Alert | undefined> {
+  async function onSaveAlert(): Promise<Rule | undefined> {
     try {
-      if (isValidAlert(alert, alertErrors, alertActionsErrors) && !hasActionsWithBrokenConnector) {
+      if (
+        !isLoading &&
+        isValidAlert(alert, alertErrors, alertActionsErrors) &&
+        !hasActionsWithBrokenConnector
+      ) {
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
@@ -110,7 +133,7 @@ export const AlertEdit = ({
       } else {
         setAlert(
           getAlertWithInvalidatedFields(
-            alert as Alert,
+            alert as Rule,
             alertParamsErrors,
             alertBaseErrors,
             alertActionsErrors
@@ -134,6 +157,7 @@ export const AlertEdit = ({
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
@@ -149,7 +173,7 @@ export const AlertEdit = ({
           <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               {hasActionsDisabled && (
-                <Fragment>
+                <>
                   <EuiCallOut
                     size="s"
                     color="danger"
@@ -161,14 +185,14 @@ export const AlertEdit = ({
                     )}
                   />
                   <EuiSpacer />
-                </Fragment>
+                </>
               )}
               <AlertForm
                 alert={alert}
                 dispatch={dispatch}
                 errors={alertErrors}
                 actionTypeRegistry={actionTypeRegistry}
-                alertTypeRegistry={alertTypeRegistry}
+                ruleTypeRegistry={ruleTypeRegistry}
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
                 setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
@@ -193,10 +217,18 @@ export const AlertEdit = ({
                     )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {isLoading ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiSpacer size="s" />
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                ) : (
+                  <></>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    color="secondary"
+                    color="success"
                     data-test-subj="saveEditedAlertButton"
                     type="submit"
                     iconType="check"

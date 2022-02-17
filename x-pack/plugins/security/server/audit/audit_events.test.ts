@@ -12,13 +12,14 @@ import { httpServerMock } from 'src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../authentication';
 import {
-  EventOutcome,
   httpRequestEvent,
   SavedObjectAction,
   savedObjectEvent,
+  sessionCleanupEvent,
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
+  userLogoutEvent,
 } from './audit_events';
 
 describe('#savedObjectEvent', () => {
@@ -26,7 +27,7 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: SavedObjectAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -34,9 +35,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -62,9 +67,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -94,9 +103,13 @@ describe('#savedObjectEvent', () => {
         },
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -197,9 +210,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_remove_references",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "change",
+          "type": Array [
+            "change",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -222,13 +239,16 @@ describe('#userLoginEvent', () => {
         authenticationResult: AuthenticationResult.succeeded(mockAuthenticatedUser()),
         authenticationProvider: 'basic1',
         authenticationType: 'basic',
+        sessionId: '123',
       })
     ).toMatchInlineSnapshot(`
       Object {
         "error": undefined,
         "event": Object {
           "action": "user_login",
-          "category": "authentication",
+          "category": Array [
+            "authentication",
+          ],
           "outcome": "success",
         },
         "kibana": Object {
@@ -236,6 +256,7 @@ describe('#userLoginEvent', () => {
           "authentication_realm": "native1",
           "authentication_type": "basic",
           "lookup_realm": "native1",
+          "session_id": "123",
           "space_id": undefined,
         },
         "message": "User [user] has logged in using basic provider [name=basic1]",
@@ -264,7 +285,9 @@ describe('#userLoginEvent', () => {
         },
         "event": Object {
           "action": "user_login",
-          "category": "authentication",
+          "category": Array [
+            "authentication",
+          ],
           "outcome": "failure",
         },
         "kibana": Object {
@@ -272,10 +295,93 @@ describe('#userLoginEvent', () => {
           "authentication_realm": undefined,
           "authentication_type": "basic",
           "lookup_realm": undefined,
+          "session_id": undefined,
           "space_id": undefined,
         },
         "message": "Failed attempt to login using basic provider [name=basic1]",
         "user": undefined,
+      }
+    `);
+  });
+});
+
+describe('#userLogoutEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      userLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] is logging out using basic provider [name=basic1]",
+        "user": Object {
+          "name": "elastic",
+        },
+      }
+    `);
+
+    expect(
+      userLogoutEvent({
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [undefined] is logging out using basic provider [name=basic1]",
+        "user": undefined,
+      }
+    `);
+  });
+});
+
+describe('#sessionCleanupEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      sessionCleanupEvent({
+        usernameHash: 'abcdef',
+        sessionId: 'sid',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "session_cleanup",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+          "session_id": "sid",
+        },
+        "message": "Removing invalid or expired session for user [hash=abcdef]",
+        "user": Object {
+          "hash": "abcdef",
+        },
       }
     `);
   });
@@ -291,7 +397,9 @@ describe('#httpRequestEvent', () => {
       Object {
         "event": Object {
           "action": "http_request",
-          "category": "web",
+          "category": Array [
+            "web",
+          ],
           "outcome": "unknown",
         },
         "http": Object {
@@ -328,7 +436,9 @@ describe('#httpRequestEvent', () => {
       Object {
         "event": Object {
           "action": "http_request",
-          "category": "web",
+          "category": Array [
+            "web",
+          ],
           "outcome": "unknown",
         },
         "http": Object {
@@ -354,7 +464,7 @@ describe('#spaceAuditEvent', () => {
     expect(
       spaceAuditEvent({
         action: SpaceAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'space', id: 'SPACE_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -362,9 +472,13 @@ describe('#spaceAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "space_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -388,9 +502,13 @@ describe('#spaceAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "space_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -418,9 +536,13 @@ describe('#spaceAuditEvent', () => {
         },
         "event": Object {
           "action": "space_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {

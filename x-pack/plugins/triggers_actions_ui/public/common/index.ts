@@ -5,15 +5,11 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110895
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './expression_items';
 export * from './constants';
 export * from './index_controls';
 export * from './lib';
 export * from './types';
-
-export {
-  getServiceNowITSMActionType,
-  getServiceNowSIRActionType,
-} from '../application/components/builtin_action_types/servicenow';
-export { getJiraActionType } from '../application/components/builtin_action_types/jira';
-export { getResilientActionType } from '../application/components/builtin_action_types/resilient';

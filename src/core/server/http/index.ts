@@ -9,7 +9,7 @@
 export { config, HttpConfig } from './http_config';
 export type { HttpConfigType } from './http_config';
 export { HttpService } from './http_service';
-export type { GetAuthHeaders } from './auth_headers_storage';
+export type { GetAuthHeaders, SetAuthHeaders, IAuthHeadersStorage } from './auth_headers_storage';
 export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export {
   isKibanaRequest,
@@ -30,7 +30,6 @@ export type {
   KibanaRequestRouteOptions,
   IKibanaResponse,
   KnownHeaders,
-  LegacyRequest,
   LifecycleResponseFactory,
   RedirectResponseOptions,
   RequestHandler,
@@ -87,6 +86,8 @@ export type {
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   HttpAuth,
+  HttpServicePreboot,
+  InternalHttpServicePreboot,
   HttpServiceSetup,
   InternalHttpServiceSetup,
   HttpServiceStart,

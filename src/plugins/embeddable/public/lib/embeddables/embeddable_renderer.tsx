@@ -28,12 +28,6 @@ interface EmbeddableRendererPropsWithEmbeddable<I extends EmbeddableInput> {
   embeddable: IEmbeddable<I>;
 }
 
-function isWithEmbeddable<I extends EmbeddableInput>(
-  props: EmbeddableRendererProps<I>
-): props is EmbeddableRendererPropsWithEmbeddable<I> {
-  return 'embeddable' in props;
-}
-
 interface EmbeddableRendererWithFactory<I extends EmbeddableInput> {
   input: I;
   onInputUpdated?: (newInput: I) => void;
@@ -44,6 +38,72 @@ function isWithFactory<I extends EmbeddableInput>(
   props: EmbeddableRendererProps<I>
 ): props is EmbeddableRendererWithFactory<I> {
   return 'factory' in props;
+}
+
+export function useEmbeddableFactory<I extends EmbeddableInput>({
+  input,
+  factory,
+  onInputUpdated,
+}: EmbeddableRendererWithFactory<I>) {
+  const [embeddable, setEmbeddable] = useState<IEmbeddable<I> | ErrorEmbeddable | undefined>(
+    undefined
+  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
+  const latestInput = React.useRef(input);
+  useEffect(() => {
+    latestInput.current = input;
+  }, [input]);
+
+  useEffect(() => {
+    let canceled = false;
+
+    // keeping track of embeddables created by this component to be able to destroy them
+    let createdEmbeddableRef: IEmbeddable | ErrorEmbeddable | undefined;
+    setEmbeddable(undefined);
+    setLoading(true);
+    factory
+      .create(latestInput.current!)
+      .then((createdEmbeddable) => {
+        if (canceled) {
+          if (createdEmbeddable) {
+            createdEmbeddable.destroy();
+          }
+        } else {
+          createdEmbeddableRef = createdEmbeddable;
+          setEmbeddable(createdEmbeddable);
+        }
+      })
+      .catch((err) => {
+        if (canceled) return;
+        setError(err?.message);
+      })
+      .finally(() => {
+        if (canceled) return;
+        setLoading(false);
+      });
+
+    return () => {
+      canceled = true;
+      if (createdEmbeddableRef) {
+        createdEmbeddableRef.destroy();
+      }
+    };
+  }, [factory]);
+
+  useEffect(() => {
+    if (!embeddable) return;
+    if (isErrorEmbeddable(embeddable)) return;
+    if (!onInputUpdated) return;
+    const sub = embeddable.getInput$().subscribe((newInput) => {
+      onInputUpdated(newInput);
+    });
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [embeddable, onInputUpdated]);
+
+  return [embeddable, loading, error] as const;
 }
 
 /**
@@ -82,72 +142,22 @@ function isWithFactory<I extends EmbeddableInput>(
 export const EmbeddableRenderer = <I extends EmbeddableInput>(
   props: EmbeddableRendererProps<I>
 ) => {
-  const { input, onInputUpdated } = props;
-  const [embeddable, setEmbeddable] = useState<IEmbeddable<I> | ErrorEmbeddable | undefined>(
-    isWithEmbeddable(props) ? props.embeddable : undefined
-  );
-  const [loading, setLoading] = useState<boolean>(!isWithEmbeddable(props));
-  const [error, setError] = useState<string | undefined>();
-  const latestInput = React.useRef(props.input);
-  useEffect(() => {
-    latestInput.current = input;
-  }, [input]);
+  if (isWithFactory(props)) {
+    return <EmbeddableByFactory {...props} />;
+  }
+  return <EmbeddableRoot embeddable={props.embeddable} input={props.input} />;
+};
 
-  const factoryFromProps = isWithFactory(props) ? props.factory : undefined;
-  const embeddableFromProps = isWithEmbeddable(props) ? props.embeddable : undefined;
-  useEffect(() => {
-    let canceled = false;
-    if (embeddableFromProps) {
-      setEmbeddable(embeddableFromProps);
-      return;
-    }
-
-    // keeping track of embeddables created by this component to be able to destroy them
-    let createdEmbeddableRef: IEmbeddable | ErrorEmbeddable | undefined;
-    if (factoryFromProps) {
-      setEmbeddable(undefined);
-      setLoading(true);
-      factoryFromProps
-        .create(latestInput.current!)
-        .then((createdEmbeddable) => {
-          if (canceled) {
-            if (createdEmbeddable) {
-              createdEmbeddable.destroy();
-            }
-          } else {
-            createdEmbeddableRef = createdEmbeddable;
-            setEmbeddable(createdEmbeddable);
-          }
-        })
-        .catch((err) => {
-          if (canceled) return;
-          setError(err?.message);
-        })
-        .finally(() => {
-          if (canceled) return;
-          setLoading(false);
-        });
-    }
-
-    return () => {
-      canceled = true;
-      if (createdEmbeddableRef) {
-        createdEmbeddableRef.destroy();
-      }
-    };
-  }, [factoryFromProps, embeddableFromProps]);
-
-  useEffect(() => {
-    if (!embeddable) return;
-    if (isErrorEmbeddable(embeddable)) return;
-    if (!onInputUpdated) return;
-    const sub = embeddable.getInput$().subscribe((newInput) => {
-      onInputUpdated(newInput);
-    });
-    return () => {
-      sub.unsubscribe();
-    };
-  }, [embeddable, onInputUpdated]);
-
+//
+const EmbeddableByFactory = <I extends EmbeddableInput>({
+  factory,
+  input,
+  onInputUpdated,
+}: EmbeddableRendererWithFactory<I>) => {
+  const [embeddable, loading, error] = useEmbeddableFactory({
+    factory,
+    input,
+    onInputUpdated,
+  });
   return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
 };

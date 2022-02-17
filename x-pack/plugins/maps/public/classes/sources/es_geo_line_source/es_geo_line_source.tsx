@@ -10,6 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -22,7 +23,7 @@ import {
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { registerSource } from '../source_registry';
@@ -35,9 +36,11 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { makePublicExecutionContext } from '../../../util';
+
+type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
 const MAX_TRACKS = 250;
 
@@ -82,7 +85,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters, true);
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -98,7 +101,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
   }
 
-  getSyncMeta() {
+  getSyncMeta(): ESGeoLineSourceSyncMeta {
     return {
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
@@ -120,9 +123,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         value: geoLineTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esGeoLine.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternTitle,
       },
       {
@@ -139,7 +140,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       fieldName: this._descriptor.splitField,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: true,
     });
   }
 
@@ -202,6 +202,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
         terms: addFieldToDSL(termsAgg, splitField),
       },
     });
+    if (splitField.type === 'string') {
+      const entityIsNotEmptyFilter = buildPhraseFilter(splitField, '', indexPattern);
+      entityIsNotEmptyFilter.meta.negate = true;
+      entitySearchSource.setField('filter', [
+        ...(entitySearchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
+
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
@@ -216,6 +225,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:entities'),
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -242,7 +252,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     const entityFilters: { [key: string]: unknown } = {};
     for (let i = 0; i < entityBuckets.length; i++) {
-      entityFilters[entityBuckets[i].key] = esFilters.buildPhraseFilter(
+      entityFilters[entityBuckets[i].key] = buildPhraseFilter(
         splitField,
         entityBuckets[i].key,
         indexPattern
@@ -287,6 +297,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:tracks'),
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,
@@ -309,7 +320,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
+  getSourceStatus(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest
       ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)
@@ -326,21 +337,21 @@ export class ESGeoLineSource extends AbstractESAggSource {
       ? i18n.translate('xpack.maps.esGeoLine.areEntitiesTrimmedMsg', {
           defaultMessage: `Results limited to first {entityCount} tracks of ~{totalEntities}.`,
           values: {
-            entityCount: meta.entityCount,
-            totalEntities: meta.totalEntities,
+            entityCount: meta.entityCount.toLocaleString(),
+            totalEntities: meta.totalEntities.toLocaleString(),
           },
         })
       : i18n.translate('xpack.maps.esGeoLine.tracksCountMsg', {
           defaultMessage: `Found {entityCount} tracks.`,
-          values: { entityCount: meta.entityCount },
+          values: { entityCount: meta.entityCount.toLocaleString() },
         });
     const tracksTrimmedMsg =
       meta.numTrimmedTracks > 0
         ? i18n.translate('xpack.maps.esGeoLine.tracksTrimmedMsg', {
             defaultMessage: `{numTrimmedTracks} of {entityCount} tracks are incomplete.`,
             values: {
-              entityCount: meta.entityCount,
-              numTrimmedTracks: meta.numTrimmedTracks,
+              entityCount: meta.entityCount.toLocaleString(),
+              numTrimmedTracks: meta.numTrimmedTracks.toLocaleString(),
             },
           })
         : undefined;
@@ -359,7 +370,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return true;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 

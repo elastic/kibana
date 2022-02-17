@@ -9,7 +9,7 @@
 import path from 'path';
 import { statSync } from 'fs';
 
-import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
+import { versionSatisfies, cleanVersion } from './utils/version';
 
 export function existingInstall(settings, logger) {
   try {

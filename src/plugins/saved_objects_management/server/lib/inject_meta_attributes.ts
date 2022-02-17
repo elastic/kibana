@@ -25,6 +25,7 @@ export function injectMetaAttributes<T = unknown>(
   result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
   result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
   result.meta.namespaceType = savedObjectsManagement.getNamespaceType(savedObject);
+  result.meta.hiddenType = savedObjectsManagement.isHidden(savedObject);
 
   return result;
 }

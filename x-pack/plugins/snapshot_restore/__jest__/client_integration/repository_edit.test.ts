@@ -215,7 +215,7 @@ describe('<RepositoryEdit />', () => {
       );
       expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
 
-      const codeEditor = testBed.component.find('EuiCodeEditor');
+      const codeEditor = testBed.component.find('EuiCodeEditor').at(1);
       expect(JSON.parse(codeEditor.props().value as string)).toEqual({
         loadDefault: true,
         conf1: 'foo',

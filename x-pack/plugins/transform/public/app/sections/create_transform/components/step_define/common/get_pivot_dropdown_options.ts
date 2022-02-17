@@ -13,6 +13,9 @@ import {
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { getNestedProperty } from '../../../../../../../common/utils/object_utils';
+import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
+
+import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
 
 import {
   DropDownLabel,
@@ -26,7 +29,6 @@ import {
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
 import type { Field, StepDefineExposedState } from './types';
-import { isRuntimeMappings } from './types';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
@@ -93,41 +95,44 @@ export function getPivotDropdownOptions(
 
   const combinedFields = [...indexPatternFields, ...runtimeFields].sort(sortByLabel);
   combinedFields.forEach((field) => {
+    const rawFieldName = field.name;
+    const displayFieldName = removeKeywordPostfix(rawFieldName);
+
     // Group by
     const availableGroupByAggs: [] = getNestedProperty(pivotGroupByFieldSupport, field.type);
 
     if (availableGroupByAggs !== undefined) {
       availableGroupByAggs.forEach((groupByAgg) => {
         // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
-        const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
+        const aggName = displayFieldName.replace(illegalEsAggNameChars, '').trim();
         // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
-        const dropDownName = `${groupByAgg}(${field.name})`;
+        const dropDownName = `${groupByAgg}(${displayFieldName})`;
         const groupByOption: DropDownLabel = { label: dropDownName };
         groupByOptions.push(groupByOption);
         groupByOptionsData[dropDownName] = getDefaultGroupByConfig(
           aggName,
           dropDownName,
-          field.name,
+          rawFieldName,
           groupByAgg
         );
       });
     }
 
     // Aggregations
-    const aggOption: DropDownOption = { label: field.name, options: [] };
+    const aggOption: DropDownOption = { label: displayFieldName, options: [] };
     const availableAggs: [] = getNestedProperty(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {
       availableAggs.forEach((agg) => {
         // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
-        const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
+        const aggName = `${displayFieldName.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
         // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
-        const dropDownName = `${agg}(${field.name})`;
+        const dropDownName = `${agg}(${displayFieldName})`;
         aggOption.options.push({ label: dropDownName });
         aggOptionsData[dropDownName] = getDefaultAggregationConfig(
           aggName,
           dropDownName,
-          field.name,
+          rawFieldName,
           agg
         );
       });
@@ -136,6 +141,7 @@ export function getPivotDropdownOptions(
   });
 
   return {
+    fields: combinedFields,
     groupByOptions,
     groupByOptionsData,
     aggOptions,

@@ -6,25 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart, CoreStart } from 'src/core/public';
+import { NotificationsStart, CoreStart, ThemeServiceStart } from 'src/core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { IndexPatternsContract } from './index_patterns';
+import { IndexPatternsContract } from './data_views';
 import { DataPublicPluginStart } from './types';
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
-export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
-  'UiSettings'
-);
+export const [getUiSettings, setUiSettings] =
+  createGetterSetter<CoreStart['uiSettings']>('UiSettings');
 
 export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
 
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
+export const [getIndexPatterns, setIndexPatterns] =
+  createGetterSetter<IndexPatternsContract>('IndexPatterns');
 
-export const [getSearchService, setSearchService] = createGetterSetter<
-  DataPublicPluginStart['search']
->('Search');
+export const [getSearchService, setSearchService] =
+  createGetterSetter<DataPublicPluginStart['search']>('Search');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');

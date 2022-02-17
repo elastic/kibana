@@ -293,6 +293,20 @@ export const SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES = (totalTimelineTemplates:
     }
   );
 
+export const SUCCESSFULLY_DELETED_TIMELINES = (totalTimelines: number) =>
+  i18n.translate('xpack.securitySolution.open.timeline.successfullyDeletedTimelinesTitle', {
+    values: { totalTimelines },
+    defaultMessage:
+      'Successfully deleted {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
+  });
+
+export const SUCCESSFULLY_DELETED_TIMELINE_TEMPLATES = (totalTimelineTemplates: number) =>
+  i18n.translate('xpack.securitySolution.open.timeline.successfullyDeletedTimelineTemplatesTitle', {
+    values: { totalTimelineTemplates },
+    defaultMessage:
+      'Successfully deleted {totalTimelineTemplates, plural, =0 {all timelines} =1 {{totalTimelineTemplates} timeline template} other {{totalTimelineTemplates} timeline templates}}',
+  });
+
 export const TAB_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.tabs.timelinesTitle',
   {
@@ -355,16 +369,19 @@ export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
     {
       values: { totalCount },
       defaultMessage:
-        'Successfully imported {totalCount} {totalCount, plural, =1 {timeline} other {timelines}}',
+        'Successfully imported {totalCount} {totalCount, plural, =1 {item} other {items}}',
     }
   );
 
-export const IMPORT_FAILED = i18n.translate(
-  'xpack.securitySolution.timelines.components.importTimelineModal.importFailedTitle',
-  {
-    defaultMessage: 'Failed to import',
-  }
-);
+export const IMPORT_FAILED = (totalTimelines: number) =>
+  i18n.translate(
+    'xpack.securitySolution.timelines.components.importTimelineModal.importFailedTitle',
+    {
+      values: { totalTimelines },
+      defaultMessage:
+        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {rule} other {rules}}',
+    }
+  );
 
 export const IMPORT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importTitle',
@@ -373,11 +390,11 @@ export const IMPORT_TIMELINE = i18n.translate(
   }
 );
 
-export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: string) =>
+export const IMPORT_FAILED_DETAILED = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.timelines.components.importTimelineModal.importFailedDetailedTitle',
     {
-      values: { id, statusCode, message },
-      defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
+      values: { message },
+      defaultMessage: '{message}',
     }
   );

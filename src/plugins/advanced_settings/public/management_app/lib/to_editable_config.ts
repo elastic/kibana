@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  PublicUiSettingsParams,
-  UserProvidedValues,
-  StringValidationRegexString,
-  SavedObjectAttribute,
-} from 'src/core/public';
+import { PublicUiSettingsParams, UserProvidedValues, SavedObjectAttribute } from 'src/core/public';
 import { FieldSetting } from '../types';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
@@ -40,8 +35,6 @@ export function toEditableConfig({
     def = {};
   }
 
-  const validationTyped = def.validation as StringValidationRegexString;
-
   const conf: FieldSetting = {
     name,
     displayName: def.name || name,
@@ -55,13 +48,6 @@ export function toEditableConfig({
     type: getValType(def, value),
     description: def.description,
     deprecation: def.deprecation,
-    validation:
-      validationTyped && validationTyped.regexString
-        ? {
-            regex: new RegExp(validationTyped.regexString),
-            message: validationTyped.message,
-          }
-        : def.validation,
     options: def.options,
     optionLabels: def.optionLabels,
     order: def.order,

@@ -5,28 +5,29 @@
  * 2.0.
  */
 
+import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, isValidHex } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
 import { MAX_SPACE_INITIALS } from '../../common';
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';
+import type { SpaceAvatarProps } from './types';
 
-interface Props {
-  space: Partial<Space>;
-  size?: 's' | 'm' | 'l' | 'xl';
-  className?: string;
-  announceSpaceName?: boolean;
-}
-
-export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
+export const SpaceAvatarInternal: FC<SpaceAvatarProps> = (props: SpaceAvatarProps) => {
   const { space, size, announceSpaceName, ...rest } = props;
 
   const spaceName = space.name ? space.name.trim() : '';
 
   const spaceColor = getSpaceColor(space);
+
+  const spaceInitials = getSpaceInitials(space);
+
+  const spaceImageUrl = getSpaceImageUrl(space);
+
+  const avatarConfig: Partial<EuiAvatarProps> = spaceImageUrl
+    ? { imageUrl: spaceImageUrl }
+    : { initials: spaceInitials, initialsLength: MAX_SPACE_INITIALS };
 
   return (
     <EuiAvatar
@@ -39,10 +40,8 @@ export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
         'aria-hidden': true,
       })}
       size={size || 'm'}
-      initialsLength={MAX_SPACE_INITIALS}
-      initials={getSpaceInitials(space)}
       color={isValidHex(spaceColor) ? spaceColor : ''}
-      imageUrl={getSpaceImageUrl(space)}
+      {...avatarConfig}
       {...rest}
     />
   );

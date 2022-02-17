@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -77,7 +77,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
       {/** Stats panel */}
       {stats && (
         <Fragment>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiStat

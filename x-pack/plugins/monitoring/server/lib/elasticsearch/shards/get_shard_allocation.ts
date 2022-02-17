@@ -6,13 +6,15 @@
  */
 
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
+import { StringOptions } from '@kbn/config-schema/target_types/types';
 // @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
@@ -23,16 +25,31 @@ export function handleResponse(response: ElasticsearchResponse) {
   // deduplicate any shards from earlier days with the same cluster state state_uuid
   const uniqueShards = new Set<string>();
 
-  // map into object with shard and source properties
+  // map into object with shard and source propertiesd
   return hits.reduce((shards: Array<ElasticsearchLegacySource['shard']>, hit) => {
-    const shard = hit._source.shard;
+    const legacyShard = hit._source.shard;
+    const mbShard = hit._source.elasticsearch;
 
-    if (shard) {
+    if (legacyShard || mbShard) {
+      const index = mbShard?.index?.name ?? legacyShard?.index;
+      const shardNumber = mbShard?.shard?.number ?? legacyShard?.shard;
+      const primary = mbShard?.shard?.primary ?? legacyShard?.primary;
+      const relocatingNode =
+        mbShard?.shard?.relocating_node?.id ?? legacyShard?.relocating_node ?? null;
+      const node = mbShard?.node?.id ?? legacyShard?.node;
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-      const shardId = `${shard.index}-${shard.shard}-${shard.primary}-${shard.relocating_node}-${shard.node}`;
+      const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
       if (!uniqueShards.has(shardId)) {
-        shards.push(shard);
+        // @ts-ignore
+        shards.push({
+          index,
+          node,
+          primary,
+          relocating_node: relocatingNode,
+          shard: shardNumber,
+          state: legacyShard?.state ?? mbShard?.shard?.state,
+        });
         uniqueShards.add(shardId);
       }
     }
@@ -43,34 +60,72 @@ export function handleResponse(response: ElasticsearchResponse) {
 
 export function getShardAllocation(
   req: LegacyRequest,
-  esIndexPattern: string,
   {
     shardFilter,
     stateUuid,
     showSystemIndices = false,
   }: { shardFilter: any; stateUuid: string; showSystemIndices: boolean }
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardAllocation');
+  const filters = [
+    {
+      bool: {
+        should: [
+          {
+            term: {
+              state_uuid: stateUuid,
+            },
+          },
+          {
+            term: {
+              'elasticsearch.cluster.stats.state.state_uuid': stateUuid,
+            },
+          },
+        ],
+      },
+    },
+    shardFilter,
+  ];
 
-  const filters = [{ term: { state_uuid: stateUuid } }, shardFilter];
   if (!showSystemIndices) {
     filters.push({
-      bool: { must_not: [{ prefix: { 'shard.index': '.' } }] },
+      bool: {
+        must_not: [
+          { prefix: { 'shard.index': '.' } },
+          { prefix: { 'elasticsearch.index.name': '.' } },
+        ],
+      },
     });
   }
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metric = ElasticsearchMetric.getMetricFields();
+
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    dataset,
+    moduleType,
+  });
+
   const params = {
-    index: esIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    index: indexPatterns,
+    size: config.ui.max_bucket_size,
+    ignore_unavailable: true,
     body: {
-      query: createQuery({ type: 'shards', clusterUuid, metric, filters }),
+      query: createQuery({
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
+        clusterUuid,
+        metric,
+        filters,
+      }),
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then(handleResponse);
 }

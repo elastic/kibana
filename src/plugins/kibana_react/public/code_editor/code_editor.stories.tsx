@@ -79,6 +79,25 @@ storiesOf('CodeEditor', module)
     }
   )
   .add(
+    'transparent background',
+    () => (
+      <div>
+        <CodeEditor
+          languageId="plaintext"
+          height={250}
+          value="Hello!"
+          onChange={action('onChange')}
+          transparentBackground
+        />
+      </div>
+    ),
+    {
+      info: {
+        text: 'Plaintext Monaco Editor',
+      },
+    }
+  )
+  .add(
     'custom log language',
     () => (
       <div>
@@ -87,8 +106,7 @@ storiesOf('CodeEditor', module)
     ),
     {
       info: {
-        text:
-          'Custom language example. Language definition taken from [here](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages)',
+        text: 'Custom language example. Language definition taken from [here](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages)',
       },
     }
   )

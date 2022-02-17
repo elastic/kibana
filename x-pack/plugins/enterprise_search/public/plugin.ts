@@ -15,12 +15,14 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { CloudSetup } from '../../cloud/public';
+import { CloudSetup, CloudStart } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -36,17 +38,20 @@ export interface ClientConfigType {
 }
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
-  errorConnecting?: boolean;
+  errorConnectingMessage?: string;
 }
 
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface PluginsStart {
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -114,6 +119,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
+        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
+        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
+        if (this.config.host) chrome.setIsVisible(false);
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
@@ -128,11 +136,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
         description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        order: 100,
       });
 
       plugins.home.featureCatalogue.register({
@@ -165,10 +172,18 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public stop() {}
 
-  private async getKibanaDeps(core: CoreSetup, params: AppMountParameters, cloud?: CloudSetup) {
+  private async getKibanaDeps(
+    core: CoreSetup,
+    params: AppMountParameters,
+    cloudSetup?: CloudSetup
+  ) {
     // Helper for using start dependencies on mount (instead of setup dependencies)
     // and for grouping Kibana-related args together (vs. plugin-specific args)
     const [coreStart, pluginsStart] = await core.getStartServices();
+    const cloud =
+      cloudSetup && (pluginsStart as PluginsStart).cloud
+        ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
+        : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
     return { params, core: coreStart, plugins };
@@ -184,10 +199,10 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      this.data = await http.get('/api/enterprise_search/config_data');
+      this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
-    } catch {
-      this.data.errorConnecting = true;
+    } catch (e) {
+      this.data.errorConnectingMessage = `${e.res.status} ${e.message}`;
     }
   }
 }

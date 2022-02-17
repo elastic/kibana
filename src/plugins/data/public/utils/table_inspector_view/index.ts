@@ -11,7 +11,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import { Adapters, InspectorViewDescription } from '../../../../inspector/public';
 import { getDataViewComponentWrapper } from './components/data_view_wrapper';
 import { UiActionsStart } from '../../../../ui_actions/public';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../../../field_formats/public';
 import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 export const getTableViewDescription = (

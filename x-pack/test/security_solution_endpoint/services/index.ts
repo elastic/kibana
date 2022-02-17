@@ -9,9 +9,13 @@ import { services as xPackFunctionalServices } from '../../functional/services';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
+import { EndpointTestResources } from './endpoint';
+import { EndpointArtifactsTestResources } from './endpoint_artifacts';
 
 export const services = {
   ...xPackFunctionalServices,
+  endpointTestResources: EndpointTestResources,
+  endpointArtifactTestResources: EndpointArtifactsTestResources,
   policyTestResources: EndpointPolicyTestResourcesProvider,
   telemetryTestResources: EndpointTelemetryTestResourcesProvider,
   ingestManager: IngestManagerProvider,

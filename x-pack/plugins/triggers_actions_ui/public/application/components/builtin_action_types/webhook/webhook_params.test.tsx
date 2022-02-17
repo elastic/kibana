@@ -6,8 +6,21 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
+import { MockCodeEditor } from '../../../code_editor.mock';
+
+const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
+
+jest.mock(kibanaReactPath, () => {
+  const original = jest.requireActual(kibanaReactPath);
+  return {
+    ...original,
+    CodeEditor: (props: any) => {
+      return <MockCodeEditor {...props} />;
+    },
+  };
+});
 
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -21,6 +34,13 @@ describe('WebhookParamsFields renders', () => {
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

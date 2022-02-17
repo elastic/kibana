@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { AlertConditionsProps, ActionGroupWithCondition } from './alert_conditions';
@@ -55,7 +55,7 @@ export const AlertConditionsGroup = <ConditionProps extends unknown>({
           ...otherProps,
         })
       ) : (
-        <Fragment />
+        <></>
       )}
     </EuiFormRow>
   );

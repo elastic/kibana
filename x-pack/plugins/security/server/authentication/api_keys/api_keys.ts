@@ -30,15 +30,21 @@ export interface CreateAPIKeyParams {
   name: string;
   role_descriptors: Record<string, any>;
   expiration?: string;
+  metadata?: Record<string, any>;
 }
 
-interface GrantAPIKeyParams {
-  api_key: CreateAPIKeyParams;
-  grant_type: 'password' | 'access_token';
-  username?: string;
-  password?: string;
-  access_token?: string;
-}
+type GrantAPIKeyParams =
+  | {
+      api_key: CreateAPIKeyParams;
+      grant_type: 'password';
+      username: string;
+      password: string;
+    }
+  | {
+      api_key: CreateAPIKeyParams;
+      grant_type: 'access_token';
+      access_token: string;
+    };
 
 /**
  * Represents the params for invalidating multiple API keys
@@ -107,11 +113,11 @@ export interface InvalidateAPIKeyResult {
    * Details about these errors. This field is not present in the response when error_count is 0.
    */
   error_details?: Array<{
-    type: string;
-    reason: string;
+    type?: string;
+    reason?: string;
     caused_by?: {
-      type: string;
-      reason: string;
+      type?: string;
+      reason?: string;
     };
   }>;
 }
@@ -161,6 +167,9 @@ export class APIKeys {
 
   /**
    * Tries to create an API key for the current user.
+   *
+   * Returns newly created API key or `null` if API keys are disabled.
+   *
    * @param request Request instance.
    * @param params The params to create an API key
    */
@@ -177,11 +186,9 @@ export class APIKeys {
     // User needs `manage_api_key` privilege to use this API
     let result: CreateAPIKeyResult;
     try {
-      result = (
-        await this.clusterClient
-          .asScoped(request)
-          .asCurrentUser.security.createApiKey({ body: params })
-      ).body;
+      result = await this.clusterClient
+        .asScoped(request)
+        .asCurrentUser.security.createApiKey({ body: params });
       this.logger.debug('API key was created successfully');
     } catch (e) {
       this.logger.error(`Failed to create API key: ${e.message}`);
@@ -213,12 +220,10 @@ export class APIKeys {
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      result = (
-        await this.clusterClient.asInternalUser.security.grantApiKey({
-          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors
-          body: params,
-        })
-      ).body;
+      result = await this.clusterClient.asInternalUser.security.grantApiKey({
+        // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors  doesn't support `Record<string, any>`
+        body: params,
+      });
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
@@ -243,13 +248,11 @@ export class APIKeys {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = (
-        await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
-          body: {
-            ids: params.ids,
-          },
-        })
-      ).body;
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
+        body: {
+          ids: params.ids,
+        },
+      });
       this.logger.debug(
         `API keys by ids=[${params.ids.join(', ')}] was invalidated successfully as current user`
       );
@@ -279,13 +282,11 @@ export class APIKeys {
     let result: InvalidateAPIKeyResult;
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
-      result = (
-        await this.clusterClient.asInternalUser.security.invalidateApiKey({
-          body: {
-            ids: params.ids,
-          },
-        })
-      ).body;
+      result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
+        body: {
+          ids: params.ids,
+        },
+      });
       this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {
       this.logger.error(

@@ -11,7 +11,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
@@ -25,19 +25,21 @@ interface MetaEngineCreationValues {
   name: string;
   rawName: string;
   selectedIndexedEngineNames: string[];
+  isLoading: boolean;
 }
 
 interface MetaEngineCreationActions {
   fetchIndexedEngineNames(page?: number): { page: number };
   onEngineCreationSuccess(): void;
-  setIndexedEngineNames(
-    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']
-  ): { indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'] };
+  setIndexedEngineNames(indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']): {
+    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'];
+  };
   setRawName(rawName: string): { rawName: string };
   setSelectedIndexedEngineNames(
     selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']
   ): { selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames'] };
   submitEngine(): void;
+  onSubmitError(): void;
 }
 
 export const MetaEngineCreationLogic = kea<
@@ -50,9 +52,17 @@ export const MetaEngineCreationLogic = kea<
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedIndexedEngineNames: (selectedIndexedEngineNames) => ({ selectedIndexedEngineNames }),
-    submitEngine: () => null,
+    submitEngine: true,
+    onSubmitError: true,
   },
   reducers: {
+    isLoading: [
+      false,
+      {
+        submitEngine: () => true,
+        onSubmitError: () => false,
+      },
+    ],
     indexedEngineNames: [
       [],
       {
@@ -82,7 +92,7 @@ export const MetaEngineCreationLogic = kea<
       let response: { results: EngineDetails[]; meta: Meta } | undefined;
 
       try {
-        response = await http.get('/api/app_search/engines', {
+        response = await http.get('/internal/app_search/engines', {
           query: { type: 'indexed', 'page[current]': page, 'page[size]': DEFAULT_META.page.size },
         });
       } catch (e) {
@@ -103,7 +113,7 @@ export const MetaEngineCreationLogic = kea<
       const { navigateToUrl } = KibanaLogic.values;
       const enginePath = generatePath(ENGINE_PATH, { engineName: name });
 
-      setQueuedSuccessMessage(META_ENGINE_CREATION_SUCCESS_MESSAGE);
+      flashSuccessToast(META_ENGINE_CREATION_SUCCESS_MESSAGE(name));
       navigateToUrl(enginePath);
     },
     submitEngine: async () => {
@@ -117,10 +127,11 @@ export const MetaEngineCreationLogic = kea<
       });
 
       try {
-        await http.post('/api/app_search/engines', { body });
+        await http.post('/internal/app_search/engines', { body });
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
+        actions.onSubmitError();
       }
     },
   }),

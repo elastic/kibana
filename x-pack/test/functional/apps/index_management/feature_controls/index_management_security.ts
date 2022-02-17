@@ -17,12 +17,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
@@ -60,7 +60,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with index management', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
+
+        // The index_management_user has been given permissions to advanced settings for Stack Management Tests.
+        // https://github.com/elastic/kibana/pull/113078/
+        expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'data',
           sectionLinks: ['index_management', 'transform'],

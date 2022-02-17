@@ -20,8 +20,14 @@ describe(`feature_privilege_builder`, () => {
 
       const privilege: FeatureKibanaPrivileges = {
         alerting: {
-          all: [],
-          read: [],
+          rule: {
+            all: [],
+            read: [],
+          },
+          alert: {
+            all: [],
+            read: [],
+          },
         },
 
         savedObject: {
@@ -46,14 +52,16 @@ describe(`feature_privilege_builder`, () => {
     });
 
     describe(`within feature`, () => {
-      test('grants `read` privileges under feature consumer', () => {
+      test('grants `read` privileges to rules under feature consumer', () => {
         const actions = new Actions(version);
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
-            all: [],
-            read: ['alert-type'],
+            rule: {
+              all: [],
+              read: ['alert-type'],
+            },
           },
 
           savedObject: {
@@ -76,22 +84,24 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:alert-type/my-feature/get",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertInstanceSummary",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
           ]
         `);
       });
 
-      test('grants `all` privileges under feature consumer', () => {
+      test('grants `read` privileges to alerts under feature consumer', () => {
         const actions = new Actions(version);
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
-            all: ['alert-type'],
-            read: [],
+            alert: {
+              all: [],
+              read: ['alert-type'],
+            },
           },
 
           savedObject: {
@@ -114,32 +124,26 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:alert-type/my-feature/get",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertInstanceSummary",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/find",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/create",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/delete",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/update",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/updateApiKey",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/enable",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/disable",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/muteAll",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteAll",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/muteInstance",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteInstance",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
           ]
         `);
       });
 
-      test('grants both `all` and `read` privileges under feature consumer', () => {
+      test('grants `read` privileges to rules and alerts under feature consumer', () => {
         const actions = new Actions(version);
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
-            all: ['alert-type'],
-            read: ['readonly-alert-type'],
+            rule: {
+              all: [],
+              read: ['alert-type'],
+            },
+            alert: {
+              all: [],
+              read: ['alert-type'],
+            },
           },
 
           savedObject: {
@@ -162,26 +166,318 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:alert-type/my-feature/get",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertInstanceSummary",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/find",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/create",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/delete",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/update",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/updateApiKey",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/enable",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/disable",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/muteAll",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteAll",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/muteInstance",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteInstance",
-            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/get",
-            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/getAlertInstanceSummary",
-            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
           ]
         `);
+      });
+
+      test('grants `all` privileges to rules under feature consumer', () => {
+        const actions = new Actions(version);
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: ['alert-type'],
+              read: [],
+            },
+          },
+
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+            Array [
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+            ]
+          `);
+      });
+
+      test('grants `all` privileges to alerts under feature consumer', () => {
+        const actions = new Actions(version);
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            alert: {
+              all: ['alert-type'],
+              read: [],
+            },
+          },
+
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+            Array [
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
+            ]
+          `);
+      });
+
+      test('grants `all` privileges to rules and alerts under feature consumer', () => {
+        const actions = new Actions(version);
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: ['alert-type'],
+              read: [],
+            },
+            alert: {
+              all: ['alert-type'],
+              read: [],
+            },
+          },
+
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+            Array [
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
+            ]
+          `);
+      });
+
+      test('grants both `all` and `read` to rules privileges under feature consumer', () => {
+        const actions = new Actions(version);
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: ['alert-type'],
+              read: ['readonly-alert-type'],
+            },
+          },
+
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+            Array [
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
+            ]
+          `);
+      });
+
+      test('grants both `all` and `read` to alerts privileges under feature consumer', () => {
+        const actions = new Actions(version);
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            alert: {
+              all: ['alert-type'],
+              read: ['readonly-alert-type'],
+            },
+          },
+
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+            Array [
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
+            ]
+          `);
+      });
+
+      test('grants both `all` and `read` to rules and alerts privileges under feature consumer', () => {
+        const actions = new Actions(version);
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: ['alert-type'],
+              read: ['readonly-alert-type'],
+            },
+            alert: {
+              all: ['another-alert-type'],
+              read: ['readonly-alert-type'],
+            },
+          },
+
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+            Array [
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
+              "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
+              "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
+              "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/update",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
+              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
+            ]
+          `);
       });
     });
   });

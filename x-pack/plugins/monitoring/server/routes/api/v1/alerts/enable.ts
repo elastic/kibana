@@ -8,16 +8,15 @@
 // @ts-ignore
 import { handleError } from '../../../../lib/errors';
 import { AlertsFactory } from '../../../../alerts';
-import { RouteDependencies } from '../../../../types';
+import { LegacyServer, RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
-import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
 import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
-export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) {
+export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
@@ -27,12 +26,15 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
       try {
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
-          const {
-            isSufficientlySecure,
-            hasPermanentEncryptionKey,
-          } = await AlertingSecurity.getSecurityHealth(context, npRoute.encryptedSavedObjects);
+          const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
+            ?.getSecurityHealth
+            ? await npRoute.alerting?.getSecurityHealth()
+            : { isSufficientlySecure: false, hasPermanentEncryptionKey: false };
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
+            server.log.info(
+              `Skipping rule creation for "${context.infra.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
+            );
             return response.ok({
               body: {
                 isSufficientlySecure,
@@ -42,10 +44,10 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
           }
         }
 
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
-        if (!alertsClient || !actionsClient || !types) {
+        if (!rulesClient || !actionsClient || !types) {
           return response.ok({ body: undefined });
         }
 
@@ -79,15 +81,19 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
 
         let createdAlerts: Array<SanitizedAlert<AlertTypeParams>> = [];
         const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
-          npRoute.cluster.asScoped(request).callAsCurrentUser,
+          npRoute.cluster.asScoped(request).asCurrentUser,
           npRoute.logger
         );
 
         if (disabledWatcherClusterAlerts) {
           createdAlerts = await Promise.all(
-            alerts.map((alert) => alert.createIfDoesNotExist(alertsClient, actionsClient, actions))
+            alerts.map((alert) => alert.createIfDoesNotExist(rulesClient, actionsClient, actions))
           );
         }
+
+        server.log.info(
+          `Created ${createdAlerts.length} alerts for "${context.infra.spaceId}" space`
+        );
 
         return response.ok({ body: { createdAlerts, disabledWatcherClusterAlerts } });
       } catch (err) {

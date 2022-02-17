@@ -10,7 +10,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { CanvasServices } from './services';
 import { CanvasSetup, CanvasStart, CanvasStartDeps, CanvasPlugin } from './plugin';
 
-export { CanvasSetup, CanvasStart };
+export type { CanvasSetup, CanvasStart };
 
 export interface WithKibanaProps {
   kibana: {
@@ -18,4 +18,5 @@ export interface WithKibanaProps {
   };
 }
 
-export const plugin = (_initializerContext: PluginInitializerContext) => new CanvasPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new CanvasPlugin(initializerContext);

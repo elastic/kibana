@@ -6,7 +6,7 @@
  */
 
 import { savedVisualization } from './saved_visualization';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
 
 const filterContext: ExpressionValueFilter = {
@@ -56,5 +56,16 @@ describe('savedVisualization', () => {
   it('accepts an empty title when title is disabled', () => {
     const expression = fn(null, { ...args, title: '' }, {} as any);
     expect(expression.input.title).toEqual('');
+  });
+
+  it('accepts time range', () => {
+    const expression = fn(
+      null,
+      { ...args, timerange: { type: 'timerange', from: '15m-now', to: 'now' } },
+      {} as any
+    );
+    expect(expression.input.timeRange).toHaveProperty('from', '15m-now');
+    expect(expression.input.timeRange).toHaveProperty('to', 'now');
+    expect(expression.input.timeRange).not.toHaveProperty('type');
   });
 });

@@ -30,7 +30,7 @@ interface Pipeline {
 export const registerEsHelpers = (getService: FtrProviderContext['getService']) => {
   let pipelinesCreated: string[] = [];
 
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const createPipeline = (pipeline: Pipeline, cachePipeline?: boolean) => {
     if (cachePipeline) {

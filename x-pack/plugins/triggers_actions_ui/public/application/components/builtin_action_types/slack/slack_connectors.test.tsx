@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { SlackActionConnector } from '../types';
 import SlackActionFields from './slack_connectors';
@@ -30,6 +30,8 @@ describe('SlackActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
 
@@ -56,10 +58,33 @@ describe('SlackActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.email',
+      isMissingSecrets: true,
+      config: {},
+      secrets: {},
+    } as SlackActionConnector;
+    const wrapper = mountWithIntl(
+      <SlackActionFields
+        action={actionConnector}
+        errors={{ index: [], webhookUrl: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 
   test('should display a message on edit to re-enter credentials', () => {
@@ -79,6 +104,8 @@ describe('SlackActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);

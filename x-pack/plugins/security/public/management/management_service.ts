@@ -47,7 +47,7 @@ export class ManagementService {
     this.securitySection.registerApp(
       rolesManagementApp.create({ fatalErrors, license, getStartServices })
     );
-    this.securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
     this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
   }
 

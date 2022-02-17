@@ -6,13 +6,10 @@
  */
 
 import { shallow } from 'enzyme';
-import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -25,6 +22,16 @@ import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
+import { render } from '@testing-library/react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../../common/lib/kibana/hooks', () => ({
+  useNavigateTo: () => ({
+    navigateTo: jest.fn(),
+  }),
+}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -37,28 +44,18 @@ jest.mock('../../../common/components/query_bar', () => ({
 
 jest.mock('../../../common/components/link_to');
 
+jest.mock('../../../common/hooks/use_experimental_features');
+
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
@@ -66,14 +63,14 @@ describe('Hosts Table', () => {
       const wrapper = shallow(
         <TestProviders store={store}>
           <HostsTable
-            data={mockData.Hosts.edges}
+            data={mockData}
             id="hostsQuery"
             isInspect={false}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+            fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.Hosts.pageInfo)}
-            totalCount={mockData.Hosts.totalCount}
+            showMorePagesIndicator={false}
+            totalCount={-1}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -82,30 +79,68 @@ describe('Hosts Table', () => {
       expect(wrapper.find('HostsTable')).toMatchSnapshot();
     });
 
+    test('it renders "Host Risk classfication" column when "riskyHostsEnabled" feature flag is enabled', () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
+    });
+
+    test("it doesn't renders 'Host Risk classfication' column when 'riskyHostsEnabled' feature flag is disabled", () => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
+    });
+
     describe('Sorting on Table', () => {
       let wrapper: ReturnType<typeof mount>;
 
       beforeEach(() => {
         wrapper = mount(
-          <MockedProvider>
-            <TestProviders store={store}>
-              <HostsTable
-                id="hostsQuery"
-                isInspect={false}
-                loading={false}
-                data={mockData.Hosts.edges}
-                totalCount={mockData.Hosts.totalCount}
-                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-                showMorePagesIndicator={getOr(
-                  false,
-                  'showMorePagesIndicator',
-                  mockData.Hosts.pageInfo
-                )}
-                loadPage={loadPage}
-                type={hostsModel.HostsType.page}
-              />
-            </TestProviders>
-          </MockedProvider>
+          <TestProviders store={store}>
+            <HostsTable
+              id="hostsQuery"
+              isInspect={false}
+              loading={false}
+              data={mockData}
+              totalCount={0}
+              fakeTotalCount={-1}
+              showMorePagesIndicator={false}
+              loadPage={loadPage}
+              type={hostsModel.HostsType.page}
+            />
+          </TestProviders>
         );
       });
       test('Initial value of the store', () => {
@@ -115,9 +150,7 @@ describe('Hosts Table', () => {
           sortField: 'lastSeen',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-          'Last seen Click to sort in ascending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Last seen ');
         expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
       });
 
@@ -132,9 +165,7 @@ describe('Hosts Table', () => {
           sortField: 'hostName',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-          'Host nameClick to sort in descending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Host name');
       });
     });
   });

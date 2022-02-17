@@ -8,8 +8,10 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
+
 import type { Response } from 'node-fetch';
+
+import { splitPkgKey as split } from '../../../../common';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -19,7 +21,7 @@ import type {
   InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
+  GetCategoriesRequest,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -30,12 +32,9 @@ import {
 } from '../archive';
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
-import {
-  PackageKeyInvalidError,
-  PackageNotFoundError,
-  PackageCacheError,
-  RegistryResponseError,
-} from '../../../errors';
+import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -45,31 +44,7 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-export interface CategoriesParams {
-  experimental?: boolean;
-}
-
-/**
- * Extract the package name and package version from a string.
- *
- * @param pkgkey a string containing the package name delimited by the package version
- */
-export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // this will return an empty string if `indexOf` returns -1
-  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
-  if (pkgName === '') {
-    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
-  }
-
-  // this will return the entire string if `indexOf` return -1
-  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semverValid(pkgVersion)) {
-    throw new PackageKeyInvalidError(
-      'Package key parsing failed: package version was not a valid semver'
-    );
-  }
-  return { pkgName, pkgVersion };
-}
+export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
@@ -77,8 +52,6 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -88,32 +61,77 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
   }
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
-  const registryUrl = getRegistryUrl();
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
-  const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
-  );
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
+async function _fetchFindLatestPackage(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const { ignoreConstraints = false } = options ?? {};
+
+  const registryUrl = getRegistryUrl();
+  const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
+
+  if (!ignoreConstraints) {
+    setKibanaVersion(url);
   }
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
+
+  const res = await fetchUrl(url.toString(), 1);
+  const searchResults: RegistryPackage[] = JSON.parse(res);
+
+  return searchResults;
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+    }
+
     return searchResults[0];
-  } else {
-    throw new PackageNotFoundError(`${packageName} not found`);
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      throw error;
+    }
+
+    return bundledPackage;
+  }
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      return undefined;
+    }
+
+    return searchResults[0];
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      return undefined;
+    }
+
+    return bundledPackage;
   }
 }
 
@@ -145,14 +163,35 @@ export async function fetchFile(filePath: string): Promise<Response> {
   return getResponse(`${registryUrl}${filePath}`);
 }
 
-export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+function setKibanaVersion(url: URL) {
+  const disableVersionCheck =
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+  if (disableVersionCheck) {
+    return;
+  }
+
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+
+  if (kibanaVersion) {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
+}
+
+export async function fetchCategories(
+  params?: GetCategoriesRequest['query']
+): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
     if (params.experimental) {
       url.searchParams.set('experimental', params.experimental.toString());
     }
+    if (params.include_policy_templates) {
+      url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());
+    }
   }
+
+  setKibanaVersion(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -245,4 +284,16 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     kibana: assets.kibana,
     elasticsearch: assets.elasticsearch,
   };
+}
+
+export function getNoticePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
 }

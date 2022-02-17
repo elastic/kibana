@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'maps']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
@@ -53,13 +53,13 @@ export default function ({ getPageObjects, getService }) {
 
       it('should create filters when create filter button is clicked', async () => {
         await testSubjects.click('mapTooltipCreateFilterButton');
-        await testSubjects.click('applyFiltersPopoverButton');
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+        await PageObjects.maps.waitForLayersToLoadMinimizedLayerControl();
 
-        // TODO: Fix me #64861
-        // const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
-        // expect(hasSourceFilter).to.be(true);
+        const numFilters = await filterBar.getFilterCount();
+        expect(numFilters).to.be(1);
 
-        const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
+        const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
     });
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.equal(2);
 
-        const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
+        const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
 

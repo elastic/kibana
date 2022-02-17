@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
-import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
-import { ExceptionListItemIdentifiers } from '../types';
+import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
@@ -36,6 +36,7 @@ interface ExceptionsViewerItemsProps {
   showEmpty: boolean;
   showNoResults: boolean;
   isInitLoading: boolean;
+  disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
   commentsAccordionId: string;
@@ -52,6 +53,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   commentsAccordionId,
   onDeleteException,
   onEditExceptionItem,
+  disableActions,
 }): JSX.Element => (
   <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
     {showEmpty || showNoResults || isInitLoading ? (
@@ -93,6 +95,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
                   <EuiSpacer size="s" />
                 )}
                 <ExceptionItem
+                  disableActions={disableActions}
                   loadingItemIds={loadingItemIds}
                   commentsAccordionId={commentsAccordionId}
                   exceptionItem={exception}

@@ -7,16 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
 } from '../../../../../../common/constants';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
 // @ts-ignore
 import { handleError } from '../../../../../lib/errors';
-import { RouteDependencies } from '../../../../../types';
+import { RouteDependencies, LegacyServer } from '../../../../../types';
 
 const queryBody = {
   size: 0,
@@ -44,11 +45,11 @@ const queryBody = {
 };
 
 const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, index: string) => {
-  const { client: esClient } = context.core.elasticsearch.legacy;
-  const result = await esClient.callAsCurrentUser('search', {
+  const client = context.core.elasticsearch.client.asCurrentUser;
+  const result = await client.search<estypes.SearchResponse<unknown>>({
     index,
     body: queryBody,
-  });
+  } as estypes.SearchRequest);
 
   const { aggregations } = result;
   const counts = {
@@ -62,17 +63,14 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
 
   const {
     types: { buckets },
-  } = aggregations;
+  } = aggregations as { types: { buckets: Array<{ key: string }> } };
   counts.mbIndicesCount = buckets.filter(({ key }: { key: string }) => key.includes('-mb-')).length;
 
   counts.legacyIndicesCount = buckets.length - counts.mbIndicesCount;
   return counts;
 };
 
-export function internalMonitoringCheckRoute(
-  server: { config: () => unknown },
-  npRoute: RouteDependencies
-) {
+export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
@@ -89,11 +87,11 @@ export function internalMonitoringCheckRoute(
           mb_indices: 0,
         };
 
-        const config = server.config();
+        const config = server.config;
         const { ccs } = request.body;
-        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs, true);
-        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs, true);
-        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs, true);
+        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
+        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),

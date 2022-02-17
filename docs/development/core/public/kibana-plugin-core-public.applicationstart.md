@@ -15,9 +15,9 @@ export interface ApplicationStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [applications$](./kibana-plugin-core-public.applicationstart.applications_.md) | <code>Observable&lt;ReadonlyMap&lt;string, PublicAppInfo&gt;&gt;</code> | Observable emitting the list of currently registered apps and their associated status. |
-|  [capabilities](./kibana-plugin-core-public.applicationstart.capabilities.md) | <code>RecursiveReadonly&lt;Capabilities&gt;</code> | Gets the read-only capabilities. |
-|  [currentAppId$](./kibana-plugin-core-public.applicationstart.currentappid_.md) | <code>Observable&lt;string &#124; undefined&gt;</code> | An observable that emits the current application id and each subsequent id update. |
+|  [applications$](./kibana-plugin-core-public.applicationstart.applications_.md) | Observable&lt;ReadonlyMap&lt;string, PublicAppInfo&gt;&gt; | Observable emitting the list of currently registered apps and their associated status. |
+|  [capabilities](./kibana-plugin-core-public.applicationstart.capabilities.md) | RecursiveReadonly&lt;Capabilities&gt; | Gets the read-only capabilities. |
+|  [currentAppId$](./kibana-plugin-core-public.applicationstart.currentappid_.md) | Observable&lt;string \| undefined&gt; | An observable that emits the current application id and each subsequent id update. |
 
 ## Methods
 

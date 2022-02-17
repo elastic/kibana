@@ -45,7 +45,7 @@ export function getBundleCacheEvent$(
     const eligibleBundles: Bundle[] = [];
     const bundleRefs = BundleRefs.fromBundles(config.bundles);
 
-    for (const bundle of config.bundles) {
+    for (const bundle of config.filteredBundles) {
       if (!config.cache) {
         events.push({
           type: 'bundle not cached',

@@ -53,7 +53,7 @@ export default function () {
 To consume the test server, use can use something like supertest to send request. Just make sure that you disable your test suite if the user doesn't choose to enable your docker server:
 
 ```ts
-import makeSupertest from 'supertest-as-promised';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   const server = dockerServers.get('helloWorld');
-  const supertest = makeSupertest(server.url);
+  const request = supertest(server.url);
 
   describe('test suite name', function () {
     if (!server.enabled) {
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     it('test name', async () => {
-      await supertest.get('/foo/bar').expect(200);
+      await request.get('/foo/bar').expect(200);
     });
   });
 }

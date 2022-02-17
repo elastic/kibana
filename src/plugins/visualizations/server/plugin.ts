@@ -8,47 +8,59 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+
+import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+import { registerVisualizationsCollector } from './usage_collector';
+import { capabilitiesProvider } from './capabilities_provider';
+
+import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
 } from '../../../core/server';
-
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
-
-import { visualizationSavedObjectType } from './saved_objects';
-
-import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
-import { registerVisualizationsCollector } from './usage_collector';
+import type { UsageCollectionSetup } from '../../usage_collection/server';
+import type { EmbeddableSetup } from '../../embeddable/server';
+import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
+import { getVisualizationSavedObjectType } from './saved_objects';
 
 export class VisualizationsPlugin
-  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
+  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
+{
   private readonly logger: Logger;
-  private readonly config: Observable<{ kibana: { index: string } }>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+  public setup(
+    core: CoreSetup,
+    plugins: {
+      usageCollection?: UsageCollectionSetup;
+      embeddable: EmbeddableSetup;
+      data: DataPluginSetup;
+    }
+  ) {
     this.logger.debug('visualizations: Setup');
 
-    core.savedObjects.registerType(visualizationSavedObjectType);
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
+    core.savedObjects.registerType(getVisualizationSavedObjectType(getSearchSourceMigrations));
+    core.capabilities.registerProvider(capabilitiesProvider);
 
     core.uiSettings.register({
       [VISUALIZE_ENABLE_LABS_SETTING]: {
         name: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsTitle', {
-          defaultMessage: 'Enable experimental visualizations',
+          defaultMessage: 'Enable technical preview visualizations',
         }),
         value: true,
         description: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsText', {
-          defaultMessage: `Allows users to create, view, and edit experimental visualizations. If disabled,
-            only visualizations that are considered production-ready are available to the user.`,
+          defaultMessage: `Allows users to create, view, and edit visualizations that are in technical preview.
+            If disabled, only visualizations that are considered production-ready are available to the user.`,
         }),
         category: ['visualization'],
         schema: schema.boolean(),
@@ -56,8 +68,12 @@ export class VisualizationsPlugin
     });
 
     if (plugins.usageCollection) {
-      registerVisualizationsCollector(plugins.usageCollection, this.config);
+      registerVisualizationsCollector(plugins.usageCollection);
     }
+
+    plugins.embeddable.registerEmbeddableFactory(
+      makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
+    );
 
     return {};
   }

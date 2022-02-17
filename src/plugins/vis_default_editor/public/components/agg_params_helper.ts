@@ -72,6 +72,9 @@ function getAggParamsToRender({
     if (hideCustomLabel && param.name === 'customLabel') {
       return;
     }
+    if (param.name === 'timeShift') {
+      return;
+    }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
       let availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(agg);

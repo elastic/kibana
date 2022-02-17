@@ -12,6 +12,8 @@ export default ({ getService, getPageObjects }) => {
     const log = getService('log');
     const testSubjects = getService('testSubjects');
     const isSaml = !!process.env.VM.includes('saml') || !!process.env.VM.includes('oidc');
+    const clusterOverview = getService('monitoringClusterOverview');
+    const find = getService('find');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
@@ -25,9 +27,11 @@ export default ({ getService, getPageObjects }) => {
       }
       // navigateToApp without a username and password will default to the superuser
       await PageObjects.common.navigateToApp('monitoring', { insertTimestamp: false });
+      await clusterOverview.acceptAlertsModal();
     });
 
     it('should have Monitoring already enabled', async () => {
+      await find.clickByLinkText('elasticsearch');
       await testSubjects.click('esOverview');
     });
 

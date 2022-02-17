@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { indexPatternMock } from './index_pattern';
-import { indexPatternsMock } from './index_patterns';
+import { dataViewMock } from './data_view';
+import { dataViewsContractMock } from './data_view_contract';
 import { kibanaConfigMock } from './kibana_config';
 import { savedSearchMock } from './saved_search';
 
@@ -15,8 +15,8 @@ export const kibanaContextValueMock = {
     query: 'the-query-string',
     language: 'the-query-language',
   },
-  currentIndexPattern: indexPatternMock,
+  currentDataView: dataViewMock,
   currentSavedSearch: savedSearchMock,
-  indexPatterns: indexPatternsMock,
+  dataViewsContract: dataViewsContractMock,
   kibanaConfig: kibanaConfigMock,
 };

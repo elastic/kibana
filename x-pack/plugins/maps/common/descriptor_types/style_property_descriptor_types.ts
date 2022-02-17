@@ -215,24 +215,22 @@ export type Category = {
   count: number;
 };
 
-export type CategoryFieldMeta = {
-  categories: Category[];
-};
-
 export type GeometryTypes = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   isPolygonsOnly: boolean;
 };
 
+export type FieldMeta = {
+  [key: string]: {
+    range?: RangeFieldMeta;
+    categories: Category[];
+  };
+};
+
 export type StyleMetaDescriptor = {
   geometryTypes?: GeometryTypes;
-  fieldMeta: {
-    [key: string]: {
-      range?: RangeFieldMeta;
-      categories?: CategoryFieldMeta;
-    };
-  };
+  fieldMeta: FieldMeta;
 };
 
 export type VectorStyleDescriptor = StyleDescriptor & {

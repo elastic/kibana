@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import React from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import {
   ValidationResult,
-  Alert,
-  AlertType,
+  Rule,
+  RuleType,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -24,14 +24,14 @@ import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerting
 import { useKibana } from '../../../common/lib/kibana';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
 jest.mock('../../../common/lib/kibana');
 
 describe('alert_form', () => {
-  const alertType = {
+  const ruleType = {
     id: 'my-alert-type',
     iconClass: 'test',
     description: 'Alert when testing',
@@ -39,7 +39,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    ruleParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -47,24 +47,24 @@ describe('alert_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({
         config: {
           errors: {},
         },
         secrets: {
           errors: {},
         },
-      };
+      });
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
   });
 
-  const alertTypeNonEditable = {
+  const ruleTypeNonEditable = {
     id: 'non-edit-alert-type',
     iconClass: 'test',
     description: 'test',
@@ -72,11 +72,11 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    ruleParamsExpression: () => <></>,
     requiresAppContext: true,
   };
 
-  const disabledByLicenseAlertType = {
+  const disabledByLicenseRuleType = {
     id: 'disabled-by-license',
     iconClass: 'test',
     description: 'Alert when testing',
@@ -84,7 +84,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    ruleParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -96,7 +96,7 @@ describe('alert_form', () => {
     async function setup() {
       const mocks = coreMock.createSetup();
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
-      const alertTypes: AlertType[] = [
+      const alertTypes: RuleType[] = [
         {
           id: 'my-alert-type',
           name: 'Test',
@@ -159,16 +159,16 @@ describe('alert_form', () => {
           delete: true,
         },
       };
-      alertTypeRegistry.list.mockReturnValue([
-        alertType,
-        alertTypeNonEditable,
-        disabledByLicenseAlertType,
+      ruleTypeRegistry.list.mockReturnValue([
+        ruleType,
+        ruleTypeNonEditable,
+        disabledByLicenseRuleType,
       ]);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         params: {},
         consumer: ALERTS_FEATURE_ID,
@@ -180,7 +180,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -189,7 +189,7 @@ describe('alert_form', () => {
           errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
         />
       );
 
@@ -313,7 +313,7 @@ describe('alert_form', () => {
           delete: true,
         },
       };
-      alertTypeRegistry.list.mockReturnValue([
+      ruleTypeRegistry.list.mockReturnValue([
         {
           id: 'same-consumer-producer-alert-type',
           iconClass: 'test',
@@ -322,7 +322,7 @@ describe('alert_form', () => {
           validate: (): ValidationResult => {
             return { errors: {} };
           },
-          alertParamsExpression: () => <Fragment />,
+          ruleParamsExpression: () => <></>,
           requiresAppContext: true,
         },
         {
@@ -333,14 +333,14 @@ describe('alert_form', () => {
           validate: (): ValidationResult => {
             return { errors: {} };
           },
-          alertParamsExpression: () => <Fragment />,
+          ruleParamsExpression: () => <></>,
           requiresAppContext: false,
         },
       ]);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'non alerting consumer test',
         params: {},
         consumer: 'test',
@@ -352,7 +352,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -361,7 +361,7 @@ describe('alert_form', () => {
           errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
         />
       );
 
@@ -394,16 +394,16 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      alertTypeRegistry.list.mockReturnValue([alertType]);
-      alertTypeRegistry.get.mockReturnValue(alertType);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.list.mockReturnValue([ruleType]);
+      ruleTypeRegistry.get.mockReturnValue(ruleType);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
-        alertTypeId: alertType.id,
+        alertTypeId: ruleType.id,
         params: {},
         consumer: ALERTS_FEATURE_ID,
         schedule: {
@@ -414,7 +414,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -423,7 +423,7 @@ describe('alert_form', () => {
           errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
         />
       );
 

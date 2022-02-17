@@ -8,13 +8,13 @@
 
 /* eslint-disable no-multi-str*/
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiSteps,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -160,15 +160,24 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     );
   }
 
-  renderInstallStep = () => {
+  render() {
     const installMsg = this.props.installMsg
       ? this.props.installMsg
       : this.props.intl.formatMessage({
           id: 'home.tutorial.savedObject.installLabel',
           defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
         });
-    const installStep = (
-      <Fragment>
+
+    return (
+      <>
+        <EuiTitle size="m">
+          <h2>
+            {this.props.intl.formatMessage({
+              id: 'home.tutorial.savedObject.loadTitle',
+              defaultMessage: 'Load Kibana objects',
+            })}
+          </h2>
+        </EuiTitle>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiText>
@@ -190,22 +199,8 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
         <EuiSpacer size="s" />
 
         {this.renderInstallMessage()}
-      </Fragment>
+      </>
     );
-
-    return {
-      title: this.props.intl.formatMessage({
-        id: 'home.tutorial.savedObject.loadTitle',
-        defaultMessage: 'Load Kibana objects',
-      }),
-      status: this.state.isInstalled ? 'complete' : 'incomplete',
-      children: installStep,
-      key: 'installStep',
-    };
-  };
-
-  render() {
-    return <EuiSteps steps={[this.renderInstallStep()]} />;
   }
 }
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DeprecationsRegistry } from './deprecations_registry';
 import type { Logger } from '../logging';
 import type {
@@ -16,13 +17,21 @@ import type {
 
 export interface DeprecationsFactoryDeps {
   logger: Logger;
+  config: DeprecationsFactoryConfig;
+}
+
+export interface DeprecationsFactoryConfig {
+  ignoredConfigDeprecations: string[];
 }
 
 export class DeprecationsFactory {
   private readonly registries: Map<string, DeprecationsRegistry> = new Map();
   private readonly logger: Logger;
-  constructor({ logger }: DeprecationsFactoryDeps) {
+  private readonly config: DeprecationsFactoryConfig;
+
+  constructor({ logger, config }: DeprecationsFactoryDeps) {
     this.logger = logger;
+    this.config = config;
   }
 
   public getRegistry = (domainId: string): DeprecationsRegistry => {
@@ -40,7 +49,7 @@ export class DeprecationsFactory {
     dependencies: GetDeprecationsContext
   ): Promise<DomainDeprecationDetails[]> => {
     const infoBody = await this.getDeprecationsBody(domainId, dependencies);
-    return this.createDeprecationInfo(domainId, infoBody).flat();
+    return this.createDeprecationInfo(domainId, infoBody);
   };
 
   public getAllDeprecations = async (
@@ -62,13 +71,10 @@ export class DeprecationsFactory {
     domainId: string,
     deprecationInfoBody: DeprecationsDetails[]
   ): DomainDeprecationDetails[] => {
-    return deprecationInfoBody
-      .flat()
-      .filter(Boolean)
-      .map((pluginDeprecation) => ({
-        ...pluginDeprecation,
-        domainId,
-      }));
+    return deprecationInfoBody.map((pluginDeprecation) => ({
+      ...pluginDeprecation,
+      domainId,
+    }));
   };
 
   private getDeprecationsBody = async (
@@ -89,16 +95,30 @@ export class DeprecationsFactory {
           );
           return [
             {
-              message: `Failed to get deprecations info for plugin "${domainId}".`,
+              title: i18n.translate('core.deprecations.deprecations.fetchFailedTitle', {
+                defaultMessage: `Failed to fetch deprecations for {domainId}`,
+                values: { domainId },
+              }),
+              message: i18n.translate('core.deprecations.deprecations.fetchFailedMessage', {
+                defaultMessage: 'Unable to fetch deprecations info for plugin {domainId}.',
+                values: { domainId },
+              }),
               level: 'fetch_error',
               correctiveActions: {
-                manualSteps: ['Check Kibana server logs for error message.'],
+                manualSteps: [
+                  i18n.translate(
+                    'core.deprecations.deprecations.fetchFailed.manualStepOneMessage',
+                    {
+                      defaultMessage: 'Check Kibana server logs for error message.',
+                    }
+                  ),
+                ],
               },
             },
           ];
         }
 
-        return settledResult.value;
+        return filterIgnoredDeprecations(settledResult.value.flat(), this.config);
       });
     } catch (err) {
       this.logger.warn(`Failed to get deprecations info for plugin "${domainId}".`, err);
@@ -106,3 +126,15 @@ export class DeprecationsFactory {
     }
   };
 }
+
+const filterIgnoredDeprecations = (
+  deprecations: DeprecationsDetails[],
+  config: DeprecationsFactoryConfig
+): DeprecationsDetails[] => {
+  return deprecations.filter((deprecation) => {
+    if (deprecation.deprecationType === 'config') {
+      return !config.ignoredConfigDeprecations.includes(deprecation.configPath);
+    }
+    return true;
+  });
+};

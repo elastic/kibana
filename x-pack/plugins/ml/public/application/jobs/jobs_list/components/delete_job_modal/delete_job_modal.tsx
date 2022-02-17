@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiModal,
@@ -20,11 +20,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { deleteJobs } from '../utils';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
+import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
-type ShowFunc = (jobs: Array<{ id: string }>) => void;
+type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
 interface Props {
   setShowFunction(showFunc: ShowFunc): void;
@@ -37,6 +41,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [canDelete, setCanDelete] = useState(false);
+  const [hasManagedJob, setHasManagedJob] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -49,18 +54,19 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     };
   }, []);
 
-  function showModal(jobs: any[]) {
+  const showModal = useCallback((jobs: MlSummaryJob[]) => {
     setJobIds(jobs.map(({ id }) => id));
+    setHasManagedJob(jobs.some((job) => isManagedJob(job)));
     setModalVisible(true);
     setDeleting(false);
-  }
+  }, []);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setModalVisible(false);
     setCanDelete(false);
-  }
+  }, []);
 
-  function deleteJob() {
+  const deleteJob = useCallback(() => {
     setDeleting(true);
     deleteJobs(jobIds.map((id) => ({ id })));
 
@@ -68,7 +74,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }
+  }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
@@ -103,17 +109,30 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                 </div>
               </div>
             ) : (
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                  defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
+              <>
+                {hasManagedJob ? (
+                  <>
+                    <ManagedJobsWarningCallout
+                      jobsCount={jobIds.length}
+                      action={i18n.translate('xpack.ml.jobsList.deleteJobModal.deleteAction', {
+                        defaultMessage: 'deleting',
+                      })}
+                    />
+                    <EuiSpacer />
+                  </>
+                ) : null}
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
+                    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
                 {jobsCount, plural, one {It} other {They}} will be deleted in the background
                 and may not disappear from the jobs list instantly."
-                  values={{
-                    jobsCount: jobIds.length,
-                  }}
-                />
-              </EuiText>
+                    values={{
+                      jobsCount: jobIds.length,
+                    }}
+                  />
+                </EuiText>
+              </>
             )}
           </p>
         </EuiModalBody>
@@ -154,6 +173,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
           }}
           onCloseCallback={closeModal}
           refreshJobsCallback={refreshJobs}
+          hasManagedJob={hasManagedJob}
         />
       </>
     );

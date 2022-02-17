@@ -6,17 +6,18 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import {
+import type {
   FilterOrUndefined,
   FoundExceptionListItemSchema,
   ListId,
   NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
+  PitOrUndefined,
+  SearchAfterOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { findExceptionListsItem } from './find_exception_list_items';
 
@@ -25,10 +26,12 @@ interface FindExceptionListItemOptions {
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
   filter: FilterOrUndefined;
-  perPage: PerPageOrUndefined;
   page: PageOrUndefined;
+  perPage: PerPageOrUndefined;
+  pit: PitOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+  searchAfter: SearchAfterOrUndefined;
 }
 
 export const findExceptionListItem = async ({
@@ -38,6 +41,8 @@ export const findExceptionListItem = async ({
   filter,
   page,
   perPage,
+  pit,
+  searchAfter,
   sortField,
   sortOrder,
 }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
@@ -47,7 +52,9 @@ export const findExceptionListItem = async ({
     namespaceType: [namespaceType],
     page,
     perPage,
+    pit,
     savedObjectsClient,
+    searchAfter,
     sortField,
     sortOrder,
   });

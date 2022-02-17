@@ -6,21 +6,23 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
-import * as listsApi from '../../../../../lists/public/exceptions/api';
+import * as listsApi from '@kbn/securitysolution-list-api';
 import * as getQueryFilterHelper from '../../../../common/detection_engine/get_query_filter';
 import * as buildFilterHelpers from '../../../detections/components/alerts_table/default_config';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../lists_plugin_deps';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { TestProviders } from '../../mock';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -31,28 +33,25 @@ import {
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../common/lib/kibana');
+jest.mock('@kbn/securitysolution-list-api');
 
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('useAddOrUpdateException', () => {
-  let updateAlertStatus: jest.SpyInstance<ReturnType<typeof alertsApi.updateAlertStatus>>;
-  let addExceptionListItem: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionListItem>>;
-  let updateExceptionListItem: jest.SpyInstance<
-    ReturnType<typeof listsApi.updateExceptionListItem>
-  >;
+  let updateAlertStatus: jest.SpyInstance<Promise<estypes.UpdateByQueryResponse>>;
+  let addExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
+  let updateExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
-  let buildAlertStatusFilter: jest.SpyInstance<
-    ReturnType<typeof buildFilterHelpers.buildAlertStatusFilter>
+  let buildAlertStatusesFilter: jest.SpyInstance<
+    ReturnType<typeof buildFilterHelpers.buildAlertStatusesFilter>
   >;
-  let buildAlertsRuleIdFilter: jest.SpyInstance<
-    ReturnType<typeof buildFilterHelpers.buildAlertsRuleIdFilter>
-  >;
+  let buildAlertsFilter: jest.SpyInstance<ReturnType<typeof buildFilterHelpers.buildAlertsFilter>>;
   let addOrUpdateItemsArgs: Parameters<AddOrUpdateExceptionItemsFunc>;
   let render: () => RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>;
   const onError = jest.fn();
   const onSuccess = jest.fn();
-  const ruleId = 'rule-id';
+  const ruleStaticId = 'rule-id';
   const alertIdToClose = 'idToClose';
   const bulkCloseIndex = ['.custom'];
   const itemsToAdd: CreateExceptionListItemSchema[] = [
@@ -127,18 +126,22 @@ describe('useAddOrUpdateException', () => {
 
     getQueryFilter = jest.spyOn(getQueryFilterHelper, 'getQueryFilter');
 
-    buildAlertStatusFilter = jest.spyOn(buildFilterHelpers, 'buildAlertStatusFilter');
+    buildAlertStatusesFilter = jest.spyOn(buildFilterHelpers, 'buildAlertStatusesFilter');
 
-    buildAlertsRuleIdFilter = jest.spyOn(buildFilterHelpers, 'buildAlertsRuleIdFilter');
+    buildAlertsFilter = jest.spyOn(buildFilterHelpers, 'buildAlertsFilter');
 
-    addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate];
+    addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate];
     render = () =>
-      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(() =>
-        useAddOrUpdateException({
-          http: mockKibanaHttpService,
-          onError,
-          onSuccess,
-        })
+      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
+        () =>
+          useAddOrUpdateException({
+            http: mockKibanaHttpService,
+            onError,
+            onSuccess,
+          }),
+        {
+          wrapper: TestProviders,
+        }
       );
   });
 
@@ -254,7 +257,7 @@ describe('useAddOrUpdateException', () => {
 
   describe('when alertIdToClose is passed in', () => {
     beforeEach(() => {
-      addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate, alertIdToClose];
+      addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate, alertIdToClose];
     });
     it('should update the alert status', async () => {
       await act(async () => {
@@ -309,7 +312,7 @@ describe('useAddOrUpdateException', () => {
 
   describe('when bulkCloseIndex is passed in', () => {
     beforeEach(() => {
-      addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate, undefined, bulkCloseIndex];
+      addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate, undefined, bulkCloseIndex];
     });
     it('should update the status of only alerts that are open', async () => {
       await act(async () => {
@@ -323,8 +326,12 @@ describe('useAddOrUpdateException', () => {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
         await waitForNextUpdate();
-        expect(buildAlertStatusFilter).toHaveBeenCalledTimes(1);
-        expect(buildAlertStatusFilter.mock.calls[0][0]).toEqual('open');
+        expect(buildAlertStatusesFilter).toHaveBeenCalledTimes(1);
+        expect(buildAlertStatusesFilter.mock.calls[0][0]).toEqual([
+          'open',
+          'acknowledged',
+          'in-progress',
+        ]);
       });
     });
     it('should update the status of only alerts generated by the provided rule', async () => {
@@ -339,8 +346,8 @@ describe('useAddOrUpdateException', () => {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
         await waitForNextUpdate();
-        expect(buildAlertsRuleIdFilter).toHaveBeenCalledTimes(1);
-        expect(buildAlertsRuleIdFilter.mock.calls[0][0]).toEqual(ruleId);
+        expect(buildAlertsFilter).toHaveBeenCalledTimes(1);
+        expect(buildAlertsFilter.mock.calls[0][0]).toEqual(ruleStaticId);
       });
     });
     it('should generate the query filter using exceptions', async () => {

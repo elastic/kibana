@@ -6,4 +6,4 @@
  */
 
 export { parseSearchParams } from './parse_search_params';
-export { ParsedSearchParams, FilterValues, FilterValueType } from './types';
+export type { ParsedSearchParams, FilterValues, FilterValueType } from './types';

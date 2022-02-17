@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { MlRouter, MlRoute } from './router';
+export type { MlRoute } from './router';
+export { MlRouter } from './router';

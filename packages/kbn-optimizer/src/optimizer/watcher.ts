@@ -38,7 +38,6 @@ export class Watcher {
 
   private readonly watchpack = new Watchpack({
     aggregateTimeout: 0,
-    ignored: /node_modules\/([^\/]+[\/])*(?!package.json)([^\/]+)$/,
   });
 
   private readonly change$ = Rx.fromEvent<[string]>(this.watchpack, 'change').pipe(share());

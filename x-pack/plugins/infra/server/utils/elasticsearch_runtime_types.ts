@@ -7,12 +7,12 @@
 
 import * as rt from 'io-ts';
 
-export const shardFailureRT = rt.type({
-  index: rt.string,
-  node: rt.string,
-  reason: rt.type({
-    reason: rt.string,
-    type: rt.string,
+export const shardFailureRT = rt.partial({
+  index: rt.union([rt.string, rt.null]),
+  node: rt.union([rt.string, rt.null]),
+  reason: rt.partial({
+    reason: rt.union([rt.string, rt.null]),
+    type: rt.union([rt.string, rt.null]),
   }),
   shard: rt.number,
 });

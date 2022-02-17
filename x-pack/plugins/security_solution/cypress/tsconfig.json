@@ -1,16 +1,23 @@
 {
   "extends": "../../../../tsconfig.base.json",
-  "exclude": [],
   "include": [
-    "./**/*"
+    "**/*",
+    "fixtures/**/*.json"
+  ],
+  "exclude": [
+    "target/**/*"
   ],
   "compilerOptions": {
-    "tsBuildInfoFile": "../../../../build/tsbuildinfo/security_solution/cypress",
+    "target": "ES2019",
+    "outDir": "target/types",
     "types": [
       "cypress",
+      "cypress-file-upload",
       "cypress-pipe",
-      "node"
+      "node",
     ],
-    "resolveJsonModule": true,
   },
+  "references": [
+    { "path": "../tsconfig.json" }
+  ]
 }

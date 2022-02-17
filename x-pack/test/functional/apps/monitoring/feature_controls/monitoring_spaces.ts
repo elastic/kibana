@@ -17,13 +17,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
-      await PageObjects.common.navigateToApp('home');
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('space with no features disabled', () => {
@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
 
-        const exists = await find.existsByCssSelector('monitoring-main');
+        const exists = await find.existsByCssSelector('[data-test-subj="monitoringAppContainer"]');
         expect(exists).to.be(true);
       });
     });

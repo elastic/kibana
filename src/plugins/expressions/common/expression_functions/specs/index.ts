@@ -6,38 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { clog } from './clog';
-import { font } from './font';
-import { variableSet } from './var_set';
-import { variable } from './var';
-import { AnyExpressionFunctionDefinition } from '../types';
-import { theme } from './theme';
-import { cumulativeSum } from './cumulative_sum';
-import { derivative } from './derivative';
-import { movingAverage } from './moving_average';
-import { mapColumn } from './map_column';
-import { math } from './math';
-
-export const functionSpecs: AnyExpressionFunctionDefinition[] = [
-  clog,
-  font,
-  variableSet,
-  variable,
-  theme,
-  cumulativeSum,
-  derivative,
-  movingAverage,
-  mapColumn,
-  math,
-];
-
 export * from './clog';
+export * from './create_table';
 export * from './font';
 export * from './var_set';
 export * from './var';
 export * from './theme';
 export * from './cumulative_sum';
+export * from './overall_metric';
 export * from './derivative';
 export * from './moving_average';
-export { mapColumn, MapColumnArguments } from './map_column';
-export { math, MathArguments, MathInput } from './math';
+export * from './ui_setting';
+export type { MapColumnArguments } from './map_column';
+export { mapColumn } from './map_column';
+export type { MathArguments, MathInput } from './math';
+export { math } from './math';
+export type { MathColumnArguments } from './math_column';
+export { mathColumn } from './math_column';

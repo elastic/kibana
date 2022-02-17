@@ -6,8 +6,18 @@
  */
 
 import { getPieVisualization } from './visualization';
-import { PieVisualizationState } from './types';
+import {
+  PieVisualizationState,
+  PieChartTypes,
+  CategoryDisplay,
+  NumberDisplay,
+  LegendDisplay,
+} from '../../common';
+import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
+import { FramePublicAPI } from '../types';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -15,22 +25,34 @@ const LAYER_ID = 'l1';
 
 const pieVisualization = getPieVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 function getExampleState(): PieVisualizationState {
   return {
-    shape: 'pie',
+    shape: PieChartTypes.PIE,
     layers: [
       {
         layerId: LAYER_ID,
+        layerType: layerTypes.DATA,
         groups: [],
         metric: undefined,
-        numberDisplay: 'percent',
-        categoryDisplay: 'default',
-        legendDisplay: 'default',
+        numberDisplay: NumberDisplay.PERCENT,
+        categoryDisplay: CategoryDisplay.DEFAULT,
+        legendDisplay: LegendDisplay.DEFAULT,
         nestedLegend: false,
       },
     ],
+  };
+}
+
+function mockFrame(): FramePublicAPI {
+  return {
+    ...createMockFramePublicAPI(),
+    datasourceLayers: {
+      l1: createMockDatasource('l1').publicAPIMock,
+      l42: createMockDatasource('l42').publicAPIMock,
+    },
   };
 }
 
@@ -43,6 +65,20 @@ describe('pie_visualization', () => {
       expect(error).not.toBeDefined();
     });
   });
+
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(pieVisualization.getSupportedLayers()).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(pieVisualization.getLayerType(LAYER_ID, getExampleState())).toEqual(layerTypes.DATA);
+      expect(pieVisualization.getLayerType('foo', getExampleState())).toBeUndefined();
+    });
+  });
+
   describe('#setDimension', () => {
     it('returns expected state', () => {
       const prevState: PieVisualizationState = {
@@ -50,25 +86,27 @@ describe('pie_visualization', () => {
           {
             groups: ['a'],
             layerId: LAYER_ID,
-            numberDisplay: 'percent',
-            categoryDisplay: 'default',
-            legendDisplay: 'default',
+            layerType: layerTypes.DATA,
+            numberDisplay: NumberDisplay.PERCENT,
+            categoryDisplay: CategoryDisplay.DEFAULT,
+            legendDisplay: LegendDisplay.DEFAULT,
             nestedLegend: false,
             metric: undefined,
           },
         ],
-        shape: 'donut',
+        shape: PieChartTypes.DONUT,
       };
       const setDimensionResult = pieVisualization.setDimension({
         prevState,
         columnId: 'x',
         layerId: LAYER_ID,
         groupId: 'a',
+        frame: mockFrame(),
       });
 
       expect(setDimensionResult).toEqual(
         expect.objectContaining({
-          shape: 'donut',
+          shape: PieChartTypes.DONUT,
         })
       );
     });

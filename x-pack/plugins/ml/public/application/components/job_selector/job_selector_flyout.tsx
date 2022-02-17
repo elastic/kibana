@@ -35,22 +35,26 @@ import { JobSelectionMaps } from './job_selector';
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
+export interface JobSelectionResult {
+  newSelection: string[];
+  jobIds: string[];
+  groups: Array<{ groupId: string; jobIds: string[] }>;
+  time: { from: string; to: string } | undefined;
+}
+
 export interface JobSelectorFlyoutProps {
   dateFormatTz: string;
   selectedIds?: string[];
   newSelection?: string[];
   onFlyoutClose: () => void;
   onJobsFetched?: (maps: JobSelectionMaps) => void;
-  onSelectionConfirmed: (payload: {
-    newSelection: string[];
-    jobIds: string[];
-    groups: Array<{ groupId: string; jobIds: string[] }>;
-    time: any;
-  }) => void;
+  onSelectionConfirmed: (payload: JobSelectionResult) => void;
   singleSelection: boolean;
   timeseriesOnly: boolean;
   maps: JobSelectionMaps;
   withTimeRangeSelector?: boolean;
+  applyTimeRangeConfig?: boolean;
+  onTimeRangeConfigChange?: (v: boolean) => void;
 }
 
 export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
@@ -62,6 +66,8 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   onSelectionConfirmed,
   onFlyoutClose,
   maps,
+  applyTimeRangeConfig,
+  onTimeRangeConfigChange,
   withTimeRangeSelector = true,
 }) => {
   const {
@@ -75,7 +81,6 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
-  const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
@@ -101,7 +106,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     // create a Set to remove duplicate values
     const allNewSelectionUnique = Array.from(new Set(allNewSelection));
 
-    const time = applyTimeRange
+    const time = applyTimeRangeConfig
       ? getTimeRangeFromSelection(jobs, allNewSelectionUnique)
       : undefined;
 
@@ -111,14 +116,16 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       groups: groupSelection,
       time,
     });
-  }, [onSelectionConfirmed, newSelection, jobGroupsMaps, applyTimeRange]);
+  }, [onSelectionConfirmed, newSelection, jobGroupsMaps, applyTimeRangeConfig]);
 
   function removeId(id: string) {
     setNewSelection(newSelection.filter((item) => item !== id));
   }
 
   function toggleTimerangeSwitch() {
-    setApplyTimeRange(!applyTimeRange);
+    if (onTimeRangeConfigChange) {
+      onTimeRangeConfigChange(!applyTimeRangeConfig);
+    }
   }
 
   function clearSelection() {
@@ -135,9 +142,8 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     if (jobs.length === 0 || !flyoutEl.current) return;
 
     // get all cols in flyout table
-    const tableHeaderCols: NodeListOf<HTMLElement> = flyoutEl.current.querySelectorAll(
-      'table thead th'
-    );
+    const tableHeaderCols: NodeListOf<HTMLElement> =
+      flyoutEl.current.querySelectorAll('table thead th');
     // get the width of the last col
     const derivedWidth = tableHeaderCols[tableHeaderCols.length - 1].offsetWidth - 16;
     const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);
@@ -188,7 +194,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody className="mlJobSelectorFlyoutBody">
+      <EuiFlyoutBody className="mlJobSelectorFlyoutBody" data-test-subj={'mlJobSelectorFlyoutBody'}>
         <EuiResizeObserver onResize={handleResize}>
           {(resizeRef) => (
             <div
@@ -233,7 +239,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                             </EuiButtonEmpty>
                           )}
                         </EuiFlexItem>
-                        {withTimeRangeSelector && (
+                        {withTimeRangeSelector && applyTimeRangeConfig !== undefined && (
                           <EuiFlexItem grow={false}>
                             <EuiSwitch
                               label={i18n.translate(
@@ -242,7 +248,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                                   defaultMessage: 'Apply time range',
                                 }
                               )}
-                              checked={applyTimeRange}
+                              checked={applyTimeRangeConfig}
                               onChange={toggleTimerangeSwitch}
                               data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
                             />

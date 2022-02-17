@@ -15,10 +15,12 @@ import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
+import type { ThemeServiceStart } from '../theme';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
+  AppDeepLink,
   AppLeaveHandler,
   AppMount,
   AppNavLinkStatus,
@@ -43,6 +45,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  theme: ThemeServiceStart;
   overlays: OverlayStart;
 }
 
@@ -53,6 +56,7 @@ function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
     )
   );
 }
+
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
 
@@ -61,6 +65,11 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
     ? `/${mounters.get(appId)!.appRoute}`
     : `/app/${appId}`;
   return appendAppPath(appBasePath, path);
+};
+
+const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) => {
+  const flattenedLinks = flattenDeepLinks(app.deepLinks);
+  return flattenedLinks[deepLinkId];
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -92,6 +101,7 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
+  private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
 
@@ -115,6 +125,11 @@ export class ApplicationService {
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
       return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+    };
+
+    this.openInNewTab = (url) => {
+      // window.open shares session information if base url is same
+      return window.open(appendAppPath(basename, url), '_blank');
     };
 
     this.redirectTo = redirectTo;
@@ -160,6 +175,7 @@ export class ApplicationService {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -177,7 +193,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -218,7 +234,7 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state, replace = false }: NavigateToAppOptions = {}
+      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
@@ -226,15 +242,27 @@ export class ApplicationService {
         ? true
         : await this.shouldNavigate(overlays, appId);
 
+      const targetApp = applications$.value.get(appId);
+
       if (shouldNavigate) {
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
+        }
         if (path === undefined) {
-          path = applications$.value.get(appId)?.defaultPath;
+          path = targetApp?.defaultPath;
         }
-        if (!navigatingToSameApp) {
-          this.appInternalStates.delete(this.currentAppId$.value!);
+        if (openInNewTab) {
+          this.openInNewTab!(getAppUrl(availableMounters, appId, path));
+        } else {
+          if (!navigatingToSameApp) {
+            this.appInternalStates.delete(this.currentAppId$.value!);
+          }
+          this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+          this.currentAppId$.next(appId);
         }
-        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
-        this.currentAppId$.next(appId);
       }
     };
 
@@ -258,8 +286,20 @@ export class ApplicationService {
       history: this.history!,
       getUrlForApp: (
         appId,
-        { path, absolute = false }: { path?: string; absolute?: boolean } = {}
+        {
+          path,
+          absolute = false,
+          deepLinkId,
+        }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
+        const targetApp = applications$.value.get(appId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
+        }
+
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
@@ -279,6 +319,7 @@ export class ApplicationService {
         return (
           <AppRouter
             history={this.history}
+            theme$={theme.theme$}
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
@@ -324,6 +365,8 @@ export class ApplicationService {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
+        confirmButtonText: action.confirmButtonText,
+        buttonColor: action.buttonColor,
       });
       if (!confirmed) {
         if (action.callback) {
@@ -371,13 +414,42 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
         ...fields,
         // status and navLinkStatus enums are ordered by reversed priority
         // if multiple updaters wants to change these fields, we will always follow the priority order.
-        status: Math.max(changes.status ?? 0, fields.status ?? 0),
-        navLinkStatus: Math.max(changes.navLinkStatus ?? 0, fields.navLinkStatus ?? 0),
+        status: Math.max(
+          changes.status ?? AppStatus.accessible,
+          fields.status ?? AppStatus.accessible
+        ),
+        navLinkStatus: Math.max(
+          changes.navLinkStatus ?? AppNavLinkStatus.default,
+          fields.navLinkStatus ?? AppNavLinkStatus.default
+        ),
+        ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
   });
+
   return {
     ...app,
     ...changes,
   };
+};
+
+const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
+  if (!deepLinks) {
+    return [];
+  }
+  return deepLinks.map((deepLink) => ({
+    ...deepLink,
+    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
+  }));
+};
+
+const flattenDeepLinks = (deepLinks?: AppDeepLink[]): Record<string, string> => {
+  if (!deepLinks) {
+    return {};
+  }
+  return deepLinks.reduce((deepLinkPaths: Record<string, string>, deepLink) => {
+    if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
+    return { ...deepLinkPaths, ...flattenDeepLinks(deepLink.deepLinks) };
+  }, {});
 };

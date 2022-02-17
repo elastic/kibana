@@ -7,7 +7,7 @@
  */
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { Component } from 'react';
 import React from 'react';
 
@@ -161,7 +161,7 @@ class FilterOptionsUI extends Component<Props, State> {
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="m">
           <FormattedMessage
             id="data.filter.searchBar.changeAllFiltersTitle"
             defaultMessage="Change all filters"

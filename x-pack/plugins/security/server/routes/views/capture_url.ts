@@ -17,11 +17,7 @@ export function defineCaptureURLRoutes({ httpResources }: RouteDefinitionParams)
     {
       path: '/internal/security/capture-url',
       validate: {
-        query: schema.object({
-          providerType: schema.string({ minLength: 1 }),
-          providerName: schema.string({ minLength: 1 }),
-          next: schema.maybe(schema.string()),
-        }),
+        query: schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' }),
       },
       options: { authRequired: false },
     },

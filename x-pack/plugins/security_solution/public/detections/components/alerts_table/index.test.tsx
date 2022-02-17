@@ -35,11 +35,11 @@ describe('AlertsTableComponent', () => {
           isSelectAllChecked={false}
           clearSelected={jest.fn()}
           setEventsLoading={jest.fn()}
-          clearEventsLoading={jest.fn()}
           setEventsDeleted={jest.fn()}
-          clearEventsDeleted={jest.fn()}
           showBuildingBlockAlerts={false}
           onShowBuildingBlockAlertsChanged={jest.fn()}
+          showOnlyThreatIndicatorAlerts={false}
+          onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
         />
       </TestProviders>
     );

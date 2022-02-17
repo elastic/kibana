@@ -12,3 +12,7 @@
 .insRequestSelector__menuSpinner {
   margin-left: $euiSizeS;
 }
+
+.insRequestCodeViewer .react-monaco-editor-container {
+  flex-grow: 1; // Ensure the editor takes the full height of its flex container on Safari.
+}

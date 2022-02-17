@@ -23,10 +23,15 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
-import { DashboardPicker } from '../../services/presentation_util';
+import { LazyDashboardPicker, withSuspense } from '../../services/presentation_util';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
-import { createDashboardEditUrl, DashboardConstants } from '../..';
+import {
+  EmbeddableStateTransfer,
+  IEmbeddable,
+  PanelNotFoundError,
+} from '../../services/embeddable';
+import { createDashboardEditUrl, DashboardConstants, DashboardContainer } from '../..';
+import { DashboardPanelState } from '..';
 
 interface CopyToDashboardModalProps {
   capabilities: DashboardCopyToCapabilities;
@@ -36,6 +41,8 @@ interface CopyToDashboardModalProps {
   dashboardId?: string;
   closeModal: () => void;
 }
+
+const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({
   PresentationUtilContext,
@@ -51,9 +58,16 @@ export function CopyToDashboardModal({
   );
 
   const onSubmit = useCallback(() => {
+    const dashboard = embeddable.getRoot() as DashboardContainer;
+    const panelToCopy = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+    if (!panelToCopy) {
+      throw new PanelNotFoundError();
+    }
     const state = {
-      input: omit(embeddable.getInput(), 'id'),
       type: embeddable.type,
+      input: {
+        ...omit(panelToCopy.explicitInput, 'id'),
+      },
     };
 
     const path =

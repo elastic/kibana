@@ -93,8 +93,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     onConfig,
     context,
   }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const variables = React.useMemo(() => this.getVariableList(context), [context]);
+    const [variables, exampleUrl] = React.useMemo(
+      () => [this.getVariableList(context), this.getExampleUrl(context)],
+      [context]
+    );
 
     return (
       <KibanaContextProvider
@@ -104,6 +106,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       >
         <UrlDrilldownCollectConfig
           variables={variables}
+          exampleUrl={exampleUrl}
           config={config}
           onConfig={onConfig}
           syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
@@ -117,7 +120,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly createConfig = () => ({
     url: {
-      template: 'https://example.com/?{{event.key}}={{event.value}}',
+      template: '',
     },
     openInNewTab: true,
     encodeUrl: true,
@@ -129,7 +132,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     const scope = this.getRuntimeVariables(context);
-    const { isValid, error } = urlDrilldownValidateUrlTemplate(config.url, scope);
+    const { isValid, error } = await urlDrilldownValidateUrlTemplate(config.url, scope);
 
     if (!isValid) {
       // eslint-disable-next-line no-console
@@ -139,7 +142,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       return false;
     }
 
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       return false;
@@ -148,9 +151,9 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return true;
   };
 
-  private buildUrl(config: Config, context: ActionContext): string {
+  private async buildUrl(config: Config, context: ActionContext): Promise<string> {
     const doEncode = config.encodeUrl ?? true;
-    const url = urlDrilldownCompileUrl(
+    const url = await urlDrilldownCompileUrl(
       config.url.template,
       this.getRuntimeVariables(context),
       doEncode
@@ -159,7 +162,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   }
 
   public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       throw new Error(
@@ -196,5 +199,19 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     const globalVariables = getGlobalVariableList(globalScopeValues);
 
     return [...eventVariables, ...contextVariables, ...globalVariables];
+  };
+
+  public readonly getExampleUrl = (context: ActionFactoryContext): string => {
+    switch (context.triggers[0]) {
+      case SELECT_RANGE_TRIGGER:
+        return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
+      case CONTEXT_MENU_TRIGGER:
+        return 'https://www.example.com/?panel={{context.panel.title}}';
+      case ROW_CLICK_TRIGGER:
+        return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
+      case VALUE_CLICK_TRIGGER:
+      default:
+        return 'https://www.example.com/?{{event.key}}={{event.value}}';
+    }
   };
 }

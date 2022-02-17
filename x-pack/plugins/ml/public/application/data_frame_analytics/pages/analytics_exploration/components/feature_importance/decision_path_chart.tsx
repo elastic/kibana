@@ -6,7 +6,7 @@
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   AxisStyle,
   Chart,
@@ -24,7 +24,7 @@ import { EuiIcon } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
 import {
@@ -43,7 +43,6 @@ const baselineStyle: LineAnnotationStyle = {
   details: {
     fontFamily: 'Arial',
     fontSize: 10,
-    fontStyle: 'bold',
     fill: euiColorMediumShade,
     padding: 0,
   },
@@ -137,7 +136,7 @@ export const DecisionPathChart = ({
         {regressionBaselineData && (
           <LineAnnotation
             id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
-            domainType={AnnotationDomainTypes.YDomain}
+            domainType={AnnotationDomainType.YDomain}
             dataValues={regressionBaselineData}
             style={baselineStyle}
             marker={AnnotationBaselineMarker}

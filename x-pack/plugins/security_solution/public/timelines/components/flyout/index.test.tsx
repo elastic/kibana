@@ -11,7 +11,6 @@ import React from 'react';
 import '../../../common/mock/react_beautiful_dnd';
 
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -35,7 +34,6 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../timeline', () => ({
-  // eslint-disable-next-line react/display-name
   StatefulTimeline: () => <div />,
 }));
 
@@ -78,7 +76,6 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
         kibanaObservable,
         storage
       );

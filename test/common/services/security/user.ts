@@ -33,7 +33,7 @@ export class User {
 
   public async delete(username: string) {
     this.log.debug(`deleting user ${username}`);
-    const { data, status, statusText } = await await this.kbnClient.request({
+    const { data, status, statusText } = await this.kbnClient.request({
       path: `/internal/security/users/${username}`,
       method: 'DELETE',
     });
@@ -43,5 +43,33 @@ export class User {
       );
     }
     this.log.debug(`deleted user ${username}`);
+  }
+
+  public async disable(username: string) {
+    this.log.debug(`disabling user ${username}`);
+    const { data, status, statusText } = await this.kbnClient.request({
+      path: `/internal/security/users/${encodeURIComponent(username)}/_disable`,
+      method: 'POST',
+    });
+    if (status !== 204) {
+      throw new Error(
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
+      );
+    }
+    this.log.debug(`disabled user ${username}`);
+  }
+
+  public async enable(username: string) {
+    this.log.debug(`enabling user ${username}`);
+    const { data, status, statusText } = await this.kbnClient.request({
+      path: `/internal/security/users/${encodeURIComponent(username)}/_enable`,
+      method: 'POST',
+    });
+    if (status !== 204) {
+      throw new Error(
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
+      );
+    }
+    this.log.debug(`enabled user ${username}`);
   }
 }

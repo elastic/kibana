@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 
+import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 import { index } from '../common/schemas';
-import { PositiveInteger, PositiveIntegerGreaterThanZero } from '../types';
 
 export const signalsReindexOptions = t.partial({
   requests_per_second: t.number,

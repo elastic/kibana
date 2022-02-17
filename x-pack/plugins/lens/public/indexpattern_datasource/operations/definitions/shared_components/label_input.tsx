@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useRef } from 'react';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '../../../../shared_components';
 
 export const LabelInput = ({
   value,
@@ -27,20 +27,14 @@ export const LabelInput = ({
   dataTestSubj?: string;
   compressed?: boolean;
 }) => {
-  const [inputValue, setInputValue] = useState(value);
-
-  useDebounce(() => onChange(inputValue), 256, [inputValue]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = String(e.target.value);
-    setInputValue(val);
-  };
+  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
+  const localKeyHold = useRef(false);
 
   return (
     <EuiFieldText
       data-test-subj={dataTestSubj || 'lens-labelInput'}
       value={inputValue}
-      onChange={handleInputChange}
+      onChange={(e) => handleInputChange(e.target.value)}
       fullWidth
       placeholder={placeholder || ''}
       inputRef={(node) => {
@@ -48,10 +42,15 @@ export const LabelInput = ({
           inputRef.current = node;
         }
       }}
+      onKeyDown={() => {
+        localKeyHold.current = true;
+      }}
       onKeyUp={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
-        if (keys.ENTER === key && onSubmit) {
+        // only submit on key up in case the user started the keypress while the input was focused
+        if (localKeyHold.current && keys.ENTER === key && onSubmit) {
           onSubmit();
         }
+        localKeyHold.current = false;
       }}
       prepend={i18n.translate('xpack.lens.labelInput.label', {
         defaultMessage: 'Label',

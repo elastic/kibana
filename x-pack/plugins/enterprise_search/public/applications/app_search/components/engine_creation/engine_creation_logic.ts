@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { generatePath } from 'react-router-dom';
-
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
 
 import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
+import { getRedirectToAfterEngineCreation } from './utils';
 
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
+  setIngestionMethod(method: string): { method: string };
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
+  onSubmitError(): void;
 }
 
 interface EngineCreationValues {
+  ingestionMethod: string;
+  isLoading: boolean;
   language: string;
   name: string;
   rawName: string;
@@ -34,11 +36,26 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
   path: ['enterprise_search', 'app_search', 'engine_creation_logic'],
   actions: {
     onEngineCreationSuccess: true,
+    setIngestionMethod: (method) => ({ method }),
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     submitEngine: true,
+    onSubmitError: true,
   },
   reducers: {
+    ingestionMethod: [
+      '',
+      {
+        setIngestionMethod: (_, { method }) => method,
+      },
+    ],
+    isLoading: [
+      false,
+      {
+        submitEngine: () => true,
+        onSubmitError: () => false,
+      },
+    ],
     language: [
       DEFAULT_LANGUAGE,
       {
@@ -63,19 +80,20 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       const body = JSON.stringify({ name, language });
 
       try {
-        await http.post('/api/app_search/engines', { body });
+        await http.post('/internal/app_search/engines', { body });
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
+        actions.onSubmitError();
       }
     },
     onEngineCreationSuccess: () => {
-      const { name } = values;
+      const { ingestionMethod, name } = values;
       const { navigateToUrl } = KibanaLogic.values;
-      const enginePath = generatePath(ENGINE_PATH, { engineName: name });
+      const toUrl = getRedirectToAfterEngineCreation({ ingestionMethod, engineName: name });
 
-      setQueuedSuccessMessage(ENGINE_CREATION_SUCCESS_MESSAGE);
-      navigateToUrl(enginePath);
+      flashSuccessToast(ENGINE_CREATION_SUCCESS_MESSAGE(name));
+      navigateToUrl(toUrl);
     },
   }),
 });

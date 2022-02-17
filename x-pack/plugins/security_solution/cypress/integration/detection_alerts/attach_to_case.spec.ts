@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
-import { waitForAlertsIndexToBeCreated, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
+import { expandFirstAlertActions } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, loginAndWaitForPage, waitForPageWithoutDateRange } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON } from '../../screens/alerts_detection_rules';
+import { ALERTS_URL } from '../../urls/navigation';
+import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../screens/alerts';
 
 const loadDetectionsPage = (role: ROLES) => {
-  waitForPageWithoutDateRange(DETECTIONS_URL, role);
+  waitForPageWithoutDateRange(ALERTS_URL, role);
   waitForAlertsToPopulate();
 };
 
@@ -27,12 +27,10 @@ describe('Alerts timeline', () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
-    loginAndWaitForPage(DETECTIONS_URL, ROLES.platform_engineer);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
 
     // Then we login as read-only user to test.
     login(ROLES.reader);
@@ -44,7 +42,8 @@ describe('Alerts timeline', () => {
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
-      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('be.disabled');
+      // Disabled actions for read only users are hidden, so actions button should not show
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
   });
 
@@ -54,6 +53,7 @@ describe('Alerts timeline', () => {
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {
+      expandFirstAlertActions();
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });
   });

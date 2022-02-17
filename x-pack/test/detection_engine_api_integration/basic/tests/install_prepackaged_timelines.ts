@@ -21,16 +21,17 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const log = getService('log');
 
   describe('install_prepackaged_timelines', () => {
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await deleteAllTimelines(es);
       });
 
@@ -67,13 +68,17 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
         await supertest.put(TIMELINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
 
-        await waitFor(async () => {
-          const { body } = await supertest
-            .get(`${TIMELINE_PREPACKAGED_URL}/_status`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
-          return body.timelines_not_installed === 0;
-        }, `${TIMELINE_PREPACKAGED_URL}/_status`);
+        await waitFor(
+          async () => {
+            const { body } = await supertest
+              .get(`${TIMELINE_PREPACKAGED_URL}/_status`)
+              .set('kbn-xsrf', 'true')
+              .expect(200);
+            return body.timelines_not_installed === 0;
+          },
+          `${TIMELINE_PREPACKAGED_URL}/_status`,
+          log
+        );
 
         const { body } = await supertest
           .put(TIMELINE_PREPACKAGED_URL)

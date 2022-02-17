@@ -10,15 +10,11 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
-
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
@@ -29,6 +25,7 @@ function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
     id: title,
     href: title,
     baseUrl: '/',
+    url: '/',
     isActive: true,
     'data-test-subj': title,
   };
@@ -50,6 +47,7 @@ function mockProps() {
     isLocked: false,
     isNavOpen: false,
     homeHref: '/',
+    url: '/',
     navLinks$: new BehaviorSubject([]),
     recentlyAccessed$: new BehaviorSubject([]),
     storage: new StubBrowserStorage(),
@@ -58,6 +56,7 @@ function mockProps() {
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
     customNavLink$: new BehaviorSubject(undefined),
+    button: <button />,
   };
 }
 
@@ -72,25 +71,20 @@ function expectNavIsClosed(component: ReactWrapper) {
 }
 
 function clickGroup(component: ReactWrapper, group: string) {
-  component.find(`[data-test-subj="collapsibleNavGroup-${group}"] button`).simulate('click');
+  component
+    .find(`[data-test-subj="collapsibleNavGroup-${group}"] button`)
+    .first()
+    .simulate('click');
 }
 
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
   it('renders the default nav', () => {
-    const onLock = sinon.spy();
-    const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
+    const component = mount(<CollapsibleNav {...mockProps()} />);
     expect(component).toMatchSnapshot();
 
     component.setProps({ isOpen: true });
     expect(component).toMatchSnapshot();
-
-    component.setProps({ isLocked: true });
-    expect(component).toMatchSnapshot();
-
-    // limit the find to buttons because jest also renders data-test-subj on a JSX wrapper element
-    component.find('button[data-test-subj="collapsible-nav-lock"]').simulate('click');
-    expect(onLock.callCount).toEqual(1);
   });
 
   it('renders links grouped by category', () => {

@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { expectedExportedRule, newRule } from '../../objects/rule';
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import { exportFirstRule } from '../../tasks/alerts_detection_rules';
+import { expectedExportedRule, getNewRule } from '../../objects/rule';
+import { exportFirstRule, getRulesImportExportToast } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Export rules', () => {
   beforeEach(() => {
@@ -25,17 +20,17 @@ describe('Export rules', () => {
       'POST',
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule).as('ruleResponse');
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    createCustomRule(getNewRule()).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
-    goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(this.ruleResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
+      getRulesImportExportToast([
+        'Successfully exported 1 of 1 rule. Prebuilt rules were excluded from the resulting file.',
+      ]);
     });
   });
 });

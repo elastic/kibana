@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import supertestAsPromised from 'supertest-as-promised';
-import { Client } from '@elastic/elasticsearch';
+import supertest from 'supertest';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -17,7 +17,7 @@ export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
   kibanaUrl.auth = null;
   kibanaUrl.password = null;
 
-  return supertestAsPromised(formatUrl(kibanaUrl));
+  return supertest(formatUrl(kibanaUrl));
 }
 
 export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKey: string) {
@@ -29,15 +29,32 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
       apiKey: esApiKey,
     },
     requestTimeout: config.get('timeouts.esRequestTimeout'),
+    Connection: HttpConnection,
   });
 }
 
-export function setupFleetAndAgents({ getService }: FtrProviderContext) {
+export function setupFleetAndAgents(providerContext: FtrProviderContext) {
   before(async () => {
-    await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
-    await getService('supertest')
+    // Use elastic/fleet-server service account to execute setup to verify privilege configuration
+    const es = providerContext.getService('es');
+    // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
+    const { token } = await es.security.createServiceToken({
+      namespace: 'elastic',
+      service: 'fleet-server',
+    });
+    const supetestWithoutAuth = getSupertestWithoutAuth(providerContext);
+
+    await supetestWithoutAuth
+      .post(`/api/fleet/setup`)
+      .set('kbn-xsrf', 'xxx')
+      .set('Authorization', `Bearer ${token.value}`)
+      .send()
+      .expect(200);
+    await supetestWithoutAuth
       .post(`/api/fleet/agents/setup`)
       .set('kbn-xsrf', 'xxx')
-      .send({ forceRecreate: true });
+      .set('Authorization', `Bearer ${token.value}`)
+      .send({ forceRecreate: true })
+      .expect(200);
   });
 }

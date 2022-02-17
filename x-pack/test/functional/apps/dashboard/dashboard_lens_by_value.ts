@@ -9,25 +9,32 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'header']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'timePicker']);
 
-  const find = getService('find');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const kibanaServer = getService('kibanaServer');
 
   describe('dashboard lens by value', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
     });
 
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+    });
+
     it('can add a lens panel by value', async () => {
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({});
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(1);
@@ -41,8 +48,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
 
-      const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
-      expect(pieExists).to.be(true);
+      const partitionVisExists = await testSubjects.exists('partitionVisChart');
+      expect(partitionVisExists).to.be(true);
     });
 
     it('editing and saving a lens by value panel retains number of panels', async () => {
@@ -71,11 +78,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
 
-    it('is no longer linked to a dashboard after visiting the visuali1ze listing page', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+    it('is no longer linked to a dashboard after visiting the visualize listing page', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickLensWidget();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -86,8 +92,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.notLinkedToOriginatingApp();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       // return to origin should not be present in save modal
       await testSubjects.click('lnsApp_saveButton');

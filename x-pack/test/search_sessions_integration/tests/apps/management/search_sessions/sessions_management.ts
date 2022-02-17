@@ -109,81 +109,92 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('autorefreshes and shows items on the server', async () => {
-        await esArchiver.load('data/search_sessions');
+        await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
         expect(searchSessionList.length).to.be(10);
-        expectSnapshot(searchSessionList.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
-          .toMatchInline(`
+        expectSnapshot(
+          searchSessionList.map((ss) => [ss.app, ss.name, ss.created, ss.expires, ss.status])
+        ).toMatchInline(`
           Array [
             Array [
               "graph",
-              "[eCommerce] Orders Test 6 ",
+              "[eCommerce] Orders Test 6",
               "16 Feb, 2021, 00:00:00",
               "--",
+              "error",
             ],
             Array [
               "lens",
               "[eCommerce] Orders Test 7",
               "15 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "apm",
               "[eCommerce] Orders Test 8",
               "14 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "appSearch",
               "[eCommerce] Orders Test 9",
               "13 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "auditbeat",
               "[eCommerce] Orders Test 10",
               "12 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "code",
               "[eCommerce] Orders Test 11",
               "11 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "console",
               "[eCommerce] Orders Test 12",
               "10 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "security",
-              "[eCommerce] Orders Test 5 ",
+              "[eCommerce] Orders Test 5",
               "9 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
             Array [
               "visualize",
-              "[eCommerce] Orders Test 4 ",
+              "[eCommerce] Orders Test 4",
               "8 Feb, 2021, 00:00:00",
               "--",
+              "cancelled",
             ],
             Array [
               "canvas",
               "[eCommerce] Orders Test 3",
               "7 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
+              "expired",
             ],
           ]
         `);
 
-        await esArchiver.unload('data/search_sessions');
+        await esArchiver.unload('x-pack/test/functional/es_archives/data/search_sessions');
       });
 
       it('has working pagination controls', async () => {
-        await esArchiver.load('data/search_sessions');
+        await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
 
         log.debug(`loading first page of sessions`);
         const sessionListFirst = await PageObjects.searchSessionsManagement.getList();
@@ -201,18 +212,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               "discover",
               "[eCommerce] Orders Test 2",
               "6 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
             ],
             Array [
               "dashboard",
               "[eCommerce] Revenue Dashboard",
               "5 Feb, 2021, 00:00:00",
-              "24 Feb, 2021, 00:00:00",
+              "--",
             ],
           ]
         `);
 
-        await esArchiver.unload('data/search_sessions');
+        await esArchiver.unload('x-pack/test/functional/es_archives/data/search_sessions');
       });
     });
   });

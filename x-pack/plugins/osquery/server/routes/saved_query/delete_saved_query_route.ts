@@ -6,36 +6,30 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const deleteSavedQueryRoute = (router: IRouter) => {
   router.delete(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/internal/osquery/saved_query/{id}',
       validate: {
-        body: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          id: schema.string(),
+        }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      // @ts-expect-error update types
-      const { savedQueryIds } = request.body;
-
-      await Promise.all(
-        savedQueryIds.map(
-          // @ts-expect-error update types
-          async (savedQueryId) =>
-            await savedObjectsClient.delete(savedQuerySavedObjectType, savedQueryId, {
-              refresh: 'wait_for',
-            })
-        )
-      );
+      await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
+        refresh: 'wait_for',
+      });
 
       return response.ok({
-        body: savedQueryIds,
+        body: {},
       });
     }
   );

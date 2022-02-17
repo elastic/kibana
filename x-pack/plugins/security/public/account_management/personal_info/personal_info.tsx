@@ -8,15 +8,15 @@
 import { EuiDescribedFormGroup, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AuthenticatedUser } from '../../../common/model';
 
-interface Props {
+export interface PersonalInfoProps {
   user: AuthenticatedUser;
 }
 
-export const PersonalInfo = (props: Props) => {
+export const PersonalInfo = (props: PersonalInfoProps) => {
   return (
     <EuiDescribedFormGroup
       fullWidth

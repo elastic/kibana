@@ -6,13 +6,14 @@
  */
 
 import { get } from 'lodash/fp';
+
 import {
-  Meta,
   Severity,
   SeverityMappingItem,
   severity as SeverityIOTS,
   SeverityMappingOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { Meta } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { SearchTypes } from '../../../../../common/detection_engine/types';
 import { SignalSource } from '../types';
 

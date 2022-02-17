@@ -8,25 +8,30 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('reassign agent(s)', () => {
     before(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     beforeEach(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
     setupFleetAndAgents(providerContext);
     afterEach(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     after(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     describe('reassign single agent', () => {
@@ -52,8 +57,8 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
 
-      it('can reassign from unmanaged policy to unmanaged', async () => {
-        // policy2 is not managed
+      it('can reassign from regular agent policy to regular', async () => {
+        // policy2 is not hosted
         // reassign succeeds
         await supertest
           .put(`/api/fleet/agents/agent1/reassign`)
@@ -64,8 +69,8 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('cannot reassign from unmanaged policy to managed', async () => {
-        // agent1 is enrolled in policy1. set policy1 to managed
+      it('cannot reassign from regular agent policy to hosted', async () => {
+        // agent1 is enrolled in policy1. set policy1 to hosted
         await supertest
           .put(`/api/fleet/agent_policies/policy1`)
           .set('kbn-xsrf', 'xxx')
@@ -135,8 +140,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent3data.body.item.policy_id).to.eql('policy2');
       });
 
-      it('should allow to reassign multiple agents by id -- mixed invalid, managed, etc', async () => {
-        // agent1 is enrolled in policy1. set policy1 to managed
+      it('should allow to reassign multiple agents by id -- mixed invalid, hosted, etc', async () => {
+        // agent1 is enrolled in policy1. set policy1 to hosted
         await supertest
           .put(`/api/fleet/agent_policies/policy1`)
           .set('kbn-xsrf', 'xxx')
@@ -154,7 +159,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           agent2: {
             success: false,
-            error: 'Cannot reassign an agent from managed agent policy policy1',
+            error:
+              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
           },
           INVALID_ID: {
             success: false,
@@ -162,7 +168,8 @@ export default function (providerContext: FtrProviderContext) {
           },
           agent3: {
             success: false,
-            error: 'Cannot reassign an agent from managed agent policy policy1',
+            error:
+              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
           },
         });
 
@@ -179,13 +186,13 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: 'fleet-agents.active: true',
+            agents: 'active: true',
             policy_id: 'policy2',
           })
           .expect(200);
         const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
         expect(body.total).to.eql(4);
-        body.list.forEach((agent: any) => {
+        body.items.forEach((agent: any) => {
           expect(agent.policy_id).to.eql('policy2');
         });
       });
@@ -199,6 +206,18 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'INVALID_ID',
           })
           .expect(404);
+      });
+
+      it('should return a 403 if user lacks fleet all permissions', async () => {
+        await supertestWithoutAuth
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent2', 'agent3'],
+            policy_id: 'policy2',
+          })
+          .expect(403);
       });
     });
   });

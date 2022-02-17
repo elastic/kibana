@@ -14,24 +14,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'settings']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
+    'doc_table:legacy': true,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should correctly display documents', async function () {
@@ -55,6 +56,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('removing a column adds a default column', async function () {
       await PageObjects.discover.clickFieldListItemRemove('_score');
       expect(await PageObjects.discover.getDocHeader()).not.to.have.string('_score');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+    });
+
+    it('displays _source viewer in doc viewer', async function () {
+      await PageObjects.discover.clickDocTableRowToggle(0);
+      await PageObjects.discover.isShowingDocViewer();
+      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.expectSourceViewerToExist();
+    });
+
+    it('switches to _source column when fields API is no longer used', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('_source');
+    });
+
+    it('switches to Document column when fields API is used', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+
       expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { alterColumn } from './alterColumn';
@@ -14,6 +14,7 @@ const errors = getFunctionErrors().alterColumn;
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);
+
   const nameColumnIndex = testTable.columns.findIndex(({ name }) => name === 'name');
   const timeColumnIndex = testTable.columns.findIndex(({ name }) => name === 'time');
   const priceColumnIndex = testTable.columns.findIndex(({ name }) => name === 'price');

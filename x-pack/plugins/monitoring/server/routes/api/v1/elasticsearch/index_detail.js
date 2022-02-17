@@ -12,9 +12,8 @@ import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_index_detail';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
@@ -41,36 +40,30 @@ export function esIndexRoute(server) {
     },
     handler: async (req) => {
       try {
-        const config = server.config();
-        const ccs = req.payload.ccs;
+        const config = server.config;
         const clusterUuid = req.params.clusterUuid;
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-        const filebeatIndexPattern = prefixIndexPattern(
-          config,
-          config.get('monitoring.ui.logs.index'),
-          '*'
-        );
+        const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
-        const cluster = await getClusterStats(req, esIndexPattern, clusterUuid);
+        const cluster = await getClusterStats(req, clusterUuid);
         const showSystemIndices = true; // hardcode to true, because this could be a system index
 
-        const shardStats = await getShardStats(req, esIndexPattern, cluster, {
+        const shardStats = await getShardStats(req, cluster, {
           includeNodes: true,
           includeIndices: true,
           indexName: indexUuid,
         });
-        const indexSummary = await getIndexSummary(req, esIndexPattern, shardStats, {
+        const indexSummary = await getIndexSummary(req, shardStats, {
           clusterUuid,
           indexUuid,
           start,
           end,
         });
-        const metrics = await getMetrics(req, esIndexPattern, metricSet, [
+        const metrics = await getMetrics(req, 'elasticsearch', metricSet, [
           { term: { 'index_stats.index': indexUuid } },
         ]);
 
@@ -78,14 +71,25 @@ export function esIndexRoute(server) {
         let shardAllocation;
         if (!isAdvanced) {
           // TODO: Why so many fields needed for a single component (shard legend)?
-          const shardFilter = { term: { 'shard.index': indexUuid } };
-          const stateUuid = get(cluster, 'cluster_state.state_uuid');
+          const shardFilter = {
+            bool: {
+              should: [
+                { term: { 'shard.index': indexUuid } },
+                { term: { 'elasticsearch.index.name': indexUuid } },
+              ],
+            },
+          };
+          const stateUuid = get(
+            cluster,
+            'elasticsearch.cluster.stats.state.state_uuid',
+            get(cluster, 'cluster_state.state_uuid')
+          );
           const allocationOptions = {
             shardFilter,
             stateUuid,
             showSystemIndices,
           };
-          const shards = await getShardAllocation(req, esIndexPattern, allocationOptions);
+          const shards = await getShardAllocation(req, allocationOptions);
 
           logs = await getLogs(config, req, filebeatIndexPattern, {
             clusterUuid,

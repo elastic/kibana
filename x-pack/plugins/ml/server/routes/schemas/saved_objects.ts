@@ -7,24 +7,30 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const jobTypeLiterals = schema.oneOf([
+  schema.literal('anomaly-detector'),
+  schema.literal('data-frame-analytics'),
+]);
+
+export const jobTypeSchema = schema.object({ jobType: jobTypeLiterals });
+
 export const jobsAndSpaces = schema.object({
-  jobType: schema.string(),
+  jobType: jobTypeLiterals,
   jobIds: schema.arrayOf(schema.string()),
-  spaces: schema.arrayOf(schema.string()),
+  spacesToAdd: schema.arrayOf(schema.string()),
+  spacesToRemove: schema.arrayOf(schema.string()),
 });
 
 export const jobsAndCurrentSpace = schema.object({
-  jobType: schema.string(),
+  jobType: jobTypeLiterals,
   jobIds: schema.arrayOf(schema.string()),
 });
 
 export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
 
-export const jobTypeSchema = schema.object({
-  jobType: schema.string(),
-});
+export const syncCheckSchema = schema.object({ jobType: schema.maybe(schema.string()) });
 
 export const canDeleteJobSchema = schema.object({
   /** List of job IDs. */
-  jobIds: schema.arrayOf(schema.maybe(schema.string())),
+  jobIds: schema.arrayOf(schema.string()),
 });

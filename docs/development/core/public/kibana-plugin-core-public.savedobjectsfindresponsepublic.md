@@ -11,14 +11,16 @@ Return type of the Saved Objects `find()` method.
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> 
+export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown> extends SavedObjectsBatchResponse<T> 
 ```
+<b>Extends:</b> SavedObjectsBatchResponse&lt;T&gt;
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [page](./kibana-plugin-core-public.savedobjectsfindresponsepublic.page.md) | <code>number</code> |  |
-|  [perPage](./kibana-plugin-core-public.savedobjectsfindresponsepublic.perpage.md) | <code>number</code> |  |
-|  [total](./kibana-plugin-core-public.savedobjectsfindresponsepublic.total.md) | <code>number</code> |  |
+|  [aggregations?](./kibana-plugin-core-public.savedobjectsfindresponsepublic.aggregations.md) | A | <i>(Optional)</i> |
+|  [page](./kibana-plugin-core-public.savedobjectsfindresponsepublic.page.md) | number |  |
+|  [perPage](./kibana-plugin-core-public.savedobjectsfindresponsepublic.perpage.md) | number |  |
+|  [total](./kibana-plugin-core-public.savedobjectsfindresponsepublic.total.md) | number |  |
 

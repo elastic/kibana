@@ -33,8 +33,11 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
-  getInfoPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  getInfoPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
   },
 
   getStatsPath: (pkgName: string) => {
@@ -45,19 +48,27 @@ export const epmRouteService = {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
 
-  getInstallPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgkey}', pkgkey).replace(
-      /\/$/,
-      ''
-    ); // trim trailing slash
+  getInstallPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
   },
 
   getBulkInstallPath: () => {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
-  getRemovePath: (pkgkey: string) => {
-    return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+  getRemovePath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
+  getUpdatePath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
   },
 };
 
@@ -80,6 +91,14 @@ export const packagePolicyRouteService = {
 
   getDeletePath: () => {
     return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
+  },
+
+  getUpgradePath: () => {
+    return PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN;
+  },
+
+  getDryRunPath: () => {
+    return PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN;
   },
 };
 
@@ -134,7 +153,6 @@ export const fleetSetupRouteService = {
 export const agentRouteService = {
   getInfoPath: (agentId: string) => AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
   getUpdatePath: (agentId: string) => AGENT_API_ROUTES.UPDATE_PATTERN.replace('{agentId}', agentId),
-  getEventsPath: (agentId: string) => AGENT_API_ROUTES.EVENTS_PATTERN.replace('{agentId}', agentId),
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
@@ -155,6 +173,9 @@ export const outputRoutesService = {
   getUpdatePath: (outputId: string) =>
     OUTPUT_API_ROUTES.UPDATE_PATTERN.replace('{outputId}', outputId),
   getListPath: () => OUTPUT_API_ROUTES.LIST_PATTERN,
+  getDeletePath: (outputId: string) =>
+    OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
+  getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
 };
 
 export const settingsRoutesService = {
@@ -163,7 +184,8 @@ export const settingsRoutesService = {
 };
 
 export const appRoutesService = {
-  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getCheckPermissionsPath: (fleetServerSetup?: boolean) => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

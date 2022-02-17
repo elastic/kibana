@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertsClient as AlertsClientClass } from './alerts_client';
+import { RulesClient as RulesClientClass } from './rules_client';
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
 import { configSchema } from './config';
 import { AlertsConfigType } from './types';
 
-export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
+export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
-  AlertType,
+  RuleType,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
@@ -28,25 +27,42 @@ export type {
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
+  RuleParamsAndRefs,
 } from './types';
-export { PluginSetupContract, PluginStartContract } from './plugin';
-export { FindResult } from './alerts_client';
-export { PublicAlertInstance as AlertInstance } from './alert_instance';
+export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { FindResult } from './rules_client';
+export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
+export { getEsErrorMessage } from './lib/errors';
+export type {
+  IAbortableEsClient,
+  IAbortableClusterClient,
+} from './lib/create_abortable_es_client_factory';
+export { createAbortableEsClientFactory } from './lib/create_abortable_es_client_factory';
+export {
+  ReadOperations,
+  AlertingAuthorizationFilterType,
+  AlertingAuthorization,
+  WriteOperations,
+  AlertingAuthorizationEntity,
+} from './authorization';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck'),
+    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
-      'xpack.alerting.invalidateApiKeysTask.interval'
+      'xpack.alerting.invalidateApiKeysTask.interval',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
-      'xpack.alerting.invalidateApiKeysTask.removalDelay'
+      'xpack.alerting.invalidateApiKeysTask.removalDelay',
+      { level: 'warning' }
     ),
   ],
 };

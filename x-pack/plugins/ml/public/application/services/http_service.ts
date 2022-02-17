@@ -16,9 +16,10 @@ function getResultHeaders(headers: HeadersInit) {
   };
 }
 
-function getFetchOptions(
-  options: HttpFetchOptionsWithPath
-): { path: string; fetchOptions: HttpFetchOptions } {
+function getFetchOptions(options: HttpFetchOptionsWithPath): {
+  path: string;
+  fetchOptions: HttpFetchOptions;
+} {
   if (!options.path) {
     throw new Error('URL path is missing');
   }
@@ -112,7 +113,11 @@ function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
  * ML Http Service
  */
 export class HttpService {
-  constructor(private httpStart: HttpStart) {}
+  public getLoadingCount$: Observable<number>;
+
+  constructor(private httpStart: HttpStart) {
+    this.getLoadingCount$ = httpStart.getLoadingCount$();
+  }
 
   private getResultHeaders(headers: HeadersInit): HeadersInit {
     return {
@@ -121,9 +126,10 @@ export class HttpService {
     } as HeadersInit;
   }
 
-  private getFetchOptions(
-    options: HttpFetchOptionsWithPath
-  ): { path: string; fetchOptions: HttpFetchOptions } {
+  private getFetchOptions(options: HttpFetchOptionsWithPath): {
+    path: string;
+    fetchOptions: HttpFetchOptions;
+  } {
     if (!options.path) {
       throw new Error('URL path is missing');
     }

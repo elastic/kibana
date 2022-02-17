@@ -9,8 +9,8 @@
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
-import { getIndexESListItemMock } from '../../../common/schemas/elastic_query/index_es_list_item_schema.mock';
 import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import { getIndexESListItemMock } from '../../schemas/elastic_query/index_es_list_item_schema.mock';
 
 import { CreateListItemOptions, createListItem } from './create_list_item';
 import { getCreateListItemOptionsMock } from './create_list_item.mock';
@@ -27,9 +27,9 @@ describe('crete_list_item', () => {
   test('it returns a list item as expected with the id changed out for the elastic id', async () => {
     const options = getCreateListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockReturnValue(
+    esClient.index.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+      { _id: 'elastic-id-123' }
     );
     const listItem = await createListItem({ ...options, esClient });
     const expected = getListItemResponseMock();
@@ -54,9 +54,9 @@ describe('crete_list_item', () => {
     const options = getCreateListItemOptionsMock();
     options.id = undefined;
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockReturnValue(
+    esClient.index.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+      { _id: 'elastic-id-123' }
     );
     const list = await createListItem({ ...options, esClient });
     const expected = getListItemResponseMock();

@@ -18,27 +18,46 @@ const apmConfigSchema = schema.object({
   ),
 });
 
+const fullStoryConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  org_id: schema.conditional(
+    schema.siblingRef('enabled'),
+    true,
+    schema.string({ minLength: 1 }),
+    schema.maybe(schema.string())
+  ),
+});
+
+const chatConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  chatURL: schema.maybe(schema.string()),
+});
+
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
-  cname: schema.maybe(schema.string()),
   base_url: schema.maybe(schema.string()),
-  profile_url: schema.maybe(schema.string()),
+  chat: chatConfigSchema,
+  chatIdentitySecret: schema.maybe(schema.string()),
+  cname: schema.maybe(schema.string()),
   deployment_url: schema.maybe(schema.string()),
+  full_story: fullStoryConfigSchema,
+  id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
+  profile_url: schema.maybe(schema.string()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
-    id: true,
-    cname: true,
     base_url: true,
-    profile_url: true,
+    chat: true,
+    cname: true,
     deployment_url: true,
+    full_story: true,
+    id: true,
     organization_url: true,
+    profile_url: true,
   },
   schema: configSchema,
 };

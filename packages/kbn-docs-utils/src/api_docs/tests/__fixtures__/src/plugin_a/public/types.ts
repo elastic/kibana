@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { ReactElement } from 'react';
 import { ImACommonType } from '../common';
 import { FooType, ImNotExportedFromIndex } from './foo';
 
@@ -24,6 +24,14 @@ export type ImAType = string | number | TypeWithGeneric<string> | FooType | ImAC
  * @param t This is a generic T type. It can be anything.
  */
 export type FnWithGeneric = <T>(t: T) => TypeWithGeneric<T>;
+
+/**
+ * Ever so slightly different than above. Users of this type must specify the generic.
+ *
+ * @param t something!
+ * @return something!
+ */
+export type FnTypeWithGeneric<T> = (t: T, p: MyProps) => TypeWithGeneric<T>;
 
 /**
  * Comments on enums.
@@ -46,3 +54,10 @@ export interface ImAnObject {
 
 /** @internal */
 export type IShouldBeInternal = string | { foo: string };
+
+export interface MyProps {
+  foo: string;
+  bar: FnWithGeneric;
+}
+
+export type AReactElementFn = () => ReactElement<MyProps>;

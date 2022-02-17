@@ -13,6 +13,7 @@ import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 
 import { CommonResponseStatusSchema, TransformIdsSchema } from '../../../common/api_schemas/common';
 import { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';
+import { ResetTransformsResponseSchema } from '../../../common/api_schemas/reset_transforms';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 
@@ -21,7 +22,10 @@ export function isRequestTimeout(error: any) {
 }
 
 interface Params {
-  results: CommonResponseStatusSchema | DeleteTransformsResponseSchema;
+  results:
+    | CommonResponseStatusSchema
+    | DeleteTransformsResponseSchema
+    | ResetTransformsResponseSchema;
   id: string;
   items: TransformIdsSchema;
   action: string;
@@ -60,7 +64,10 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     ],
   };
 
-  const newResults: CommonResponseStatusSchema | DeleteTransformsResponseSchema = {};
+  const newResults:
+    | CommonResponseStatusSchema
+    | DeleteTransformsResponseSchema
+    | ResetTransformsResponseSchema = {};
 
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {
@@ -152,16 +159,21 @@ interface EsError {
   reason: string;
   line?: number;
   col?: number;
+  script?: string;
 }
 
 /**
  * Returns an error message based on the root cause
  */
-function extractErrorMessage({ type, reason, line, col }: EsError): string {
+function extractErrorMessage({ type, reason, script, line, col }: EsError): string {
   let message = `[${type}] ${reason}`;
 
   if (line !== undefined && col !== undefined) {
     message += `, with line=${line} & col=${col}`;
+  }
+
+  if (script !== undefined) {
+    message += ` '${script}'`;
   }
 
   return message;

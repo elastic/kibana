@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { extractQueryParams, indices } from '../../../../src/plugins/es_ui_shared/public';
+export {
+  extractQueryParams,
+  indices,
+  SectionLoading,
+} from '../../../../src/plugins/es_ui_shared/public';
+
+export { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';

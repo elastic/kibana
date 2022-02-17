@@ -6,32 +6,42 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
   data-test-subj="visNoResult"
 >
   <div
-    class="item top"
-  />
-  <div
-    class="item"
+    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+    data-test-subj="visualization-error"
   >
     <div
-      class="euiText euiText--extraSmall"
+      class="euiEmptyPrompt__main"
     >
       <div
-        class="euiTextColor euiTextColor--subdued"
+        class="euiEmptyPrompt__icon"
       >
         <span
-          color="subdued"
+          color="default"
           data-euiicon-type="visualizeApp"
         />
+      </div>
+      <div
+        class="euiEmptyPrompt__content"
+      >
         <div
-          class="euiSpacer euiSpacer--s"
-        />
-        <p>
-          No results found
-        </p>
+          class="euiEmptyPrompt__contentInner"
+        >
+          <span
+            class="euiTextColor euiTextColor--subdued"
+          >
+            <div
+              class="euiText euiText--medium"
+            >
+              <div
+                class="euiText euiText--extraSmall"
+              >
+                No results found
+              </div>
+            </div>
+          </span>
+        </div>
       </div>
     </div>
   </div>
-  <div
-    class="item bottom"
-  />
 </div>
 `;

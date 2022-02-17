@@ -7,9 +7,17 @@
 
 import moment from 'moment';
 
-import { entriesNested, ExceptionListItemSchema } from '../../../../lists_plugin_deps';
-import { getEntryValue, getExceptionOperatorSelect, formatOperatingSystems } from '../helpers';
-import { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
+import { entriesNested, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  getEntryValue,
+  getExceptionOperatorSelect,
+  BuilderEntry,
+} from '@kbn/securitysolution-list-utils';
+
+import React from 'react';
+import { EuiDescriptionListDescription, EuiText, EuiToolTip } from '@elastic/eui';
+import { formatOperatingSystems } from '../helpers';
+import type { FormattedEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
 
 /**
@@ -70,11 +78,23 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
  * Formats ExceptionItem details for description list component
  *
  * @param exceptionItem an ExceptionItem
+ * @param includeModified if modified information should be included
+ * @param includeName if the Name should be included
  */
 export const getDescriptionListContent = (
-  exceptionItem: ExceptionListItemSchema
+  exceptionItem: ExceptionListItemSchema,
+  includeModified: boolean = false,
+  includeName: boolean = false
 ): DescriptionListItem[] => {
   const details = [
+    ...(includeName
+      ? [
+          {
+            title: i18n.NAME,
+            value: exceptionItem.name,
+          },
+        ]
+      : []),
     {
       title: i18n.OPERATING_SYSTEM,
       value: formatOperatingSystems(exceptionItem.os_types),
@@ -87,6 +107,18 @@ export const getDescriptionListContent = (
       title: i18n.CREATED_BY,
       value: exceptionItem.created_by,
     },
+    ...(includeModified
+      ? [
+          {
+            title: i18n.DATE_MODIFIED,
+            value: moment(exceptionItem.updated_at).format('MMMM Do YYYY @ HH:mm:ss'),
+          },
+          {
+            title: i18n.MODIFIED_BY,
+            value: exceptionItem.updated_by,
+          },
+        ]
+      : []),
     {
       title: i18n.DESCRIPTION,
       value: exceptionItem.description,
@@ -95,7 +127,38 @@ export const getDescriptionListContent = (
 
   return details.reduce<DescriptionListItem[]>((acc, { value, title }) => {
     if (value != null && value.trim() !== '') {
-      return [...acc, { title, description: value }];
+      const valueElement = (
+        <EuiToolTip content={value} anchorClassName="eventFiltersDescriptionListDescription">
+          <EuiDescriptionListDescription className="eui-fullWidth">
+            {value}
+          </EuiDescriptionListDescription>
+        </EuiToolTip>
+      );
+      if (title === i18n.DESCRIPTION) {
+        return [
+          ...acc,
+          {
+            title,
+            description:
+              value.length > 75 ? (
+                <EuiDescriptionListDescription style={{ height: 150, overflowY: 'hidden' }}>
+                  <EuiText
+                    tabIndex={0}
+                    role="region"
+                    aria-label=""
+                    className="eui-yScrollWithShadows"
+                    size="s"
+                  >
+                    {value}
+                  </EuiText>
+                </EuiDescriptionListDescription>
+              ) : (
+                valueElement
+              ),
+          },
+        ];
+      }
+      return [...acc, { title, description: valueElement }];
     } else {
       return acc;
     }

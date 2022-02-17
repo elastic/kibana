@@ -11,6 +11,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
 import { MlCustomUrls } from './custom_urls';
 
+export interface SectionOptions {
+  withAdvancedSection: boolean;
+}
+
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -19,10 +23,6 @@ export function MachineLearningJobWizardCommonProvider(
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-
-  interface SectionOptions {
-    withAdvancedSection: boolean;
-  }
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -527,7 +527,7 @@ export function MachineLearningJobWizardCommonProvider(
 
       const expectedIndex = existingCustomUrls.length;
 
-      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
+      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {

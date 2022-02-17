@@ -7,21 +7,25 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { Ping } from '../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 import { PingTimestamp } from '../../monitor/ping_list/columns/ping_timestamp';
 
 interface Props {
-  step: Ping;
+  step: JourneyStep;
+  compactView?: boolean;
 }
 
-export const StepImage = ({ step }: Props) => {
+export const StepImage = ({ step, compactView }: Props) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
       <EuiFlexItem grow={false}>
-        <PingTimestamp ping={step} initialStepNo={step.synthetics?.step?.index} />
+        <PingTimestamp
+          checkGroup={step.monitor.check_group}
+          initialStepNo={step.synthetics?.step?.index}
+        />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText>{step.synthetics?.step?.name}</EuiText>
+      <EuiFlexItem grow={false} style={{ minWidth: 80 }}>
+        <EuiText size={compactView ? 's' : 'm'}>{step.synthetics?.step?.name}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

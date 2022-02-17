@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
@@ -67,12 +66,17 @@ export default function ({ getService }: FtrProviderContext) {
   describe('anomaly explorer', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
+    });
+
+    after(async () => {
+      await ml.testResources.deleteMLTestDashboard();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -98,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
 
           await ml.testExecution.logTestStep('open job in anomaly explorer');
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
@@ -143,11 +146,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'y', ['Overall']);
         });
@@ -156,11 +156,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',
@@ -235,8 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates pagination');
           await ml.swimLane.setPageSize(viewBySwimLaneTestSubj, 5);
 
-          const axisLabels = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
-          expect(axisLabels.length).to.eql(5);
+          await ml.swimLane.assertAxisLabelCount(viewBySwimLaneTestSubj, 'y', 5);
 
           await ml.swimLane.selectPage(viewBySwimLaneTestSubj, 3);
 
@@ -326,10 +322,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
+        it('allows to change the anomalies table pagination', async () => {
+          await ml.testExecution.logTestStep('displays the anomalies table with default config');
+          await ml.anomaliesTable.assertTableExists();
+          await ml.anomaliesTable.assertRowsNumberPerPage(25);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+
+          await ml.testExecution.logTestStep('updates table pagination');
+          await ml.anomaliesTable.setRowsNumberPerPage(10);
+          await ml.anomaliesTable.assertTableRowsCount(10);
+        });
+
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
           await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swimlane embeddable to the dashboard'
+            'should allow to attach anomaly swim lane embeddable to the dashboard'
           );
           await ml.anomalyExplorer.openAddToDashboardControl();
           await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');

@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import { mean } from 'lodash';
 import {
   ApmFetchDataResponse,
   FetchDataParams,
 } from '../../../../observability/public';
-import { callApmApi } from './createCallApmApi';
-
-export { createCallApmApi } from './createCallApmApi';
+import { callApmApi } from './create_call_apm_api';
 
 export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
   relativeTime,
   bucketSize,
+  intervalString,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
-  const data = await callApmApi({
-    endpoint: 'GET /api/apm/observability_overview',
+  const data = await callApmApi('GET /internal/apm/observability_overview', {
     signal: null,
     params: {
       query: {
         start: new Date(absoluteTime.start).toISOString(),
         end: new Date(absoluteTime.end).toISOString(),
         bucketSize,
+        intervalString,
       },
     },
   });
 
-  const { serviceCount, transactionCoordinates } = data;
+  const { serviceCount, transactionPerMinute } = data;
 
   return {
     appLink: `/app/apm/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
@@ -42,27 +40,19 @@ export const fetchObservabilityOverviewPageData = async ({
       },
       transactions: {
         type: 'number',
-        value:
-          mean(
-            transactionCoordinates
-              .map(({ y }) => y)
-              .filter((y) => y && isFinite(y))
-          ) || 0,
+        value: transactionPerMinute.value || 0,
       },
     },
     series: {
       transactions: {
-        coordinates: transactionCoordinates,
+        coordinates: transactionPerMinute.timeseries,
       },
     },
   };
 };
 
 export async function getHasData() {
-  const res = await callApmApi({
-    endpoint: 'GET /api/apm/observability_overview/has_data',
+  return await callApmApi('GET /internal/apm/observability_overview/has_data', {
     signal: null,
   });
-
-  return res.hasData;
 }

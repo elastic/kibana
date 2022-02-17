@@ -5,5 +5,33 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './types';
+export {
+  AGG_TYPE,
+  COLOR_MAP_TYPE,
+  ES_GEO_FIELD_TYPE,
+  FIELD_ORIGIN,
+  INITIAL_LOCATION,
+  LABEL_BORDER_SIZES,
+  LAYER_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+  STYLE_TYPE,
+  SYMBOLIZE_AS_TYPES,
+  LAYER_WIZARD_CATEGORY,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  VECTOR_SHAPE_TYPE,
+} from './constants';
+
+export type { FieldFormatter } from './constants';
+
+export type {
+  EMSFileSourceDescriptor,
+  ESTermSourceDescriptor,
+  LayerDescriptor,
+  TooltipFeature,
+  VectorLayerDescriptor,
+  VectorStyleDescriptor,
+  VectorSourceRequestMeta,
+} from './descriptor_types';

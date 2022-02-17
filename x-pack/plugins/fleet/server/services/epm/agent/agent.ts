@@ -14,8 +14,14 @@ const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
-  const template = handlebars.compile(templateStr, { noEscape: true });
-  let compiledTemplate = template(vars);
+  let compiledTemplate: string;
+  try {
+    const template = handlebars.compile(templateStr, { noEscape: true });
+    compiledTemplate = template(vars);
+  } catch (err) {
+    throw new Error(`Error while compiling agent template: ${err.message}`);
+  }
+
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
 
   const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
@@ -58,14 +64,6 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-const maybeEscapeString = (value: string) => {
-  // Numeric strings need to be quoted to stay strings.
-  if (value.length && !isNaN(+value)) {
-    return `"${value}"`;
-  }
-  return value;
-};
-
 function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
@@ -90,18 +88,8 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
 
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
+      varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
-    } else if (
-      recordEntry.type &&
-      (recordEntry.type === 'text' || recordEntry.type === 'string') &&
-      recordEntry.value?.length
-    ) {
-      if (Array.isArray(recordEntry.value)) {
-        varPart[lastKeyPart] = recordEntry.value.map((value: string) => maybeEscapeString(value));
-      } else {
-        varPart[lastKeyPart] = maybeEscapeString(recordEntry.value);
-      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }
@@ -111,11 +99,12 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
   return { vars, yamlValues };
 }
 
-function containsHelper(this: any, item: string, list: string[], options: any) {
-  if (Array.isArray(list) && list.includes(item)) {
+function containsHelper(this: any, item: string, check: string | string[], options: any) {
+  if ((Array.isArray(check) || typeof check === 'string') && check.includes(item)) {
     if (options && options.fn) {
       return options.fn(this);
     }
+    return true;
   }
   return '';
 }

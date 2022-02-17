@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Direction, HostsFields } from '../../graphql/types';
-import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 import { HostsModel, HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
+import { Direction, HostsFields, HostRiskScoreFields } from '../../../common/search_strategy';
 
 export const mockHostsState: HostsModel = {
   page: {
@@ -35,6 +35,15 @@ export const mockHostsState: HostsModel = {
       [HostsTableType.alerts]: {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: HostRiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
       },
     },
   },
@@ -63,6 +72,15 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: HostRiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
     },
   },
 };
@@ -71,56 +89,74 @@ describe('Hosts redux store', () => {
   describe('#setHostsQueriesActivePageToZero', () => {
     test('set activePage to zero for all queries in hosts page  ', () => {
       expect(setHostsQueriesActivePageToZero(mockHostsState, HostsType.page)).toEqual({
-        allHosts: {
+        [HostsTableType.hosts]: {
           activePage: 0,
           direction: 'desc',
           limit: 10,
           sortField: 'lastSeen',
         },
-        anomalies: null,
-        authentications: {
+        [HostsTableType.anomalies]: null,
+        [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
         },
-        events: {
+        [HostsTableType.events]: {
           activePage: 0,
           limit: 10,
         },
-        uncommonProcesses: {
+        [HostsTableType.uncommonProcesses]: {
           activePage: 0,
           limit: 10,
         },
-        alerts: {
+        [HostsTableType.alerts]: {
           activePage: 0,
           limit: 10,
+        },
+        [HostsTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          severitySelection: [],
+          sort: {
+            direction: 'desc',
+            field: 'risk_stats.risk_score',
+          },
         },
       });
     });
 
     test('set activePage to zero for all queries in host details  ', () => {
       expect(setHostsQueriesActivePageToZero(mockHostsState, HostsType.details)).toEqual({
-        allHosts: {
+        [HostsTableType.hosts]: {
           activePage: 0,
           direction: 'desc',
           limit: 10,
           sortField: 'lastSeen',
         },
-        anomalies: null,
-        authentications: {
+        [HostsTableType.anomalies]: null,
+        [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
         },
-        events: {
+        [HostsTableType.events]: {
           activePage: 0,
           limit: 10,
         },
-        uncommonProcesses: {
+        [HostsTableType.uncommonProcesses]: {
           activePage: 0,
           limit: 10,
         },
-        alerts: {
+        [HostsTableType.alerts]: {
           activePage: 0,
           limit: 10,
+        },
+        [HostsTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          severitySelection: [],
+          sort: {
+            direction: 'desc',
+            field: 'risk_stats.risk_score',
+          },
         },
       });
     });

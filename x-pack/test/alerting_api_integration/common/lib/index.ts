@@ -14,6 +14,7 @@ export {
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
 } from './alert_utils';
+export type { TaskManagerDoc } from './task_manager_utils';
 export { TaskManagerUtils } from './task_manager_utils';
 export * from './test_assertions';
 export { checkAAD } from './check_aad';

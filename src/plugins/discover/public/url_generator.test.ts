@@ -31,7 +31,7 @@ const setup = async ({ useHash = false }: SetupParams = {}) => {
 };
 
 beforeEach(() => {
-  // @ts-ignore
+  // @ts-expect-error
   hashedItemStore.storage = mockStorage;
 });
 

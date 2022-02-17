@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { ExternalService, ExecutorSubActionPushParams } from './types';
+import {
+  ExternalService,
+  ExecutorSubActionPushParams,
+  PushToServiceApiParamsSIR,
+  ExternalServiceSIR,
+  Observable,
+  ObservableTypes,
+  ExternalServiceITOM,
+  ExecutorSubActionAddEventParams,
+} from './types';
 
 export const serviceNowCommonFields = [
   {
@@ -74,6 +83,10 @@ const createMock = (): jest.Mocked<ExternalService> => {
     getFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
+        id: 'incident-1',
+        title: 'INC01',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+        url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
         short_description: 'title from servicenow',
         description: 'description from servicenow',
       })
@@ -95,16 +108,74 @@ const createMock = (): jest.Mocked<ExternalService> => {
       })
     ),
     findIncidents: jest.fn(),
+    getApplicationInformation: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        name: 'Elastic',
+        scope: 'x_elas2_inc_int',
+        version: '1.0.0',
+      })
+    ),
+    checkIfApplicationIsInstalled: jest.fn(),
+    getUrl: jest.fn().mockImplementation(() => 'https://instance.service-now.com'),
+    checkInstance: jest.fn(),
   };
 
   return service;
 };
 
-const externalServiceMock = {
+const createSIRMock = (): jest.Mocked<ExternalServiceSIR> => {
+  const service = {
+    ...createMock(),
+    addObservableToIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        value: 'https://example.com',
+        observable_sys_id: '3',
+      })
+    ),
+    bulkAddObservableToIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve([
+        {
+          value: '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9',
+          observable_sys_id: '1',
+        },
+        {
+          value: '127.0.0.1',
+          observable_sys_id: '2',
+        },
+        {
+          value: 'https://example.com',
+          observable_sys_id: '3',
+        },
+      ])
+    ),
+  };
+
+  return service;
+};
+
+const createITOMMock = (): jest.Mocked<ExternalServiceITOM> => {
+  const serviceMock = createMock();
+  const service = {
+    getChoices: serviceMock.getChoices,
+    addEvent: jest.fn().mockImplementation(() => Promise.resolve()),
+  };
+
+  return service;
+};
+
+export const externalServiceMock = {
   create: createMock,
 };
 
-const executorParams: ExecutorSubActionPushParams = {
+export const externalServiceSIRMock = {
+  create: createSIRMock,
+};
+
+export const externalServiceITOMMock = {
+  create: createITOMMock,
+};
+
+export const executorParams: ExecutorSubActionPushParams = {
   incident: {
     externalId: 'incident-3',
     short_description: 'Incident title',
@@ -114,6 +185,8 @@ const executorParams: ExecutorSubActionPushParams = {
     impact: '3',
     category: 'software',
     subcategory: 'os',
+    correlation_id: 'ruleId',
+    correlation_display: 'Alerting',
   },
   comments: [
     {
@@ -127,6 +200,60 @@ const executorParams: ExecutorSubActionPushParams = {
   ],
 };
 
-const apiParams = executorParams;
+export const sirParams: PushToServiceApiParamsSIR = {
+  incident: {
+    externalId: 'incident-3',
+    short_description: 'Incident title',
+    description: 'Incident description',
+    dest_ip: ['192.168.1.1', '192.168.1.3'],
+    source_ip: ['192.168.1.2', '192.168.1.4'],
+    malware_hash: ['5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'],
+    malware_url: ['https://example.com'],
+    category: 'software',
+    subcategory: 'os',
+    correlation_id: 'ruleId',
+    correlation_display: 'Alerting',
+    priority: '1',
+  },
+  comments: [
+    {
+      commentId: 'case-comment-1',
+      comment: 'A comment',
+    },
+    {
+      commentId: 'case-comment-2',
+      comment: 'Another comment',
+    },
+  ],
+};
 
-export { externalServiceMock, executorParams, apiParams };
+export const observables: Observable[] = [
+  {
+    value: '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9',
+    type: ObservableTypes.sha256,
+  },
+  {
+    value: '127.0.0.1',
+    type: ObservableTypes.ip4,
+  },
+  {
+    value: 'https://example.com',
+    type: ObservableTypes.url,
+  },
+];
+
+export const apiParams = executorParams;
+
+export const itomEventParams: ExecutorSubActionAddEventParams = {
+  source: 'A source',
+  event_class: 'An event class',
+  resource: 'C:',
+  node: 'node.example.com',
+  metric_name: 'Percentage Logical Disk Free Space',
+  type: 'Disk space',
+  severity: '4',
+  description: 'desc',
+  additional_info: '{"alert": "test"}',
+  message_key: 'a key',
+  time_of_event: '2021-10-13T10:51:44.981Z',
+};

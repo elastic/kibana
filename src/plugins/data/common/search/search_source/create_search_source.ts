@@ -8,7 +8,7 @@
 
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract, SerializedSearchSourceFields } from '../..';
 import { SearchSourceFields } from './types';
 
 /**
@@ -31,22 +31,38 @@ import { SearchSourceFields } from './types';
 export const createSearchSource = (
   indexPatterns: IndexPatternsContract,
   searchSourceDependencies: SearchSourceDependencies
-) => async (searchSourceFields: SearchSourceFields = {}) => {
-  const fields = { ...searchSourceFields };
+) => {
+  const createFields = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+    const { index, parent, ...restOfFields } = searchSourceFields;
+    const fields: SearchSourceFields = {
+      ...restOfFields,
+    };
 
-  // hydrating index pattern
-  if (fields.index && typeof fields.index === 'string') {
-    fields.index = await indexPatterns.get(searchSourceFields.index as any);
-  }
+    // hydrating index pattern
+    if (searchSourceFields.index) {
+      fields.index = await indexPatterns.get(searchSourceFields.index);
+    }
 
-  const searchSource = new SearchSource(fields, searchSourceDependencies);
+    if (searchSourceFields.parent) {
+      fields.parent = await createFields(searchSourceFields.parent);
+    }
 
-  // todo: move to migration script .. create issue
-  const query = searchSource.getOwnField('query');
+    return fields;
+  };
 
-  if (typeof query !== 'undefined') {
-    searchSource.setField('query', migrateLegacyQuery(query));
-  }
+  const createSearchSourceFn = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+    const fields = await createFields(searchSourceFields);
+    const searchSource = new SearchSource(fields, searchSourceDependencies);
 
-  return searchSource;
+    // todo: move to migration script .. create issue
+    const query = searchSource.getOwnField('query');
+
+    if (typeof query !== 'undefined') {
+      searchSource.setField('query', migrateLegacyQuery(query));
+    }
+
+    return searchSource;
+  };
+
+  return createSearchSourceFn;
 };

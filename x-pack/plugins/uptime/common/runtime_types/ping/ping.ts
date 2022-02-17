@@ -7,7 +7,30 @@
 
 import * as t from 'io-ts';
 import { DateRangeType } from '../common';
-import { PingErrorType } from '../monitor';
+import { SyntheticsDataType } from './synthetics';
+
+// IO type for validation
+export const PingErrorType = t.intersection([
+  t.partial({
+    code: t.string,
+    id: t.string,
+    stack_trace: t.string,
+    type: t.string,
+  }),
+  t.type({
+    // this is _always_ on the error field
+    message: t.string,
+  }),
+]);
+
+// Typescript type for type checking
+export type PingError = t.TypeOf<typeof PingErrorType>;
+
+export const MonitorDetailsType = t.intersection([
+  t.type({ monitorId: t.string }),
+  t.partial({ error: PingErrorType, timestamp: t.string, alerts: t.unknown }),
+]);
+export type MonitorDetails = t.TypeOf<typeof MonitorDetailsType>;
 
 export const HttpResponseBodyType = t.partial({
   bytes: t.number,
@@ -67,14 +90,14 @@ export type Tls = t.TypeOf<typeof TlsType>;
 
 export const MonitorType = t.intersection([
   t.type({
-    duration: t.type({
-      us: t.number,
-    }),
     id: t.string,
     status: t.string,
     type: t.string,
   }),
   t.partial({
+    duration: t.type({
+      us: t.number,
+    }),
     check_group: t.string,
     ip: t.string,
     name: t.string,
@@ -176,49 +199,7 @@ export const PingType = t.intersection([
       down: t.number,
       up: t.number,
     }),
-    synthetics: t.partial({
-      index: t.number,
-      journey: t.type({
-        id: t.string,
-        name: t.string,
-      }),
-      error: t.partial({
-        message: t.string,
-        name: t.string,
-        stack: t.string,
-      }),
-      package_version: t.string,
-      step: t.type({
-        index: t.number,
-        name: t.string,
-      }),
-      type: t.string,
-      // ui-related field
-      screenshotLoading: t.boolean,
-      // ui-related field
-      screenshotExists: t.boolean,
-      blob: t.string,
-      blob_mime: t.string,
-      payload: t.partial({
-        duration: t.number,
-        index: t.number,
-        is_navigation_request: t.boolean,
-        message: t.string,
-        method: t.string,
-        name: t.string,
-        params: t.partial({
-          homepage: t.string,
-        }),
-        source: t.string,
-        start: t.number,
-        status: t.string,
-        ts: t.number,
-        type: t.string,
-        url: t.string,
-        end: t.number,
-        text: t.string,
-      }),
-    }),
+    synthetics: SyntheticsDataType,
     tags: t.array(t.string),
     tcp: t.partial({
       rtt: t.partial({
@@ -239,38 +220,9 @@ export const PingType = t.intersection([
     service: t.partial({
       name: t.string,
     }),
+    config_id: t.string,
   }),
 ]);
-
-export const SyntheticsJourneyApiResponseType = t.intersection([
-  t.type({
-    checkGroup: t.string,
-    steps: t.array(PingType),
-  }),
-  t.partial({
-    details: t.union([
-      t.intersection([
-        t.type({
-          timestamp: t.string,
-          journey: PingType,
-        }),
-        t.partial({
-          next: t.type({
-            timestamp: t.string,
-            checkGroup: t.string,
-          }),
-          previous: t.type({
-            timestamp: t.string,
-            checkGroup: t.string,
-          }),
-        }),
-      ]),
-      t.null,
-    ]),
-  }),
-]);
-
-export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;
 
 export type Ping = t.TypeOf<typeof PingType>;
 
@@ -316,6 +268,7 @@ export const GetPingsParamsType = t.intersection([
     dateRange: DateRangeType,
   }),
   t.partial({
+    excludedLocations: t.string,
     index: t.number,
     size: t.number,
     locations: t.string,

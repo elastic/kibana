@@ -8,8 +8,8 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
-import { GraphWorkspaceSavedObject, Workspace } from '../types';
-import { GraphStoreDependencies, GraphState } from '.';
+import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
+import { GraphStoreDependencies, GraphState, submitSearch } from '.';
 import { datasourceSelector } from './datasource';
 import { setDatasource, IndexpatternDatasource } from './datasource';
 import { loadFields, selectedFieldsSelector } from './fields';
@@ -25,11 +25,19 @@ import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
+import type { IndexPattern } from '../../../../../src/plugins/data/public';
+
+export interface LoadSavedWorkspacePayload {
+  indexPatterns: IndexPatternSavedObject[];
+  savedWorkspace: GraphWorkspaceSavedObject;
+  urlQuery: string | null;
+}
 
 const actionCreator = actionCreatorFactory('x-pack/graph');
 
-export const loadSavedWorkspace = actionCreator<GraphWorkspaceSavedObject>('LOAD_WORKSPACE');
-export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
+export const loadSavedWorkspace = actionCreator<LoadSavedWorkspacePayload>('LOAD_WORKSPACE');
+export const saveWorkspace = actionCreator<GraphWorkspaceSavedObject>('SAVE_WORKSPACE');
+export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
 
 /**
  * Saga handling loading of a saved workspace.
@@ -39,18 +47,16 @@ export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
  */
 export const loadingSaga = ({
   createWorkspace,
-  getWorkspace,
-  indexPatterns,
   notifications,
   indexPatternProvider,
 }: GraphStoreDependencies) => {
-  function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>) {
-    const workspacePayload = action.payload;
-    const migrationStatus = migrateLegacyIndexPatternRef(workspacePayload, indexPatterns);
+  function* deserializeWorkspace(action: Action<LoadSavedWorkspacePayload>): Generator {
+    const { indexPatterns, savedWorkspace, urlQuery } = action.payload;
+    const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, indexPatterns);
     if (!migrationStatus.success) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern "{name}" not found',
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
           values: {
             name: migrationStatus.missingIndexPattern,
           },
@@ -59,31 +65,33 @@ export const loadingSaga = ({
       return;
     }
 
-    const selectedIndexPatternId = lookupIndexPatternId(workspacePayload);
-    const indexPattern = yield call(indexPatternProvider.get, selectedIndexPatternId);
-    const initialSettings = settingsSelector(yield select());
+    const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
+    const indexPattern = (yield call(
+      indexPatternProvider.get,
+      selectedIndexPatternId
+    )) as IndexPattern;
+    const initialSettings = settingsSelector((yield select()) as GraphState);
 
-    createWorkspace(indexPattern.title, initialSettings);
+    const createdWorkspace = createWorkspace(indexPattern.title, initialSettings);
 
     const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
-      workspacePayload,
+      savedWorkspace,
       indexPattern,
-      // workspace won't be null because it's created in the same call stack
-      getWorkspace()!
+      createdWorkspace
     );
 
     // put everything in the store
     yield put(
       updateMetaData({
-        title: workspacePayload.title,
-        description: workspacePayload.description,
-        savedObjectId: workspacePayload.id,
+        title: savedWorkspace.title,
+        description: savedWorkspace.description,
+        savedObjectId: savedWorkspace.id,
       })
     );
     yield put(
       setDatasource({
         type: 'indexpattern',
-        id: indexPattern.id,
+        id: indexPattern.id!,
         title: indexPattern.title,
       })
     );
@@ -91,7 +99,11 @@ export const loadingSaga = ({
     yield put(updateSettings(advancedSettings));
     yield put(loadTemplates(urlTemplates));
 
-    getWorkspace()!.runLayout();
+    if (urlQuery) {
+      yield put(submitSearch(urlQuery));
+    }
+
+    createdWorkspace.runLayout();
   }
 
   return function* () {
@@ -105,8 +117,8 @@ export const loadingSaga = ({
  * It will serialize everything and save it using the saved objects client
  */
 export const savingSaga = (deps: GraphStoreDependencies) => {
-  function* persistWorkspace() {
-    const savedWorkspace = deps.getSavedWorkspace();
+  function* persistWorkspace(action: Action<GraphWorkspaceSavedObject>) {
+    const savedWorkspace = action.payload;
     const state: GraphState = yield select();
     const workspace = deps.getWorkspace();
     const selectedDatasource = datasourceSelector(state).current;
@@ -114,13 +126,13 @@ export const savingSaga = (deps: GraphStoreDependencies) => {
       return;
     }
 
-    const savedObjectId = yield cps(showModal, {
+    const savedObjectId = (yield cps(showModal, {
       deps,
       workspace,
       savedWorkspace,
       state,
       selectedDatasource,
-    });
+    })) as string;
     if (savedObjectId) {
       yield put(updateMetaData({ savedObjectId }));
     }

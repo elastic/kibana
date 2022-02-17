@@ -23,6 +23,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'overviewHostQuery';
 
@@ -49,7 +50,7 @@ export const useHostOverview = ({
   skip = false,
   startDate,
 }: UseHostOverview): [boolean, HostOverviewArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -66,6 +67,7 @@ export const useHostOverview = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const overviewHostSearch = useCallback(
     (request: HostOverviewRequestOptions | null) => {
@@ -95,16 +97,14 @@ export const useHostOverview = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
+                addWarning(i18n.ERROR_HOST_OVERVIEW);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_HOST_OVERVIEW,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -115,7 +115,7 @@ export const useHostOverview = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

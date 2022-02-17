@@ -14,7 +14,7 @@ export enum LatencyAggregationType {
 }
 
 export const latencyAggregationTypeRt = t.union([
-  t.literal('avg'),
-  t.literal('p95'),
-  t.literal('p99'),
+  t.literal(LatencyAggregationType.avg),
+  t.literal(LatencyAggregationType.p95),
+  t.literal(LatencyAggregationType.p99),
 ]);

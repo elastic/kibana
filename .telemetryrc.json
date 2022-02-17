@@ -2,6 +2,8 @@
   {
     "output": "src/plugins/telemetry/schema/oss_plugins.json",
     "root": "src/plugins/",
-    "exclude": []
+    "exclude": [
+      "src/plugins/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
+    ]
   }
 ]

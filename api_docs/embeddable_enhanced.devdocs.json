@@ -1,0 +1,339 @@
+{
+  "id": "embeddableEnhanced",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.isEnhancedEmbeddable",
+        "type": "Function",
+        "tags": [],
+        "label": "isEnhancedEmbeddable",
+        "description": [],
+        "signature": [
+          "<E>(maybeEnhancedEmbeddable: E) => maybeEnhancedEmbeddable is ",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.EnhancedEmbeddable",
+            "text": "EnhancedEmbeddable"
+          },
+          "<E extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          "> ? E : never>"
+        ],
+        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.isEnhancedEmbeddable.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "maybeEnhancedEmbeddable",
+            "description": [],
+            "signature": [
+              "E"
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.EnhancedEmbeddableContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EnhancedEmbeddableContext",
+        "description": [],
+        "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.EnhancedEmbeddableContext.embeddable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              "> & { enhancements: { dynamicActions: ",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.DynamicActionManager",
+                "text": "DynamicActionManager"
+              },
+              "; }; }"
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.SetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "SetupDependencies",
+        "description": [],
+        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.SetupDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableSetup",
+                "text": "EmbeddableSetup"
+              }
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.SetupDependencies.uiActionsEnhanced",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActionsEnhanced",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.SetupContract",
+                "text": "SetupContract"
+              }
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.StartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "StartDependencies",
+        "description": [],
+        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.StartDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddableEnhanced",
+            "id": "def-public.StartDependencies.uiActionsEnhanced",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActionsEnhanced",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.StartContract",
+                "text": "StartContract"
+              }
+            ],
+            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.drilldownGrouping",
+        "type": "Array",
+        "tags": [],
+        "label": "drilldownGrouping",
+        "description": [],
+        "signature": [
+          "PresentableGroup",
+          "<{ embeddable?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          "> | undefined; }>[]"
+        ],
+        "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.EnhancedEmbeddable",
+        "type": "Type",
+        "tags": [],
+        "label": "EnhancedEmbeddable",
+        "description": [],
+        "signature": [
+          "E & { enhancements: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; }; }"
+        ],
+        "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "embeddableEnhanced",
+      "id": "def-public.SetupContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "SetupContract",
+      "description": [],
+      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "embeddableEnhanced",
+      "id": "def-public.StartContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "StartContract",
+      "description": [],
+      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -9,63 +9,64 @@ import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
 import { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
-import { SecurityPageName } from '../../../app/types';
+import { HOSTS_PATH } from '../../../../common/constants';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `/${hostName}/${tabName}`;
+  `${HOSTS_PATH}/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = (
   hostName: string,
-  hasMlUserPermissions: boolean
+  hasMlUserPermissions: boolean,
+  isRiskyHostsEnabled: boolean
 ): HostDetailsNavTab => {
+  const hiddenTabs = [];
+
   const hostDetailsNavTabs = {
     [HostsTableType.authentications]: {
       id: HostsTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
       disabled: false,
-      urlKey: 'host',
-      isDetailPage: true,
-      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.uncommonProcesses]: {
       id: HostsTableType.uncommonProcesses,
       name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
       disabled: false,
-      urlKey: 'host',
-      isDetailPage: true,
-      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.anomalies]: {
       id: HostsTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
       disabled: false,
-      urlKey: 'host',
-      isDetailPage: true,
-      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.events]: {
       id: HostsTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
       disabled: false,
-      urlKey: 'host',
-      isDetailPage: true,
-      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.alerts]: {
       id: HostsTableType.alerts,
       name: i18n.NAVIGATION_ALERTS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
       disabled: false,
-      urlKey: 'host',
-      pageId: SecurityPageName.hosts,
+    },
+    [HostsTableType.risk]: {
+      id: HostsTableType.risk,
+      name: i18n.NAVIGATION_HOST_RISK_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.risk),
+      disabled: false,
     },
   };
 
-  return hasMlUserPermissions
-    ? hostDetailsNavTabs
-    : omit(HostsTableType.anomalies, hostDetailsNavTabs);
+  if (!hasMlUserPermissions) {
+    hiddenTabs.push(HostsTableType.anomalies);
+  }
+
+  if (!isRiskyHostsEnabled) {
+    hiddenTabs.push(HostsTableType.risk);
+  }
+
+  return omit(hiddenTabs, hostDetailsNavTabs);
 };

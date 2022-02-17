@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { UserEcs } from '../../../../ecs/user';
 import { SourceEcs } from '../../../../ecs/source';
@@ -72,9 +72,13 @@ export interface AuthenticationBucket {
   doc_count: number;
   failures: {
     doc_count: number;
+    // TODO: Keep this or make a new structure?
+    value?: number;
   };
   successes: {
     doc_count: number;
+    // TODO: Keep this or make a new structure?
+    value?: number;
   };
   authentication: {
     hits: {

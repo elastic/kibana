@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
+
 import { RouteDependencies } from '../../plugin';
 
 export function registerDocumentsRoutes({
@@ -14,17 +16,14 @@ export function registerDocumentsRoutes({
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.post(
-    {
-      path: '/api/app_search/engines/{engineName}/documents',
+    skipBodyValidation({
+      path: '/internal/app_search/engines/{engineName}/documents',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          documents: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-        }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/documents/new',
     })
@@ -37,7 +36,7 @@ export function registerDocumentRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+      path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -51,7 +50,7 @@ export function registerDocumentRoutes({
   );
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+      path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

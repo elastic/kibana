@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render add form row when attribution not provided 1`] = `
+<fieldset
+  aria-labelledby="mapsLayerSettingsAttributionLegend"
+>
+  <div
+    className="mapAttributionFormRow"
+  >
+    <legend
+      className="mapAttributionFormRow__legend"
+      id="mapsLayerSettingsAttributionLegend"
+    >
+      Attribution
+    </legend>
+    <div
+      className="mapAttributionFormRow__field"
+    >
+      <AttributionPopover
+        label=""
+        onChange={[Function]}
+        popoverButtonAriaLabel="Add attribution"
+        popoverButtonClassName="mapAttributionFormRow__addButton"
+        popoverButtonIcon="plusInCircleFilled"
+        popoverButtonLabel="Add attribution"
+        url=""
+      />
+    </div>
+  </div>
+</fieldset>
+`;
+
+exports[`Should render edit form row when attribution not provided 1`] = `
+<fieldset
+  aria-labelledby="mapsLayerSettingsAttributionLegend"
+>
+  <div
+    className="mapAttributionFormRow"
+  >
+    <legend
+      className="mapAttributionFormRow__legend"
+      id="mapsLayerSettingsAttributionLegend"
+    >
+      Attribution
+    </legend>
+    <div
+      className="mapAttributionFormRow__field"
+    >
+      <EuiPanel
+        color="subdued"
+        paddingSize="s"
+      >
+        <EuiLink
+          color="text"
+          href="url1"
+          target="_blank"
+        >
+          label1
+        </EuiLink>
+      </EuiPanel>
+      <div
+        className="mapAttributionFormRow__buttons"
+      >
+        <AttributionPopover
+          label="label1"
+          onChange={[Function]}
+          popoverButtonAriaLabel="Edit attribution"
+          popoverButtonIcon="pencil"
+          popoverButtonLabel="Edit"
+          url="url1"
+        />
+        <EuiButtonEmpty
+          aria-label="Clear attribution"
+          color="danger"
+          iconType="trash"
+          onClick={[Function]}
+          size="xs"
+        >
+          <FormattedMessage
+            defaultMessage="Clear"
+            id="xpack.maps.attribution.clearBtnLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </div>
+    </div>
+  </div>
+</fieldset>
+`;
+
+exports[`Should render null when layer source has attribution provider 1`] = `""`;

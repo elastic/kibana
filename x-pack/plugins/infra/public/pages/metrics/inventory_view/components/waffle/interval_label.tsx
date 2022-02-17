@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIconTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   intervalAsString?: string;
@@ -19,14 +19,16 @@ export const IntervalLabel = ({ intervalAsString }: Props) => {
   }
 
   return (
-    <EuiText color="subdued" size="s">
-      <p>
+    <EuiIconTip
+      size="m"
+      type="clock"
+      content={
         <FormattedMessage
           id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
           defaultMessage="Last {duration} of data for the selected time"
           values={{ duration: intervalAsString }}
         />
-      </p>
-    </EuiText>
+      }
+    />
   );
 };

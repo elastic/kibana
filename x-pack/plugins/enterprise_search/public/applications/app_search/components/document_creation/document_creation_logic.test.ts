@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import dedent from 'dedent';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
@@ -493,7 +493,7 @@ describe('DocumentCreationLogic', () => {
           await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith(
-            "Cannot read property 'total' of undefined"
+            "Cannot read properties of undefined (reading 'total')"
           );
         });
 
@@ -516,7 +516,7 @@ describe('DocumentCreationLogic', () => {
 
       describe('chunks large uploads', () => {
         // Using an array of #s for speed, it doesn't really matter what the contents of the documents are for this test
-        const largeDocumentsArray = ([...Array(200).keys()] as unknown) as object[];
+        const largeDocumentsArray = [...Array(200).keys()] as unknown as object[];
 
         const mockFirstResponse = {
           validDocuments: { total: 99, examples: largeDocumentsArray.slice(0, 98) },

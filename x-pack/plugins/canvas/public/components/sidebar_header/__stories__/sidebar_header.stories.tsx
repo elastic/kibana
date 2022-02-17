@@ -8,7 +8,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { SidebarHeader } from '../sidebar_header';
+import { SidebarHeader } from '../sidebar_header.component';
 
 const handlers = {
   bringToFront: action('bringToFront'),

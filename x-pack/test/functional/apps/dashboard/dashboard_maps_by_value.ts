@@ -19,10 +19,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const kibanaServer = getService('kibanaServer');
 
   const LAYER_NAME = 'World Countries';
   let mapCounter = 0;
@@ -33,7 +34,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     if (inViewMode) {
       await PageObjects.dashboard.switchToEditMode();
     }
-    await PageObjects.visualize.clickMapsApp();
+    await dashboardAddPanel.clickEditorMenuButton();
+    await dashboardAddPanel.clickVisType('maps');
     await PageObjects.maps.clickSaveAndReturnButton();
   }
 
@@ -75,15 +77,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard maps by value', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard', 'tag', 'map'],
+      });
     });
 
     describe('adding a map by value', () => {
       it('can add a map by value', async () => {
         await createNewDashboard();
-
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await createAndAddMapByValue();
         const newPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
@@ -93,7 +105,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('editing a map by value', () => {
       before(async () => {
         await createNewDashboard();
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await createAndAddMapByValue();
         await editByValueMap();
       });
@@ -112,7 +123,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('editing a map and adding to map library', () => {
       beforeEach(async () => {
         await createNewDashboard();
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await createAndAddMapByValue();
       });
 

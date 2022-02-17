@@ -10,22 +10,23 @@
  */
 
 import React, { Fragment, lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../triggers_actions_ui/public/application/rule_type_registry.mock';
 import {
   ValidationResult,
-  Alert,
+  Rule,
   ConnectorValidationResult,
   GenericValidationResult,
+  RuleTypeModel,
 } from '../../../triggers_actions_ui/public/types';
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
 interface AlertAction {
@@ -47,26 +48,22 @@ jest.mock('../../../triggers_actions_ui/public/application/lib/alert_api', () =>
 const initLegacyShims = () => {
   const triggersActionsUi = {
     actionTypeRegistry: actionTypeRegistryMock.create(),
-    alertTypeRegistry: alertTypeRegistryMock.create(),
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
   };
   const data = { query: { timefilter: { timefilter: {} } } } as any;
-  const ngInjector = {} as angular.auto.IInjectorService;
-  Legacy.init(
-    {
-      core: coreMock.createStart(),
-      data,
-      isCloud: false,
-      triggersActionsUi,
-      usageCollection: {},
-    } as any,
-    ngInjector
-  );
+  Legacy.init({
+    core: coreMock.createStart(),
+    data,
+    isCloud: false,
+    triggersActionsUi,
+    usageCollection: {},
+  } as any);
 };
 
 const ALERTS_FEATURE_ID = 'alerts';
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 describe('alert_form', () => {
   beforeEach(() => {
@@ -74,13 +71,13 @@ describe('alert_form', () => {
     jest.resetAllMocks();
   });
 
-  const alertType = {
+  const ruleType: RuleTypeModel = {
     id: 'alert-type',
     iconClass: 'test',
     description: 'Testing',
     documentationUrl: 'https://...',
     validate: validationMethod,
-    alertParamsExpression: () => <Fragment />,
+    ruleParamsExpression: () => <Fragment />,
     requiresAppContext: false,
   };
 
@@ -94,12 +91,12 @@ describe('alert_form', () => {
     id: 'alert-action-type',
     iconClass: '',
     selectMessage: '',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
@@ -109,18 +106,18 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
-      alertTypeRegistry.list.mockReturnValue([alertType]);
-      alertTypeRegistry.get.mockReturnValue(alertType);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.list.mockReturnValue([ruleType]);
+      ruleTypeRegistry.get.mockReturnValue(ruleType);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
       const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
-        alertTypeId: alertType.id,
+        alertTypeId: ruleType.id,
         params: {},
         consumer: ALERTS_FEATURE_ID,
         schedule: {
@@ -131,7 +128,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <I18nProvider>
@@ -142,7 +139,7 @@ describe('alert_form', () => {
               errors={{ name: [], interval: [] }}
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
-              alertTypeRegistry={alertTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
             />
           </KibanaReactContext.Provider>
         </I18nProvider>
@@ -201,9 +198,9 @@ describe('alert_form', () => {
         actionTypeRegistry.has.mockReturnValue(true);
         actionTypeRegistry.get.mockReturnValue(actionType);
 
-        const initialAlert = ({
+        const initialAlert = {
           name: 'test',
-          alertTypeId: alertType.id,
+          alertTypeId: ruleType.id,
           params: {},
           consumer: ALERTS_FEATURE_ID,
           schedule: {
@@ -223,7 +220,7 @@ describe('alert_form', () => {
           muteAll: false,
           enabled: false,
           mutedInstanceIds: [],
-        } as unknown) as Alert;
+        } as unknown as Rule;
 
         const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 

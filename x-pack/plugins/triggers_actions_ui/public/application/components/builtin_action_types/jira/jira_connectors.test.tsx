@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import JiraConnectorFields from './jira_connectors';
 import { JiraActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
 
 describe('JiraActionConnectorFields renders', () => {
-  test('alerting Jira connector fields is rendered', () => {
+  test('alerting Jira connector fields are rendered', () => {
     const actionConnector = {
       secrets: {
         email: 'email',
@@ -34,6 +34,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
 
@@ -74,6 +76,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
         readOnly={false}
         consumer={'case'}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
@@ -104,10 +108,34 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message when secrets is missing', () => {
+    const actionConnector = {
+      actionTypeId: '.jira',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      secrets: {},
+      config: {},
+    } as JiraActionConnector;
+    const wrapper = mountWithIntl(
+      <JiraConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 
   test('should display a message on edit to re-enter credentials', () => {
@@ -132,6 +160,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);

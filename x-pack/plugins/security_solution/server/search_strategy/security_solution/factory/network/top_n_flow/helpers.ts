@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   GeoItem,

@@ -7,13 +7,14 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SearchSessionStatus } from '../../../../plugins/data_enhanced/common';
+import { SearchSessionStatus } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const retry = getService('retry');
+  const spacesService = getService('spaces');
 
   describe('search session', () => {
     describe('session management', () => {
@@ -26,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
             sessionId,
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(400);
       });
@@ -41,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -62,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -81,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -113,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: oldName,
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -164,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -187,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { id: id2 } = searchRes2.body;
 
-        await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        await retry.waitFor('searches persisted into session', async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}`)
             .set('kbn-xsrf', 'foo')
@@ -216,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -283,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { id: id2 } = searchRes2.body;
 
-      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+      await retry.waitFor('searches persisted into session', async () => {
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)
           .set('kbn-xsrf', 'foo')
@@ -336,11 +337,11 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'My Session',
           appId: 'discover',
           expires: '123',
-          urlGeneratorId: 'discover',
+          locatorId: 'discover',
         })
         .expect(200);
 
-      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+      await retry.waitFor('searches persisted into session', async () => {
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)
           .set('kbn-xsrf', 'foo')
@@ -359,9 +360,8 @@ export default function ({ getService }: FtrProviderContext) {
       // session refresh interval is 10 seconds, wait to give a chance for status to update
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
-      await retry.waitForWithTimeout(
+      await retry.waitFor(
         'searches eventually complete and session gets into the complete state',
-        5000,
         async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}`)
@@ -402,7 +402,12 @@ export default function ({ getService }: FtrProviderContext) {
       const { id: id1 } = searchRes1.body;
 
       // it might take the session a moment to be created
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await retry.waitFor('search session created', async () => {
+        const response = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo');
+        return response.body.statusCode === undefined;
+      });
 
       const getSessionFirstTime = await supertest
         .get(`/internal/session/${sessionId}`)
@@ -421,17 +426,21 @@ export default function ({ getService }: FtrProviderContext) {
       // it might take the session a moment to be updated
       await new Promise((resolve) => setTimeout(resolve, 2500));
 
-      const getSessionSecondTime = await supertest
-        .get(`/internal/session/${sessionId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      await retry.waitFor('search session touched time updated', async () => {
+        const getSessionSecondTime = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
 
-      expect(getSessionFirstTime.body.attributes.sessionId).to.be.equal(
-        getSessionSecondTime.body.attributes.sessionId
-      );
-      expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
-        getSessionSecondTime.body.attributes.touched
-      );
+        expect(getSessionFirstTime.body.attributes.sessionId).to.be.equal(
+          getSessionSecondTime.body.attributes.sessionId
+        );
+        expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
+          getSessionSecondTime.body.attributes.touched
+        );
+
+        return true;
+      });
     });
 
     describe('with security', () => {
@@ -457,7 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -478,7 +487,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -499,7 +508,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -520,7 +529,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -544,7 +553,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(401);
       });
@@ -585,7 +594,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(403);
 
@@ -594,6 +603,157 @@ export default function ({ getService }: FtrProviderContext) {
           .auth('analyst', 'analyst-password')
           .set('kbn-xsrf', 'foo')
           .expect(403);
+      });
+    });
+
+    describe('in non-default space', () => {
+      const spaceId = 'foo-space';
+      before(async () => {
+        try {
+          await spacesService.create({
+            id: spaceId,
+            name: 'Foo Space',
+          });
+        } catch {
+          // might already be created
+        }
+      });
+
+      after(async () => {
+        await spacesService.delete(spaceId);
+      });
+
+      it('should complete and delete non-persistent sessions', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+
+        // run search
+        const searchRes = await supertest
+          .post(`/s/${spaceId}/internal/search/ese`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            params: {
+              body: {
+                query: {
+                  term: {
+                    agent: '1',
+                  },
+                },
+              },
+              wait_for_completion_timeout: '1ms',
+            },
+          })
+          .expect(200);
+
+        const { id } = searchRes.body;
+
+        await retry.waitFor('searches persisted into session', async () => {
+          const resp = await supertest
+            .get(`/s/${spaceId}/internal/session/${sessionId}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+
+          const { touched, created, persisted, idMapping } = resp.body.attributes;
+          expect(persisted).to.be(false);
+          expect(touched).not.to.be(undefined);
+          expect(created).not.to.be(undefined);
+
+          const idMappings = Object.values(idMapping).map((value: any) => value.id);
+          expect(idMappings).to.contain(id);
+          return true;
+        });
+
+        // not touched timeout in tests is 15s, wait to give a chance for status to update
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve(void 0);
+          }, 15_000)
+        );
+
+        await retry.waitForWithTimeout(
+          'searches eventually complete and session gets into the complete state',
+          30_000,
+          async () => {
+            await supertest
+              .get(`/s/${spaceId}/internal/session/${sessionId}`)
+              .set('kbn-xsrf', 'foo')
+              .expect(404);
+
+            return true;
+          }
+        );
+      });
+
+      it('should complete persisted session', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+
+        // run search
+        const searchRes = await supertest
+          .post(`/s/${spaceId}/internal/search/ese`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            params: {
+              body: {
+                query: {
+                  term: {
+                    agent: '1',
+                  },
+                },
+              },
+              wait_for_completion_timeout: '1ms',
+            },
+          })
+          .expect(200);
+
+        const { id } = searchRes.body;
+
+        // persist session
+        await supertest
+          .post(`/s/${spaceId}/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            locatorId: 'discover',
+          })
+          .expect(200);
+
+        await retry.waitFor('searches persisted into session', async () => {
+          const resp = await supertest
+            .get(`/s/${spaceId}/internal/session/${sessionId}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+
+          const { touched, created, persisted, idMapping } = resp.body.attributes;
+          expect(persisted).to.be(true);
+          expect(touched).not.to.be(undefined);
+          expect(created).not.to.be(undefined);
+
+          const idMappings = Object.values(idMapping).map((value: any) => value.id);
+          expect(idMappings).to.contain(id);
+          return true;
+        });
+
+        // session refresh interval is 5 seconds, wait to give a chance for status to update
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        await retry.waitFor(
+          'searches eventually complete and session gets into the complete state',
+          async () => {
+            const resp = await supertest
+              .get(`/s/${spaceId}/internal/session/${sessionId}`)
+              .set('kbn-xsrf', 'foo')
+              .expect(200);
+
+            const { status } = resp.body.attributes;
+
+            expect(status).to.be(SearchSessionStatus.COMPLETE);
+            return true;
+          }
+        );
       });
     });
   });

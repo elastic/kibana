@@ -19,7 +19,7 @@ import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -31,17 +31,17 @@ export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
-const newJobLineChart = memoizeOne(ml.jobs.newJobLineChart, eq);
-const newJobPopulationsChart = memoizeOne(ml.jobs.newJobPopulationsChart, eq);
-const getEventRateData = memoizeOne(mlResultsService.getEventRateData, eq);
-const getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
-
 export class ChartLoader {
   private _indexPatternTitle: IndexPatternTitle = '';
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  constructor(indexPattern: IndexPattern, query: object) {
+  private _newJobLineChart = memoizeOne(ml.jobs.newJobLineChart, eq);
+  private _newJobPopulationsChart = memoizeOne(ml.jobs.newJobPopulationsChart, eq);
+  private _getEventRateData = memoizeOne(mlResultsService.getEventRateData, eq);
+  private _getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
+
+  constructor(indexPattern: DataView, query: object) {
     this._indexPatternTitle = indexPattern.title;
     this._query = query;
 
@@ -69,7 +69,7 @@ export class ChartLoader {
       const splitFieldName = splitField !== null ? splitField.name : null;
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
-      const resp = await newJobLineChart(
+      const resp = await this._newJobLineChart(
         this._indexPatternTitle,
         this._timeFieldName,
         start,
@@ -106,7 +106,7 @@ export class ChartLoader {
       const splitFieldName = splitField !== null ? splitField.name : '';
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
-      const resp = await newJobPopulationsChart(
+      const resp = await this._newJobPopulationsChart(
         this._indexPatternTitle,
         this._timeFieldName,
         start,
@@ -132,7 +132,7 @@ export class ChartLoader {
     indicesOptions?: IndicesOptions
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
-      const resp = await getEventRateData(
+      const resp = await this._getEventRateData(
         this._indexPatternTitle,
         this._query,
         this._timeFieldName,
@@ -159,7 +159,7 @@ export class ChartLoader {
     runtimeMappings: RuntimeMappings | null,
     indicesOptions?: IndicesOptions
   ): Promise<string[]> {
-    const { results } = await getCategoryFields(
+    const { results } = await this._getCategoryFields(
       this._indexPatternTitle,
       field.name,
       10,

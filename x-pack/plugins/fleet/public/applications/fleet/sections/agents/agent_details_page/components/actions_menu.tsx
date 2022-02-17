@@ -7,31 +7,35 @@
 
 import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Agent } from '../../../../types';
-import { useCapabilities, useKibanaVersion } from '../../../../hooks';
+import type { Agent, AgentPolicy } from '../../../../types';
+import { useAuthz, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
-  AgentReassignAgentPolicyFlyout,
+  AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
 import { isAgentUpgradeable } from '../../../../services';
+import { policyHasFleetServer } from '../../services/has_fleet_server';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
+  agentPolicy?: AgentPolicy;
   assignFlyoutOpenByDefault?: boolean;
   onCancelReassign?: () => void;
-}> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign }) => {
-  const hasWriteCapabilites = useCapabilities().write;
+}> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
+
+  const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -45,7 +49,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignAgentPolicyFlyout agents={[agent]} onClose={onClose} />
+          <AgentReassignAgentPolicyModal agents={[agent]} onClose={onClose} />
         </EuiPortal>
       )}
       {isUnenrollModalOpen && (
@@ -58,6 +62,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               refreshAgent();
             }}
             useForceUnenroll={isUnenrolling}
+            hasFleetServer={hasFleetServer}
           />
         </EuiPortal>
       )}
@@ -76,7 +81,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       )}
       <ContextMenuActions
         button={{
-          props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary', fill: true },
+          props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
           children: (
             <FormattedMessage
               id="xpack.fleet.agentDetails.actionsButton"
@@ -100,7 +105,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="cross"
-            disabled={!hasWriteCapabilites || !agent.active}
+            disabled={!hasFleetAllPrivileges || !agent.active}
             onClick={() => {
               setIsUnenrollModalOpen(true);
             }}

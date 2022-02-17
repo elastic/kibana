@@ -8,8 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
 import { handleError } from '../../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
 
 /**
@@ -45,10 +43,8 @@ export function logstashClusterPipelinesRoute(server) {
       },
     },
     handler: async (req) => {
-      const config = server.config();
-      const { ccs, pagination, sort, queryText } = req.payload;
+      const { pagination, sort, queryText } = req.payload;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       const throughputMetric = 'logstash_cluster_pipeline_throughput';
       const nodesCountMetric = 'logstash_cluster_pipeline_nodes_count';
@@ -61,21 +57,19 @@ export function logstashClusterPipelinesRoute(server) {
       if (sort) {
         sort.field = sortMetricSetMap[sort.field] || sort.field;
       }
-
       try {
-        const response = await getPaginatedPipelines(
+        const response = await getPaginatedPipelines({
           req,
-          lsIndexPattern,
-          { clusterUuid },
-          { throughputMetric, nodesCountMetric },
+          clusterUuid,
+          metrics: { throughputMetric, nodesCountMetric },
           pagination,
           sort,
-          queryText
-        );
+          queryText,
+        });
 
         return {
           ...response,
-          clusterStatus: await getClusterStatus(req, lsIndexPattern, { clusterUuid }),
+          clusterStatus: await getClusterStatus(req, { clusterUuid }),
         };
       } catch (err) {
         throw handleError(err, req);

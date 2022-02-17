@@ -16,7 +16,8 @@ import { UI_SETTINGS } from '../../../../common';
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   indexPattern: IIndexPattern;
-  field?: IFieldType;
+  field: IFieldType;
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 export interface PhraseSuggestorState {
@@ -53,7 +54,15 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
     );
     const { field } = this.props;
-    return shouldSuggestValues && field && field.aggregatable && field.type === 'string';
+    const isVersionFieldType = field?.esTypes?.includes('version');
+
+    return (
+      shouldSuggestValues &&
+      field &&
+      field.aggregatable &&
+      field.type === 'string' &&
+      !isVersionFieldType // suggestions don't work for version fields
+    );
   }
 
   protected onSearchChange = (value: string | number | boolean) => {
@@ -63,7 +72,8 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   protected updateSuggestions = debounce(async (query: string = '') => {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const { indexPattern, field } = this.props as PhraseSuggestorProps;
+    const { indexPattern, field, timeRangeForSuggestionsOverride } = this
+      .props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
     }
@@ -74,8 +84,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       field,
       query,
       signal: this.abortController.signal,
-      // Show all results in filter bar autocomplete
-      useTimeRange: false,
+      useTimeRange: timeRangeForSuggestionsOverride,
     });
 
     this.setState({ suggestions, isLoading: false });

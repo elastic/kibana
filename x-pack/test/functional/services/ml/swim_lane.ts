@@ -17,6 +17,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   /**
    * Y axis labels width + padding
@@ -88,6 +89,16 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         expectedValues,
         `Expected swim lane ${axis} labels to be ${expectedValues}, got ${actualValues}`
       );
+    },
+
+    async assertAxisLabelCount(testSubj: string, axis: 'x' | 'y', expectedCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const actualValues = await this.getAxisLabels(testSubj, axis);
+        expect(actualValues.length).to.eql(
+          expectedCount,
+          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues}`
+        );
+      });
     },
 
     async getCells(testSubj: string): Promise<HeatmapDebugState['heatmap']['cells']> {

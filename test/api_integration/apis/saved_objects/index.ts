@@ -19,9 +19,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./import'));
-    loadTestFile(require.resolve('./migrations'));
     loadTestFile(require.resolve('./resolve'));
     loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./delete_unknown_types'));
   });
 }

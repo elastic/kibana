@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -24,7 +24,6 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -38,9 +37,7 @@ export const sourceTitle = i18n.translate(
   }
 );
 
-export class MVTSingleLayerVectorSource
-  extends AbstractSource
-  implements ITiledSingleLayerVectorSource {
+export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVectorSource {
   static createDescriptor({
     urlTemplate,
     layerName,
@@ -80,6 +77,10 @@ export class MVTSingleLayerVectorSource
       .filter((f) => f !== null) as MVTField[];
   }
 
+  isMvt() {
+    return true;
+  }
+
   async supportsFitToBounds() {
     return false;
   }
@@ -94,6 +95,14 @@ export class MVTSingleLayerVectorSource
     return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
       return field.name;
     });
+  }
+
+  addFeature(geometry: Geometry | Position[]): Promise<void> {
+    throw new Error('Does not implement addFeature');
+  }
+
+  deleteFeature(featureId: string): Promise<void> {
+    throw new Error('Does not implement deleteFeature');
   }
 
   getMVTFields(): MVTField[] {
@@ -131,7 +140,7 @@ export class MVTSingleLayerVectorSource
   }
 
   getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
-    // Having this method here is a consequence of ITiledSingleLayerVectorSource extending IVectorSource.
+    // Having this method here is a consequence of IMvtVectorSource extending IVectorSource.
     throw new Error('Does not implement getGeoJsonWithMeta');
   }
 
@@ -139,7 +148,7 @@ export class MVTSingleLayerVectorSource
     return this.getMVTFields();
   }
 
-  getLayerName(): string {
+  getTileSourceLayer(): string {
     return this._descriptor.layerName;
   }
 
@@ -151,23 +160,18 @@ export class MVTSingleLayerVectorSource
   }
 
   async getDisplayName(): Promise<string> {
-    return this.getLayerName();
+    return this.getTileSourceLayer();
   }
 
-  async getUrlTemplateWithMeta() {
-    return {
-      urlTemplate: this._descriptor.urlTemplate,
-      layerName: this._descriptor.layerName,
-      minSourceZoom: this._descriptor.minSourceZoom,
-      maxSourceZoom: this._descriptor.maxSourceZoom,
-    };
+  async getTileUrl(): Promise<string> {
+    return this._descriptor.urlTemplate;
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return !!this._tooltipFields.length;
   }
 
@@ -180,13 +184,13 @@ export class MVTSingleLayerVectorSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
   }
 
-  getSyncMeta(): VectorSourceSyncMeta {
+  getSyncMeta(): null {
     return null;
   }
 
@@ -194,7 +198,7 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  getSourceTooltipContent() {
+  getSourceStatus() {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
@@ -220,6 +224,26 @@ export class MVTSingleLayerVectorSource
       }
     }
     return tooltips;
+  }
+
+  async getTimesliceMaskFieldName() {
+    return null;
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    return false;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
+  }
+
+  showJoinEditor(): boolean {
+    return false;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 }
 

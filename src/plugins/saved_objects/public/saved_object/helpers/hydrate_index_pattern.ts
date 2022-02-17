@@ -7,7 +7,7 @@
  */
 
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { IndexPatternsContract } from '../../../../data/public';
+import { DataViewsContract } from '../../../../data_views/public';
 
 /**
  * After creation or fetching from ES, ensure that the searchSources index indexPattern
@@ -18,7 +18,7 @@ import { IndexPatternsContract } from '../../../../data/public';
 export async function hydrateIndexPattern(
   id: string,
   savedObject: SavedObject,
-  indexPatterns: IndexPatternsContract,
+  dataViews: DataViewsContract,
   config: SavedObjectConfig
 ) {
   const indexPattern = config.indexPattern;
@@ -33,7 +33,7 @@ export async function hydrateIndexPattern(
     return null;
   }
 
-  const indexObj = await indexPatterns.get(index);
+  const indexObj = await dataViews.get(index);
   savedObject.searchSource.setField('index', indexObj);
   return indexObj;
 }

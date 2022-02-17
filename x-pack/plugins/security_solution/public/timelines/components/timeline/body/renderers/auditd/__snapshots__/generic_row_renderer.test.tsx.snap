@@ -98,6 +98,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
           },
         }
       }
+      isDraggable={true}
       text="connected using"
       timelineId="test"
     />
@@ -222,6 +223,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
         }
       }
       fileIcon="document"
+      isDraggable={true}
       text="opened file using"
       timelineId="test"
     />

@@ -7,11 +7,18 @@
 
 import { omit } from 'lodash';
 import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { FindOptions, FindResult } from '../alerts_client';
+import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
-import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import {
+  AlertTypeParams,
+  AlertingRequestHandlerContext,
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
+} from '../types';
+import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // query definition
 const querySchema = schema.object({
@@ -91,8 +98,9 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         muted_alert_ids: mutedInstanceIds,
         scheduled_task_id: scheduledTaskId,
         execution_status: executionStatus && {
-          ...omit(executionStatus, 'lastExecutionDate'),
+          ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
           last_execution_date: executionStatus.lastExecutionDate,
+          last_duration: executionStatus.lastDuration,
         },
         actions: actions.map(({ group, id, actionTypeId, params }) => ({
           group,
@@ -105,20 +113,38 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
   };
 };
 
-export const findRulesRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+interface BuildFindRulesRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  excludeFromPublicApi?: boolean;
+  usageCounter?: UsageCounter;
+}
+
+const buildFindRulesRoute = ({
+  licenseState,
+  path,
+  router,
+  excludeFromPublicApi = false,
+  usageCounter,
+}: BuildFindRulesRouteParams) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rules/_find`,
+      path,
       validate: {
         query: querySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = context.alerting.getRulesClient();
+
+        trackLegacyTerminology(
+          [req.query.search, req.query.search_fields, req.query.sort_field].filter(
+            Boolean
+          ) as string[],
+          usageCounter
+        );
 
         const options = rewriteQueryReq({
           ...req.query,
@@ -126,13 +152,49 @@ export const findRulesRoute = (
           search_fields: searchFieldsAsArray(req.query.search_fields),
         });
 
-        const findResult = await alertsClient.find({ options });
+        if (req.query.fields) {
+          usageCounter?.incrementCounter({
+            counterName: `alertingFieldsUsage`,
+            counterType: 'alertingFieldsUsage',
+            incrementBy: 1,
+          });
+        }
+
+        const findResult = await rulesClient.find({ options, excludeFromPublicApi });
         return res.ok({
           body: rewriteBodyRes(findResult),
         });
       })
     )
   );
+};
+
+export const findRulesRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
+  buildFindRulesRoute({
+    excludeFromPublicApi: true,
+    licenseState,
+    path: `${BASE_ALERTING_API_PATH}/rules/_find`,
+    router,
+    usageCounter,
+  });
+};
+
+export const findInternalRulesRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
+  buildFindRulesRoute({
+    excludeFromPublicApi: false,
+    licenseState,
+    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`,
+    router,
+    usageCounter,
+  });
 };
 
 function searchFieldsAsArray(searchFields: string | string[] | undefined): string[] | undefined {

@@ -12,7 +12,11 @@ import { API_URLS } from '../../common/constants';
 
 export enum UptimePage {
   Overview = 'Overview',
+  MappingError = 'MappingError',
   Monitor = 'Monitor',
+  MonitorAdd = 'AddMonitor',
+  MonitorEdit = 'EditMonitor',
+  MonitorManagement = 'MonitorManagement',
   Settings = 'Settings',
   Certificates = 'Certificates',
   StepDetail = 'StepDetail',
@@ -21,12 +25,8 @@ export enum UptimePage {
 }
 
 export const useUptimeTelemetry = (page?: UptimePage) => {
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    autorefreshInterval,
-    autorefreshIsPaused,
-  } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, autorefreshInterval, autorefreshIsPaused } =
+    useGetUrlParams();
 
   useEffect(() => {
     if (!apiService.http) throw new Error('Core http services are not defined');
@@ -38,6 +38,8 @@ export const useUptimeTelemetry = (page?: UptimePage) => {
       dateEnd: dateRangeEnd,
       autoRefreshEnabled: !autorefreshIsPaused,
     };
-    apiService.post(API_URLS.LOG_PAGE_VIEW, params);
+    setTimeout(() => {
+      apiService.post(API_URLS.LOG_PAGE_VIEW, params);
+    }, 100);
   }, [autorefreshInterval, autorefreshIsPaused, dateRangeEnd, dateRangeStart, page]);
 };

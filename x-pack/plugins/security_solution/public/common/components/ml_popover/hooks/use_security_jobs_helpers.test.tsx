@@ -31,6 +31,7 @@ describe('useSecurityJobsHelpers', () => {
       );
       expect(securityJob).toEqual({
         awaitingNodeAssignment: false,
+        bucketSpanSeconds: 900,
         datafeedId: '',
         datafeedIndices: [],
         datafeedState: '',
@@ -44,6 +45,7 @@ describe('useSecurityJobsHelpers', () => {
         isInstalled: false,
         isSingleMetricViewerJob: false,
         jobState: '',
+        jobTags: {},
         memory_status: '',
         moduleId: 'siem_auditbeat',
         processed_record_count: 0,

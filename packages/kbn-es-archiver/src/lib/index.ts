@@ -20,7 +20,8 @@ export {
 
 export { createFilterRecordsStream } from './records';
 
-export { createStats, Stats } from './stats';
+export type { Stats } from './stats';
+export { createStats } from './stats';
 
 export {
   isGzip,

@@ -15,19 +15,19 @@ Once you have retrieved all of the results you need, it is recommended to call `
 <b>Signature:</b>
 
 ```typescript
-createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
+createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder<T, A>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  findOptions | <code>SavedObjectsCreatePointInTimeFinderOptions</code> |  |
-|  dependencies | <code>SavedObjectsCreatePointInTimeFinderDependencies</code> |  |
+|  findOptions | SavedObjectsCreatePointInTimeFinderOptions |  |
+|  dependencies | SavedObjectsCreatePointInTimeFinderDependencies |  |
 
 <b>Returns:</b>
 
-`ISavedObjectsPointInTimeFinder`
+ISavedObjectsPointInTimeFinder&lt;T, A&gt;
 
 ## Example
 
@@ -48,6 +48,5 @@ for await (const response of finder.find()) {
     await finder.close();
   }
 }
-
 ```
 

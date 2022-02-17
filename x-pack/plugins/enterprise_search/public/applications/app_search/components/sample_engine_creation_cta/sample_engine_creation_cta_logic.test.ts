@@ -10,9 +10,9 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SampleEngineCreationCtaLogic } from './sample_engine_creation_cta_logic';
 
@@ -20,7 +20,7 @@ describe('SampleEngineCreationCtaLogic', () => {
   const { mount } = new LogicMounter(SampleEngineCreationCtaLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     isLoading: false,
@@ -47,13 +47,15 @@ describe('SampleEngineCreationCtaLogic', () => {
 
   describe('listeners', () => {
     describe('createSampleEngine', () => {
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           seed_sample_engine: true,
         });
         SampleEngineCreationCtaLogic.actions.createSampleEngine();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/onboarding_complete', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/onboarding_complete', {
+          body,
+        });
       });
 
       it('calls onSampleEngineCreationSuccess on valid submission', async () => {
@@ -82,10 +84,10 @@ describe('SampleEngineCreationCtaLogic', () => {
       });
     });
 
-    it('onSampleEngineCreationSuccess should set a success message and navigate the user to the engine page', () => {
+    it('onSampleEngineCreationSuccess should show a success message and navigate the user to the engine page', () => {
       SampleEngineCreationCtaLogic.actions.onSampleEngineCreationSuccess();
 
-      expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
+      expect(flashSuccessToast).toHaveBeenCalledWith("Engine 'national-parks-demo' was created");
       expect(navigateToUrl).toHaveBeenCalledWith('/engines/national-parks-demo');
     });
   });

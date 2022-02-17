@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { generateEncodedPath } from '../../utils/encode_path_params';
+
+import { ENGINES_TITLE } from '../engines';
 
 import { EngineLogic } from './';
 
@@ -15,4 +18,12 @@ import { EngineLogic } from './';
 export const generateEnginePath = (path: string, pathParams: object = {}) => {
   const { engineName } = EngineLogic.values;
   return generateEncodedPath(path, { engineName, ...pathParams });
+};
+
+/**
+ * Generate a breadcrumb trail with engineName automatically filled from EngineLogic state
+ */
+export const getEngineBreadcrumbs = (breadcrumbs: BreadcrumbTrail = []) => {
+  const { engineName } = EngineLogic.values;
+  return [ENGINES_TITLE, engineName, ...breadcrumbs];
 };

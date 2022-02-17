@@ -16,11 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('POST /api/saved_objects_tagging/assignments/update_by_tags', () => {
     beforeEach(async () => {
-      await esArchiver.load('bulk_assign');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('bulk_assign');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      );
     });
 
     const authorized: ExpectedResponse = {

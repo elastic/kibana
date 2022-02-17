@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`trace queries fetches a trace 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "trace.id": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+        "must_not": Object {
+          "terms": Object {
+            "error.log.level": Array [
+              "debug",
+              "info",
+              "warning",
+            ],
+          },
+        },
+      },
+    },
+    "size": 1000,
+  },
+}
+`;

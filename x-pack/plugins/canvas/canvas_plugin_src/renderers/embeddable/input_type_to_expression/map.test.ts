@@ -6,12 +6,12 @@
  */
 
 import { toExpression } from './map';
-import { MapEmbeddableInput } from '../../../../../../plugins/maps/public/embeddable';
-import { fromExpression, Ast } from '@kbn/interpreter/common';
+import { fromExpression, Ast } from '@kbn/interpreter';
 
 const baseSavedMapInput = {
+  id: 'elementId',
   attributes: { title: '' },
-  id: 'embeddableId',
+  savedObjectId: 'embeddableId',
   filters: [],
   isLayerTOCOpen: false,
   refreshConfig: {
@@ -23,7 +23,7 @@ const baseSavedMapInput = {
 
 describe('toExpression', () => {
   it('converts to a savedMap expression', () => {
-    const input: MapEmbeddableInput = {
+    const input = {
       ...baseSavedMapInput,
     };
 
@@ -33,7 +33,7 @@ describe('toExpression', () => {
     expect(ast.type).toBe('expression');
     expect(ast.chain[0].function).toBe('savedMap');
 
-    expect(ast.chain[0].arguments.id).toStrictEqual([input.id]);
+    expect(ast.chain[0].arguments.id).toStrictEqual([input.savedObjectId]);
 
     expect(ast.chain[0].arguments).not.toHaveProperty('title');
     expect(ast.chain[0].arguments).not.toHaveProperty('center');
@@ -41,7 +41,7 @@ describe('toExpression', () => {
   });
 
   it('includes optional input values', () => {
-    const input: MapEmbeddableInput = {
+    const input = {
       ...baseSavedMapInput,
       mapCenter: {
         lat: 1,
@@ -73,7 +73,7 @@ describe('toExpression', () => {
   });
 
   it('includes empty panel title', () => {
-    const input: MapEmbeddableInput = {
+    const input = {
       ...baseSavedMapInput,
       title: '',
     };

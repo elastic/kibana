@@ -28,24 +28,22 @@ export const accountManagementApp = Object.freeze({
       title,
       navLinkStatus: AppNavLinkStatus.hidden,
       appRoute: '/security/account',
-      async mount({ element }: AppMountParameters) {
-        const [
-          [coreStart],
-          { renderAccountManagementPage },
-          { UserAPIClient },
-        ] = await Promise.all([
-          getStartServices(),
-          import('./account_management_page'),
-          import('../management'),
-        ]);
+      async mount({ element, theme$ }: AppMountParameters) {
+        const [[coreStart], { renderAccountManagementPage }, { UserAPIClient }] = await Promise.all(
+          [getStartServices(), import('./account_management_page'), import('../management')]
+        );
 
         coreStart.chrome.setBreadcrumbs([{ text: title }]);
 
-        return renderAccountManagementPage(coreStart.i18n, element, {
-          authc,
-          notifications: coreStart.notifications,
-          userAPIClient: new UserAPIClient(coreStart.http),
-        });
+        return renderAccountManagementPage(
+          coreStart.i18n,
+          { element, theme$ },
+          {
+            authc,
+            notifications: coreStart.notifications,
+            userAPIClient: new UserAPIClient(coreStart.http),
+          }
+        );
       },
     });
   },

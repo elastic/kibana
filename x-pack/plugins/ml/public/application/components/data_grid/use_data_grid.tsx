@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
-import { HITS_TOTAL_RELATION } from '../../../../common/types/es_client';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../common/types/es_client';
 import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
@@ -36,6 +36,7 @@ export const useDataGrid = (
 ): UseDataGridReturnType => {
   const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: defaultPageSize };
 
+  const [ccsWarning, setCcsWarning] = useState(false);
   const [noDataMessage, setNoDataMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -86,15 +87,15 @@ export const useDataGrid = (
   const onSort: OnSort = useCallback(
     (sc) => {
       // Check if an unsupported column type for sorting was selected.
-      const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
+      const updatedInvalidSortingColumns = sc.reduce<string[]>((arr, current) => {
         const columnType = columns.find((dgc) => dgc.id === current.id);
         if (columnType?.schema === 'json') {
           arr.push(current.id);
         }
         return arr;
       }, []);
-      setInvalidSortingColumnns(updatedInvalidSortingColumnns);
-      if (updatedInvalidSortingColumnns.length === 0) {
+      setInvalidSortingColumnns(updatedInvalidSortingColumns);
+      if (updatedInvalidSortingColumns.length === 0) {
         setSortingColumns(sc);
       }
     },
@@ -146,12 +147,13 @@ export const useDataGrid = (
     if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
       setChartsVisible(
         rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED &&
-          rowCountRelation !== HITS_TOTAL_RELATION.GTE
+          rowCountRelation !== ES_CLIENT_TOTAL_HITS_RELATION.GTE
       );
     }
   }, [chartsVisible, rowCount, rowCountRelation]);
 
   return {
+    ccsWarning,
     chartsVisible,
     chartsButtonVisible: true,
     columnsWithCharts,
@@ -166,6 +168,7 @@ export const useDataGrid = (
     rowCount,
     rowCountRelation,
     setColumnCharts,
+    setCcsWarning,
     setErrorMessage,
     setNoDataMessage,
     setPagination,

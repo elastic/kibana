@@ -9,10 +9,11 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { safeLoad } from 'js-yaml';
+import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
-
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
@@ -22,7 +23,10 @@ import {
   getTemplate,
   getTemplatePriority,
   generateTemplateIndexPattern,
+  updateCurrentWriteIndices,
 } from './template';
+
+const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-1';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -67,7 +71,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual(composedOfTemplates);
+    expect(template.composed_of).toStrictEqual([...composedOfTemplates, FLEET_COMPONENT_TEMPLATE]);
   });
 
   it('adds empty composed_of correctly', () => {
@@ -82,7 +86,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual(composedOfTemplates);
+    expect(template.composed_of).toStrictEqual([FLEET_COMPONENT_TEMPLATE]);
   });
 
   it('adds hidden field correctly', () => {
@@ -170,6 +174,26 @@ describe('EPM template', () => {
     });
 
     expect(template).toMatchSnapshot(path.basename(ymlPath));
+  });
+
+  it('tests processing long field with index false', () => {
+    const longWithIndexFalseYml = `
+- name: longIndexFalse
+  type: long
+  index: false
+`;
+    const longWithIndexFalseMapping = {
+      properties: {
+        longIndexFalse: {
+          type: 'long',
+          index: false,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(longWithIndexFalseYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(longWithIndexFalseMapping);
   });
 
   it('tests processing text field with multi fields', () => {
@@ -299,6 +323,98 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
+  });
+
+  it('tests processing keyword field with multi fields with long field', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+      - name: keywordWithMultiFields
+        type: keyword
+        multi_fields:
+          - name: number_memory_devices
+            type: long
+            normalizer: lowercase
+      `;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'keyword',
+          fields: {
+            number_memory_devices: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
+  it('tests processing keyword field with multi fields with double field', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+      - name: keywordWithMultiFields
+        type: keyword
+        multi_fields:
+          - name: number
+            type: double
+            normalizer: lowercase
+      `;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'keyword',
+          fields: {
+            number: {
+              type: 'double',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
+  it('tests processing wildcard field with multi fields', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+- name: keywordWithMultiFields
+  type: wildcard
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'wildcard',
+          fields: {
+            raw: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            indexed: {
+              type: 'text',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
   });
 
   it('tests processing object field with no other attributes', () => {
@@ -553,6 +669,116 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
+  it('tests constant_keyword field type with value', () => {
+    const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  value: always_the_same
+  `;
+    const constantKeywordMapping = {
+      properties: {
+        constantKeyword: {
+          type: 'constant_keyword',
+          value: 'always_the_same',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
+  it('processes meta fields', () => {
+    const metaFieldLiteralYaml = `
+- name: fieldWithMetas
+  type: integer
+  unit: byte
+  metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        fieldWithMetas: {
+          type: 'long',
+          meta: {
+            metric_type: 'gauge',
+            unit: 'byte',
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('processes meta fields with only one meta value', () => {
+    const metaFieldLiteralYaml = `
+- name: fieldWithMetas
+  type: integer
+  metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        fieldWithMetas: {
+          type: 'long',
+          meta: {
+            metric_type: 'gauge',
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('processes grouped meta fields', () => {
+    const metaFieldLiteralYaml = `
+- name: groupWithMetas
+  type: group
+  unit: byte
+  metric_type: gauge
+  fields:
+    - name: fieldA
+      type: integer
+      unit: byte
+      metric_type: gauge
+    - name: fieldB
+      type: integer
+      unit: byte
+      metric_type: gauge
+  `;
+    const metaFieldMapping = {
+      properties: {
+        groupWithMetas: {
+          properties: {
+            fieldA: {
+              type: 'long',
+              meta: {
+                metric_type: 'gauge',
+                unit: 'byte',
+              },
+            },
+            fieldB: {
+              type: 'long',
+              meta: {
+                metric_type: 'gauge',
+                unit: 'byte',
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'metrics',
@@ -610,5 +836,59 @@ describe('EPM template', () => {
 
     expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
     expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
+  });
+
+  describe('updateCurrentWriteIndices', () => {
+    it('update all the index matching, index template index pattern', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+      expect(esClient.indices.getDataStream).toBeCalledWith({
+        name: 'test.*-*',
+      });
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('test.prefix1-default');
+    });
+    it('update non replicated datastream', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [
+          { name: 'test-non-replicated' },
+          { name: 'test-replicated', replicated: true },
+        ],
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('test-non-replicated');
+    });
   });
 });

@@ -20,19 +20,6 @@ describe('collector', () => {
       );
     });
 
-    it('should fail if init is not a function', () => {
-      expect(
-        () =>
-          new Collector(logger, {
-            type: 'my_test_collector',
-            // @ts-expect-error
-            init: 1,
-          })
-      ).toThrowError(
-        'If init property is passed, Collector must be instantiated with a options.init as a function property'
-      );
-    });
-
     it('should fail if fetch is not defined', () => {
       expect(
         () =>

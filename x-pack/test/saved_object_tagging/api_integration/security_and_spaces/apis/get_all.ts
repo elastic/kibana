@@ -16,11 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /api/saved_objects_tagging/tags', () => {
     before(async () => {
-      await esArchiver.load('rbac_tags');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('rbac_tags');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     const responses: Record<string, ExpectedResponse> = {
@@ -46,10 +50,12 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
       unauthorized: {
-        httpCode: 200,
+        httpCode: 403,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
-            tags: [],
+            error: 'Forbidden',
+            message: 'unauthorized',
+            statusCode: 403,
           });
         },
       },

@@ -51,23 +51,45 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
 }
 
+/**
+ * Setup contract for the Spaces plugin.
+ */
 export interface SpacesPluginSetup {
+  /**
+   * Service for interacting with spaces.
+   */
   spacesService: SpacesServiceSetup;
+
+  /**
+   * Registries exposed for the security plugin to transparently provide authorization and audit logging.
+   * @private
+   */
   spacesClient: {
+    /**
+     * Sets the client repository factory.
+     * @private
+     */
     setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
+    /**
+     * Registers a client wrapper.
+     * @private
+     */
     registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };
 }
 
+/**
+ * Start contract for the Spaces plugin.
+ */
 export interface SpacesPluginStart {
+  /** Service for interacting with spaces. */
   spacesService: SpacesServiceStart;
 }
 
 export class SpacesPlugin
-  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+{
   private readonly config$: Observable<ConfigType>;
-
-  private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
 
   private readonly log: Logger;
 
@@ -83,7 +105,6 @@ export class SpacesPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
-    this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
     this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
@@ -153,7 +174,7 @@ export class SpacesPlugin
 
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
-        kibanaIndexConfig$: this.kibanaIndexConfig$,
+        kibanaIndex: core.savedObjects.getKibanaIndex(),
         features: plugins.features,
         licensing: plugins.licensing,
         usageStatsServicePromise,

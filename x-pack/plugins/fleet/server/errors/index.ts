@@ -6,13 +6,11 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import type { ElasticsearchErrorDetails } from 'src/core/server';
+
 import { isESClientError } from './utils';
 
-export {
-  defaultIngestErrorHandler,
-  ingestErrorToResponseOptions,
-  isLegacyESClientError,
-} from './handlers';
+export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export { isESClientError } from './utils';
 
@@ -34,19 +32,31 @@ export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class AgentPolicyError extends IngestManagerError {}
+export class AgentPolicyNotFoundError extends IngestManagerError {}
 export class AgentNotFoundError extends IngestManagerError {}
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
 export class PackageInvalidArchiveError extends IngestManagerError {}
 export class PackageCacheError extends IngestManagerError {}
 export class PackageOperationNotSupportedError extends IngestManagerError {}
-export class FleetAdminUserInvalidError extends IngestManagerError {}
 export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
-export class AgentUnenrollmentError extends IngestManagerError {}
-export class AgentPolicyDeletionError extends IngestManagerError {}
+export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
+export class PackagePolicyValidationError extends IngestManagerError {}
+export class BundledPackageNotFoundError extends IngestManagerError {}
+export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
 
 export class FleetSetupError extends IngestManagerError {}
+export class GenerateServiceTokenError extends IngestManagerError {}
+export class FleetUnauthorizedError extends IngestManagerError {}
+
+export class OutputUnauthorizedError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {
@@ -62,8 +72,8 @@ export class ArtifactsElasticsearchError extends IngestManagerError {
   constructor(public readonly meta: Error) {
     super(
       `${
-        isESClientError(meta) && meta.meta.body?.error?.reason
-          ? meta.meta.body?.error?.reason
+        isESClientError(meta) && (meta.meta.body as ElasticsearchErrorDetails)?.error?.reason
+          ? (meta.meta.body as ElasticsearchErrorDetails)?.error?.reason
           : `Elasticsearch error while working with artifacts: ${meta.message}`
       }`
     );

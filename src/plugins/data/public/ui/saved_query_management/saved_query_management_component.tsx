@@ -61,10 +61,8 @@ export function SavedQueryManagementComponent({
         requestGotCancelled = true;
       };
 
-      const {
-        total: savedQueryCount,
-        queries: savedQueryItems,
-      } = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const { total: savedQueryCount, queries: savedQueryItems } =
+        await savedQueryService.findSavedQueries('', perPage, activePage + 1);
 
       if (requestGotCancelled) return;
 
@@ -77,9 +75,10 @@ export function SavedQueryManagementComponent({
     }
   }, [isOpen, activePage, savedQueryService]);
 
-  const handleTogglePopover = useCallback(() => setIsOpen((currentState) => !currentState), [
-    setIsOpen,
-  ]);
+  const handleTogglePopover = useCallback(
+    () => setIsOpen((currentState) => !currentState),
+    [setIsOpen]
+  );
 
   const handleClosePopover = useCallback(() => setIsOpen(false), []);
 
@@ -202,7 +201,7 @@ export function SavedQueryManagementComponent({
           className="kbnSavedQueryManagement__popover"
           data-test-subj="saved-query-management-popover"
         >
-          <EuiPopoverTitle id={'savedQueryManagementPopoverTitle'}>
+          <EuiPopoverTitle paddingSize="m" id={'savedQueryManagementPopoverTitle'}>
             {savedQueryPopoverTitleText}
           </EuiPopoverTitle>
           {savedQueries.length > 0 ? (
@@ -234,7 +233,7 @@ export function SavedQueryManagementComponent({
               <EuiSpacer size="s" />
             </Fragment>
           )}
-          <EuiPopoverFooter>
+          <EuiPopoverFooter paddingSize="m">
             <EuiFlexGroup
               direction="rowReverse"
               gutterSize="s"

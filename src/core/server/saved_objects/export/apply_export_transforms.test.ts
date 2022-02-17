@@ -27,6 +27,8 @@ const createTransform = (
   implementation: SavedObjectsExportTransform = (ctx, objs) => objs
 ): jest.MockedFunction<SavedObjectsExportTransform> => jest.fn(implementation);
 
+const toMap = <V>(record: Record<string, V>): Map<string, V> => new Map(Object.entries(record));
+
 const expectedContext = {
   request: expect.any(KibanaRequest),
 };
@@ -49,10 +51,10 @@ describe('applyExportTransforms', () => {
     await applyExportTransforms({
       request,
       objects: [foo1, bar1, foo2],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
         bar: barTransform,
-      },
+      }),
     });
 
     expect(fooTransform).toHaveBeenCalledTimes(1);
@@ -71,10 +73,10 @@ describe('applyExportTransforms', () => {
     await applyExportTransforms({
       request,
       objects: [foo1],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
         bar: barTransform,
-      },
+      }),
     });
 
     expect(fooTransform).toHaveBeenCalledTimes(1);
@@ -100,10 +102,10 @@ describe('applyExportTransforms', () => {
     const result = await applyExportTransforms({
       request,
       objects: [foo1, bar1, foo2],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
         bar: barTransform,
-      },
+      }),
     });
 
     expect(result).toEqual([foo1, foo2, dolly1, bar1, hello1]);
@@ -123,9 +125,9 @@ describe('applyExportTransforms', () => {
     const result = await applyExportTransforms({
       request,
       objects: [foo1, foo2, bar1, bar2],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
-      },
+      }),
     });
 
     expect(result).toEqual([foo1, foo2, dolly1, bar1, bar2]);
@@ -150,9 +152,9 @@ describe('applyExportTransforms', () => {
     const result = await applyExportTransforms({
       request,
       objects: [foo1, foo2],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
-      },
+      }),
     });
 
     expect(result).toEqual([foo1, foo2].map(disableFoo));
@@ -175,10 +177,10 @@ describe('applyExportTransforms', () => {
     const result = await applyExportTransforms({
       request,
       objects: [foo1, bar1],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
         bar: barTransform,
-      },
+      }),
     });
 
     expect(result).toEqual([foo1, dolly1, bar1, hello1]);
@@ -201,10 +203,10 @@ describe('applyExportTransforms', () => {
     const result = await applyExportTransforms({
       request,
       objects: [foo1, bar1],
-      transforms: {
+      transforms: toMap({
         foo: fooTransform,
         bar: barTransform,
-      },
+      }),
       sortFunction: (obj1, obj2) => (obj1.id > obj2.id ? 1 : -1),
     });
 
@@ -223,9 +225,9 @@ describe('applyExportTransforms', () => {
       applyExportTransforms({
         request,
         objects: [foo1, foo2],
-        transforms: {
+        transforms: toMap({
           foo: fooTransform,
-        },
+        }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid transform performed on objects to export"`
@@ -247,9 +249,9 @@ describe('applyExportTransforms', () => {
       applyExportTransforms({
         request,
         objects: [foo1, foo2],
-        transforms: {
+        transforms: toMap({
           foo: fooTransform,
-        },
+        }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid transform performed on objects to export"`
@@ -271,9 +273,9 @@ describe('applyExportTransforms', () => {
       applyExportTransforms({
         request,
         objects: [foo1, foo2],
-        transforms: {
+        transforms: toMap({
           foo: fooTransform,
-        },
+        }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid transform performed on objects to export"`
@@ -291,9 +293,9 @@ describe('applyExportTransforms', () => {
       applyExportTransforms({
         request,
         objects: [foo1],
-        transforms: {
+        transforms: toMap({
           foo: fooTransform,
-        },
+        }),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error transforming objects to export"`);
   });

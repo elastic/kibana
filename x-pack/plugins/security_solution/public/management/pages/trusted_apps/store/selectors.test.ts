@@ -94,6 +94,7 @@ describe('selectors', () => {
         page_size: 10,
         view_type: 'grid',
         filter: '',
+        included_policies: '',
       };
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
@@ -176,6 +177,7 @@ describe('selectors', () => {
         page_size: 10,
         view_type: 'grid',
         filter: '',
+        included_policies: '',
       };
 
       expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
@@ -189,6 +191,7 @@ describe('selectors', () => {
         page_size: 20,
         view_type: 'grid',
         filter: '',
+        included_policies: '',
       };
 
       expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);

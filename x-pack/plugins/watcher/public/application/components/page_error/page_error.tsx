@@ -25,7 +25,7 @@ export function getPageErrorCode(errorOrErrors: any) {
   }
 }
 
-export function PageError({ errorCode, id }: { errorCode?: any; id?: any }) {
+export function PageError({ errorCode, id }: { errorCode?: number; id?: string }) {
   switch (errorCode) {
     case 404:
       return <PageErrorNotExist id={id} />;

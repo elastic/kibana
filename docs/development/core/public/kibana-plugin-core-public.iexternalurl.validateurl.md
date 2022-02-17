@@ -18,9 +18,9 @@ validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  relativeOrAbsoluteUrl | <code>string</code> |  |
+|  relativeOrAbsoluteUrl | string |  |
 
 <b>Returns:</b>
 
-`URL | null`
+URL \| null
 

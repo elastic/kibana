@@ -17,6 +17,7 @@ export interface ModelSnapshotsResponse {
   count: number;
   model_snapshots: ModelSnapshot[];
 }
+
 export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
@@ -30,7 +31,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
     replay: boolean,
     end?: number,
     deleteInterveningResults: boolean = true,
-    calendarEvents?: [{ start: number; end: number; description: string }]
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
   ) {
     let datafeedId = `datafeed-${jobId}`;
     // ensure job exists
@@ -53,15 +54,13 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
     }
 
     // ensure the snapshot exists
-    const { body: snapshot } = await mlClient.getModelSnapshots<ModelSnapshotsResponse>({
+    const snapshot = await mlClient.getModelSnapshots({
       job_id: jobId,
       snapshot_id: snapshotId,
     });
 
     // apply the snapshot revert
-    const {
-      body: { model },
-    } = await mlClient.revertModelSnapshot<RevertModelSnapshotResponse>({
+    const { model } = await mlClient.revertModelSnapshot({
       job_id: jobId,
       snapshot_id: snapshotId,
       body: {
@@ -85,7 +84,6 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
           ),
           events: calendarEvents.map((s) => ({
             calendar_id: calendarId,
-            event_id: '',
             description: s.description,
             start_time: `${s.start}`,
             end_time: `${s.end}`,

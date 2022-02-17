@@ -9,6 +9,7 @@ import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<TaskManagerSetupContract> = {
+    index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
   };
@@ -22,8 +23,10 @@ const createStartMock = () => {
     remove: jest.fn(),
     schedule: jest.fn(),
     runNow: jest.fn(),
+    ephemeralRunNow: jest.fn(),
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn(),
+    supportsEphemeralTasks: jest.fn(),
   };
   return mock;
 };

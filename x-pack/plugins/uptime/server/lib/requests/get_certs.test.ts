@@ -84,23 +84,22 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
-    esClient.search.mockResolvedValueOnce({
-      body: {
-        hits: {
-          hits: mockHits,
-        },
+    esClient.search.mockResponseOnce({
+      hits: {
+        hits: mockHits,
       },
     } as any);
 
     const result = await getCerts({
       uptimeEsClient,
-      index: 1,
+      pageIndex: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',
       size: 30,
       sortBy: 'not_after',
       direction: 'desc',
+      notValidAfter: 'now+100d',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -173,7 +172,7 @@ describe('getCerts', () => {
                   "filter": Array [
                     Object {
                       "exists": Object {
-                        "field": "tls.server",
+                        "field": "tls.server.hash.sha256",
                       },
                     },
                     Object {
@@ -182,6 +181,20 @@ describe('getCerts', () => {
                           "gte": "now-2d",
                           "lte": "now+1h",
                         },
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "range": Object {
+                              "tls.certificate_not_valid_after": Object {
+                                "lte": "now+100d",
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -212,7 +225,10 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          },
+          Object {
+            "meta": true,
           },
         ],
       ]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   HostsQueries,
@@ -17,6 +17,7 @@ import {
 export const mockOptions: HostDetailsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -440,10 +441,10 @@ export const mockOptions: HostDetailsRequestOptions = {
     from: '2020-09-02T15:17:13.678Z',
     to: '2020-09-03T15:17:13.678Z',
   },
-  sort: ({
+  sort: {
     direction: Direction.desc,
     field: 'success',
-  } as unknown) as SortField<HostsFields>,
+  } as unknown as SortField<HostsFields>,
   params: {},
   hostName: 'bastion00.siem.estc.dev',
 } as HostDetailsRequestOptions;
@@ -1300,9 +1301,10 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1310,7 +1312,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             aggregations: {
@@ -1370,6 +1372,20 @@ export const formattedSearchStrategyResponse = {
                 terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
                 aggs: { timestamp: { max: { field: '@timestamp' } } },
               },
+              endpoint_id: {
+                filter: {
+                  term: {
+                    'agent.type': 'endpoint',
+                  },
+                },
+                aggs: {
+                  value: {
+                    terms: {
+                      field: 'agent.id',
+                    },
+                  },
+                },
+              },
             },
             query: {
               bool: {
@@ -1399,9 +1415,10 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -1409,10 +1426,24 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: false,
   body: {
     aggregations: {
+      endpoint_id: {
+        filter: {
+          term: {
+            'agent.type': 'endpoint',
+          },
+        },
+        aggs: {
+          value: {
+            terms: {
+              field: 'agent.id',
+            },
+          },
+        },
+      },
       host_architecture: {
         terms: {
           field: 'host.architecture',

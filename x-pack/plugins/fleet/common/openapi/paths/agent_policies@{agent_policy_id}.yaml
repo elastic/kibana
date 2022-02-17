@@ -37,7 +37,7 @@ put:
                 $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
-  operationId: put-agent-policy-agentPolicyId
+  operationId: update-agent-policy
   requestBody:
     content:
       application/json:

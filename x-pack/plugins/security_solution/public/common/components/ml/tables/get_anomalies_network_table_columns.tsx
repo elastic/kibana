@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -24,7 +22,7 @@ import { ExplorerLink } from '../links/create_explorer_link';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { NetworkType } from '../../../../network/store/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
-import { FlowTarget } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: string,

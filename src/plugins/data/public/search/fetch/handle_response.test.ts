@@ -12,7 +12,8 @@ import { handleResponse } from './handle_response';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
-import { SearchResponse } from 'elasticsearch';
+import { IKibanaSearchResponse } from 'src/plugins/data/common';
+import { themeServiceMock } from 'src/core/public/mocks';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -21,6 +22,8 @@ jest.mock('@kbn/i18n', () => {
     },
   };
 });
+
+const theme = themeServiceMock.createStartContract();
 
 describe('handleResponse', () => {
   const notifications = notificationServiceMock.createStartContract();
@@ -33,9 +36,11 @@ describe('handleResponse', () => {
   test('should notify if timed out', () => {
     const request = { body: {} };
     const response = {
-      timed_out: true,
-    } as SearchResponse<any>;
-    const result = handleResponse(request, response);
+      rawResponse: {
+        timed_out: true,
+      },
+    } as IKibanaSearchResponse<any>;
+    const result = handleResponse(request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -46,14 +51,16 @@ describe('handleResponse', () => {
   test('should notify if shards failed', () => {
     const request = { body: {} };
     const response = {
-      _shards: {
-        failed: 1,
-        total: 2,
-        successful: 1,
-        skipped: 1,
+      rawResponse: {
+        _shards: {
+          failed: 1,
+          total: 2,
+          successful: 1,
+          skipped: 1,
+        },
       },
-    } as SearchResponse<any>;
-    const result = handleResponse(request, response);
+    } as IKibanaSearchResponse<any>;
+    const result = handleResponse(request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -63,8 +70,10 @@ describe('handleResponse', () => {
 
   test('returns the response', () => {
     const request = {};
-    const response = {} as SearchResponse<any>;
-    const result = handleResponse(request, response);
+    const response = {
+      rawResponse: {},
+    } as IKibanaSearchResponse<any>;
+    const result = handleResponse(request, response, theme);
     expect(result).toBe(response);
   });
 });

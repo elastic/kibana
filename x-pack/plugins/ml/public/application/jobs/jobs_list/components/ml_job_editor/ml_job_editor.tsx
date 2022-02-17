@@ -7,8 +7,12 @@
 
 import React, { FC } from 'react';
 
-import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
-import { expandLiteralStrings, XJsonMode } from '../../../../../../shared_imports';
+import {
+  expandLiteralStrings,
+  XJsonMode,
+  EuiCodeEditor,
+  EuiCodeEditorProps,
+} from '../../../../../../shared_imports';
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -33,7 +37,12 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   onChange = () => {},
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
-    value = expandLiteralStrings(value);
+    try {
+      value = expandLiteralStrings(value);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   }
 
   return (

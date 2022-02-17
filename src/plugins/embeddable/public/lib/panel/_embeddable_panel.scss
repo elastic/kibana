@@ -21,8 +21,7 @@
     min-height: 0; // Absolute must for Firefox to scroll contents
   }
 
-  // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
-  // but it MIGHT be fixing IE
+  // SASSTODO: this MIGHT be fixing IE
   .embPanel__content--fullWidth {
     width: 100%;
   }
@@ -120,9 +119,10 @@
 // EDITING MODE
 
 .embPanel--editing {
-  border-style: dashed;
-  border-color: $euiColorMediumShade;
+  border-style: dashed !important;
+  border-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+  border-width: $euiBorderWidthThin;
 
   &:hover,
   &:focus {
@@ -162,12 +162,5 @@
 .embPanel__label {
   position: absolute;
   padding-left: $euiSizeS;
-}
-
-.embPanel__content[data-error],
-.embPanel__content[data-loading] {
-  pointer-events: none;
-  filter: grayscale(100%);
-  /* stylelint-disable-next-line color-named */
-  filter: gray;
+  z-index: $euiZLevel1;
 }

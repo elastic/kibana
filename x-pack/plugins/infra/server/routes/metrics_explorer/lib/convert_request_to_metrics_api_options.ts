@@ -26,7 +26,7 @@ export const convertRequestToMetricsAPIOptions = (
     indexPattern,
     limit,
     metrics,
-    dropLastBucket: true,
+    dropPartialBuckets: true,
   };
 
   if (options.afterKey) {

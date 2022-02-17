@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider } from '@kbn/test/jest';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { ImportSummary, ImportSummaryProps } from './import_summary';
 import { FailedImport } from '../../../lib';
@@ -24,6 +24,7 @@ describe('ImportSummary', () => {
     failedImports: [],
     successfulImports: [],
     importWarnings: [],
+    allowedTypes: [],
     ...parts,
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { AppState } from '../../state';
+import type { AppState } from '../../state';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -29,13 +29,9 @@ export const monitorStatusSelector = (state: AppState) => state.monitorStatus.st
 
 export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
 
-export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern;
-
 export const selectPingHistogram = ({ ping }: AppState) => ping;
 
 export const selectPingList = ({ pingList }: AppState) => pingList;
-
-export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
 
 export const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities;
 
@@ -76,17 +72,12 @@ export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppS
 
 export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => alertFlyoutType;
 
-export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
-  filters: ui.esKuery,
-  indexPattern: indexPattern.index_pattern,
-  locations: overviewFilters.filters.locations,
-});
-
 export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
-export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
+export const monitorManagementListSelector = ({ monitorManagementList }: AppState) =>
+  monitorManagementList;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
@@ -99,3 +90,7 @@ export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
 export const journeySelector = ({ journeys }: AppState) => journeys;
 
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
+
+export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
+
+export const uptimeWriteSelector = (state: AppState) => state;

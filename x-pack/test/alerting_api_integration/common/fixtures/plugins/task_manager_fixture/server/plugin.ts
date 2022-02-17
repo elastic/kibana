@@ -45,7 +45,8 @@ const taskByIdQuery = (id: string) => ({
 });
 
 export class SampleTaskManagerFixturePlugin
-  implements Plugin<void, void, {}, SampleTaskManagerFixtureStartDeps> {
+  implements Plugin<void, void, {}, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
     .pipe(first())
@@ -90,7 +91,7 @@ export class SampleTaskManagerFixturePlugin
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
       ): Promise<IKibanaResponse<any>> {
-        await core.elasticsearch.legacy.client.callAsInternalUser('indices.refresh', {
+        await context.core.elasticsearch.client.asInternalUser.indices.refresh({
           index: '.kibana_task_manager',
         });
         return res.ok({ body: {} });

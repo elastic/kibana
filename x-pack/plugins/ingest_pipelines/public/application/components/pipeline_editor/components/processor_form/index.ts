@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export {
-  ProcessorFormContainer as ProcessorForm,
-  ProcessorFormOnSubmitArg,
-  OnSubmitHandler,
-} from './processor_form.container';
+export type { ProcessorFormOnSubmitArg, OnSubmitHandler } from './processor_form.container';
+export { ProcessorFormContainer as ProcessorForm } from './processor_form.container';

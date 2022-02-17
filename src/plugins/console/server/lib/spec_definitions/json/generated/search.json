@@ -49,7 +49,7 @@
       "suggest_text": "",
       "timeout": "",
       "track_scores": "__flag__",
-      "track_total_hits": "__flag__",
+      "track_total_hits": "",
       "allow_partial_search_results": "__flag__",
       "typed_keys": "__flag__",
       "version": "__flag__",
@@ -58,7 +58,8 @@
       "batched_reduce_size": "",
       "max_concurrent_shard_requests": "",
       "pre_filter_shard_size": "",
-      "rest_total_hits_as_int": "__flag__"
+      "rest_total_hits_as_int": "__flag__",
+      "min_compatible_shard_node": ""
     },
     "methods": [
       "GET",

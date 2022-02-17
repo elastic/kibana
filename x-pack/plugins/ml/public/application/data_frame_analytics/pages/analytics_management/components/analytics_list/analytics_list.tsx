@@ -34,11 +34,12 @@ import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { SourceSelection } from '../source_selection';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
-import { AnalyticsEmptyPrompt } from './empty_prompt';
+import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -119,6 +120,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
 
+  const refreshObs = useRefresh();
+
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
@@ -174,6 +177,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isManagementTable
   );
 
+  useEffect(
+    function updateOnTimerRefresh() {
+      getAnalyticsCallback();
+    },
+    [refreshObs]
+  );
+
   const { columns, modals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
@@ -219,17 +229,17 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  if (analytics.length === 0) {
+  if (analytics.length === 0 && !isManagementTable) {
     return (
       <div data-test-subj="mlAnalyticsJobList">
+        <EuiSpacer size="m" />
         <AnalyticsEmptyPrompt
-          isManagementTable={isManagementTable}
           disabled={disabled}
-          onCreateFirstJobClick={() => setIsSourceIndexModalVisible(true)}
+          onCreateFirstJobClick={setIsSourceIndexModalVisible.bind(null, true)}
         />
-        {isSourceIndexModalVisible === true && (
-          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-        )}
+        {isSourceIndexModalVisible ? (
+          <SourceSelection onClose={setIsSourceIndexModalVisible.bind(null, false)} />
+        ) : null}
       </div>
     );
   }

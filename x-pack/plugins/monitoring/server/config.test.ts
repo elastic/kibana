@@ -7,8 +7,7 @@
 
 import fs from 'fs';
 import { when } from 'jest-when';
-
-import { createConfig, configSchema } from './config';
+import { configSchema, createConfig } from './config';
 
 const MOCKED_PATHS = [
   '/proc/self/cgroup',
@@ -19,7 +18,9 @@ const MOCKED_PATHS = [
 
 beforeEach(() => {
   const spy = jest.spyOn(fs, 'readFileSync').mockImplementation();
-  MOCKED_PATHS.forEach((file) => when(spy).calledWith(file).mockReturnValue(`contents-of-${file}`));
+  MOCKED_PATHS.forEach((file) =>
+    when(spy).calledWith(file, 'utf8').mockReturnValue(`contents-of-${file}`)
+  );
 });
 
 describe('config schema', () => {
@@ -36,7 +37,6 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
-        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,
@@ -66,8 +66,11 @@ describe('config schema', () => {
               "enabled": false,
             },
           },
+          "debug_log_path": "",
+          "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",
@@ -81,6 +84,7 @@ describe('config schema', () => {
             ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
+            "skipStartupConnectionCheck": false,
             "sniffInterval": false,
             "sniffOnConnectionFault": false,
             "sniffOnStart": false,
@@ -96,9 +100,6 @@ describe('config schema', () => {
             "index": "filebeat-*",
           },
           "max_bucket_size": 10000,
-          "metricbeat": Object {
-            "index": "metricbeat-*",
-          },
           "min_interval_seconds": 10,
           "show_license_expiration": true,
         },

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './types';
@@ -23,8 +23,8 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
 
   const indexPattern = state.indexPatterns[layer.indexPatternId];
 
-  const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingIndexPattern', {
-    defaultMessage: 'Index pattern not found',
+  const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
+    defaultMessage: 'Data view not found',
   });
 
   return (
@@ -40,6 +40,7 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
         }}
         indexPatternId={layer.indexPatternId}
         indexPatternRefs={state.indexPatternRefs}
+        isMissingCurrent={!indexPattern}
         onChangeIndexPattern={onChangeIndexPattern}
       />
     </I18nProvider>

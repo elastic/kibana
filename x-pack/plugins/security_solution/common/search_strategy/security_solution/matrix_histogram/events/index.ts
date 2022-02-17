@@ -26,10 +26,14 @@ export interface EventsActionGroupData {
   doc_count: number;
 }
 
+export interface Fields<T = unknown[]> {
+  [x: string]: T | Array<Fields<T>>;
+}
+
 export interface EventHit extends SearchHit {
   sort: string[];
   _source: EventSource;
-  fields: Record<string, unknown[]>;
+  fields: Fields;
   aggregations: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [agg: string]: any;

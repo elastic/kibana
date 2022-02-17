@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { values } from 'lodash';
 import { PluginServiceProvider, PluginServiceProviders } from './provider';
+import { PluginServiceProvidersMediator } from './providers_mediator';
 
 /**
  * A `PluginServiceRegistry` maintains a set of service providers which can be collectively
@@ -20,10 +20,12 @@ import { PluginServiceProvider, PluginServiceProviders } from './provider';
  */
 export class PluginServiceRegistry<Services, StartParameters = {}> {
   private providers: PluginServiceProviders<Services, StartParameters>;
+  private providersMediator: PluginServiceProvidersMediator<Services, StartParameters>;
   private _isStarted = false;
 
   constructor(providers: PluginServiceProviders<Services, StartParameters>) {
     this.providers = providers;
+    this.providersMediator = new PluginServiceProvidersMediator(providers);
   }
 
   /**
@@ -47,16 +49,17 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
    * Returns a React Context Provider for use in consuming applications.
    */
   getContextProvider() {
+    const values = Object.values(this.getServiceProviders()) as Array<
+      PluginServiceProvider<any, any>
+    >;
+
     // Collect and combine Context.Provider elements from each Service Provider into a single
     // Functional Component.
     const provider: React.FC = ({ children }) => (
       <>
-        {values<PluginServiceProvider<any, any>>(this.getServiceProviders()).reduceRight(
-          (acc, serviceProvider) => {
-            return <serviceProvider.Provider>{acc}</serviceProvider.Provider>;
-          },
-          children
-        )}
+        {values.reduceRight((acc, serviceProvider) => {
+          return <serviceProvider.Provider>{acc}</serviceProvider.Provider>;
+        }, children)}
       </>
     );
 
@@ -69,9 +72,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
    * @param params Parameters used to start the registry.
    */
   start(params: StartParameters) {
-    values<PluginServiceProvider<any, any>>(this.providers).map((serviceProvider) =>
-      serviceProvider.start(params)
-    );
+    this.providersMediator.start(params);
     this._isStarted = true;
     return this;
   }
@@ -80,9 +81,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
    * Stop the registry.
    */
   stop() {
-    values<PluginServiceProvider<any, any>>(this.providers).map((serviceProvider) =>
-      serviceProvider.stop()
-    );
+    this.providersMediator.stop();
     this._isStarted = false;
     return this;
   }

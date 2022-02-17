@@ -9,4 +9,4 @@ export { StepAliasesContainer } from './step_aliases_container';
 export { StepMappingsContainer } from './step_mappings_container';
 export { StepSettingsContainer } from './step_settings_container';
 
-export { CommonWizardSteps } from './types';
+export type { CommonWizardSteps } from './types';

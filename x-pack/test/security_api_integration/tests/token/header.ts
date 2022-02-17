@@ -12,9 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   async function createToken() {
-    const {
-      body: { access_token: accessToken },
-    } = await es.security.getToken({
+    const { access_token: accessToken } = await es.security.getToken({
       body: {
         grant_type: 'password',
         username: 'elastic',

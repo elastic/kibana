@@ -7,6 +7,10 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
   key: string;
@@ -15,12 +19,18 @@ interface ESAggResponse {
 export async function fetchLogstashVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertVersions[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'logstash',
+    dataset: 'node_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
-    filterPath: ['aggregations'],
+    index: indexPatterns,
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -31,11 +41,7 @@ export async function fetchLogstashVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'logstash_stats',
-              },
-            },
+            createDatasetFilter('logstash_stats', 'node_stats', 'logstash.node_stats'),
             {
               range: {
                 timestamp: {
@@ -89,7 +95,16 @@ export async function fetchLogstashVersions(
     },
   };
 
-  const { body: response } = await esClient.search(params);
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
+  const response = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

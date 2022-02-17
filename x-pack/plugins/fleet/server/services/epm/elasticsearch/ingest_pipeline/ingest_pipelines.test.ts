@@ -121,7 +121,7 @@ test('getPipelineNameForInstallation gets correct name', () => {
   const packageVersion = '1.0.1';
   const pipelineRefName = 'pipeline-json';
   const pipelineEntryNameForInstallation = getPipelineNameForInstallation({
-    pipelineName: dataStream.ingest_pipeline,
+    pipelineName: dataStream.ingest_pipeline!,
     dataStream,
     packageVersion,
   });

@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { NameList } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
-import { IndexPattern } from '../../index_patterns';
-import { SearchSource } from './search_source';
+import { IndexPattern } from '../..';
+import type { SearchSource } from './search_source';
+import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**
  * search source interface
@@ -22,12 +25,13 @@ export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
  * high level search service
  * @public
  */
-export interface ISearchStartSearchSource {
+export interface ISearchStartSearchSource
+  extends PersistableStateService<SerializedSearchSourceFields> {
   /**
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
    */
-  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */
@@ -41,12 +45,22 @@ export enum SortDirection {
   desc = 'desc',
 }
 
-export interface SortDirectionNumeric {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SortDirectionFormat = {
+  order: SortDirection;
+  format?: string;
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SortDirectionNumeric = {
   order: SortDirection;
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
-}
+};
 
-export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+export type EsQuerySortValue = Record<
+  string,
+  SortDirection | SortDirectionNumeric | SortDirectionFormat
+>;
 
 interface SearchField {
   [key: string]: SearchFieldValue;
@@ -78,10 +92,10 @@ export interface SearchSourceFields {
   /**
    * {@link AggConfigs}
    */
-  aggs?: any;
+  aggs?: object | IAggConfigs | (() => object);
   from?: number;
   size?: number;
-  source?: NameList;
+  source?: boolean | estypes.Fields;
   version?: boolean;
   /**
    * Retrieve fields via the search Fields API
@@ -92,7 +106,7 @@ export interface SearchSourceFields {
    *
    * @deprecated It is recommended to use `fields` wherever possible.
    */
-  fieldsFromSource?: NameList;
+  fieldsFromSource?: estypes.Fields;
   /**
    * {@link IndexPatternService}
    */
@@ -103,6 +117,54 @@ export interface SearchSourceFields {
 
   parent?: SearchSourceFields;
 }
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedSearchSourceFields = {
+  type?: string;
+  /**
+   * {@link Query}
+   */
+  query?: Query;
+  /**
+   * {@link Filter}
+   */
+  filter?: Filter[];
+  /**
+   * {@link EsQuerySortValue}
+   */
+  sort?: EsQuerySortValue[];
+  highlight?: SerializableRecord;
+  highlightAll?: boolean;
+  trackTotalHits?: boolean | number;
+  // todo: needs aggconfigs serializable type
+  /**
+   * {@link AggConfigs}
+   */
+  aggs?: AggConfigSerialized[];
+  from?: number;
+  size?: number;
+  source?: boolean | estypes.Fields;
+  version?: boolean;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: estypes.Fields;
+  /**
+   * {@link IndexPatternService}
+   */
+  index?: string;
+  searchAfter?: EsQuerySearchAfter;
+  timeout?: string;
+  terminate_after?: number;
+
+  parent?: SerializedSearchSourceFields;
+};
 
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
@@ -147,7 +209,7 @@ export interface ShardFailure {
       type: string;
     };
     reason: string;
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     script?: string;
     script_stack?: string[];
     type: string;

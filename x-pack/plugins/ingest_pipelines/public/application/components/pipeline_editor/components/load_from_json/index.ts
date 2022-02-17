@@ -6,4 +6,4 @@
  */
 
 export { LoadFromJsonButton } from './button';
-export { OnDoneLoadJsonHandler } from './modal_provider';
+export type { OnDoneLoadJsonHandler } from './modal_provider';

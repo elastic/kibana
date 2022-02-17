@@ -101,12 +101,15 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
             })}
           >
             <EuiButtonIcon
-              href={getHref('fleet_agent_details', {
+              href={getHref('agent_details', {
                 agentId: agent.id,
                 tabId: 'logs',
                 logQuery: getLogsQueryByInputType(inputType),
               })}
               iconType="editorAlignLeft"
+              aria-label={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+                defaultMessage: 'View logs',
+              })}
             />
           </EuiToolTip>
         );
@@ -136,6 +139,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
               <EuiFlexItem className="eui-textTruncate">
                 <EuiLink
                   className="eui-textTruncate"
+                  data-test-subj="agentPolicyDetailsLink"
                   href={getHref('edit_integration', {
                     policyId: agentPolicy.id,
                     packagePolicyId: packagePolicy.id,

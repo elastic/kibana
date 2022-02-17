@@ -16,12 +16,10 @@ import {
   getGroupPath,
   getGroupSourcePrioritizationPath,
   getReindexJobRoute,
-  getRoleMappingPath,
   getSourcesPath,
   GROUPS_PATH,
   SOURCES_PATH,
-  PERSONAL_SOURCES_PATH,
-  ROLE_MAPPINGS_PATH,
+  PRIVATE_SOURCES_PATH,
   SOURCE_DETAILS_PATH,
 } from './routes';
 
@@ -42,19 +40,13 @@ describe('getContentSourcePath', () => {
     const wrapper = shallow(<TestComponent id="123" />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${PERSONAL_SOURCES_PATH}/123`);
+    expect(path).toEqual(`${PRIVATE_SOURCES_PATH}/123`);
   });
 });
 
 describe('getGroupPath', () => {
   it('should format path', () => {
     expect(getGroupPath('123')).toEqual(`${GROUPS_PATH}/123`);
-  });
-});
-
-describe('getRoleMappingPath', () => {
-  it('should format path', () => {
-    expect(getRoleMappingPath('123')).toEqual(`${ROLE_MAPPINGS_PATH}/123`);
   });
 });
 
@@ -84,13 +76,13 @@ describe('getReindexJobRoute', () => {
 
   it('should format org path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, true)).toEqual(
-      `/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 
   it('should format user path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, false)).toEqual(
-      `/p/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/p/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 });

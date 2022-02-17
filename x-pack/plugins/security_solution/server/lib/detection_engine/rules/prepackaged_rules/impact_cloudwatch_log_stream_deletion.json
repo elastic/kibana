@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of an AWS CloudWatch log stream, which permanently deletes all associated archived log events with the stream.",
   "false_positives": [
-    "A log stream may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log stream deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "A log stream may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log stream deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS CloudWatch Log Stream Deletion",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:DeleteLogStream and event.dataset:aws.cloudtrail and event.provider:logs.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:logs.amazonaws.com and event.action:DeleteLogStream and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/logs/delete-log-stream.html",
     "https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_DeleteLogStream.html"
@@ -73,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

@@ -7,11 +7,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
+
 import { Loading } from '../loading';
 import { ArgLabel } from './arg_label';
 
-const { ArgFormPendingArgValue: strings } = ComponentStrings;
+const strings = {
+  getLoadingMessage: () =>
+    i18n.translate('xpack.canvas.argFormPendingArgValue.loadingMessage', {
+      defaultMessage: 'Loading',
+    }),
+};
 
 export class PendingArgValue extends React.PureComponent {
   static propTypes = {
@@ -41,7 +47,6 @@ export class PendingArgValue extends React.PureComponent {
 
   render() {
     const { label, argTypeInstance } = this.props;
-
     return (
       <div className="canvasArg">
         <ArgLabel

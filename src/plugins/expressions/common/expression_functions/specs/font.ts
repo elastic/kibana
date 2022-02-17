@@ -9,7 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { openSans, FontLabel as FontFamily } from '../../fonts';
-import { CSSStyle, FontStyle, FontWeight, Style, TextAlignment, TextDecoration } from '../../types';
+import {
+  CSSStyle,
+  FontSizeUnit,
+  FontStyle,
+  FontWeight,
+  Style,
+  TextAlignment,
+  TextDecoration,
+} from '../../types';
 
 const dashify = (str: string) => {
   return str
@@ -30,7 +38,7 @@ const inlineStyle = (obj: Record<string, string | number>) => {
   return styles.join(';');
 };
 
-interface Arguments {
+export interface FontArguments {
   align?: TextAlignment;
   color?: string;
   family?: FontFamily;
@@ -39,9 +47,15 @@ interface Arguments {
   size?: number;
   underline?: boolean;
   weight?: FontWeight;
+  sizeUnit?: string;
 }
 
-export type ExpressionFunctionFont = ExpressionFunctionDefinition<'font', null, Arguments, Style>;
+export type ExpressionFunctionFont = ExpressionFunctionDefinition<
+  'font',
+  null,
+  FontArguments,
+  Style
+>;
 
 export const font: ExpressionFunctionFont = {
   name: 'font',
@@ -96,9 +110,17 @@ export const font: ExpressionFunctionFont = {
     size: {
       default: `{ theme "font.size" default=14 }`,
       help: i18n.translate('expressions.functions.font.args.sizeHelpText', {
-        defaultMessage: 'The font size in pixels',
+        defaultMessage: 'The font size',
       }),
       types: ['number'],
+    },
+    sizeUnit: {
+      default: `px`,
+      help: i18n.translate('expressions.functions.font.args.sizeUnitHelpText', {
+        defaultMessage: 'The font size unit',
+      }),
+      types: ['string'],
+      options: ['px', 'pt'],
     },
     underline: {
       default: `{ theme "font.underline" default=false }`,
@@ -150,13 +172,25 @@ export const font: ExpressionFunctionFont = {
     // pixel setting
     const lineHeight = args.lHeight != null ? `${args.lHeight}px` : '1';
 
+    const availableSizeUnits: string[] = [FontSizeUnit.PX, FontSizeUnit.PT];
+    if (args.sizeUnit && !availableSizeUnits.includes(args.sizeUnit)) {
+      throw new Error(
+        i18n.translate('expressions.functions.font.invalidSizeUnitErrorMessage', {
+          defaultMessage: "Invalid size unit: '{sizeUnit}'",
+          values: {
+            sizeUnit: args.sizeUnit,
+          },
+        })
+      );
+    }
+
     const spec: CSSStyle = {
       fontFamily: args.family,
       fontWeight: args.weight,
       fontStyle: args.italic ? FontStyle.ITALIC : FontStyle.NORMAL,
       textDecoration: args.underline ? TextDecoration.UNDERLINE : TextDecoration.NONE,
       textAlign: args.align,
-      fontSize: `${args.size}px`, // apply font size as a pixel setting
+      fontSize: `${args.size}${args.sizeUnit}`,
       lineHeight, // apply line height as a pixel setting
     };
 

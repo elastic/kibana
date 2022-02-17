@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import { NoDataLayout } from './components/no_data_layout';
 
@@ -22,7 +22,7 @@ export const NoAccessPage = injectI18n(({ intl }) => (
       <FormattedMessage
         id="xpack.fleet.noAccess.accessDeniedDescription"
         defaultMessage="You are not authorized to access Elastic Fleet. To use Elastic Fleet,
-          you need a user role that contains read or all permissions for this application."
+          you need a user role that contains All permissions for this application."
       />
     </p>
   </NoDataLayout>

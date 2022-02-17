@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+export type { Props as SimulateTemplateProps } from './simulate_template_flyout';
 export {
   SimulateTemplateFlyoutContent,
   defaultFlyoutProps as simulateTemplateFlyoutProps,
-  Props as SimulateTemplateProps,
 } from './simulate_template_flyout';
 
-export { SimulateTemplate, Filters as SimulateTemplateFilters } from './simulate_template';
+export type { Filters as SimulateTemplateFilters } from './simulate_template';
+export { SimulateTemplate } from './simulate_template';

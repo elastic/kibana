@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
@@ -36,6 +37,7 @@ import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } f
 
 interface Props {
   field: NormalizedField;
+  kibanaVersion: SemVer;
 }
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -73,14 +75,13 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   }
 };
 
-export const TextType = React.memo(({ field }: Props) => {
-  const onIndexPrefixesChanage = (minField: FieldHook, maxField: FieldHook) => ([
-    min,
-    max,
-  ]: any) => {
-    minField.setValue(min);
-    maxField.setValue(max);
-  };
+export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
+  const onIndexPrefixesChanage =
+    (minField: FieldHook, maxField: FieldHook) =>
+    ([min, max]: any) => {
+      minField.setValue(min);
+      maxField.setValue(max);
+    };
 
   return (
     <>
@@ -247,7 +248,10 @@ export const TextType = React.memo(({ field }: Props) => {
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        {/* The "boost" parameter is deprecated since 8.x */}
+        {kibanaVersion.major < 8 && (
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        )}
       </AdvancedParametersSection>
     </>
   );

@@ -7,28 +7,33 @@
 
 import * as t from 'io-ts';
 
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  SortOrder,
-  author,
-  building_block_type,
-  license,
   risk_score_mapping,
-  rule_name_override,
-  severity_mapping,
-  timestamp_override,
-  threshold,
-  type,
-  threats,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  listArray,
   threat_query,
   threat_index,
   threat_indicator_path,
   threat_mapping,
   threat_language,
   threat_filters,
-} from '../../../../../common/detection_engine/schemas/types';
+  threats,
+  type,
+  severity_mapping,
+  severity,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  SortOrder,
+  author,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+  threshold,
+  BulkAction,
+  BulkActionEditPayload,
+  ruleExecutionSummary,
+} from '../../../../../common/detection_engine/schemas/common';
+
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -38,6 +43,7 @@ import {
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/alert.ts
+ * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
   t.type({
@@ -50,6 +56,11 @@ export const action = t.exact(
 
 export interface CreateRulesProps {
   rule: CreateRulesSchema;
+  signal: AbortSignal;
+}
+
+export interface PreviewRulesProps {
+  rule: CreateRulesSchema & { invocationCount: number };
   signal: AbortSignal;
 }
 
@@ -73,14 +84,6 @@ const MetaRule = t.intersection([
   }),
 ]);
 
-const StatusTypes = t.union([
-  t.literal('succeeded'),
-  t.literal('failed'),
-  t.literal('going to run'),
-  t.literal('partial failure'),
-  t.literal('warning'),
-]);
-
 // TODO: make a ticket
 export const RuleSchema = t.intersection([
   t.type({
@@ -100,7 +103,7 @@ export const RuleSchema = t.intersection([
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
-    severity: t.string,
+    severity,
     severity_mapping,
     tags: t.array(t.string),
     type,
@@ -112,24 +115,20 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
+    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    alias_target_id: t.string,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
     index: t.array(t.string),
     language: t.string,
     license,
-    last_failure_at: t.string,
-    last_failure_message: t.string,
-    last_success_message: t.string,
-    last_success_at: t.string,
     meta: MetaRule,
-    machine_learning_job_id: t.string,
+    machine_learning_job_id: t.array(t.string),
     output_index: t.string,
     query: t.string,
     rule_name_override,
     saved_id: t.string,
-    status: StatusTypes,
-    status_date: t.string,
     threshold,
     threat_query,
     threat_filters,
@@ -142,7 +141,9 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     exceptions_list: listArray,
+    uuid: t.string,
     version: t.number,
+    execution_summary: ruleExecutionSummary,
   }),
 ]);
 
@@ -171,16 +172,33 @@ export interface PaginationOptions {
 }
 
 export interface FetchRulesProps {
-  pagination?: PaginationOptions;
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
-  signal: AbortSignal;
+  sortingOptions?: SortingOptions;
+  signal?: AbortSignal;
 }
 
-export type RulesSortingFields = 'enabled' | 'updated_at' | 'name' | 'created_at';
+export type RulesSortingFields =
+  | 'created_at'
+  | 'enabled'
+  | 'execution_summary.last_execution.date'
+  | 'execution_summary.last_execution.metrics.execution_gap_duration_s'
+  | 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
+  | 'execution_summary.last_execution.metrics.total_search_duration_ms'
+  | 'execution_summary.last_execution.status'
+  | 'name'
+  | 'risk_score'
+  | 'severity'
+  | 'updated_at'
+  | 'version';
+
+export interface SortingOptions {
+  field: RulesSortingFields;
+  order: SortOrder;
+}
+
 export interface FilterOptions {
   filter: string;
-  sortField: RulesSortingFields;
-  sortOrder: SortOrder;
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
@@ -211,6 +229,50 @@ export interface DuplicateRulesProps {
   rules: Rule[];
 }
 
+export interface BulkActionProps<Action extends BulkAction> {
+  action: Action;
+  query?: string;
+  ids?: string[];
+  edit?: BulkActionEditPayload[];
+}
+
+export interface BulkActionSummary {
+  failed: number;
+  succeeded: number;
+  total: number;
+}
+
+export interface BulkActionResult {
+  updated: Rule[];
+  created: Rule[];
+  deleted: Rule[];
+}
+
+export interface BulkActionAggregatedError {
+  message: string;
+  status_code: number;
+  rules: Array<{ id: string; name?: string }>;
+}
+
+export interface BulkActionResponse {
+  success?: boolean;
+  rules_count?: number;
+  attributes: {
+    summary: BulkActionSummary;
+    results: BulkActionResult;
+    errors?: BulkActionAggregatedError[];
+  };
+}
+
+export type BulkActionResponseMap<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResponse;
+  [BulkAction.disable]: BulkActionResponse;
+  [BulkAction.enable]: BulkActionResponse;
+  [BulkAction.duplicate]: BulkActionResponse;
+  [BulkAction.export]: Blob;
+  [BulkAction.edit]: BulkActionResponse;
+}[Action];
+
 export interface BasicFetchProps {
   signal: AbortSignal;
 }
@@ -218,6 +280,7 @@ export interface BasicFetchProps {
 export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
+  overwriteExceptions?: boolean;
   signal: AbortSignal;
 }
 
@@ -237,45 +300,31 @@ export interface ImportResponseError {
   };
 }
 
+export interface ExceptionsImportError {
+  error: {
+    status_code: number;
+    message: string;
+  };
+  id?: string | undefined;
+  list_id?: string | undefined;
+  item_id?: string | undefined;
+}
+
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: Array<ImportRulesResponseError | ImportResponseError>;
+  exceptions_success?: boolean;
+  exceptions_success_count?: number;
+  exceptions_errors?: ExceptionsImportError[];
 }
 
 export interface ExportDocumentsProps {
   ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
-
-export interface RuleStatus {
-  current_status: RuleInfoStatus;
-  failures: RuleInfoStatus[];
-}
-
-export type RuleStatusType =
-  | 'failed'
-  | 'going to run'
-  | 'succeeded'
-  | 'partial failure'
-  | 'warning';
-export interface RuleInfoStatus {
-  alert_id: string;
-  status_date: string;
-  status: RuleStatusType | null;
-  last_failure_at: string | null;
-  last_success_at: string | null;
-  last_failure_message: string | null;
-  last_success_message: string | null;
-  last_look_back_date: string | null | undefined;
-  gap: string | null | undefined;
-  bulk_create_time_durations: string[] | null | undefined;
-  search_after_time_durations: string[] | null | undefined;
-}
-
-export type RuleStatusResponse = Record<string, RuleStatus>;
 
 export interface PrePackagedRulesStatusResponse {
   rules_custom_installed: number;

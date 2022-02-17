@@ -7,10 +7,11 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
-import { TimefilterSetup } from '../../query';
+import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
+import type { TimefilterSetup } from '../../query';
 import { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
@@ -22,6 +23,7 @@ interface ValueSuggestionsGetFnArgs {
   useTimeRange?: boolean;
   boolFilter?: any[];
   signal?: AbortSignal;
+  method?: ValueSuggestionsMethod;
 }
 
 const getAutocompleteTimefilter = (
@@ -54,12 +56,27 @@ export const setupValueSuggestionProvider = (
   }
 
   const requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, filters: any = [], signal?: AbortSignal) => {
+    <T = unknown>(
+      index: string,
+      field: IFieldType,
+      query: string,
+      filters: any = [],
+      signal?: AbortSignal,
+      method: ValueSuggestionsMethod = core.uiSettings.get<ValueSuggestionsMethod>(
+        UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD
+      )
+    ) => {
       usageCollector?.trackRequest();
       return core.http
-        .fetch(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',
-          body: JSON.stringify({ query, field: field.name, filters }),
+          body: JSON.stringify({
+            query,
+            field: field.name,
+            fieldMeta: field?.toSpec?.(),
+            filters,
+            method,
+          }),
           signal,
         })
         .then((r) => {
@@ -77,6 +94,7 @@ export const setupValueSuggestionProvider = (
     useTimeRange,
     boolFilter,
     signal,
+    method,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
@@ -85,9 +103,16 @@ export const setupValueSuggestionProvider = (
       useTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
     const { title } = indexPattern;
 
+    const isVersionFieldType = field.type === 'string' && field.esTypes?.includes('version');
+
     if (field.type === 'boolean') {
       return [true, false];
-    } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
+    } else if (
+      !shouldSuggestValues ||
+      !field.aggregatable ||
+      field.type !== 'string' ||
+      isVersionFieldType // suggestions don't work for version fields
+    ) {
       return [];
     }
 
@@ -98,7 +123,7 @@ export const setupValueSuggestionProvider = (
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
       usageCollector?.trackCall();
-      return await requestSuggestions(title, field, query, filters, signal);
+      return await requestSuggestions(title, field, query, filters, signal, method);
     } catch (e) {
       if (!signal?.aborted) {
         usageCollector?.trackError();

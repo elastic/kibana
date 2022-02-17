@@ -1,8 +1,0 @@
-{
-  "id": "indexPatternManagement",
-  "version": "kibana",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["management", "data", "urlForwarding", "indexPatternFieldEditor"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils"]
-}

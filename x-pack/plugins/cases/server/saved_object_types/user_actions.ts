@@ -6,26 +6,23 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
 import { userActionsMigrations } from './migrations';
-
-export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,
-  hidden: false,
-  namespaceType: 'single',
+  hidden: true,
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
-      action_field: {
-        type: 'keyword',
-      },
       action: {
         type: 'keyword',
       },
-      action_at: {
+      created_at: {
         type: 'date',
       },
-      action_by: {
+      created_by: {
         properties: {
           email: {
             type: 'keyword',
@@ -38,13 +35,29 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      new_value: {
-        type: 'text',
+      payload: {
+        dynamic: false,
+        properties: {
+          connector: {
+            properties: {
+              // connector.type
+              type: { type: 'keyword' },
+            },
+          },
+        },
       },
-      old_value: {
-        type: 'text',
+      owner: {
+        type: 'keyword',
+      },
+      // The type of the action
+      type: {
+        type: 'keyword',
       },
     },
   },
   migrations: userActionsMigrations,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
 };

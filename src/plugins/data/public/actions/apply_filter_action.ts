@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ThemeServiceSetup } from 'kibana/public';
 import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
@@ -21,6 +22,9 @@ export interface ApplyGlobalFilterActionContext {
   // Need to make this unknown to prevent circular dependencies.
   // Apps using this property will need to cast to `IEmbeddable`.
   embeddable?: unknown;
+  // controlledBy is an optional key in filter.meta that identifies the owner of a filter
+  // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
+  controlledBy?: string;
 }
 
 async function isCompatible(context: ApplyGlobalFilterActionContext) {
@@ -29,7 +33,8 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 
 export function createFilterAction(
   filterManager: FilterManager,
-  timeFilter: TimefilterContract
+  timeFilter: TimefilterContract,
+  theme: ThemeServiceSetup
 ): Action {
   return createAction({
     type: ACTION_GLOBAL_APPLY_FILTER,
@@ -42,7 +47,7 @@ export function createFilterAction(
       });
     },
     isCompatible,
-    execute: async ({ filters, timeFieldName }: ApplyGlobalFilterActionContext) => {
+    execute: async ({ filters, timeFieldName, controlledBy }: ApplyGlobalFilterActionContext) => {
       if (!filters) {
         throw new Error('Applying a filter requires a filter');
       }
@@ -74,7 +79,8 @@ export function createFilterAction(
                   overlay.close();
                   resolve(filterSelection);
                 }
-              )
+              ),
+              { theme$: theme.theme$ }
             ),
             {
               'data-test-subj': 'test',
@@ -83,6 +89,15 @@ export function createFilterAction(
         });
 
         selectedFilters = await filterSelectionPromise;
+      }
+
+      // remove existing filters for control prior to adding new filtes for control
+      if (controlledBy) {
+        filterManager.getFilters().forEach((filter) => {
+          if (filter.meta.controlledBy === controlledBy) {
+            filterManager.removeFilter(filter);
+          }
+        });
       }
 
       if (timeFieldName) {

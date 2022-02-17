@@ -7,12 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import Boom from '@hapi/boom';
 import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
-import { CASE_DETAILS_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
+import { getWarningHeader, logDeprecatedEndpoint, wrapError } from '../utils';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetCaseApi({ router, logger }: RouteDeps) {
+export function initGetCaseApi({ router, logger, kibanaVersion }: RouteDeps) {
   router.get(
     {
       path: CASE_DETAILS_URL,
@@ -21,31 +20,75 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
           case_id: schema.string(),
         }),
         query: schema.object({
+          /**
+           * @deprecated since version 8.1.0
+           */
           includeComments: schema.boolean({ defaultValue: true }),
-          includeSubCaseComments: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        if (!ENABLE_CASE_CONNECTOR && request.query.includeSubCaseComments !== undefined) {
-          throw Boom.badRequest(
-            'The `subCaseId` is not supported when the case connector feature is disabled'
+        const isIncludeCommentsParamProvidedByTheUser =
+          request.url.searchParams.has('includeComments');
+
+        if (isIncludeCommentsParamProvidedByTheUser) {
+          logDeprecatedEndpoint(
+            logger,
+            request.headers,
+            `The query parameter 'includeComments' of the get case API '${CASE_DETAILS_URL}' is deprecated`
           );
         }
-        const casesClient = context.cases.getCasesClient();
+
+        const casesClient = await context.cases.getCasesClient();
         const id = request.params.case_id;
 
         return response.ok({
-          body: await casesClient.get({
+          ...(isIncludeCommentsParamProvidedByTheUser && {
+            headers: {
+              ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
+            },
+          }),
+          body: await casesClient.cases.get({
             id,
             includeComments: request.query.includeComments,
-            includeSubCaseComments: request.query.includeSubCaseComments,
           }),
         });
       } catch (error) {
         logger.error(
-          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments} \ninclude sub comments: ${request.query.includeSubCaseComments}: ${error}`
+          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`
+        );
+        return response.customError(wrapError(error));
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${CASE_DETAILS_URL}/resolve`,
+      validate: {
+        params: schema.object({
+          case_id: schema.string(),
+        }),
+        query: schema.object({
+          includeComments: schema.boolean({ defaultValue: true }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const casesClient = await context.cases.getCasesClient();
+        const id = request.params.case_id;
+
+        return response.ok({
+          body: await casesClient.cases.resolve({
+            id,
+            includeComments: request.query.includeComments,
+          }),
+        });
+      } catch (error) {
+        logger.error(
+          `Failed to retrieve case in resolve route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`
         );
         return response.customError(wrapError(error));
       }

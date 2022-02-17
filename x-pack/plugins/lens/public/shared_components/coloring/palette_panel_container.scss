@@ -1,0 +1,29 @@
+@import '@elastic/eui/src/components/flyout/variables';
+@import '@elastic/eui/src/components/flyout/mixins';
+
+.lnsPalettePanelContainer {
+  // Use the EuiFlyout style
+  @include euiFlyout;
+  // But with custom positioning to keep it within the sidebar contents
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+  // making just a bit higher than the dimension flyout to stack on top of it
+  z-index: $euiZLevel3 + 1
+}
+
+.lnsPalettePanelContainer__header {
+  padding: $euiSize;
+}
+
+.lnsPalettePanelContainer__content {
+  @include euiYScroll;
+  flex: 1;
+}
+
+.lnsPalettePanelContainer__footer {
+  padding: $euiSize;
+}

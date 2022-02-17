@@ -18,7 +18,7 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { featuresPluginMock } from '../../../features/public/mocks';
 import type { PluginsStart } from '../plugin';
@@ -51,6 +51,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       element: container,
       setBreadcrumbs,
       history: scopedHistoryMock.create({ pathname }),
+      theme$: themeServiceMock.createTheme$(),
     });
 
   return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };
@@ -77,13 +78,13 @@ describe('spacesManagementApp', () => {
     const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Spaces' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Spaces' }]);
     expect(docTitle.change).toHaveBeenCalledWith('Spaces');
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="kbnRedirectCrossAppLinks"
+          class="kbnAppWrapper kbnRedirectCrossAppLinks"
         >
           Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
         </div>
@@ -109,7 +110,7 @@ describe('spacesManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="kbnRedirectCrossAppLinks"
+          class="kbnAppWrapper kbnRedirectCrossAppLinks"
         >
           Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}}}
         </div>
@@ -134,14 +135,14 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Spaces' },
-      { href: `/edit/${spaceId}`, text: `space with id some-space` },
+      { text: `space with id some-space` },
     ]);
     expect(docTitle.change).toHaveBeenCalledWith('Spaces');
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="kbnRedirectCrossAppLinks"
+          class="kbnAppWrapper kbnRedirectCrossAppLinks"
         >
           Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}}}
         </div>

@@ -34,7 +34,8 @@ export interface SetupContract {}
 export interface StartContract {}
 
 export class DashboardEnhancedPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+{
   public readonly drilldowns = new DashboardDrilldownsService();
 
   constructor(protected readonly context: PluginInitializerContext) {}

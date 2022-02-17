@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -81,13 +81,13 @@ describe('CredentialsList', () => {
         ],
       });
       const wrapper = shallow(<CredentialsList />);
-      const { items } = wrapper.find(EuiBasicTable).props();
-      expect(items.map((i: ApiToken) => i.id)).toEqual([undefined, 1, 2]);
+      const items = wrapper.find(EuiBasicTable).props().items as ApiToken[];
+      expect(items.map((i) => i.id)).toEqual([undefined, 1, 2]);
     });
   });
 
   describe('empty state', () => {
-    it('renders an EuiEmptyState when no credentials are available', () => {
+    it('renders an EuiEmptyPrompt when no credentials are available', () => {
       setMockValues({
         ...values,
         apiTokens: [],

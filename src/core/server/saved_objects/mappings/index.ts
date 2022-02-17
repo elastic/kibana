@@ -8,8 +8,6 @@
 
 export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
 export type {
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsTypeMappingDefinitions,
   SavedObjectsMappingProperties,

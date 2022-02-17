@@ -83,7 +83,7 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
         ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const { body: fieldCaps } = await asCurrentUser.fieldCaps({
+        const fieldCaps = await asCurrentUser.fieldCaps({
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
@@ -166,7 +166,7 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
                 }
               } else {
                 // only report uniqueFieldName as not aggregatable if it's not part
-                // of a valid categorization configuration and if it's not a scripted field or runtime mapping.
+                // of a valid categorization configuration and if it's not a scripted field or runtime field.
                 if (
                   !isValidCategorizationConfig(job, uniqueFieldName) &&
                   !isScriptField(job, uniqueFieldName) &&

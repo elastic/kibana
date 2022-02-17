@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { PackagePolicy, NewPackagePolicy, UpdatePackagePolicy } from '../models';
+import type {
+  PackagePolicy,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  DryRunPackagePolicy,
+  PackagePolicyPackage,
+} from '../models';
+
+import type { ListResult, ListWithKuery } from './common';
 
 export interface GetPackagePoliciesRequest {
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
-  };
+  query: ListWithKuery;
 }
 
-export interface GetPackagePoliciesResponse {
-  items: PackagePolicy[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {
   params: {
@@ -56,4 +55,30 @@ export type DeletePackagePoliciesResponse = Array<{
   id: string;
   name?: string;
   success: boolean;
+  package?: PackagePolicyPackage;
+  policy_id?: string;
 }>;
+
+export interface UpgradePackagePolicyBaseResponse {
+  name?: string;
+
+  // Support generic errors
+  statusCode?: number;
+  body?: {
+    message: string;
+  };
+}
+
+export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
+  hasErrors: boolean;
+  diff?: [PackagePolicy, DryRunPackagePolicy];
+}
+
+export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];
+
+export interface UpgradePackagePolicyResponseItem extends UpgradePackagePolicyBaseResponse {
+  id: string;
+  success: boolean;
+}
+
+export type UpgradePackagePolicyResponse = UpgradePackagePolicyResponseItem[];

@@ -1,0 +1,12 @@
+.dvFieldCount__panel {
+  margin-left: $euiSizeXS;
+  @include euiBreakpoint('xs', 's') {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.dvFieldCount__item {
+  max-width: 300px;
+  min-width: 300px;
+}

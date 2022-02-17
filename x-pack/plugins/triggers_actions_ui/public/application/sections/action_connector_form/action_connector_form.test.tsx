@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   UserConfiguredActionConnector,
@@ -23,12 +23,12 @@ describe('action_connector_form', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-        return {};
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
       },
-      validateParams: (): GenericValidationResult<unknown> => {
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
-        return validationResult;
+        return Promise.resolve(validationResult);
       },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
@@ -49,6 +49,8 @@ describe('action_connector_form', () => {
         dispatch={() => {}}
         errors={{ name: [] }}
         actionTypeRegistry={actionTypeRegistry}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     const connectorNameField = wrapper?.find('[data-test-subj="nameInput"]');

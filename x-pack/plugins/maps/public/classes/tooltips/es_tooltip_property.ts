@@ -6,31 +6,34 @@
  */
 
 import _ from 'lodash';
+import { type Filter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
-import {
-  esFilters,
-  Filter,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../../../../src/plugins/data/public';
+import { DataView, DataViewField } from '../../../../../../src/plugins/data/common';
 
 export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _indexPattern: IndexPattern;
+  private readonly _indexPattern: DataView;
   private readonly _field: IField;
+  private readonly _applyGlobalQuery: boolean;
 
-  constructor(tooltipProperty: ITooltipProperty, indexPattern: IndexPattern, field: IField) {
+  constructor(
+    tooltipProperty: ITooltipProperty,
+    indexPattern: DataView,
+    field: IField,
+    applyGlobalQuery: boolean
+  ) {
     this._tooltipProperty = tooltipProperty;
     this._indexPattern = indexPattern;
     this._field = field;
+    this._applyGlobalQuery = applyGlobalQuery;
   }
 
   getPropertyKey(): string {
     return this._tooltipProperty.getPropertyKey();
   }
 
-  getPropertyName(): string {
+  getPropertyName() {
     return this._tooltipProperty.getPropertyName();
   }
 
@@ -38,7 +41,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getRawValue();
   }
 
-  _getIndexPatternField(): IndexPatternField | undefined {
+  _getIndexPatternField(): DataViewField | undefined {
     return this._indexPattern.fields.getByName(this._field.getRootName());
   }
 
@@ -65,6 +68,10 @@ export class ESTooltipProperty implements ITooltipProperty {
   }
 
   isFilterable(): boolean {
+    if (!this._applyGlobalQuery) {
+      return false;
+    }
+
     const indexPatternField = this._getIndexPatternField();
     return (
       !!indexPatternField &&
@@ -76,18 +83,25 @@ export class ESTooltipProperty implements ITooltipProperty {
   }
 
   async getESFilters(): Promise<Filter[]> {
+    if (!this._applyGlobalQuery) {
+      return [];
+    }
+
     const indexPatternField = this._getIndexPatternField();
     if (!indexPatternField) {
       return [];
     }
 
-    const value = this.getRawValue();
-    if (value == null) {
-      const existsFilter = esFilters.buildExistsFilter(indexPatternField, this._indexPattern);
+    const rawValue = this.getRawValue();
+    if (rawValue == null) {
+      const existsFilter = buildExistsFilter(indexPatternField, this._indexPattern);
       existsFilter.meta.negate = true;
       return [existsFilter];
     } else {
-      return [esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern)];
+      const values = Array.isArray(rawValue) ? (rawValue as string[]) : [rawValue as string];
+      return values.map((value) => {
+        return buildPhraseFilter(indexPatternField, value, this._indexPattern);
+      });
     }
   }
 }

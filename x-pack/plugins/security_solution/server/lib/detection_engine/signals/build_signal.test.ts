@@ -28,11 +28,12 @@ describe('buildSignal', () => {
 
   test('it builds a signal as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.event;
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
+
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -61,7 +62,8 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       status: 'open',
       rule: {
         author: [],
@@ -85,10 +87,6 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
-        status_date: '2020-02-22T16:47:50.047Z',
-        last_success_at: '2020-02-22T16:47:50.047Z',
-        last_success_message: 'succeeded',
         output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
@@ -105,7 +103,6 @@ describe('buildSignal', () => {
 
   test('it builds a signal as expected with original_event if is present', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -113,8 +110,9 @@ describe('buildSignal', () => {
       module: 'system',
     };
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -143,7 +141,8 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',
@@ -173,10 +172,6 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
-        status_date: '2020-02-22T16:47:50.047Z',
-        last_success_at: '2020-02-22T16:47:50.047Z',
-        last_success_message: 'succeeded',
         output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
@@ -193,7 +188,6 @@ describe('buildSignal', () => {
 
   test('it builds a ancestor correctly if the parent does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -212,14 +206,12 @@ describe('buildSignal', () => {
 
   test('it builds a ancestor correctly if the parent does exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
       kind: 'event',
       module: 'system',
     };
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.signal = {
       parents: [
         {
@@ -255,7 +247,6 @@ describe('buildSignal', () => {
 
   test('it builds a signal ancestor correctly if the parent does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -276,14 +267,12 @@ describe('buildSignal', () => {
 
   test('it builds a signal ancestor correctly if the parent does exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
       kind: 'event',
       module: 'system',
     };
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.signal = {
       parents: [
         {
@@ -340,39 +329,39 @@ describe('buildSignal', () => {
 
     test('it will remove a "signal" numeric clash', () => {
       const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: 127,
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown as BaseSignalHit;
       const output = removeClashes(doc);
       expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
     });
 
     test('it will remove a "signal" object clash', () => {
       const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { child_1: { child_2: 'Test nesting' } },
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown as BaseSignalHit;
       const output = removeClashes(doc);
       expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
     });
 
     test('it will not remove a "signal" if that is signal is one of our signals', () => {
       const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-      const doc = ({
+      const doc = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown as BaseSignalHit;
       const output = removeClashes(doc);
       const expected = {
         ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'),

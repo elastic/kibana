@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Attempt to Unload Elastic Endpoint Security Kernel Extension",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:kextunload and process.args:(\"/System/Library/Extensions/EndpointSecurity.kext\" or \"EndpointSecurity.kext\")",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:kextunload and process.args:(\"/System/Library/Extensions/EndpointSecurity.kext\" or \"EndpointSecurity.kext\")\n",
   "risk_score": 73,
   "rule_id": "70fa1af4-27fd-4f26-bd03-50b6af6b9e24",
   "severity": "high",

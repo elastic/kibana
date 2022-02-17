@@ -8,9 +8,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
 
-const { ExpressionElementNotSelected: strings } = ComponentStrings;
+const strings = {
+  getCloseButtonLabel: () =>
+    i18n.translate('xpack.canvas.expressionElementNotSelected.closeButtonLabel', {
+      defaultMessage: 'Close',
+    }),
+  getSelectDescription: () =>
+    i18n.translate('xpack.canvas.expressionElementNotSelected.selectDescription', {
+      defaultMessage: 'Select an element to show expression input',
+    }),
+};
 
 export const ElementNotSelected = ({ done }) => (
   <div>

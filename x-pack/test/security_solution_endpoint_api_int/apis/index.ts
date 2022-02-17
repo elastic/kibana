@@ -15,7 +15,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
 
-    this.tags('ciGroup7');
     const log = getService('log');
 
     if (!isRegistryEnabled()) {
@@ -30,9 +29,11 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
     loadTestFile(require.resolve('./resolver/index'));
     loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./metadata_v1'));
     loadTestFile(require.resolve('./policy'));
-    loadTestFile(require.resolve('./artifacts'));
     loadTestFile(require.resolve('./package'));
+    loadTestFile(require.resolve('./endpoint_authz'));
+    loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
+    loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
+    loadTestFile(require.resolve('./endpoint_artifacts/host_isolation_exceptions'));
   });
 }

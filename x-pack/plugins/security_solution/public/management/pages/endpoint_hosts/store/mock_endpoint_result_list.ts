@@ -10,9 +10,9 @@ import {
   GetHostPolicyResponse,
   HostInfo,
   HostPolicyResponse,
-  HostResultList,
   HostStatus,
-  MetadataQueryStrategyVersions,
+  MetadataListResponse,
+  PendingActionsResponse,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -28,42 +28,41 @@ import {
   GetAgentsResponse,
 } from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
+import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
+import {
+  ACTION_STATUS_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+} from '../../../../../common/endpoint/constants';
+import { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
 
 export const mockEndpointResultList: (options?: {
   total?: number;
-  request_page_size?: number;
-  request_page_index?: number;
-  query_strategy_version?: MetadataQueryStrategyVersions;
-}) => HostResultList = (options = {}) => {
-  const {
-    total = 1,
-    request_page_size: requestPageSize = 10,
-    request_page_index: requestPageIndex = 0,
-    query_strategy_version: queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
-  } = options;
+  page?: number;
+  pageSize?: number;
+}) => MetadataListResponse = (options = {}) => {
+  const { total = 1, page = 0, pageSize = 10 } = options;
 
   // Skip any that are before the page we're on
-  const numberToSkip = requestPageSize * requestPageIndex;
+  const numberToSkip = pageSize * page;
 
   // total - numberToSkip is the count of non-skipped ones, but return no more than a pageSize, and no less than 0
-  const actualCountToReturn = Math.max(Math.min(total - numberToSkip, requestPageSize), 0);
+  const actualCountToReturn = Math.max(Math.min(total - numberToSkip, pageSize), 0);
 
   const hosts: HostInfo[] = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     hosts.push({
       metadata: generator.generateHostMetadata(),
       host_status: HostStatus.UNHEALTHY,
-      query_strategy_version: queryStrategyVersion,
     });
   }
-  const mock: HostResultList = {
-    hosts,
+  const mock: MetadataListResponse = {
+    data: hosts,
     total,
-    request_page_size: requestPageSize,
-    request_page_index: requestPageIndex,
-    query_strategy_version: queryStrategyVersion,
+    page,
+    pageSize,
   };
   return mock;
 };
@@ -75,7 +74,6 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
     host_status: HostStatus.UNHEALTHY,
-    query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };
 
@@ -84,39 +82,38 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
  * API handlers for Host details based on a list of Host results.
  */
 const endpointListApiPathHandlerMocks = ({
-  endpointsResults = mockEndpointResultList({ total: 3 }).hosts,
+  endpointsResults = mockEndpointResultList({ total: 3 }).data,
   epmPackages = [generator.generateEpmPackage()],
   endpointPackagePolicies = [],
   policyResponse = generator.generatePolicyResponse(),
   agentPolicy = generator.generateAgentPolicy(),
-  queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
   totalAgentsUsingEndpoint = 0,
+  transforms = [],
 }: {
   /** route handlers will be setup for each individual host in this array */
-  endpointsResults?: HostResultList['hosts'];
-  epmPackages?: GetPackagesResponse['response'];
+  endpointsResults?: MetadataListResponse['data'];
+  epmPackages?: GetPackagesResponse['items'];
   endpointPackagePolicies?: GetPolicyListResponse['items'];
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
-  queryStrategyVersion?: MetadataQueryStrategyVersions;
   totalAgentsUsingEndpoint?: number;
+  transforms?: TransformStats[];
 } = {}) => {
   const apiHandlers = {
     // endpoint package info
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
-        response: epmPackages,
+        items: epmPackages,
       };
     },
 
     // endpoint list
-    '/api/endpoint/metadata': (): HostResultList => {
+    [HOST_METADATA_LIST_ROUTE]: (): MetadataListResponse => {
       return {
-        hosts: endpointsResults,
-        request_page_size: 10,
-        request_page_index: 0,
+        data: endpointsResults,
         total: endpointsResults?.length || 0,
-        query_strategy_version: queryStrategyVersion,
+        page: 0,
+        pageSize: 10,
       };
     },
 
@@ -153,19 +150,29 @@ const endpointListApiPathHandlerMocks = ({
     [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
       return {
         total: totalAgentsUsingEndpoint,
-        list: [],
+        items: [],
         totalInactive: 0,
         page: 1,
         perPage: 10,
       };
     },
+
+    // Pending Actions
+    [ACTION_STATUS_ROUTE]: (): PendingActionsResponse => {
+      return pendingActionsResponseMock();
+    },
+
+    [METADATA_TRANSFORMS_STATUS_ROUTE]: (): TransformStatsResponse => ({
+      count: transforms.length,
+      transforms,
+    }),
   };
 
   // Build a GET route handler for each endpoint details based on the list of Endpoints passed on input
   if (endpointsResults) {
     endpointsResults.forEach((host) => {
       // @ts-expect-error
-      apiHandlers[`/api/endpoint/metadata/${host.metadata.agent.id}`] = () => host;
+      apiHandlers[`${HOST_METADATA_LIST_ROUTE}/${host.metadata.agent.id}`] = () => host;
     });
   }
 
@@ -184,38 +191,12 @@ export const setEndpointListApiMockImplementation: (
   apiResponses?: Parameters<typeof endpointListApiPathHandlerMocks>[0]
 ) => void = (
   mockedHttpService,
-  {
-    endpointsResults = mockEndpointResultList({ total: 3 }).hosts,
-    queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
-    ...pathHandlersOptions
-  } = {}
+  { endpointsResults = mockEndpointResultList({ total: 3 }).data, ...pathHandlersOptions } = {}
 ) => {
   const apiHandlers = endpointListApiPathHandlerMocks({
     ...pathHandlersOptions,
     endpointsResults,
-    queryStrategyVersion,
   });
-
-  mockedHttpService.post
-    .mockImplementation(async (...args) => {
-      throw new Error(`un-expected call to http.post: ${args}`);
-    })
-    // First time called, return list of endpoints
-    .mockImplementationOnce(async () => {
-      return apiHandlers['/api/endpoint/metadata']();
-    })
-    // Metadata is called a second time to get the full total of Endpoints regardless of filters.
-    .mockImplementationOnce(async () => {
-      return apiHandlers['/api/endpoint/metadata']();
-    });
-
-  // If the endpoints list results is zero, then mock the third call to `/metadata` to return
-  // empty list - indicating there are no endpoints currently present on the system
-  if (!endpointsResults.length) {
-    mockedHttpService.post.mockImplementationOnce(async () => {
-      return apiHandlers['/api/endpoint/metadata']();
-    });
-  }
 
   // Setup handling of GET requests
   mockedHttpService.get.mockImplementation(async (...args) => {

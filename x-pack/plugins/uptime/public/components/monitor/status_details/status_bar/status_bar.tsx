@@ -14,7 +14,8 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
@@ -39,6 +40,29 @@ export const MonListDescription = styled(EuiDescriptionListDescription)`
     overflow-wrap: anywhere;
   }
 `;
+
+export const renderMonitorType = (type: string | undefined) => {
+  switch (type) {
+    case 'http':
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.http', {
+        defaultMessage: 'HTTP',
+      });
+    case 'tcp':
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.tcp', {
+        defaultMessage: 'TCP',
+      });
+    case 'icmp':
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.icmp', {
+        defaultMessage: 'ICMP',
+      });
+    case 'browser':
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.browser', {
+        defaultMessage: 'Browser',
+      });
+    default:
+      return '';
+  }
+};
 
 export const MonitorStatusBar: React.FC = () => {
   const { monitorId, monitorStatus, monitorLocations = {} } = useStatusBar();
@@ -66,10 +90,19 @@ export const MonitorStatusBar: React.FC = () => {
           />
         </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
-        <MonListDescription>
-          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank" external>
-            {full}
-          </EuiLink>
+        <MonListDescription data-test-subj="monitor-page-url">
+          {full ? (
+            <EuiLink
+              aria-label={labels.monitorUrlLinkAriaLabel}
+              href={full}
+              target="_blank"
+              external
+            >
+              {full}
+            </EuiLink>
+          ) : (
+            '--'
+          )}
         </MonListDescription>
         <MonListTitle>{MonitorIDLabel}</MonListTitle>
         <MonListDescription data-test-subj="monitor-page-title">{monitorId}</MonListDescription>
@@ -77,7 +110,7 @@ export const MonitorStatusBar: React.FC = () => {
           <>
             <MonListTitle aria-label={labels.typeAriaLabel}>{labels.typeLabel}</MonListTitle>
             <MonListDescription data-test-subj="monitor-page-type">
-              {monitorStatus.monitor.type}
+              {renderMonitorType(monitorStatus?.monitor?.type)}
             </MonListDescription>
           </>
         )}

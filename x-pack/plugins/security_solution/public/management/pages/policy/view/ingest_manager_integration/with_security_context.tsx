@@ -13,6 +13,8 @@ import { CurrentLicense } from '../../../../../common/components/current_license
 import { StartPlugins } from '../../../../../types';
 import { managementReducer } from '../../../../store/reducer';
 import { managementMiddlewareFactory } from '../../../../store/middleware';
+import { appReducer } from '../../../../../common/store/app';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
 type ComposeType = typeof compose;
 declare global {
@@ -51,8 +53,16 @@ export const withSecurityContext = <P extends {}>({
       store = createStore(
         combineReducers({
           management: managementReducer,
+          app: appReducer,
         }),
-        { management: undefined },
+        {
+          management: undefined,
+          // ignore this error as we just need the enableExperimental and it's temporary
+          // @ts-expect-error TS2739
+          app: {
+            enableExperimental: ExperimentalFeaturesService.get(),
+          },
+        },
         composeEnhancers(applyMiddleware(...managementMiddlewareFactory(coreStart, depsStart)))
       );
     }

@@ -17,7 +17,6 @@ const createSetupContract = (): Setup => ({
 
 const createStartContract = (): Start => ({
   getForwards: jest.fn(),
-  navigateToDefaultApp: jest.fn(),
   navigateToLegacyKibanaUrl: jest.fn(),
 });
 

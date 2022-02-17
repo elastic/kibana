@@ -6,7 +6,8 @@
  */
 
 import '../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, mockKibanaValues, mockHistory } from '../../__mocks__';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
+import { mockHistory } from '../../__mocks__/react_router';
 
 import React from 'react';
 

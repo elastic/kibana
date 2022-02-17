@@ -14,8 +14,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import styled, { StyledComponent } from 'styled-components';
+import styled from 'styled-components';
 
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
@@ -26,7 +25,7 @@ import {
   getRuleDetailsUrl,
   getRulesUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
-import { WrapperPage } from '../../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
@@ -35,12 +34,11 @@ import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import {
   redirectToDetections,
   getActionMessageParams,
-  userHasNoPermissions,
+  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import { RuleStep, RuleStepsFormData, RuleStepsFormHooks } from '../types';
@@ -48,6 +46,9 @@ import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
+import { APP_UI_ID } from '../../../../../../common/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -73,19 +74,6 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const StepDefineRuleAccordion: StyledComponent<
-  typeof EuiAccordion,
-  any, // eslint-disable-line
-  { ref: React.MutableRefObject<EuiAccordion | null> },
-  never
-> = styled(EuiAccordion)`
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-`;
-
-StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
-
 const CreateRulePageComponent: React.FC = () => {
   const [
     {
@@ -96,10 +84,9 @@ const CreateRulePageComponent: React.FC = () => {
       canUserCRUD,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
+  const { navigateToApp } = useKibana().services.application;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
@@ -143,7 +130,6 @@ const CreateRulePageComponent: React.FC = () => {
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
-  const history = useHistory();
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -235,6 +221,10 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep]
   );
 
+  const submitStepDefineRule = useCallback(() => {
+    submitStep(RuleStep.defineRule);
+  }, [submitStep]);
+
   const defineRuleButton = (
     <AccordionTitle
       name="1"
@@ -266,7 +256,10 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    history.replace(getRuleDetailsUrl(ruleId));
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId),
+    });
     return null;
   }
 
@@ -278,30 +271,34 @@ const CreateRulePageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
-  } else if (userHasNoPermissions(canUserCRUD)) {
-    history.replace(getRulesUrl());
+  } else if (!userHasPermissions(canUserCRUD)) {
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRulesUrl(),
+    });
     return null;
   }
-
   return (
     <>
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
-                href: getRulesUrl(),
+                path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
-                pageId: SecurityPageName.detections,
+                pageId: SecurityPageName.rules,
               }}
-              border
               isLoading={isLoading || loading}
               title={i18n.PAGE_TITLE}
             />
-            <MyEuiPanel zindex={4}>
-              <StepDefineRuleAccordion
+            <MyEuiPanel zindex={4} hasBorder>
+              <EuiAccordion
                 initialIsOpen={true}
                 id={RuleStep.defineRule}
                 buttonContent={defineRuleButton}
@@ -328,13 +325,13 @@ const CreateRulePageComponent: React.FC = () => {
                   isReadOnlyView={activeStep !== RuleStep.defineRule}
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
-                  onSubmit={() => submitStep(RuleStep.defineRule)}
+                  onSubmit={submitStepDefineRule}
                   descriptionColumns="singleSplit"
                 />
-              </StepDefineRuleAccordion>
+              </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={3}>
+            <MyEuiPanel hasBorder zindex={3}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.aboutRule}
@@ -369,7 +366,7 @@ const CreateRulePageComponent: React.FC = () => {
               </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={2}>
+            <MyEuiPanel hasBorder zindex={2}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.scheduleRule}
@@ -391,6 +388,7 @@ const CreateRulePageComponent: React.FC = () => {
               >
                 <EuiHorizontalRule margin="m" />
                 <StepScheduleRule
+                  ruleType={ruleType}
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.scheduleRule].data}
                   descriptionColumns="singleSplit"
@@ -402,7 +400,7 @@ const CreateRulePageComponent: React.FC = () => {
               </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={1}>
+            <MyEuiPanel hasBorder zindex={1}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.ruleActions}
@@ -436,9 +434,9 @@ const CreateRulePageComponent: React.FC = () => {
             </MyEuiPanel>
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.detections} />
+      <SpyRoute pageName={SecurityPageName.rules} />
     </>
   );
 };

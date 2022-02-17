@@ -11,11 +11,17 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage } from './helpers';
+import {
+  getInvalidFieldMessage,
+  getFilter,
+  isColumnFormatted,
+  combineErrorMessages,
+} from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -34,11 +40,20 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   }),
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]),
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: adjustTimeScaleLabelSuffix(field.displayName, undefined, oldColumn.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        field.displayName,
+        undefined,
+        oldColumn.timeScale,
+        undefined,
+        oldColumn.timeShift
+      ),
       sourceField: field.name,
     };
   },
@@ -51,22 +66,35 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
-  buildColumn({ field, previousColumn }) {
+  getDefaultLabel: (column) =>
+    adjustTimeScaleLabelSuffix(
+      countLabel,
+      undefined,
+      column.timeScale,
+      undefined,
+      column.timeShift
+    ),
+  buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        countLabel,
+        undefined,
+        previousColumn?.timeScale,
+        undefined,
+        previousColumn?.timeShift
+      ),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params:
         previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
+        isColumnFormatted(previousColumn) &&
+        previousColumn.params
           ? { format: previousColumn.params.format }
           : undefined,
     };
@@ -82,6 +110,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       id: columnId,
       enabled: true,
       schema: 'metric',
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
   isTransferable: () => {
@@ -89,4 +119,20 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'elasticsearch',
+    signature: '',
+    description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
+      defaultMessage: `
+Calculates the number of documents.
+
+Example: Calculate the number of documents:
+\`count()\`
+
+Example: Calculate the number of documents matching a certain filter:
+\`count(kql='price > 500')\`
+      `,
+    }),
+  },
+  shiftable: true,
 };

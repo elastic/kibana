@@ -15,7 +15,7 @@
 // Static styles for a draggable item
 @mixin lnsDraggable {
   @include euiSlightShadow;
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+  background: $euiColorEmptyShade;
   border: $euiBorderWidthThin dashed transparent;
   cursor: grab;
 }
@@ -46,4 +46,31 @@
 // Style for drop area that is not allowed for current item
 @mixin lnsDroppableNotAllowed {
   opacity: .5;
+}
+
+// Removes EUI focus ring
+@mixin removeEuiFocusRing {
+  outline: none;
+
+  &:focus-visible {
+    outline-style: none;
+  }
+}
+
+// Passes focus ring styles down to a child of a focused element
+@mixin passDownFocusRing($target) {
+  @include removeEuiFocusRing;
+
+  #{$target} {
+    @include euiFocusBackground;
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+  }
+
+  &:focus-visible #{$target} {
+    outline-style: auto; // Chrome
+  }
+
+  &:not(:focus-visible) #{$target} {
+    outline: none;
+  }
 }

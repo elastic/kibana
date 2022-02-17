@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
+import { EuiButtonIconColor } from '@elastic/eui';
 
-export type FieldType = InternalSchemaTypes | SchemaTypes;
+import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
+
+export type FieldType = InternalSchemaType | SchemaType;
 
 export type Raw = string | string[] | number | number[];
 export type Snippet = string;
@@ -20,6 +22,7 @@ export interface ResultMeta {
   id: string;
   score?: number;
   engine: string;
+  clicks?: number;
 }
 
 // A search result item
@@ -38,5 +41,6 @@ export interface ResultAction {
   onClick(): void;
   title: string;
   iconType: string;
-  iconColor?: string;
+  iconColor?: EuiButtonIconColor;
+  disabled?: boolean;
 }

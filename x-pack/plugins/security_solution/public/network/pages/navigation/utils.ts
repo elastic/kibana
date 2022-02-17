@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NETWORK_PATH } from '../../../../common/constants';
 import { GetNetworkRoutePath, NetworkRouteType } from './types';
 
 export const getNetworkRoutePath: GetNetworkRoutePath = (
@@ -12,11 +13,11 @@ export const getNetworkRoutePath: GetNetworkRoutePath = (
   hasMlUserPermission
 ) => {
   if (capabilitiesFetched && !hasMlUserPermission) {
-    return `/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.dns}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.alerts})`;
+    return `${NETWORK_PATH}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.dns}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.alerts})`;
   }
 
   return (
-    `/:tabName(` +
+    `${NETWORK_PATH}/:tabName(` +
     `${NetworkRouteType.flows}|` +
     `${NetworkRouteType.dns}|` +
     `${NetworkRouteType.anomalies}|` +

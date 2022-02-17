@@ -6,9 +6,7 @@
  */
 
 // decodeCloudId decodes the c.id into c.esURL and c.kibURL
-export function decodeCloudId(
-  cid: string
-):
+export function decodeCloudId(cid: string):
   | {
       host: string;
       defaultPort: string;

@@ -32,7 +32,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
         height={items.length * FIXED_AXIS_HEIGHT}
         data-test-subj="wfSidebarContainer"
       >
-        <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
+        <WaterfallChartSidebarContainerInnerPanel
+          paddingSize="none"
+          hasBorder={false}
+          hasShadow={false}
+        >
           <WaterfallChartSidebarContainerFlexGroup
             direction="column"
             gutterSize="none"

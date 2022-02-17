@@ -9,16 +9,16 @@ Find all SavedObjects matching the search query
 <b>Signature:</b>
 
 ```typescript
-find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>SavedObjectsFindOptions</code> |  |
+|  options | SavedObjectsFindOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsFindResponse<T>>`
+Promise&lt;SavedObjectsFindResponse&lt;T, A&gt;&gt;
 

@@ -5,72 +5,68 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataPluginStart } from 'src/plugins/data/server/plugin';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { CancellationToken } from '../common';
-import { BaseParams, TaskRunResult } from '../common/types';
-import { ReportingConfigType } from './config';
-import { ReportingCore } from './core';
-import { LevelLogger } from './lib';
-import { ReportTaskParams } from './lib/tasks';
+import type { DataPluginStart } from 'src/plugins/data/server/plugin';
+import { FieldFormatsStart } from 'src/plugins/field_formats/server';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { Writable } from 'stream';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { LicensingPluginStart } from '../../licensing/server';
+import type {
+  ScreenshotOptions as BaseScreenshotOptions,
+  ScreenshottingStart,
+} from '../../screenshotting/server';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/server';
+import type { SpacesPluginSetup } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { CancellationToken } from '../common/cancellation_token';
+import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
+import type { ReportingConfigType } from './config';
+import type { ReportingCore } from './core';
+import type { LevelLogger } from './lib';
+import type { ReportTaskParams } from './lib/tasks';
 
-/*
- * Plugin Contract
+/**
+ * Plugin Setup Contract
  */
-
-export interface ReportingSetupDeps {
-  licensing: LicensingPluginSetup;
-  features: FeaturesPluginSetup;
-  security?: SecurityPluginSetup;
-  spaces?: SpacesPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
+export interface ReportingSetup {
+  /**
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   */
+  usesUiCapabilities: () => boolean;
 }
 
-export interface ReportingStartDeps {
-  data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
-}
-
-export type ReportingStart = object;
-export type ReportingSetup = object;
-
-/*
- * Internal Types
+/**
+ * Plugin Start Contract
  */
-
+export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { BaseParams };
-
-// base params decorated with encrypted headers that come into runJob functions
-export interface BasePayload extends BaseParams {
-  headers: string;
-  spaceId?: string;
-}
+/**
+ * Internal Types
+ */
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  request: KibanaRequest<any, any, any, any>
-) => Promise<JobPayloadType>;
+  context: ReportingRequestHandlerContext
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
 // default fn type for RunTaskFnFactory
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
   payload: ReportTaskParams<TaskPayloadType>['payload'],
-  cancellationToken: CancellationToken
+  cancellationToken: CancellationToken,
+  stream: Writable
 ) => Promise<TaskRunResult>;
 
 export type CreateJobFnFactory<CreateJobFnType> = (
@@ -97,14 +93,33 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-/**
- * @internal
- */
-export interface ReportingRequestHandlerContext extends RequestHandlerContext {
-  reporting: ReportingStart | null;
+export interface ReportingSetupDeps {
+  features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
-/**
- * @internal
- */
+export interface ReportingStartDeps {
+  data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
+}
+
+export interface ReportingRequestHandlerContext {
+  reporting: ReportingStart | null;
+  core: RequestHandlerContext['core'];
+}
+
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
+
+export interface ScreenshotOptions extends Omit<BaseScreenshotOptions, 'timeouts' | 'urls'> {
+  urls: UrlOrUrlLocatorTuple[];
+}
+
+export type { BaseParams, BasePayload };

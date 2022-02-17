@@ -26,10 +26,8 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
   };
 
   beforeEach(() => {
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 

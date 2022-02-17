@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { operator } from '../../../../../lists/common/schemas';
+import { listOperator as operator } from '@kbn/securitysolution-io-ts-list-types';
 
 export const translatedEntryMatchAnyMatcher = t.keyof({
   exact_cased_any: null,
@@ -29,6 +29,42 @@ export const translatedEntryMatchMatcher = t.keyof({
   exact_caseless: null,
 });
 export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
+
+export const translatedEntryMatchWildcardMatcher = t.keyof({
+  wildcard_cased: null,
+  wildcard_caseless: null,
+});
+export type TranslatedEntryMatchWildcardMatcher = t.TypeOf<
+  typeof translatedEntryMatchWildcardMatcher
+>;
+
+export const translatedEntryMatchWildcard = t.exact(
+  t.type({
+    field: t.string,
+    operator,
+    type: translatedEntryMatchWildcardMatcher,
+    value: t.string,
+  })
+);
+export type TranslatedEntryMatchWildcard = t.TypeOf<typeof translatedEntryMatchWildcard>;
+
+export const translatedEntryMatchWildcardNameMatcher = t.keyof({
+  exact_cased: null,
+  exact_caseless: null,
+});
+export type TranslatedEntryMatchWildcardNameMatcher = t.TypeOf<
+  typeof translatedEntryMatchWildcardNameMatcher
+>;
+
+export const translatedEntryMatchWildcardName = t.exact(
+  t.type({
+    field: t.string,
+    operator,
+    type: translatedEntryMatchWildcardNameMatcher,
+    value: t.string,
+  })
+);
+export type TranslatedEntryMatchWildcardName = t.TypeOf<typeof translatedEntryMatchWildcardName>;
 
 export const translatedEntryMatch = t.exact(
   t.type({
@@ -61,9 +97,16 @@ export type TranslatedEntryNested = t.TypeOf<typeof translatedEntryNested>;
 export const translatedEntry = t.union([
   translatedEntryNested,
   translatedEntryMatch,
+  translatedEntryMatchWildcard,
   translatedEntryMatchAny,
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;
+
+export const translatedPerformantEntries = t.array(
+  t.union([translatedEntryMatchWildcard, translatedEntryMatchWildcardName])
+);
+
+export type TranslatedPerformantEntries = t.TypeOf<typeof translatedPerformantEntries>;
 
 export const translatedExceptionListItem = t.exact(
   t.type({

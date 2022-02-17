@@ -5,42 +5,44 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
+import { EuiLoadingElastic, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
-import { Container, Nav, Wrapper } from './layouts';
+import { Container, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useOsqueryIntegrationStatus } from '../common/hooks';
+import { OsqueryAppEmptyState } from './empty_state';
+import { MainNavigation } from './main_navigation';
 
-export const OsqueryAppComponent = () => {
-  const location = useLocation();
-  const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+const OsqueryAppComponent = () => {
+  const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
+
+  if (!isFetched) {
+    return (
+      <EuiPage paddingSize="none">
+        <EuiPageBody>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            paddingSize="none"
+            color="subdued"
+            hasShadow={false}
+          >
+            <EuiLoadingElastic size="xxl" />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
+
+  if (isFetched && osqueryIntegration?.install_status !== 'installed') {
+    return <OsqueryAppEmptyState />;
+  }
 
   return (
-    <Container>
+    <Container id="osquery-app">
       <Wrapper>
-        <Nav>
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem>
-              <EuiTabs display="condensed">
-                <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
-                  <FormattedMessage
-                    id="xpack.osquery.appNavigation.overviewLinkText"
-                    defaultMessage="Overview"
-                  />
-                </EuiTab>
-                <EuiTab isSelected={section === 'live_query'} {...useRouterNavigate('live_query')}>
-                  <FormattedMessage
-                    id="xpack.osquery.appNavigation.liveQueryLinkText"
-                    defaultMessage="Live Query"
-                  />
-                </EuiTab>
-              </EuiTabs>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Nav>
+        <MainNavigation />
         <OsqueryAppRoutes />
       </Wrapper>
     </Container>

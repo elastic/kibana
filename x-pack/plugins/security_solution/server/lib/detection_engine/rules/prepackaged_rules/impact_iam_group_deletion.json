@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of a specified AWS Identity and Access Management (IAM) resource group. Deleting a resource group does not delete resources that are members of the group; it only deletes the group structure.",
   "false_positives": [
-    "A resource group may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Resource group deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "A resource group may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Resource group deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS IAM Group Deletion",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:DeleteGroup and event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:DeleteGroup and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iam/delete-group.html",
     "https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteGroup.html"
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 6
 }

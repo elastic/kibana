@@ -8,6 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { GetGuards } from '../shared_services';
 import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
+import { datafeedsProvider } from '../../models/job_service/datafeeds';
 
 export function getAlertingServiceProvider(getGuards: GetGuards) {
   return {
@@ -20,8 +21,13 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, scopedClient.asInternalUser).preview(...args)
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry, getDataViewsService }) =>
+              alertingServiceProvider(
+                mlClient,
+                datafeedsProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry,
+                getDataViewsService
+              ).preview(...args)
             );
         },
         execute: async (
@@ -30,8 +36,13 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, scopedClient.asInternalUser).execute(...args)
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry, getDataViewsService }) =>
+              alertingServiceProvider(
+                mlClient,
+                datafeedsProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry,
+                getDataViewsService
+              ).execute(...args)
             );
         },
       };

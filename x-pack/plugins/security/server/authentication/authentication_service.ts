@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
   IClusterClient,
@@ -15,36 +16,42 @@ import type {
   LoggerFactory,
 } from 'src/core/server';
 
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuthenticatedUser, SecurityLicense } from '../../common';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
+import { shouldProviderUseLoginForm } from '../../common/model';
+import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
-import { getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
+import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
-  http: Pick<HttpServiceSetup, 'registerAuth'>;
+  http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
+  config: ConfigType;
   license: SecurityLicense;
+  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
-  http: Pick<HttpServiceStart, 'auth' | 'basePath'>;
+  http: Pick<HttpServiceStart, 'auth' | 'basePath' | 'getServerInfo'>;
   config: ConfigType;
   clusterClient: IClusterClient;
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
 }
 
-export interface AuthenticationServiceStart {
+export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
   apiKeys: Pick<
     APIKeys,
     | 'areAPIKeysEnabled'
@@ -59,14 +66,41 @@ export interface AuthenticationServiceStart {
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
+/**
+ * Authentication services available on the security plugin's start contract.
+ */
+export interface AuthenticationServiceStart {
+  apiKeys: Pick<
+    APIKeys,
+    | 'areAPIKeysEnabled'
+    | 'create'
+    | 'invalidate'
+    | 'grantAsInternalUser'
+    | 'invalidateAsInternalUser'
+  >;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+}
+
 export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
+  private session?: PublicMethodsOf<Session>;
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ http, license }: AuthenticationServiceSetupParams) {
+  setup({ config, http, license, buildNumber, elasticsearch }: AuthenticationServiceSetupParams) {
     this.license = license;
+
+    // If we cannot automatically authenticate users we should redirect them straight to the login
+    // page if possible, so that they can try other methods to log in. If not possible, we should
+    // render a dedicated `Unauthenticated` page from which users can explicitly trigger a new
+    // login attempt. There are two cases when we can redirect to the login page:
+    // 1. Login selector is enabled
+    // 2. Login selector is disabled, but the provider with the lowest `order` uses login form
+    const isLoginPageAvailable =
+      config.authc.selector.enabled ||
+      (config.authc.sortedProviders.length > 0 &&
+        shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
@@ -118,8 +152,9 @@ export class AuthenticationService {
       }
 
       if (authenticationResult.failed()) {
-        this.logger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
         const error = authenticationResult.error!;
+        this.logger.info(`Authentication attempt failed: ${getDetailedErrorMessage(error)}`);
+
         // proxy Elasticsearch "native" errors
         const statusCode = getErrorStatusCode(error);
         if (typeof statusCode === 'number') {
@@ -139,7 +174,118 @@ export class AuthenticationService {
       return t.notHandled();
     });
 
-    this.logger.debug('Successfully registered core authentication handler.');
+    http.registerOnPreResponse(async (request, preResponse, toolkit) => {
+      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
+        return toolkit.next();
+      }
+
+      if (!this.authenticator) {
+        // Core doesn't allow returning error here.
+        this.logger.error('Authentication sub-system is not fully initialized yet.');
+        return toolkit.next();
+      }
+
+      // If users can eventually re-login we want to redirect them directly to the page they tried
+      // to access initially, but we only want to do that for routes that aren't part of the various
+      // authentication flows that wouldn't make any sense after successful authentication.
+      const originalURL = !request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
+        ? this.authenticator.getRequestOriginalURL(request)
+        : `${http.basePath.get(request)}/`;
+      if (!isLoginPageAvailable) {
+        return toolkit.render({
+          body: renderUnauthenticatedPage({ buildNumber, basePath: http.basePath, originalURL }),
+          headers: { 'Content-Security-Policy': http.csp.header },
+        });
+      }
+
+      const needsToLogout = (await this.session?.getSID(request)) !== undefined;
+      if (needsToLogout) {
+        this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
+      }
+
+      return toolkit.render({
+        body: '<div/>',
+        headers: {
+          'Content-Security-Policy': http.csp.header,
+          Refresh: `0;url=${http.basePath.prepend(
+            `${
+              needsToLogout ? '/logout' : '/login'
+            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+              originalURL
+            )}`
+          )}`,
+        },
+      });
+    });
+
+    elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
+      if (!this.authenticator) {
+        this.logger.error('Authentication sub-system is not fully initialized yet.');
+        return toolkit.notHandled();
+      }
+
+      if (!license.isLicenseAvailable() || !license.isEnabled()) {
+        this.logger.error(
+          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}).`
+        );
+        return toolkit.notHandled();
+      }
+
+      if (getErrorStatusCode(error) !== 401) {
+        this.logger.error(
+          `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
+            error
+          )}.`
+        );
+        return toolkit.notHandled();
+      }
+
+      this.logger.debug(
+        `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
+      );
+
+      let authenticationResult;
+      const originalHeaders = request.headers;
+      try {
+        // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
+        // headers returned during authentication stage. We should remove these headers before re-authentication to not
+        // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
+        (request.headers as Record<string, unknown>) = Object.fromEntries(
+          Object.entries(originalHeaders).filter(
+            ([headerName]) => headerName.toLowerCase() !== 'authorization'
+          )
+        );
+        authenticationResult = await this.authenticator.reauthenticate(request);
+      } catch (err) {
+        this.logger.error(
+          `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
+        );
+        throw err;
+      } finally {
+        (request.headers as Record<string, unknown>) = originalHeaders;
+      }
+
+      if (authenticationResult.succeeded()) {
+        if (authenticationResult.authHeaders) {
+          this.logger.debug('Re-authentication succeeded');
+          return toolkit.retry({ authHeaders: authenticationResult.authHeaders });
+        }
+
+        this.logger.error(
+          'Re-authentication succeeded, but authentication headers are not available.'
+        );
+      } else if (authenticationResult.failed()) {
+        this.logger.error(
+          `Re-authentication failed due to: ${getDetailedErrorMessage(authenticationResult.error)}`
+        );
+      } else if (authenticationResult.redirected()) {
+        this.logger.error('Re-authentication failed since redirect is required.');
+      } else {
+        this.logger.error('Re-authentication cannot be handled.');
+      }
+
+      return toolkit.notHandled();
+    });
   }
 
   start({
@@ -148,21 +294,31 @@ export class AuthenticationService {
     clusterClient,
     featureUsageService,
     http,
-    legacyAuditLogger,
     loggers,
     session,
-  }: AuthenticationServiceStartParams): AuthenticationServiceStart {
+  }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
     });
 
+    /**
+     * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
+     * to construct a server base URL (deprecated, used by the SAML provider only).
+     */
+    const getServerBaseURL = () => {
+      const { protocol, hostname, port } = http.getServerInfo();
+      const serverConfig = { protocol, hostname, port, ...config.public };
+
+      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+    };
+
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
+    this.session = session;
     this.authenticator = new Authenticator({
-      legacyAuditLogger,
       audit,
       loggers,
       clusterClient,
@@ -170,6 +326,7 @@ export class AuthenticationService {
       config: { authc: config.authc },
       getCurrentUser,
       featureUsageService,
+      getServerBaseURL,
       license: this.license,
       session,
     });

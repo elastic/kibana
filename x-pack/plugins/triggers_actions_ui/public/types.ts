@@ -10,50 +10,79 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionType } from '../../actions/common';
+import { IconType } from '@elastic/eui';
+import {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
+  AsApiContract,
+} from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   AlertActionParam,
-  SanitizedAlert,
+  SanitizedAlert as SanitizedRule,
+  ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  RuleTaskState,
+  RuleTaskStateWithActions,
+  AlertSummary,
+  ExecutionDuration,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
-  AlertTypeParams,
+  AlertTypeParams as RuleTypeParams,
   ActionVariable,
-  AlertType as CommonAlertType,
+  RuleType as CommonRuleType,
 } from '../../alerting/common';
 
-// In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
+// In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
-type Alert = SanitizedAlert<AlertTypeParams>;
+type Rule = SanitizedRule<RuleTypeParams>;
+type ResolvedRule = ResolvedSanitizedRule<RuleTypeParams>;
 
-export {
-  Alert,
+export type {
+  Rule,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  RuleTaskState,
+  RuleTaskStateWithActions,
+  AlertSummary,
+  ExecutionDuration,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
+  ResolvedRule,
 };
-export { ActionType };
+export type { ActionType, AsApiContract };
+export {
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+};
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type AlertTypeIndex = Map<string, AlertType>;
+export type RuleTypeIndex = Map<string, RuleType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
-export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
+export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+
+export type ActionConnectorFieldsCallbacks = {
+  beforeActionConnectorSave?: () => Promise<void>;
+  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
+} | null;
+export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
+  React.SetStateAction<ActionConnectorFieldsCallbacks>
+>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
@@ -62,6 +91,8 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export enum AlertFlyoutCloseReason {
@@ -77,6 +108,9 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   actionConnector?: ActionConnector;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  showEmailSubjectAndMessage?: boolean;
 }
 
 export interface Pagination {
@@ -89,23 +123,31 @@ export interface Sorting {
   direction: string;
 }
 
+interface CustomConnectorSelectionItem {
+  getText: (actionConnector: ActionConnector) => string;
+  getComponent: (
+    actionConnector: ActionConnector
+  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
-  iconClass: string;
+  iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
-  ) => GenericValidationResult<Partial<ActionParams> | unknown>;
+  ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  customConnectorSelectItem?: CustomConnectorSelectionItem;
 }
 
 export interface GenericValidationResult<T> {
@@ -129,6 +171,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isMissingSecrets?: boolean;
 }
 
 export type PreConfiguredActionConnector = Omit<
@@ -161,16 +204,16 @@ export type ActionConnectorTableItem = ActionConnector & {
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
 };
-export const REQUIRED_ACTION_VARIABLES = ['state', 'params'] as const;
-export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
+export const REQUIRED_ACTION_VARIABLES = ['params'] as const;
+export const OPTIONAL_ACTION_VARIABLES = ['state', 'context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType<
+export interface RuleType<
   ActionGroupIds extends string = string,
   RecoveryActionGroupId extends string = string
 > extends Pick<
-    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
+    CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'
@@ -178,37 +221,40 @@ export interface AlertType<
     | 'minimumLicenseRequired'
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
+    | 'ruleTaskTimeout'
+    | 'defaultScheduleInterval'
+    | 'minimumScheduleInterval'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
 }
 
-export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
+export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
+export type AlertUpdates = Omit<Rule, 'id' | 'executionStatus'>;
 
-export interface AlertTableItem extends Alert {
-  alertType: AlertType['name'];
-  tagsText: string;
+export interface AlertTableItem extends Rule {
+  alertType: RuleType['name'];
+  index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
 }
 
-export interface AlertTypeParamsExpressionProps<
-  Params extends AlertTypeParams = AlertTypeParams,
+export interface RuleTypeParamsExpressionProps<
+  Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
   ActionGroupIds extends string = string
 > {
-  alertParams: Params;
-  alertInterval: string;
-  alertThrottle: string;
+  ruleParams: Params;
+  ruleInterval: string;
+  ruleThrottle: string;
   alertNotifyWhen: AlertNotifyWhenType;
-  setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
-  setAlertProperty: <Prop extends keyof Alert>(
+  setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
+  setRuleProperty: <Prop extends keyof Rule>(
     key: Prop,
-    value: SanitizedAlert<Params>[Prop] | null
+    value: SanitizedRule<Params>[Prop] | null
   ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
@@ -218,19 +264,74 @@ export interface AlertTypeParamsExpressionProps<
   data: DataPublicPluginStart;
 }
 
-export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams> {
+export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (alertParams: Params) => ValidationResult;
-  alertParamsExpression:
+  validate: (ruleParams: Params) => ValidationResult;
+  ruleParamsExpression:
     | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<Params>>>;
+    | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
 }
 
 export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
+}
+
+export interface ConnectorAddFlyoutProps {
+  onClose: () => void;
+  actionTypes?: ActionType[];
+  onTestConnector?: (connector: ActionConnector) => void;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+export enum EditConectorTabs {
+  Configuration = 'configuration',
+  Test = 'test',
+}
+
+export interface ConnectorEditFlyoutProps {
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
+
+export interface AlertEditProps<MetaData = Record<string, any>> {
+  initialAlert: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
+  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
+  metadata?: MetaData;
+  ruleType?: RuleType<string, string>;
+}
+
+export interface AlertAddProps<MetaData = Record<string, any>> {
+  consumer: string;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
+  alertTypeId?: string;
+  canChangeTrigger?: boolean;
+  initialValues?: Partial<Rule>;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
+  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
+  metadata?: MetaData;
+  ruleTypeIndex?: RuleTypeIndex;
+}
+
+export enum Percentiles {
+  P50 = 'P50',
+  P95 = 'P95',
+  P99 = 'P99',
 }

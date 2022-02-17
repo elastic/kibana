@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, ReactElement } from 'react';
+import React from 'react';
+import { waitFor } from '@testing-library/react';
+import ReactDOM from 'react-dom';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
+import { FieldList } from './field_list';
 import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/data_view_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { TermsIndexPatternColumn } from './operations';
+import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const fieldsOne = [
   {
@@ -168,7 +175,7 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',
@@ -195,7 +202,7 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',
@@ -235,7 +242,10 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
+
+// @ts-expect-error Portal mocks are notoriously difficult to type
+ReactDOM.createPortal = jest.fn((element) => element);
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
@@ -249,6 +259,7 @@ describe('IndexPattern Data Panel', () => {
       indexPatternRefs: [],
       existingFields: {},
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onUpdateIndexPattern: jest.fn(),
       dragDropContext: createMockedDragDropContext(),
@@ -266,6 +277,7 @@ describe('IndexPattern Data Panel', () => {
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
       hasSuggestionForField: jest.fn(() => false),
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 
@@ -326,7 +338,7 @@ describe('IndexPattern Data Panel', () => {
     function testProps() {
       const setState = jest.fn();
       core.http.post.mockImplementation(async (path) => {
-        const parts = ((path as unknown) as string).split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -391,7 +403,7 @@ describe('IndexPattern Data Panel', () => {
 
       if (stateChanges || propChanges) {
         await act(async () => {
-          ((inst.setProps as unknown) as (props: unknown) => {})({
+          (inst.setProps as unknown as (props: unknown) => {})({
             ...props,
             ...((propChanges as object) || {}),
             state: {
@@ -556,7 +568,7 @@ describe('IndexPattern Data Panel', () => {
         }
         ++queryCount;
 
-        const parts = ((path as unknown) as string).split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
@@ -575,7 +587,7 @@ describe('IndexPattern Data Panel', () => {
       inst.update();
 
       act(() => {
-        ((inst.setProps as unknown) as (props: unknown) => {})({
+        (inst.setProps as unknown as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
         });
@@ -583,7 +595,7 @@ describe('IndexPattern Data Panel', () => {
       });
 
       await act(async () => {
-        ((inst.setProps as unknown) as (props: unknown) => {})({
+        (inst.setProps as unknown as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
         });
@@ -629,7 +641,7 @@ describe('IndexPattern Data Panel', () => {
     });
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
-      expect(wrapper.find(FieldItem).first().prop('field').name).toEqual('Records');
+      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -659,7 +671,14 @@ describe('IndexPattern Data Panel', () => {
               ...props.indexPatterns['1'],
               fields: [
                 ...props.indexPatterns['1'].fields,
-                { name: '_id', displayName: '_id', meta: true, type: 'string' },
+                {
+                  name: '_id',
+                  displayName: '_id',
+                  meta: true,
+                  type: 'string',
+                  searchable: true,
+                  aggregatable: true,
+                },
               ],
             },
           }}
@@ -713,17 +732,40 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
+    it('should not allow field details when error', () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} existenceFetchFailed={true} />
+      );
+
+      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+        expect.objectContaining({
+          AvailableFields: expect.objectContaining({ hideDetails: true }),
+        })
+      );
+    });
+
+    it('should allow field details when timeout', () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} existenceFetchTimeout={true} />
+      );
+
+      expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
+        expect.objectContaining({
+          AvailableFields: expect.objectContaining({ hideDetails: false }),
+        })
+      );
+    });
+
     it('should filter down by name', () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
           target: { value: 'me' },
-        } as ChangeEvent<HTMLInputElement>);
+        });
       });
 
       wrapper
-        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
-        .find('button')
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"] button')
         .first()
         .simulate('click');
 
@@ -736,9 +778,9 @@ describe('IndexPattern Data Panel', () => {
     it('should announce filter in live region', () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
           target: { value: 'me' },
-        } as ChangeEvent<HTMLInputElement>);
+        });
       });
 
       wrapper
@@ -772,7 +814,7 @@ describe('IndexPattern Data Panel', () => {
       wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
 
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
+        DOCUMENT_FIELD_NAME,
       ]);
       expect(wrapper.find(NoFieldsCallout).length).toEqual(3);
     });
@@ -796,9 +838,9 @@ describe('IndexPattern Data Panel', () => {
     it('should filter down by type and by name', () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
           target: { value: 'me' },
-        } as ChangeEvent<HTMLInputElement>);
+        });
       });
 
       wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
@@ -820,22 +862,26 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          (wrapper
-            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
-            .first()
-            .prop('children') as ReactElement).props.items[0].props.onClick();
+          const popoverTrigger = wrapper.find(
+            '[data-test-subj="lnsIndexPatternActions-popover"] button'
+          );
+          popoverTrigger.simulate('click');
         });
 
+        wrapper.update();
+        act(() => {
+          wrapper.find('[data-test-subj="indexPattern-add-field"]').first().simulate('click');
+        });
         // wait for indx pattern to be loaded
-        await act(async () => await new Promise((r) => setTimeout(r, 0)));
-
-        expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
-          expect.objectContaining({
-            ctx: expect.objectContaining({
-              indexPattern: mockIndexPattern,
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
+            expect.objectContaining({
+              ctx: expect.objectContaining({
+                dataView: mockIndexPattern,
+              }),
+            })
+          );
+        });
       });
 
       it('should reload index pattern if callback gets called', async () => {
@@ -853,12 +899,19 @@ describe('IndexPattern Data Panel', () => {
           Promise.resolve(mockIndexPattern)
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+
         act(() => {
-          (wrapper
-            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
-            .first()
-            .prop('children') as ReactElement).props.items[0].props.onClick();
+          const popoverTrigger = wrapper.find(
+            '[data-test-subj="lnsIndexPatternActions-popover"] button'
+          );
+          popoverTrigger.simulate('click');
         });
+
+        wrapper.update();
+        act(() => {
+          wrapper.find('[data-test-subj="indexPattern-add-field"]').first().simulate('click');
+        });
+
         // wait for indx pattern to be loaded
         await act(async () => await new Promise((r) => setTimeout(r, 0)));
 

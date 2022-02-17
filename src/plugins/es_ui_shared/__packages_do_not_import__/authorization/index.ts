@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
+export type { Authorization } from './components';
 export {
   WithPrivileges,
   NotAuthorizedSection,
   AuthorizationProvider,
   AuthorizationContext,
   SectionError,
-  Error,
+  PageError,
   useAuthorizationContext,
 } from './components';
 
-export { Privileges, MissingPrivileges } from './types';
+export type { Privileges, MissingPrivileges, Error } from './types';

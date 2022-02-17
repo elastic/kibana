@@ -20,18 +20,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   const expected = {
     apiTransformTransformsNodes: {
-      count: 1,
+      minCount: 1,
     },
   };
 
   function assertTransformsNodesResponseBody(body: GetTransformNodesResponseSchema) {
     expect(isGetTransformNodesResponseSchema(body)).to.eql(true);
 
-    expect(body.count).to.eql(expected.apiTransformTransformsNodes.count);
+    expect(body.count).to.not.be.lessThan(expected.apiTransformTransformsNodes.minCount);
   }
 
   describe('/api/transform/transforms/_nodes', function () {
-    it('should return the number of available transform nodes', async () => {
+    it('should return the number of available transform nodes for a power user', async () => {
       const { body } = await supertest
         .get('/api/transform/transforms/_nodes')
         .auth(
@@ -43,6 +43,32 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       assertTransformsNodesResponseBody(body);
+    });
+
+    it('should return the number of available transform nodes for a viewer user', async () => {
+      const { body } = await supertest
+        .get('/api/transform/transforms/_nodes')
+        .auth(
+          USER.TRANSFORM_VIEWER,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
+        )
+        .set(COMMON_REQUEST_HEADERS)
+        .send()
+        .expect(200);
+
+      assertTransformsNodesResponseBody(body);
+    });
+
+    it('should not return the number of available transform nodes for an unauthorized user', async () => {
+      await supertest
+        .get('/api/transform/transforms/_nodes')
+        .auth(
+          USER.TRANSFORM_UNAUTHORIZED,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_UNAUTHORIZED)
+        )
+        .set(COMMON_REQUEST_HEADERS)
+        .send()
+        .expect(403);
     });
   });
 };

@@ -1,0 +1,79 @@
+---
+id: formLibCoreFormComponent
+slug: /form-lib/core/form-component
+title: <Form />
+summary: The boundary of your form
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+Once you have created <DocLink id="formLibCoreFormHook" text="a form hook"/>, you can wrap your form with the `<Form />` component.
+
+This component accepts the following props.
+
+## Props
+
+### form (required)
+
+**Type:** `FormHook`
+
+The form hook you've created with `useForm()`.
+
+```js
+const MyFormComponent = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      ...
+    </Form>
+  );
+};
+```
+
+### FormWrapper
+
+**Type:** `React.ComponentType`
+**Default:**: `EuiForm`
+
+This is the component that will wrap your form fields. By default it renders the `<EuiForm />` component.
+
+Any props that you pass to the `<Form />` component, except the `form` hook, will be forwarded to that component.
+
+```js
+const MyFormComponent = () => {
+  const { form } = useForm();
+
+  // "isInvalid" and "error" are 2 props from <EuiForm />
+  return (
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
+      ...
+    </Form>
+  );
+};
+```
+
+By default, `<EuiForm />` wraps the form with a `<div>` element. In some cases semantic HTML is preferred: wrapping your form with the `<form>` element. This also allows the user to submit the form by hitting the "ENTER" key inside a field.
+
+**Important:** Make sure to **not** declare the FormWrapper inline on the prop but outside of your component.
+
+```js
+// Create a wrapper component with the <form> element
+const FormWrapper = (props: any) => <form {...props} />;
+
+export const MyFormComponent = () => {
+  const { form } = useForm();
+
+  // Hitting the "ENTER" key in a textfield will submit the form.
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    ...
+  };
+
+  return (
+    <Form form={form} FormWrapper={FormWrapper} onSubmit={submitForm}>
+      ...
+    </Form>
+  );
+};
+```

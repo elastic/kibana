@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'lens',
   ]);
 
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
@@ -31,8 +31,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard time to visualize security', () => {
     before(async () => {
-      await esArchiver.load('dashboard/feature_controls/security');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+      );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
@@ -68,13 +70,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await security.role.delete('dashboard_write_vis_read');
       await security.user.delete('dashboard_write_vis_read_user');
 
-      await esArchiver.unload('dashboard/feature_controls/security');
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+      );
     });
 
     describe('lens by value works without library save permissions', () => {
@@ -85,7 +90,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can add a lens panel by value', async () => {
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await PageObjects.lens.createAndAddLensFromDashboard({});
         const newPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
@@ -99,8 +103,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.lens.saveAndReturn();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
-        expect(pieExists).to.be(true);
+        const partitionVisExists = await testSubjects.exists('partitionVisChart');
+        expect(partitionVisExists).to.be(true);
       });
 
       it('disables save to library button without visualize save permissions', async () => {
@@ -171,9 +175,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await testSubjects.click('dashboardAddNewPanelButton');
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-        await PageObjects.visualize.clickMarkdownWidget();
+        await dashboardAddPanel.clickMarkdownQuickButton();
         await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
         await PageObjects.visEditor.clickGo();
 

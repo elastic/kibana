@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiBadgeProps } from '@elastic/eui';
 import type React from 'react';
 export type TitleProp = string | React.ReactNode;
 
@@ -15,6 +16,7 @@ export interface DraggableArguments {
 
 export interface BadgeOptions {
   beta?: boolean;
-  text: string;
-  tooltip?: string;
+  text: React.ReactNode;
+  tooltip?: React.ReactNode;
+  color?: EuiBadgeProps['color'];
 }

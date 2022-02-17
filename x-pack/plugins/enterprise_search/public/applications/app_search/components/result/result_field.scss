@@ -14,6 +14,16 @@
     }
   }
 
+  &__key {
+    display: flex;
+    align-items: center;
+    @include euiCodeFont;
+
+    .euiToken {
+      margin-right: $euiSizeS;
+    }
+  }
+
   &__value {
     padding-left: $euiSize;
     overflow: hidden;

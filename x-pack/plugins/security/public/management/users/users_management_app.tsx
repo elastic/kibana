@@ -11,16 +11,24 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import type { CoreStart, StartServicesAccessor } from 'src/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { CoreStart, CoreTheme, StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
-import { Breadcrumb, BreadcrumbsProvider, getDocTitle } from '../../components/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbsProvider,
+  createBreadcrumbsChangeHandler,
+} from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
@@ -44,7 +52,7 @@ export const usersManagementApp = Object.freeze({
       id: this.id,
       order: 10,
       title,
-      async mount({ element, setBreadcrumbs, history }) {
+      async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
           [coreStart],
           { UsersGridPage },
@@ -62,12 +70,10 @@ export const usersManagementApp = Object.freeze({
         render(
           <Providers
             services={coreStart}
+            theme$={theme$}
             history={history}
             authc={authc}
-            onChange={(breadcrumbs) => {
-              setBreadcrumbs(breadcrumbs);
-              coreStart.chrome.docTitle.change(getDocTitle(breadcrumbs));
-            }}
+            onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
           >
             <Breadcrumb
               text={i18n.translate('xpack.security.users.breadcrumb', {
@@ -118,7 +124,6 @@ export const usersManagementApp = Object.freeze({
         );
 
         return () => {
-          coreStart.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },
@@ -128,6 +133,7 @@ export const usersManagementApp = Object.freeze({
 
 export interface ProvidersProps {
   services: CoreStart;
+  theme$: Observable<CoreTheme>;
   history: History;
   authc: AuthenticationServiceSetup;
   onChange?: BreadcrumbsChangeHandler;
@@ -135,6 +141,7 @@ export interface ProvidersProps {
 
 export const Providers: FunctionComponent<ProvidersProps> = ({
   services,
+  theme$,
   history,
   authc,
   onChange,
@@ -143,9 +150,11 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
       <I18nProvider>
-        <Router history={history}>
-          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-        </Router>
+        <KibanaThemeProvider theme$={theme$}>
+          <Router history={history}>
+            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+          </Router>
+        </KibanaThemeProvider>
       </I18nProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>

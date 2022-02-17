@@ -46,7 +46,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
   );
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
-  const viewRef = React.useRef<'create' | 'manage'>('create');
+  const viewRef = React.useRef<'/create' | '/manage'>('/create');
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -57,7 +57,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
           icon: 'plusInCircle',
           onClick: () => {
             setOpenPopup(false);
-            viewRef.current = 'create';
+            viewRef.current = '/create';
             setShowManager((x) => !x);
           },
         },
@@ -66,7 +66,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
           icon: 'list',
           onClick: () => {
             setOpenPopup(false);
-            viewRef.current = 'manage';
+            viewRef.current = '/manage';
             setShowManager((x) => !x);
           },
         },
@@ -122,12 +122,13 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
-          <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-            onClose={() => setShowManager(false)}
-            viewMode={viewRef.current}
+          <plugins.uiActionsEnhanced.DrilldownManager
+            key={viewRef.current}
+            initialRoute={viewRef.current}
             dynamicActionManager={managerWithEmbeddable}
             triggers={[VALUE_CLICK_TRIGGER]}
             placeContext={{ embeddable }}
+            onClose={() => setShowManager(false)}
           />
         </EuiFlyout>
       )}

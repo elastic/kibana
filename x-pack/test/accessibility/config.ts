@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -17,10 +17,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('./apps/login_page'),
-      require.resolve('./apps/home'),
       require.resolve('./apps/kibana_overview'),
+      require.resolve('./apps/home'),
       require.resolve('./apps/grok_debugger'),
       require.resolve('./apps/search_profiler'),
+      require.resolve('./apps/painless_lab'),
       require.resolve('./apps/uptime'),
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
@@ -36,6 +37,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/canvas'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
+      require.resolve('./apps/remote_clusters'),
+      require.resolve('./apps/reporting'),
+      require.resolve('./apps/enterprise_search'),
     ],
 
     pageObjects,

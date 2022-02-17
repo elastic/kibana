@@ -7,11 +7,7 @@
 
 import React from 'react';
 
-import { BrowserFields } from '../../../../../common/containers/source';
-import type { RowRendererId } from '../../../../../../common/types/timeline';
-import { Ecs } from '../../../../../../common/ecs';
 import { EventsTrSupplement } from '../../styles';
-
 interface RowRendererContainerProps {
   children: React.ReactNode;
 }
@@ -22,17 +18,3 @@ export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ chi
   </EventsTrSupplement>
 ));
 RowRendererContainer.displayName = 'RowRendererContainer';
-
-export interface RowRenderer {
-  id: RowRendererId;
-  isInstance: (data: Ecs) => boolean;
-  renderRow: ({
-    browserFields,
-    data,
-    timelineId,
-  }: {
-    browserFields: BrowserFields;
-    data: Ecs;
-    timelineId: string;
-  }) => React.ReactNode;
-}

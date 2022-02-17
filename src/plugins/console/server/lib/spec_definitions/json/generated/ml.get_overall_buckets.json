@@ -1,0 +1,22 @@
+{
+  "ml.get_overall_buckets": {
+    "url_params": {
+      "top_n": 0,
+      "bucket_span": "",
+      "overall_score": 0,
+      "exclude_interim": "__flag__",
+      "start": "",
+      "end": "",
+      "allow_no_match": "__flag__",
+      "allow_no_jobs": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/overall_buckets"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-overall-buckets.html"
+  }
+}

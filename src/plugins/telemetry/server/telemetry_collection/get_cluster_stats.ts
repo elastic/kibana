@@ -9,21 +9,22 @@
 import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { ElasticsearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
+
 /**
  * Get the cluster stats from the connected cluster.
  *
  * This is the equivalent to GET /_cluster/stats?timeout=30s.
  */
 export async function getClusterStats(esClient: ElasticsearchClient) {
-  const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });
-  return body;
+  return await esClient.cluster.stats({ timeout: TIMEOUT });
 }
 
 /**
  * Get the cluster uuids from the connected cluster.
+ * @internal only used externally by the X-Pack Telemetry extension
+ * @param esClient Scoped Elasticsearch client
  */
 export const getClusterUuids: ClusterDetailsGetter = async ({ esClient }) => {
-  const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });
-
+  const body = await esClient.cluster.stats({ timeout: TIMEOUT });
   return [{ clusterUuid: body.cluster_uuid }];
 };

@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
+import { MetricExpressionParams } from '../../../../plugins/infra/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
-import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const client = getService('legacyEs');
+  const client = getService('es');
   const index = 'test-index';
   const getSearchParams = (aggType: string) =>
     ({
@@ -33,20 +33,31 @@ export default function ({ getService }: FtrProviderContext) {
     describe('querying the entire infrastructure', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
-          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), '@timestamp');
+          const timeframe = {
+            start: moment().subtract(25, 'minutes').valueOf(),
+            end: moment().valueOf(),
+          };
+          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe, 100);
           const result = await client.search({
             index,
             body: searchBody,
           });
-          expect(result.error).to.not.be.ok();
+
           expect(result.hits).to.be.ok();
-          expect(result.aggregations).to.be.ok();
+          if (aggType !== 'count') {
+            expect(result.aggregations).to.be.ok();
+          }
         });
       }
       it('should work with a filterQuery', async () => {
+        const timeframe = {
+          start: moment().subtract(25, 'minutes').valueOf(),
+          end: moment().valueOf(),
+        };
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
+          timeframe,
+          100,
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
@@ -54,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
           index,
           body: searchBody,
         });
-        expect(result.error).to.not.be.ok();
+
         expect(result.hits).to.be.ok();
         expect(result.aggregations).to.be.ok();
       });
@@ -62,24 +73,34 @@ export default function ({ getService }: FtrProviderContext) {
     describe('querying with a groupBy parameter', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
+          const timeframe = {
+            start: moment().subtract(25, 'minutes').valueOf(),
+            end: moment().valueOf(),
+          };
           const searchBody = getElasticsearchMetricQuery(
             getSearchParams(aggType),
-            '@timestamp',
+            timeframe,
+            100,
             'agent.id'
           );
           const result = await client.search({
             index,
             body: searchBody,
           });
-          expect(result.error).to.not.be.ok();
+
           expect(result.hits).to.be.ok();
           expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
+        const timeframe = {
+          start: moment().subtract(25, 'minutes').valueOf(),
+          end: moment().valueOf(),
+        };
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
+          timeframe,
+          100,
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
@@ -87,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
           index,
           body: searchBody,
         });
-        expect(result.error).to.not.be.ok();
+
         expect(result.hits).to.be.ok();
         expect(result.aggregations).to.be.ok();
       });

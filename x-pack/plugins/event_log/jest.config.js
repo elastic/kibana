@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/event_log'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/event_log',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/event_log/{common,server}/**/*.{ts,tsx}'],
 };

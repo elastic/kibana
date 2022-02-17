@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Conhost Spawned By Suspicious Parent Process",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:conhost.exe and process.parent.name:(svchost.exe or lsass.exe or services.exe or smss.exe or winlogon.exe or explorer.exe or dllhost.exe or rundll32.exe or regsvr32.exe or userinit.exe or wininit.exe or spoolsv.exe or wermgr.exe or csrss.exe or ctfmon.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"conhost.exe\" and\n  process.parent.name : (\"svchost.exe\", \"lsass.exe\", \"services.exe\", \"smss.exe\", \"winlogon.exe\", \"explorer.exe\",\n                         \"dllhost.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"userinit.exe\", \"wininit.exe\", \"spoolsv.exe\",\n                         \"wermgr.exe\", \"csrss.exe\", \"ctfmon.exe\")\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2017/08/monitoring-windows-console-activity-part-one.html"
   ],
@@ -44,6 +44,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

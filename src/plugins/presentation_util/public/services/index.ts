@@ -6,29 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { SimpleSavedObject } from 'src/core/public';
+import { PresentationUtilPluginStart } from '../types';
 import { PluginServices } from './create';
-import { PartialDashboardAttributes } from './kibana/dashboards';
+import { PresentationCapabilitiesService } from './capabilities';
+import { PresentationDashboardsService } from './dashboards';
+import { PresentationLabsService } from './labs';
+import { registry as stubRegistry } from './stub';
+import { PresentationDataViewsService } from './data_views';
+import { registerExpressionsLanguage } from '..';
 
-export interface PresentationDashboardsService {
-  findDashboards: (
-    query: string,
-    fields: string[]
-  ) => Promise<Array<SimpleSavedObject<PartialDashboardAttributes>>>;
-  findDashboardsByTitle: (
-    title: string
-  ) => Promise<Array<SimpleSavedObject<PartialDashboardAttributes>>>;
-}
-
-export interface PresentationCapabilitiesService {
-  canAccessDashboards: () => boolean;
-  canCreateNewDashboards: () => boolean;
-  canSaveVisualizations: () => boolean;
-}
+export type { PresentationCapabilitiesService } from './capabilities';
+export type { PresentationDashboardsService } from './dashboards';
+export type { PresentationLabsService } from './labs';
 
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
+  dataViews: PresentationDataViewsService;
   capabilities: PresentationCapabilitiesService;
+  labs: PresentationLabsService;
 }
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();
+
+export const getStubPluginServices = (): PresentationUtilPluginStart => {
+  pluginServices.setRegistry(stubRegistry.start({}));
+  return {
+    ContextProvider: pluginServices.getContextProvider(),
+    labsService: pluginServices.getServices().labs,
+    registerExpressionsLanguage,
+  };
+};

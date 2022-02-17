@@ -5,88 +5,54 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBox,
-  EuiTextColor,
-  EuiPortal,
   EuiFormRow,
-  EuiLink,
+  EuiDescribedFormGroup,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 
 import { Error } from '../../../components';
 import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
-import {
-  useGetPackageInfoByKey,
-  useGetAgentPolicies,
-  sendGetOneAgentPolicy,
-  useCapabilities,
-  useFleetStatus,
-} from '../../../hooks';
-import { CreateAgentPolicyFlyout } from '../list_page/components';
+import { useGetAgentPolicies, sendGetOneAgentPolicy, useFleetStatus } from '../../../hooks';
 
-const AgentPolicyWrapper = styled(EuiFormRow)`
+const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
     width: 100%;
   }
 `;
 
-// Custom styling for drop down list items due to:
-//  1) the max-width and overflow properties is added to prevent long agent policy
-//     names/descriptions from overflowing the flex items
-//  2) max-width is built from the grow property on the flex items because the value
-//     changes based on if Fleet is enabled/setup or not
-const AgentPolicyNameColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
-  overflow: hidden;
-`;
-const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
-  overflow: hidden;
-`;
-
 export const StepSelectAgentPolicy: React.FunctionComponent<{
-  pkgkey: string;
-  updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
+  packageInfo?: PackageInfo;
   agentPolicy: AgentPolicy | undefined;
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
-  setIsLoadingSecondStep: (isLoading: boolean) => void;
-}> = ({ pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep }) => {
+  setHasAgentPolicyError: (hasError: boolean) => void;
+  selectedAgentPolicyId?: string;
+}> = ({
+  packageInfo,
+  agentPolicy,
+  updateAgentPolicy,
+  setHasAgentPolicyError,
+  selectedAgentPolicyId,
+}) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
-  // Selected agent policy state
-  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
-    agentPolicy ? agentPolicy.id : undefined
-  );
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
-
-  // Create new agent policy flyout state
-  const hasWriteCapabilites = useCapabilities().write;
-  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] = useState<boolean>(
-    false
-  );
-
-  // Fetch package info
-  const {
-    data: packageInfoData,
-    error: packageInfoError,
-    isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgkey);
-  const isLimitedPackage = (packageInfoData && isPackageLimited(packageInfoData.response)) || false;
 
   // Fetch agent policies info
   const {
     data: agentPoliciesData,
     error: agentPoliciesError,
     isLoading: isAgentPoliciesLoading,
-    resendRequest: refreshAgentPolicies,
   } = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
@@ -94,7 +60,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     sortOrder: 'asc',
     full: true,
   });
-  const agentPolicies = useMemo(() => agentPoliciesData?.items || [], [agentPoliciesData?.items]);
+  const agentPolicies = useMemo(
+    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
+    [agentPoliciesData?.items]
+  );
+
   const agentPoliciesById = useMemo(() => {
     return agentPolicies.reduce((acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
       acc[policy.id] = policy;
@@ -102,18 +72,25 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }, {});
   }, [agentPolicies]);
 
-  // Update parent package state
-  useEffect(() => {
-    if (packageInfoData && packageInfoData.response) {
-      updatePackageInfo(packageInfoData.response);
-    }
-  }, [packageInfoData, updatePackageInfo]);
+  // Selected agent policy state
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
+    agentPolicy?.id ??
+      (selectedAgentPolicyId || (agentPolicies.length === 1 ? agentPolicies[0].id : undefined))
+  );
+
+  const doesAgentPolicyHaveLimitedPackage = useCallback(
+    (policy: AgentPolicy, pkgInfo: PackageInfo) => {
+      return policy
+        ? isPackageLimited(pkgInfo) && doesAgentPolicyAlreadyIncludePackage(policy, pkgInfo.name)
+        : false;
+    },
+    []
+  );
 
   // Update parent selected agent policy state
   useEffect(() => {
     const fetchAgentPolicyInfo = async () => {
       if (selectedPolicyId) {
-        setIsLoadingSecondStep(true);
         const { data, error } = await sendGetOneAgentPolicy(selectedPolicyId);
         if (error) {
           setSelectedAgentPolicyError(error);
@@ -126,65 +103,43 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         setSelectedAgentPolicyError(undefined);
         updateAgentPolicy(undefined);
       }
-      setIsLoadingSecondStep(false);
     };
     if (!agentPolicy || selectedPolicyId !== agentPolicy.id) {
       fetchAgentPolicyInfo();
     }
-  }, [selectedPolicyId, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep]);
+  }, [selectedPolicyId, agentPolicy, updateAgentPolicy]);
 
-  const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+  const agentPolicyOptions: EuiSelectOption[] = useMemo(
     () =>
-      packageInfoData
+      packageInfo
         ? agentPolicies.map((agentConf) => {
-            const alreadyHasLimitedPackage =
-              (isLimitedPackage &&
-                doesAgentPolicyAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
-              false;
             return {
-              label: agentConf.name,
+              text: agentConf.name,
               value: agentConf.id,
-              disabled: alreadyHasLimitedPackage,
+              disabled: doesAgentPolicyHaveLimitedPackage(agentConf, packageInfo),
               'data-test-subj': 'agentPolicyItem',
             };
           })
         : [],
-    [agentPolicies, isLimitedPackage, packageInfoData]
-  );
-
-  const selectedAgentPolicyOption = agentPolicyOptions.find(
-    (option) => option.value === selectedPolicyId
+    [agentPolicies, doesAgentPolicyHaveLimitedPackage, packageInfo]
   );
 
   // Try to select default agent policy
   useEffect(() => {
     if (!selectedPolicyId && agentPolicies.length && agentPolicyOptions.length) {
-      const defaultAgentPolicy = agentPolicies.find((policy) => policy.is_default);
-      if (defaultAgentPolicy) {
-        const defaultAgentPolicyOption = agentPolicyOptions.find(
-          (option) => option.value === defaultAgentPolicy.id
-        );
-        if (defaultAgentPolicyOption && !defaultAgentPolicyOption.disabled) {
-          setSelectedPolicyId(defaultAgentPolicy.id);
-        }
+      const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
+      if (enabledOptions.length === 1) {
+        setSelectedPolicyId(enabledOptions[0].value as string | undefined);
       }
     }
   }, [agentPolicies, agentPolicyOptions, selectedPolicyId]);
 
-  // Display package error if there is one
-  if (packageInfoError) {
-    return (
-      <Error
-        title={
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle"
-            defaultMessage="Error loading package information"
-          />
-        }
-        error={packageInfoError}
-      />
-    );
-  }
+  // Bubble up any issues with agent policy selection
+  useEffect(() => {
+    if (selectedPolicyId && !selectedAgentPolicyError) {
+      setHasAgentPolicyError(false);
+    } else setHasAgentPolicyError(true);
+  }, [selectedAgentPolicyError, selectedPolicyId, setHasAgentPolicyError]);
 
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
@@ -203,111 +158,93 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   return (
     <>
-      {isCreateAgentPolicyFlyoutOpen ? (
-        <EuiPortal>
-          <CreateAgentPolicyFlyout
-            onClose={(newAgentPolicy?: AgentPolicy) => {
-              setIsCreateAgentPolicyFlyoutOpen(false);
-              if (newAgentPolicy) {
-                refreshAgentPolicies();
-                setSelectedPolicyId(newAgentPolicy.id);
-              }
-            }}
-            ownFocus={true}
-          />
-        </EuiPortal>
-      ) : null}
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <AgentPolicyWrapper
-            fullWidth={true}
-            label={
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
+          <EuiDescribedFormGroup
+            title={
+              <EuiTitle size="xs">
+                <h3>
                   <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupTitle"
                     defaultMessage="Agent policy"
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <div>
-                    <EuiLink
-                      disabled={!hasWriteCapabilites}
-                      onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.StepSelectPolicy.addButton"
-                        defaultMessage="Create agent policy"
-                      />
-                    </EuiLink>
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </h3>
+              </EuiTitle>
             }
-            helpText={
-              isFleetReady && selectedPolicyId ? (
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
-                  defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent policy."
-                  values={{
-                    count: agentPoliciesById[selectedPolicyId]?.agents ?? 0,
-                  }}
-                />
-              ) : null
+            description={
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupDescription"
+                    defaultMessage="Agent policies are used to manage a group of integrations across a set of agents."
+                  />
+                </p>
+              </EuiText>
             }
           >
-            <EuiComboBox
-              placeholder={i18n.translate(
-                'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
-                {
-                  defaultMessage: 'Select an agent policy to add this integration to',
-                }
-              )}
-              singleSelection={{ asPlainText: true }}
-              isClearable={false}
+            <AgentPolicyFormRow
               fullWidth={true}
-              isLoading={isAgentPoliciesLoading || isPackageInfoLoading}
-              options={agentPolicyOptions}
-              renderOption={(option: EuiComboBoxOptionOption<string>) => {
-                return (
-                  <EuiFlexGroup>
-                    <AgentPolicyNameColumn grow={2}>
-                      <span className="eui-textTruncate">{option.label}</span>
-                    </AgentPolicyNameColumn>
-                    <AgentPolicyDescriptionColumn grow={isFleetReady ? 5 : 7}>
-                      <EuiTextColor className="eui-textTruncate" color="subdued">
-                        {agentPoliciesById[option.value!].description}
-                      </EuiTextColor>
-                    </AgentPolicyDescriptionColumn>
-                    {isFleetReady ? (
-                      <EuiFlexItem grow={2} className="eui-textRight">
-                        <EuiTextColor color="subdued">
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsCountText"
-                            defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
-                            values={{
-                              count: agentPoliciesById[option.value!]?.agents ?? 0,
-                            }}
-                          />
-                        </EuiTextColor>
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                );
-              }}
-              selectedOptions={selectedAgentPolicyOption ? [selectedAgentPolicyOption] : []}
-              onChange={(options) => {
-                const selectedOption = options[0] || undefined;
-                if (selectedOption) {
-                  if (selectedOption.value !== selectedPolicyId) {
-                    setSelectedPolicyId(selectedOption.value);
+              label={
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
+                      defaultMessage="Agent policy"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              helpText={
+                isFleetReady && selectedPolicyId ? (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
+                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policy."
+                    values={{
+                      count: agentPoliciesById[selectedPolicyId]?.agents ?? 0,
+                    }}
+                  />
+                ) : null
+              }
+              isInvalid={Boolean(
+                !selectedPolicyId ||
+                  !packageInfo ||
+                  doesAgentPolicyHaveLimitedPackage(
+                    agentPoliciesById[selectedPolicyId],
+                    packageInfo
+                  )
+              )}
+              error={
+                !selectedPolicyId ? (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
+                    defaultMessage="An agent policy is required."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
+                    defaultMessage="This integration can only be added once per agent policy."
+                  />
+                )
+              }
+            >
+              <EuiSelect
+                placeholder={i18n.translate(
+                  'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
+                  {
+                    defaultMessage: 'Select an agent policy to add this integration to',
                   }
-                } else {
-                  setSelectedPolicyId(undefined);
-                }
-              }}
-            />
-          </AgentPolicyWrapper>
+                )}
+                hasNoInitialSelection={agentPolicies.length > 1}
+                fullWidth
+                isLoading={isAgentPoliciesLoading || !packageInfo}
+                options={agentPolicyOptions}
+                value={selectedPolicyId || undefined}
+                onChange={(e) => setSelectedPolicyId(e.target.value)}
+                data-test-subj="agentPolicySelect"
+                aria-label="Select Agent Policy"
+              />
+            </AgentPolicyFormRow>
+          </EuiDescribedFormGroup>
         </EuiFlexItem>
         {/* Display selected agent policy error if there is one */}
         {selectedAgentPolicyError ? (

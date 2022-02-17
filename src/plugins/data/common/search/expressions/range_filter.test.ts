@@ -24,14 +24,17 @@ describe('interpreter/functions#rangeFilter', () => {
         "meta": Object {
           "alias": null,
           "disabled": false,
+          "field": "test",
           "index": undefined,
           "negate": false,
           "params": Object {},
         },
-        "range": Object {
-          "test": Object {
-            "gte": 10,
-            "lt": 20,
+        "query": Object {
+          "range": Object {
+            "test": Object {
+              "gte": 10,
+              "lt": 20,
+            },
           },
         },
         "type": "kibana_filter",

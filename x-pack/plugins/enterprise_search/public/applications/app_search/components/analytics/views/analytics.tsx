@@ -25,6 +25,7 @@ import {
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
+import { SuggestedCurationsCallout } from '../../engine_overview/components/suggested_curations_callout';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
 import {
@@ -60,6 +61,7 @@ export const Analytics: React.FC = () => {
 
   return (
     <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
+      <SuggestedCurationsCallout />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={1}>
           <AnalyticsCards
@@ -83,8 +85,7 @@ export const Analytics: React.FC = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          {/* TODO: Update this panel to use the bordered version once available */}
-          <EuiPanel hasShadow={false} color="transparent">
+          <EuiPanel hasBorder>
             <AnalyticsChart
               lines={[
                 {
@@ -196,6 +197,7 @@ export const Analytics: React.FC = () => {
       <EuiSpacer size="xl" />
 
       <DataPanel
+        hasBorder
         title={<h2>{RECENT_QUERIES}</h2>}
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesDescription',

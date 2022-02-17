@@ -21,7 +21,6 @@ export const calculatedInterval = async (search: ESSearchClient, options: Metric
         search,
         {
           indexPattern: options.indexPattern,
-          timestampField: options.timerange.field,
           timerange: { from: options.timerange.from, to: options.timerange.to },
         },
         options.modules

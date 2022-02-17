@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -117,11 +117,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         // Alert user if last snapshot failed
         if (lastSuccess && lastFailure && lastFailure.time > lastSuccess.time) {
           return (
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              className="snapshotRestorePolicyTableSnapshotFailureContainer"
-            >
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
@@ -363,7 +359,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"
@@ -382,7 +378,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.table.addPolicyButton"
-          defaultMessage="Create a policy"
+          defaultMessage="Create policy"
         />
       </EuiButton>,
     ],

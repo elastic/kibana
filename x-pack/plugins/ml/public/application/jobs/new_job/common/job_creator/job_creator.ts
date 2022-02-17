@@ -40,15 +40,13 @@ import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import {
-  getAggregationBucketsName,
-  getDatafeedAggregations,
-} from '../../../../../../common/util/datafeed_utils';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
+import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
+import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
-  protected _indexPattern: IndexPattern;
+  protected _indexPattern: DataView;
   protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
@@ -76,11 +74,7 @@ export class JobCreator {
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
     this._indexPatternTitle = indexPattern.title;
@@ -89,7 +83,7 @@ export class JobCreator {
     this._calendars = [];
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
     this._detectors = this._job_config.analysis_config.detectors;
-    this._influencers = this._job_config.analysis_config.influencers;
+    this._influencers = this._job_config.analysis_config.influencers!;
 
     if (typeof indexPattern.timeFieldName === 'string') {
       this._job_config.data_description.time_field = indexPattern.timeFieldName;
@@ -224,11 +218,11 @@ export class JobCreator {
   }
 
   public get description(): string {
-    return this._job_config.description;
+    return this._job_config.description ?? '';
   }
 
   public get groups(): string[] {
-    return this._job_config.groups;
+    return this._job_config.groups ?? [];
   }
 
   public set groups(groups: string[]) {
@@ -289,6 +283,7 @@ export class JobCreator {
     if (enable) {
       this._job_config.results_index_name = this._job_config.job_id;
     } else {
+      // @ts-expect-error The operand of a 'delete' operator must be optional
       delete this._job_config.results_index_name;
     }
   }
@@ -375,7 +370,7 @@ export class JobCreator {
   }
 
   public get timeFieldName(): string {
-    return this._job_config.data_description.time_field;
+    return this._job_config.data_description.time_field!;
   }
 
   public set timeFieldName(fieldName: string) {
@@ -396,6 +391,9 @@ export class JobCreator {
     // change the detector to be a non-zer or non-null count or sum.
     // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
     this._detectors.forEach((d, i) => {
+      if (this._aggs[i] === undefined) {
+        return;
+      }
       switch (this._aggs[i].id) {
         case ML_JOB_AGGREGATION.COUNT:
           d.function = this._sparseData
@@ -502,6 +500,10 @@ export class JobCreator {
 
   public get indices(): string[] {
     return this._datafeed_config.indices;
+  }
+
+  public set indices(indics: string[]) {
+    this._datafeed_config.indices = indics;
   }
 
   public get scriptFields(): Field[] {
@@ -644,7 +646,6 @@ export class JobCreator {
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
     ) {
-      // @ts-expect-error
       return this._job_config.custom_settings[setting];
     }
     return null;
@@ -713,13 +714,14 @@ export class JobCreator {
   }
 
   private _extractRuntimeMappings() {
-    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap;
+    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap as
+      | RuntimeMappings
+      | undefined;
     if (runtimeFieldMap !== undefined) {
       if (this._datafeed_config.runtime_mappings === undefined) {
         this._datafeed_config.runtime_mappings = {};
       }
       Object.entries(runtimeFieldMap).forEach(([key, val]) => {
-        // @ts-expect-error
         this._datafeed_config.runtime_mappings![key] = val;
       });
     }
@@ -764,7 +766,8 @@ export class JobCreator {
     this._datafeed_config = datafeed;
 
     this._detectors = this._job_config.analysis_config.detectors;
-    this._influencers = this._job_config.analysis_config.influencers;
+    this._influencers = this._job_config.analysis_config.influencers!;
+
     if (this._job_config.groups === undefined) {
       this._job_config.groups = [];
     }
@@ -786,7 +789,7 @@ export class JobCreator {
     this._aggregationFields = [];
     const aggs = getDatafeedAggregations(this._datafeed_config);
     if (aggs !== undefined) {
-      const aggBucketsName = getAggregationBucketsName(aggs);
+      const aggBucketsName = getFirstKeyInObject(aggs);
       if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
         const buckets = aggs[aggBucketsName];
         collectAggs(buckets, this._aggregationFields);

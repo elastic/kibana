@@ -10,16 +10,18 @@ import { AppMountParameters } from 'kibana/public';
 
 interface ContextProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  theme$?: AppMountParameters['theme$'];
 }
 
 export const HeaderActionMenuContext = React.createContext<ContextProps>({});
 
 export const HeaderActionMenuProvider: React.FC<Required<ContextProps>> = ({
   setHeaderActionMenu,
+  theme$,
   children,
 }) => {
   return (
-    <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu }}>
+    <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
       {children}
     </HeaderActionMenuContext.Provider>
   );

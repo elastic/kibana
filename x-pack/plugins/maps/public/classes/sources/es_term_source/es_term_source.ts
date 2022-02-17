@@ -26,16 +26,18 @@ import {
 import {
   ESTermSourceDescriptor,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { ITermJoinSource } from '../term_join_source/term_join_source';
+import { ITermJoinSource } from '../term_join_source';
 import { IField } from '../../fields/field';
+import { makePublicExecutionContext } from '../../../util';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
+
+type ESTermSourceSyncMeta = Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
 
 export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
@@ -152,6 +154,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
         },
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_term_source:terms'),
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
@@ -171,12 +174,12 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
-    return this._descriptor.size !== undefined
-      ? {
-          size: this._descriptor.size,
-        }
-      : null;
+  getSyncMeta(): ESTermSourceSyncMeta {
+    return {
+      indexPatternId: this._descriptor.indexPatternId,
+      size: this._descriptor.size,
+      term: this._descriptor.term,
+    };
   }
 
   getRightFields(): IField[] {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test/jest';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 import { ReasonFound } from '.';
 
 jest.mock('../../../legacy_shims', () => ({
@@ -58,7 +58,7 @@ describe('ReasonFound', () => {
           data: 'false',
           context: 'fakeContext',
         }}
-        enabled={enabler}
+        enabler={enabler}
       />
     );
     expect(component).toMatchSnapshot();

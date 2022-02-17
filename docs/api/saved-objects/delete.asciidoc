@@ -22,7 +22,7 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `type`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
 
 `id`::
   (Required, string) The object ID that you want to remove.
@@ -43,7 +43,7 @@ TIP: Use this if you attempted to delete an object and received an HTTP 400 erro
 
 ==== Example
 
-Delete an index pattern object with the `my-pattern` ID:
+Delete {a-data-source} object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------

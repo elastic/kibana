@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import { ScopedHistory } from 'kibana/public';
+import type { CoreSetup, CoreStart } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import type { ScopedHistory } from 'kibana/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 
 export interface AppDependencies {
+  application: CoreStart['application'];
   chrome: CoreStart['chrome'];
   data: DataPublicPluginStart;
   docLinks: CoreStart['docLinks'];
@@ -26,9 +30,13 @@ export interface AppDependencies {
   savedObjects: CoreStart['savedObjects'];
   storage: Storage;
   overlays: CoreStart['overlays'];
+  theme: CoreStart['theme'];
   history: ScopedHistory;
   savedObjectsPlugin: SavedObjectsStart;
+  share: SharePluginStart;
   ml: GetMlSharedImportsReturnType;
+  spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export const useAppDependencies = () => {

@@ -9,7 +9,7 @@ import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
 import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 
-import { findTestSubject } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test-jest-helpers';
 
 import { SubFeatureForm } from '../sub_feature_form';
 
@@ -38,16 +38,16 @@ export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
 
     const subFeatureForm = featureControls.find(SubFeatureForm);
     if (subFeatureForm.length > 0) {
-      const independentPrivileges = (subFeatureForm.find(
-        EuiCheckbox
-      ) as ReactWrapper<EuiCheckboxProps>).reduce((acc2, checkbox) => {
+      const independentPrivileges = (
+        subFeatureForm.find(EuiCheckbox) as ReactWrapper<EuiCheckboxProps>
+      ).reduce((acc2, checkbox) => {
         const { id: privilegeId, checked } = checkbox.props();
         return checked ? [...acc2, privilegeId] : acc2;
       }, [] as string[]);
 
-      const mutuallyExclusivePrivileges = (subFeatureForm.find(
-        EuiButtonGroup
-      ) as ReactWrapper<EuiButtonGroupProps>).reduce((acc2, subPrivButtonGroup) => {
+      const mutuallyExclusivePrivileges = (
+        subFeatureForm.find(EuiButtonGroup) as ReactWrapper<EuiButtonGroupProps>
+      ).reduce((acc2, subPrivButtonGroup) => {
         const { idSelected: selectedSubPrivilege } = subPrivButtonGroup.props();
         return selectedSubPrivilege && selectedSubPrivilege !== 'none'
           ? [...acc2, selectedSubPrivilege]

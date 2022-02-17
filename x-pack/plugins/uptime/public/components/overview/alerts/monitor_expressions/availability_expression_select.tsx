@@ -13,9 +13,10 @@ import { AlertFieldNumber } from '../alert_field_number';
 import { TimeRangeOption, TimeUnitSelectable } from './time_unit_selectable';
 
 interface Props {
-  alertParams: { [param: string]: any };
+  ruleParams: { [param: string]: any };
   isOldAlert: boolean;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
+  hasFilters: boolean;
 }
 
 const TimeRangeOptions: TimeRangeOption[] = [
@@ -52,20 +53,21 @@ const DEFAULT_THRESHOLD = '99';
 const isThresholdInvalid = (n: number): boolean => isNaN(n) || n <= 0 || n > 100;
 
 export const AvailabilityExpressionSelect: React.FC<Props> = ({
-  alertParams,
+  ruleParams,
   isOldAlert,
-  setAlertParams,
+  setRuleParams,
+  hasFilters,
 }) => {
-  const [range, setRange] = useState<number>(alertParams?.availability?.range ?? DEFAULT_RANGE);
+  const [range, setRange] = useState<number>(ruleParams?.availability?.range ?? DEFAULT_RANGE);
   const [rangeUnit, setRangeUnit] = useState<string>(
-    alertParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT
+    ruleParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT
   );
   const [threshold, setThreshold] = useState<string>(
-    alertParams?.availability?.threshold ?? DEFAULT_THRESHOLD
+    ruleParams?.availability?.threshold ?? DEFAULT_THRESHOLD
   );
   const [isEnabled, setIsEnabled] = useState<boolean>(
     // if an older version of alert is displayed, this expression should default to disabled
-    alertParams?.shouldCheckAvailability ?? !isOldAlert
+    ruleParams?.shouldCheckAvailability ?? !isOldAlert
   );
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<TimeRangeOption[]>(
     TimeRangeOptions.map((opt) =>
@@ -77,19 +79,19 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
 
   useEffect(() => {
     if (thresholdIsInvalid) {
-      setAlertParams('availability', undefined);
-      setAlertParams('shouldCheckAvailability', false);
+      setRuleParams('availability', undefined);
+      setRuleParams('shouldCheckAvailability', false);
     } else if (isEnabled) {
-      setAlertParams('shouldCheckAvailability', true);
-      setAlertParams('availability', {
+      setRuleParams('shouldCheckAvailability', true);
+      setRuleParams('availability', {
         range,
         rangeUnit,
         threshold,
       });
     } else {
-      setAlertParams('shouldCheckAvailability', false);
+      setRuleParams('shouldCheckAvailability', false);
     }
-  }, [isEnabled, range, rangeUnit, setAlertParams, threshold, thresholdIsInvalid]);
+  }, [isEnabled, range, rangeUnit, setRuleParams, threshold, thresholdIsInvalid]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -114,7 +116,11 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
             />
           }
           data-test-subj="xpack.uptime.alerts.monitorStatus.availability.threshold"
-          description={labels.ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION}
+          description={
+            hasFilters
+              ? labels.ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION
+              : labels.ENTER_ANY_AVAILABILITY_THRESHOLD_DESCRIPTION
+          }
           id="threshold"
           isEnabled={isEnabled}
           isInvalid={thresholdIsInvalid}

@@ -14,6 +14,23 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
     type: 'long',
     _meta: { description: 'Number of times the user opened one of the in-product help popovers.' },
   },
+  error_fix_action: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user used the fix action of an error displayed in the workspace.',
+    },
+  },
+  open_formula_popover: {
+    type: 'long',
+    _meta: { description: 'Number of times the user opened the in-product formula help popover.' },
+  },
+  toggle_fullscreen_formula: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user toggled fullscreen mode on formula.',
+    },
+  },
   indexpattern_field_info_click: { type: 'long' },
   loaded: { type: 'long' },
   app_filters_updated: { type: 'long' },
@@ -162,6 +179,10 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
     type: 'long',
     _meta: { description: 'Number of times the moving average function was selected' },
   },
+  indexpattern_dimension_operation_formula: {
+    type: 'long',
+    _meta: { description: 'Number of times the formula function was selected' },
+  },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
@@ -183,6 +204,34 @@ const savedSchema: MakeSchemaFrom<LensUsage['saved_overall']> = {
   lnsDatatable: { type: 'long' },
   lnsPie: { type: 'long' },
   lnsMetric: { type: 'long' },
+  formula: {
+    type: 'long',
+    _meta: {
+      description: 'Number of saved lens visualizations which are using at least one formula',
+    },
+  },
+};
+
+const savedMultitermsSchema: MakeSchemaFrom<LensUsage['saved_multiterms_overall']> = {
+  multiterms_docs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of saved lens visualizations which are using at least one multiterms operation',
+    },
+  },
+  multiterms_terms_count: {
+    type: 'long',
+    _meta: {
+      description: 'Sum of terms used for multiterms operations of saved lens visualizations',
+    },
+  },
+  multiterms_operations_count: {
+    type: 'long',
+    _meta: {
+      description: 'Sum of operations using multiterms of saved lens visualizations',
+    },
+  },
 };
 
 export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {
@@ -200,4 +249,8 @@ export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {
   saved_overall: savedSchema,
   saved_30_days: savedSchema,
   saved_90_days: savedSchema,
+
+  saved_multiterms_overall: savedMultitermsSchema,
+  saved_multiterms_30_days: savedMultitermsSchema,
+  saved_multiterms_90_days: savedMultitermsSchema,
 };

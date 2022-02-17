@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { isTab } from '../../../../timelines/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../common/search_strategy';
@@ -46,12 +47,11 @@ import {
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
-import { isTab } from '../../common/components/accessibility/helpers';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
-
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -61,8 +61,10 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
+const ID = 'NetworkQueryId';
+
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ networkPagePath, hasMlUserPermissions, capabilitiesFetched }) => {
+  ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -82,6 +84,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { globalFullScreen } = useGlobalFullScreen();
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
+
+    const canUseMaps = kibana.services.application.capabilities.maps.show;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
@@ -107,7 +111,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -133,18 +137,20 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
     );
 
-    const filterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
-    const tabsFilterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    const [tabsFilterQuery] = convertToBuildEsQuery({
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,
     });
+
+    useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
     return (
       <>
@@ -155,10 +161,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
+            <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
                 <HeaderPage
-                  border
                   subtitle={
                     <LastEventTime
                       docValueFields={docValueFields}
@@ -167,17 +172,27 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     />
                   }
                   title={i18n.PAGE_TITLE}
+                  border
                 />
 
-                <EmbeddedMap
-                  query={query}
-                  filters={filters}
-                  startDate={from}
-                  endDate={to}
-                  setQuery={setQuery}
-                />
-
-                <EuiSpacer />
+                {canUseMaps && (
+                  <>
+                    <EuiPanel
+                      hasBorder
+                      paddingSize="none"
+                      data-test-subj="conditional-embeddable-map"
+                    >
+                      <EmbeddedMap
+                        query={query}
+                        filters={filters}
+                        startDate={from}
+                        endDate={to}
+                        setQuery={setQuery}
+                      />
+                    </EuiPanel>
+                    <EuiSpacer />
+                  </>
+                )}
 
                 <NetworkKpiComponent
                   filterQuery={filterQuery}
@@ -185,7 +200,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   indexNames={selectedPatterns}
                   narrowDateRange={narrowDateRange}
                   setQuery={setQuery}
-                  skip={isInitializing}
+                  skip={isInitializing || filterQuery === undefined}
                   to={to}
                 />
               </Display>
@@ -194,9 +209,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
-
-                    <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
-
+                    <SecuritySolutionTabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
                     <EuiSpacer />
                   </Display>
 
@@ -211,19 +224,17 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
                     to={to}
-                    networkPagePath={networkPagePath}
                   />
                 </>
               ) : (
                 <NetworkRoutesLoading />
               )}
-            </WrapperPage>
+            </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <WrapperPage>
-            <HeaderPage border title={i18n.PAGE_TITLE} />
+          <SecuritySolutionPageWrapper>
             <OverviewEmpty />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />

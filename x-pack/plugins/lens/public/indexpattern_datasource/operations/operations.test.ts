@@ -320,6 +320,22 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
+                "operationType": "overall_sum",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_min",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_max",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_average",
+                "type": "fullReference",
+              },
+              Object {
                 "field": "bytes",
                 "operationType": "min",
                 "type": "field",
@@ -354,6 +370,38 @@ describe('getOperationTypesForField', () => {
                 "operationType": "last_value",
                 "type": "field",
               },
+              Object {
+                "operationType": "math",
+                "type": "managedReference",
+              },
+              Object {
+                "operationType": "formula",
+                "type": "managedReference",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "date",
+              "isBucketed": false,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "field": "timestamp",
+                "operationType": "min",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "max",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "last_value",
+                "type": "field",
+              },
             ],
           },
           Object {
@@ -367,6 +415,20 @@ describe('getOperationTypesForField', () => {
                 "field": "source",
                 "operationType": "last_value",
                 "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "isStaticValue": true,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "operationType": "static_value",
+                "type": "managedReference",
               },
             ],
           },

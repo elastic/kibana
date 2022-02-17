@@ -28,7 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const appTitleText = await pageObjects.crossClusterReplication.appTitleText();
       expect(appTitleText).to.be('Cross-Cluster Replication');
 
-      const followerIndexButton = await pageObjects.crossClusterReplication.createFollowerIndexButton();
+      const followerIndexButton =
+        await pageObjects.crossClusterReplication.createFollowerIndexButton();
       expect(await followerIndexButton.isDisplayed()).to.be(true);
     });
   });

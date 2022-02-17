@@ -15,6 +15,8 @@ import {
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { NewJobCapsResponse } from '../../../../common/types/fields';
+import { JobMessage } from '../../../../common/types/audit_message';
 import {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
@@ -49,9 +51,7 @@ export interface DeleteDataFrameAnalyticsWithIndexResponse {
 }
 
 export interface JobsExistsResponse {
-  results: {
-    [jobId: string]: boolean;
-  };
+  [jobId: string]: { exists: boolean };
 }
 
 export const dataFrameAnalytics = {
@@ -107,7 +107,7 @@ export const dataFrameAnalytics = {
       query: { treatAsRoot, type },
     });
   },
-  jobsExists(analyticsIds: string[], allSpaces: boolean = false) {
+  jobsExist(analyticsIds: string[], allSpaces: boolean = false) {
     const body = JSON.stringify({ analyticsIds, allSpaces });
     return http<JobsExistsResponse>({
       path: `${basePath()}/data_frame/analytics/jobs_exist`,
@@ -162,7 +162,7 @@ export const dataFrameAnalytics = {
     });
   },
   getAnalyticsAuditMessages(analyticsId: string) {
-    return http<any>({
+    return http<JobMessage[]>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
     });
@@ -173,6 +173,14 @@ export const dataFrameAnalytics = {
       path: `${basePath()}/data_frame/analytics/validate`,
       method: 'POST',
       body,
+    });
+  },
+  newJobCapsAnalytics(indexPatternTitle: string, isRollup: boolean = false) {
+    const query = isRollup === true ? { rollup: true } : {};
+    return http<NewJobCapsResponse>({
+      path: `${basePath()}/data_frame/analytics/new_job_caps/${indexPatternTitle}`,
+      method: 'GET',
+      query,
     });
   },
 };

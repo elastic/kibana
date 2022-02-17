@@ -12,11 +12,11 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
+import { IClusterClient } from 'src/core/server';
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { isString } from 'lodash';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   MonitoringStats,
@@ -25,8 +25,14 @@ import {
   RawMonitoringStats,
 } from '../monitoring';
 import { TaskManagerConfig } from '../config';
+import { logHealthMetrics } from '../lib/log_health_metrics';
+import { calculateHealthStatus } from '../lib/calculate_health_status';
 
-type MonitoredHealth = RawMonitoringStats & { id: string; status: HealthStatus; timestamp: string };
+export type MonitoredHealth = RawMonitoringStats & {
+  id: string;
+  status: HealthStatus;
+  timestamp: string;
+};
 
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: 'Task Manager is healthy',
@@ -34,40 +40,57 @@ const LEVEL_SUMMARY = {
   [ServiceStatusLevels.unavailable.toString()]: 'Task Manager is unavailable',
 };
 
-export function healthRoute(
-  router: IRouter,
-  monitoringStats$: Observable<MonitoringStats>,
-  logger: Logger,
-  taskManagerId: string,
-  config: TaskManagerConfig
-): Observable<ServiceStatus> {
+/**
+ * We enforce a `meta` of `never` because this meta gets duplicated into *every dependant plugin*, and
+ * this will then get logged out when logging is set to Verbose.
+ * We used to pass in the the entire MonitoredHealth into this `meta` field, but this means that the
+ * whole MonitoredHealth JSON (which can be quite big) was duplicated dozens of times and when we
+ * try to view logs in Discover, it fails to render as this JSON was often dozens of levels deep.
+ */
+type TaskManagerServiceStatus = ServiceStatus<never>;
+
+export interface HealthRouteParams {
+  router: IRouter;
+  monitoringStats$: Observable<MonitoringStats>;
+  logger: Logger;
+  taskManagerId: string;
+  config: TaskManagerConfig;
+  kibanaVersion: string;
+  kibanaIndexName: string;
+  getClusterClient: () => Promise<IClusterClient>;
+  usageCounter?: UsageCounter;
+}
+
+export function healthRoute(params: HealthRouteParams): {
+  serviceStatus$: Observable<TaskManagerServiceStatus>;
+  monitoredHealth$: Observable<MonitoredHealth>;
+} {
+  const {
+    router,
+    monitoringStats$,
+    logger,
+    taskManagerId,
+    config,
+    kibanaVersion,
+    kibanaIndexName,
+    getClusterClient,
+    usageCounter,
+  } = params;
+
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
 
-  // if "cold" health stats are any more stale than the configured refresh (+ a buffer), consider the system unhealthy
-  const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
-
-  function calculateStatus(monitoredStats: MonitoringStats): MonitoredHealth {
+  function getHealthStatus(monitoredStats: MonitoringStats) {
+    const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
+    const status = calculateHealthStatus(summarizedStats, config, logger);
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    const summarizedStats = summarizeMonitoringStats(monitoredStats, config);
-
-    /**
-     * If the monitored stats aren't fresh, return a red status
-     */
-    const healthStatus =
-      hasStatus(summarizedStats.stats, HealthStatus.Error) ||
-      hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness) ||
-      hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)
-        ? HealthStatus.Error
-        : hasStatus(summarizedStats.stats, HealthStatus.Warning)
-        ? HealthStatus.Warning
-        : HealthStatus.OK;
-    return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status, ...summarizedStats };
   }
 
-  const serviceStatus$: Subject<ServiceStatus> = new Subject<ServiceStatus>();
+  const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
+  const monitoredHealth$: Subject<MonitoredHealth> = new Subject<MonitoredHealth>();
 
   /* keep track of last health summary, as we'll return that to the next call to _health */
   let lastMonitoredStats: MonitoringStats | null = null;
@@ -81,16 +104,19 @@ export function healthRoute(
       }),
       // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
-      map((stats) => withServiceStatus(calculateStatus(stats)))
+      map((stats) => withServiceStatus(getHealthStatus(stats)))
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
-      logger.debug(`Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`);
+      monitoredHealth$.next(monitoredHealth);
+      logHealthMetrics(monitoredHealth, logger, config);
     });
 
   router.get(
     {
       path: '/api/task_manager/_health',
+      // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
+      // options: { tags: ['access:taskManager'] },
       validate: false,
     },
     async function (
@@ -98,73 +124,61 @@ export function healthRoute(
       req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
+      // If we are able to count usage, we want to check whether the user has access to
+      // the `taskManager` feature, which is only available as part of the Global All privilege.
+      if (usageCounter) {
+        const clusterClient = await getClusterClient();
+        const hasPrivilegesResponse = await clusterClient
+          .asScoped(req)
+          .asCurrentUser.security.hasPrivileges({
+            body: {
+              application: [
+                {
+                  application: `kibana-${kibanaIndexName}`,
+                  resources: ['*'],
+                  privileges: [`api:${kibanaVersion}:taskManager`],
+                },
+              ],
+            },
+          });
+
+        // Keep track of total access vs admin access
+        usageCounter.incrementCounter({
+          counterName: `taskManagerHealthApiAccess`,
+          counterType: 'taskManagerHealthApi',
+          incrementBy: 1,
+        });
+        if (hasPrivilegesResponse.has_all_requested) {
+          usageCounter.incrementCounter({
+            counterName: `taskManagerHealthApiAdminAccess`,
+            counterType: 'taskManagerHealthApi',
+            incrementBy: 1,
+          });
+        }
+      }
+
       return res.ok({
         body: lastMonitoredStats
-          ? calculateStatus(lastMonitoredStats)
+          ? getHealthStatus(lastMonitoredStats)
           : { id: taskManagerId, timestamp: new Date().toISOString(), status: HealthStatus.Error },
       });
     }
   );
-  return serviceStatus$;
+  return { serviceStatus$, monitoredHealth$ };
 }
 
 export function withServiceStatus(
   monitoredHealth: MonitoredHealth
-): [MonitoredHealth, ServiceStatus] {
+): [MonitoredHealth, TaskManagerServiceStatus] {
   const level =
     monitoredHealth.status === HealthStatus.OK
       ? ServiceStatusLevels.available
-      : monitoredHealth.status === HealthStatus.Warning
-      ? ServiceStatusLevels.degraded
-      : ServiceStatusLevels.unavailable;
+      : ServiceStatusLevels.degraded;
   return [
     monitoredHealth,
     {
       level,
       summary: LEVEL_SUMMARY[level.toString()],
-      meta: monitoredHealth,
     },
   ];
-}
-
-/**
- * If certain "hot" stats are not fresh, then the _health api will should return a Red status
- * @param monitoringStats The monitored stats
- * @param now The time to compare against
- * @param requiredFreshness How fresh should these stats be
- */
-function hasExpiredHotTimestamps(
-  monitoringStats: RawMonitoringStats,
-  now: number,
-  requiredFreshness: number
-): boolean {
-  return (
-    now -
-      getOldestTimestamp(
-        monitoringStats.last_update,
-        monitoringStats.stats.runtime?.value.polling.last_successful_poll
-      ) >
-    requiredFreshness
-  );
-}
-
-function hasExpiredColdTimestamps(
-  monitoringStats: RawMonitoringStats,
-  now: number,
-  requiredFreshness: number
-): boolean {
-  return now - getOldestTimestamp(monitoringStats.stats.workload?.timestamp) > requiredFreshness;
-}
-
-function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {
-  return Object.values(stats)
-    .map((stat) => stat?.status === status)
-    .includes(true);
-}
-
-function getOldestTimestamp(...timestamps: Array<JsonValue | undefined>): number {
-  const validTimestamps = timestamps
-    .map((timestamp) => (isString(timestamp) ? Date.parse(timestamp) : NaN))
-    .filter((timestamp) => !isNaN(timestamp));
-  return validTimestamps.length ? Math.min(...validTimestamps) : 0;
 }

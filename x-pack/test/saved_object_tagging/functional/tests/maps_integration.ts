@@ -30,17 +30,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     }
     // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('main .euiFieldSearch');
+    const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
     await searchFilter.click();
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/89073
   describe.skip('maps integration', () => {
     before(async () => {
-      await esArchiver.load('maps');
+      await esArchiver.load('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
     });
     after(async () => {
-      await esArchiver.unload('maps');
+      await esArchiver.unload('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
     });
 
     describe('listing', () => {
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to select tags for a new map', async () => {
-        await PageObjects.maps.saveMap('my-new-map', true, ['tag-1', 'tag-3']);
+        await PageObjects.maps.saveMap('my-new-map', true, true, ['tag-1', 'tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await selectFilterTags('tag-1');
@@ -133,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to select tags for an existing map', async () => {
         await listingTable.clickItemLink('map', 'map 4 (tag-1)');
 
-        await PageObjects.maps.saveMap('map 4 (tag-1)', true, ['tag-3']);
+        await PageObjects.maps.saveMap('map 4 (tag-1)', true, true, ['tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await selectFilterTags('tag-3');

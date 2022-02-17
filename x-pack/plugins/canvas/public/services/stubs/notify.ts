@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { NotifyService } from '../notify';
+import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+
+import { CanvasNotifyService } from '../notify';
+
+type CanvasNotifyServiceFactory = PluginServiceFactory<CanvasNotifyService>;
 
 const noop = (..._args: any[]): any => {};
 
-export const notifyService: NotifyService = {
+export const notifyServiceFactory: CanvasNotifyServiceFactory = () => ({
   error: noop,
   info: noop,
   success: noop,
   warning: noop,
-};
+});

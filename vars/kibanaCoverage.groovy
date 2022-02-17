@@ -189,17 +189,23 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmen
   }
 }
 
+def prepareKibana() {
+  kibanaPipeline.notifyOnError {
+    runbld("./test/scripts/jenkins_code_coverage.sh", "Verify tests")
+  }
+}
+
 def runTests() {
   parallel([
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
-      { kibanaPipeline.buildOss() },
+      { prepareKibana() },
       ossProks()
     ),
     'kibana-xpack-agent' : workers.functional(
       'kibana-xpack-tests',
-      { kibanaPipeline.buildXpack() },
+      { prepareKibana() },
       xpackProks()
     ),
   ])
@@ -218,7 +224,6 @@ def ossProks() {
     'oss-ciGroup9' : kibanaPipeline.ossCiGroupProcess(9),
     'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
     'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
-    'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
 

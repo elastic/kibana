@@ -6,23 +6,15 @@
  * Side Public License, v 1.
  */
 
-export {
-  SavedObjectsManagementActionService,
+export type {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementActionServiceSetup,
 } from './action_service';
-export {
-  SavedObjectsManagementColumnService,
+export { SavedObjectsManagementActionService } from './action_service';
+export type {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
-export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
-export {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-} from './types';
+export { SavedObjectsManagementColumnService } from './column_service';
+export type { SavedObjectsManagementColumn, SavedObjectsManagementRecord } from './types';
+export { SavedObjectsManagementAction } from './types';

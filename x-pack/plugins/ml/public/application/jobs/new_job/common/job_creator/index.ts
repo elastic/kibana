@@ -11,12 +11,14 @@ export { MultiMetricJobCreator } from './multi_metric_job_creator';
 export { PopulationJobCreator } from './population_job_creator';
 export { AdvancedJobCreator } from './advanced_job_creator';
 export { CategorizationJobCreator } from './categorization_job_creator';
+export { RareJobCreator } from './rare_job_creator';
+export type { JobCreatorType } from './type_guards';
 export {
-  JobCreatorType,
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
+  isRareJobCreator,
 } from './type_guards';
 export { jobCreatorFactory } from './job_creator_factory';

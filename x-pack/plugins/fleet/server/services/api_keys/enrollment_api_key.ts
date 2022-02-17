@@ -8,18 +8,22 @@
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import type { ESSearchResponse as SearchResponse } from '../../../../../../typings/elasticsearch';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+
+import type { ESSearchResponse as SearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
+import { IngestManagerError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-import { createAPIKey, invalidateAPIKeys } from './security';
+import { invalidateAPIKeys } from './security';
 
-const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
+const uuidRegex =
+  /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,
@@ -27,30 +31,46 @@ export async function listEnrollmentApiKeys(
     page?: number;
     perPage?: number;
     kuery?: string;
+    query?: ReturnType<typeof toElasticsearchQuery>;
     showInactive?: boolean;
   }
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
   const { page = 1, perPage = 20, kuery } = options;
+  const query = options.query ?? (kuery && toElasticsearchQuery(fromKueryExpression(kuery)));
 
   const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
     index: ENROLLMENT_API_KEYS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    sort: 'created_at:desc',
     track_total_hits: true,
-    q: kuery,
+    ignore_unavailable: true,
+    body: {
+      sort: [{ created_at: { order: 'desc' } }],
+      ...(query ? { query } : {}),
+    },
   });
 
-  // @ts-expect-error @elastic/elasticsearch
-  const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+  // @ts-expect-error @elastic/elasticsearch _source is optional
+  const items = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {
     items,
     // @ts-expect-error value is number | TotalHits
-    total: res.body.hits.total.value,
+    total: res.hits.total.value,
     page,
     perPage,
   };
+}
+
+export async function hasEnrollementAPIKeysForPolicy(
+  esClient: ElasticsearchClient,
+  policyId: string
+) {
+  const res = await listEnrollmentApiKeys(esClient, {
+    kuery: `policy_id:"${policyId}"`,
+  });
+
+  return res.total !== 0;
 }
 
 export async function getEnrollmentAPIKey(
@@ -58,15 +78,15 @@ export async function getEnrollmentAPIKey(
   id: string
 ): Promise<EnrollmentAPIKey> {
   try {
-    const res = await esClient.get<FleetServerEnrollmentAPIKey>({
+    const body = await esClient.get<FleetServerEnrollmentAPIKey>({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
     });
 
     // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
-    return esDocToEnrollmentApiKey(res.body);
+    return esDocToEnrollmentApiKey(body);
   } catch (e) {
-    if (e instanceof ResponseError && e.statusCode === 404) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
       throw Boom.notFound(`Enrollment api key ${id} not found`);
     }
 
@@ -76,32 +96,38 @@ export async function getEnrollmentAPIKey(
 
 /**
  * Invalidate an api key and mark it as inactive
- * @param soClient
  * @param id
  */
 export async function deleteEnrollmentApiKey(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  id: string
+  id: string,
+  forceDelete = false
 ) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
-  await invalidateAPIKeys(soClient, [enrollmentApiKey.api_key_id]);
+  await invalidateAPIKeys([enrollmentApiKey.api_key_id]);
 
-  await esClient.update({
-    index: ENROLLMENT_API_KEYS_INDEX,
-    id,
-    body: {
-      doc: {
-        active: false,
+  if (forceDelete) {
+    await esClient.delete({
+      index: ENROLLMENT_API_KEYS_INDEX,
+      id,
+      refresh: 'wait_for',
+    });
+  } else {
+    await esClient.update({
+      index: ENROLLMENT_API_KEYS_INDEX,
+      id,
+      body: {
+        doc: {
+          active: false,
+        },
       },
-    },
-    refresh: 'wait_for',
-  });
+      refresh: 'wait_for',
+    });
+  }
 }
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicyId: string
 ) {
@@ -119,7 +145,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
     }
 
     for (const apiKey of items) {
-      await deleteEnrollmentApiKey(soClient, esClient, apiKey.id);
+      await deleteEnrollmentApiKey(esClient, apiKey.id);
     }
   }
 }
@@ -130,7 +156,7 @@ export async function generateEnrollmentAPIKey(
   data: {
     name?: string;
     expiration?: string;
-    agentPolicyId?: string;
+    agentPolicyId: string;
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
@@ -139,8 +165,7 @@ export async function generateEnrollmentAPIKey(
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
   }
-  const agentPolicyId =
-    data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
+  const agentPolicyId = data.agentPolicyId;
 
   if (providedKeyName && !forceRecreate) {
     let hasMore = true;
@@ -150,7 +175,7 @@ export async function generateEnrollmentAPIKey(
       const { items } = await listEnrollmentApiKeys(esClient, {
         page: page++,
         perPage: 100,
-        kuery: `policy_id:"${agentPolicyId}" AND name:${providedKeyName.replace(/ /g, '\\ ')}*`,
+        query: getQueryForExistingKeyNameOnPolicy(agentPolicyId, providedKeyName),
       });
       if (items.length === 0) {
         hasMore = false;
@@ -167,7 +192,7 @@ export async function generateEnrollmentAPIKey(
         k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
       )
     ) {
-      throw new Error(
+      throw new IngestManagerError(
         i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
           defaultMessage:
             'An enrollment key named {providedKeyName} already exists for agent policy {agentPolicyId}',
@@ -181,19 +206,36 @@ export async function generateEnrollmentAPIKey(
   }
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
-  const key = await createAPIKey(soClient, name, {
-    // Useless role to avoid to have the privilege of the user that created the key
-    'fleet-apikey-enroll': {
-      cluster: [],
-      applications: [
-        {
-          application: '.fleet',
-          privileges: ['no-privileges'],
-          resources: ['*'],
+
+  const key = await esClient.security
+    .createApiKey({
+      body: {
+        name,
+        metadata: {
+          managed_by: 'fleet',
+          managed: true,
+          type: 'enroll',
+          policy_id: data.agentPolicyId,
         },
-      ],
-    },
-  });
+        role_descriptors: {
+          // Useless role to avoid to have the privilege of the user that created the key
+          'fleet-apikey-enroll': {
+            cluster: [],
+            index: [],
+            applications: [
+              {
+                application: 'fleet',
+                privileges: ['no-privileges'],
+                resources: ['*'],
+              },
+            ],
+          },
+        },
+      },
+    })
+    .catch((err) => {
+      throw new Error(`Impossible to create an api key: ${err.message}`);
+    });
 
   if (!key) {
     throw new Error(
@@ -222,19 +264,43 @@ export async function generateEnrollmentAPIKey(
   });
 
   return {
-    id: res.body._id,
+    id: res._id,
     ...body,
   };
+}
+
+function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyName: string) {
+  const query = {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [{ match_phrase: { policy_id: agentPolicyId } }],
+            minimum_should_match: 1,
+          },
+        },
+        {
+          bool: {
+            should: [{ query_string: { fields: ['name'], query: `(${providedKeyName}) *` } }],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+
+  return query;
 }
 
 export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
   const res = await esClient.search<FleetServerEnrollmentAPIKey>({
     index: ENROLLMENT_API_KEYS_INDEX,
+    ignore_unavailable: true,
     q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
   });
 
   // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
-  const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+  const [enrollmentAPIKey] = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
     throw new Error(

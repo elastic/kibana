@@ -22,6 +22,7 @@ const buildRuleMessage = buildRuleMessageFactory({
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
+// Failing with rule registry enabled
 describe('findThresholdSignals', () => {
   let mockService: AlertServicesMock;
 
@@ -29,108 +30,6 @@ describe('findThresholdSignals', () => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
     mockService = alertsMock.createAlertServices();
-  });
-
-  it('should generate a threshold signal for pre-7.12 rules', async () => {
-    await findThresholdSignals({
-      from: 'now-6m',
-      to: 'now',
-      inputIndexPattern: ['*'],
-      services: mockService,
-      logger: mockLogger,
-      filter: queryFilter,
-      threshold: {
-        field: 'host.name',
-        value: 100,
-      },
-      buildRuleMessage,
-      timestampOverride: undefined,
-    });
-    expect(mockSingleSearchAfter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggregations: {
-          'threshold_0:host.name': {
-            terms: {
-              field: 'host.name',
-              min_doc_count: 100,
-              size: 10000,
-            },
-            aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      })
-    );
-  });
-
-  it('should generate a signal for pre-7.12 rules with no threshold field', async () => {
-    await findThresholdSignals({
-      from: 'now-6m',
-      to: 'now',
-      inputIndexPattern: ['*'],
-      services: mockService,
-      logger: mockLogger,
-      filter: queryFilter,
-      threshold: {
-        field: '',
-        value: 100,
-      },
-      buildRuleMessage,
-      timestampOverride: undefined,
-    });
-    expect(mockSingleSearchAfter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggregations: {
-          threshold_0: {
-            terms: {
-              script: {
-                source: '""',
-                lang: 'painless',
-              },
-              min_doc_count: 100,
-            },
-            aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      })
-    );
   });
 
   it('should generate a threshold signal query when only a value is provided', async () => {
@@ -160,22 +59,14 @@ describe('findThresholdSignals', () => {
               min_doc_count: 100,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -210,22 +101,14 @@ describe('findThresholdSignals', () => {
               size: 10000,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -246,6 +129,7 @@ describe('findThresholdSignals', () => {
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
+        cardinality: [],
       },
       buildRuleMessage,
       timestampOverride: undefined,
@@ -267,22 +151,14 @@ describe('findThresholdSignals', () => {
                   size: 10000,
                 },
                 aggs: {
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -328,6 +204,7 @@ describe('findThresholdSignals', () => {
               'threshold_1:user.name': {
                 terms: {
                   field: 'user.name',
+                  order: { cardinality_count: 'desc' },
                   min_doc_count: 100,
                   size: 10000,
                 },
@@ -345,22 +222,14 @@ describe('findThresholdSignals', () => {
                       script: 'params.cardinalityCount >= 2',
                     },
                   },
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -403,6 +272,7 @@ describe('findThresholdSignals', () => {
                 lang: 'painless',
               },
               min_doc_count: 200,
+              order: { cardinality_count: 'desc' },
             },
             aggs: {
               cardinality_count: {
@@ -418,22 +288,14 @@ describe('findThresholdSignals', () => {
                   script: 'params.cardinalityCount >= 5',
                 },
               },
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
                 },
               },
             },

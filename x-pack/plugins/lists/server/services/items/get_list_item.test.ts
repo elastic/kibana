@@ -8,7 +8,6 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import {
   DATE_NOW,
@@ -18,6 +17,7 @@ import {
   TIE_BREAKER,
   USER,
 } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { getListItem } from './get_list_item';
 
@@ -33,9 +33,7 @@ describe('get_list_item', () => {
   test('it returns a list item as expected if the list item is found', async () => {
     const data = getSearchListItemMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
     const expected = getListItemResponseMock();
     expect(list).toEqual(expected);
@@ -45,9 +43,7 @@ describe('get_list_item', () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
@@ -89,9 +85,7 @@ describe('get_list_item', () => {
       updated_by: USER,
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });

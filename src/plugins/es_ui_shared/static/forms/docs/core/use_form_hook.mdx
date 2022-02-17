@@ -1,0 +1,263 @@
+---
+id: formLibCoreUseForm
+slug: /form-lib/core/use-form
+title: useForm()
+summary: The only hook you'll need to declare a new form
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+**Returns:** [`FormHook`](form_hook.md)
+
+Use the `useForm` hook to declare a new form object. As we have seen in the <DocLink id="formLibCoreFundamentals" text="fundamentals"/>, you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optional).
+
+## Configuration
+
+### onSubmit(data, isValid)
+
+**Arguments:** `data: T, isValid: boolean`  
+**Returns:** `Promise<void>`
+
+The `onSubmit` handler is executed when calling `form.submit()`. It receives the form data and a boolean for the validity of the form.
+When the form is submitted its `isSubmitting` state will be set to `true` and then back to `false` after the `onSubmit` handler has finished running. This can be useful to update the state of the submit button while saving the form to the server for example.
+
+```js
+interface MyFormData {
+  name: string;
+}
+
+const onFormSubmit = async (data: MyFormData, isValid: boolean): Promise<void> => {
+    // "form.isSubmitting" is set to "true"
+
+    if (!isValid) {
+      // Maybe show a callout
+      return;
+    }
+    // Do anything with the data
+    await myApiService.createResource(data);
+
+    // "form.isSubmitting" is set to "false".
+}
+const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
+
+// JSX
+<button disabled={form.isSubmitting} onClick{form.submit}>Send form</button>
+```
+
+### defaultValue
+
+**Type:** `Record<string, any>`
+
+The `defaultValue` is an object that you provide to give the initial value for your fields. 
+
+**Note:** There are multiple places where you can define the default value of a field, <DocLink id="formLibCoreDefaultValue" text="read the difference between them"/>.
+
+```js
+const fetchedData = { firstName: 'John' };
+const { form } = useForm({ defaultValue: fetchedData });
+```
+
+### schema
+
+**Type:** `Record<string, FieldConfig>`
+
+Instead of manually providing a `config` object to each `<UseField />`, in some cases it is more convenient to provide a schema to the form with the fields configuration at the desired paths.
+
+```js
+interface MyForm {
+  user: {
+    firstName: string;
+    lastName: string;
+  }
+}
+
+const schema: Schema<MyForm> {
+  user: {
+    firstName: {
+      defaultValue: '',
+      ... // other config
+    },
+    lastName: {
+      defaultValue: '',
+      ...
+    },
+    isAdmin: {
+      defaultValue: false,
+    }
+  }
+};
+
+export const MyComponent = () => {
+  const { form } = useForm<MyForm>({ schema });
+
+  // No need to provide the "config" prop on each field,
+  // it will be read from the schema
+  return (
+    <Form form={form}>
+      <UseField path="user.firstName" />
+      <UseField path="user.lastName" />
+      <UseField path="user.isAdmin" />
+    </Form>
+  );
+}
+```
+
+### deserializer
+
+When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values.  
+**Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.  
+
+```js
+import { Form, useForm, useFormData, Field, FIELD_TYPES, FormDataProvider } from '<path-to-form-lib>';
+
+// Data coming from the server
+const fetchedData = {
+  name: 'John',
+  address: {
+    street: 'El Camino Real #350'
+  }
+}
+
+// We want to have a toggle in the UI to display the address _if_ there is one.
+// Otherwise the toggle value is "false" and no address is displayed.
+const deserializer = (defaultValue) => {
+  return {
+    ...defaultValue,
+    // We add an extra toggle field
+    showAddress:  defaultValue.hasOwnProperty('address'),
+  };
+}
+
+export const MyComponent = ({ fetchedData }: Props) => {
+  const { form } = useForm({
+    defaultValue: fetchedData,
+    deserializer
+  });
+  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' });
+
+  // We can now use our "showAddress" internal field in the UI
+  return (
+    <Form form={form}>
+      <UseField path="name" config={{ type: FIELD_TYPES.TEXT }} component={Field} />
+      <UseField path="showAddress" config={{ type: FIELD_TYPES.TOGGLE }} component={Field} />
+      {/* Show the street address when the toggle is "true" */}
+      {showAddress ? <UseField path="address.street" /> : null}
+
+      <button onClick={form.submit}>Submit</button>
+    </Form>
+  )
+}
+```
+
+### serializer
+
+Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  
+**Note:** As with the `deserializer`, it is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
+
+If we run the example above for the `deserializer`, and we click on the "Submit" button, we would get this in the console
+
+```
+Form data: {
+  address: {
+    street: 'El Camino Real #350'
+  },
+  name: 'John',
+  showAddress: true
+}
+```
+
+We don't want to surface the internal `showAddress` field. Let's use a `serializer` to remove it.
+
+```js
+
+const deserializer = (value) => {
+  ...
+};
+
+  // Remove the showAddress field from the outputted data
+const serializer = (value) => {
+  const { showAddress, ...rest } = value;
+  return rest;
+}
+
+export const MyComponent = ({ fetchedData }: Props) => {
+  const { form } = useForm({
+    defaultValue: fetchedData,
+    deserializer,
+    serializer,
+  });
+
+  ...
+
+};
+```
+
+Much better, now when we submit the form, the internal UI fields are not leaked outside when building the form object.
+
+### id
+
+**Type:** `string`
+
+You can optionally give an id to the form, that will be attached to the `form` object you receive. This can be useful for debugging purpose when you have multiple forms on the page.
+
+### options
+
+**Type:** `{ valueChangeDebounceTime?: number; stripEmptyFields?: boolean }`
+
+#### valueChangeDebounceTime
+
+**Type:** `number` (ms)
+**Default:** 500
+
+When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state changes depends on the time it takes to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
+
+With this option, you can define the minimum time you'd like to have between the two state change, so the `isChangingValue` state will stay `true` for at least the amount of milliseconds defined here. This is useful for example if you want to display possible errors on the field after a minimum of time has passed since the last value change.
+
+This setting **can be overriden** on a per-field basis, providing a `valueChangeDebounceTime` in its config object.
+
+```js
+const { form } = useForm({ options: { valueChangeDebounceTime: 300 } });
+
+return (
+  <UseField<string> path="name">
+    {(field) => {
+      let isInvalid = false;
+      let errorMessage = null;
+  
+      if (!field.isChangingValue) {
+        // Only update this derived state after 300ms of the last key stroke
+        isInvalid = field.errors.length > 0;
+        errorMessage = isInvalid ? field.errors[0].message : null;
+      }
+  
+      return (
+        <div>
+          <input type="text" value={field.value} onChange={field.onChange} />
+          {isInvalid && <div>{errorMessage}</div>}
+        </div>
+      );
+    }}
+  </UseField>
+);
+```
+
+#### stripEmptyFields
+
+**Type:** `boolean`
+**Default:** `true`
+
+With this option you can decide if you want empty string value to be returned by the form.
+
+```js
+// stripEmptyFields: true (default)
+{
+  "firstName": "John"
+}
+
+// stripEmptyFields: false
+{
+  "firstName": "John",
+  "lastName": "",
+  "role": ""
+}
+```

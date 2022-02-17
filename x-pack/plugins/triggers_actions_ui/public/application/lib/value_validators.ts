@@ -6,7 +6,7 @@
  */
 
 import { constant, get, set } from 'lodash';
-import { UserConfiguredActionConnector, IErrorObject, Alert } from '../../types';
+import { UserConfiguredActionConnector, IErrorObject, Rule } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {
@@ -71,10 +71,10 @@ export function getConnectorWithInvalidatedFields(
 }
 
 export function getAlertWithInvalidatedFields(
-  alert: Alert,
+  alert: Rule,
   paramsErrors: IErrorObject,
   baseAlertErrors: IErrorObject,
-  actionsErrors: Record<string, IErrorObject>
+  actionsErrors: IErrorObject[]
 ) {
   Object.keys(paramsErrors).forEach((errorKey) => {
     if (paramsErrors[errorKey].length >= 1 && get(alert.params, errorKey) === undefined) {
@@ -86,17 +86,15 @@ export function getAlertWithInvalidatedFields(
       set(alert, errorKey, null);
     }
   });
-  Object.keys(actionsErrors).forEach((actionId) => {
-    const actionToValidate = alert.actions.find((action) => action.id === actionId);
-    Object.keys(actionsErrors[actionId]).forEach((errorKey) => {
-      if (
-        actionToValidate &&
-        actionsErrors[actionId][errorKey].length >= 1 &&
-        get(actionToValidate!.params, errorKey) === undefined
-      ) {
-        set(actionToValidate!.params, errorKey, null);
-      }
-    });
+  actionsErrors.forEach((error: IErrorObject, index: number) => {
+    const actionToValidate = alert.actions.length > index ? alert.actions[index] : null;
+    if (actionToValidate) {
+      Object.keys(error).forEach((errorKey) => {
+        if (error[errorKey].length >= 1 && get(actionToValidate!.params, errorKey) === undefined) {
+          set(actionToValidate!.params, errorKey, null);
+        }
+      });
+    }
   });
   return alert;
 }

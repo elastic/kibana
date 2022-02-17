@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../../services/documentation';
@@ -43,9 +43,10 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  kibanaVersion: SemVer;
 }
 
-export const TokenCountType = ({ field }: Props) => {
+export const TokenCountType = ({ field, kibanaVersion }: Props) => {
   return (
     <>
       <BasicParametersSection>
@@ -113,7 +114,10 @@ export const TokenCountType = ({ field }: Props) => {
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        {/* The "boost" parameter is deprecated since 8.x */}
+        {kibanaVersion.major < 8 && (
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        )}
       </AdvancedParametersSection>
     </>
   );

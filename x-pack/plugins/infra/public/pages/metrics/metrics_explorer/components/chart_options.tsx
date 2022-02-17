@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiRadioGroup,
@@ -39,7 +39,12 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
   }, []);
 
   const button = (
-    <EuiButtonEmpty iconSide="left" iconType="eye" onClick={handleOpenPopover}>
+    <EuiButtonEmpty
+      iconSide="left"
+      iconType="eye"
+      onClick={handleOpenPopover}
+      data-test-subj="metricsExplorer-customize"
+    >
       <FormattedMessage
         id="xpack.infra.metricsExplorer.customizeChartOptions"
         defaultMessage="Customize"
@@ -64,18 +69,21 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
 
   const typeRadios = [
     {
+      'data-test-subj': 'metricsExplorer-chartRadio-line',
       id: MetricsExplorerChartType.line,
       label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.lineLabel', {
         defaultMessage: 'Line',
       }),
     },
     {
+      'data-test-subj': 'metricsExplorer-chartRadio-area',
       id: MetricsExplorerChartType.area,
       label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.areaLabel', {
         defaultMessage: 'Area',
       }),
     },
     {
+      'data-test-subj': 'metricsExplorer-chartRadio-bar',
       id: MetricsExplorerChartType.bar,
       label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.barLabel', {
         defaultMessage: 'Bar',

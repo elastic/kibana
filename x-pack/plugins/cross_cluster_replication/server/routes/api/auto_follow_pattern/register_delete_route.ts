@@ -16,7 +16,7 @@ import { RouteDependencies } from '../../../types';
 export const registerDeleteRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
     id: schema.string(),
@@ -30,29 +30,22 @@ export const registerDeleteRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
       const ids = id.split(',');
 
       const itemsDeleted: string[] = [];
       const errors: Array<{ id: string; error: any }> = [];
 
-      const formatError = (err: any) => {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        return response.customError({ statusCode: 500, body: err });
-      };
-
       await Promise.all(
         ids.map((_id) =>
-          context
-            .crossClusterReplication!.client.callAsCurrentUser('ccr.deleteAutoFollowPattern', {
-              id: _id,
+          client.asCurrentUser.ccr
+            .deleteAutoFollowPattern({
+              name: _id,
             })
             .then(() => itemsDeleted.push(_id))
-            .catch((err: any) => {
-              errors.push({ id: _id, error: formatError(err) });
+            .catch((error: any) => {
+              errors.push({ id: _id, error: handleEsError({ error, response }) });
             })
         )
       );

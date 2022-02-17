@@ -15,12 +15,14 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
   TimelineEventsQueries,
-  TimelineRequestBasicOptions,
+  TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimerangeInput,
 } from '../../../../common/search_strategy';
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
 
 export interface UseTimelineKpiProps {
   timerange: TimerangeInput;
@@ -37,20 +39,20 @@ export const useTimelineKpis = ({
   defaultIndex,
   isBlankTimeline,
 }: UseTimelineKpiProps): [boolean, TimelineKpiStrategyResponse | null] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineRequestBasicOptions | null>(
+  const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineKpiStrategyRequest | null>(
     null
   );
-  const [
-    timelineKpiResponse,
-    setTimelineKpiResponse,
-  ] = useState<TimelineKpiStrategyResponse | null>(null);
+  const [timelineKpiResponse, setTimelineKpiResponse] =
+    useState<TimelineKpiStrategyResponse | null>(null);
+  const { addError, addWarning } = useAppToasts();
+
   const timelineKpiSearch = useCallback(
-    (request: TimelineRequestBasicOptions | null) => {
+    (request: TimelineKpiStrategyRequest | null) => {
       if (request == null) {
         return;
       }
@@ -59,8 +61,8 @@ export const useTimelineKpis = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<TimelineRequestBasicOptions, TimelineKpiStrategyResponse>(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
+          .search<TimelineKpiStrategyRequest, TimelineKpiStrategyResponse>(request, {
+            strategy: 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
@@ -71,13 +73,13 @@ export const useTimelineKpis = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning('An error has occurred');
+                addWarning(i18n.FAIL_TIMELINE_KPI_DETAILS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger('Failed to load KPIs');
+              addError(msg, { title: i18n.FAIL_TIMELINE_KPI_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -87,7 +89,7 @@ export const useTimelineKpis = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning]
   );
 
   useEffect(() => {

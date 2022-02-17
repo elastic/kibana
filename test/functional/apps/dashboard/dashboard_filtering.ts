@@ -29,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filtering', function () {
-    this.tags('includeFirefox');
-
     const populateDashboard = async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
@@ -53,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -114,13 +112,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
-      // });
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -176,13 +173,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
-      // });
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -205,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(3);
+        await dashboardExpect.seriesElementCount(2);
       });
 
       it('data tables', async () => {
@@ -237,7 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCount(1);
+        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {

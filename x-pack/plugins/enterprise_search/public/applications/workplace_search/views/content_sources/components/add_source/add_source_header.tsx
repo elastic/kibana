@@ -9,7 +9,14 @@ import React from 'react';
 
 import { startCase } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiTextColor,
+} from '@elastic/eui';
 
 import { SourceIcon } from '../../../../components/shared/source_icon';
 
@@ -42,11 +49,11 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="m">
-            <h3>
+          <EuiTitle size="s">
+            <h1>
               <EuiTextColor color="default">{name}</EuiTextColor>
-            </h3>
-          </EuiText>
+            </h1>
+          </EuiTitle>
           <EuiText size="xs" color="subdued">
             {categories.map((category) => startCase(category)).join(', ')}
           </EuiText>

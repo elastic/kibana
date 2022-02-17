@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import { RawAlert } from '../types';
+import { RawRule } from '../types';
 
 import {
   SavedObjectsClient,
@@ -17,7 +17,7 @@ import {
 import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from './index';
 
 export type PartiallyUpdateableAlertAttributes = Partial<
-  Pick<RawAlert, AlertAttributesExcludedFromAADType>
+  Pick<RawRule, AlertAttributesExcludedFromAADType>
 >;
 
 export interface PartiallyUpdateAlertSavedObjectOptions {
@@ -40,10 +40,15 @@ export async function partiallyUpdateAlert(
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
   const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
-  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version', 'refresh');
+  const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
+    options,
+    'namespace',
+    'version',
+    'refresh'
+  );
 
   try {
-    await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates, updateOptions);
+    await savedObjectsClient.update<RawRule>('alert', id, attributeUpdates, updateOptions);
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;

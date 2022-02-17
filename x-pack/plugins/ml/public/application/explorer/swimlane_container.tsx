@@ -12,12 +12,12 @@ import {
   EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
 import {
   Chart,
+  BrushEndListener,
   Settings,
   Heatmap,
   HeatmapElementEvent,
@@ -28,6 +28,7 @@ import {
   HeatmapBrushEvent,
   Position,
   ScaleType,
+  PartialTheme,
 } from '@elastic/charts';
 import moment from 'moment';
 
@@ -40,11 +41,16 @@ import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
+import {
+  Y_AXIS_LABEL_WIDTH,
+  Y_AXIS_LABEL_PADDING,
+  X_AXIS_RIGHT_OVERFLOW,
+} from './swimlane_annotation_container';
+import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
   interface Window {
@@ -55,14 +61,19 @@ declare global {
   }
 }
 
+function getFormattedSeverityScore(score: number): string {
+  return String(parseInt(String(score), 10));
+}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
+
 const Y_AXIS_HEIGHT = 24;
-export const SWIM_LANE_LABEL_WIDTH = 200;
+
+export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -71,31 +82,16 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
 /**
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
-const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => ({ values }) => {
-  const tooltipData: TooltipValue[] = [];
+const SwimLaneTooltip =
+  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  ({ values }) => {
+    const tooltipData: TooltipValue[] = [];
 
-  if (values.length === 1 && fieldName) {
-    // Y-axis tooltip for viewBy swim lane
-    const [yAxis] = values;
-    // @ts-ignore
-    tooltipData.push({ skipHeader: true });
-    tooltipData.push({
-      label: fieldName,
-      value: yAxis.value,
+    if (values.length === 1 && fieldName) {
+      // Y-axis tooltip for viewBy swim lane
+      const [yAxis] = values;
       // @ts-ignore
-      seriesIdentifier: {
-        key: yAxis.value,
-      },
-    });
-  } else if (values.length === 3) {
-    // Cell tooltip
-    const [xAxis, yAxis, cell] = values;
-
-    // Display date using same format as Kibana visualizations.
-    const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
-    tooltipData.push({ label: formattedDate } as TooltipValue);
-
-    if (fieldName !== undefined) {
+      tooltipData.push({ skipHeader: true });
       tooltipData.push({
         label: fieldName,
         value: yAxis.value,
@@ -104,31 +100,48 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
           key: yAxis.value,
         },
       });
-    }
-    tooltipData.push({
-      label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
-        defaultMessage: 'Max anomaly score',
-      }),
-      value: cell.formattedValue,
-      color: cell.color,
-      // @ts-ignore
-      seriesIdentifier: {
-        key: cell.value,
-      },
-    });
-  }
+    } else if (values.length === 3) {
+      // Cell tooltip
+      const [xAxis, yAxis, cell] = values;
 
-  return <FormattedTooltip tooltipData={tooltipData} />;
-};
+      // Display date using same format as Kibana visualizations.
+      const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
+      tooltipData.push({ label: formattedDate } as TooltipValue);
+
+      if (fieldName !== undefined) {
+        tooltipData.push({
+          label: fieldName,
+          value: yAxis.value,
+          // @ts-ignore
+          seriesIdentifier: {
+            key: yAxis.value,
+          },
+        });
+      }
+      tooltipData.push({
+        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+          defaultMessage: 'Max anomaly score',
+        }),
+        value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
+        color: cell.color,
+        // @ts-ignore
+        seriesIdentifier: {
+          key: cell.value,
+        },
+      });
+    }
+
+    return <FormattedTooltip tooltipData={tooltipData} />;
+  };
 
 export interface SwimlaneProps {
   filterActive?: boolean;
-  maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
+  showLegend?: boolean;
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
   swimlaneType: SwimlaneType;
   selection?: AppStateSelectedCells;
-  onCellsSelection: (payload?: AppStateSelectedCells) => void;
+  onCellsSelection?: (payload?: AppStateSelectedCells) => void;
   'data-test-subj'?: string;
   onResize: (width: number) => void;
   fromPage?: number;
@@ -145,6 +158,7 @@ export interface SwimlaneProps {
    * Enables/disables timeline on the X-axis.
    */
   showTimeline?: boolean;
+  showYAxis?: boolean;
 }
 
 /**
@@ -166,13 +180,15 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   selection,
   onCellsSelection,
   timeBuckets,
-  maskAll,
   showTimeline = true,
+  showYAxis = true,
+  showLegend = true,
   'data-test-subj': dataTestSubj,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const isDarkTheme = !!useUiSettings().get('theme:darkMode');
+  const { euiTheme } = useCurrentEuiTheme();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -232,8 +248,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (true ? Y_AXIS_HEIGHT : 0);
-  }, [isLoading, rowsCount, showTimeline]);
+        rowsCount * CELL_HEIGHT +
+          (showLegend ? LEGEND_HEIGHT : 0) +
+          (showYAxis ? Y_AXIS_HEIGHT : 0);
+  }, [isLoading, rowsCount]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -257,68 +275,61 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
   }, [selection, swimlaneData, swimlaneType]);
 
-  const swimLaneConfig: HeatmapSpec['config'] = useMemo(() => {
+  const showBrush = !!onCellsSelection;
+
+  const themeOverrides = useMemo<PartialTheme>(() => {
     if (!showSwimlane) return {};
 
-    return {
-      onBrushEnd: (e: HeatmapBrushEvent) => {
-        onCellsSelection({
-          lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000) as [number, number],
-          type: swimlaneType,
-          viewByFieldName: swimlaneData.fieldName,
-        });
-      },
-      grid: {
-        cellHeight: {
-          min: CELL_HEIGHT,
-          max: CELL_HEIGHT,
+    const theme: PartialTheme = {
+      heatmap: {
+        grid: {
+          cellHeight: {
+            min: CELL_HEIGHT,
+            max: CELL_HEIGHT,
+          },
+          stroke: {
+            width: 1,
+            color: euiTheme.euiBorderColor,
+          },
         },
-        stroke: {
-          width: 1,
-          color: '#D3DAE6',
+        cell: {
+          maxWidth: 'fill',
+          maxHeight: 'fill',
+          label: {
+            visible: false,
+          },
+          border: {
+            stroke: euiTheme.euiBorderColor,
+            strokeWidth: 0,
+          },
         },
-      },
-      cell: {
-        maxWidth: 'fill',
-        maxHeight: 'fill',
-        label: {
-          visible: false,
+        yAxisLabel: {
+          visible: showYAxis,
+          width: Y_AXIS_LABEL_WIDTH,
+          textColor: euiTheme.euiTextSubduedColor,
+          padding: Y_AXIS_LABEL_PADDING,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
         },
-        border: {
-          stroke: '#D3DAE6',
-          strokeWidth: 0,
+        xAxisLabel: {
+          visible: showTimeline,
+          textColor: euiTheme.euiTextSubduedColor,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
+          // Required to calculate where the swimlane ends
+          width: X_AXIS_RIGHT_OVERFLOW * 2,
         },
-      },
-      yAxisLabel: {
-        visible: true,
-        width: 170,
-        // eui color subdued
-        fill: `#6a717d`,
-        padding: 8,
-        formatter: (laneLabel: string) => {
-          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
+        brushMask: {
+          visible: showBrush,
+          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
         },
-      },
-      xAxisLabel: {
-        visible: true,
-        // eui color subdued
-        fill: `#98A2B3`,
-        formatter: (v: number) => {
-          timeBuckets.setInterval(`${swimlaneData.interval}s`);
-          const scaledDateFormat = timeBuckets.getScaledDateFormat();
-          return moment(v).format(scaledDateFormat);
+        brushArea: {
+          visible: showBrush,
+          stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
         },
+        ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       },
-      brushMask: {
-        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-      },
-      brushArea: {
-        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-      },
-      maxLegendHeight: LEGEND_HEIGHT,
-      timeZone: 'UTC',
     };
+
+    return theme;
   }, [
     showSwimlane,
     swimlaneType,
@@ -328,9 +339,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     onCellsSelection,
   ]);
 
-  // @ts-ignore
-  const onElementClick: ElementClickListener = useCallback(
+  const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
+      if (!onCellsSelection) return;
+
       const cell = e[0][0];
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
@@ -342,7 +354,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onCellsSelection(payload);
     },
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
-  );
+  ) as ElementClickListener;
 
   const tooltipOptions: TooltipSettings = useMemo(
     () => ({
@@ -354,6 +366,33 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData?.fieldName]
   );
 
+  const xDomain = useMemo(
+    () =>
+      swimlaneData
+        ? {
+            min: swimlaneData.earliest * 1000,
+            max: swimlaneData.latest * 1000,
+            minInterval: swimlaneData.interval * 1000,
+          }
+        : undefined,
+    [swimlaneData]
+  );
+
+  const onBrushEnd = (e: HeatmapBrushEvent) => {
+    if (!e.cells.length || !showBrush) return;
+
+    if (typeof onCellsSelection === 'function') {
+      onCellsSelection({
+        lanes: e.y as string[],
+        times: e.x!.map((v) => (v as number) / 1000) as [number, number],
+        type: swimlaneType,
+        viewByFieldName: swimlaneData.fieldName,
+      });
+    }
+  };
+
+  const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -361,7 +400,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', overflow: 'hidden' }}
+          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
           data-test-subj={dataTestSubj}
         >
@@ -369,80 +408,112 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             style={{
               width: '100%',
               overflowY: 'auto',
+              overflowX: 'hidden',
             }}
             grow={false}
           >
-            <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
-              {showSwimlane && !isLoading && (
-                <Chart className={'mlSwimLaneContainer'}>
-                  <Settings
-                    onElementClick={onElementClick}
-                    showLegend
-                    legendPosition={Position.Top}
-                    xDomain={{
-                      min: swimlaneData.earliest * 1000,
-                      max: swimlaneData.latest * 1000,
-                      minInterval: swimlaneData.interval * 1000,
-                    }}
-                    tooltip={tooltipOptions}
-                    debugState={window._echDebugStateFlag ?? false}
-                  />
-                  <Heatmap
-                    id={id}
-                    colorScale={ScaleType.Threshold}
-                    ranges={[
-                      ANOMALY_THRESHOLD.LOW,
-                      ANOMALY_THRESHOLD.WARNING,
-                      ANOMALY_THRESHOLD.MINOR,
-                      ANOMALY_THRESHOLD.MAJOR,
-                      ANOMALY_THRESHOLD.CRITICAL,
-                    ]}
-                    colors={[
-                      SEVERITY_COLORS.BLANK,
-                      SEVERITY_COLORS.LOW,
-                      SEVERITY_COLORS.WARNING,
-                      SEVERITY_COLORS.MINOR,
-                      SEVERITY_COLORS.MAJOR,
-                      SEVERITY_COLORS.CRITICAL,
-                    ]}
-                    data={swimLanePoints}
-                    xAccessor="time"
-                    yAccessor="laneLabel"
-                    valueAccessor="value"
-                    highlightedData={highlightedData}
-                    valueFormatter={getFormattedSeverityScore}
-                    xScaleType={ScaleType.Time}
-                    ySortPredicate="dataIndex"
-                    config={swimLaneConfig}
-                  />
-                </Chart>
-              )}
-
-              {isLoading && (
-                <EuiText
-                  textAlign={'center'}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%,-50%)',
-                  }}
+            <>
+              <div>
+                <div
+                  style={{ height: `${containerHeight}px`, position: 'relative' }}
+                  hidden={noSwimLaneData}
                 >
-                  <EuiLoadingChart
-                    size="xl"
-                    mono={true}
-                    data-test-subj="mlSwimLaneLoadingIndicator"
-                  />
-                </EuiText>
-              )}
-              {!isLoading && !showSwimlane && (
-                <EuiEmptyPrompt
-                  titleSize="xs"
-                  style={{ padding: 0 }}
-                  title={<h2>{noDataWarning}</h2>}
-                />
-              )}
-            </div>
+                  {showSwimlane && !isLoading && (
+                    <Chart className={'mlSwimLaneContainer'}>
+                      <Settings
+                        theme={themeOverrides}
+                        onElementClick={onElementClick}
+                        showLegend={showLegend}
+                        legendPosition={Position.Top}
+                        xDomain={xDomain}
+                        tooltip={tooltipOptions}
+                        debugState={window._echDebugStateFlag ?? false}
+                        onBrushEnd={onBrushEnd as BrushEndListener}
+                      />
+
+                      <Heatmap
+                        id={id}
+                        timeZone="UTC"
+                        colorScale={{
+                          type: 'bands',
+                          bands: [
+                            {
+                              start: ANOMALY_THRESHOLD.LOW,
+                              end: ANOMALY_THRESHOLD.WARNING,
+                              color: SEVERITY_COLORS.LOW,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.WARNING,
+                              end: ANOMALY_THRESHOLD.MINOR,
+                              color: SEVERITY_COLORS.WARNING,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.MINOR,
+                              end: ANOMALY_THRESHOLD.MAJOR,
+                              color: SEVERITY_COLORS.MINOR,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.MAJOR,
+                              end: ANOMALY_THRESHOLD.CRITICAL,
+                              color: SEVERITY_COLORS.MAJOR,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              end: Infinity,
+                              color: SEVERITY_COLORS.CRITICAL,
+                            },
+                          ],
+                        }}
+                        data={swimLanePoints}
+                        xAccessor="time"
+                        yAccessor="laneLabel"
+                        valueAccessor="value"
+                        highlightedData={highlightedData}
+                        valueFormatter={getFormattedSeverityScore}
+                        xScale={{
+                          type: ScaleType.Time,
+                          interval: {
+                            type: 'fixed',
+                            unit: 'ms',
+                            // the xDomain.minInterval should always be available at rendering time
+                            // adding a fallback to 1m bucket
+                            value: xDomain?.minInterval ?? 1000 * 60,
+                          },
+                        }}
+                        ySortPredicate="dataIndex"
+                        yAxisLabelFormatter={(laneLabel) => {
+                          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : String(laneLabel);
+                        }}
+                        xAxisLabelFormatter={(v) => {
+                          timeBuckets.setInterval(`${swimlaneData.interval}s`);
+                          const scaledDateFormat = timeBuckets.getScaledDateFormat();
+                          return moment(v).format(scaledDateFormat);
+                        }}
+                      />
+                    </Chart>
+                  )}
+
+                  {isLoading && (
+                    <EuiText
+                      textAlign={'center'}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%,-50%)',
+                      }}
+                    >
+                      <EuiLoadingChart
+                        size="xl"
+                        mono={true}
+                        data-test-subj="mlSwimLaneLoadingIndicator"
+                      />
+                    </EuiText>
+                  )}
+                </div>
+                {noSwimLaneData ? <>{noDataWarning}</> : null}
+              </div>
+            </>
           </EuiFlexItem>
 
           {isPaginationVisible && (

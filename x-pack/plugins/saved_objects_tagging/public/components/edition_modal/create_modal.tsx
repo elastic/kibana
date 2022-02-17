@@ -44,12 +44,13 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
   );
 
   const setField = useCallback(
-    <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
-      setTagAttributes((current) => ({
-        ...current,
-        [field]: value,
-      }));
-    },
+    <T extends keyof TagAttributes>(field: T) =>
+      (value: TagAttributes[T]) => {
+        setTagAttributes((current) => ({
+          ...current,
+          [field]: value,
+        }));
+      },
     []
   );
 

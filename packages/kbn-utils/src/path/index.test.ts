@@ -7,21 +7,42 @@
  */
 
 import { accessSync, constants } from 'fs';
-import { getConfigPath, getDataPath, getConfigDirectory } from './';
+import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from './';
+import { REPO_ROOT } from '../repo_root';
+
+expect.addSnapshotSerializer(
+  ((rootPath: string = REPO_ROOT, replacement = '<absolute path>') => {
+    return {
+      test: (value: any) => typeof value === 'string' && value.startsWith(rootPath),
+      serialize: (value: string) => value.replace(rootPath, replacement).replace(/\\/g, '/'),
+    };
+  })()
+);
 
 describe('Default path finder', () => {
-  it('should find a kibana.yml', () => {
-    const configPath = getConfigPath();
-    expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
+  it('should expose a path to the config directory', () => {
+    expect(getConfigDirectory()).toMatchInlineSnapshot('<absolute path>/config');
   });
 
-  it('should find a data directory', () => {
-    const dataPath = getDataPath();
-    expect(() => accessSync(dataPath, constants.R_OK)).not.toThrow();
+  it('should expose a path to the kibana.yml', () => {
+    expect(getConfigPath()).toMatchInlineSnapshot('<absolute path>/config/kibana.yml');
+  });
+
+  it('should expose a path to the data directory', () => {
+    expect(getDataPath()).toMatchInlineSnapshot('<absolute path>/data');
+  });
+
+  it('should expose a path to the logs directory', () => {
+    expect(getLogsPath()).toMatchInlineSnapshot('<absolute path>/logs');
   });
 
   it('should find a config directory', () => {
     const configDirectory = getConfigDirectory();
     expect(() => accessSync(configDirectory, constants.R_OK)).not.toThrow();
+  });
+
+  it('should find a kibana.yml', () => {
+    const configPath = getConfigPath();
+    expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
   });
 });

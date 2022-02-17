@@ -6,8 +6,14 @@
  */
 
 import { FrameworkRequest } from '../../../framework';
-import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../../../graphql/types';
-import { SavedNote, NoteSavedObject } from '../../../../../common/types/timeline/note';
+import {
+  SavedNote,
+  NoteSavedObject,
+  PageInfoNote,
+  SortNote,
+  ResponseNotes,
+  ResponseNote,
+} from '../../../../../common/types/timeline/note';
 
 export * from './saved_object';
 export interface Notes {
@@ -22,13 +28,17 @@ export interface Notes {
     search: string | null,
     sort: SortNote | null
   ) => Promise<ResponseNotes>;
-  persistNote: (
-    request: FrameworkRequest,
-    noteId: string | null,
-    version: string | null,
-    note: SavedNote,
-    overrideOwner: boolean
-  ) => Promise<ResponseNote>;
+  persistNote: ({
+    request,
+    noteId,
+    note,
+    overrideOwner,
+  }: {
+    request: FrameworkRequest;
+    noteId: string | null;
+    note: SavedNote;
+    overrideOwner: boolean;
+  }) => Promise<ResponseNote>;
   convertSavedObjectToSavedNote: (
     savedObject: unknown,
     timelineVersion?: string | undefined | null

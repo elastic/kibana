@@ -8,22 +8,15 @@
 import React, { useState } from 'react';
 
 import { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/types';
-import { FilterMode as RecentCasesFilterMode } from '../recent_cases/types';
 
 import { Sidebar } from './sidebar';
 
 export const StatefulSidebar = React.memo(() => {
-  const [recentTimelinesFilterBy, setRecentTimelinesFilterBy] = useState<RecentTimelinesFilterMode>(
-    'favorites'
-  );
-  const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
-    'recentlyCreated'
-  );
+  const [recentTimelinesFilterBy, setRecentTimelinesFilterBy] =
+    useState<RecentTimelinesFilterMode>('favorites');
 
   return (
     <Sidebar
-      recentCasesFilterBy={recentCasesFilterBy}
-      setRecentCasesFilterBy={setRecentCasesFilterBy}
       recentTimelinesFilterBy={recentTimelinesFilterBy}
       setRecentTimelinesFilterBy={setRecentTimelinesFilterBy}
     />

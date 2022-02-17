@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
+import { cacheDataViewsContract, loadSavedSearches } from '../util/index_utils';
 import { checkFullLicense } from '../license';
 import { checkGetJobsCapabilitiesResolver } from '../capabilities/check_capabilities';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
 
-import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 export interface Resolvers {
   [name: string]: () => Promise<any>;
@@ -21,18 +21,18 @@ export interface ResolverResults {
 }
 
 interface BasicResolverDependencies {
-  indexPatterns: IndexPatternsContract;
+  dataViewsContract: DataViewsContract;
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const basicResolvers = ({
-  indexPatterns,
+  dataViewsContract,
   redirectToMlAccessDeniedPage,
 }: BasicResolverDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  loadIndexPatterns: () => loadIndexPatterns(indexPatterns),
+  cacheDataViewsContract: () => cacheDataViewsContract(dataViewsContract),
   checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   loadSavedSearches,
 });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import semver from 'semver';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
+import { testUsers } from '../test_users';
 
 const makeSnapshotVersion = (version: string) => {
   return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
@@ -22,18 +23,22 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet upgrade', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+    });
+    afterEach(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     describe('one agent', () => {
@@ -54,7 +59,6 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             version: kibanaVersion,
-            source_uri: 'http://path/to/download',
           })
           .expect(200);
 
@@ -157,14 +161,28 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             version: higherVersion,
+          })
+          .expect(400);
+      });
+      it('should respond 400 if trying to upgrade with source_uri set', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        const res = await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
             source_uri: 'http://path/to/download',
           })
           .expect(400);
+
+        expect(res.body.message).to.eql(
+          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
+        );
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
-          force: true,
+          revoke: true,
         });
         await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
@@ -207,8 +225,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.equal('agent agent1 is not upgradeable');
       });
 
-      it('enrolled in a managed policy should respond 400 to upgrade and not update the agent SOs', async () => {
-        // update enrolled policy to managed
+      it('enrolled in a hosted agent policy should respond 400 to upgrade and not update the agent SOs', async () => {
+        // update enrolled policy to hosted
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
           namespace: 'default',
@@ -226,16 +244,40 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        // attempt to upgrade agent in managed policy
+        // attempt to upgrade agent in hosted agent policy
         const { body } = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({ version: kibanaVersion })
           .expect(400);
-        expect(body.message).to.contain('Cannot upgrade agent agent1 in managed policy policy1');
+        expect(body.message).to.contain(
+          'Cannot upgrade agent agent1 in hosted agent policy policy1'
+        );
 
         const agent1data = await supertest.get(`/api/fleet/agents/agent1`);
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('should respond 403 if user lacks fleet all permissions', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertestWithoutAuth
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .send({
+            version: kibanaVersion,
+          })
+          .expect(403);
       });
     });
 
@@ -328,7 +370,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should not upgrade an unenrolling agent during bulk_upgrade', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
-          force: true,
+          revoke: true,
         });
         await es.update({
           id: 'agent1',
@@ -540,12 +582,49 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('enrolled in a managed policy bulk upgrade should respond with 200 and object of results. Should not update the managed agent SOs', async () => {
-        // move agent2 to policy2 to keep it unmanaged
+      it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        const res = await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent1', 'agent2'],
+            version: kibanaVersion,
+            source_uri: 'http://path/to/download',
+            force: true,
+          })
+          .expect(400);
+        expect(res.body.message).to.eql(
+          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
+        );
+      });
+
+      it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
+        // move agent2 to policy2 to keep it regular
         await supertest.put(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
           policy_id: 'policy2',
         });
-        // update enrolled policy to managed
+        // update enrolled policy to hosted
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
           namespace: 'default',
@@ -577,7 +656,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        // attempt to upgrade agent in managed policy
+        // attempt to upgrade agent in hosted agent policy
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
@@ -588,7 +667,11 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.eql({
-          agent1: { success: false, error: 'Cannot upgrade agent in managed policy policy1' },
+          agent1: {
+            success: false,
+            error:
+              'Cannot upgrade agent in hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+          },
           agent2: { success: true },
         });
 
@@ -601,8 +684,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
 
-      it('enrolled in a managed policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
-        // update enrolled policy to managed
+      it('enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
+        // update enrolled policy to hosted
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
           namespace: 'default',
@@ -634,7 +717,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        // attempt to upgrade agent in managed policy
+        // attempt to upgrade agent in hosted agent policy
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')

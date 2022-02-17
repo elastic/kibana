@@ -13,7 +13,7 @@ import {
   isEscape,
   focusColumn,
   OnColumnFocused,
-} from '../../../../../../common/components/accessibility/helpers';
+} from '../../../../../../../../timelines/public';
 
 type FocusOwnership = 'not-owned' | 'owned';
 
@@ -90,12 +90,10 @@ export const useStatefulEventFocus = ({
     ]
   );
 
-  const memoizedReturn = useMemo(() => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }), [
-    focusOwnership,
-    onFocus,
-    onKeyDown,
-    onOutsideClick,
-  ]);
+  const memoizedReturn = useMemo(
+    () => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }),
+    [focusOwnership, onFocus, onKeyDown, onOutsideClick]
+  );
 
   return memoizedReturn;
 };

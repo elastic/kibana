@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Observable } from 'rxjs';
 
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory, CoreTheme } from 'kibana/public';
 import { RegisterManagementAppArgs, I18nStart } from '../types';
 
 export declare const renderApp: (
   elem: HTMLElement | null,
   I18nContext: I18nStart['Context'],
   appDependencies: {
-    isCloudEnabled?: boolean;
+    isCloudEnabled: boolean;
+    cloudBaseUrl: string;
   },
-  history: ScopedHistory
+  history: ScopedHistory,
+  theme$: Observable<CoreTheme>
 ) => ReturnType<RegisterManagementAppArgs['mount']>;

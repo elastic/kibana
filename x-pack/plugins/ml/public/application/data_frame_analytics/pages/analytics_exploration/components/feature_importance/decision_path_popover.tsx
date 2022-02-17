@@ -7,7 +7,7 @@
 
 import React, { FC, useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RegressionDecisionPath } from './decision_path_regression';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import {
@@ -58,7 +58,11 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   const docLink = docLinks.links.ml.featureImportance;
 
   if (featureImportance.length < 2) {
-    return <DecisionPathJSONViewer featureImportance={featureImportance} />;
+    return (
+      <div data-test-subj="mlDFADecisionPathJSONViewer">
+        <DecisionPathJSONViewer featureImportance={featureImportance} />
+      </div>
+    );
   }
 
   const tabs = [

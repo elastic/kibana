@@ -11,7 +11,7 @@ A type's export transform function will be executed once per user-initiated expo
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsExportTransform = <T = unknown>(context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) => SavedObject[] | Promise<SavedObject[]>;
+export declare type SavedObjectsExportTransform<T = unknown> = (context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) => SavedObject[] | Promise<SavedObject[]>;
 ```
 
 ## Remarks
@@ -45,7 +45,6 @@ export class Plugin() {
     });
   }
 }
-
 ```
 
 ## Example 2
@@ -81,6 +80,5 @@ export class Plugin() {
     });
   }
 }
-
 ```
 

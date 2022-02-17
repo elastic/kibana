@@ -9,9 +9,7 @@ import {
   hitsToGeoJson,
   geoPointToGeometry,
   geoShapeToGeometry,
-  createExtentFilter,
   roundCoordinates,
-  extractFeaturesFromFilters,
   makeESBbox,
   scaleBounds,
 } from './elasticsearch_geo_utils';
@@ -44,14 +42,24 @@ describe('hitsToGeoJson', () => {
         _id: 'doc1',
         _index: 'index1',
         fields: {
-          [geoFieldName]: '20,100',
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+          ],
         },
       },
       {
         _id: 'doc2',
         _index: 'index1',
-        _source: {
-          [geoFieldName]: '30,110',
+        fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [110, 30],
+            },
+          ],
         },
       },
     ];
@@ -75,12 +83,17 @@ describe('hitsToGeoJson', () => {
   it('Should handle documents where geoField is not populated', () => {
     const hits = [
       {
-        _source: {
-          [geoFieldName]: '20,100',
+        fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+          ],
         },
       },
       {
-        _source: {},
+        fields: {},
       },
     ];
     const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
@@ -92,10 +105,15 @@ describe('hitsToGeoJson', () => {
     const hits = [
       {
         _source: {
-          [geoFieldName]: '20,100',
           myField: 8,
         },
         fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+          ],
           myScriptedField: 10,
         },
       },
@@ -111,8 +129,17 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
-          [geoFieldName]: ['20,100', '30,110'],
+        fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+            {
+              type: 'Point',
+              coordinates: [110, 30],
+            },
+          ],
           myField: 8,
         },
       },
@@ -153,15 +180,15 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
+        fields: {
           [geoFieldName]: {
             type: 'GeometryCollection',
             geometries: [
               {
-                type: 'geometrycollection', //explicitly test coercion to proper GeoJson type value
+                type: 'geometrycollection',
                 geometries: [
                   {
-                    type: 'point', //explicitly test coercion to proper GeoJson type value
+                    type: 'Point',
                     coordinates: [0, 0],
                   },
                 ],
@@ -218,8 +245,11 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
-          [geoFieldName]: '20,100',
+        fields: {
+          [geoFieldName]: {
+            type: 'Point',
+            coordinates: [100, 20],
+          },
           myDateField: '1587156257081',
         },
       },
@@ -236,16 +266,21 @@ describe('hitsToGeoJson', () => {
     const geoFieldName = 'my.location';
     const indexPatternFlattenHit = (hit) => {
       return {
-        [geoFieldName]: _.get(hit._source, geoFieldName),
+        [geoFieldName]: _.get(hit.fields, geoFieldName),
       };
     };
 
     it('Should handle geoField being an object', () => {
       const hits = [
         {
-          _source: {
+          fields: {
             my: {
-              location: '20,100',
+              location: [
+                {
+                  type: 'Point',
+                  coordinates: [100, 20],
+                },
+              ],
             },
           },
         },
@@ -260,8 +295,13 @@ describe('hitsToGeoJson', () => {
     it('Should handle geoField containing dot in the name', () => {
       const hits = [
         {
-          _source: {
-            ['my.location']: '20,100',
+          fields: {
+            ['my.location']: [
+              {
+                type: 'Point',
+                coordinates: [100, 20],
+              },
+            ],
           },
         },
       ];
@@ -271,6 +311,36 @@ describe('hitsToGeoJson', () => {
         type: 'Point',
       });
     });
+
+    it('Should not modify results of flattenHit', () => {
+      const geoFieldName = 'location';
+      const cachedProperities = {
+        [geoFieldName]: [
+          {
+            type: 'Point',
+            coordinates: [100, 20],
+          },
+        ],
+      };
+      const cachedFlattenHit = () => {
+        return cachedProperities;
+      };
+      const hits = [
+        {
+          fields: {
+            [geoFieldName]: [
+              {
+                type: 'Point',
+                coordinates: [100, 20],
+              },
+            ],
+          },
+        },
+      ];
+      const geojson = hitsToGeoJson(hits, cachedFlattenHit, geoFieldName, 'geo_point', []);
+      expect(cachedProperities.hasOwnProperty('location')).toBe(true);
+      expect(geojson.features[0].properties).toEqual({});
+    });
   });
 });
 
@@ -278,8 +348,11 @@ describe('geoPointToGeometry', () => {
   const lat = 41.12;
   const lon = -71.34;
 
-  it('Should convert single docvalue_field', () => {
-    const value = `${lat},${lon}`;
+  it('Should convert value', () => {
+    const value = {
+      type: 'Point',
+      coordinates: [lon, lat],
+    };
     const points = [];
     geoPointToGeometry(value, points);
     expect(points.length).toBe(1);
@@ -287,10 +360,19 @@ describe('geoPointToGeometry', () => {
     expect(points[0].coordinates).toEqual([lon, lat]);
   });
 
-  it('Should convert multiple docvalue_fields', () => {
+  it('Should convert array of values', () => {
     const lat2 = 30;
     const lon2 = -60;
-    const value = [`${lat},${lon}`, `${lat2},${lon2}`];
+    const value = [
+      {
+        type: 'Point',
+        coordinates: [lon, lat],
+      },
+      {
+        type: 'Point',
+        coordinates: [lon2, lat2],
+      },
+    ];
     const points = [];
     geoPointToGeometry(value, points);
     expect(points.length).toBe(2);
@@ -300,13 +382,13 @@ describe('geoPointToGeometry', () => {
 });
 
 describe('geoShapeToGeometry', () => {
-  it('Should convert value stored as geojson', () => {
+  it('Should convert value', () => {
     const coordinates = [
       [-77.03653, 38.897676],
       [-77.009051, 38.889939],
     ];
     const value = {
-      type: 'linestring',
+      type: 'LineString',
       coordinates: coordinates,
     };
     const shapes = [];
@@ -322,7 +404,7 @@ describe('geoShapeToGeometry', () => {
       [101.0, 0.0],
     ];
     const value = {
-      type: 'envelope',
+      type: 'Envelope',
       coordinates: coordinates,
     };
     const shapes = [];
@@ -348,11 +430,11 @@ describe('geoShapeToGeometry', () => {
     const pointCoordinates = [125.6, 10.1];
     const value = [
       {
-        type: 'linestring',
+        type: 'LineString',
         coordinates: linestringCoordinates,
       },
       {
-        type: 'point',
+        type: 'Point',
         coordinates: pointCoordinates,
       },
     ];
@@ -363,116 +445,6 @@ describe('geoShapeToGeometry', () => {
     expect(shapes[0].coordinates).toEqual(linestringCoordinates);
     expect(shapes[1].type).toBe('Point');
     expect(shapes[1].coordinates).toEqual(pointCoordinates);
-  });
-
-  it('Should convert wkt shapes to geojson', () => {
-    const pointWkt = 'POINT (32 40)';
-    const linestringWkt = 'LINESTRING (50 60, 70 80)';
-
-    const shapes = [];
-    geoShapeToGeometry(pointWkt, shapes);
-    geoShapeToGeometry(linestringWkt, shapes);
-
-    expect(shapes.length).toBe(2);
-    expect(shapes[0]).toEqual({
-      coordinates: [32, 40],
-      type: 'Point',
-    });
-    expect(shapes[1]).toEqual({
-      coordinates: [
-        [50, 60],
-        [70, 80],
-      ],
-      type: 'LineString',
-    });
-  });
-});
-
-describe('createExtentFilter', () => {
-  it('should return elasticsearch geo_bounding_box filter', () => {
-    const mapExtent = {
-      maxLat: 39,
-      maxLon: -83,
-      minLat: 35,
-      minLon: -89,
-    };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [-89, 39],
-        bottom_right: [-83, 35],
-      },
-    });
-  });
-
-  it('should clamp longitudes to -180 to 180 and latitudes to -90 to 90', () => {
-    const mapExtent = {
-      maxLat: 120,
-      maxLon: 200,
-      minLat: -100,
-      minLon: -190,
-    };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [-180, 89],
-        bottom_right: [180, -89],
-      },
-    });
-  });
-
-  it('should make left longitude greater then right longitude when area crosses 180 meridian east to west', () => {
-    const mapExtent = {
-      maxLat: 39,
-      maxLon: 200,
-      minLat: 35,
-      minLon: 100,
-    };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
-    const leftLon = filter.geo_bounding_box.location.top_left[0];
-    const rightLon = filter.geo_bounding_box.location.bottom_right[0];
-    expect(leftLon).toBeGreaterThan(rightLon);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [100, 39],
-        bottom_right: [-160, 35],
-      },
-    });
-  });
-
-  it('should make left longitude greater then right longitude when area crosses 180 meridian west to east', () => {
-    const mapExtent = {
-      maxLat: 39,
-      maxLon: -100,
-      minLat: 35,
-      minLon: -200,
-    };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
-    const leftLon = filter.geo_bounding_box.location.top_left[0];
-    const rightLon = filter.geo_bounding_box.location.bottom_right[0];
-    expect(leftLon).toBeGreaterThan(rightLon);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [160, 39],
-        bottom_right: [-100, 35],
-      },
-    });
-  });
-
-  it('should clamp longitudes to -180 to 180 when longitude wraps globe', () => {
-    const mapExtent = {
-      maxLat: 39,
-      maxLon: 209,
-      minLat: 35,
-      minLon: -191,
-    };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
-    expect(filter.geo_bounding_box).toEqual({
-      location: {
-        top_left: [-180, 39],
-        bottom_right: [180, 35],
-      },
-    });
   });
 });
 
@@ -489,134 +461,6 @@ describe('roundCoordinates', () => {
       [-105.3062, 40.23193],
       [-105.3062, 30.64713],
     ]);
-  });
-});
-
-describe('extractFeaturesFromFilters', () => {
-  it('should ignore non-spatial filers', () => {
-    const phraseFilter = {
-      meta: {
-        alias: null,
-        disabled: false,
-        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        key: 'machine.os',
-        negate: false,
-        params: {
-          query: 'ios',
-        },
-        type: 'phrase',
-      },
-      query: {
-        match_phrase: {
-          'machine.os': 'ios',
-        },
-      },
-    };
-    expect(extractFeaturesFromFilters([phraseFilter])).toEqual([]);
-  });
-
-  it('should convert geo_distance filter to feature', () => {
-    const spatialFilter = {
-      geo_distance: {
-        distance: '1096km',
-        'geo.coordinates': [-89.87125, 53.49454],
-      },
-      meta: {
-        alias: 'geo.coordinates within 1096km of -89.87125,53.49454',
-        disabled: false,
-        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        key: 'geo.coordinates',
-        negate: false,
-        type: 'spatial_filter',
-        value: '',
-      },
-    };
-
-    const features = extractFeaturesFromFilters([spatialFilter]);
-    expect(features[0].geometry.coordinates[0][0]).toEqual([-89.87125, 63.35109118642093]);
-    expect(features[0].properties).toEqual({
-      filter: 'geo.coordinates within 1096km of -89.87125,53.49454',
-    });
-  });
-
-  it('should convert geo_shape filter to feature', () => {
-    const spatialFilter = {
-      geo_shape: {
-        'geo.coordinates': {
-          relation: 'INTERSECTS',
-          shape: {
-            coordinates: [
-              [
-                [-101.21639, 48.1413],
-                [-101.21639, 41.84905],
-                [-90.95149, 41.84905],
-                [-90.95149, 48.1413],
-                [-101.21639, 48.1413],
-              ],
-            ],
-            type: 'Polygon',
-          },
-        },
-        ignore_unmapped: true,
-      },
-      meta: {
-        alias: 'geo.coordinates in bounds',
-        disabled: false,
-        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        key: 'geo.coordinates',
-        negate: false,
-        type: 'spatial_filter',
-        value: '',
-      },
-    };
-
-    expect(extractFeaturesFromFilters([spatialFilter])).toEqual([
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [-101.21639, 48.1413],
-              [-101.21639, 41.84905],
-              [-90.95149, 41.84905],
-              [-90.95149, 48.1413],
-              [-101.21639, 48.1413],
-            ],
-          ],
-        },
-        properties: {
-          filter: 'geo.coordinates in bounds',
-        },
-      },
-    ]);
-  });
-
-  it('should ignore geo_shape filter with pre-index shape', () => {
-    const spatialFilter = {
-      geo_shape: {
-        'geo.coordinates': {
-          indexed_shape: {
-            id: 's5gldXEBkTB2HMwpC8y0',
-            index: 'world_countries_v1',
-            path: 'coordinates',
-          },
-          relation: 'INTERSECTS',
-        },
-        ignore_unmapped: true,
-      },
-      meta: {
-        alias: 'geo.coordinates in multipolygon',
-        disabled: false,
-        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        key: 'geo.coordinates',
-        negate: false,
-        type: 'spatial_filter',
-        value: '',
-      },
-    };
-
-    expect(extractFeaturesFromFilters([spatialFilter])).toEqual([]);
   });
 });
 

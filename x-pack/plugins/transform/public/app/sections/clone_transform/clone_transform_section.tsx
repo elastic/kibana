@@ -9,22 +9,18 @@ import React, { useEffect, useState, FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
-
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
-import { TransformPivotConfig } from '../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../common/types/transform';
 
 import { isHttpFetchError } from '../../common/request';
 import { useApi } from '../../hooks/use_api';
@@ -35,8 +31,10 @@ import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../se
 import { PrivilegesWrapper } from '../../lib/authorization';
 
 import { Wizard } from '../create_transform/components/wizard';
+import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;
+
 export const CloneTransformSection: FC<Props> = ({ match, location }) => {
   const { indexPatternId }: Record<string, any> = parse(location.search, {
     sort: false,
@@ -53,7 +51,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
 
   const transformId = match.params.transformId;
 
-  const [transformConfig, setTransformConfig] = useState<TransformPivotConfig>();
+  const [transformConfig, setTransformConfig] = useState<TransformConfigUnion>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const { error: searchItemsError, searchItems, setSavedObjectId } = useSearchItems(undefined);
@@ -78,14 +76,14 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
       if (indexPatternId === undefined) {
         throw new Error(
           i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
-            defaultMessage: 'Could not fetch the Kibana index pattern ID.',
+            defaultMessage: 'Could not fetch the Kibana data view ID.',
           })
         );
       }
 
       setSavedObjectId(indexPatternId);
 
-      setTransformConfig(transformConfigs.transforms[0]);
+      setTransformConfig(overrideTransformForCloning(transformConfigs.transforms[0]));
       setErrorMessage(undefined);
       setIsInitialized(true);
     } catch (e) {
@@ -105,37 +103,38 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const docsLink = (
+    <EuiButtonEmpty
+      href={esTransform}
+      target="_blank"
+      iconType="help"
+      data-test-subj="documentationLink"
+    >
+      <FormattedMessage
+        id="xpack.transform.transformsWizard.transformDocsLinkText"
+        defaultMessage="Transform docs"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <EuiPageContent data-test-subj="transformPageCloneTransform">
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1>
-                <FormattedMessage
-                  id="xpack.transform.transformsWizard.cloneTransformTitle"
-                  defaultMessage="Clone transform"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={esTransform}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.transform.transformsWizard.transformDocsLinkText"
-                  defaultMessage="Transform docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiPageContentBody>
-          <EuiSpacer size="l" />
-          {typeof errorMessage !== 'undefined' && (
+      <EuiPageHeader
+        pageTitle={
+          <FormattedMessage
+            id="xpack.transform.transformsWizard.cloneTransformTitle"
+            defaultMessage="Clone transform"
+          />
+        }
+        rightSideItems={[docsLink]}
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiPageContentBody data-test-subj="transformPageCloneTransform">
+        {typeof errorMessage !== 'undefined' && (
+          <>
             <EuiCallOut
               title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
                 defaultMessage: 'An error occurred getting the transform configuration.',
@@ -145,12 +144,13 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
             >
               <pre>{JSON.stringify(errorMessage)}</pre>
             </EuiCallOut>
-          )}
-          {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
-            <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
-          )}
-        </EuiPageContentBody>
-      </EuiPageContent>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
+          <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
+        )}
+      </EuiPageContentBody>
     </PrivilegesWrapper>
   );
 };

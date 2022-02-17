@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { takeLatest, put, call } from 'redux-saga/effects';
+import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { fetchEffectFactory } from './fetch_effect';
@@ -25,7 +25,7 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { kibanaService } from '../kibana_service';
 
 export function* fetchDynamicSettingsEffect() {
-  yield takeLatest(
+  yield takeLeading(
     String(getDynamicSettings),
     fetchEffectFactory(getDynamicSettingsAPI, getDynamicSettingsSuccess, getDynamicSettingsFail)
   );

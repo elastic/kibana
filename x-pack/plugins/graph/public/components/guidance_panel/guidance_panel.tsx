@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
 import { IDataPluginServices } from 'src/plugins/data/public';
 import {
@@ -50,6 +50,7 @@ function ListItem({
   children: ReactNode;
 }) {
   return (
+    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       className={classNames('gphGuidancePanel__item', {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -86,8 +87,8 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   const kibana = useKibana<IDataPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings, chrome, application } = services;
-  if (!overlays || !chrome || !application) return null;
+  const { savedObjects, uiSettings, application } = services;
+  if (!overlays || !application) return null;
 
   const onOpenDatasourcePicker = () => {
     openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected);
@@ -149,8 +150,9 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   );
 
   if (noIndexPatterns) {
-    const managementUrl = chrome.navLinks.get('kibana:stack_management')!.url;
-    const indexPatternUrl = `${managementUrl}/kibana/indexPatterns`;
+    const indexPatternUrl = application.getUrlForApp('management', {
+      path: '/kibana/indexPatterns',
+    });
     const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
     content = (
       <EuiPanel paddingSize="none">
@@ -172,13 +174,13 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
+              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create a data view for your Elasticsearch indices."
               values={{
                 managementIndexPatternsLink: (
                   <a href={indexPatternUrl}>
                     <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
+                      id="xpack.graph.noDataSourceNotificationMessageText.managementDataViewLinkText"
+                      defaultMessage="Management &gt; Data views"
                     />
                   </a>
                 ),

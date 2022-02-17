@@ -14,6 +14,8 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { HeaderActions } from '../body/actions/header_actions';
+import { CellValueElementProps } from '../cell_rendering';
 import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -21,19 +23,22 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { TimelineModel } from '../../../store/timeline/model';
-import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  RowRenderer,
+  TimelineTabs,
+  ToggleDetailPanel,
+} from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
+import { getDefaultControlColumn } from '../body/control_columns';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -60,11 +65,7 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   }
 `;
 
-const ExitFullScreenFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    ${({ theme }) => `margin: ${theme.eui.euiSizeS} 0 0 ${theme.eui.euiSizeS};`}
-  }
-
+const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
 
@@ -87,6 +88,8 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
@@ -99,6 +102,8 @@ interface PinnedFilter {
 
 export type Props = OwnProps & PropsFromRedux;
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const PinnedTabContentComponent: React.FC<Props> = ({
   columns,
   timelineId,
@@ -106,19 +111,21 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   pinnedEventIds,
   onEventClosed,
+  renderCellValue,
+  rowRenderers,
   showExpandedDetails,
   sort,
 }) => {
-  const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields,
+    docValueFields,
+    dataViewId,
+    loading: loadingSourcerer,
+    runtimeMappings,
+    selectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const ACTION_BUTTON_COUNT = 5;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -175,37 +182,48 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [
-    isQueryLoading,
-    { events, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: '',
-    id: `pinned-${timelineId}`,
-    indexNames: existingIndexNames,
-    fields: timelineQueryFields,
-    limit: itemsPerPage,
-    filterQuery,
-    skip: filterQuery === '',
-    startDate: '',
-    sort: timelineQuerySortField,
-    timerangeKind: undefined,
-  });
+  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: '',
+      id: `pinned-${timelineId}`,
+      indexNames: selectedPatterns,
+      dataViewId,
+      fields: timelineQueryFields,
+      limit: itemsPerPage,
+      filterQuery,
+      runtimeMappings,
+      skip: filterQuery === '',
+      startDate: '',
+      sort: timelineQuerySortField,
+      timerangeKind: undefined,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    []
+  );
+
   return (
     <>
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
-        {timelineFullScreen && setTimelineFullScreen != null && (
-          <ExitFullScreenFlexItem grow={false}>
-            <ExitFullScreen fullScreen={timelineFullScreen} setFullScreen={setTimelineFullScreen} />
-          </ExitFullScreenFlexItem>
-        )}
-
         <ScrollableFlexItem grow={2}>
+          {timelineFullScreen && setTimelineFullScreen != null && (
+            <ExitFullScreenContainer>
+              <ExitFullScreen
+                fullScreen={timelineFullScreen}
+                setFullScreen={setTimelineFullScreen}
+              />
+            </ExitFullScreenContainer>
+          )}
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
@@ -217,12 +235,16 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 data={events}
                 id={timelineId}
                 refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
                 sort={sort}
                 tabType={TimelineTabs.pinned}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter
@@ -254,6 +276,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
               />
@@ -269,14 +292,8 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const {
-      columns,
-      expandedDetail,
-      itemsPerPage,
-      itemsPerPageOptions,
-      pinnedEventIds,
-      sort,
-    } = timeline;
+    const { columns, expandedDetail, itemsPerPage, itemsPerPageOptions, pinnedEventIds, sort } =
+      timeline;
 
     return {
       columns,

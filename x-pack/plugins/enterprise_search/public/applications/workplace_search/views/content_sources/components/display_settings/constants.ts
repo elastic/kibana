@@ -7,12 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LEAVE_UNASSIGNED_FIELD = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.leaveUnassigned.field',
-  {
-    defaultMessage: 'Leave unassigned',
-  }
-);
+export const LEAVE_UNASSIGNED_FIELD = '';
 
 export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.success.message',
@@ -82,6 +77,55 @@ export const TITLE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.title.label',
   {
     defaultMessage: 'Title',
+  }
+);
+
+export const URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.url.label',
+  {
+    defaultMessage: 'URL',
+  }
+);
+
+export const COLOR_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.color.label',
+  {
+    defaultMessage: 'Color',
+  }
+);
+
+export const TYPE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.type.label',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const MEDIA_TYPE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.mediaType.label',
+  {
+    defaultMessage: 'Media Type',
+  }
+);
+
+export const CREATED_BY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.createdBy.label',
+  {
+    defaultMessage: 'Created By',
+  }
+);
+
+export const UPDATED_BY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.updatedBy.label',
+  {
+    defaultMessage: 'Updated By',
+  }
+);
+
+export const OPTIONAL_AREA_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.optionalArea.text',
+  {
+    defaultMessage: 'This area is optional',
   }
 );
 

@@ -21,6 +21,7 @@ describe('interpreter/functions#timerange', () => {
     context = {
       getSearchContext: () => ({}),
       getSearchSessionId: () => undefined,
+      getExecutionContext: () => undefined,
       types: {},
       variables: {},
       abortSignal: {} as any,

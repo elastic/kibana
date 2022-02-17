@@ -32,8 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('legacy urls', function describeIndexTests() {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'animals']);
-      await esArchiver.load('dashboard/current/kibana');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');

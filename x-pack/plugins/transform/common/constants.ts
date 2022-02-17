@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { LicenseType } from '../../licensing/common/types';
+import { TransformHealthTests } from './types/alerting';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
@@ -42,9 +43,9 @@ export const API_BASE_PATH = '/api/transform/';
 // In the UI additional privileges are required:
 // - kibana_admin (builtin)
 // - dest index: monitor (applied to df-*)
-// - cluster: monitor
+// - cluster: monitor, read_pipeline
 //
-// Note that users with kibana_admin can see all Kibana index patterns and saved searches
+// Note that users with kibana_admin can see all Kibana data views and saved searches
 // in the source selection modal when creating a transform, but the wizard will trigger
 // error callouts when there are no sufficient privileges to read the actual source indices.
 
@@ -54,10 +55,14 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/delete',
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
+  'cluster:admin/transform/reset',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',
 ];
+
+// Minimum privileges required to return transform node count
+export const NODES_INFO_PRIVILEGES = ['cluster:monitor/transform/get'];
 
 // Equivalent of capabilities.canGetTransform
 export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
@@ -65,7 +70,7 @@ export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/stats/get',
 ];
 
-// Equivalent of capabilities.canGetTransform
+// Equivalent of capabilities.canCreateTransform
 export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/get',
   'cluster.cluster:monitor/transform/stats/get',
@@ -77,7 +82,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -85,6 +90,7 @@ export const TRANSFORM_STATE = {
   STARTED: 'started',
   STOPPED: 'stopped',
   STOPPING: 'stopping',
+  WAITING: 'waiting',
 } as const;
 
 const transformStates = Object.values(TRANSFORM_STATE);
@@ -104,3 +110,26 @@ export const TRANSFORM_FUNCTION = {
 } as const;
 
 export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];
+
+export const TRANSFORM_RULE_TYPE = {
+  TRANSFORM_HEALTH: 'transform_health',
+} as const;
+
+export const ALL_TRANSFORMS_SELECTION = '*';
+
+export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
+  TransformHealthTests,
+  { name: string; description: string }
+> = {
+  notStarted: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedCheckName', {
+      defaultMessage: 'Transform is not started',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.notStartedCheckDescription',
+      {
+        defaultMessage: 'Get alerts when the transform is not started or is not indexing data.',
+      }
+    ),
+  },
+};

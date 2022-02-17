@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with single metric job', function () {
       before(async () => {
-        await esArchiver.loadIfNeeded('ml/farequote');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
         await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       });
 
       it('opens a job from job list link', async () => {
@@ -63,7 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        await esArchiver.loadIfNeeded('ml/ecommerce');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
         await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
         await ml.testResources.setKibanaTimeZoneToUTC();
         await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);
@@ -142,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
       });
 
       it('opens a job from job list link', async () => {
@@ -150,7 +151,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobConfig.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);

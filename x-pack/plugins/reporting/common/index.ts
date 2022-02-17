@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { LayoutSelectorDictionary } from './types';
-
-export * as constants from './constants';
-export { CancellationToken } from './cancellation_token';
-export { Poller } from './poller';
-
-export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
-  screenshot: '[data-shared-items-container]',
-  renderComplete: '[data-shared-item]',
-  itemsCountAttribute: 'data-shared-items-count',
-  timefilterDurationAttribute: 'data-shared-timefilter-duration',
-});
+/**
+ * Common types that are documented in the Public API
+ */
+export type {
+  BaseParams,
+  BaseParamsV2,
+  BasePayload,
+  BasePayloadV2,
+  JobAppParamsPDF,
+  JobAppParamsPDFV2,
+  LocatorParams,
+} from './types';

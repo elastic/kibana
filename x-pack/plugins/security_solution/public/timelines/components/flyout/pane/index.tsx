@@ -5,31 +5,45 @@
  * 2.0.
  */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { StatefulTimeline } from '../../timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
+import { defaultRowRenderers } from '../../timeline/body/renderers';
+import { DefaultCellRenderer } from '../../timeline/cell_rendering/default_cell_renderer';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
+  visible?: boolean;
 }
 
-const EuiFlyoutContainer = styled.div`
-  .timeline-flyout {
-    z-index: ${({ theme }) => theme.eui.euiZLevel8};
-    min-width: 150px;
-    width: 100%;
-    animation: none;
+const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
+  animation: none;
+  min-width: 150px;
+  z-index: ${({ theme }) => theme.eui.euiZLevel4};
+`;
+
+// SIDE EFFECT: the following creates a global class selector
+const IndexPatternFieldEditorOverlayGlobalStyle = createGlobalStyle<{
+  theme: { eui: { euiZLevel5: number } };
+}>`
+  .indexPatternFieldEditorMaskOverlay {
+    ${({ theme }) => `
+    z-index: ${theme.eui.euiZLevel5};
+  `}
   }
 `;
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
+  timelineId,
+  visible = true,
+}) => {
   const dispatch = useDispatch();
   const handleClose = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
@@ -37,18 +51,25 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId })
   }, [dispatch, timelineId]);
 
   return (
-    <EuiFlyoutContainer data-test-subj="flyout-pane">
-      <EuiFlyout
+    <div data-test-subj="flyout-pane" style={{ visibility: visible ? 'visible' : 'hidden' }}>
+      <StyledEuiFlyout
         aria-label={i18n.TIMELINE_DESCRIPTION}
         className="timeline-flyout"
         data-test-subj="eui-flyout"
         hideCloseButton={true}
         onClose={handleClose}
-        size="l"
+        size="100%"
+        ownFocus={false}
+        style={{ visibility: visible ? 'visible' : 'hidden' }}
       >
-        <StatefulTimeline timelineId={timelineId} />
-      </EuiFlyout>
-    </EuiFlyoutContainer>
+        <IndexPatternFieldEditorOverlayGlobalStyle />
+        <StatefulTimeline
+          renderCellValue={DefaultCellRenderer}
+          rowRenderers={defaultRowRenderers}
+          timelineId={timelineId}
+        />
+      </StyledEuiFlyout>
+    </div>
   );
 };
 

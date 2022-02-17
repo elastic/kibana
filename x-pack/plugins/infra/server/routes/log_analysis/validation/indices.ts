@@ -36,7 +36,7 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { fields, indices } = payload.data;
+      const { fields, indices, runtimeMappings } = payload.data;
       const errors: ValidationIndicesError[] = [];
 
       // Query each pattern individually, to map correctly the errors
@@ -47,6 +47,9 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
             fields: fields.map((field) => field.name),
             ignore_unavailable: true,
             index,
+            body: {
+              runtime_mappings: runtimeMappings,
+            },
           });
 
           if (fieldCaps.indices.length === 0) {

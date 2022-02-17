@@ -92,7 +92,10 @@ export class Project {
   public ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
     const relativePathToProjectIfBazelPkg = normalizePath(
-      Path.relative(this.path, `bazel/bin/packages/${Path.basename(project.path)}`)
+      Path.relative(
+        this.path,
+        `${__dirname}/../../../bazel-bin/packages/${Path.basename(project.path)}`
+      )
     );
 
     const versionInPackageJson = this.allDependencies[project.name];
@@ -100,7 +103,7 @@ export class Project {
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`;
 
     // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
-    //  do not allow child projects to hold dependencies
+    //  do not allow child projects to hold dependencies, unless they are meant to be published externally
     if (
       versionInPackageJson === expectedVersionInPackageJson ||
       versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg

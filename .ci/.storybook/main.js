@@ -11,6 +11,12 @@ const aliases = require('../../src/dev/storybook/aliases.ts').storybookAliases;
 
 config.refs = {};
 
+// Required due to https://github.com/storybookjs/storybook/issues/13834
+config.babel = async (options) => ({
+  ...options,
+  plugins: ['@babel/plugin-transform-typescript', ...options.plugins],
+});
+
 for (const alias of Object.keys(aliases).filter((a) => a !== 'ci_composite')) {
   // snake_case -> Title Case
   const title = alias

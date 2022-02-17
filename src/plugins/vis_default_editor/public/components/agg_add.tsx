@@ -16,7 +16,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { IAggConfig, AggGroupNames } from '../../../data/public';
 import type { Schema } from '../../../visualizations/public';
@@ -52,7 +52,7 @@ function DefaultEditorAggAdd({
 
   const addButton = (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       iconType="plusInCircleFilled"
       data-test-subj={`visEditorAdd_${groupName}`}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -88,7 +88,7 @@ function DefaultEditorAggAdd({
           repositionOnScroll={true}
           closePopover={() => setIsPopoverOpen(false)}
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle paddingSize="s">
             {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
                 id="visDefaultEditor.aggAdd.addGroupButtonLabel"

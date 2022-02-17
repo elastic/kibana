@@ -47,19 +47,15 @@ export const useSourceViaHttp = ({ sourceId = 'default', fetch, toastWarning }: 
     );
   };
 
-  const {
-    error,
-    loading,
-    response,
-    makeRequest,
-  } = useHTTPRequest<MetricsSourceConfigurationResponse>(
-    `/api/metrics/source/${sourceId}`,
-    'GET',
-    null,
-    decodeResponse,
-    fetch,
-    toastWarning
-  );
+  const { error, loading, response, makeRequest } =
+    useHTTPRequest<MetricsSourceConfigurationResponse>(
+      `/api/metrics/source/${sourceId}`,
+      'GET',
+      null,
+      decodeResponse,
+      fetch,
+      toastWarning
+    );
 
   useEffect(() => {
     (async () => {

@@ -47,13 +47,7 @@ exports[`CcrShard that is renders an exception properly 1`] = `
 `;
 
 exports[`CcrShard that it renders normally 1`] = `
-<EuiPage
-  style={
-    Object {
-      "backgroundColor": "white",
-    }
-  }
->
+<EuiPage>
   <EuiPageBody>
     <EuiPanel>
       <Status
@@ -142,6 +136,8 @@ exports[`CcrShard that it renders normally 1`] = `
           </h2>
         </EuiTitle>
       }
+      buttonElement="button"
+      element="div"
       id="ccrLatestStat"
       initialIsOpen={false}
       isLoading={false}
@@ -152,7 +148,7 @@ exports[`CcrShard that it renders normally 1`] = `
         size="s"
       >
         <h2>
-          September 27, 2018 1:32:09 PM
+          September 27, 2018 9:32:09 AM
         </h2>
       </EuiTitle>
       <EuiHorizontalRule />

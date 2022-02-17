@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
+export type {
+  ISyncStateRef,
+  IKbnUrlStateStorage,
+  ReduxLikeStateContainer,
+} from '../../../kibana_utils/public';
 export {
   Storage,
   unhashUrl,
   syncState,
-  ISyncStateRef,
   getQueryParams,
   setStateToKbnUrl,
   removeQueryParam,
   withNotifyOnErrors,
-  IKbnUrlStateStorage,
   createKbnUrlTracker,
   SavedObjectNotFound,
   createStateContainer,
-  ReduxLikeStateContainer,
   createKbnUrlStateStorage,
 } from '../../../kibana_utils/public';

@@ -1,9 +1,13 @@
 {
   "id": "savedObjects",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data"],
+  "requiredPlugins": ["data", "dataViews"],
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact"

@@ -28,25 +28,29 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-class MockField extends AbstractField {}
+class MockField extends AbstractField {
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
+  }
+}
 
 function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TYPE[]) {
   const fields: IField[] = [];
   for (let i = 0; i < numFields; i++) {
     fields.push(new MockField({ fieldName: `field${i}`, origin: FIELD_ORIGIN.SOURCE }));
   }
-  return ({
+  return {
     getStyleEditorFields: async () => {
       return fields;
     },
     getSource: () => {
-      return ({
+      return {
         getSupportedShapeTypes: async () => {
           return supportedShapeTypes;
         },
-      } as unknown) as IVectorSource;
+      } as unknown as IVectorSource;
     },
-  } as unknown) as IVectorLayer;
+  } as unknown as IVectorLayer;
 }
 
 const vectorStyleDescriptor = {
@@ -56,8 +60,8 @@ const vectorStyleDescriptor = {
 };
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
-  ({} as unknown) as IVectorSource,
-  ({} as unknown) as IVectorLayer
+  {} as unknown as IVectorSource,
+  {} as unknown as IVectorLayer
 );
 const styleProperties: StyleProperties = {};
 vectorStyle.getAllStyleProperties().forEach((styleProperty) => {

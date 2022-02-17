@@ -12,39 +12,45 @@ import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
-  getResult,
+  getAlertMock,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('patch_rules_bulk', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('patch_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.alertsClient.update.mockResolvedValue(getResult()); // update succeeds
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // update succeeds
 
-    patchRulesBulkRoute(server.router, ml);
+    patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200', async () => {
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(200);
     });
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -70,23 +76,16 @@ describe('patch_rules_bulk', () => {
       });
       await server.inject(request, context);
 
-      expect(clients.alertsClient.update).toHaveBeenCalledWith(
+      expect(clients.rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             params: expect.objectContaining({
               anomalyThreshold: 4,
-              machineLearningJobId: 'some_job_id',
+              machineLearningJobId: ['some_job_id'],
             }),
           }),
         })
       );
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
-      const response = await server.inject(getPatchBulkRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {

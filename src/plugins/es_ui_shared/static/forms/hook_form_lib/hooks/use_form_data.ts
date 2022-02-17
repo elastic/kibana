@@ -12,18 +12,26 @@ import { FormData, FormHook } from '../types';
 import { unflattenObject } from '../lib';
 import { useFormDataContext, Context } from '../form_data_context';
 
-interface Options {
+interface Options<I> {
   watch?: string | string[];
   form?: FormHook<any>;
+  /**
+   * Use this handler if you want to listen to field value change
+   * before the validations are ran.
+   */
+  onChange?: (formData: I) => void;
 }
 
 export type HookReturn<I extends object = FormData, T extends object = I> = [I, () => T, boolean];
 
 export const useFormData = <I extends object = FormData, T extends object = I>(
-  options: Options = {}
+  options: Options<I> = {}
 ): HookReturn<I, T> => {
-  const { watch, form } = options;
+  const { watch, form, onChange } = options;
   const ctx = useFormDataContext<T, I>();
+  const watchToArray: string[] = watch === undefined ? [] : Array.isArray(watch) ? watch : [watch];
+  // We will use "stringifiedWatch" to compare if the array has changed in the useMemo() below
+  const stringifiedWatch = watchToArray.join('.');
 
   let getFormData: Context<T, I>['getFormData'];
   let getFormData$: Context<T, I>['getFormData$'];
@@ -60,20 +68,32 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
         return;
       }
 
-      if (watch) {
-        const pathsToWatchArray: string[] = Array.isArray(watch) ? watch : [watch];
-
-        if (pathsToWatchArray.some((path) => previousRawData.current[path] !== raw[path])) {
+      if (watchToArray.length > 0) {
+        // Only update the state if one of the field we watch has changed.
+        if (watchToArray.some((path) => previousRawData.current[path] !== raw[path])) {
           previousRawData.current = raw;
-          // Only update the state if one of the field we watch has changed.
-          setFormData(unflattenObject<I>(raw));
+          const nextState = unflattenObject<I>(raw);
+
+          if (onChange) {
+            onChange(nextState);
+          }
+
+          setFormData(nextState);
         }
       } else {
-        setFormData(unflattenObject<I>(raw));
+        const nextState = unflattenObject<I>(raw);
+        if (onChange) {
+          onChange(nextState);
+        }
+        setFormData(nextState);
       }
     });
+
     return subscription.unsubscribe;
-  }, [getFormData$, watch]);
+
+    // To compare we use the stringified version of the "watchToArray" array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stringifiedWatch, getFormData$, onChange]);
 
   useEffect(() => {
     isMounted.current = true;

@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`icon should use vector icon 1`] = `
-<span
-  data-euiicon-type="vector"
-  size="m"
-/>
-`;

@@ -6,7 +6,8 @@
  */
 
 import { map } from 'rxjs/operators';
-import { connectToQueryState, esFilters } from '../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
+import { connectToQueryState } from '../../../../../../../src/plugins/data/public';
 import {
   syncState,
   BaseStateContainer,
@@ -39,7 +40,7 @@ export function startAppStateSyncing(appStateManager: AppStateManager) {
     ),
   };
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(query, stateContainer, {
-    filters: esFilters.FilterStateStore.APP_STATE,
+    filters: FilterStateStore.APP_STATE,
     query: true,
   });
 
@@ -60,7 +61,9 @@ export function startAppStateSyncing(appStateManager: AppStateManager) {
   stateContainer.set(initialAppState);
 
   // set current url to whatever is in app state container
-  kbnUrlStateStorage.set('_a', initialAppState);
+  kbnUrlStateStorage.set('_a', initialAppState, {
+    replace: true,
+  });
 
   // finally start syncing state containers with url
   startSyncingAppStateWithUrl();

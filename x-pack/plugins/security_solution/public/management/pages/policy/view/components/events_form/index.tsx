@@ -8,8 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckbox, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
-import { OperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
-import { OS } from '../../../types';
+import {
+  OperatingSystem,
+  PolicyOperatingSystem,
+  UIPolicyConfig,
+} from '../../../../../../../common/endpoint/types';
 import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 
 const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {
@@ -19,14 +22,13 @@ const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {
 };
 
 interface OperatingSystemToOsMap {
-  [OperatingSystem.WINDOWS]: OS.windows;
-  [OperatingSystem.LINUX]: OS.linux;
-  [OperatingSystem.MAC]: OS.mac;
+  [OperatingSystem.WINDOWS]: PolicyOperatingSystem.windows;
+  [OperatingSystem.LINUX]: PolicyOperatingSystem.linux;
+  [OperatingSystem.MAC]: PolicyOperatingSystem.mac;
 }
 
-export type ProtectionField<
-  T extends OperatingSystem
-> = keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
+export type ProtectionField<T extends OperatingSystem> =
+  keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
 
 export type EventFormSelection<T extends OperatingSystem> = { [K in ProtectionField<T>]: boolean };
 
@@ -54,7 +56,7 @@ export const EventsForm = <T extends OperatingSystem>({
 }: EventsFormProps<T>) => (
   <ConfigForm
     type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
-      defaultMessage: 'Event Collection',
+      defaultMessage: 'Event collection',
     })}
     supportedOss={[os]}
     rightCorner={

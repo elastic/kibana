@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './fade.scss';
-
 import { TransitionStrings } from '../../../i18n';
 
 const { fade: strings } = TransitionStrings;

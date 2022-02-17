@@ -19,12 +19,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { LicenseCallout } from '../../../components/shared/license_callout';
 import { SourceIcon } from '../../../components/shared/source_icon';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
+  NAV,
   CONFIGURE_BUTTON,
   CONNECTORS_HEADER_TITLE,
   CONNECTORS_HEADER_DESCRIPTION,
@@ -46,8 +46,6 @@ export const Connectors: React.FC = () => {
     initializeConnectors();
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const availableConnectors = reject(
     connectors,
     ({ serviceType }) => serviceType === CUSTOM_SERVICE_TYPE
@@ -62,7 +60,7 @@ export const Connectors: React.FC = () => {
     const updateButtons = (
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmptyTo to={editPath} data-test-subj="UpdateButton">
+          <EuiButtonEmptyTo to={editPath as string} data-test-subj="UpdateButton">
             {UPDATE_BUTTON}
           </EuiButtonEmptyTo>
         </EuiFlexItem>
@@ -125,12 +123,15 @@ export const Connectors: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader
-        title={CONNECTORS_HEADER_TITLE}
-        description={CONNECTORS_HEADER_DESCRIPTION}
-      />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SETTINGS, NAV.SETTINGS_SOURCE_PRIORITIZATION]}
+      pageHeader={{
+        pageTitle: CONNECTORS_HEADER_TITLE,
+        description: CONNECTORS_HEADER_DESCRIPTION,
+      }}
+      isLoading={dataLoading}
+    >
       {connectorsList}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

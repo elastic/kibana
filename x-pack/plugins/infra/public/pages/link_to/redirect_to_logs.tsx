@@ -26,7 +26,7 @@ export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
   const sourceId = match.params.sourceId || 'default';
   const filter = getFilterFromLocation(location);
   const searchString = flowRight(
-    replaceLogFilterInQueryString(filter),
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');

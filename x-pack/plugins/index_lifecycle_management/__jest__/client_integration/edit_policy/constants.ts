@@ -9,26 +9,26 @@ import moment from 'moment-timezone';
 
 import { PolicyFromES } from '../../../common/types';
 
+import { defaultRolloverAction } from '../../../public/application/constants';
+
 export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 
 export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     name: 'my_policy',
     phases: {
       hot: {
         min_age: '0ms',
         actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb',
-          },
+          rollover: defaultRolloverAction,
         },
       },
       warm: {
+        min_age: '1d',
         actions: {
           migrate: { enabled: false },
         },
@@ -40,7 +40,7 @@ export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
 
 export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     name: 'my_policy',
     phases: {
@@ -54,6 +54,7 @@ export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '10d',
         actions: {
           allocate: {
             include: {
@@ -72,7 +73,7 @@ export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
 
 export const DELETE_PHASE_POLICY: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     phases: {
       hot: {
@@ -104,29 +105,29 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
   name: POLICY_NAME,
 };
 
-export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
+export const getDefaultHotPhasePolicy = (policyName?: string): PolicyFromES => ({
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
-    name: policyName,
+    name: policyName ?? POLICY_NAME,
     phases: {
       hot: {
         min_age: '0ms',
         actions: {
           rollover: {
             max_age: '30d',
-            max_size: '50gb',
+            max_primary_shard_size: '50gb',
           },
         },
       },
     },
   },
-  name: policyName,
+  name: policyName ?? POLICY_NAME,
 });
 
 export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     phases: {
       hot: {
@@ -159,7 +160,7 @@ export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
 
 export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     phases: {
       hot: {
@@ -180,7 +181,7 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   name: POLICY_NAME,
 };
 
-export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
+export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = {
   version: 1,
   modified_date: Date.now().toString(),
   policy: {
@@ -196,6 +197,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
         },
       },
       warm: {
+        min_age: '10d',
         actions: {
           my_unfollow_action: {},
           set_priority: {
@@ -205,6 +207,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
         },
       },
       delete: {
+        min_age: '15d',
         wait_for_snapshot: {
           policy: SNAPSHOT_POLICY_NAME,
         },
@@ -216,7 +219,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
     name: POLICY_NAME,
   },
   name: POLICY_NAME,
-} as any) as PolicyFromES;
+} as any as PolicyFromES;
 
 export const getGeneratedPolicies = (): PolicyFromES[] => {
   const policy = {
@@ -235,8 +238,8 @@ export const getGeneratedPolicies = (): PolicyFromES[] => {
   for (let i = 0; i < 105; i++) {
     policies.push({
       version: i,
-      modified_date: moment().subtract(i, 'days').toISOString(),
-      linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+      modifiedDate: moment().subtract(i, 'days').toISOString(),
+      indices: i % 2 === 0 ? [`index${i}`] : [],
       name: `testy${i}`,
       policy: {
         ...policy,

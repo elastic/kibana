@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getLatestStats, getStats } from '../../../../lib/beats';
 import { handleError } from '../../../../lib/errors';
@@ -32,7 +32,7 @@ export function beatsOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
@@ -41,7 +41,7 @@ export function beatsOverviewRoute(server) {
         const [latest, stats, metrics] = await Promise.all([
           getLatestStats(req, beatsIndexPattern, clusterUuid),
           getStats(req, beatsIndexPattern, clusterUuid),
-          getMetrics(req, beatsIndexPattern, metricSet),
+          getMetrics(req, 'beats', metricSet),
         ]);
 
         return {

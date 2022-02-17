@@ -7,6 +7,8 @@ If running elasticsearch from source, elasticsearch needs to be cloned to a sibl
 
 To run, go to the Kibana root and run `node scripts/es --help` to get the latest command line options.
 
+The script attempts to preserve the existing interfaces used by Elasticsearch CLI. This includes passing through options with the `-E` argument and the `ES_JAVA_OPTS` environment variable for Java options.
+
 ### Examples
 
 Run a snapshot install with a trial license

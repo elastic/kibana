@@ -1,5 +1,7 @@
 #!/bin/groovy
 
+return
+
 def MAXIMUM_COMMITS_TO_CHECK = 10
 def MAXIMUM_COMMITS_TO_BUILD = 5
 

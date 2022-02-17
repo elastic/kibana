@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   SavedObjectWithMetadata,
   SavedObjectMetadata,
   SavedObjectRelation,
   SavedObjectRelationKind,
   SavedObjectInvalidRelation,
   SavedObjectGetRelationshipsResponse,
+  SavedObjectManagementTypeInfo,
 } from './types';

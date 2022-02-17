@@ -21,33 +21,14 @@ import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
-import {
-  IAggConfigs,
-  IndexPattern,
-  ISearchSource,
-  AggConfigOptions,
-  SearchSourceFields,
-} from '../../../plugins/data/public';
+import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
+import { IAggConfigs, IndexPattern, ISearchSource, AggConfigSerialized } from '../../data/public';
 import { BaseVisType } from './vis_types';
-import { VisParams } from '../common/types';
+import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
-export interface SerializedVisData {
-  expression?: string;
-  aggs: AggConfigOptions[];
-  searchSource: SearchSourceFields;
-  savedSearchId?: string;
-}
+import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
 
-export interface SerializedVis<T = VisParams> {
-  id?: string;
-  title: string;
-  description?: string;
-  type: string;
-  params: T;
-  uiState?: any;
-  data: SerializedVisData;
-}
+export type { SerializedVis, SerializedVisData };
 
 export interface VisData {
   ast?: string;
@@ -58,14 +39,20 @@ export interface VisData {
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
-  const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
-    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
+    const savedSearch = await getSavedSearch(savedSearchId, {
+      search: getSearch(),
+      savedObjectsClient: getSavedObjects().client,
+      spaces: getSpaces(),
+    });
 
-    searchSource.setParent(savedSearch.searchSource);
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
+
+    if (savedSearch?.searchSource) {
+      inputSearchSource.setParent(savedSearch.searchSource);
+    }
   }
-  searchSource.setField('size', 0);
-  return searchSource;
+  return inputSearchSource;
 };
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
@@ -105,7 +92,19 @@ export class Vis<TVisParams = VisParams> {
     return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
-  async setState(state: PartialVisState) {
+  async setState(inState: PartialVisState) {
+    let state = inState;
+
+    const { updateVisTypeOnParamsChange } = this.type;
+    const newType = updateVisTypeOnParamsChange && updateVisTypeOnParamsChange(state.params);
+    if (newType) {
+      state = {
+        ...inState,
+        type: newType,
+        params: { ...inState.params, type: newType },
+      };
+    }
+
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore
@@ -169,7 +168,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.serialize()) : [];
     return {
       id: this.id,
       title: this.title,
@@ -180,7 +179,7 @@ export class Vis<TVisParams = VisParams> {
       data: {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
-        savedSearchId: this.data.savedSearchId,
+        ...(this.data.savedSearchId ? { savedSearchId: this.data.savedSearchId } : {}),
       },
     };
   }
@@ -194,7 +193,7 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: any) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigSerialized[], schemas: any) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
@@ -213,3 +212,6 @@ export class Vis<TVisParams = VisParams> {
     return newConfigs;
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default Vis;

@@ -31,21 +31,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/86950
-  describe.skip('dashboard feature controls security', () => {
+  describe('dashboard feature controls security', () => {
     before(async () => {
-      await esArchiver.load('dashboard/feature_controls/security');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+      );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await esArchiver.unload('dashboard/feature_controls/security');
-
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+      );
     });
 
     describe('global dashboard all privileges, no embeddable application privileges', () => {
@@ -86,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -108,8 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      // Can't figure out how to get this test to pass
-      it.skip(`create new dashboard shows addNew button`, async () => {
+      it(`create new dashboard shows addNew button`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -290,7 +293,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks).to.eql(['Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -320,8 +323,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await globalNav.badgeExistsOrFail('Read only');
       });
 
-      // Has this behavior changed?
-      it.skip(`create new dashboard redirects to the home page`, async () => {
+      it(`create new dashboard shows the read only warning`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -330,7 +332,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: 20000 });
+        await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -345,6 +347,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
+      });
+
+      it('does not allow copy to dashboard behaviour', async () => {
+        await panelActions.expectMissingPanelAction('embeddablePanelAction-copyToDashboard');
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -418,7 +424,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks).to.eql(['Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -438,8 +444,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await globalNav.badgeExistsOrFail('Read only');
       });
 
-      // Has this behavior changed?
-      it.skip(`create new dashboard redirects to the home page`, async () => {
+      it(`create new dashboard shows the read only warning`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -448,7 +453,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: 20000 });
+        await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -494,7 +499,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no dashboard privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116881
+    describe.skip('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {

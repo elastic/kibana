@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('geo_shapes*');
       expect(doesLayerExist).to.equal(true);
-      const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('4');
+      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('geo_shapes*');
+      expect(tooltipText).to.equal('geo_shapes*\nFound ~8 documents. This count is approximate.');
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
 
@@ -55,8 +55,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('logstash-*');
       expect(doesLayerExist).to.equal(true);
-      const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('7');
+      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('logstash-*');
+      expect(tooltipText).to.equal(
+        'logstash-*\nFound 7 documents.\nResults narrowed by global search\nResults narrowed by global time'
+      );
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
   });

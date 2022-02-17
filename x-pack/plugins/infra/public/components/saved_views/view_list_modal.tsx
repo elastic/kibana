@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
@@ -58,7 +58,7 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
   }, [views, currentView]);
 
   return (
-    <EuiModal onClose={close}>
+    <EuiModal onClose={close} data-test-subj="savedViews-loadModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -83,7 +83,9 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
           {(list, search) => (
             <>
               {search}
-              <div style={{ marginTop: 20 }}>{list}</div>
+              <div style={{ marginTop: 20 }} data-test-subj="savedViews-loadList">
+                {list}
+              </div>
             </>
           )}
         </EuiSelectable>

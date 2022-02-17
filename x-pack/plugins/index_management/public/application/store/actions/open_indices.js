@@ -13,19 +13,21 @@ import { notificationService } from '../../services/notification';
 
 export const openIndicesStart = createAction('INDEX_MANAGEMENT_OPEN_INDICES_START');
 
-export const openIndices = ({ indexNames }) => async (dispatch) => {
-  dispatch(openIndicesStart({ indexNames }));
-  try {
-    await request(indexNames);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return dispatch(clearRowStatus({ indexNames }));
-  }
-  dispatch(reloadIndices(indexNames));
-  notificationService.showSuccessToast(
-    i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
-      defaultMessage: 'Successfully opened: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') },
-    })
-  );
-};
+export const openIndices =
+  ({ indexNames }) =>
+  async (dispatch) => {
+    dispatch(openIndicesStart({ indexNames }));
+    try {
+      await request(indexNames);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    dispatch(reloadIndices(indexNames));
+    notificationService.showSuccessToast(
+      i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
+        defaultMessage: 'Successfully opened: [{indexNames}]',
+        values: { indexNames: indexNames.join(', ') },
+      })
+    );
+  };

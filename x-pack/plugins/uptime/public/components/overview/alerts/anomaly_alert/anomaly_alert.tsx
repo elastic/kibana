@@ -19,31 +19,31 @@ import { AnomalyTranslations } from './translations';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
 import { monitorIdSelector } from '../../../../state/selectors';
-import { getSeverityColor, getSeverityType } from '../../../../../../ml/public';
+import { getSeverityColor, getSeverity } from '../../../../../../ml/public';
 
 interface Props {
-  alertParams: { [key: string]: any };
-  setAlertParams: (key: string, value: any) => void;
+  ruleParams: { [key: string]: any };
+  setRuleParams: (key: string, value: any) => void;
 }
 
-export function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
+export function AnomalyAlertComponent({ setRuleParams, ruleParams }: Props) {
   const [severity, setSeverity] = useState(DEFAULT_SEVERITY);
 
   const monitorIdStore = useSelector(monitorIdSelector);
 
-  const monitorId = monitorIdStore || alertParams?.monitorId;
+  const monitorId = monitorIdStore || ruleParams?.monitorId;
 
   useEffect(() => {
-    setAlertParams('monitorId', monitorId);
-  }, [monitorId, setAlertParams]);
+    setRuleParams('monitorId', monitorId);
+  }, [monitorId, setRuleParams]);
 
   useEffect(() => {
-    setAlertParams('severity', severity.val);
-  }, [severity, setAlertParams]);
+    setRuleParams('severity', severity.val);
+  }, [severity, setRuleParams]);
 
   useEffect(() => {
-    if (alertParams.severity !== undefined) {
-      setSeverity(SEVERITY_OPTIONS.find(({ val }) => val === alertParams.severity)!);
+    if (ruleParams.severity !== undefined) {
+      setSeverity(SEVERITY_OPTIONS.find(({ val }) => val === ruleParams.severity)!);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,7 +81,7 @@ export function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
                 style={{ textTransform: 'capitalize' }}
                 color={getSeverityColor(severity.val)}
               >
-                {getSeverityType(severity.val)}
+                {getSeverity(severity.val).label}
               </EuiHealth>
             }
             isEnabled={true}

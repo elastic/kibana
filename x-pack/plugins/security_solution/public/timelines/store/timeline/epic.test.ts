@@ -5,59 +5,62 @@
  * 2.0.
  */
 
-import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { FilterStateStore, Filter } from '@kbn/es-query';
+import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
-import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
+      const columns: TimelineModel['columns'] = [
+        {
+          columnHeaderType: 'not-filtered',
+          id: '@timestamp',
+          initialWidth: 190,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'message',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.category',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.action',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'host.name',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'source.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'destination.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'user.name',
+          initialWidth: 180,
+        },
+      ];
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            width: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            width: 180,
-          },
-        ],
+        prevActiveTab: TimelineTabs.notes,
+        columns,
+        defaultColumns: columns,
         dataProviders: [
           {
             id: 'hosts-table-hostName-DESKTOP-QBBSCUT',
@@ -72,8 +75,7 @@ describe('Epic Timeline', () => {
             },
             and: [
               {
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 name: 'event.module: endgame',
                 enabled: true,
                 excluded: false,
@@ -87,8 +89,10 @@ describe('Epic Timeline', () => {
             ],
           },
         ],
+        dataViewId: null,
         deletedEventIds: [],
         description: '',
+        documentType: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
           tiebreakerField: '',
@@ -102,7 +106,7 @@ describe('Epic Timeline', () => {
         historyIds: [],
         filters: [
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -114,7 +118,7 @@ describe('Epic Timeline', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -123,7 +127,7 @@ describe('Epic Timeline', () => {
               type: 'exists',
               value: 'exists',
             },
-            exists: { field: '@timestamp' },
+            query: { exists: { field: '@timestamp' } },
           } as Filter,
         ],
         indexNames: [],
@@ -143,6 +147,8 @@ describe('Epic Timeline', () => {
           },
         },
         loadingEventIds: [],
+        queryFields: [],
+        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -211,8 +217,7 @@ describe('Epic Timeline', () => {
               {
                 enabled: true,
                 excluded: false,
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 kqlQuery: '',
                 name: 'event.module: endgame',
                 queryMatch: {
@@ -234,6 +239,7 @@ describe('Epic Timeline', () => {
             },
           },
         ],
+        dataViewId: null,
         dateRange: {
           end: '2019-10-31T21:06:27.644Z',
           start: '2019-10-30T21:06:27.644Z',
@@ -260,13 +266,12 @@ describe('Epic Timeline', () => {
               type: 'phrase',
               value: null,
             },
-            missing: null,
             query: '{"match_phrase":{"event.category":"file"}}',
             range: null,
             script: null,
           },
           {
-            exists: '{"field":"@timestamp"}',
+            query: '{"exists":{"field":"@timestamp"}}',
             match_all: null,
             meta: {
               alias: null,
@@ -278,8 +283,6 @@ describe('Epic Timeline', () => {
               type: 'exists',
               value: 'exists',
             },
-            missing: null,
-            query: null,
             range: null,
             script: null,
           },

@@ -12,6 +12,7 @@ import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { createUninitialisedResourceState } from '../../../state';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;
@@ -24,7 +25,7 @@ describe('EndpointList store concerns', () => {
   const loadDataToStore = () => {
     dispatch({
       type: 'serverReturnedEndpointList',
-      payload: mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
+      payload: mockEndpointResultList({ pageSize: 1, page: 0, total: 10 }),
     });
   };
 
@@ -41,9 +42,29 @@ describe('EndpointList store concerns', () => {
         total: 0,
         loading: false,
         error: undefined,
-        details: undefined,
-        detailsLoading: false,
-        detailsError: undefined,
+        endpointDetails: {
+          activityLog: {
+            paging: {
+              disabled: false,
+              page: 1,
+              pageSize: 50,
+              startDate: 'now-1d',
+              endDate: 'now',
+              isInvalidDateRange: false,
+              autoRefreshOptions: {
+                enabled: false,
+                duration: DEFAULT_POLL_INTERVAL,
+              },
+              recentlyUsedDateRanges: [],
+            },
+            logData: { type: 'UninitialisedResourceState' },
+          },
+          hostDetails: {
+            details: undefined,
+            detailsLoading: false,
+            detailsError: undefined,
+          },
+        },
         policyResponse: undefined,
         policyResponseLoading: false,
         policyResponseError: undefined,
@@ -51,7 +72,9 @@ describe('EndpointList store concerns', () => {
         policyItems: [],
         selectedPolicyId: undefined,
         policyItemsLoading: false,
-        endpointPackageInfo: undefined,
+        endpointPackageInfo: {
+          type: 'UninitialisedResourceState',
+        },
         nonExistingPolicies: {},
         agentPolicies: {},
         endpointsExist: true,
@@ -65,13 +88,21 @@ describe('EndpointList store concerns', () => {
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
         policyVersionInfo: undefined,
+        isolationRequestState: {
+          type: 'UninitialisedResourceState',
+        },
+        endpointPendingActions: {
+          data: new Map(),
+          type: 'LoadedResourceState',
+        },
+        metadataTransformStats: createUninitialisedResourceState(),
       });
     });
 
     test('it handles `serverReturnedEndpointList', () => {
       const payload = mockEndpointResultList({
-        request_page_size: 1,
-        request_page_index: 1,
+        page: 0,
+        pageSize: 1,
         total: 10,
       });
       dispatch({
@@ -80,9 +111,9 @@ describe('EndpointList store concerns', () => {
       });
 
       const currentState = store.getState();
-      expect(currentState.hosts).toEqual(payload.hosts);
-      expect(currentState.pageSize).toEqual(payload.request_page_size);
-      expect(currentState.pageIndex).toEqual(payload.request_page_index);
+      expect(currentState.hosts).toEqual(payload.data);
+      expect(currentState.pageSize).toEqual(payload.pageSize);
+      expect(currentState.pageIndex).toEqual(payload.page);
       expect(currentState.total).toEqual(payload.total);
     });
   });

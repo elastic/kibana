@@ -7,8 +7,10 @@
  */
 
 import { omit, isObject } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as esKuery from '@kbn/es-query';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
+import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
@@ -48,14 +50,13 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
 } from '../saved_objects_client';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -63,38 +64,54 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsTypeValidator } from '../../validation';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
+import { validateAndConvertAggregations } from './aggregations';
+import {
+  getBulkOperationError,
+  getCurrentTime,
+  getExpectedVersionProperties,
+  getSavedObjectFromSource,
+  normalizeNamespace,
+  rawDocExistsInNamespace,
+  rawDocExistsInNamespaces,
+  Either,
+  isLeft,
+  isRight,
+} from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
+import {
+  collectMultiNamespaceReferences,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+} from './collect_multi_namespace_references';
+import {
+  updateObjectsSpaces,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from './update_objects_spaces';
+import { getIndexForType } from './get_index_for_type';
+import {
+  preflightCheckForCreate,
+  PreflightCheckForCreateObject,
+} from './preflight_check_for_create';
+import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
-interface Left {
-  tag: 'Left';
-  error: Record<string, any>;
-}
-
-interface Right {
-  tag: 'Right';
-  value: Record<string, any>;
-}
-
-type Either = Left | Right;
-const isLeft = (either: Either): either is Left => either.tag === 'Left';
-const isRight = (either: Either): either is Right => either.tag === 'Right';
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
   client: ElasticsearchClient;
-  typeRegistry: SavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: IKibanaMigrator;
   allowedTypes: string[];
@@ -133,7 +150,7 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
   refresh?: boolean;
 }
 
-const DEFAULT_REFRESH_SETTING = 'wait_for';
+export const DEFAULT_REFRESH_SETTING = 'wait_for';
 
 /**
  * See {@link SavedObjectsRepository}
@@ -153,13 +170,46 @@ export interface SavedObjectsIncrementCounterField {
 }
 
 /**
+ * @internal
+ */
+interface PreflightCheckNamespacesParams {
+  /** The object type to fetch */
+  type: string;
+  /** The object ID to fetch */
+  id: string;
+  /** The current space */
+  namespace: string | undefined;
+  /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
+  initialNamespaces?: string[];
+}
+
+/**
+ * @internal
+ */
+interface PreflightCheckNamespacesResult {
+  /** If the object exists, and whether or not it exists in the current space */
+  checkResult: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
+  /**
+   * What namespace(s) the object should exist in, if it needs to be created; practically speaking, this will never be undefined if
+   * checkResult == not_found or checkResult == found_in_namespace
+   */
+  savedObjectNamespaces?: string[];
+  /** The source of the raw document, if the object already exists */
+  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+}
+
+function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
+}
+
+/**
  * @public
  */
 export class SavedObjectsRepository {
   private _migrator: IKibanaMigrator;
   private _index: string;
   private _mappings: IndexMapping;
-  private _registry: SavedObjectTypeRegistry;
+  private _registry: ISavedObjectTypeRegistry;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
@@ -175,7 +225,7 @@ export class SavedObjectsRepository {
    */
   public static createRepository(
     migrator: IKibanaMigrator,
-    typeRegistry: SavedObjectTypeRegistry,
+    typeRegistry: ISavedObjectTypeRegistry,
     indexName: string,
     client: ElasticsearchClient,
     logger: Logger,
@@ -259,8 +309,8 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id = SavedObjectsUtils.generateId(),
       migrationVersion,
+      coreMigrationVersion,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
@@ -268,36 +318,41 @@ export class SavedObjectsRepository {
       initialNamespaces,
       version,
     } = options;
+    const id = options.id || SavedObjectsUtils.generateId();
     const namespace = normalizeNamespace(options.namespace);
 
-    if (initialNamespaces) {
-      if (!this._registry.isShareable(type)) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          '"options.initialNamespaces" can only be used on multi-namespace types'
-        );
-      } else if (!initialNamespaces.length) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          '"options.initialNamespaces" must be a non-empty array of strings'
-        );
-      }
-    }
+    this.validateInitialNamespaces(type, initialNamespaces);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const time = this._getCurrentTime();
-    let savedObjectNamespace;
+    const time = getCurrentTime();
+    let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
 
-    if (this._registry.isSingleNamespace(type) && namespace) {
-      savedObjectNamespace = namespace;
+    if (this._registry.isSingleNamespace(type)) {
+      savedObjectNamespace = initialNamespaces
+        ? normalizeNamespace(initialNamespaces[0])
+        : namespace;
     } else if (this._registry.isMultiNamespace(type)) {
-      if (id && overwrite) {
+      if (options.id) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
         // note: this check throws an error if the object is found but does not exist in this namespace
-        const existingNamespaces = await this.preflightGetNamespaces(type, id, namespace);
-        savedObjectNamespaces = initialNamespaces || existingNamespaces;
+        const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+        const [{ error, existingDocument }] = await preflightCheckForCreate({
+          registry: this._registry,
+          client: this.client,
+          serializer: this._serializer,
+          getIndexForType: this.getIndexForType.bind(this),
+          createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+          objects: [{ type, id, overwrite, namespaces: initialNamespaces ?? [namespaceString] }],
+        });
+        if (error) {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id);
+        }
+        savedObjectNamespaces =
+          initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
       } else {
         savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
@@ -311,11 +366,20 @@ export class SavedObjectsRepository {
       originId,
       attributes,
       migrationVersion,
+      coreMigrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
 
-    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    /**
+     * If a validation has been registered for this type, we run it against the migrated attributes.
+     * This is an imperfect solution because malformed attributes could have already caused the
+     * migration to fail, but it's the best we can do without devising a way to run validations
+     * inside the migration algorithm itself.
+     */
+    this.validateObjectAttributes(type, migrated as SavedObjectSanitizedDoc<T>);
+
+    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
     const requestParams = {
       id: raw._id,
@@ -326,10 +390,15 @@ export class SavedObjectsRepository {
       require_alias: true,
     };
 
-    const { body } =
+    const { body, statusCode, headers } =
       id && overwrite
-        ? await this.client.index(requestParams)
-        : await this.client.create(requestParams);
+        ? await this.client.index(requestParams, { meta: true })
+        : await this.client.create(requestParams, { meta: true });
+
+    // throw if we can't verify a 404 response is from Elasticsearch
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
+    }
 
     return this._rawToSavedObject<T>({
       ...raw,
@@ -352,133 +421,156 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
 
-    let bulkGetRequestIndexCounter = 0;
-    const expectedResults: Either[] = objects.map((object) => {
+    let preflightCheckIndexCounter = 0;
+    const expectedResults = objects.map<
+      Either<
+        { type: string; id?: string; error: Payload },
+        {
+          method: 'index' | 'create';
+          object: SavedObjectsBulkCreateObject & { id: string };
+          preflightCheckIndex?: number;
+        }
+      >
+    >((object) => {
+      const { type, id, initialNamespaces } = object;
       let error: DecoratedError | undefined;
-      if (!this._allowedTypes.includes(object.type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
-      } else if (object.initialNamespaces) {
-        if (!this._registry.isShareable(object.type)) {
-          error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"initialNamespaces" can only be used on multi-namespace types'
-          );
-        } else if (!object.initialNamespaces.length) {
-          error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"initialNamespaces" must be a non-empty array of strings'
-          );
+      if (!this._allowedTypes.includes(type)) {
+        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      } else {
+        try {
+          this.validateInitialNamespaces(type, initialNamespaces);
+        } catch (e) {
+          error = e;
         }
       }
 
       if (error) {
         return {
-          tag: 'Left' as 'Left',
-          error: { id: object.id, type: object.type, error: errorContent(error) },
+          tag: 'Left',
+          value: { id, type, error: errorContent(error) },
         };
       }
 
-      const method = object.id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
-
-      if (object.id == null) {
-        object.id = SavedObjectsUtils.generateId();
-      }
+      const method = id && overwrite ? 'index' : 'create';
+      const requiresNamespacesCheck = id && this._registry.isMultiNamespace(type);
 
       return {
-        tag: 'Right' as 'Right',
+        tag: 'Right',
         value: {
           method,
-          object,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          object: { ...object, id: object.id || SavedObjectsUtils.generateId() },
+          ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
         },
       };
     });
 
-    const bulkGetDocs = expectedResults
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    const preflightCheckObjects = expectedResults
       .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { object: { type, id } } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      }));
-    const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget<SavedObjectsRawDocSource>(
-          {
-            body: {
-              docs: bulkGetDocs,
-            },
-          },
-          { ignore: [404] }
-        )
-      : undefined;
+      .filter(({ value }) => value.preflightCheckIndex !== undefined)
+      .map<PreflightCheckForCreateObject>(({ value }) => {
+        const { type, id, initialNamespaces } = value.object;
+        const namespaces = initialNamespaces ?? [namespaceString];
+        return { type, id, overwrite, namespaces };
+      });
+    const preflightCheckResponse = await preflightCheckForCreate({
+      registry: this._registry,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+      objects: preflightCheckObjects,
+    });
 
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
+    const expectedBulkResults = expectedResults.map<
+      Either<
+        { type: string; id?: string; error: Payload },
+        { esRequestIndex: number; requestedId: string; rawMigratedDoc: SavedObjectsRawDoc }
+      >
+    >((expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
       }
 
-      let savedObjectNamespace;
-      let savedObjectNamespaces;
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
       let versionProperties;
       const {
-        esRequestIndex,
+        preflightCheckIndex,
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
-      if (esRequestIndex !== undefined) {
-        const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && actualResult?.found === true;
-        // @ts-expect-error MultiGetHit._source is optional
-        if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
-          const { id, type } = object;
+      if (preflightCheckIndex !== undefined) {
+        const preflightResult = preflightCheckResponse[preflightCheckIndex];
+        const { type, id, existingDocument, error } = preflightResult;
+        if (error) {
+          const { metadata } = error;
           return {
-            tag: 'Left' as 'Left',
-            error: {
+            tag: 'Left',
+            value: {
               id,
               type,
               error: {
                 ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                metadata: { isNotOverwritable: true },
+                ...(metadata && { metadata }),
               },
             },
           };
         }
         savedObjectNamespaces =
-          initialNamespaces ||
-          // @ts-expect-error MultiGetHit._source is optional
-          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
-        // @ts-expect-error MultiGetHit._source is optional
-        versionProperties = getExpectedVersionProperties(version, actualResult);
+          initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
+        versionProperties = getExpectedVersionProperties(version, existingDocument);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = namespace;
+          savedObjectNamespace = initialNamespaces
+            ? normalizeNamespace(initialNamespaces[0])
+            : namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      const migrated = this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+        coreMigrationVersion: object.coreMigrationVersion,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        updated_at: time,
+        references: object.references || [],
+        originId: object.originId,
+      }) as SavedObjectSanitizedDoc<T>;
+
+      /**
+       * If a validation has been registered for this type, we run it against the migrated attributes.
+       * This is an imperfect solution because malformed attributes could have already caused the
+       * migration to fail, but it's the best we can do without devising a way to run validations
+       * inside the migration algorithm itself.
+       */
+      try {
+        this.validateObjectAttributes(object.type, migrated);
+      } catch (error) {
+        return {
+          tag: 'Left',
+          value: {
+            id: object.id,
+            type: object.type,
+            error,
+          },
+        };
+      }
+
       const expectedResult = {
         esRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-            updated_at: time,
-            references: object.references || [],
-            originId: object.originId,
-          }) as SavedObjectSanitizedDoc
-        ),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(migrated),
       };
 
       bulkCreateParams.push(
@@ -492,7 +584,7 @@ export class SavedObjectsRepository {
         expectedResult.rawMigratedDoc._source
       );
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      return { tag: 'Right', value: expectedResult };
     });
 
     const bulkResponse = bulkCreateParams.length
@@ -506,20 +598,15 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex] ?? {}
-        )[0] as any;
+        const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
 
+        const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
         if (error) {
-          return {
-            id: requestedId,
-            type: rawMigratedDoc._source.type,
-            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
-          };
+          return { type: rawMigratedDoc._source.type, id: requestedId, error };
         }
 
         // When method == 'index' the bulkResponse doesn't include the indexed
@@ -548,29 +635,30 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id } = object;
+    const expectedBulkGetResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      objects.map((object) => {
+        const { type, id } = object;
 
-      if (!this._allowedTypes.includes(type)) {
+        if (!this._allowedTypes.includes(type)) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+            },
+          };
+        }
+
         return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
+          tag: 'Right',
+          value: {
             type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+            id,
+            esRequestIndex: bulkGetRequestIndexCounter++,
           },
         };
-      }
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          type,
-          id,
-          esRequestIndex: bulkGetRequestIndexCounter++,
-        },
-      };
-    });
+      });
 
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
@@ -584,20 +672,30 @@ export class SavedObjectsRepository {
               docs: bulkGetDocs,
             },
           },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         )
       : undefined;
+    // throw if we can't verify a 404 response is from Elasticsearch
+    if (
+      bulkGetResponse &&
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetResponse.statusCode,
+        headers: bulkGetResponse.headers,
+      })
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
 
     const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
     expectedBulkGetResults.forEach((expectedResult) => {
       if (isLeft(expectedResult)) {
-        errors.push(expectedResult.error as any);
+        errors.push(expectedResult.value as any);
         return;
       }
 
       const { type, id, esRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      if (doc?.found) {
+      if (isMgetDoc(doc) && doc.found) {
         errors.push({
           id,
           type,
@@ -633,11 +731,22 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
-    let preflightResult: SavedObjectsRawDoc | undefined;
+    let preflightResult: PreflightCheckNamespacesResult | undefined;
 
     if (this._registry.isMultiNamespace(type)) {
-      preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
-      const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult) ?? [];
+      // note: this check throws an error if the object is found but does not exist in this namespace
+      preflightResult = await this.preflightCheckNamespaces({
+        type,
+        id,
+        namespace,
+      });
+      if (
+        preflightResult.checkResult === 'found_outside_namespace' ||
+        preflightResult.checkResult === 'not_found'
+      ) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      const existingNamespaces = preflightResult.savedObjectNamespaces ?? [];
       if (
         !force &&
         (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
@@ -648,23 +757,46 @@ export class SavedObjectsRepository {
       }
     }
 
-    const { body, statusCode } = await this.client.delete(
+    const { body, statusCode, headers } = await this.client.delete(
       {
         id: rawId,
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult),
+        ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
         refresh,
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
+
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+    }
 
     const deleted = body.result === 'deleted';
     if (deleted) {
+      const namespaces = preflightResult?.savedObjectNamespaces;
+      if (namespaces) {
+        // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
+        await deleteLegacyUrlAliases({
+          mappings: this._mappings,
+          registry: this._registry,
+          client: this.client,
+          getIndexForType: this.getIndexForType.bind(this),
+          type,
+          id,
+          ...(namespaces.includes(ALL_NAMESPACES_STRING)
+            ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
+            : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
+        }).catch((err) => {
+          // The object has already been deleted, but we caught an error when attempting to delete aliases.
+          // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
+          this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
+        });
+      }
       return {};
     }
 
     const deleteDocNotFound = body.result === 'not_found';
-    // @ts-expect-error 'error' does not exist on type 'DeleteResponse'
+    // @ts-expect-error @elastic/elasticsearch doesn't declare error on DeleteResponse
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
@@ -695,9 +827,18 @@ export class SavedObjectsRepository {
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
-    const typesToUpdate = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
+    const typesToUpdate = [
+      ...allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type)),
+      LEGACY_URL_ALIAS_TYPE,
+    ];
 
-    const { body } = await this.client.updateByQuery(
+    // Construct kueryNode to filter legacy URL aliases (these space-agnostic objects do not use root-level "namespace/s" fields)
+    const { buildNode } = esKuery.nodeTypes.function;
+    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetNamespace`, namespace);
+    const match2 = buildNode('not', buildNode('is', 'type', LEGACY_URL_ALIAS_TYPE));
+    const kueryNode = buildNode('or', [match1, match2]);
+
+    const { body, statusCode, headers } = await this.client.updateByQuery(
       {
         index: this.getIndicesForTypes(typesToUpdate),
         refresh: options.refresh,
@@ -718,13 +859,18 @@ export class SavedObjectsRepository {
           },
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
-            namespaces: namespace ? [namespace] : undefined,
+            namespaces: [namespace],
             type: typesToUpdate,
+            kueryNode,
           }),
         },
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
+    // throw if we can't verify a 404 response is from Elasticsearch
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
 
     return body;
   }
@@ -748,7 +894,9 @@ export class SavedObjectsRepository {
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
     const {
       search,
       defaultSearchOperator = 'OR',
@@ -768,6 +916,7 @@ export class SavedObjectsRepository {
       typeToNamespacesMap,
       filter,
       preference,
+      aggs,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -799,7 +948,7 @@ export class SavedObjectsRepository {
       : Array.from(typeToNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
-      return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -811,16 +960,24 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
-
-    try {
-      if (filter) {
+    if (filter) {
+      try {
         kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      } catch (e) {
+        if (e.name === 'KQLSyntaxError') {
+          throw SavedObjectsErrorHelpers.createBadRequestError(`KQLSyntaxError: ${e.message}`);
+        } else {
+          throw e;
+        }
       }
-    } catch (e) {
-      if (e.name === 'KQLSyntaxError') {
-        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
-      } else {
-        throw e;
+    }
+
+    let aggsObject;
+    if (aggs) {
+      try {
+        aggsObject = validateAndConvertAggregations(allowedTypes, aggs, this._mappings);
+      } catch (e) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid aggregation: ${e.message}`);
       }
     }
 
@@ -829,7 +986,7 @@ export class SavedObjectsRepository {
       index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(type, fields),
+      _source: includedFields(allowedTypes, fields),
       preference,
       rest_total_hits_as_int: true,
       size: perPage,
@@ -837,7 +994,8 @@ export class SavedObjectsRepository {
         size: perPage,
         seq_no_primary_term: true,
         from: perPage * (page - 1),
-        _source: includedFields(type, fields),
+        _source: includedFields(allowedTypes, fields),
+        ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
@@ -857,10 +1015,17 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
-      ignore: [404],
-    });
+    const { body, statusCode, headers } = await this.client.search<SavedObjectsRawDocSource>(
+      esOptions,
+      {
+        ignore: [404],
+        meta: true,
+      }
+    );
     if (statusCode === 404) {
+      if (!isSupportedEsServer(headers)) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+      }
       // 404 is only possible here if the index is missing, which
       // we don't want to leak, see "404s from missing index" above
       return {
@@ -872,20 +1037,21 @@ export class SavedObjectsRepository {
     }
 
     return {
+      ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
       page,
       per_page: perPage,
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
-        (hit: estypes.Hit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
-          // @ts-expect-error @elastic/elasticsearch declared Id as string | number
+        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           ...this._rawToSavedObject(hit),
           score: hit._score!,
-          // @ts-expect-error @elastic/elasticsearch declared sort as string | number
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           sort: hit.sort,
         })
       ),
       pit_id: body.pit_id,
-    } as SavedObjectsFindResponse<T>;
+    } as SavedObjectsFindResponse<T, A>;
   }
 
   /**
@@ -913,35 +1079,46 @@ export class SavedObjectsRepository {
     }
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id, fields } = object;
+    const expectedBulkGetResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      objects.map((object) => {
+        const { type, id, fields, namespaces } = object;
 
-      if (!this._allowedTypes.includes(type)) {
+        let error: DecoratedError | undefined;
+        if (!this._allowedTypes.includes(type)) {
+          error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+        } else {
+          try {
+            this.validateObjectNamespaces(type, id, namespaces);
+          } catch (e) {
+            error = e;
+          }
+        }
+
+        if (error) {
+          return {
+            tag: 'Left',
+            value: { id, type, error: errorContent(error) },
+          };
+        }
+
         return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
+          tag: 'Right',
+          value: {
             type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+            id,
+            fields,
+            namespaces,
+            esRequestIndex: bulkGetRequestIndexCounter++,
           },
         };
-      }
+      });
 
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          type,
-          id,
-          fields,
-          esRequestIndex: bulkGetRequestIndexCounter++,
-        },
-      };
-    });
-
+    const getNamespaceId = (namespaces?: string[]) =>
+      namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
-      .map(({ value: { type, id, fields } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
+      .map(({ value: { type, id, fields, namespaces } }) => ({
+        _id: this._serializer.generateRawId(getNamespaceId(namespaces), type, id), // the namespace prefix is only used for single-namespace object types
         _index: this.getIndexForType(type),
         _source: { includes: includedFields(type, fields) },
       }));
@@ -952,32 +1129,90 @@ export class SavedObjectsRepository {
               docs: bulkGetDocs,
             },
           },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         )
       : undefined;
+    // fail fast if we can't verify a 404 is from Elasticsearch
+    if (
+      bulkGetResponse &&
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetResponse.statusCode,
+        headers: bulkGetResponse.headers,
+      })
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
 
     return {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
-        const { type, id, esRequestIndex } = expectedResult.value;
+        const {
+          type,
+          id,
+          namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)],
+          esRequestIndex,
+        } = expectedResult.value;
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
         // @ts-expect-error MultiGetHit._source is optional
-        if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
-          return ({
+        if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
+          return {
             id,
             type,
             error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          } as any) as SavedObject<T>;
+          } as any as SavedObject<T>;
         }
 
         // @ts-expect-error MultiGetHit._source is optional
-        return this.getSavedObjectFromSource(type, id, doc);
+        return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
+  }
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   *
+   * @param {array} objects - an array of objects containing id, type
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { resolved_objects: [{ saved_object, outcome }] }
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   */
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      incrementCounterInternal: this.incrementCounterInternal.bind(this),
+      objects,
+      options,
+    });
+    const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
+      // extract payloads from saved object errors
+      if ((result as InternalBulkResolveError).error) {
+        const errorResult = result as InternalBulkResolveError;
+        const { type, id, error } = errorResult;
+        return {
+          saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
+          outcome: 'exactMatch',
+        };
+      }
+      return result as SavedObjectsResolveResponse<T>;
+    });
+    return { resolved_objects: resolvedObjects };
   }
 
   /**
@@ -997,18 +1232,19 @@ export class SavedObjectsRepository {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
     const namespace = normalizeNamespace(options.namespace);
-
-    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
+    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
-
     const indexNotFound = statusCode === 404;
+    // check if we have the elasticsearch header when index is not found and, if we do, ensure it is from Elasticsearch
+    if (indexNotFound && !isSupportedEsServer(headers)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+    }
 
     if (
       !isFoundGetResponse(body) ||
@@ -1018,8 +1254,7 @@ export class SavedObjectsRepository {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
-    return this.getSavedObjectFromSource(type, id, body);
+    return getSavedObjectFromSource(this._registry, type, id, body);
   }
 
   /**
@@ -1036,113 +1271,21 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      incrementCounterInternal: this.incrementCounterInternal.bind(this),
+      objects: [{ type, id }],
+      options,
+    });
+    const [result] = bulkResults;
+    if ((result as InternalBulkResolveError).error) {
+      throw (result as InternalBulkResolveError).error;
     }
-
-    const namespace = normalizeNamespace(options.namespace);
-    if (namespace === undefined) {
-      // legacy URL aliases cannot exist for the default namespace; just attempt to get the object
-      return this.resolveExactMatch(type, id, options);
-    }
-
-    const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
-    const time = this._getCurrentTime();
-
-    // retrieve the alias, and if it is not disabled, update it
-    const aliasResponse = await this.client.update<{ 'legacy-url-alias': LegacyUrlAlias }>(
-      {
-        id: rawAliasId,
-        index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
-        refresh: false,
-        _source: 'true',
-        body: {
-          script: {
-            source: `
-              if (ctx._source[params.type].disabled != true) {
-                if (ctx._source[params.type].resolveCounter == null) {
-                  ctx._source[params.type].resolveCounter = 1;
-                }
-                else {
-                  ctx._source[params.type].resolveCounter += 1;
-                }
-                ctx._source[params.type].lastResolved = params.time;
-                ctx._source.updated_at = params.time;
-              }
-            `,
-            lang: 'painless',
-            params: {
-              type: LEGACY_URL_ALIAS_TYPE,
-              time,
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    );
-
-    if (
-      aliasResponse.statusCode === 404 ||
-      aliasResponse.body.get?.found === false ||
-      aliasResponse.body.get?._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
-    ) {
-      // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
-      return this.resolveExactMatch(type, id, options);
-    }
-
-    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get!._source[LEGACY_URL_ALIAS_TYPE];
-    const objectIndex = this.getIndexForType(type);
-    const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
-      {
-        body: {
-          docs: [
-            {
-              // attempt to find an exact match for the given ID
-              _id: this._serializer.generateRawId(namespace, type, id),
-              _index: objectIndex,
-            },
-            {
-              // also attempt to find a match for the legacy URL alias target ID
-              _id: this._serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
-              _index: objectIndex,
-            },
-          ],
-        },
-      },
-      { ignore: [404] }
-    );
-
-    const exactMatchDoc = bulkGetResponse?.body.docs[0];
-    const aliasMatchDoc = bulkGetResponse?.body.docs[1];
-    const foundExactMatch =
-      // @ts-expect-error MultiGetHit._source is optional
-      exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
-    const foundAliasMatch =
-      // @ts-expect-error MultiGetHit._source is optional
-      aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
-
-    if (foundExactMatch && foundAliasMatch) {
-      return {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
-        outcome: 'conflict',
-        aliasTargetId: legacyUrlAlias.targetId,
-      };
-    } else if (foundExactMatch) {
-      return {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
-        outcome: 'exactMatch',
-      };
-    } else if (foundAliasMatch) {
-      return {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
-        outcome: 'aliasMatch',
-        aliasTargetId: legacyUrlAlias.targetId,
-      };
-    }
-    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    return result as SavedObjectsResolveResponse<T>;
   }
 
   /**
@@ -1160,21 +1303,65 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions = {}
+    options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
-    const namespace = normalizeNamespace(options.namespace);
-
-    let preflightResult: SavedObjectsRawDoc | undefined;
-    if (this._registry.isMultiNamespace(type)) {
-      preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
+    if (!id) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
     }
 
-    const time = this._getCurrentTime();
+    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const namespace = normalizeNamespace(options.namespace);
+
+    let preflightResult: PreflightCheckNamespacesResult | undefined;
+    if (this._registry.isMultiNamespace(type)) {
+      preflightResult = await this.preflightCheckNamespaces({
+        type,
+        id,
+        namespace,
+      });
+      if (
+        preflightResult.checkResult === 'found_outside_namespace' ||
+        (!upsert && preflightResult.checkResult === 'not_found')
+      ) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      if (upsert && preflightResult.checkResult === 'not_found') {
+        // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
+        // This takes an extra round trip to Elasticsearch, but this won't happen often.
+        // TODO: improve performance by combining these into a single preflight check
+        await this.preflightCheckForUpsertAliasConflict(type, id, namespace);
+      }
+    }
+
+    const time = getCurrentTime();
+
+    let rawUpsert: SavedObjectsRawDoc | undefined;
+    // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
+    if (upsert && (!preflightResult || preflightResult.checkResult === 'not_found')) {
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
+
+      if (this._registry.isSingleNamespace(type) && namespace) {
+        savedObjectNamespace = namespace;
+      } else if (this._registry.isMultiNamespace(type)) {
+        savedObjectNamespaces = preflightResult!.savedObjectNamespaces;
+      }
+
+      const migrated = this._migrator.migrateDocument({
+        id,
+        type,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        attributes: {
+          ...upsert,
+        },
+        updated_at: time,
+      });
+      rawUpsert = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    }
 
     const doc = {
       [type]: attributes,
@@ -1182,20 +1369,23 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body } = await this.client
-      .update<SavedObjectsRawDocSource>({
+    const body = await this.client
+      .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version, preflightResult),
+        ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
         refresh,
-
         body: {
           doc,
+          ...(rawUpsert && { upsert: rawUpsert._source }),
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
       })
       .catch((err) => {
+        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+          throw err;
+        }
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           // see "404s from missing index" above
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1224,169 +1414,54 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Adds one or more namespaces to a given multi-namespace saved object. This method and
-   * [`deleteFromNamespaces`]{@link SavedObjectsRepository.deleteFromNamespaces} are the only ways to change which Spaces a multi-namespace
-   * saved object is shared to.
+   * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
+   * type.
+   *
+   * @param objects The objects to get the references for.
    */
-  async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<SavedObjectsAddToNamespacesResponse> {
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    if (!this._registry.isShareable(type)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `${type} doesn't support multiple namespaces`
-      );
-    }
-
-    if (!namespaces.length) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'namespaces must be a non-empty array of strings'
-      );
-    }
-
-    const { version, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
-    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
-
-    const rawId = this._serializer.generateRawId(undefined, type, id);
-    const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
-    const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
-    // there should never be a case where a multi-namespace object does not have any existing namespaces
-    // however, it is a possibility if someone manually modifies the document in Elasticsearch
-    const time = this._getCurrentTime();
-
-    const doc = {
-      updated_at: time,
-      namespaces: existingNamespaces ? unique(existingNamespaces.concat(namespaces)) : namespaces,
-    };
-
-    const { statusCode } = await this.client.update(
-      {
-        id: rawId,
-        index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version, preflightResult),
-        refresh,
-        body: {
-          doc,
-        },
-      },
-      { ignore: [404] }
-    );
-
-    if (statusCode === 404) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    return { namespaces: doc.namespaces };
+  async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
+  ) {
+    return collectMultiNamespaceReferences({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+      objects,
+      options,
+    });
   }
 
   /**
-   * Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted
-   * entirely. This method and [`addToNamespaces`]{@link SavedObjectsRepository.addToNamespaces} are the only ways to change which Spaces a
-   * multi-namespace saved object is shared to.
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
    */
-  async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    if (!this._registry.isShareable(type)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `${type} doesn't support multiple namespaces`
-      );
-    }
-
-    if (!namespaces.length) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'namespaces must be a non-empty array of strings'
-      );
-    }
-
-    const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
-    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
-
-    const rawId = this._serializer.generateRawId(undefined, type, id);
-    const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
-    const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
-    // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
-    const remainingNamespaces = existingNamespaces?.filter((x) => !namespaces.includes(x));
-
-    if (remainingNamespaces?.length) {
-      // if there is 1 or more namespace remaining, update the saved object
-      const time = this._getCurrentTime();
-
-      const doc = {
-        updated_at: time,
-        namespaces: remainingNamespaces,
-      };
-
-      const { statusCode } = await this.client.update(
-        {
-          id: rawId,
-          index: this.getIndexForType(type),
-          ...getExpectedVersionProperties(undefined, preflightResult),
-          refresh,
-
-          body: {
-            doc,
-          },
-        },
-        {
-          ignore: [404],
-        }
-      );
-
-      if (statusCode === 404) {
-        // see "404s from missing index" above
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-      return { namespaces: doc.namespaces };
-    } else {
-      // if there are no namespaces remaining, delete the saved object
-      const { body, statusCode } = await this.client.delete(
-        {
-          id: this._serializer.generateRawId(undefined, type, id),
-          refresh,
-          ...getExpectedVersionProperties(undefined, preflightResult),
-          index: this.getIndexForType(type),
-        },
-        {
-          ignore: [404],
-        }
-      );
-
-      const deleted = body.result === 'deleted';
-      if (deleted) {
-        return { namespaces: [] };
-      }
-
-      const deleteDocNotFound = body.result === 'not_found';
-      // @ts-expect-error
-      const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
-      if (deleteDocNotFound || deleteIndexNotFound) {
-        // see "404s from missing index" above
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-
-      throw new Error(
-        `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
-          type,
-          id,
-          response: { body, statusCode },
-        })}`
-      );
-    }
+  async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options?: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return updateObjectsSpaces({
+      mappings: this._mappings,
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      logger: this._logger,
+      getIndexForType: this.getIndexForType.bind(this),
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options,
+    });
   }
 
   /**
@@ -1401,61 +1476,62 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id } = object;
+    const expectedBulkGetResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      objects.map((object) => {
+        const { type, id } = object;
 
-      if (!this._allowedTypes.includes(type)) {
+        if (!this._allowedTypes.includes(type)) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            },
+          };
+        }
+
+        const { attributes, references, version, namespace: objectNamespace } = object;
+
+        if (objectNamespace === ALL_NAMESPACES_STRING) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(
+                SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"')
+              ),
+            },
+          };
+        }
+        // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
+        // The object namespace string, if defined, will supersede the operation's namespace ID.
+
+        const documentToSave = {
+          [type]: attributes,
+          updated_at: time,
+          ...(Array.isArray(references) && { references }),
+        };
+
+        const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
+
         return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
+          tag: 'Right',
+          value: {
             type,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            id,
+            version,
+            documentToSave,
+            objectNamespace,
+            ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
           },
         };
-      }
-
-      const { attributes, references, version, namespace: objectNamespace } = object;
-
-      if (objectNamespace === ALL_NAMESPACES_STRING) {
-        return {
-          tag: 'Left' as 'Left',
-          error: {
-            id,
-            type,
-            error: errorContent(
-              SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"')
-            ),
-          },
-        };
-      }
-      // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
-      // The object namespace string, if defined, will supersede the operation's namespace ID.
-
-      const documentToSave = {
-        [type]: attributes,
-        updated_at: time,
-        ...(Array.isArray(references) && { references }),
-      };
-
-      const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          type,
-          id,
-          version,
-          documentToSave,
-          objectNamespace,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-        },
-      };
-    });
+      });
 
     const getNamespaceId = (objectNamespace?: string) =>
       objectNamespace !== undefined
@@ -1481,41 +1557,46 @@ export class SavedObjectsRepository {
           },
           {
             ignore: [404],
+            meta: true,
           }
         )
       : undefined;
+    // fail fast if we can't verify a 404 response is from Elasticsearch
+    if (
+      bulkGetResponse &&
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetResponse.statusCode,
+        headers: bulkGetResponse.headers,
+      })
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
 
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
-    const expectedBulkUpdateResults: Either[] = expectedBulkGetResults.map(
-      (expectedBulkGetResult) => {
+    const expectedBulkUpdateResults: Array<Either<Record<string, any>, Record<string, any>>> =
+      expectedBulkGetResults.map((expectedBulkGetResult) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
 
-        const {
-          esRequestIndex,
-          id,
-          type,
-          version,
-          documentToSave,
-          objectNamespace,
-        } = expectedBulkGetResult.value;
+        const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
+          expectedBulkGetResult.value;
 
         let namespaces;
         let versionProperties;
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && actualResult?.found === true;
+          const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
           if (
             !docFound ||
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
           ) {
             return {
-              tag: 'Left' as 'Left',
-              error: {
+              tag: 'Left',
+              value: {
                 id,
                 type,
                 error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
@@ -1556,9 +1637,8 @@ export class SavedObjectsRepository {
           { doc: documentToSave }
         );
 
-        return { tag: 'Right' as 'Right', value: expectedResult };
-      }
-    );
+        return { tag: 'Right', value: expectedResult };
+      });
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const bulkUpdateResponse = bulkUpdateParams.length
@@ -1573,26 +1653,24 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex] ?? {};
+        const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
+        const rawResponse = Object.values(response)[0] as any;
+
+        const error = getBulkOperationError(type, id, rawResponse);
+        if (error) {
+          return { type, id, error };
+        }
+
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
-        const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
-          response
-        )[0] as any;
+        const { _seq_no: seqNo, _primary_term: primaryTerm, get } = rawResponse;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { [type]: attributes, references, updated_at } = documentToSave;
-        if (error) {
-          return {
-            id,
-            type,
-            error: getBulkOperationError(error, type, id),
-          };
-        }
 
         const { originId } = get._source;
         return {
@@ -1627,7 +1705,7 @@ export class SavedObjectsRepository {
     // we need to target all SO indices as all types of objects may have references to the given SO.
     const targetIndices = this.getIndicesForTypes(allTypes);
 
-    const { body } = await this.client.updateByQuery(
+    const { body, statusCode, headers } = await this.client.updateByQuery(
       {
         index: targetIndices,
         refresh,
@@ -1658,8 +1736,12 @@ export class SavedObjectsRepository {
           }),
         },
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
+    // fail fast if we can't verify a 404 is from Elasticsearch
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+    }
 
     if (body.failures?.length) {
       throw SavedObjectsErrorHelpers.createConflictError(
@@ -1687,7 +1769,7 @@ export class SavedObjectsRepository {
    *
    * When using incrementCounter for collecting usage data, you need to ensure
    * that usage collection happens on a best-effort basis and doesn't
-   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
+   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
    *
    * @example
    * ```ts
@@ -1731,8 +1813,8 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
-    options: SavedObjectsIncrementCounterOptions<T> = {}
-  ): Promise<SavedObject<T>> {
+    options?: SavedObjectsIncrementCounterOptions<T>
+  ) {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
@@ -1753,6 +1835,16 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
+    return this.incrementCounterInternal<T>(type, id, counterFields, options);
+  }
+
+  /** @internal incrementCounter function that is used internally and bypasses validation checks. */
+  private async incrementCounterInternal<T = unknown>(
+    type: string,
+    id: string,
+    counterFields: Array<string | SavedObjectsIncrementCounterField>,
+    options: SavedObjectsIncrementCounterOptions<T> = {}
+  ): Promise<SavedObject<T>> {
     const {
       migrationVersion,
       refresh = DEFAULT_REFRESH_SETTING,
@@ -1760,9 +1852,25 @@ export class SavedObjectsRepository {
       upsertAttributes,
     } = options;
 
+    if (!id) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
+    }
+
     const normalizedCounterFields = counterFields.map((counterField) => {
-      const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
-      const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
+      /**
+       * no counterField configs provided, instead a field name string was passed.
+       * ie `incrementCounter(so_type, id, ['my_field_name'])`
+       * Using the default of incrementing by 1
+       */
+      if (typeof counterField === 'string') {
+        return {
+          fieldName: counterField,
+          incrementBy: initialize ? 0 : 1,
+        };
+      }
+
+      const { incrementBy = 1, fieldName } = counterField;
+
       return {
         fieldName,
         incrementBy: initialize ? 0 : incrementBy,
@@ -1770,14 +1878,31 @@ export class SavedObjectsRepository {
     });
     const namespace = normalizeNamespace(options.namespace);
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     let savedObjectNamespace;
     let savedObjectNamespaces: string[] | undefined;
 
     if (this._registry.isSingleNamespace(type) && namespace) {
       savedObjectNamespace = namespace;
     } else if (this._registry.isMultiNamespace(type)) {
-      savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+      // note: this check throws an error if the object is found but does not exist in this namespace
+      const preflightResult = await this.preflightCheckNamespaces({
+        type,
+        id,
+        namespace,
+      });
+      if (preflightResult.checkResult === 'found_outside_namespace') {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      }
+
+      if (preflightResult.checkResult === 'not_found') {
+        // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
+        // This takes an extra round trip to Elasticsearch, but this won't happen often.
+        // TODO: improve performance by combining these into a single preflight check
+        await this.preflightCheckForUpsertAliasConflict(type, id, namespace);
+      }
+
+      savedObjectNamespaces = preflightResult.savedObjectNamespaces;
     }
 
     // attributes: { [counterFieldName]: incrementBy },
@@ -1800,12 +1925,12 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const { body } = await this.client.update<SavedObjectsRawDocSource>({
+    const body = await this.client.update<unknown, unknown, SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
       require_alias: true,
-      _source: 'true',
+      _source: true,
       body: {
         script: {
           source: `
@@ -1903,18 +2028,17 @@ export class SavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
-    const {
-      body,
-      statusCode,
-    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
-      // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
-      esOptions,
-      {
-        ignore: [404],
-      }
-    );
+    const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
+      ignore: [404],
+      meta: true,
+    });
+
     if (statusCode === 404) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+      if (!isSupportedEsServer(headers)) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+      } else {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+      }
     }
 
     return {
@@ -1967,11 +2091,9 @@ export class SavedObjectsRepository {
     id: string,
     options?: SavedObjectsClosePointInTimeOptions
   ): Promise<SavedObjectsClosePointInTimeResponse> {
-    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+    return await this.client.closePointInTime({
       body: { id },
     });
-
-    return body;
   }
 
   /**
@@ -2019,10 +2141,10 @@ export class SavedObjectsRepository {
    * }
    * ```
    */
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): ISavedObjectsPointInTimeFinder {
+  ): ISavedObjectsPointInTimeFinder<T, A> {
     return new PointInTimeFinder(findOptions, {
       logger: this._logger,
       client: this,
@@ -2036,16 +2158,12 @@ export class SavedObjectsRepository {
    * @param type - the type
    */
   private getIndexForType(type: string) {
-    // TODO migrationsV2: Remove once we release migrations v2
-    //   This is a hacky, but it required the least amount of changes to
-    //   existing code to support a migrations v2 index. Long term we would
-    //   want to always use the type registry to resolve a type's index
-    //   (including the default index).
-    if (this._migrator.savedObjectsConfig.enableV2) {
-      return `${this._registry.getIndex(type) || this._index}_${this._migrator.kibanaVersion}`;
-    } else {
-      return this._registry.getIndex(type) || this._index;
-    }
+    return getIndexForType({
+      type,
+      defaultIndex: this._index,
+      typeRegistry: this._registry,
+      kibanaVersion: this._migrator.kibanaVersion,
+    });
   }
 
   /**
@@ -2059,10 +2177,6 @@ export class SavedObjectsRepository {
     return unique(types.map((t) => this.getIndexForType(t)));
   }
 
-  private _getCurrentTime() {
-    return new Date().toISOString();
-  }
-
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     const { namespace, type } = savedObject;
@@ -2072,175 +2186,148 @@ export class SavedObjectsRepository {
     return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
-  /**
-   * Check to ensure that a raw document exists in a namespace. If the document is not a multi-namespace type, then this returns `true` as
-   * we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to ensure that the
-   * document's `namespaces` value includes the string representation of the given namespace.
-   *
-   * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
-   * format mentioned above do not apply.
-   */
-  private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace?: string) {
-    const rawDocType = raw._source.type;
+  private rawDocExistsInNamespaces(raw: SavedObjectsRawDoc, namespaces: string[]) {
+    return rawDocExistsInNamespaces(this._registry, raw, namespaces);
+  }
 
-    // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
-    // of the document ID format and don't need to check this
-    if (!this._registry.isMultiNamespace(rawDocType)) {
-      return true;
-    }
-
-    const namespaces = raw._source.namespaces;
-    const existsInNamespace =
-      namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
-      namespaces?.includes('*');
-    return existsInNamespace ?? false;
+  private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace: string | undefined) {
+    return rawDocExistsInNamespace(this._registry, raw, namespace);
   }
 
   /**
-   * Pre-flight check to get a multi-namespace saved object's included namespaces. This ensures that, if the saved object exists, it
-   * includes the target namespace.
-   *
-   * @param type The type of the saved object.
-   * @param id The ID of the saved object.
-   * @param namespace The target namespace.
-   * @returns Array of namespaces that this saved object currently includes, or (if the object does not exist yet) the namespaces that a
-   * newly-created object will include. Value may be undefined if an existing saved object has no namespaces attribute; this should not
-   * happen in normal operations, but it is possible if the Elasticsearch document is manually modified.
-   * @throws Will throw an error if the saved object exists and it does not include the target namespace.
+   * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
    */
-  private async preflightGetNamespaces(type: string, id: string, namespace?: string) {
+  private async preflightCheckNamespaces({
+    type,
+    id,
+    namespace,
+    initialNamespaces,
+  }: PreflightCheckNamespacesParams): Promise<PreflightCheckNamespacesResult> {
     if (!this._registry.isMultiNamespace(type)) {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
 
-    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
+    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
       },
       {
         ignore: [404],
+        meta: true,
       }
     );
+
+    const namespaces = initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)];
 
     const indexFound = statusCode !== 404;
     if (indexFound && isFoundGetResponse(body)) {
-      if (!this.rawDocExistsInNamespace(body, namespace)) {
-        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      if (!this.rawDocExistsInNamespaces(body, namespaces)) {
+        return { checkResult: 'found_outside_namespace' };
       }
-      return getSavedObjectNamespaces(namespace, body);
+      return {
+        checkResult: 'found_in_namespace',
+        savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace, body),
+        rawDocSource: body,
+      };
+    } else if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      // checking if the 404 is from Elasticsearch
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    return getSavedObjectNamespaces(namespace);
+    return {
+      checkResult: 'not_found',
+      savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace),
+    };
   }
 
   /**
-   * Pre-flight check for a multi-namespace saved object's namespaces. This ensures that, if the saved object exists, it includes the target
-   * namespace.
-   *
-   * @param type The type of the saved object.
-   * @param id The ID of the saved object.
-   * @param namespace The target namespace.
-   * @returns Raw document from Elasticsearch.
-   * @throws Will throw an error if the saved object is not found, or if it doesn't include the target namespace.
+   * Pre-flight check to ensure that an upsert which would create a new object does not result in an alias conflict.
    */
-  private async preflightCheckIncludesNamespace(type: string, id: string, namespace?: string) {
-    if (!this._registry.isMultiNamespace(type)) {
-      throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
+  private async preflightCheckForUpsertAliasConflict(
+    type: string,
+    id: string,
+    namespace: string | undefined
+  ) {
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    const [{ error }] = await preflightCheckForCreate({
+      registry: this._registry,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+      objects: [{ type, id, namespaces: [namespaceString] }],
+    });
+    if (error?.type === 'aliasConflict') {
+      throw SavedObjectsErrorHelpers.createConflictError(type, id);
+    }
+    // any other error from this check does not matter
+  }
+
+  /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */
+  private validateInitialNamespaces(type: string, initialNamespaces: string[] | undefined) {
+    if (!initialNamespaces) {
+      return;
     }
 
-    const rawId = this._serializer.generateRawId(undefined, type, id);
-    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
-      {
-        id: rawId,
-        index: this.getIndexForType(type),
-      },
-      { ignore: [404] }
-    );
-
-    const indexFound = statusCode !== 404;
-    if (
-      !indexFound ||
-      !isFoundGetResponse(body) ||
-      !this.rawDocExistsInNamespace(body, namespace)
+    if (this._registry.isNamespaceAgnostic(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"initialNamespaces" cannot be used on space-agnostic types'
+      );
+    } else if (!initialNamespaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"initialNamespaces" must be a non-empty array of strings'
+      );
+    } else if (
+      !this._registry.isShareable(type) &&
+      (initialNamespaces.length > 1 || initialNamespaces.includes(ALL_NAMESPACES_STRING))
     ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"initialNamespaces" can only specify a single space when used with space-isolated types'
+      );
+    }
+  }
+
+  /** The object-specific `namespaces` field (bulkGet) is used to check if an object exists in any of a given number of spaces. */
+  private validateObjectNamespaces(type: string, id: string, namespaces: string[] | undefined) {
+    if (!namespaces) {
+      return;
+    }
+
+    if (this._registry.isNamespaceAgnostic(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"namespaces" cannot be used on space-agnostic types'
+      );
+    } else if (!namespaces.length) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    } else if (
+      !this._registry.isShareable(type) &&
+      (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"namespaces" can only specify a single space when used with space-isolated types'
+      );
     }
-    return body;
   }
 
-  private getSavedObjectFromSource<T>(
-    type: string,
-    id: string,
-    doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
-  ): SavedObject<T> {
-    const { originId, updated_at: updatedAt } = doc._source;
-
-    let namespaces: string[] = [];
-    if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = doc._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
-      ];
+  /** Validate a migrated doc against the registered saved object type's schema. */
+  private validateObjectAttributes(type: string, doc: SavedObjectSanitizedDoc) {
+    const savedObjectType = this._registry.getType(type);
+    if (!savedObjectType?.schemas) {
+      return;
     }
 
-    return {
-      id,
+    const validator = new SavedObjectsTypeValidator({
+      logger: this._logger.get('type-validator'),
       type,
-      namespaces,
-      ...(originId && { originId }),
-      ...(updatedAt && { updated_at: updatedAt }),
-      version: encodeHitVersion(doc),
-      attributes: doc._source[type],
-      references: doc._source.references || [],
-      migrationVersion: doc._source.migrationVersion,
-      coreMigrationVersion: doc._source.coreMigrationVersion,
-    };
-  }
+      validationMap: savedObjectType.schemas,
+    });
 
-  private async resolveExactMatch<T>(
-    type: string,
-    id: string,
-    options: SavedObjectsBaseOptions
-  ): Promise<SavedObjectsResolveResponse<T>> {
-    const object = await this.get<T>(type, id, options);
-    return { saved_object: object, outcome: 'exactMatch' };
+    try {
+      validator.validate(this._migrator.kibanaVersion, doc);
+    } catch (error) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
+    }
   }
-}
-
-function getBulkOperationError(
-  error: { type: string; reason?: string; index?: string },
-  type: string,
-  id: string
-) {
-  switch (error.type) {
-    case 'version_conflict_engine_exception':
-      return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
-    case 'document_missing_exception':
-      return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-    case 'index_not_found_exception':
-      return errorContent(SavedObjectsErrorHelpers.createIndexAliasNotFoundError(error.index!));
-    default:
-      return {
-        message: error.reason || JSON.stringify(error),
-      };
-  }
-}
-
-/**
- * Returns an object with the expected version properties. This facilitates Elasticsearch's Optimistic Concurrency Control.
- *
- * @param version Optional version specified by the consumer.
- * @param document Optional existing document that was obtained in a preflight operation.
- */
-function getExpectedVersionProperties(version?: string, document?: SavedObjectsRawDoc) {
-  if (version) {
-    return decodeRequestVersion(version);
-  } else if (document) {
-    return {
-      if_seq_no: document._seq_no,
-      if_primary_term: document._primary_term,
-    };
-  }
-  return {};
 }
 
 /**
@@ -2262,20 +2349,6 @@ function getSavedObjectNamespaces(
 }
 
 /**
- * Ensure that a namespace is always in its namespace ID representation.
- * This allows `'default'` to be used interchangeably with `undefined`.
- */
-const normalizeNamespace = (namespace?: string) => {
-  if (namespace === ALL_NAMESPACES_STRING) {
-    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
-  } else if (namespace === undefined) {
-    return namespace;
-  } else {
-    return SavedObjectsUtils.namespaceStringToId(namespace);
-  }
-};
-
-/**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.
  */
 const errorContent = (error: DecoratedError) => error.output.payload;
@@ -2283,7 +2356,7 @@ const errorContent = (error: DecoratedError) => error.output.payload;
 const unique = (array: string[]) => [...new Set(array)];
 
 /**
- * Type and type guard function for converting a possibly not existant doc to an existant doc.
+ * Type and type guard function for converting a possibly not existent doc to an existent doc.
  */
 type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocument> &
   Required<

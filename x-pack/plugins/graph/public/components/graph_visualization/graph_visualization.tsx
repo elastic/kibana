@@ -9,31 +9,14 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
-import { WorkspaceNode, WorkspaceEdge } from '../../types';
+import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 
-/*
- * The layouting algorithm sets a few extra properties on
- * node objects to handle grouping. This will be moved to
- * a separate data structure when the layouting is migrated
- */
-
-export interface GroupAwareWorkspaceNode extends WorkspaceNode {
-  kx: number;
-  ky: number;
-  numChildren: number;
-}
-
-export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
-  topTarget: GroupAwareWorkspaceNode;
-  topSrc: GroupAwareWorkspaceNode;
-}
-
 export interface GraphVisualizationProps {
-  nodes?: GroupAwareWorkspaceNode[];
-  edges?: GroupAwareWorkspaceEdge[];
-  edgeClick: (edge: GroupAwareWorkspaceEdge) => void;
-  nodeClick: (node: GroupAwareWorkspaceNode, e: React.MouseEvent<Element, MouseEvent>) => void;
+  workspace: Workspace;
+  onSetControl: (control: ControlType) => void;
+  selectSelected: (node: WorkspaceNode) => void;
+  onSetMergeCandidates: (terms: TermIntersect[]) => void;
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -55,12 +38,38 @@ function registerZooming(element: SVGSVGElement) {
 }
 
 export function GraphVisualization({
-  nodes,
-  edges,
-  edgeClick,
-  nodeClick,
+  workspace,
+  selectSelected,
+  onSetControl,
+  onSetMergeCandidates,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
+
+  const nodeClick = (n: WorkspaceNode, event: React.MouseEvent) => {
+    // Selection logic - shift key+click helps selects multiple nodes
+    // Without the shift key we deselect all prior selections (perhaps not
+    // a great idea for touch devices with no concept of shift key)
+    if (!event.shiftKey) {
+      const prevSelection = n.isSelected;
+      workspace.selectNone();
+      n.isSelected = prevSelection;
+    }
+    if (workspace.toggleNodeSelection(n)) {
+      selectSelected(n);
+    } else {
+      onSetControl('none');
+    }
+    workspace.changeHandler();
+  };
+
+  const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
+    const mergeCandidates: TermIntersect[] = [...termIntersects];
+    onSetMergeCandidates(mergeCandidates);
+    onSetControl('mergeTerms');
+  };
+
+  const edgeClick = (edge: WorkspaceEdge) =>
+    workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
 
   return (
     <svg
@@ -79,30 +88,45 @@ export function GraphVisualization({
     >
       <g>
         <g>
-          {edges &&
-            edges.map((edge) => (
-              <line
+          {workspace.edges &&
+            workspace.edges.map((edge) => (
+              <g
                 key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
                   edge.target.data.field,
                   edge.target.data.term
                 )}`}
-                x1={edge.topSrc.kx}
-                y1={edge.topSrc.ky}
-                x2={edge.topTarget.kx}
-                y2={edge.topTarget.ky}
-                onClick={() => {
-                  edgeClick(edge);
-                }}
-                className={classNames('gphEdge', {
-                  'gphEdge--selected': edge.isSelected,
-                })}
-                style={{ strokeWidth: edge.width }}
-                strokeLinecap="round"
-              />
+                className="gphEdge--wrapper"
+              >
+                {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
+                <line
+                  x1={edge.topSrc.kx}
+                  y1={edge.topSrc.ky}
+                  x2={edge.topTarget.kx}
+                  y2={edge.topTarget.ky}
+                  className={classNames('gphEdge', {
+                    'gphEdge--selected': edge.isSelected,
+                  })}
+                  strokeLinecap="round"
+                  style={{ strokeWidth: edge.width }}
+                />
+                <line
+                  x1={edge.topSrc.kx}
+                  y1={edge.topSrc.ky}
+                  x2={edge.topTarget.kx}
+                  y2={edge.topTarget.ky}
+                  onClick={() => {
+                    edgeClick(edge);
+                  }}
+                  className="gphEdge gphEdge--clickable"
+                  style={{
+                    strokeWidth: Math.max(edge.width, 15),
+                  }}
+                />
+              </g>
             ))}
         </g>
-        {nodes &&
-          nodes
+        {workspace.nodes &&
+          workspace.nodes
             .filter((node) => !node.parent)
             .map((node) => (
               <g

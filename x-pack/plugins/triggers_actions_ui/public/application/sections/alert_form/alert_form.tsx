@@ -7,7 +7,7 @@
 
 import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +35,7 @@ import {
   EuiToolTip,
   EuiCallOut,
 } from '@elastic/eui';
-import { capitalize, isObject } from 'lodash';
+import { capitalize } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
@@ -44,14 +44,13 @@ import {
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
-  AlertTypeModel,
-  Alert,
+  RuleTypeModel,
+  Rule,
   IErrorObject,
   AlertAction,
-  AlertTypeIndex,
-  AlertType,
-  ValidationResult,
-  AlertTypeRegistryContract,
+  RuleTypeIndex,
+  RuleType,
+  RuleTypeRegistryContract,
   ActionTypeRegistryContract,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
@@ -74,101 +73,9 @@ import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
+import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const ENTER_KEY = 13;
-
-export function validateBaseProperties(alertObject: InitialAlert): ValidationResult {
-  const validationResult = { errors: {} };
-  const errors = {
-    name: new Array<string>(),
-    interval: new Array<string>(),
-    alertTypeId: new Array<string>(),
-    actionConnectors: new Array<string>(),
-  };
-  validationResult.errors = errors;
-  if (!alertObject.name) {
-    errors.name.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredNameText', {
-        defaultMessage: 'Name is required.',
-      })
-    );
-  }
-  if (alertObject.schedule.interval.length < 2) {
-    errors.interval.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
-        defaultMessage: 'Check interval is required.',
-      })
-    );
-  }
-  if (!alertObject.alertTypeId) {
-    errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
-        defaultMessage: 'Rule type is required.',
-      })
-    );
-  }
-  const emptyConnectorActions = alertObject.actions.find(
-    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
-  );
-  if (emptyConnectorActions !== undefined) {
-    errors.actionConnectors.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
-        defaultMessage: 'Action for {actionTypeId} connector is required.',
-        values: { actionTypeId: emptyConnectorActions.actionTypeId },
-      })
-    );
-  }
-  return validationResult;
-}
-
-export function getAlertErrors(
-  alert: Alert,
-  actionTypeRegistry: ActionTypeRegistryContract,
-  alertTypeModel: AlertTypeModel | null
-) {
-  const alertParamsErrors: IErrorObject = alertTypeModel
-    ? alertTypeModel.validate(alert.params).errors
-    : [];
-  const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
-  const alertErrors = {
-    ...alertParamsErrors,
-    ...alertBaseErrors,
-  } as IErrorObject;
-
-  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
-    return {
-      ...prev,
-      [alertAction.id]: actionTypeRegistry
-        .get(alertAction.actionTypeId)
-        ?.validateParams(alertAction.params).errors,
-    };
-  }, {}) as Record<string, IErrorObject>;
-  return {
-    alertParamsErrors,
-    alertBaseErrors,
-    alertActionsErrors,
-    alertErrors,
-  };
-}
-
-export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
-    return errorList.length >= 1;
-  });
-
-export function isValidAlert(
-  alertObject: InitialAlert | Alert,
-  validationResult: IErrorObject,
-  actionsErrors: Record<string, IErrorObject>
-): alertObject is Alert {
-  return (
-    !hasObjectErrors(validationResult) &&
-    Object.keys(actionsErrors).find((actionErrorsKey) =>
-      hasObjectErrors(actionsErrors[actionErrorsKey])
-    ) === undefined
-  );
-}
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
@@ -178,7 +85,7 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
@@ -186,6 +93,9 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
 }
+
+const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
+const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
 
 export const AlertForm = ({
   alert,
@@ -195,7 +105,7 @@ export const AlertForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   operation,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
 }: AlertFormProps) => {
@@ -210,13 +120,17 @@ export const AlertForm = ({
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
+  const [alertTypeModel, setAlertTypeModel] = useState<RuleTypeModel | null>(null);
 
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
-    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
+    alert.schedule.interval
+      ? getDurationNumberInItsUnit(alert.schedule.interval)
+      : defaultScheduleInterval
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
+    alert.schedule.interval
+      ? getDurationUnitValue(alert.schedule.interval)
+      : defaultScheduleIntervalUnit
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
@@ -225,13 +139,13 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
+  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | null>(null);
 
   const [availableAlertTypes, setAvailableAlertTypes] = useState<
-    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+    Array<{ alertTypeModel: RuleTypeModel; alertType: RuleType }>
   >([]);
   const [filteredAlertTypes, setFilteredAlertTypes] = useState<
-    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+    Array<{ alertTypeModel: RuleTypeModel; alertType: RuleType }>
   >([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
@@ -244,14 +158,14 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypesResult = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = new Map();
+        const index: RuleTypeIndex = new Map();
         for (const alertTypeItem of alertTypesResult) {
           index.set(alertTypeItem.id, alertTypeItem);
         }
         if (alert.alertTypeId && index.has(alert.alertTypeId)) {
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
-        setAlertTypesIndex(index);
+        setRuleTypeIndex(index);
 
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
@@ -287,26 +201,40 @@ export const AlertForm = ({
   }, []);
 
   useEffect(() => {
-    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
-    if (alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)) {
-      setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
+    setAlertTypeModel(alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null);
+    if (alert.alertTypeId && ruleTypeIndex && ruleTypeIndex.has(alert.alertTypeId)) {
+      setDefaultActionGroupId(ruleTypeIndex.get(alert.alertTypeId)!.defaultActionGroupId);
     }
-  }, [alert, alert.alertTypeId, alertTypesIndex, alertTypeRegistry]);
+  }, [alert, alert.alertTypeId, ruleTypeIndex, ruleTypeRegistry]);
 
-  const setAlertProperty = useCallback(
-    <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
+  useEffect(() => {
+    if (alert.schedule.interval) {
+      const interval = getDurationNumberInItsUnit(alert.schedule.interval);
+      const intervalUnit = getDurationUnitValue(alert.schedule.interval);
+
+      if (interval !== defaultScheduleInterval) {
+        setAlertInterval(interval);
+      }
+      if (intervalUnit !== defaultScheduleIntervalUnit) {
+        setAlertIntervalUnit(intervalUnit);
+      }
+    }
+  }, [alert.schedule.interval]);
+
+  const setRuleProperty = useCallback(
+    <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
       dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
     },
     [dispatch]
   );
 
   const setActions = useCallback(
-    (updatedActions: AlertAction[]) => setAlertProperty('actions', updatedActions),
-    [setAlertProperty]
+    (updatedActions: AlertAction[]) => setRuleProperty('actions', updatedActions),
+    [setRuleProperty]
   );
 
-  const setAlertParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
+  const setRuleParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setRuleParams' }, payload: { key, value } });
   };
 
   const setScheduleProperty = (key: string, value: any) => {
@@ -346,21 +274,21 @@ export const AlertForm = ({
         )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
+  }, [ruleTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
 
-  const getAvailableAlertTypes = (alertTypesResult: AlertType[]) =>
-    alertTypeRegistry
+  const getAvailableAlertTypes = (alertTypesResult: RuleType[]) =>
+    ruleTypeRegistry
       .list()
       .reduce(
         (
-          arr: Array<{ alertType: AlertType; alertTypeModel: AlertTypeModel }>,
-          alertTypeRegistryItem: AlertTypeModel
+          arr: Array<{ alertType: RuleType; alertTypeModel: RuleTypeModel }>,
+          ruleTypeRegistryItem: RuleTypeModel
         ) => {
-          const alertType = alertTypesResult.find((item) => alertTypeRegistryItem.id === item.id);
+          const alertType = alertTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
           if (alertType) {
             arr.push({
               alertType,
-              alertTypeModel: alertTypeRegistryItem,
+              alertTypeModel: ruleTypeRegistryItem,
             });
           }
           return arr;
@@ -373,9 +301,7 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
-  const selectedAlertType = alert?.alertTypeId
-    ? alertTypesIndex?.get(alert?.alertTypeId)
-    : undefined;
+  const selectedAlertType = alert?.alertTypeId ? ruleTypeIndex?.get(alert?.alertTypeId) : undefined;
   const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
   const getDefaultActionParams = useCallback(
     (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
@@ -390,7 +316,7 @@ export const AlertForm = ({
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
   const isActionGroupDisabledForActionType = useCallback(
-    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+    (alertType: RuleType, actionGroupId: string, actionTypeId: string): boolean => {
       return isActionGroupDisabledForActionTypeId(
         actionGroupId === alertType?.recoveryActionGroup?.id
           ? RecoveredActionGroup.id
@@ -402,7 +328,7 @@ export const AlertForm = ({
   );
 
   const AlertParamsExpressionComponent = alertTypeModel
-    ? alertTypeModel.alertParamsExpression
+    ? alertTypeModel.ruleParamsExpression
     : null;
 
   const alertTypesByProducer = filteredAlertTypes.reduce(
@@ -413,7 +339,7 @@ export const AlertForm = ({
           id: string;
           name: string;
           checkEnabledResult: IsEnabledResult | IsDisabledResult;
-          alertTypeItem: AlertTypeModel;
+          alertTypeItem: RuleTypeModel;
         }>
       >,
       alertTypeValue
@@ -476,35 +402,35 @@ export const AlertForm = ({
                 </span>
               );
               return (
-                <Fragment key={index}>
-                  <EuiListGroupItem
-                    data-test-subj={`${item.id}-SelectOption`}
-                    color="primary"
-                    label={
-                      item.checkEnabledResult.isEnabled ? (
-                        alertTypeListItemHtml
-                      ) : (
-                        <EuiToolTip
-                          position="top"
-                          data-test-subj={`${item.id}-disabledTooltip`}
-                          content={item.checkEnabledResult.message}
-                        >
-                          {alertTypeListItemHtml}
-                        </EuiToolTip>
-                      )
+                <EuiListGroupItem
+                  wrapText
+                  key={index}
+                  data-test-subj={`${item.id}-SelectOption`}
+                  color="primary"
+                  label={
+                    item.checkEnabledResult.isEnabled ? (
+                      alertTypeListItemHtml
+                    ) : (
+                      <EuiToolTip
+                        position="top"
+                        data-test-subj={`${item.id}-disabledTooltip`}
+                        content={item.checkEnabledResult.message}
+                      >
+                        {alertTypeListItemHtml}
+                      </EuiToolTip>
+                    )
+                  }
+                  isDisabled={!item.checkEnabledResult.isEnabled}
+                  onClick={() => {
+                    setRuleProperty('alertTypeId', item.id);
+                    setActions([]);
+                    setAlertTypeModel(item.alertTypeItem);
+                    setRuleProperty('params', {});
+                    if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
+                      setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                     }
-                    isDisabled={!item.checkEnabledResult.isEnabled}
-                    onClick={() => {
-                      setAlertProperty('alertTypeId', item.id);
-                      setActions([]);
-                      setAlertTypeModel(item.alertTypeItem);
-                      setAlertProperty('params', {});
-                      if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                        setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
-                      }
-                    }}
-                  />
-                </Fragment>
+                  }}
+                />
               );
             })}
         </EuiListGroup>
@@ -513,14 +439,14 @@ export const AlertForm = ({
     ));
 
   const alertTypeDetails = (
-    <Fragment>
+    <>
       <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
-              {alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
-                ? alertTypesIndex.get(alert.alertTypeId)!.name
+              {alert.alertTypeId && ruleTypeIndex && ruleTypeIndex.has(alert.alertTypeId)
+                ? ruleTypeIndex.get(alert.alertTypeId)!.name
                 : ''}
             </h5>
           </EuiTitle>
@@ -537,9 +463,9 @@ export const AlertForm = ({
                 }
               )}
               onClick={() => {
-                setAlertProperty('alertTypeId', null);
+                setRuleProperty('alertTypeId', null);
                 setAlertTypeModel(null);
-                setAlertProperty('params', {});
+                setRuleProperty('params', {});
               }}
             />
           </EuiFlexItem>
@@ -588,13 +514,13 @@ export const AlertForm = ({
             }
           >
             <AlertParamsExpressionComponent
-              alertParams={alert.params}
-              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              ruleParams={alert.params}
+              ruleInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              ruleThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
               alertNotifyWhen={alert.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
-              setAlertParams={setAlertParams}
-              setAlertProperty={setAlertProperty}
+              setRuleParams={setRuleParams}
+              setRuleProperty={setRuleProperty}
               defaultActionGroupId={defaultActionGroupId}
               actionGroups={selectedAlertType.actionGroups}
               metadata={metadata}
@@ -611,11 +537,11 @@ export const AlertForm = ({
       selectedAlertType ? (
         <>
           {errors.actionConnectors.length >= 1 ? (
-            <Fragment>
+            <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
               <EuiSpacer />
-            </Fragment>
+            </>
           ) : null}
           <ActionForm
             actions={alert.actions}
@@ -646,7 +572,7 @@ export const AlertForm = ({
           />
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 
   const labelForAlertChecked = (
@@ -659,7 +585,8 @@ export const AlertForm = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'Define how often to evaluate the condition.',
+          defaultMessage:
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
         })}
       />
     </>
@@ -689,11 +616,11 @@ export const AlertForm = ({
               data-test-subj="alertNameInput"
               value={alert.name || ''}
               onChange={(e) => {
-                setAlertProperty('name', e.target.value);
+                setRuleProperty('name', e.target.value);
               }}
               onBlur={() => {
                 if (!alert.name) {
-                  setAlertProperty('name', '');
+                  setRuleProperty('name', '');
                 }
               }}
             />
@@ -713,20 +640,20 @@ export const AlertForm = ({
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
                 const newOptions = [...tagsOptions, { label: searchValue }];
-                setAlertProperty(
+                setRuleProperty(
                   'tags',
                   newOptions.map((newOption) => newOption.label)
                 );
               }}
               onChange={(selectedOptions: Array<{ label: string }>) => {
-                setAlertProperty(
+                setRuleProperty(
                   'tags',
                   selectedOptions.map((selectedOption) => selectedOption.label)
                 );
               }}
               onBlur={() => {
                 if (!alert.tags) {
-                  setAlertProperty('tags', []);
+                  setRuleProperty('tags', []);
                 }
               }}
             />
@@ -782,26 +709,26 @@ export const AlertForm = ({
             throttleUnit={alertThrottleUnit}
             onNotifyWhenChange={useCallback(
               (notifyWhen) => {
-                setAlertProperty('notifyWhen', notifyWhen);
+                setRuleProperty('notifyWhen', notifyWhen);
               },
-              [setAlertProperty]
+              [setRuleProperty]
             )}
             onThrottleChange={useCallback(
               (throttle: number | null, throttleUnit: string) => {
                 setAlertThrottle(throttle);
                 setAlertThrottleUnit(throttleUnit);
-                setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+                setRuleProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
               },
-              [setAlertProperty]
+              [setRuleProperty]
             )}
           />
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
       {alertTypeModel ? (
-        <Fragment>{alertTypeDetails}</Fragment>
+        <>{alertTypeDetails}</>
       ) : availableAlertTypes.length ? (
-        <Fragment>
+        <>
           <EuiHorizontalRule />
           <EuiFormRow
             fullWidth
@@ -838,7 +765,12 @@ export const AlertForm = ({
                 <EuiFieldSearch
                   fullWidth
                   data-test-subj="alertSearchField"
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    if (e.target.value === '') {
+                      setSearchText('');
+                    }
+                  }}
                   onKeyUp={(e) => {
                     if (e.keyCode === ENTER_KEY) {
                       setSearchText(inputText);
@@ -863,15 +795,15 @@ export const AlertForm = ({
           </EuiFormRow>
           <EuiSpacer />
           {errors.alertTypeId.length >= 1 && alert.alertTypeId !== undefined ? (
-            <Fragment>
+            <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.alertTypeId} />
               <EuiSpacer />
-            </Fragment>
+            </>
           ) : null}
           {alertTypeNodes}
-        </Fragment>
-      ) : alertTypesIndex ? (
+        </>
+      ) : ruleTypeIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
         <SectionLoading>

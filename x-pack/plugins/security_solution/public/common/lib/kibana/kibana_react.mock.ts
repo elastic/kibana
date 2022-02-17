@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
@@ -32,12 +32,14 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlUrlGenerator } from '../../../../../ml/public';
+import { MlLocatorDefinition } from '../../../../../ml/public';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { MockUrlService } from 'src/plugins/share/common/mocks';
+import { fleetMock } from '../../../../../fleet/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -58,21 +60,25 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-    idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  },
+  [DEFAULT_TRANSFORMS]: {
+    enabled: false,
   },
 };
 
-export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown): unknown => {
-  const result = mockUiSettings[key];
+export const createUseUiSettingMock =
+  () =>
+  (key: string, defaultValue?: unknown): unknown => {
+    const result = mockUiSettings[key];
 
-  if (typeof result != null) return result;
+    if (typeof result != null) return result;
 
-  if (defaultValue != null) {
-    return defaultValue;
-  }
+    if (defaultValue != null) {
+      return defaultValue;
+    }
 
-  throw new TypeError(`Unexpected config key: ${key}`);
-};
+    throw new TypeError(`Unexpected config key: ${key}`);
+  };
 
 export const createUseUiSetting$Mock = () => {
   const useUiSettingMock = createUseUiSettingMock();
@@ -83,15 +89,26 @@ export const createUseUiSetting$Mock = () => {
   ];
 };
 
-export const createStartServicesMock = (): StartServices => {
-  const core = coreMock.createStart();
+export const createStartServicesMock = (
+  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
+  const urlService = new MockUrlService();
+  const locator = urlService.locators.create(new MlLocatorDefinition());
+  const fleet = fleetMock.createStartMock();
 
-  return ({
+  return {
     ...core,
+    cases: {
+      getAllCases: jest.fn(),
+      getCaseView: jest.fn(),
+      getConfigureCases: jest.fn(),
+      getCreateCase: jest.fn(),
+      getRecentCases: jest.fn(),
+    },
     data: {
       ...data,
       query: {
@@ -127,13 +144,14 @@ export const createStartServicesMock = (): StartServices => {
     },
     security,
     storage,
+    fleet,
     ml: {
-      urlGenerator: new MlUrlGenerator({
-        appBasePath: '/app/ml',
-        useHash: false,
-      }),
+      locator,
     },
-  } as unknown) as StartServices;
+    theme: {
+      theme$: themeServiceMock.createTheme$(),
+    },
+  } as unknown as StartServices;
 };
 
 export const createWithKibanaMock = () => {

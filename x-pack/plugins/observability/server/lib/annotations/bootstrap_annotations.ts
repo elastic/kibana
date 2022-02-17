@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext, KibanaRequest } from 'kibana/server';
-import { PromiseReturnType } from '../../../typings/common';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  KibanaRequest,
+  RequestHandlerContext,
+} from 'kibana/server';
+import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
-import type { ObservabilityRequestHandlerContext } from '../../types';
 
 interface Params {
   index: string;
@@ -17,12 +21,12 @@ interface Params {
   context: PluginInitializerContext;
 }
 
-export type ScopedAnnotationsClientFactory = PromiseReturnType<
-  typeof bootstrapAnnotations
+export type ScopedAnnotationsClientFactory = Awaited<
+  ReturnType<typeof bootstrapAnnotations>
 >['getScopedAnnotationsClient'];
 
 export type ScopedAnnotationsClient = ReturnType<ScopedAnnotationsClientFactory>;
-export type AnnotationsAPI = PromiseReturnType<typeof bootstrapAnnotations>;
+export type AnnotationsAPI = Awaited<ReturnType<typeof bootstrapAnnotations>>;
 
 export async function bootstrapAnnotations({ index, core, context }: Params) {
   const logger = context.logger.get('annotations');
@@ -35,7 +39,7 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
 
   return {
     getScopedAnnotationsClient: (
-      requestContext: ObservabilityRequestHandlerContext,
+      requestContext: RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext },
       request: KibanaRequest
     ) => {
       return createAnnotationsClient({

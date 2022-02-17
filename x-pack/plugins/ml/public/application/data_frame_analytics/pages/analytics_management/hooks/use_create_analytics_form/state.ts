@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
 import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
@@ -15,6 +17,7 @@ import {
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsId,
   DataFrameAnalysisConfigType,
+  FeatureProcessor,
 } from '../../../../../../../common/types/data_frame_analytics';
 import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
@@ -59,12 +62,13 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
-    earlyStoppingEnabled: undefined | boolean;
     downsampleFactor: undefined | number;
+    earlyStoppingEnabled: undefined | boolean;
     eta: undefined | number;
     etaGrowthRatePerTree: undefined | number;
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
+    featureProcessors: undefined | FeatureProcessor[];
     gamma: undefined | number;
     includes: string[];
     jobId: DataFrameAnalyticsId;
@@ -75,7 +79,10 @@ export interface State {
     jobType: AnalyticsJobType;
     jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
+    jobConfigQueryLanguage: string | undefined;
     lambda: number | undefined;
+    lossFunction: string | undefined;
+    lossFunctionParameter: number | undefined;
     loadingFieldOptions: boolean;
     maxNumThreads: undefined | number;
     maxOptimizationRoundsPerHyperparameter: undefined | number;
@@ -94,6 +101,9 @@ export interface State {
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     resultsField: undefined | string;
+    runtimeMappings: undefined | RuntimeMappings;
+    runtimeMappingsUpdated: boolean;
+    previousRuntimeMapping: undefined | RuntimeMappings;
     softTreeDepthLimit: undefined | number;
     softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
@@ -142,6 +152,7 @@ export const getInitialState = (): State => ({
     etaGrowthRatePerTree: undefined,
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
+    featureProcessors: undefined,
     gamma: undefined,
     includes: [],
     jobId: '',
@@ -152,7 +163,10 @@ export const getInitialState = (): State => ({
     jobType: undefined,
     jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
+    jobConfigQueryLanguage: undefined,
     lambda: undefined,
+    lossFunction: undefined,
+    lossFunctionParameter: undefined,
     loadingFieldOptions: false,
     maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxOptimizationRoundsPerHyperparameter: undefined,
@@ -171,6 +185,9 @@ export const getInitialState = (): State => ({
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     resultsField: undefined,
+    runtimeMappings: undefined,
+    runtimeMappingsUpdated: false,
+    previousRuntimeMapping: undefined,
     softTreeDepthLimit: undefined,
     softTreeDepthTolerance: undefined,
     sourceIndex: '',
@@ -205,13 +222,16 @@ export const getJobConfigFromFormState = (
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     description: formState.description,
     source: {
-      // If a Kibana index patterns includes commas, we need to split
+      // If a Kibana data view name includes commas, we need to split
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')
         ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
       query: formState.jobConfigQuery,
+      ...(isRuntimeMappings(formState.runtimeMappings)
+        ? { runtime_mappings: formState.runtimeMappings }
+        : {}),
     },
     dest: {
       index: formState.destinationIndex,
@@ -257,8 +277,15 @@ export const getJobConfigFromFormState = (
       formState.featureBagFraction && {
         feature_bag_fraction: formState.featureBagFraction,
       },
+      formState.featureProcessors && {
+        feature_processors: formState.featureProcessors,
+      },
       formState.gamma && { gamma: formState.gamma },
       formState.lambda && { lambda: formState.lambda },
+      formState.lossFunction && { loss_function: formState.lossFunction },
+      formState.lossFunctionParameter && {
+        loss_function_parameter: formState.lossFunctionParameter,
+      },
       formState.maxOptimizationRoundsPerHyperparameter && {
         max_optimization_rounds_per_hyperparameter:
           formState.maxOptimizationRoundsPerHyperparameter,
@@ -340,6 +367,7 @@ export function getFormStateFromJobConfig(
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
+    runtimeMappings: analyticsJobConfig.source.runtime_mappings,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields?.includes ?? [],

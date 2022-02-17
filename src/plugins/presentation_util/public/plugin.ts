@@ -10,11 +10,13 @@ import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { pluginServices } from './services';
 import { registry } from './services/kibana';
 import {
-  PresentationUtilPluginSetup,
-  PresentationUtilPluginStart,
   PresentationUtilPluginSetupDeps,
   PresentationUtilPluginStartDeps,
+  PresentationUtilPluginSetup,
+  PresentationUtilPluginStart,
 } from './types';
+
+import { registerExpressionsLanguage } from '.';
 
 export class PresentationUtilPlugin
   implements
@@ -23,9 +25,10 @@ export class PresentationUtilPlugin
       PresentationUtilPluginStart,
       PresentationUtilPluginSetupDeps,
       PresentationUtilPluginStartDeps
-    > {
+    >
+{
   public setup(
-    _coreSetup: CoreSetup<PresentationUtilPluginSetup>,
+    _coreSetup: CoreSetup<PresentationUtilPluginStartDeps, PresentationUtilPluginStart>,
     _setupPlugins: PresentationUtilPluginSetupDeps
   ): PresentationUtilPluginSetup {
     return {};
@@ -39,6 +42,8 @@ export class PresentationUtilPlugin
 
     return {
       ContextProvider: pluginServices.getContextProvider(),
+      labsService: pluginServices.getServices().labs,
+      registerExpressionsLanguage,
     };
   }
 

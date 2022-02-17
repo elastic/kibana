@@ -8,7 +8,7 @@
 import React from 'react';
 import 'brace';
 import { of } from 'rxjs';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import EsQueryAlertTypeExpression from './expression';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
@@ -22,7 +22,6 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { EsQueryAlertParams } from './types';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public');
-jest.mock('../../../../../../src/plugins/es_ui_shared/public');
 jest.mock('../../../../../../src/plugins/es_ui_shared/public', () => ({
   XJson: {
     useXJsonMode: jest.fn().mockReturnValue({
@@ -31,26 +30,18 @@ jest.mock('../../../../../../src/plugins/es_ui_shared/public', () => ({
       xJson: jest.fn(),
     }),
   },
+  // Mocking EuiCodeEditor, which uses React Ace under the hood
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  EuiCodeEditor: (props: any) => (
+    <input
+      data-test-subj="mockCodeEditor"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onChange={(syntheticEvent: any) => {
+        props.onChange(syntheticEvent.jsonString);
+      }}
+    />
+  ),
 }));
-jest.mock('');
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
-        }}
-      />
-    ),
-  };
-});
 jest.mock('../../../../triggers_actions_ui/public', () => {
   const original = jest.requireActual('../../../../triggers_actions_ui/public');
   return {
@@ -150,12 +141,12 @@ describe('EsQueryAlertTypeExpression', () => {
 
     const wrapper = mountWithIntl(
       <EsQueryAlertTypeExpression
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams}
-        setAlertParams={() => {}}
-        setAlertProperty={() => {}}
+        ruleParams={alertParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
         errors={errors}
         data={dataMock}
         defaultActionGroupId=""

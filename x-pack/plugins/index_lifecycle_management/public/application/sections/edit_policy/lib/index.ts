@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-export {
-  calculateRelativeFromAbsoluteMilliseconds,
-  formDataToAbsoluteTimings,
+export type {
   AbsoluteTimings,
   PhaseAgeInMilliseconds,
   RelativePhaseTimingInMs,
+} from './absolute_timing_to_relative_timing';
+export {
+  calculateRelativeFromAbsoluteMilliseconds,
+  formDataToAbsoluteTimings,
+  getPhaseMinAgeInMilliseconds,
 } from './absolute_timing_to_relative_timing';
 
 export { getDefaultRepository } from './get_default_repository';

@@ -44,6 +44,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -71,6 +72,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -106,7 +108,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_jvm_memory_usage_2",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_jvm_memory_usage_label",
@@ -166,7 +168,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_jvm_memory_usage_2",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_jvm_memory_usage_label",
@@ -231,7 +233,7 @@ Array [
         "name": <EuiText>
           es_name_1
            (
-          2
+          3
           )
         </EuiText>,
         "panel": 2,
@@ -247,6 +249,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -268,6 +271,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -289,6 +293,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -316,6 +321,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -337,6 +343,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -352,6 +359,28 @@ Array [
           </EuiText>
         </React.Fragment>,
         "panel": 7,
+      },
+      Object {
+        "name": <React.Fragment>
+          <EuiToolTip
+            content="triggered:0"
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiText
+              size="s"
+            >
+              triggered:0
+            </EuiText>
+          </EuiToolTip>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_nodes_changed_label_2
+          </EuiText>
+        </React.Fragment>,
+        "panel": 8,
       },
     ],
     "title": "es_name_1",
@@ -372,7 +401,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_nodes_changed_2",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_nodes_changed_label",
@@ -432,7 +461,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_disk_usage_1",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_disk_usage_label",
@@ -492,7 +521,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_license_expiration_2",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_license_expiration_label",
@@ -552,7 +581,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_nodes_changed_2",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_nodes_changed_label",
@@ -612,7 +641,7 @@ Array [
             "lastExecutionDate": 2020-12-08T00:00:00.000Z,
             "status": "ok",
           },
-          "id": "",
+          "id": "monitoring_alert_license_expiration_2",
           "muteAll": false,
           "mutedInstanceIds": Array [],
           "name": "monitoring_alert_license_expiration_label",
@@ -654,6 +683,66 @@ Array [
     />,
     "id": 7,
     "title": "monitoring_alert_license_expiration_label",
+    "width": 400,
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_nodes_changed",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T00:00:00.000Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T00:00:00.000Z,
+            "status": "ok",
+          },
+          "id": "monitoring_alert_nodes_changed_3",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_nodes_changed_label_2",
+          "notifyWhen": null,
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T00:00:00.000Z,
+          "updatedBy": null,
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "nodeId": "es1",
+            "nodeName": "es_name_1",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+    />,
+    "id": 8,
+    "title": "monitoring_alert_nodes_changed_label_2",
     "width": 400,
   },
 ]

@@ -10,7 +10,7 @@ import { PropTypes } from 'prop-types';
 import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiFlexGroup,
@@ -24,7 +24,7 @@ import {
 import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];

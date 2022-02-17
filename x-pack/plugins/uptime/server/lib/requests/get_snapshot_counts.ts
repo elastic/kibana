@@ -9,7 +9,8 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { EXCLUDE_RUN_ONCE_FILTER } from '../../../common/constants/client_defaults';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;
@@ -43,9 +44,12 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
-  const { body: res } = await context.search({
-    body: statusCountBody(await context.dateAndCustomFilters(), context),
-  });
+  const { body: res } = await context.search(
+    {
+      body: statusCountBody(await context.dateAndCustomFilters(), context),
+    },
+    'geSnapshotCount'
+  );
 
   return (
     (res.aggregations?.counts?.value as Snapshot) ?? {
@@ -81,7 +85,7 @@ const statusCountBody = (filters: ESFilter[], context: QueryContext) => {
               field: 'summary',
             },
           },
-
+          EXCLUDE_RUN_ONCE_FILTER,
           ...filters,
         ],
       },

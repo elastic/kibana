@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { DashboardContainer } from '..';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import {
@@ -27,6 +28,8 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../../services/embeddable_test_samples';
+import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -55,6 +58,9 @@ describe('LibraryNotificationPopover', () => {
       uiActions: {} as any,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       http: coreStart.http,
+      theme: coreStart.theme,
+      presentationUtil: getStubPluginServices(),
+      screenshotMode: screenshotModePluginMock.createSetupContract(),
     };
 
     container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -71,10 +77,10 @@ describe('LibraryNotificationPopover', () => {
     }
 
     defaultProps = {
-      unlinkAction: ({
+      unlinkAction: {
         execute: jest.fn(),
         getDisplayName: () => 'test unlink',
-      } as unknown) as LibraryNotificationProps['unlinkAction'],
+      } as unknown as LibraryNotificationProps['unlinkAction'],
       displayName: 'test display',
       context: { embeddable: contactCardEmbeddable },
       icon: 'testIcon',

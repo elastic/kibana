@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddMessageVariables } from './add_message_variables';
 
 describe('AddMessageVariables', () => {
@@ -116,5 +116,17 @@ describe('AddMessageVariables', () => {
     expect(
       wrapper.find('button[data-test-subj="variableMenuButton-deprecatedVar"]').getDOMNode()
     ).toBeDisabled();
+  });
+
+  test(`it does't render when no variables exist`, () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="fooAddVariableButton"]')).toHaveLength(0);
   });
 });

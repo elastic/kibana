@@ -11,7 +11,7 @@ import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
@@ -48,15 +48,15 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
   return nodeStatus === 'loading' ? (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelLoading />
     </StyledPanel>
   ) : processEvent ? (
-    <StyledPanel data-test-subj="resolver:panel:node-detail">
+    <StyledPanel hasBorder data-test-subj="resolver:panel:node-detail">
       <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
     </StyledPanel>
   ) : (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelContentError translatedErrorMessage={nodeDetailError} />
     </StyledPanel>
   );

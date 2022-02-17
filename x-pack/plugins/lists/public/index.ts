@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-export * from './shared_exports';
+export { getExceptionBuilderComponentLazy } from './exceptions/components/builder/index';
+export type { OnChangeProps } from './exceptions/components/builder/index';
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '../../../../src/core/public';
 
 import { Plugin } from './plugin';
-import { PluginSetup, PluginStart } from './types';
+import type { PluginSetup, PluginStart } from './types';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
-export { Plugin, PluginSetup, PluginStart };
+export type { Plugin, PluginSetup, PluginStart };

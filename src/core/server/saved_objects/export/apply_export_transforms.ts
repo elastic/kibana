@@ -15,7 +15,7 @@ import { getObjKey, SavedObjectComparator } from './utils';
 interface ApplyExportTransformsOptions {
   objects: SavedObject[];
   request: KibanaRequest;
-  transforms: Record<string, SavedObjectsExportTransform>;
+  transforms: Map<string, SavedObjectsExportTransform>;
   sortFunction?: SavedObjectComparator;
 }
 
@@ -30,7 +30,7 @@ export const applyExportTransforms = async ({
 
   let finalObjects: SavedObject[] = [];
   for (const [type, typeObjs] of Object.entries(byType)) {
-    const typeTransformFn = transforms[type];
+    const typeTransformFn = transforms.get(type);
     if (typeTransformFn) {
       finalObjects = [
         ...finalObjects,

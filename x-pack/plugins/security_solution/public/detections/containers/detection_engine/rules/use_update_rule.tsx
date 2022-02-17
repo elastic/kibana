@@ -7,13 +7,14 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { UpdateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { transformOutput } from './transforms';
 
 import { updateRule } from './api';
 import * as i18n from './translations';
+import { useInvalidateRules } from './use_find_rules_query';
 
 interface UpdateRuleReturn {
   isLoading: boolean;
@@ -26,7 +27,8 @@ export const useUpdateRule = (): ReturnUpdateRule => {
   const [rule, setRule] = useState<UpdateRulesSchema | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
+  const invalidateRules = useInvalidateRules();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -37,12 +39,13 @@ export const useUpdateRule = (): ReturnUpdateRule => {
         try {
           setIsLoading(true);
           await updateRule({ rule: transformOutput(rule), signal: abortCtrl.signal });
+          invalidateRules();
           if (isSubscribed) {
             setIsSaved(true);
           }
         } catch (error) {
           if (isSubscribed) {
-            errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.RULE_ADD_FAILURE });
           }
         }
         if (isSubscribed) {
@@ -56,7 +59,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, dispatchToaster]);
+  }, [rule, addError, invalidateRules]);
 
   return [{ isLoading, isSaved }, setRule];
 };

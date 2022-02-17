@@ -6,19 +6,19 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
-import { HttpStart } from '../../../../../../../src/core/public';
-
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  useApi,
-} from '../../../lists_plugin_deps';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useApi } from '@kbn/securitysolution-list-hooks';
+import { HttpStart } from '../../../../../../../src/core/public';
+
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildAlertStatusFilter,
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
+  buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -28,14 +28,14 @@ import { useKibana } from '../../lib/kibana';
 /**
  * Adds exception items to the list. Also optionally closes alerts.
  *
- * @param ruleId id of the rule where the exception updates will be applied
+ * @param ruleStaticId static id of the rule (rule.ruleId, not rule.id) where the exception updates will be applied
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  ruleId: string,
+  ruleStaticId: string,
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string,
   bulkCloseIndex?: Index
@@ -70,10 +70,10 @@ export const useAddOrUpdateException = ({
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
   const { addExceptionListItem, updateExceptionListItem } = useApi(services.http);
   const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (ruleId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+    async (ruleStaticId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
       if (addOrUpdateExceptionRef.current != null) {
         addOrUpdateExceptionRef.current(
-          ruleId,
+          ruleStaticId,
           exceptionItemsToAddOrUpdate,
           alertIdToClose,
           bulkCloseIndex
@@ -88,7 +88,7 @@ export const useAddOrUpdateException = ({
     const abortCtrl = new AbortController();
 
     const onUpdateExceptionItemsAndAlertStatus: AddOrUpdateExceptionItemsFunc = async (
-      ruleId,
+      ruleStaticId,
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
       bulkCloseIndex
@@ -116,8 +116,8 @@ export const useAddOrUpdateException = ({
 
       try {
         setIsLoading(true);
-        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
-        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
+        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
         if (alertIdToClose != null) {
           alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
@@ -127,10 +127,16 @@ export const useAddOrUpdateException = ({
         }
 
         if (bulkCloseIndex != null) {
+          const alertStatusFilter = buildAlertStatusesFilter([
+            'open',
+            'acknowledged',
+            'in-progress',
+          ]);
+
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
+            [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -176,7 +182,7 @@ export const useAddOrUpdateException = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, onSuccess, onError, updateExceptionListItem, addExceptionListItem]);
+  }, [addExceptionListItem, http, onSuccess, onError, updateExceptionListItem]);
 
   return [{ isLoading }, addOrUpdateException];
 };

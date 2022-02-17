@@ -52,13 +52,13 @@ export async function tearDown(getService: FtrProviderContext['getService']) {
     }
   }
 
-  await esArchiver.unload('empty_kibana');
+  await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
 }
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration security and spaces enabled', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup17');
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));

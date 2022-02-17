@@ -10,14 +10,26 @@ import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';
-import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
+
+type PostFlightRequestFn<TAggConfig> = (
+  resp: estypes.SearchResponse<any>,
+  aggConfigs: IAggConfigs,
+  aggConfig: TAggConfig,
+  searchSource: ISearchSource,
+  inspectorRequestAdapter?: RequestAdapter,
+  abortSignal?: AbortSignal,
+  searchSessionId?: string
+) => Promise<estypes.SearchResponse<any>>;
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -40,19 +52,13 @@ export interface AggTypeConfig<
   customLabels?: boolean;
   json?: boolean;
   decorateAggConfig?: () => any;
-  postFlightRequest?: (
-    resp: any,
-    aggConfigs: IAggConfigs,
-    aggConfig: TAggConfig,
-    searchSource: ISearchSource,
-    inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal,
-    searchSessionId?: string
-  ) => Promise<any>;
+  postFlightRequest?: PostFlightRequestFn<TAggConfig>;
+  hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
   getValueBucketPath?: (agg: TAggConfig) => string;
+  getResponseId?: (agg: TAggConfig) => string;
 }
 
 // TODO need to make a more explicit interface for this
@@ -176,6 +182,9 @@ export class AggType<
    * is created, giving the agg type a chance to modify the agg config
    */
   decorateAggConfig: () => any;
+
+  hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
+
   /**
    * A function that needs to be called after the main request has been made
    * and should return an updated response
@@ -188,15 +197,7 @@ export class AggType<
    * @param searchSessionId - searchSessionId to be used for grouping requests into a single search session
    * @return {Promise}
    */
-  postFlightRequest: (
-    resp: any,
-    aggConfigs: IAggConfigs,
-    aggConfig: TAggConfig,
-    searchSource: ISearchSource,
-    inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal,
-    searchSessionId?: string
-  ) => Promise<any>;
+  postFlightRequest: PostFlightRequestFn<TAggConfig>;
   /**
    * Get the serialized format for the values produced by this agg type,
    * overridden by several metrics that always output a simple number.
@@ -219,6 +220,29 @@ export class AggType<
   getValueBucketPath = (agg: TAggConfig) => {
     return agg.id;
   };
+
+  splitForTimeShift(agg: TAggConfig, aggs: IAggConfigs) {
+    return false;
+  }
+
+  /**
+   * Returns the key of the object containing the results of the agg in the Elasticsearch response object.
+   * In most cases this returns the `agg.id` property, but in some cases the response object is structured differently.
+   * In the following example of a terms agg, `getResponseId` returns "myAgg":
+   * ```
+   * {
+   *    "aggregations": {
+   *      "myAgg": {
+   *        "doc_count_error_upper_bound": 0,
+   *        "sum_other_doc_count": 0,
+   *        "buckets": [
+   * ...
+   * ```
+   *
+   * @param  {agg} agg - the agg to return the id in the ES reponse object for
+   * @return {string}
+   */
+  getResponseId: (agg: TAggConfig) => string;
 
   /**
    * Generic AggType Constructor
@@ -283,6 +307,7 @@ export class AggType<
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
+    this.hasPrecisionError = config.hasPrecisionError;
 
     this.getSerializedFormat =
       config.getSerializedFormat ||
@@ -293,5 +318,7 @@ export class AggType<
       });
 
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
+
+    this.getResponseId = config.getResponseId || ((agg: TAggConfig) => agg.id);
   }
 }

@@ -9,21 +9,21 @@ Updates an object
 <b>Signature:</b>
 
 ```typescript
-update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  attributes | <code>Partial&lt;T&gt;</code> |  |
-|  options | <code>SavedObjectsUpdateOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  attributes | Partial&lt;T&gt; |  |
+|  options | SavedObjectsUpdateOptions&lt;T&gt; |  {<!-- -->string<!-- -->} options.version - ensures version matches that of persisted object  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->array<!-- -->} \[options.references\] - \[{ name, type, id }<!-- -->\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsUpdateResponse<T>>`
+Promise&lt;SavedObjectsUpdateResponse&lt;T&gt;&gt;
 
 {<!-- -->promise<!-- -->}
 

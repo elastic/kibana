@@ -22,13 +22,15 @@ export const Ip = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable?: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+}>(({ contextId, eventId, fieldName, isDraggable, value }) => (
   <FormattedFieldValue
     contextId={contextId}
     data-test-subj="formatted-ip"
     eventId={eventId}
     fieldName={fieldName}
+    isDraggable={isDraggable}
     fieldType={IP_FIELD_TYPE}
     value={value}
     truncate

@@ -67,13 +67,8 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(AddSourceLogic);
 
-  const {
-    sourceConfigData,
-    buttonLoading,
-    clientIdValue,
-    clientSecretValue,
-    baseUrlValue,
-  } = useValues(AddSourceLogic);
+  const { sourceConfigData, buttonLoading, clientIdValue, clientSecretValue, baseUrlValue } =
+    useValues(AddSourceLogic);
 
   const {
     accountContextOnly,

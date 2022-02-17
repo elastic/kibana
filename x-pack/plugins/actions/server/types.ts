@@ -16,13 +16,16 @@ import {
   SavedObjectAttributes,
   ElasticsearchClient,
   RequestHandlerContext,
+  SavedObjectReference,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
-export { ActionTypeExecutorResult } from '../common';
-export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
-export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
-export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
-
+import { TaskInfo } from './lib/action_executor';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+export type { ActionTypeExecutorResult } from '../common';
+export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
+export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
+export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
+export type { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
@@ -30,10 +33,12 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
+export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
+  connectorTokenClient: ConnectorTokenClient;
 }
 
 export interface ActionsApiRequestHandlerContext {
@@ -57,12 +62,15 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  isEphemeral?: boolean;
+  taskInfo?: TaskInfo;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
   id: string;
   actionTypeId: string;
   name: string;
+  isMissingSecrets?: boolean;
   config?: Config;
   isPreconfigured: boolean;
 }
@@ -106,14 +114,20 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
-  renderParameterTemplates?(params: Params, variables: Record<string, unknown>): Params;
+  renderParameterTemplates?(
+    params: Params,
+    variables: Record<string, unknown>,
+    actionId?: string
+  ): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
   name: string;
+  isMissingSecrets: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }
@@ -124,15 +138,51 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  executionId?: string;
 }
 
-export interface ActionTaskExecutorParams {
+interface PersistedActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+interface EphemeralActionTaskExecutorParams {
+  spaceId: string;
+  taskParams: ActionTaskParams;
+  references?: SavedObjectReference[];
+}
+
+export type ActionTaskExecutorParams =
+  | PersistedActionTaskExecutorParams
+  | EphemeralActionTaskExecutorParams;
+
+export function isPersistedActionTask(
+  actionTask: ActionTaskExecutorParams
+): actionTask is PersistedActionTaskExecutorParams {
+  return typeof (actionTask as PersistedActionTaskExecutorParams).actionTaskParamsId === 'string';
 }
 
 export interface ProxySettings {
   proxyUrl: string;
+  proxyBypassHosts: Set<string> | undefined;
+  proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
-  proxyRejectUnauthorizedCertificates: boolean;
+  proxySSLSettings: SSLSettings;
+}
+
+export interface ResponseSettings {
+  maxContentLength: number;
+  timeout: number;
+}
+
+export interface SSLSettings {
+  verificationMode?: 'none' | 'certificate' | 'full';
+}
+
+export interface ConnectorToken extends SavedObjectAttributes {
+  connectorId: string;
+  tokenType: string;
+  token: string;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt?: string;
 }

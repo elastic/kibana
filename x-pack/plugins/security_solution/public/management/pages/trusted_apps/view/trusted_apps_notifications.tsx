@@ -29,7 +29,7 @@ const getDeletionErrorMessage = (error: ServerApiError, entry: Immutable<Trusted
     }),
     text: i18n.translate('xpack.securitySolution.trustedapps.deletionError.text', {
       defaultMessage:
-        'Unable to remove "{name}" from the Trusted Applications list. Reason: {message}',
+        'Unable to remove "{name}" from the trusted applications list. Reason: {message}',
       values: { name: entry.name, message: error.message },
     }),
   };
@@ -41,30 +41,40 @@ const getDeletionSuccessMessage = (entry: Immutable<TrustedApp>) => {
       defaultMessage: 'Successfully removed',
     }),
     text: i18n.translate('xpack.securitySolution.trustedapps.deletionSuccess.text', {
-      defaultMessage: '"{name}" has been removed from the Trusted Applications list.',
+      defaultMessage: '"{name}" has been removed from the trusted applications list.',
       values: { name: entry?.name },
     }),
   };
 };
 
 const getCreationSuccessMessage = (entry: Immutable<NewTrustedApp>) => {
-  return i18n.translate(
-    'xpack.securitySolution.trustedapps.createTrustedAppFlyout.successToastTitle',
-    {
-      defaultMessage: '"{name}" has been added to the Trusted Applications list.',
-      values: { name: entry.name },
-    }
-  );
+  return {
+    title: i18n.translate('xpack.securitySolution.trustedapps.creationSuccess.title', {
+      defaultMessage: 'Success!',
+    }),
+    text: i18n.translate(
+      'xpack.securitySolution.trustedapps.createTrustedAppFlyout.successToastTitle',
+      {
+        defaultMessage: '"{name}" has been added to the trusted applications list.',
+        values: { name: entry.name },
+      }
+    ),
+  };
 };
 
 const getUpdateSuccessMessage = (entry: Immutable<NewTrustedApp>) => {
-  return i18n.translate(
-    'xpack.securitySolution.trustedapps.createTrustedAppFlyout.updateSuccessToastTitle',
-    {
-      defaultMessage: '"{name}" has been updated successfully',
-      values: { name: entry.name },
-    }
-  );
+  return {
+    title: i18n.translate('xpack.securitySolution.trustedapps.updateSuccess.title', {
+      defaultMessage: 'Success!',
+    }),
+    text: i18n.translate(
+      'xpack.securitySolution.trustedapps.createTrustedAppFlyout.updateSuccessToastTitle',
+      {
+        defaultMessage: '"{name}" has been updated.',
+        values: { name: entry.name },
+      }
+    ),
+  };
 };
 
 export const TrustedAppsNotifications = memo(() => {

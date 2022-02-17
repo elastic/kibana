@@ -23,5 +23,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./date_nanos_job'));
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./aggregated_scripted_job'));
+    loadTestFile(require.resolve('./custom_urls'));
+    loadTestFile(require.resolve('./forecasts'));
   });
 }

@@ -9,6 +9,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
       aria-expanded={false}
       aria-haspopup="true"
       aria-label="loading"
+      data-test-subj="spacesNavSelector"
       onClick={[Function]}
       title="loading"
     >
@@ -18,7 +19,6 @@ exports[`NavControlPopover renders without crashing 1`] = `
     </EuiHeaderSectionItemButton>
   }
   closePopover={[Function]}
-  data-test-subj="spacesNavSelector"
   display="inlineBlock"
   hasArrow={true}
   id="spcMenuPopover"

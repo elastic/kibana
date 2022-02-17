@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiForm,
   EuiCallOut,
@@ -18,12 +18,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   IErrorObject,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
   ActionTypeModel,
+  ActionConnectorFieldsSetCallbacks,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -51,17 +52,17 @@ export function validateBaseProperties<ConnectorConfig, ConnectorSecrets>(
   return validationResult;
 }
 
-export function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
+export async function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>,
   actionTypeModel: ActionTypeModel
 ) {
-  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
-  const configErrors = (connectorValidationResult.config
-    ? connectorValidationResult.config.errors
-    : {}) as IErrorObject;
-  const secretsErrors = (connectorValidationResult.secrets
-    ? connectorValidationResult.secrets.errors
-    : {}) as IErrorObject;
+  const connectorValidationResult = await actionTypeModel?.validateConnector(connector);
+  const configErrors = (
+    connectorValidationResult.config ? connectorValidationResult.config.errors : {}
+  ) as IErrorObject;
+  const secretsErrors = (
+    connectorValidationResult.secrets ? connectorValidationResult.secrets.errors : {}
+  ) as IErrorObject;
   const connectorBaseErrors = validateBaseProperties(connector).errors;
   const connectorErrors = {
     ...configErrors,
@@ -89,6 +90,8 @@ interface ActionConnectorProps<
   serverError?: {
     body: { message: string; error: string };
   };
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export const ActionConnectorForm = ({
@@ -99,6 +102,8 @@ export const ActionConnectorForm = ({
   errors,
   actionTypeRegistry,
   consumer,
+  setCallbacks,
+  isEdit,
 }: ActionConnectorProps) => {
   const {
     docLinks,
@@ -137,7 +142,7 @@ export const ActionConnectorForm = ({
   const actionTypeRegistered = actionTypeRegistry.get(connector.actionTypeId);
   if (!actionTypeRegistered)
     return (
-      <Fragment>
+      <>
         <EuiCallOut
           title={i18n.translate(
             'xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningTitleText',
@@ -169,11 +174,12 @@ export const ActionConnectorForm = ({
           </EuiText>
         </EuiCallOut>
         <EuiSpacer />
-      </Fragment>
+      </>
     );
 
   const FieldsComponent = actionTypeRegistered.actionConnectorFields;
-
+  const isNameInvalid: boolean =
+    connector.name !== undefined && errors.name !== undefined && errors.name.length > 0;
   return (
     <EuiForm isInvalid={!!serverError} error={serverError?.body.message}>
       <EuiFormRow
@@ -185,13 +191,13 @@ export const ActionConnectorForm = ({
             defaultMessage="Connector name"
           />
         }
-        isInvalid={errors.name.length > 0 && connector.name !== undefined}
+        isInvalid={isNameInvalid}
         error={errors.name}
       >
         <EuiFieldText
           fullWidth
           readOnly={!canSave}
-          isInvalid={errors.name.length > 0 && connector.name !== undefined}
+          isInvalid={isNameInvalid}
           name="name"
           placeholder="Untitled"
           data-test-subj="nameInput"
@@ -236,6 +242,8 @@ export const ActionConnectorForm = ({
                 editActionConfig={setActionConfigProperty}
                 editActionSecrets={setActionSecretsProperty}
                 consumer={consumer}
+                setCallbacks={setCallbacks}
+                isEdit={isEdit}
               />
             </Suspense>
           </EuiErrorBoundary>

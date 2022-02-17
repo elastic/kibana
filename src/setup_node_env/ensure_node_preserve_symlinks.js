@@ -99,6 +99,13 @@
     return 0;
   };
 
+  // Since we are using `stdio: inherit`, the child process will receive
+  // the `SIGINT` and `SIGTERM` from the terminal.
+  // However, we want the parent process not to exit until the child does.
+  // Adding the following handlers achieves that.
+  process.on('SIGINT', function () {});
+  process.on('SIGTERM', function () {});
+
   var spawnResult = cp.spawnSync(nodeArgv[0], nodeArgs.concat(restArgs), { stdio: 'inherit' });
   process.exit(getExitCodeFromSpawnResult(spawnResult));
 })();

@@ -80,10 +80,8 @@ export interface SourceDataItem {
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
-  sourceDescription: string;
-  connectStepDescription: string;
   addPath: string;
-  editPath: string;
+  editPath?: string; // undefined for GitHub apps, as they are configured on a source level, and don't use a connector where you can edit the configuration
   accountContextOnly: boolean;
 }
 
@@ -96,7 +94,7 @@ export interface ContentSource {
 export interface SourceContentItem {
   id: string;
   last_updated: string;
-  [key: string]: string;
+  [key: string]: string | CustomAPIFieldValue;
 }
 
 export interface ContentSourceDetails extends ContentSource {
@@ -109,6 +107,8 @@ export interface ContentSourceDetails extends ContentSource {
   errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
+  activities: SourceActivity[];
+  isOauth1: boolean;
 }
 
 interface DescriptionList {
@@ -128,12 +128,88 @@ interface SourceActivity {
   status: string;
 }
 
+export interface SyncEstimate {
+  duration?: string;
+  nextStart?: string;
+  lastRun?: string;
+}
+
+interface SyncIndexItem<T> {
+  full: T;
+  incremental: T;
+  delete: T;
+  permissions?: T;
+}
+
+export interface IndexingSchedule extends SyncIndexItem<string> {
+  estimates: SyncIndexItem<SyncEstimate>;
+  blockedWindows?: BlockedWindow[];
+}
+
+export type TimeUnit = 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
+
+export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
+
+export const DAYS_OF_WEEK_VALUES = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const;
+export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
+
+export interface BlockedWindow {
+  jobType: SyncJobType;
+  day: DayOfWeek | 'all';
+  start: string;
+  end: string;
+}
+
+export interface IndexingRuleExclude {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  exclude: string;
+}
+
+export interface IndexingRuleInclude {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  include: string;
+}
+
+export type IndexingRule = IndexingRuleInclude | IndexingRuleExclude;
+
+export interface IndexingConfig {
+  enabled: boolean;
+  features: {
+    contentExtraction: {
+      enabled: boolean;
+    };
+    thumbnails: {
+      enabled: boolean;
+    };
+  };
+  rules: IndexingRule[];
+  schedule: IndexingSchedule;
+}
+
+interface AppSecret {
+  app_id: string;
+  fingerprint: string;
+  base_url?: string;
+}
+
 export interface ContentSourceFullData extends ContentSourceDetails {
   activities: SourceActivity[];
   details: DescriptionList[];
   summary: DocumentSummaryItem[];
   groups: Group[];
+  indexing: IndexingConfig;
   custom: boolean;
+  isIndexedSource: boolean;
+  isSyncConfigEnabled: boolean;
+  areThumbnailsConfigEnabled: boolean;
   accessToken: string;
   urlField: string;
   titleField: string;
@@ -144,6 +220,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   urlFieldIsLinkable: boolean;
   createdAt: string;
   serviceName: string;
+  secret?: AppSecret; // undefined for all content sources except GitHub apps
 }
 
 export interface ContentSourceStatus {
@@ -185,8 +262,25 @@ export interface CustomSource {
   id: string;
 }
 
+// https://www.elastic.co/guide/en/workplace-search/current/workplace-search-custom-sources-api.html#_schema_data_types
+type CustomAPIString = string | string[];
+type CustomAPINumber = number | number[];
+type CustomAPIDate = string | string[];
+type CustomAPIGeolocation = string | string[] | number[] | number[][];
+
+export type CustomAPIFieldValue =
+  | CustomAPIString
+  | CustomAPINumber
+  | CustomAPIDate
+  | CustomAPIGeolocation;
+
 export interface Result {
-  [key: string]: string | string[];
+  content_source_id: string;
+  last_updated: string;
+  id: string;
+  updated_at: string;
+  source: string;
+  [key: string]: CustomAPIFieldValue;
 }
 
 export interface OptionValue {
@@ -203,6 +297,10 @@ export interface SearchResultConfig {
   titleField: string | null;
   subtitleField: string | null;
   descriptionField: string | null;
+  typeField: string | null;
+  mediaTypeField: string | null;
+  createdByField: string | null;
+  updatedByField: string | null;
   urlField: string | null;
   color: string;
   detailFields: DetailField[];
@@ -216,4 +314,10 @@ export interface RoleGroup {
 export interface WSRoleMapping extends RoleMapping {
   allGroups: boolean;
   groups: RoleGroup[];
+}
+
+export interface ApiToken {
+  key?: string;
+  id?: string;
+  name: string;
 }

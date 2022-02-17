@@ -148,10 +148,10 @@ x-pack/plugins/reporting/server/browsers/download/download.ts kibana-reporting
 x-pack/plugins/reporting/server/browsers/download/ensure_downloaded.ts kibana-reporting
 x-pack/plugins/reporting/server/browsers/download/index.ts kibana-reporting
 x-pack/plugins/reporting/server/browsers/download/util.ts kibana-reporting
-x-pack/plugins/reporting/server/browsers/extract/extract.js kibana-reporting
-x-pack/plugins/reporting/server/browsers/extract/extract_error.js kibana-reporting
-x-pack/plugins/reporting/server/browsers/extract/index.js kibana-reporting
-x-pack/plugins/reporting/server/browsers/extract/unzip.js kibana-reporting
+x-pack/plugins/reporting/server/browsers/extract/extract.ts kibana-reporting
+x-pack/plugins/reporting/server/browsers/extract/extract_error.ts kibana-reporting
+x-pack/plugins/reporting/server/browsers/extract/index.ts kibana-reporting
+x-pack/plugins/reporting/server/browsers/extract/unzip.ts kibana-reporting
 x-pack/plugins/reporting/server/browsers/index.ts kibana-reporting
 x-pack/plugins/reporting/server/browsers/install.ts kibana-reporting
 x-pack/plugins/reporting/server/browsers/network_policy.test.ts kibana-reporting

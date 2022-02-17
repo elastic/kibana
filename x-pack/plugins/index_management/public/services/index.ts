@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ExtensionsService, ExtensionsSetup } from './extensions_service';
+export type { ExtensionsSetup } from './extensions_service';
+export { ExtensionsService } from './extensions_service';

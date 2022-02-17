@@ -17,9 +17,8 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogAnalysisCapabilities = () => {
   const { services } = useKibanaContextForPlugin();
-  const [mlCapabilities, setMlCapabilities] = useState<GetMlCapabilitiesResponsePayload>(
-    initialMlCapabilities
-  );
+  const [mlCapabilities, setMlCapabilities] =
+    useState<GetMlCapabilitiesResponsePayload>(initialMlCapabilities);
 
   const [fetchMlCapabilitiesRequest, fetchMlCapabilities] = useTrackedPromise(
     {
@@ -40,9 +39,10 @@ export const useLogAnalysisCapabilities = () => {
     fetchMlCapabilities();
   }, [fetchMlCapabilities]);
 
-  const isLoading = useMemo(() => fetchMlCapabilitiesRequest.state === 'pending', [
-    fetchMlCapabilitiesRequest.state,
-  ]);
+  const isLoading = useMemo(
+    () => fetchMlCapabilitiesRequest.state === 'pending',
+    [fetchMlCapabilitiesRequest.state]
+  );
 
   const hasLogAnalysisSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasLogAnalysisReadCapabilities = mlCapabilities.capabilities.canGetJobs;

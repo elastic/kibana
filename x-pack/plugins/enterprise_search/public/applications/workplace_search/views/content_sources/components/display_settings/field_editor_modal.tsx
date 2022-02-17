@@ -23,16 +23,21 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { CANCEL_BUTTON, FIELD_LABEL, UPDATE_LABEL, ADD_LABEL } from '../../../../constants';
+import {
+  CANCEL_BUTTON,
+  FIELD_LABEL,
+  LABEL_LABEL,
+  UPDATE_LABEL,
+  ADD_LABEL,
+} from '../../../../constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
 
 const emptyField = { fieldName: '', label: '' };
 
 export const FieldEditorModal: React.FC = () => {
-  const { toggleFieldEditorModal, addDetailField, updateDetailField } = useActions(
-    DisplaySettingsLogic
-  );
+  const { toggleFieldEditorModal, addDetailField, updateDetailField } =
+    useActions(DisplaySettingsLogic);
 
   const {
     searchResultConfig: { detailFields },
@@ -67,7 +72,7 @@ export const FieldEditorModal: React.FC = () => {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label="Field">
+            <EuiFormRow label={FIELD_LABEL}>
               <EuiSelect
                 options={isEditing ? fieldOptions : availableFieldOptions}
                 name="field"
@@ -80,7 +85,7 @@ export const FieldEditorModal: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
               />
             </EuiFormRow>
-            <EuiFormRow label="Label">
+            <EuiFormRow label={LABEL_LABEL}>
               <EuiFieldText
                 name="label"
                 required

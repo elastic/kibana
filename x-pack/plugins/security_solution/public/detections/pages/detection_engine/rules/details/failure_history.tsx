@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
+import React from 'react';
 import {
   EuiBasicTable,
   EuiPanel,
@@ -14,64 +13,68 @@ import {
   EuiHealth,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { memo } from 'react';
 
-import { useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
+import { RuleExecutionEvent } from '../../../../../../common/detection_engine/schemas/common';
+import { useRuleExecutionEvents } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 
+const columns: Array<EuiBasicTableColumn<RuleExecutionEvent>> = [
+  {
+    name: i18n.COLUMN_STATUS_TYPE,
+    render: () => <EuiHealth color="danger">{i18n.TYPE_FAILED}</EuiHealth>,
+    truncateText: false,
+    width: '16%',
+  },
+  {
+    field: 'date',
+    name: i18n.COLUMN_FAILED_AT,
+    render: (value: string) => <FormattedDate value={value} fieldName="date" />,
+    sortable: false,
+    truncateText: false,
+    width: '24%',
+  },
+  {
+    field: 'message',
+    name: i18n.COLUMN_FAILED_MSG,
+    render: (value: string) => <>{value}</>,
+    sortable: false,
+    truncateText: false,
+    width: '60%',
+  },
+];
+
 interface FailureHistoryProps {
-  id?: string | null;
+  ruleId: string;
 }
 
-const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
-  const [loading, ruleStatus] = useRuleStatus(id);
+const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ ruleId }) => {
+  const events = useRuleExecutionEvents(ruleId);
+  const loading = events.isLoading;
+  const items = events.data ?? [];
+
   if (loading) {
     return (
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
         <EuiLoadingContent />
       </EuiPanel>
     );
   }
-  const columns: Array<EuiBasicTableColumn<RuleInfoStatus>> = [
-    {
-      name: i18n.COLUMN_STATUS_TYPE,
-      render: () => <EuiHealth color="danger">{i18n.TYPE_FAILED}</EuiHealth>,
-      truncateText: false,
-      width: '16%',
-    },
-    {
-      field: 'last_failure_at',
-      name: i18n.COLUMN_FAILED_AT,
-      render: (value: string) => <FormattedDate value={value} fieldName="last_failure_at" />,
-      sortable: false,
-      truncateText: false,
-      width: '24%',
-    },
-    {
-      field: 'last_failure_message',
-      name: i18n.COLUMN_FAILED_MSG,
-      render: (value: string) => <>{value}</>,
-      sortable: false,
-      truncateText: false,
-      width: '60%',
-    },
-  ];
+
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
       <EuiBasicTable
         columns={columns}
+        items={items}
         loading={loading}
-        items={
-          ruleStatus != null ? ruleStatus?.failures.filter((rs) => rs.last_failure_at != null) : []
-        }
-        sorting={{ sort: { field: 'status_date', direction: 'desc' } }}
+        sorting={{ sort: { field: 'date', direction: 'desc' } }}
       />
     </EuiPanel>
   );
 };
 
-export const FailureHistory = memo(FailureHistoryComponent);
+export const FailureHistory = React.memo(FailureHistoryComponent);
+FailureHistory.displayName = 'FailureHistory';

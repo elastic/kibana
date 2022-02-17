@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Contains utility functions for building and processing queries.
  */
@@ -44,7 +44,7 @@ export function buildBaseFilterCriteria(
 export function buildSamplerAggregation(
   aggs: any,
   samplerShardSize: number
-): Record<string, estypes.AggregationContainer> {
+): Record<string, estypes.AggregationsAggregationContainer> {
   if (samplerShardSize < 1) {
     return aggs;
   }

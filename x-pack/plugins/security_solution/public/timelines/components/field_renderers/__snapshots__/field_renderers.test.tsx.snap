@@ -10,6 +10,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
     <DefaultDraggable
       field="source.as.organization.name"
       id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
+      isDraggable={false}
       value="Test Org"
     />
   </EuiFlexItem>
@@ -24,6 +25,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
     <DefaultDraggable
       field="source.as.number"
       id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
+      isDraggable={false}
       value="12345"
     />
   </EuiFlexItem>
@@ -58,6 +60,8 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       },
     }
   }
+  hideTopN={false}
+  isDraggable={false}
   render={[Function]}
 />
 `;
@@ -79,6 +83,8 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
       },
     }
   }
+  hideTopN={false}
+  isDraggable={false}
   render={[Function]}
 />
 `;
@@ -94,6 +100,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     <DefaultDraggable
       field="source.geo.city_name"
       id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
+      isDraggable={false}
       value={
         Array [
           "New York",
@@ -108,6 +115,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     <DefaultDraggable
       field="source.geo.region_name"
       id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
+      isDraggable={false}
       value={
         Array [
           "New York",

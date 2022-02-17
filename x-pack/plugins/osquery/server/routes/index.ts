@@ -6,15 +6,19 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { initSavedQueryRoutes } from './saved_query';
-import { initScheduledQueryRoutes } from './scheduled_query';
 import { initActionRoutes } from './action';
 import { OsqueryAppContext } from '../lib/osquery_app_context_services';
+import { initSavedQueryRoutes } from './saved_query';
+import { initStatusRoutes } from './status';
+import { initFleetWrapperRoutes } from './fleet_wrapper';
 import { initPackRoutes } from './pack';
+import { initPrivilegesCheckRoutes } from './privileges_check';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   initActionRoutes(router, context);
-  initPackRoutes(router);
-  initSavedQueryRoutes(router);
-  initScheduledQueryRoutes(router, context);
+  initStatusRoutes(router, context);
+  initPackRoutes(router, context);
+  initFleetWrapperRoutes(router, context);
+  initPrivilegesCheckRoutes(router, context);
+  initSavedQueryRoutes(router, context);
 };

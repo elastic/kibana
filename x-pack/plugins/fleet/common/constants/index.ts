@@ -15,6 +15,7 @@ export * from './epm';
 export * from './output';
 export * from './enrollment_api_key';
 export * from './settings';
+export * from './preconfiguration';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible
@@ -26,12 +27,15 @@ export const FLEET_SERVER_INDICES_VERSION = 1;
 
 export const FLEET_SERVER_ARTIFACTS_INDEX = '.fleet-artifacts';
 
+export const FLEET_SERVER_SERVERS_INDEX = '.fleet-servers';
+
 export const FLEET_SERVER_INDICES = [
   '.fleet-actions',
+  '.fleet-actions-results',
   '.fleet-agents',
   FLEET_SERVER_ARTIFACTS_INDEX,
   '.fleet-enrollment-api-keys',
   '.fleet-policies',
   '.fleet-policies-leader',
-  '.fleet-servers',
+  FLEET_SERVER_SERVERS_INDEX,
 ];

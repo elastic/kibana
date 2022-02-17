@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiCard, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../../../app_context';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -18,6 +18,7 @@ export const AddLicense = ({ uploadPath = `/upload_license` }) => {
 
   return (
     <EuiCard
+      hasBorder
       title={
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"

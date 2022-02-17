@@ -13,10 +13,12 @@ import { LoadMappingsProvider } from './load_mappings_provider';
 
 interface Props {
   onJson(json: { [key: string]: any }): void;
+  /** List of plugins installed in the cluster nodes */
+  esNodesPlugins: string[];
 }
 
-export const LoadMappingsFromJsonButton = ({ onJson }: Props) => (
-  <LoadMappingsProvider onJson={onJson}>
+export const LoadMappingsFromJsonButton = ({ onJson, esNodesPlugins }: Props) => (
+  <LoadMappingsProvider onJson={onJson} esNodesPlugins={esNodesPlugins}>
     {(openModal) => (
       <EuiButtonEmpty onClick={openModal} size="s">
         {i18n.translate('xpack.idxMgmt.mappingsEditor.loadFromJsonButtonLabel', {

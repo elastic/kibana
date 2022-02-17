@@ -12,9 +12,8 @@ import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
@@ -41,19 +40,14 @@ export function esNodeRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const showSystemIndices = req.payload.showSystemIndices;
       const clusterUuid = req.params.clusterUuid;
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-      const filebeatIndexPattern = prefixIndexPattern(
-        config,
-        config.get('monitoring.ui.logs.index'),
-        '*'
-      );
+      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;
@@ -62,9 +56,7 @@ export function esNodeRoute(server) {
       } else {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
-        const showCgroupMetricsElasticsearch = config.get(
-          'monitoring.ui.container.elasticsearch.enabled'
-        );
+        const showCgroupMetricsElasticsearch = config.ui.container.elasticsearch.enabled;
         const metricCpu = metricSet.find((m) => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
           metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];
@@ -74,36 +66,51 @@ export function esNodeRoute(server) {
       }
 
       try {
-        const cluster = await getClusterStats(req, esIndexPattern, clusterUuid);
+        const cluster = await getClusterStats(req, clusterUuid, ccs);
 
-        const clusterState = get(cluster, 'cluster_state', { nodes: {} });
-        const shardStats = await getShardStats(req, esIndexPattern, cluster, {
+        const clusterState = get(
+          cluster,
+          'cluster_state',
+          get(cluster, 'elasticsearch.cluster.stats.state')
+        );
+
+        const shardStats = await getShardStats(req, cluster, {
           includeIndices: true,
           includeNodes: true,
           nodeUuid,
         });
-        const nodeSummary = await getNodeSummary(req, esIndexPattern, clusterState, shardStats, {
+        const nodeSummary = await getNodeSummary(req, clusterState, shardStats, {
           clusterUuid,
           nodeUuid,
           start,
           end,
         });
-        const metrics = await getMetrics(req, esIndexPattern, metricSet, [
+        const metrics = await getMetrics(req, 'elasticsearch', metricSet, [
           { term: { 'source_node.uuid': nodeUuid } },
         ]);
-
         let logs;
         let shardAllocation;
         if (!isAdvanced) {
           // TODO: Why so many fields needed for a single component (shard legend)?
-          const shardFilter = { term: { 'shard.node': nodeUuid } };
-          const stateUuid = get(cluster, 'cluster_state.state_uuid');
+          const shardFilter = {
+            bool: {
+              should: [
+                { term: { 'shard.node': nodeUuid } },
+                { term: { 'elasticsearch.node.name': nodeUuid } },
+              ],
+            },
+          };
+          const stateUuid = get(
+            cluster,
+            'cluster_state.state_uuid',
+            get(cluster, 'elasticsearch.cluster.stats.state.state_uuid')
+          );
           const allocationOptions = {
             shardFilter,
             stateUuid,
             showSystemIndices,
           };
-          const shards = await getShardAllocation(req, esIndexPattern, allocationOptions);
+          const shards = await getShardAllocation(req, allocationOptions);
 
           shardAllocation = {
             shards,

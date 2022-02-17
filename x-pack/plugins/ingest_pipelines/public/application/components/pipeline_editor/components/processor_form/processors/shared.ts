@@ -10,7 +10,9 @@ import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 
-import { FieldConfig, ValidationFunc } from '../../../../../../shared_imports';
+import { FieldConfig, ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
+
+const { emptyField } = fieldValidators;
 
 export const arrayOfStrings = rt.array(rt.string);
 
@@ -79,7 +81,7 @@ export const from = {
     return undefined;
   },
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
-  undefinedIfValue: (value: unknown) => (v: boolean) => (v === value ? undefined : v),
+  undefinedIfValue: (value: unknown) => (v: boolean) => v === value ? undefined : v,
   emptyStringToUndefined: (v: unknown) => (v === '' ? undefined : v),
   /**
    * Useful when serializing user input from a <textarea /> that we want to later JSON.stringify but keep the same as what
@@ -117,6 +119,22 @@ export const isJSONStringValidator: ValidationFunc = ({ value }) => {
     };
   }
 };
+
+/**
+ * Similar to the emptyField validator but we accept whitespace characters.
+ */
+export const isEmptyString =
+  (message: string): ValidationFunc =>
+  (field) => {
+    const { value } = field;
+    if (typeof value === 'string') {
+      const hasLength = Boolean(value.length);
+      const hasNonWhiteSpaceChars = hasLength && Boolean(value.trim().length);
+      if (hasNonWhiteSpaceChars) {
+        return emptyField(message)(field);
+      }
+    }
+  };
 
 export const EDITOR_PX_HEIGHT = {
   extraSmall: 75,

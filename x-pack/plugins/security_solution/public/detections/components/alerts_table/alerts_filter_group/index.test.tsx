@@ -12,7 +12,9 @@ import { AlertsTableFilterGroup } from './index';
 
 describe('AlertsTableFilterGroup', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />);
+    const wrapper = shallow(
+      <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+    );
 
     expect(wrapper.find('EuiFilterButton')).toBeTruthy();
   });

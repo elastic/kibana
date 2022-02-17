@@ -12,14 +12,14 @@ import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
-  AlertTaskState,
+  RuleTaskState,
 } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<AlertTaskState> = ({
+const rewriteBodyRes: RewriteResponseCase<RuleTaskState> = ({
   alertTypeState,
   alertInstances,
   previousStartedAt,
@@ -44,9 +44,9 @@ export const getRuleStateRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const state = await alertsClient.getAlertState({ id });
+        const state = await rulesClient.getAlertState({ id });
         return state ? res.ok({ body: rewriteBodyRes(state) }) : res.noContent();
       })
     )

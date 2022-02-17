@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { MountPoint } from '../types';
+import { CoreTheme } from '../theme';
 import { Capabilities } from './capabilities';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
@@ -63,8 +64,36 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'
+  'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'
 >;
+
+/**
+ * App navigation menu options
+ * @public
+ */
+export interface AppNavOptions {
+  /**
+   * An ordinal used to sort nav links relative to one another for display.
+   */
+  order?: number;
+
+  /**
+   * A tooltip shown when hovering over app link.
+   */
+  tooltip?: string;
+
+  /**
+   * A EUI iconType that will be used for the app's icon. This icon
+   * takes precedence over the `icon` property.
+   */
+  euiIconType?: string;
+
+  /**
+   * A URL to an image file used as an icon. Used as a fallback
+   * if `euiIconType` is not provided.
+   */
+  icon?: string;
+}
 
 /**
  * Updater for applications.
@@ -76,7 +105,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 /**
  * @public
  */
-export interface App<HistoryLocationState = unknown> {
+export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
    * The unique identifier of the application
    */
@@ -106,6 +135,12 @@ export interface App<HistoryLocationState = unknown> {
    * See {@link AppNavLinkStatus}
    */
   navLinkStatus?: AppNavLinkStatus;
+
+  /**
+   * The initial flag to determine if the application is searchable in the global search.
+   * Defaulting to `true` if `navLinkStatus` is `visible` or omitted.
+   */
+  searchable?: boolean;
 
   /**
    * Allow to define the default path a user should be directed to when navigating to the app.
@@ -149,28 +184,6 @@ export interface App<HistoryLocationState = unknown> {
   updater$?: Observable<AppUpdater>;
 
   /**
-   * An ordinal used to sort nav links relative to one another for display.
-   */
-  order?: number;
-
-  /**
-   * A tooltip shown when hovering over app link.
-   */
-  tooltip?: string;
-
-  /**
-   * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
-   */
-  euiIconType?: string;
-
-  /**
-   * A URL to an image file used as an icon. Used as a fallback
-   * if `euiIconType` is not provided.
-   */
-  icon?: string;
-
-  /**
    * Custom capabilities defined by the app.
    */
   capabilities?: Partial<Capabilities>;
@@ -211,120 +224,115 @@ export interface App<HistoryLocationState = unknown> {
    */
   exactRoute?: boolean;
 
+  /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
+  keywords?: string[];
+
   /**
-   * Meta data for an application that represent additional information for the app.
-   * See {@link AppMeta}
+   * Input type for registering secondary in-app locations for an application.
    *
-   * @remarks
-   * Used to populate navigational search results (where available).
-   * Can be updated using the {@link App.updater$} observable. See {@link PublicAppSearchDeepLinkInfo} for more details.
+   * Deep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`
+   * represents a topological level in the application's hierarchy, but does not have a destination URL that is
+   * user-accessible.
    *
    * @example
    * ```ts
    * core.application.register({
    *   id: 'my_app',
    *   title: 'Translated title',
-   *   meta: {
-   *     keywords: ['translated keyword1', 'translated keyword2'],
-   *     searchDeepLinks: [
-   *     { id: 'sub1', title: 'Sub1', path: '/sub1', keywords: ['subpath1'] },
+   *   keywords: ['translated keyword1', 'translated keyword2'],
+   *   deepLinks: [
+   *     {
+   *       id: 'sub1',
+   *       title: 'Sub1',
+   *       path: '/sub1',
+   *       keywords: ['subpath1'],
+   *     },
    *     {
    *       id: 'sub2',
    *       title: 'Sub2',
-   *       searchDeepLinks: [
-   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub', keywords: ['subpath2'] }
-   *       ]
-   *     }
+   *       deepLinks: [
+   *         {
+   *           id: 'subsub',
+   *           title: 'SubSub',
+   *           path: '/sub2/sub',
+   *           keywords: ['subpath2'],
+   *         },
+   *       ],
+   *     },
    *   ],
-   *   },
    *   mount: () => { ... }
    * })
    * ```
    */
-  meta?: AppMeta;
+  deepLinks?: AppDeepLink[];
 }
 
 /**
- * Input type for meta data for an application.
- *
- * Meta fields include `keywords` and `searchDeepLinks`
- * Keywords is an array of string with which to associate the app, must include at least one unique string as an array.
- * `searchDeepLinks` is an array of links that represent secondary in-app locations for the app.
- * @public
- */
-export interface AppMeta {
-  /** Keywords to represent this application */
-  keywords?: string[];
-  /** Array of links that represent secondary in-app locations for the app. */
-  searchDeepLinks?: AppSearchDeepLink[];
-}
-
-/**
- * Public information about a registered app's {@link AppMeta | keywords }
+ * Public information about a registered app's {@link AppDeepLink | deepLinks}
  *
  * @public
  */
-export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
-  keywords: string[];
-  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-};
-
-/**
- * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
- *
- * @public
- */
-export type PublicAppSearchDeepLinkInfo = Omit<
-  AppSearchDeepLink,
-  'searchDeepLinks' | 'keywords'
+export type PublicAppDeepLinkInfo = Omit<
+  AppDeepLink,
+  'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'
 > & {
-  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  deepLinks: PublicAppDeepLinkInfo[];
   keywords: string[];
+  navLinkStatus: AppNavLinkStatus;
+  searchable: boolean;
 };
 
 /**
  * Input type for registering secondary in-app locations for an application.
  *
- * Deep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`
+ * Deep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`
  * represents a topological level in the application's hierarchy, but does not have a destination URL that is
  * user-accessible.
  * @public
  */
-export type AppSearchDeepLink = {
+export type AppDeepLink = {
   /** Identifier to represent this sublink, should be unique for this application */
   id: string;
   /** Title to label represent this deep link */
   title: string;
-} & (
-  | {
-      /** URL path to access this link, relative to the application's appRoute. */
-      path: string;
-      /** Optional array of links that are 'underneath' this section in the hierarchy */
-      searchDeepLinks?: AppSearchDeepLink[];
-      /** Optional keywords to match with in deep links search for the page at the path */
-      keywords?: string[];
-    }
-  | {
-      /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
-      path?: string;
-      /** Array links that are 'underneath' this section in this hierarchy. */
-      searchDeepLinks: AppSearchDeepLink[];
-      /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
-      keywords?: string[];
-    }
-);
+  /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
+  keywords?: string[];
+  /** Optional status of the chrome navigation, defaults to `hidden` */
+  navLinkStatus?: AppNavLinkStatus;
+  /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
+  searchable?: boolean;
+} & AppNavOptions &
+  (
+    | {
+        /** URL path to access this link, relative to the application's appRoute. */
+        path: string;
+        /** Optional array of links that are 'underneath' this section in the hierarchy */
+        deepLinks?: AppDeepLink[];
+      }
+    | {
+        /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
+        path?: string;
+        /** Array links that are 'underneath' this section in this hierarchy. */
+        deepLinks: AppDeepLink[];
+      }
+  );
 
 /**
  * Public information about a registered {@link App | application}
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
+export type PublicAppInfo = Omit<
+  App,
+  'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'
+> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
-  meta: PublicAppMetaInfo;
+  keywords: string[];
+  deepLinks: PublicAppDeepLinkInfo[];
+  searchable: boolean;
 };
 
 /**
@@ -513,6 +521,29 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
+  /**
+   * An observable emitting {@link CoreTheme | Core's theme}.
+   * Should be used when mounting the application to include theme information.
+   *
+   * @example
+   * When mounting a react application:
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   *
+   * import { AppMountParameters } from 'src/core/public';
+   * import { wrapWithTheme } from 'src/plugins/kibana_react';
+   * import { MyApp } from './app';
+   *
+   * export renderApp = ({ element, theme$ }: AppMountParameters) => {
+   *    ReactDOM.render(wrapWithTheme(<MyApp/>, theme$), element);
+   *    return () => ReactDOM.unmountComponentAtNode(element);
+   * }
+   * ```
+   */
+  theme$: Observable<CoreTheme>;
 }
 
 /**
@@ -566,6 +597,8 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  confirmButtonText?: string;
+  buttonColor?: ButtonColor;
   callback?: () => void;
 }
 
@@ -590,9 +623,17 @@ export interface AppLeaveActionFactory {
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
    * @param callback (optional) to know that the user want to stay on the page
+   * @param confirmButtonText (optional) text for the confirmation button
+   * @param buttonColor (optional) color for the confirmation button
    * so we can show to the user the right UX for him to saved his/her/their changes
    */
-  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
+  confirm(
+    text: string,
+    title?: string,
+    callback?: () => void,
+    confirmButtonText?: string,
+    buttonColor?: ButtonColor
+  ): AppLeaveConfirmAction;
 
   /**
    * Returns a default action, resulting on executing the default behavior when
@@ -670,11 +711,17 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
 
 /**
  * Options for the {@link ApplicationStart.navigateToApp | navigateToApp API}
+ * @public
  */
 export interface NavigateToAppOptions {
   /**
+   * optional {@link App.deepLinks | deep link} id inside the application to navigate to.
+   * If an additional {@link NavigateToAppOptions.path | path} is defined it will be appended to the deep link path.
+   */
+  deepLinkId?: string;
+  /**
    * optional path inside application to deep link to.
-   * If undefined, will use {@link App.defaultPath | the app's default path}` as default.
+   * If undefined, will use {@link App.defaultPath | the app's default path} as default.
    */
   path?: string;
   /**
@@ -685,6 +732,11 @@ export interface NavigateToAppOptions {
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
    */
   replace?: boolean;
+
+  /**
+   * if true, will open the app in new tab, will share session information via window.open if base
+   */
+  openInNewTab?: boolean;
 }
 
 /** @public */
@@ -761,7 +813,10 @@ export interface ApplicationStart {
    * @param options.path - optional path inside application to deep link to
    * @param options.absolute - if true, will returns an absolute url instead of a relative one
    */
-  getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
+  getUrlForApp(
+    appId: string,
+    options?: { path?: string; absolute?: boolean; deepLinkId?: string }
+  ): string;
 
   /**
    * An observable that emits the current application id and each subsequent id update.

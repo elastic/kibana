@@ -62,11 +62,13 @@ describe('useSecurityJobs', () => {
         isInstalled: true,
         isSingleMetricViewerJob: true,
         jobState: 'closed',
+        jobTags: {},
         latestTimestampMs: 1557434782207,
         memory_status: 'hard_limit',
         moduleId: '',
         processed_record_count: 582251,
         awaitingNodeAssignment: false,
+        bucketSpanSeconds: 900,
       };
 
       const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));

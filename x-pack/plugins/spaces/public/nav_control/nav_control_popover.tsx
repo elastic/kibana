@@ -11,8 +11,8 @@ import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
@@ -71,9 +71,6 @@ export class NavControlPopover extends Component<Props, State> {
 
   public render() {
     const button = this.getActiveSpaceButton();
-    if (!button) {
-      return null;
-    }
 
     let element: React.ReactNode;
     if (!this.state.loading && this.state.spaces.length < 2) {
@@ -101,14 +98,13 @@ export class NavControlPopover extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={'spcMenuPopover'}
-        data-test-subj={`spacesNavSelector`}
+        id="spcMenuPopover"
         button={button}
         isOpen={this.state.showSpaceSelector}
         closePopover={this.closeSpaceSelector}
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
-        repositionOnScroll={true}
+        repositionOnScroll
         ownFocus
       >
         {element}
@@ -143,7 +139,7 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     return this.getButton(
-      <Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
       </Suspense>,
       (activeSpace as Space).name
@@ -157,6 +153,7 @@ export class NavControlPopover extends Component<Props, State> {
         aria-expanded={this.state.showSpaceSelector}
         aria-haspopup="true"
         aria-label={linkTitle}
+        data-test-subj="spacesNavSelector"
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
       >

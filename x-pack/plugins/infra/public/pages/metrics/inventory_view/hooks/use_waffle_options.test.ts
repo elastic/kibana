@@ -56,8 +56,7 @@ describe('useWaffleOptions', () => {
       customMetrics: [
         {
           type: 'custom',
-          id:
-            "i don't want to bother to copy and paste an actual uuid so instead i'm going to smash my keyboard skjdghsjodkyjheurvjnsgn",
+          id: "i don't want to bother to copy and paste an actual uuid so instead i'm going to smash my keyboard skjdghsjodkyjheurvjnsgn",
           aggregation: 'avg',
           field: 'hey.system.are.you.good',
         },

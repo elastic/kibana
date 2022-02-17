@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Attempt to Disable Gatekeeper",
-  "query": "event.category:process and event.type:(start or process_started) and process.args:(spctl and \"--master-disable\")",
+  "query": "event.category:process and event.type:(start or process_started) and \n  process.args:(spctl and \"--master-disable\")\n",
   "references": [
     "https://support.apple.com/en-us/HT202491",
     "https://www.carbonblack.com/blog/tau-threat-intelligence-notification-new-macos-malware-variant-of-shlayer-osx-discovered/"

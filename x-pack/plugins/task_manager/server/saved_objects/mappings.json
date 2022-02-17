@@ -29,6 +29,9 @@
       "status": {
         "type": "keyword"
       },
+      "traceparent": {
+        "type": "text"
+      },
       "params": {
         "type": "text"
       },

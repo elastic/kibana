@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 
 import type { RouteDefinitionParams } from '../';
-import { OIDCLogin } from '../../authentication';
+import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication';
 import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
-import { OIDCAuthenticationProvider } from '../../authentication/providers/oidc';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
  * Defines routes required for SAML authentication.
@@ -106,7 +106,7 @@ export function defineOIDCRoutes({
             { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false },
+        options: { authRequired: false, tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW] },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -183,7 +183,11 @@ export function defineOIDCRoutes({
             { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false, xsrfRequired: false },
+        options: {
+          authRequired: false,
+          xsrfRequired: false,
+          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -222,7 +226,10 @@ export function defineOIDCRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: false },
+      options: {
+        authRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       return performOIDCLogin(request, response, {

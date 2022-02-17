@@ -10,15 +10,6 @@ import { useDispatch } from 'react-redux';
 
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
-  Direction,
-  HostFields,
-  HostItem,
-  HostsEdges,
-  HostsFields,
-  HostsSortField,
-  OsFields,
-} from '../../../graphql/types';
-import {
   Columns,
   Criteria,
   ItemsPerRow,
@@ -29,6 +20,19 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import {
+  HostsEdges,
+  HostItem,
+  HostsSortField,
+  HostsFields,
+  HostRiskSeverity,
+} from '../../../../common/search_strategy/security_solution/hosts';
+import { Direction } from '../../../../common/search_strategy';
+import { HostEcs, OsEcs } from '../../../../common/ecs/host';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { SecurityPageName } from '../../../../common/constants';
+import { HostsTableType } from '../../store/model';
+import { useNavigateTo } from '../../../common/lib/kibana/hooks';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -45,10 +49,11 @@ interface HostsTableProps {
 }
 
 export type HostsTableColumns = [
-  Columns<HostFields['name']>,
+  Columns<HostEcs['name']>,
   Columns<HostItem['lastSeen']>,
-  Columns<OsFields['name']>,
-  Columns<OsFields['version']>
+  Columns<OsEcs['name']>,
+  Columns<OsEcs['version']>,
+  Columns<HostRiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -78,6 +83,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
+  const { navigateTo } = useNavigateTo();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
@@ -126,8 +132,28 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
-  const hostsColumns = useMemo(() => getHostsColumns(), []);
+  const dispatchSeverityUpdate = useCallback(
+    (s: HostRiskSeverity) => {
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [s],
+          hostsType: type,
+        })
+      );
+      navigateTo({
+        deepLinkId: SecurityPageName.hosts,
+        path: HostsTableType.risk,
+      });
+    },
+    [dispatch, navigateTo, type]
+  );
+
+  const hostsColumns = useMemo(
+    () => getHostsColumns(riskyHostsFeatureEnabled, dispatchSeverityUpdate),
+    [dispatchSeverityUpdate, riskyHostsFeatureEnabled]
+  );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
@@ -178,6 +204,7 @@ const getNodeField = (field: HostsFields): string => {
   }
   assertUnreachable(field);
 };
+
 export const HostsTable = React.memo(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';

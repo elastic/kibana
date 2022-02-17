@@ -7,11 +7,15 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getMonitorList } from '../../../state/actions';
-import { monitorListSelector } from '../../../state/selectors';
+import { clearRefreshedMonitorId, getMonitorList } from '../../../state/actions';
+import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
+import { useMappingCheck } from '../../../hooks/use_mapping_check';
+import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
+import { refreshedMonitorSelector } from '../../../state/reducers/monitor_list';
 
 export interface MonitorListProps {
   filters?: string;
@@ -28,7 +32,8 @@ const getPageSizeValue = () => {
 };
 
 export const MonitorList: React.FC<MonitorListProps> = (props) => {
-  const { filters } = props;
+  const filters = useSelector(esKuerySelector);
+  const filterCheck = useOverviewFilterCheck();
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
 
@@ -39,25 +44,31 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
+  const refreshedMonitorIds = useSelector(refreshedMonitorSelector);
+
   const monitorList = useSelector(monitorListSelector);
+  useMappingCheck(monitorList.error);
 
   useEffect(() => {
-    dispatch(
-      getMonitorList({
-        dateRangeStart,
-        dateRangeEnd,
-        filters,
-        pageSize,
-        pagination,
-        statusFilter,
-        query,
-      })
+    filterCheck(() =>
+      dispatch(
+        getMonitorList({
+          dateRangeStart,
+          dateRangeEnd,
+          filters,
+          pageSize,
+          pagination,
+          statusFilter,
+          query,
+        })
+      )
     );
   }, [
     dispatch,
     dateRangeStart,
     dateRangeEnd,
     filters,
+    filterCheck,
     lastRefresh,
     pageSize,
     pagination,
@@ -65,12 +76,31 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     query,
   ]);
 
+  useEffect(() => {
+    dispatch(getMonitorAlertsAction.get());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getConnectorsAction.get());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (refreshedMonitorIds) {
+      refreshedMonitorIds.forEach((id) => {
+        setTimeout(() => {
+          dispatch(clearRefreshedMonitorId(id));
+        }, 5 * 1000);
+      });
+    }
+  }, [dispatch, refreshedMonitorIds]);
+
   return (
     <MonitorListComponent
       {...props}
       monitorList={monitorList}
       pageSize={pageSize}
       setPageSize={setPageSize}
+      refreshedMonitorIds={refreshedMonitorIds}
     />
   );
 };

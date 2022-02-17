@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from '@kbn/test/jest';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { debouncedComponent } from './debounced_component';
 import { act } from 'react-dom/test-utils';
 
@@ -26,7 +26,7 @@ describe('debouncedComponent', () => {
     component.setProps({ title: 'yall' });
     expect(component.text()).toEqual('there');
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 10));
     });
     expect(component.text()).toEqual('yall');
   });

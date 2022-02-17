@@ -25,8 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console']);
+  const toasts = getService('toasts');
 
-  describe('console app', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/124104
+  describe.skip('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -84,10 +86,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Ensure that the text area can be interacted with
       await PageObjects.console.dismissTutorial();
       expect(await PageObjects.console.hasAutocompleter()).to.be(false);
+      await PageObjects.console.enterRequest();
       await PageObjects.console.promptAutocomplete();
       await retry.waitFor('autocomplete to be visible', () =>
         PageObjects.console.hasAutocompleter()
       );
+    });
+
+    it('should add comma after previous non empty line on autocomplete', async () => {
+      const LINE_NUMBER = 4;
+
+      await PageObjects.console.dismissTutorial();
+      await PageObjects.console.clearTextArea();
+      await PageObjects.console.enterRequest();
+
+      await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.promptAutocomplete();
+      await PageObjects.console.pressEnter();
+
+      const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+      log.debug(textOfPreviousNonEmptyLine);
+      const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
+      expect(lastChar).to.be.equal(',');
+    });
+
+    describe('with a data URI in the load_from query', () => {
+      it('loads the data from the URI', async () => {
+        await PageObjects.common.navigateToApp('console', {
+          hash: '#/console?load_from=data:text/plain,BYUwNmD2Q',
+        });
+
+        await retry.try(async () => {
+          const actualRequest = await PageObjects.console.getRequest();
+          log.debug(actualRequest);
+          expect(actualRequest.trim()).to.eql('hello');
+        });
+      });
+
+      describe('with invalid data', () => {
+        it('shows a toast error', async () => {
+          await PageObjects.common.navigateToApp('console', {
+            hash: '#/console?load_from=data:text/plain,BYUwNmD2',
+          });
+
+          await retry.try(async () => {
+            expect(await toasts.getToastCount()).to.equal(1);
+          });
+        });
+      });
     });
   });
 }

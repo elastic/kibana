@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await ml.securityUI.logout();
       });
 
@@ -91,9 +92,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         before(async () => {
-          await esArchiver.loadIfNeeded('ml/farequote');
-          await esArchiver.loadIfNeeded('ml/ihp_outlier');
-          await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+          await esArchiver.loadIfNeeded(
+            'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+          );
           await ml.testResources.createIndexPatternIfNeeded(fqIndexPattern, '@timestamp');
           await ml.testResources.createIndexPatternIfNeeded(ihpIndexPattern, '@timestamp');
           await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
@@ -114,7 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
             description: 'Test calendar',
           });
           await ml.api.createCalendarEvents(calendarId, [
-            // @ts-expect-error not full interface
             {
               description: eventDescription,
               start_time: '1513641600000',
@@ -137,9 +139,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteIndexPatternByTitle(fqIndexPattern);
           await ml.testResources.deleteIndexPatternByTitle(ihpIndexPattern);
           await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
-          await esArchiver.unload('ml/farequote');
-          await esArchiver.unload('ml/ihp_outlier');
-          await esArchiver.unload('ml/module_sample_ecommerce');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
           await ml.testResources.resetKibanaTimeZone();
         });
 

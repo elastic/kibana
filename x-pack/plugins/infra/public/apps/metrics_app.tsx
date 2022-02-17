@@ -16,7 +16,6 @@ import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
-import { MetricDetail } from '../pages/metrics/metric_detail';
 import { InfraClientStartDeps } from '../types';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
@@ -25,11 +24,11 @@ import { prepareMountElement } from './common_styles';
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
-  { element, history, setHeaderActionMenu }: AppMountParameters
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
 ) => {
   const storage = new Storage(window.localStorage);
 
-  prepareMountElement(element);
+  prepareMountElement(element, 'infraMetricsPage');
 
   ReactDOM.render(
     <MetricsApp
@@ -38,6 +37,7 @@ export const renderApp = (
       plugins={plugins}
       setHeaderActionMenu={setHeaderActionMenu}
       storage={storage}
+      theme$={theme$}
     />,
     element
   );
@@ -53,15 +53,17 @@ const MetricsApp: React.FC<{
   plugins: InfraClientStartDeps;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
-}> = ({ core, history, plugins, setHeaderActionMenu, storage }) => {
+  theme$: AppMountParameters['theme$'];
+}> = ({ core, history, plugins, setHeaderActionMenu, storage, theme$ }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
-    <CoreProviders core={core} plugins={plugins}>
+    <CoreProviders core={core} plugins={plugins} theme$={theme$}>
       <CommonInfraProviders
         appName="Metrics UI"
         setHeaderActionMenu={setHeaderActionMenu}
         storage={storage}
+        theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>
@@ -75,9 +77,6 @@ const MetricsApp: React.FC<{
             )}
             {uiCapabilities?.infrastructure?.show && (
               <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <Route path="/detail/:type/:node" component={MetricDetail} />
             )}
             {uiCapabilities?.infrastructure?.show && (
               <Route path="/" component={InfrastructurePage} />

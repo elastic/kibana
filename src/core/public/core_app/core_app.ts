@@ -18,18 +18,24 @@ import type { CoreContext } from '../core_system';
 import type { NotificationsSetup, NotificationsStart } from '../notifications';
 import type { IUiSettingsClient } from '../ui_settings';
 import type { InjectedMetadataSetup } from '../injected_metadata';
-import { renderApp as renderErrorApp, setupUrlOverflowDetection } from './errors';
+import {
+  renderApp as renderErrorApp,
+  setupPublicBaseUrlConfigWarning,
+  setupUrlOverflowDetection,
+} from './errors';
 import { renderApp as renderStatusApp } from './status';
+import { DocLinksStart } from '../doc_links';
 
-interface SetupDeps {
+export interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   notifications: NotificationsSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
+  docLinks: DocLinksStart;
   http: HttpStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
@@ -40,7 +46,7 @@ export class CoreApp {
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public setup({ http, application, injectedMetadata, notifications }: SetupDeps) {
+  public setup({ application, http, injectedMetadata, notifications }: SetupDeps) {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
@@ -68,7 +74,7 @@ export class CoreApp {
     });
   }
 
-  public start({ application, http, notifications, uiSettings }: StartDeps) {
+  public start({ application, docLinks, http, notifications, uiSettings }: StartDeps) {
     if (!application.history) {
       return;
     }
@@ -79,6 +85,8 @@ export class CoreApp {
       toasts: notifications.toasts,
       uiSettings,
     });
+
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications });
   }
 
   public stop() {

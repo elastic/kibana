@@ -70,3 +70,7 @@ export const COPY_FINGERPRINT = i18n.translate('xpack.uptime.certs.list.copyFing
 export const NO_CERTS_AVAILABLE = i18n.translate('xpack.uptime.certs.list.empty', {
   defaultMessage: 'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+',
 });
+
+export const LOADING_CERTIFICATES = i18n.translate('xpack.uptime.certificates.loading', {
+  defaultMessage: 'Loading certificates ...',
+});

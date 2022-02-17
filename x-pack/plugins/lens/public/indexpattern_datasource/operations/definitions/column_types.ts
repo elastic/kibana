@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/public';
 import type { Operation } from '../../../types';
-import { TimeScaleUnit } from '../../time_scale';
+import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '../definitions';
 
 export interface BaseIndexPatternColumn extends Operation {
@@ -16,11 +16,11 @@ export interface BaseIndexPatternColumn extends Operation {
   customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   filter?: Query;
+  timeShift?: string;
 }
 
 // Formatting can optionally be added to any column
-// export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
-export type FormattedIndexPatternColumn = BaseIndexPatternColumn & {
+export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
   params?: {
     format?: {
       id: string;
@@ -29,17 +29,20 @@ export type FormattedIndexPatternColumn = BaseIndexPatternColumn & {
       };
     };
   };
-};
+}
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
 }
 
-export interface ReferenceBasedIndexPatternColumn
-  extends BaseIndexPatternColumn,
-    FormattedIndexPatternColumn {
+export interface ReferenceBasedIndexPatternColumn extends FormattedIndexPatternColumn {
   references: string[];
 }
+
+export type GenericIndexPatternColumn =
+  | BaseIndexPatternColumn
+  | FieldBasedIndexPatternColumn
+  | ReferenceBasedIndexPatternColumn;
 
 // Used to store the temporary invalid state
 export interface IncompleteColumn {

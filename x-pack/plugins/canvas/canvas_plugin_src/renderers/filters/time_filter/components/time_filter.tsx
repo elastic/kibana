@@ -9,7 +9,7 @@ import { EuiSuperDatePicker, OnTimeChangeProps, EuiSuperDatePickerCommonRange } 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { UnitStrings } from '../../../../../i18n/units';
 
 const { quickRanges: strings } = UnitStrings;
@@ -54,9 +54,11 @@ export interface Props {
 }
 
 export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = [] }: Props) => {
-  const setFilter = (column: string) => ({ start, end }: OnTimeChangeProps) => {
-    commit(`timefilter from="${start}" to=${end} column=${column}`);
-  };
+  const setFilter =
+    (column: string) =>
+    ({ start, end }: OnTimeChangeProps) => {
+      commit(`timefilter from="${start}" to=${end} column=${column}`);
+    };
 
   const { column, start, end } = getFilterMeta(filter);
 

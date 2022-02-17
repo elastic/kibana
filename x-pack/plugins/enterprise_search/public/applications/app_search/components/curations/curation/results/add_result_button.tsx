@@ -7,18 +7,21 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { CurationLogic } from '..';
 
 import { AddResultLogic } from './';
 
 export const AddResultButton: React.FC = () => {
   const { openFlyout } = useActions(AddResultLogic);
+  const { isAutomated } = useValues(CurationLogic);
 
   return (
-    <EuiButton onClick={openFlyout} iconType="plusInCircle" size="s" fill>
+    <EuiButton onClick={openFlyout} iconType="plusInCircle" size="s" disabled={isAutomated}>
       {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.addResult.buttonLabel', {
         defaultMessage: 'Add result manually',
       })}

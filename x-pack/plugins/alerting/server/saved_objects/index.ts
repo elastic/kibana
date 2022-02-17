@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import type {
+  Logger,
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
+} from 'kibana/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-
+import { transformRulesForExport } from './transform_rule_for_export';
+import { RawRule } from '../types';
+import { getImportWarnings } from './get_import_warnings';
+import { isRuleExportable } from './is_rule_exportable';
+import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
@@ -19,6 +29,7 @@ export const AlertAttributesExcludedFromAAD = [
   'updatedBy',
   'updatedAt',
   'executionStatus',
+  'monitoring',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -31,18 +42,44 @@ export type AlertAttributesExcludedFromAADType =
   | 'mutedInstanceIds'
   | 'updatedBy'
   | 'updatedAt'
-  | 'executionStatus';
+  | 'executionStatus'
+  | 'monitoring';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  ruleTypeRegistry: RuleTypeRegistry,
+  logger: Logger,
+  isPreconfigured: (connectorId: string) => boolean
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
-    namespaceType: 'single',
-    migrations: getMigrations(encryptedSavedObjects),
-    mappings: mappings.alert,
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
+    migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
+    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
+    management: {
+      displayName: 'rule',
+      importableAndExportable: true,
+      getTitle(ruleSavedObject: SavedObject<RawRule>) {
+        return `Rule: [${ruleSavedObject.attributes.name}]`;
+      },
+      onImport(ruleSavedObjects) {
+        return {
+          warnings: getImportWarnings(ruleSavedObjects),
+        };
+      },
+      onExport<RawRule>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawRule>>
+      ) {
+        return transformRulesForExport(objects);
+      },
+      isExportable<RawRule>(ruleSavedObject: SavedObject<RawRule>) {
+        return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
+      },
+    },
   });
 
   savedObjects.registerType({

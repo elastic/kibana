@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { RuntimeFieldForm, FormState } from './runtime_field_form';
+export type { FormState } from './runtime_field_form';
+export { RuntimeFieldForm } from './runtime_field_form';

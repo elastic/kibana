@@ -16,10 +16,14 @@ export function setDefaultAutoFitToBounds({
     return attributes;
   }
 
-  // MapState type is defined in public, no need to bring all of that to common for this migration
-  const mapState: { settings?: { autoFitToDataBounds: boolean } } = JSON.parse(
-    attributes.mapStateJSON
-  );
+  // MapState type is defined in public, no need to pull type definition into common for this migration
+  let mapState: { settings?: { autoFitToDataBounds: boolean } } = {};
+  try {
+    mapState = JSON.parse(attributes.mapStateJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute mapStateJSON');
+  }
+
   if ('settings' in mapState) {
     mapState.settings!.autoFitToDataBounds = false;
   } else {

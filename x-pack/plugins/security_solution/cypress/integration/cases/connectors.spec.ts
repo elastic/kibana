@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { serviceNowConnector } from '../../objects/case';
+import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../objects/case';
 
 import { SERVICE_NOW_MAPPING, TOASTER } from '../../screens/configure_cases';
 
@@ -40,9 +40,19 @@ describe('Cases connectors', () => {
       { source: 'comments', target: 'comments', action_type: 'append' },
     ],
     version: 'WzEwNCwxXQ==',
+    id: '123',
+    owner: 'securitySolution',
   };
+
+  const snConnector = getServiceNowConnector();
+
   beforeEach(() => {
     cleanKibana();
+    cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
+      statusCode: 200,
+      body: getServiceNowITSMHealthResponse(),
+    });
+
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
       const connector = req.body.connector;
@@ -50,19 +60,22 @@ describe('Cases connectors', () => {
         res.send(200, { ...configureResult, connector });
       });
     }).as('saveConnector');
+
     cy.intercept('GET', '/api/cases/configure', (req) => {
       req.reply((res) => {
         const resBody =
-          res.body.version != null
-            ? {
-                ...res.body,
-                error: null,
-                mappings: [
-                  { source: 'title', target: 'short_description', action_type: 'overwrite' },
-                  { source: 'description', target: 'description', action_type: 'overwrite' },
-                  { source: 'comments', target: 'comments', action_type: 'append' },
-                ],
-              }
+          res.body.length > 0 && res.body[0].version != null
+            ? [
+                {
+                  ...res.body[0],
+                  error: null,
+                  mappings: [
+                    { source: 'title', target: 'short_description', action_type: 'overwrite' },
+                    { source: 'description', target: 'description', action_type: 'overwrite' },
+                    { source: 'comments', target: 'comments', action_type: 'append' },
+                  ],
+                },
+              ]
             : res.body;
         res.send(200, resBody);
       });
@@ -73,14 +86,14 @@ describe('Cases connectors', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
-    addServiceNowConnector(serviceNowConnector);
+    addServiceNowConnector(snConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      selectLastConnectorCreated(response!.body.id);
+      selectLastConnectorCreated(response?.body.id);
 
       cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');

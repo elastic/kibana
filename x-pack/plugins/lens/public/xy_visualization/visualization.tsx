@@ -6,17 +6,23 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import { groupBy, uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { getSuggestions } from './xy_suggestions';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
-import { State, SeriesType, visualizationTypes, XYLayerConfig } from './types';
+import { XyToolbar, DimensionEditor } from './xy_config_panel';
+import { LayerHeader } from './xy_config_panel/layer_header';
+import type { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
+import { State, visualizationTypes, XYSuggestion } from './types';
+import { SeriesType, XYLayerConfig, YAxisMode } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -24,10 +30,26 @@ import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
+import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
+import { generateId } from '../id_generator';
+import {
+  getGroupsAvailableInData,
+  getGroupsRelatedToData,
+  getGroupsToShow,
+  getStaticValue,
+} from './reference_line_helpers';
+import {
+  checkScaleOperation,
+  checkXAccessorCompatibility,
+  getAxisName,
+} from './visualization_helpers';
+import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
+
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isNumericDynamicMetric = (op: OperationMetadata) => isNumericMetric(op) && !op.isStaticValue;
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
@@ -37,7 +59,7 @@ function getVisualizationType(state: State): VisualizationType | 'mixed' {
     );
   }
   const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
-  const seriesTypes = _.uniq(state.layers.map((l) => l.seriesType));
+  const seriesTypes = uniq(state.layers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
@@ -80,10 +102,14 @@ function getDescription(state?: State) {
 
 export const getXyVisualization = ({
   paletteService,
-  data,
+  fieldFormats,
+  useLegacyTimeAxis,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -94,7 +120,12 @@ export const getXyVisualization = ({
   },
 
   getLayerIds(state) {
-    return state.layers.map((l) => l.layerId);
+    return getLayersByType(state).map((l) => l.layerId);
+  },
+
+  getRemoveOperation(state, layerId) {
+    const dataLayers = getLayersByType(state, layerTypes.DATA).map((l) => l.layerId);
+    return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
   },
 
   removeLayer(state, layerId) {
@@ -104,15 +135,16 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId) {
-    const usedSeriesTypes = _.uniq(state.layers.map((layer) => layer.seriesType));
+  appendLayer(state, layerId, layerType) {
+    const usedSeriesTypes = uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
       layers: [
         ...state.layers,
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-          layerId
+          layerId,
+          layerType
         ),
       ],
     };
@@ -146,7 +178,9 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  initialize(frame, state) {
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+
+  initialize(addNewLayer, state) {
     return (
       state || {
         title: 'Empty XY chart',
@@ -155,15 +189,97 @@ export const getXyVisualization = ({
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
-            layerId: frame.addNewLayer(),
+            layerId: addNewLayer(),
             accessors: [],
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
+            layerType: layerTypes.DATA,
           },
         ],
       }
     );
+  },
+
+  getLayerType(layerId, state) {
+    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
+  },
+
+  getSupportedLayers(state, frame) {
+    const referenceLineGroupIds = [
+      {
+        id: 'yReferenceLineLeft',
+        label: 'yLeft' as const,
+      },
+      {
+        id: 'yReferenceLineRight',
+        label: 'yRight' as const,
+      },
+      {
+        id: 'xReferenceLine',
+        label: 'x' as const,
+      },
+    ];
+
+    const dataLayers =
+      state?.layers.filter(({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA) ||
+      [];
+    const filledDataLayers = dataLayers.filter(
+      ({ accessors, xAccessor }) => accessors.length || xAccessor
+    );
+    const layerHasNumberHistogram = checkScaleOperation(
+      'interval',
+      'number',
+      frame?.datasourceLayers || {}
+    );
+    const referenceLineGroups = getGroupsRelatedToData(
+      referenceLineGroupIds,
+      state,
+      frame?.datasourceLayers || {},
+      frame?.activeData
+    );
+
+    const layers = [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
+          defaultMessage: 'Visualization',
+        }),
+        icon: LensIconChartMixedXy,
+      },
+      {
+        type: layerTypes.REFERENCELINE,
+        label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
+          defaultMessage: 'Reference lines',
+        }),
+        icon: LensIconChartBarReferenceLine,
+        disabled:
+          !filledDataLayers.length ||
+          (!dataLayers.some(layerHasNumberHistogram) &&
+            dataLayers.every(({ accessors }) => !accessors.length)),
+        tooltipContent: filledDataLayers.length
+          ? undefined
+          : i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp', {
+              defaultMessage: 'Add some data to enable reference layer',
+            }),
+        initialDimensions: state
+          ? referenceLineGroups.map(({ id, label }) => ({
+              groupId: id,
+              columnId: generateId(),
+              dataType: 'number',
+              label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+              staticValue: getStaticValue(
+                dataLayers,
+                label,
+                { activeData: frame?.activeData },
+                layerHasNumberHistogram
+              ),
+            }))
+          : undefined,
+      },
+    ];
+
+    return layers;
   },
 
   getConfiguration({ state, frame, layerId }) {
@@ -183,7 +299,7 @@ export const getXyVisualization = ({
       const colorAssignments = getColorAssignments(
         state.layers,
         { tables: frame.activeData },
-        data.fieldFormats.deserialize
+        fieldFormats.deserialize
       );
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
@@ -197,6 +313,122 @@ export const getXyVisualization = ({
     }
 
     const isHorizontal = isHorizontalChart(state.layers);
+    const isDataLayer = !layer.layerType || layer.layerType === layerTypes.DATA;
+
+    if (!isDataLayer) {
+      const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
+        memo[id] = index;
+        return memo;
+      }, {});
+      const { bottom, left, right } = groupBy(
+        [...(layer.yConfig || [])].sort(
+          ({ forAccessor: forA }, { forAccessor: forB }) => idToIndex[forA] - idToIndex[forB]
+        ),
+        ({ axisMode }) => {
+          return axisMode;
+        }
+      );
+      const groupsToShow = getGroupsToShow(
+        [
+          // When a reference layer panel is added, a static reference line should automatically be included by default
+          // in the first available axis, in the following order: vertical left, vertical right, horizontal.
+          {
+            config: left,
+            id: 'yReferenceLineLeft',
+            label: 'yLeft',
+            dataTestSubj: 'lnsXY_yReferenceLineLeftPanel',
+          },
+          {
+            config: right,
+            id: 'yReferenceLineRight',
+            label: 'yRight',
+            dataTestSubj: 'lnsXY_yReferenceLineRightPanel',
+          },
+          {
+            config: bottom,
+            id: 'xReferenceLine',
+            label: 'x',
+            dataTestSubj: 'lnsXY_xReferenceLinePanel',
+          },
+        ],
+        state,
+        frame.datasourceLayers,
+        frame?.activeData
+      );
+      return {
+        // Each reference lines layer panel will have sections for each available axis
+        // (horizontal axis, vertical axis left, vertical axis right).
+        // Only axes that support numeric reference lines should be shown
+        groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
+          groupId: id,
+          groupLabel: getAxisName(label, { isHorizontal }),
+          accessors: config.map(({ forAccessor, color }) => ({
+            columnId: forAccessor,
+            color: color || mappedAccessors.find(({ columnId }) => columnId === forAccessor)?.color,
+            triggerIcon: 'color',
+          })),
+          filterOperations: isNumericMetric,
+          supportsMoreColumns: true,
+          required: false,
+          enableDimensionEditor: true,
+          supportStaticValue: true,
+          paramEditorCustomProps: {
+            label: i18n.translate('xpack.lens.indexPattern.staticValue.label', {
+              defaultMessage: 'Reference line value',
+            }),
+          },
+          supportFieldFormat: false,
+          dataTestSubj,
+          invalid: !valid,
+          invalidMessage:
+            label === 'x'
+              ? i18n.translate('xpack.lens.configure.invalidBottomReferenceLineDimension', {
+                  defaultMessage:
+                    'This reference line is assigned to an axis that no longer exists or is no longer valid. You may move this reference line to another available axis or remove it.',
+                })
+              : i18n.translate('xpack.lens.configure.invalidReferenceLineDimension', {
+                  defaultMessage:
+                    'This reference line is assigned to an axis that no longer exists. You may move this reference line to another available axis or remove it.',
+                }),
+          requiresPreviousColumnOnDuplicate: true,
+        })),
+      };
+    }
+
+    const { left, right } = groupAxesByType([layer], frame.activeData);
+    // Check locally if it has one accessor OR one accessor per axis
+    const layerHasOnlyOneAccessor = Boolean(
+      layer.accessors.length < 2 ||
+        (left.length && left.length < 2) ||
+        (right.length && right.length < 2)
+    );
+    // Check also for multiple layers that can stack for percentage charts
+    // Make sure that if multiple dimensions are defined for a single layer, they should belong to the same axis
+    const hasOnlyOneAccessor =
+      layerHasOnlyOneAccessor &&
+      getLayersByType(state, layerTypes.DATA).filter(
+        // check that the other layers are compatible with this one
+        (dataLayer) => {
+          if (
+            dataLayer.seriesType === layer.seriesType &&
+            Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
+            Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor)
+          ) {
+            const { left: localLeft, right: localRight } = groupAxesByType(
+              [dataLayer],
+              frame.activeData
+            );
+            // return true only if matching axis are found
+            return (
+              dataLayer.accessors.length &&
+              (Boolean(localLeft.length) === Boolean(left.length) ||
+                Boolean(localRight.length) === Boolean(right.length))
+            );
+          }
+          return false;
+        }
+      ).length < 2;
+
     return {
       groups: [
         {
@@ -211,7 +443,7 @@ export const getXyVisualization = ({
           groupId: 'y',
           groupLabel: getAxisName('y', { isHorizontal }),
           accessors: mappedAccessors,
-          filterOperations: isNumericMetric,
+          filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: true,
           required: true,
           dataTestSubj: 'lnsXY_yDimensionPanel',
@@ -229,14 +461,14 @@ export const getXyVisualization = ({
                   triggerIcon: 'colorBy',
                   palette: paletteService
                     .get(layer.palette?.name || 'default')
-                    .getColors(10, layer.palette?.params),
+                    .getCategoricalColors(10, layer.palette?.params),
                 },
               ]
             : [],
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage'),
+          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],
@@ -248,12 +480,12 @@ export const getXyVisualization = ({
     return state.layers[0].palette;
   },
 
-  setDimension({ prevState, layerId, columnId, groupId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+  setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
-
+    const newLayer = { ...foundLayer };
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -264,18 +496,120 @@ export const getXyVisualization = ({
       newLayer.splitAccessor = columnId;
     }
 
+    if (newLayer.layerType === layerTypes.REFERENCELINE) {
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+      const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
+      const previousYConfig = previousColumn
+        ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+        : false;
+      if (!hasYConfig) {
+        newLayer.yConfig = [
+          ...(newLayer.yConfig || []),
+          {
+            // override with previous styling,
+            ...previousYConfig,
+            // but keep the new group & id config
+            forAccessor: columnId,
+            axisMode:
+              groupId === 'xReferenceLine'
+                ? 'bottom'
+                : groupId === 'yReferenceLineRight'
+                ? 'right'
+                : 'left',
+          },
+        ];
+      }
+    }
+
     return {
       ...prevState,
       layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
 
-  removeDimension({ prevState, layerId, columnId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+  updateLayersConfigurationFromContext({ prevState, layerId, context }) {
+    const { chartType, axisPosition, palette, metrics } = context;
+    const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
+    const axisMode = axisPosition as YAxisMode;
+    const yConfig = metrics.map((metric, idx) => {
+      return {
+        color: metric.color,
+        forAccessor: metric.accessor ?? foundLayer.accessors[idx],
+        ...(axisMode && { axisMode }),
+      };
+    });
+    const newLayer = {
+      ...foundLayer,
+      ...(chartType && { seriesType: chartType as SeriesType }),
+      ...(palette && { palette }),
+      yConfig,
+    };
 
+    const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+
+    return {
+      ...prevState,
+      layers: newLayers,
+    };
+  },
+
+  getVisualizationSuggestionFromContext({ suggestions, context }) {
+    const visualizationStateLayers = [];
+    let datasourceStateLayers = {};
+    const fillOpacity = context.configuration.fill ? Number(context.configuration.fill) : undefined;
+    for (let suggestionIdx = 0; suggestionIdx < suggestions.length; suggestionIdx++) {
+      const currentSuggestion = suggestions[suggestionIdx] as XYSuggestion;
+      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
+      const contextLayer = context.layers.find(
+        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
+      );
+      if (this.updateLayersConfigurationFromContext && contextLayer) {
+        const updatedSuggestionState = this.updateLayersConfigurationFromContext({
+          prevState: currentSuggestion.visualizationState as unknown as State,
+          layerId: currentSuggestionsLayers[0].layerId as string,
+          context: contextLayer,
+        });
+
+        visualizationStateLayers.push(...updatedSuggestionState.layers);
+        datasourceStateLayers = {
+          ...datasourceStateLayers,
+          ...currentSuggestion.datasourceState.layers,
+        };
+      }
+    }
+    let suggestion = suggestions[0] as XYSuggestion;
+    suggestion = {
+      ...suggestion,
+      datasourceState: {
+        ...suggestion.datasourceState,
+        layers: {
+          ...suggestion.datasourceState.layers,
+          ...datasourceStateLayers,
+        },
+      },
+      visualizationState: {
+        ...suggestion.visualizationState,
+        fillOpacity,
+        yRightExtent: context.configuration.extents?.yRightExtent,
+        yLeftExtent: context.configuration.extents?.yLeftExtent,
+        legend: context.configuration.legend,
+        gridlinesVisibilitySettings: context.configuration.gridLinesVisibility,
+        valuesInLegend: true,
+        layers: visualizationStateLayers,
+      },
+    };
+    return suggestion;
+  },
+
+  removeDimension({ prevState, layerId, columnId, frame }) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
+      return prevState;
+    }
+    const newLayer = { ...foundLayer };
     if (newLayer.xAccessor === columnId) {
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
@@ -290,48 +624,64 @@ export const getXyVisualization = ({
       newLayer.yConfig = newLayer.yConfig.filter(({ forAccessor }) => forAccessor !== columnId);
     }
 
+    let newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+    // check if there's any reference layer and pull it off if all data layers have no dimensions set
+    const layersByType = groupBy(newLayers, ({ layerType }) => layerType);
+    // check for data layers if they all still have xAccessors
+    const groupsAvailable = getGroupsAvailableInData(
+      layersByType[layerTypes.DATA],
+      frame.datasourceLayers,
+      frame?.activeData
+    );
+    if (
+      (Object.keys(groupsAvailable) as Array<'x' | 'yLeft' | 'yRight'>).every(
+        (id) => !groupsAvailable[id]
+      )
+    ) {
+      newLayers = newLayers.filter(
+        ({ layerType, accessors }) => layerType === layerTypes.DATA || accessors.length
+      );
+    }
+
     return {
       ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+      layers: newLayers,
     };
   },
 
-  getLayerContextMenuIcon({ state, layerId }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
-    return {
-      icon: visualizationType?.icon || 'gear',
-      label: visualizationType?.label || '',
-    };
-  },
-
-  renderLayerContextMenu(domElement, props) {
+  renderLayerHeader(domElement, props) {
     render(
-      <I18nProvider>
-        <LayerContextMenu {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerHeader {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <XyToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor
-          {...props}
-          formatFactory={data.fieldFormats.deserialize}
-          paletteService={paletteService}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionEditor
+            {...props}
+            formatFactory={fieldFormats.deserialize}
+            paletteService={paletteService}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -349,7 +699,7 @@ export const getXyVisualization = ({
 
     const errors: Array<{
       shortMessage: string;
-      longMessage: string;
+      longMessage: React.ReactNode;
     }> = [];
 
     // check if the layers in the state are compatible with this type of chart
@@ -362,8 +712,9 @@ export const getXyVisualization = ({
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
+        ({ accessors, xAccessor, splitAccessor, layerType }: XYLayerConfig) =>
+          layerType === layerTypes.DATA &&
+          (accessors.length > 0 || xAccessor != null || splitAccessor != null)
       );
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
@@ -374,6 +725,9 @@ export const getXyVisualization = ({
     }
 
     if (datasourceLayers && state) {
+      // temporary fix for #87068
+      errors.push(...checkXAccessorCompatibility(state, datasourceLayers));
+
       for (const layer of state.layers) {
         const datasourceAPI = datasourceLayers[layer.layerId];
         if (datasourceAPI) {
@@ -429,10 +783,14 @@ export const getXyVisualization = ({
       }
     }
     return accessorsWithArrayValues.map((label) => (
-      <>
-        <strong>{label}</strong> contains array values. Your visualization may not render as
-        expected.
-      </>
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.xyVisualization.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
     ));
   },
 });
@@ -445,7 +803,7 @@ function validateLayersForDimension(
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: string };
+      payload: { shortMessage: string; longMessage: React.ReactNode };
     } {
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
@@ -465,19 +823,6 @@ function validateLayersForDimension(
     valid: false,
     payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
   };
-}
-
-function getAxisName(axis: 'x' | 'y', { isHorizontal }: { isHorizontal: boolean }) {
-  const vertical = i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-    defaultMessage: 'Vertical axis',
-  });
-  const horizontal = i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-    defaultMessage: 'Horizontal axis',
-  });
-  if (axis === 'x') {
-    return isHorizontal ? vertical : horizontal;
-  }
-  return isHorizontal ? horizontal : vertical;
 }
 
 // i18n ids cannot be dynamically generated, hence the function below
@@ -510,10 +855,21 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
+function newLayerState(
+  seriesType: SeriesType,
+  layerId: string,
+  layerType: LayerType = layerTypes.DATA
+): XYLayerConfig {
   return {
     layerId,
     seriesType,
     accessors: [],
+    layerType,
   };
+}
+
+function getLayersByType(state: State, byType?: string) {
+  return state.layers.filter(({ layerType = layerTypes.DATA }) =>
+    byType ? layerType === byType : true
+  );
 }

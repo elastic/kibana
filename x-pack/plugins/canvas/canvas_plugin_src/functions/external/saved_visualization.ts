@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 import {
@@ -12,9 +13,10 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -24,7 +26,7 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -93,8 +95,9 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          savedObjectId: id,
           disableTriggers: true,
-          timeRange: timerange || defaultTimeRange,
+          timeRange: timerange ? omit(timerange, 'type') : defaultTimeRange,
           filters: getQueryFilters(filters),
           vis: visOptions,
           title: title === null ? undefined : title,
@@ -102,6 +105,31 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.visualization,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedVisualization.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'visualization',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedVisualization.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -54,7 +54,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiText size="s" color={exists ? 'subdued' : 'secondary'}>
+                      <EuiText size="s" color={exists ? 'subdued' : 'success'}>
                         {title}
                       </EuiText>
                       {success === false && error !== undefined && (

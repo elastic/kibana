@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
-      await esArchiver.load('logstash/example_pipelines');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash/example_pipelines');
     });
 
     beforeEach(async () => {
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await esArchiver.unload('logstash/example_pipelines');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash/example_pipelines');
       await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 

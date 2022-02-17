@@ -1,0 +1,271 @@
+{
+  "id": "@kbn/apm-config-loader",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.ApmConfiguration",
+        "type": "Class",
+        "tags": [],
+        "label": "ApmConfiguration",
+        "description": [],
+        "path": "packages/kbn-apm-config-loader/src/config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.ApmConfiguration.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-config-loader",
+                "id": "def-server.ApmConfiguration.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rootDir",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/apm-config-loader",
+                "id": "def-server.ApmConfiguration.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "rawKibanaConfig",
+                "description": [],
+                "signature": [
+                  "Record<string, any>"
+                ],
+                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/apm-config-loader",
+                "id": "def-server.ApmConfiguration.Unnamed.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDistributable",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.ApmConfiguration.getConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfig",
+            "description": [],
+            "signature": [
+              "(serviceName: string) => ",
+              "AgentConfigOptions"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-config-loader",
+                "id": "def-server.ApmConfiguration.getConfig.$1",
+                "type": "string",
+                "tags": [],
+                "label": "serviceName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.getConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "getConfiguration",
+        "description": [],
+        "signature": [
+          "(serviceName: string) => ",
+          "AgentConfigOptions",
+          " | undefined"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.getConfiguration.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.initApm",
+        "type": "Function",
+        "tags": [],
+        "label": "initApm",
+        "description": [],
+        "signature": [
+          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.initApm.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "argv",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.initApm.$2",
+            "type": "string",
+            "tags": [],
+            "label": "rootDir",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.initApm.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDistributable",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.initApm.$4",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.shouldInstrumentClient",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldInstrumentClient",
+        "description": [],
+        "signature": [
+          "(config: ",
+          "AgentConfigOptions",
+          " | undefined) => boolean"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.shouldInstrumentClient.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "AgentConfigOptions",
+              " | undefined"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

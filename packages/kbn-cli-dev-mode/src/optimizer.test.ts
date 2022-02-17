@@ -18,9 +18,11 @@ import { Optimizer, Options } from './optimizer';
 
 jest.mock('@kbn/optimizer');
 const realOptimizer = jest.requireActual('@kbn/optimizer');
-const { runOptimizer, OptimizerConfig, logOptimizerState } = jest.requireMock('@kbn/optimizer');
+const { runOptimizer, OptimizerConfig, logOptimizerState, logOptimizerProgress } =
+  jest.requireMock('@kbn/optimizer');
 
 logOptimizerState.mockImplementation(realOptimizer.logOptimizerState);
+logOptimizerProgress.mockImplementation(realOptimizer.logOptimizerProgress);
 
 class MockOptimizerConfig {}
 
@@ -180,6 +182,7 @@ it('is ready when optimizer phase is success or issue and logs in familiar forma
       "ready: false",
       "<issue>",
       "ready: true",
+      "complete",
     ]
   `);
 

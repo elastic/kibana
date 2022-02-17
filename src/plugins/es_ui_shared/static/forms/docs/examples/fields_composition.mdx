@@ -1,0 +1,167 @@
+---
+id: formLibExampleFieldsComposition
+slug: /form-lib/examples/fields-composition
+title: Fields composition
+summary: Be DRY and compose your form
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+If your form does not have a fix set of fields (single interface) and you need to add/remove fields dynamically, you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.  
+If you _do_ need to keep a field value, but hide the field in the UI, then you need to use CSS (`<div style={{ display: isVisible ? 'block' : 'none' }}>...</div>`)
+
+Imagine you're building an app that lets people buy a car online. You want to build a form that lets the user select the model of the car (`sedan`, `golf cart`, `clown mobile`), and based on their selection you'll show a different form for configuring the selected model's options.
+
+Those are the 3 car configurations that the form can output:
+
+```js
+// sedan
+{
+  model: 'sedan',
+  used: true,
+  plate: 'UIES2021', // unique config for this car
+};
+
+// golf cart
+{
+  model: 'golf_cart',
+  used: false,
+  forRent: true, // unique config for this car
+};
+
+// clown mobile
+{
+  model: 'clown_mobile',
+  used: true,
+  miles: 1.0, // unique config for this car
+}
+```
+
+Let's create one component for each car that will expose its unique parameter(s). Those components won't have to render the `model` and the `used` form fields as they are common to all three cars and we will put them at the root level of the form.
+
+```js
+// sedan_car.tsx
+
+const plateConfig = {
+  label: 'Plate number',
+};
+
+export const SedanCar = () => {
+  return (
+    <>
+      <UseField path="plate" config={plateConfig} component={TextField} />
+    </>
+  );
+};
+```
+
+```js
+// golf_cart_car.tsx
+
+const forRentConfig = {
+  label: 'The cart is for rent',
+  defaultValue: true,
+};
+
+export const GolfCartCar = () => {
+  return (
+    <>
+      <UseField path="forRent" config={forRentConfig} component={ToggleField} />
+    </>
+  );
+};
+```
+
+```js
+// clown_mobile_car.tsx
+
+const milesConfig = {
+  label: 'Current miles',
+  defaultValue: 1.0,
+  serializer: parseFloat,
+};
+
+export const ClownMobileCar = () => {
+  return (
+    <>
+      <UseField path="miles" config={milesConfig} component={NumericField} />
+    </>
+  );
+};
+```
+
+And finally, let's build our form which will swap those components according to the selected car `model`.
+
+```js
+import { UsedParameter } from './used_parameter';
+import { SedanCar } from './sedan_car';
+import { GolfCartCar } from './golf_cart_car';
+import { ClownMobileCar } from './clown_mobile_car';
+
+const modelToComponentMap: { [key: string]: React.FunctionComponent } = {
+  sedan: SedanCar,
+  golfCart: GolfCartCar,
+  clownMobile: ClownMobileCar,
+};
+
+// We create a schema so we don't need to manually add the config
+// to the component through props
+const formSchema = {
+  model: {
+    label: 'Car model',
+    defaultValue: 'sedan',
+  },
+  used: {
+    label: 'Car has been used',
+    defaultValue: false,
+  }
+};
+
+const modelOptions = [
+  {
+    text: 'sedan',
+  },
+  {
+    text: 'golfCart',
+  },
+  {
+    text: 'clownMobile',
+  },
+];
+
+export const CarConfigurator = () => {
+  const { form } = useForm({ schema: formSchema });
+  const [{ model }] = useFormData<{ model: string }>({ form, watch: 'model' });
+
+  const renderCarConfiguration = () => {
+    // Select the car configuration according to the chosen model.
+    const CarConfiguration = modelToComponentMap[model];
+    return <CarConfiguration />;
+  };
+
+  const submitForm = () => {
+    console.log(form.getFormData());
+  };
+
+  return (
+    <Form form={form}>
+      <UseField
+        path="model"
+        component={SelectField}
+        componentProps={{
+          euiFieldProps: { options: modelOptions },
+        }}
+      />
+      <UseField path="used" component={ToggleField} />
+
+      {model !== undefined ? renderCarConfiguration() : null}
+
+      <EuiSpacer />
+
+      <EuiButton onClick={submitForm} fill>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```

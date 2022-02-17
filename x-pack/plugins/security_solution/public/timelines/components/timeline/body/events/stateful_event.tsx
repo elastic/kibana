@@ -10,21 +10,23 @@ import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  ControlColumnProps,
+  RowRenderer,
   TimelineExpandedDetailType,
   TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { OnPinEvent, OnRowSelected } from '../../events';
+import { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
@@ -37,15 +39,14 @@ import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
-import { getMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from './stateful_event_context';
+import { useGetMappedNonEcsValue } from '../data_driven_columns';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
@@ -56,11 +57,14 @@ interface Props {
   refetch: inputsModel.Refetch;
   ariaRowindex: number;
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
 }
 
 const emptyNotes: string[] = [];
@@ -77,7 +81,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   browserFields,
   containerRef,
   columnHeaders,
-  columnRenderers,
   event,
   eventIdToNoteIds,
   isEventViewer = false,
@@ -86,38 +89,49 @@ const StatefulEventComponent: React.FC<Props> = ({
   loadingEventIds,
   onRowSelected,
   refetch,
-  onRuleChange,
+  renderCellValue,
   rowRenderers,
+  onRuleChange,
   ariaRowindex,
   selectedEventIds,
   showCheckboxes,
   tabType,
   timelineId,
+  leadingControlColumns,
+  trailingControlColumns,
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({ timelineID: timelineId, tabType });
+  const [activeStatefulEventContext] = useState({
+    timelineID: timelineId,
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    tabType,
+  });
+
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
-  const hostName = useMemo(() => {
-    const hostNameArr = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [event?.data]);
+  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
 
+  const hostName = useMemo(() => {
+    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
+  }, [hostNameArr]);
+  const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
+  const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
+  const destinationIpList = useGetMappedNonEcsValue({
+    data: event?.data,
+    fieldName: 'destination.ip',
+  });
   const hostIPAddresses = useMemo(() => {
-    const hostIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' }) ?? [];
-    const sourceIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' }) ?? [];
-    const destinationIpList =
-      getMappedNonEcsValue({
-        data: event?.data,
-        fieldName: 'destination.ip',
-      }) ?? [];
-    return new Set([...hostIpList, ...sourceIpList, ...destinationIpList]);
-  }, [event?.data]);
+    const hostIps = hostIpList ?? [];
+    const sourceIps = sourceIpList ?? [];
+    const destinationIps = destinationIpList ?? [];
+    return new Set([...hostIps, ...sourceIps, ...destinationIps]);
+  }, [destinationIpList, sourceIpList, hostIpList]);
 
   const activeTab = tabType ?? TimelineTabs.query;
   const activeExpandedDetail = expandedDetail[activeTab];
@@ -148,10 +162,10 @@ const StatefulEventComponent: React.FC<Props> = ({
     [notesById, noteIds]
   );
 
-  const hasRowRenderers: boolean = useMemo(() => getRowRenderer(event.ecs, rowRenderers) != null, [
-    event.ecs,
-    rowRenderers,
-  ]);
+  const hasRowRenderers: boolean = useMemo(
+    () => getRowRenderer(event.ecs, rowRenderers) != null,
+    [event.ecs, rowRenderers]
+  );
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
@@ -171,18 +185,9 @@ const StatefulEventComponent: React.FC<Props> = ({
     });
   }, [event]);
 
-  const onPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId })),
-    [dispatch, timelineId]
-  );
-
-  const onUnPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId })),
-    [dispatch, timelineId]
-  );
-
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const eventId = event._id;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const indexName = event._index!;
 
     const updatedExpandedDetail: TimelineExpandedDetailType = {
@@ -190,6 +195,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       params: {
         eventId,
         indexName,
+        refetch,
       },
     };
 
@@ -204,16 +210,30 @@ const StatefulEventComponent: React.FC<Props> = ({
     if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
       activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
     }
-  }, [dispatch, event._id, event._index, tabType, timelineId]);
+  }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {
       dispatch(timelineActions.addNoteToEvent({ eventId: event._id, id: timelineId, noteId }));
       if (!isEventPinned) {
-        onPinEvent(event._id); // pin the event, because it has notes
+        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event._id }));
       }
     },
-    [dispatch, event, isEventPinned, onPinEvent, timelineId]
+    [dispatch, event, isEventPinned, timelineId]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+    },
+    [dispatch, timelineId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+    },
+    [dispatch, timelineId]
   );
 
   const RowRendererContent = useMemo(
@@ -259,7 +279,6 @@ const StatefulEventComponent: React.FC<Props> = ({
           actionsColumnWidth={actionsColumnWidth}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={event.data}
           ecsData={event.ecs}
           eventIdToNoteIds={eventIdToNoteIds}
@@ -269,10 +288,9 @@ const StatefulEventComponent: React.FC<Props> = ({
           loadingEventIds={loadingEventIds}
           notesCount={notes.length}
           onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
-          onPinEvent={onPinEvent}
           onRowSelected={onRowSelected}
-          onUnPinEvent={onUnPinEvent}
           refetch={refetch}
+          renderCellValue={renderCellValue}
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
@@ -280,6 +298,10 @@ const StatefulEventComponent: React.FC<Props> = ({
           tabType={tabType}
           timelineId={timelineId}
           toggleShowNotes={onToggleShowNotes}
+          leadingControlColumns={leadingControlColumns}
+          trailingControlColumns={trailingControlColumns}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
 
         <EventsTrSupplementContainerWrapper>

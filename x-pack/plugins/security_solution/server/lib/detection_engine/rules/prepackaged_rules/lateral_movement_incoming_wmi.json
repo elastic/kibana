@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "WMI Incoming Lateral Movement",
-  "query": "sequence by host.id with maxspan = 2s\n\n /* Accepted Incoming RPC connection by Winmgmt service */\n\n  [network where process.name : \"svchost.exe\" and network.direction == \"incoming\" and\n   source.address != \"127.0.0.1\" and source.address != \"::1\" and \n   source.port >= 49152 and destination.port >= 49152\n  ]\n\n  /* Excluding Common FPs Nessus and SCCM */\n\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"WmiPrvSE.exe\" and\n   not process.args : (\"C:\\\\windows\\\\temp\\\\nessus_*.txt\", \n                       \"C:\\\\windows\\\\TEMP\\\\nessus_*.TMP\", \n                       \"C:\\\\Windows\\\\CCM\\\\SystemTemp\\\\*\", \n                       \"C:\\\\Windows\\\\CCMCache\\\\*\", \n                       \"C:\\\\CCM\\\\Cache\\\\*\")\n   ]\n",
+  "query": "sequence by host.id with maxspan = 2s\n\n /* Accepted Incoming RPC connection by Winmgmt service */\n\n  [network where process.name : \"svchost.exe\" and network.direction : (\"incoming\", \"ingress\") and\n   source.ip != \"127.0.0.1\" and source.ip != \"::1\" and source.port >= 49152 and destination.port >= 49152\n  ]\n\n  /* Excluding Common FPs Nessus and SCCM */\n\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"WmiPrvSE.exe\" and\n   not process.args : (\"C:\\\\windows\\\\temp\\\\nessus_*.txt\", \n                       \"C:\\\\windows\\\\TEMP\\\\nessus_*.TMP\", \n                       \"C:\\\\Windows\\\\CCM\\\\SystemTemp\\\\*\", \n                       \"C:\\\\Windows\\\\CCMCache\\\\*\", \n                       \"C:\\\\CCM\\\\Cache\\\\*\")\n   ]\n",
   "risk_score": 47,
   "rule_id": "f3475224-b179-4f78-8877-c2bd64c26b88",
   "severity": "medium",
@@ -50,5 +50,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 4
 }

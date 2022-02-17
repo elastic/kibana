@@ -16,22 +16,24 @@ export type CapabilitiesResolver = (
   useDefaultCapabilities: boolean
 ) => Promise<Capabilities>;
 
-export const getCapabilitiesResolver = (
-  capabilities: () => Capabilities,
-  switchers: () => CapabilitiesSwitcher[]
-): CapabilitiesResolver => async (
-  request: KibanaRequest,
-  applications: string[],
-  useDefaultCapabilities: boolean
-): Promise<Capabilities> => {
-  return resolveCapabilities(
-    capabilities(),
-    switchers(),
-    request,
-    applications,
-    useDefaultCapabilities
-  );
-};
+export const getCapabilitiesResolver =
+  (
+    capabilities: () => Capabilities,
+    switchers: () => CapabilitiesSwitcher[]
+  ): CapabilitiesResolver =>
+  async (
+    request: KibanaRequest,
+    applications: string[],
+    useDefaultCapabilities: boolean
+  ): Promise<Capabilities> => {
+    return resolveCapabilities(
+      capabilities(),
+      switchers(),
+      request,
+      applications,
+      useDefaultCapabilities
+    );
+  };
 
 export const resolveCapabilities = async (
   capabilities: Capabilities,

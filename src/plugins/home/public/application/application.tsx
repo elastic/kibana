@@ -9,8 +9,13 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { ScopedHistory, CoreStart } from 'kibana/public';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { ScopedHistory, CoreStart, CoreTheme } from 'kibana/public';
+import { Observable } from 'rxjs';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  RedirectAppLinks,
+} from '../../../kibana_react/public';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
@@ -19,6 +24,7 @@ import './index.scss';
 
 export const renderApp = async (
   element: HTMLElement,
+  theme$: Observable<CoreTheme>,
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
@@ -44,9 +50,13 @@ export const renderApp = async (
   });
 
   render(
-    <KibanaContextProvider services={{ ...coreStart }}>
-      <HomeApp directories={directories} solutions={solutions} />
-    </KibanaContextProvider>,
+    <RedirectAppLinks application={coreStart.application}>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaContextProvider services={{ ...coreStart }}>
+          <HomeApp directories={directories} solutions={solutions} />
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
+    </RedirectAppLinks>,
     element
   );
 

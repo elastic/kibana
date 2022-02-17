@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -19,11 +19,15 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { DefaultEmail, DynamicSettings } from '../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';
 import { certificateFormTranslations } from './translations';
 
-export type OnFieldChangeType = (changedValues: Partial<DynamicSettings>) => void;
+export type PartialSettings = Partial<Omit<DynamicSettings, 'defaultEmail'>> & {
+  defaultEmail?: Partial<DefaultEmail>;
+};
+
+export type OnFieldChangeType = (changedValues: PartialSettings) => void;
 
 export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
   loading,

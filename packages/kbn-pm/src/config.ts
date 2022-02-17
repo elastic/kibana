@@ -31,6 +31,7 @@ export function getProjectPaths({ rootPath, ossOnly, skipKibanaPlugins }: Option
   // correct and the expect behavior.
   projectPaths.push(resolve(rootPath, 'test/plugin_functional/plugins/*'));
   projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
+  projectPaths.push(resolve(rootPath, 'test/server_integration/__fixtures__/plugins/*'));
   projectPaths.push(resolve(rootPath, 'examples/*'));
 
   if (!ossOnly) {

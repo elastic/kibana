@@ -13,7 +13,7 @@ import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { REPO_ROOT } from '@kbn/utils';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { duration } from 'moment';
-import { fromRoot } from '../utils';
+import { fromRoot } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server } from '../server';
 
@@ -41,11 +41,6 @@ describe('Legacy config', () => {
       const legacyConfig = getGlobalConfig(configService);
 
       expect(legacyConfig).toStrictEqual({
-        kibana: {
-          index: '.kibana',
-          autocompleteTerminateAfter: duration(100000),
-          autocompleteTimeout: duration(1000),
-        },
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
@@ -64,11 +59,6 @@ describe('Legacy config', () => {
       const legacyConfig = await getGlobalConfig$(configService).pipe(take(1)).toPromise();
 
       expect(legacyConfig).toStrictEqual({
-        kibana: {
-          index: '.kibana',
-          autocompleteTerminateAfter: duration(100000),
-          autocompleteTimeout: duration(1000),
-        },
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),

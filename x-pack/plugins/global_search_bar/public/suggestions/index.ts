@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { getSuggestions, SearchSuggestion } from './get_suggestions';
+export type { SearchSuggestion } from './get_suggestions';
+export { getSuggestions } from './get_suggestions';

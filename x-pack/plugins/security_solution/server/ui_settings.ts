@@ -8,31 +8,53 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup, UiSettingsParams } from '../../../../src/core/server';
 import {
   APP_ID,
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_APP_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_APP_TIME_RANGE,
-  DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_FROM,
-  DEFAULT_TO,
-  ENABLE_NEWS_FEED_SETTING,
-  NEWS_FEED_URL_SETTING,
-  NEWS_FEED_URL_SETTING_DEFAULT,
-  IP_REPUTATION_LINKS_SETTING,
-  IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_THREAT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_VALUE,
+  DEFAULT_TO,
+  DEFAULT_TRANSFORMS,
+  DEFAULT_TRANSFORMS_SETTING,
+  ENABLE_NEWS_FEED_SETTING,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
 } from '../common/constants';
+import { transformConfigSchema } from '../common/transforms/types';
+import { ExperimentalFeatures } from '../common/experimental_features';
 
-export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
-  uiSettings.register({
+type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
+
+/**
+ * This helper is used to preserve settings order in the UI
+ *
+ * @param settings - UI settings config
+ * @returns Settings config with the order field added
+ */
+const orderSettings = (settings: SettingsConfig): SettingsConfig => {
+  return Object.fromEntries(
+    Object.entries(settings).map(([id, setting], index) => [id, { ...setting, order: index }])
+  );
+};
+
+export const initUiSettings = (
+  uiSettings: CoreSetup['uiSettings'],
+  experimentalFeatures: ExperimentalFeatures
+) => {
+  const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {
@@ -90,6 +112,23 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
     },
+    [DEFAULT_THREAT_INDEX_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
+        defaultMessage: 'Threat indices',
+      }),
+      sensitive: true,
+      value: DEFAULT_THREAT_INDEX_VALUE,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultThreatIndexDescription',
+        {
+          defaultMessage:
+            '<p>Comma-delimited list of Threat Intelligence indices from which the Security app collects indicators.</p>',
+        }
+      ),
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.arrayOf(schema.string()),
+    },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
         defaultMessage: 'Anomaly threshold',
@@ -134,13 +173,11 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       type: 'json',
       value: `{
   "on": ${DEFAULT_RULE_REFRESH_INTERVAL_ON},
-  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE},
-  "idleTimeout": ${DEFAULT_RULE_REFRESH_IDLE_VALUE}
+  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE}
 }`,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
-        idleTimeout: schema.number({ min: 300000 }),
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
@@ -181,5 +218,27 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         })
       ),
     },
-  });
+    // TODO: Remove this check once the experimental flag is removed
+    ...(experimentalFeatures.metricsEntitiesEnabled
+      ? {
+          [DEFAULT_TRANSFORMS]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
+              defaultMessage: 'Default transforms to use',
+            }),
+            value: DEFAULT_TRANSFORMS_SETTING,
+            type: 'json',
+            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
+              // TODO: Add a hyperlink to documentation about this feature
+              defaultMessage: 'Experimental: Enable an application cache through transforms',
+            }),
+            sensitive: true,
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: transformConfigSchema,
+          },
+        }
+      : {}),
+  };
+
+  uiSettings.register(orderSettings(securityUiSettings));
 };

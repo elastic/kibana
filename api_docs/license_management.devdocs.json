@@ -1,0 +1,66 @@
+{
+  "id": "licenseManagement",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "licenseManagement",
+      "id": "def-public.LicenseManagementUIPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "LicenseManagementUIPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/license_management/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "licenseManagement",
+          "id": "def-public.LicenseManagementUIPluginSetup.enabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "enabled",
+          "description": [],
+          "path": "x-pack/plugins/license_management/public/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "licenseManagement",
+      "id": "def-public.LicenseManagementUIPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "LicenseManagementUIPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/license_management/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

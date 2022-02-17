@@ -16,11 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /internal/saved_objects_tagging/tags/_find', () => {
     before(async () => {
-      await esArchiver.load('rbac_tags');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('rbac_tags');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     const responses: Record<string, ExpectedResponse> = {
@@ -41,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         },
       },
-      unauthorized: {
+      noResults: {
         httpCode: 200,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
@@ -50,8 +54,17 @@ export default function ({ getService }: FtrProviderContext) {
           });
         },
       },
+      unauthorized: {
+        httpCode: 403,
+        expectResponse: ({ body }) => {
+          expect(body).to.eql({
+            error: 'Forbidden',
+            message: 'unauthorized',
+            statusCode: 403,
+          });
+        },
+      },
     };
-
     const expectedResults: Record<string, User[]> = {
       authorized: [
         USERS.SUPERUSER,
@@ -63,7 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
       ],
-      unauthorized: [USERS.NOT_A_KIBANA_USER, USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      noResults: [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (

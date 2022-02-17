@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ApplicationStart } from 'kibana/public';
 
 import {
@@ -216,7 +216,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   }
   async componentDidMount() {
     try {
-      const policies = await loadPolicies(false);
+      const policies = await loadPolicies();
       this.setState({ policies });
     } catch (err) {
       showApiError(

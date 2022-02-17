@@ -27,6 +27,11 @@ const defaultProps = {
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 // mocking random id generator function
@@ -69,12 +74,12 @@ describe('filters', () => {
               },
             ],
           },
-        },
+        } as FiltersIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count',
         },
       },
@@ -90,24 +95,71 @@ describe('filters', () => {
         layer,
         uiSettingsMock
       );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          arguments: expect.objectContaining({
-            filters: [
-              JSON.stringify([
-                {
-                  input: { query: 'bytes >= 1', language: 'kuery' },
-                  label: 'More than one',
+
+      expect(esAggsFn.arguments.filters).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "input": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "q": Array [
+                              "bytes >= 1",
+                            ],
+                          },
+                          "function": "kql",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "label": Array [
+                    "More than one",
+                  ],
                 },
-                {
-                  input: { query: 'src : 2', language: 'kuery' },
-                  label: '',
-                },
-              ]),
+                "function": "queryFilter",
+                "type": "function",
+              },
             ],
-          }),
-        })
-      );
+            "type": "expression",
+          },
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "input": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "q": Array [
+                              "src : 2",
+                            ],
+                          },
+                          "function": "kql",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "label": Array [
+                    "",
+                  ],
+                },
+                "function": "queryFilter",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
     });
   });
 
@@ -117,6 +169,118 @@ describe('filters', () => {
         dataType: 'string',
         isBucketed: true,
         scale: 'ordinal',
+      });
+    });
+  });
+
+  describe('buildColumn', () => {
+    it('should build a column with a default query', () => {
+      expect(
+        filtersOperation.buildColumn({
+          previousColumn: undefined,
+          layer,
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual({
+        label: 'Filters',
+        dataType: 'string',
+        operationType: 'filters',
+        scale: 'ordinal',
+        isBucketed: true,
+        params: {
+          filters: [
+            {
+              input: {
+                query: '',
+                language: 'kuery',
+              },
+              label: '',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should inherit terms field when transitioning to filters', () => {
+      expect(
+        filtersOperation.buildColumn({
+          previousColumn: {
+            operationType: 'terms',
+            sourceField: 'bytes',
+            label: 'Top values of bytes',
+            isBucketed: true,
+            dataType: 'number',
+            params: {
+              // let's ignore terms params here
+              format: { id: 'number', params: { decimals: 0 } },
+            },
+          },
+          layer,
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual({
+        label: 'Filters',
+        dataType: 'string',
+        operationType: 'filters',
+        scale: 'ordinal',
+        isBucketed: true,
+        params: {
+          filters: [
+            {
+              input: {
+                query: 'bytes : *',
+                language: 'kuery',
+              },
+              label: '',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should carry over multi terms as multiple filters', () => {
+      expect(
+        filtersOperation.buildColumn({
+          previousColumn: {
+            operationType: 'terms',
+            sourceField: 'bytes',
+            label: 'Top values of bytes',
+            isBucketed: true,
+            dataType: 'number',
+            params: {
+              // let's ignore terms params here
+              format: { id: 'number', params: { decimals: 0 } },
+              // @ts-expect-error not defined in the generic type, only in the Terms specific type
+              secondaryFields: ['dest'],
+            },
+          },
+          layer,
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual({
+        label: 'Filters',
+        dataType: 'string',
+        operationType: 'filters',
+        scale: 'ordinal',
+        isBucketed: true,
+        params: {
+          filters: [
+            {
+              input: {
+                query: 'bytes : *',
+                language: 'kuery',
+              },
+              label: '',
+            },
+            {
+              input: {
+                query: 'dest : *',
+                language: 'kuery',
+              },
+              label: '',
+            },
+          ],
+        },
       });
     });
   });

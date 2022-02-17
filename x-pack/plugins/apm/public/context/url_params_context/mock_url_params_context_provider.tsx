@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IUrlParams } from './types';
+import { UrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
 
 const defaultUrlParams = {
@@ -18,7 +18,7 @@ const defaultUrlParams = {
 };
 
 interface Props {
-  params?: IUrlParams;
+  params?: UrlParams;
   children: React.ReactNode;
   refreshTimeRange?: (time: any) => void;
 }
@@ -35,7 +35,6 @@ export function MockUrlParamsContextProvider({
         rangeId: 0,
         refreshTimeRange,
         urlParams,
-        uiFilters: {},
       }}
       children={children}
     />

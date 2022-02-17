@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { EuiGlobalToastListToast as IToast } from '@elastic/eui';
+
 import { KibanaLogic } from '../kibana';
 
 import { IFlashMessage } from './types';
@@ -14,6 +16,7 @@ import { IFlashMessage } from './types';
 interface FlashMessagesValues {
   messages: IFlashMessage[];
   queuedMessages: IFlashMessage[];
+  toastMessages: IToast[];
   historyListener: Function | null;
 }
 interface FlashMessagesActions {
@@ -21,6 +24,9 @@ interface FlashMessagesActions {
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearQueuedMessages(): void;
+  addToastMessage(newToast: IToast): { newToast: IToast };
+  dismissToastMessage(removedToast: IToast): { removedToast: IToast };
+  clearToastMessages(): void;
   setHistoryListener(historyListener: Function): { historyListener: Function };
 }
 
@@ -34,6 +40,9 @@ export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMe
     clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
+    addToastMessage: (newToast) => ({ newToast }),
+    dismissToastMessage: (removedToast) => ({ removedToast }),
+    clearToastMessages: () => null,
     setHistoryListener: (historyListener) => ({ historyListener }),
   },
   reducers: {
@@ -49,6 +58,15 @@ export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMe
       {
         setQueuedMessages: (_, { messages }) => messages,
         clearQueuedMessages: () => [],
+      },
+    ],
+    toastMessages: [
+      [],
+      {
+        addToastMessage: (toasts, { newToast }) => [...toasts, newToast],
+        dismissToastMessage: (toasts, { removedToast }) =>
+          toasts.filter(({ id }) => id !== removedToast.id),
+        clearToastMessages: () => [],
       },
     ],
     historyListener: [

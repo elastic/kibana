@@ -12,21 +12,21 @@ import { TimeExpressionSelect } from './time_expression_select';
 import { statusExpLabels } from './translations';
 
 interface Props {
-  alertParams: { [param: string]: any };
+  ruleParams: { [param: string]: any };
   hasFilters: boolean;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
 }
 
 export const StatusExpressionSelect: React.FC<Props> = ({
-  alertParams,
+  ruleParams,
   hasFilters,
-  setAlertParams,
+  setRuleParams,
 }) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(alertParams.shouldCheckStatus ?? true);
+  const [isEnabled, setIsEnabled] = useState<boolean>(ruleParams.shouldCheckStatus ?? true);
 
   useEffect(() => {
-    setAlertParams('shouldCheckStatus', isEnabled);
-  }, [isEnabled, setAlertParams]);
+    setRuleParams('shouldCheckStatus', isEnabled);
+  }, [isEnabled, setRuleParams]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -40,18 +40,18 @@ export const StatusExpressionSelect: React.FC<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <DownNoExpressionSelect
-          defaultNumTimes={alertParams.numTimes}
+          defaultNumTimes={ruleParams.numTimes}
           hasFilters={hasFilters}
           isEnabled={isEnabled}
-          setAlertParams={setAlertParams}
+          setRuleParams={setRuleParams}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <TimeExpressionSelect
-          defaultTimerangeUnit={alertParams.timerangeUnit}
-          defaultTimerangeCount={alertParams.timerangeCount}
+          defaultTimerangeUnit={ruleParams.timerangeUnit}
+          defaultTimerangeCount={ruleParams.timerangeCount}
           isEnabled={isEnabled}
-          setAlertParams={setAlertParams}
+          setRuleParams={setRuleParams}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

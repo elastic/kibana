@@ -60,8 +60,6 @@ async function copySourceAndBabelify() {
         'index.js',
         '.i18nrc.json',
         'plugins/**/*',
-        'plugins/reporting/.phantom/*',
-        'plugins/reporting/.chromium/*',
         'typings/**/*',
       ],
       {
@@ -70,13 +68,16 @@ async function copySourceAndBabelify() {
         buffer: true,
         nodir: true,
         ignore: [
-          '**/README.md',
+          '**/*.{md,asciidoc}',
+          '**/jest.config.js',
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
-          '**/public/**/*.{js,ts,tsx,json}',
-          '**/{__tests__,__mocks__,__snapshots__}/**',
+          '**/public/**/*.{js,ts,tsx,json,scss}',
+          '**/{__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress}/**',
+          'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
+          'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
         ],
         allowEmpty: true,

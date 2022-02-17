@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as t from 'io-ts';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { casesPath } from '../../common';
+import { CasesPage } from '../pages/cases';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
-import { AlertsPage } from '../pages/alerts';
-import { CasesPage } from '../pages/cases';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
-
-export type Breadcrumbs = Array<{ text: string }>;
 
 export interface Params {
   query?: t.HasProps;
@@ -34,26 +33,14 @@ export const routes = {
       return <HomePage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
+    exact: true,
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.landing.breadcrumb', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ],
+    exact: true,
   },
   '/overview': {
     handler: ({ query }: any) => {
@@ -65,39 +52,30 @@ export const routes = {
         rangeTo: t.string,
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
+        alpha: jsonRt.pipe(t.boolean),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
+    exact: true,
   },
-  '/cases': {
-    handler: (routeParams: any) => {
-      return <CasesPage routeParams={routeParams} />;
+  [casesPath]: {
+    handler: () => {
+      return <CasesPage />;
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.cases.breadcrumb', {
-          defaultMessage: 'Cases',
-        }),
-      },
-    ],
+    params: {},
+    exact: false,
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
+    handler: () => {
+      return <AlertsPage />;
+    },
+    params: {
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
+    },
+    exact: true,
+  },
+  '/exploratory-view/': {
+    handler: () => {
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({
@@ -107,12 +85,6 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.alerts.breadcrumb', {
-          defaultMessage: 'Alerts',
-        }),
-      },
-    ],
+    exact: true,
   },
 };

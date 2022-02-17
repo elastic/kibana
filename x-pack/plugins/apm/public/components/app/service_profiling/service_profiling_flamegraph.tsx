@@ -12,17 +12,18 @@ import {
   PrimitiveValue,
   Settings,
   TooltipInfo,
+  PartialTheme,
 } from '@elastic/charts';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
 import {
   EuiCheckbox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiInMemoryTable,
   euiPaletteForTemperature,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { find, sumBy } from 'lodash';
@@ -44,7 +45,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { px, unit } from '../../../style/variables';
+import { unit } from '../../../utils/style';
 
 const colors = euiPaletteForTemperature(100).slice(50, 85);
 
@@ -129,8 +130,8 @@ export function ServiceProfilingFlamegraph({
   end,
 }: {
   serviceName: string;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   valueType?: ProfilingValueType;
   start?: string;
   end?: string;
@@ -146,21 +147,23 @@ export function ServiceProfilingFlamegraph({
         return undefined;
       }
 
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/profiling/statistics',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/profiling/statistics',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              kuery,
+              start,
+              end,
+              environment,
+              valueType,
+            },
           },
-          query: {
-            kuery,
-            start,
-            end,
-            environment,
-            valueType,
-          },
-        },
-      });
+        }
+      );
     },
     [kuery, start, end, environment, serviceName, valueType]
   );
@@ -284,6 +287,18 @@ export function ServiceProfilingFlamegraph({
   }, [points, highlightFilter, data]);
 
   const chartTheme = useChartTheme();
+  const themeOverrides: PartialTheme = {
+    chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
+    partition: {
+      fillLabel: {
+        fontFamily: theme.eui.euiCodeFontFamily,
+        clipText: true,
+      },
+      fontFamily: theme.eui.euiCodeFontFamily,
+      minFontSize: 9,
+      maxFontSize: 9,
+    },
+  };
 
   const chartSize = {
     height: layers.length * 20,
@@ -303,7 +318,7 @@ export function ServiceProfilingFlamegraph({
       <EuiFlexItem grow>
         <Chart size={chartSize}>
           <Settings
-            theme={chartTheme}
+            theme={[themeOverrides, ...chartTheme]}
             tooltip={{
               customTooltip: (info) => (
                 <CustomTooltip
@@ -318,24 +333,15 @@ export function ServiceProfilingFlamegraph({
             id="profile_graph"
             data={points}
             layers={layers}
+            drilldown
+            maxRowCount={1}
+            layout={PartitionLayout.icicle}
             valueAccessor={(d: Datum) => d.value as number}
             valueFormatter={() => ''}
-            config={{
-              fillLabel: {
-                fontFamily: theme.eui.euiCodeFontFamily,
-                clipText: true,
-              },
-              drilldown: true,
-              fontFamily: theme.eui.euiCodeFontFamily,
-              minFontSize: 9,
-              maxFontSize: 9,
-              maxRowCount: 1,
-              partitionLayout: PartitionLayout.icicle,
-            }}
           />
         </Chart>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: px(unit * 24) }}>
+      <EuiFlexItem grow={false} style={{ width: unit * 24 }}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
@@ -405,7 +411,7 @@ export function ServiceProfilingFlamegraph({
                     defaultMessage: 'Self',
                   }),
                   render: (_, item) => formatValue(item.value, valueUnit),
-                  width: px(unit * 6),
+                  width: `${unit * 6}px`,
                 },
               ]}
             />

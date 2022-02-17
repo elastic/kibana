@@ -8,20 +8,19 @@
 import React, { useCallback } from 'react';
 
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ResilientActionConnector } from './types';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientActionConnector>> = ({
   action,
@@ -31,14 +30,19 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
   readOnly,
 }) => {
   const { apiUrl, orgId } = action.config;
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+  const isApiUrlInvalid: boolean =
+    apiUrl !== undefined && errors.apiUrl !== undefined && errors.apiUrl.length > 0;
 
   const { apiKeyId, apiKeySecret } = action.secrets;
 
-  const isOrgIdInvalid: boolean = errors.orgId.length > 0 && orgId !== undefined;
-  const isApiKeyInvalid: boolean = errors.apiKeyId.length > 0 && apiKeyId !== undefined;
+  const isOrgIdInvalid: boolean =
+    orgId !== undefined && errors.orgId !== undefined && errors.orgId.length > 0;
+  const isApiKeyInvalid: boolean =
+    apiKeyId !== undefined && errors.apiKeyId !== undefined && errors.apiKeyId.length > 0;
   const isApiKeySecretInvalid: boolean =
-    errors.apiKeySecret.length > 0 && apiKeySecret !== undefined;
+    apiKeySecret !== undefined &&
+    errors.apiKeySecret !== undefined &&
+    errors.apiKeySecret.length > 0;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -115,7 +119,14 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+          <EuiFormRow fullWidth>
+            {getEncryptedFieldNotifyLabel(
+              !action.id,
+              2,
+              action.isMissingSecrets ?? false,
+              i18n.REENTER_VALUES_LABEL
+            )}
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -175,24 +186,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
     </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        {i18n.REMEMBER_VALUES_LABEL}
-      </EuiText>
-    );
-  }
-  return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      title={i18n.REENTER_VALUES_LABEL}
-      data-test-subj="reenterValuesMessage"
-    />
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { ResilientConnectorFields as default };

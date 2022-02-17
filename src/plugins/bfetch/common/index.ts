@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './util';
-export * from './streaming';
-export * from './buffer';
-export * from './batch';
+export { normalizeError, removeLeadingSlash, appendQueryParam } from './util';
+export type { StreamingResponseHandler } from './streaming';
+export type { ItemBufferParams, TimedItemBufferParams, BatchedFunctionParams } from './buffer';
+export { ItemBuffer, TimedItemBuffer, createBatchedFunction } from './buffer';
+export type { ErrorLike, BatchRequestData, BatchResponseItem, BatchItemWrapper } from './batch';
+export { DISABLE_BFETCH_COMPRESSION, DISABLE_BFETCH } from './constants';

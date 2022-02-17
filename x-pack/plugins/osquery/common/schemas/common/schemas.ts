@@ -7,10 +7,21 @@
 
 import * as t from 'io-ts';
 
-export const name = t.string;
-export type Name = t.TypeOf<typeof name>;
-export const nameOrUndefined = t.union([name, t.undefined]);
-export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
+export const id = t.string;
+export type Id = t.TypeOf<typeof id>;
+export const idOrUndefined = t.union([id, t.undefined]);
+export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
+
+export const agentSelection = t.type({
+  agents: t.array(t.string),
+  allAgentsSelected: t.boolean,
+  platformsSelected: t.array(t.string),
+  policiesSelected: t.array(t.string),
+});
+
+export type AgentSelection = t.TypeOf<typeof agentSelection>;
+export const agentSelectionOrUndefined = t.union([agentSelection, t.undefined]);
+export type AgentSelectionOrUndefined = t.TypeOf<typeof agentSelectionOrUndefined>;
 
 export const description = t.string;
 export type Description = t.TypeOf<typeof description>;
@@ -26,3 +37,29 @@ export const query = t.string;
 export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
+
+export const version = t.string;
+export type Version = t.TypeOf<typeof version>;
+export const versionOrUndefined = t.union([version, t.undefined]);
+export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
+
+export const interval = t.string;
+export type Interval = t.TypeOf<typeof interval>;
+export const intervalOrUndefined = t.union([interval, t.undefined]);
+export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
+
+export const savedQueryId = t.string;
+export type SavedQueryId = t.TypeOf<typeof savedQueryId>;
+export const savedQueryIdOrUndefined = t.union([savedQueryId, t.undefined]);
+export type SavedQueryIdOrUndefined = t.TypeOf<typeof savedQueryIdOrUndefined>;
+
+export const ecsMapping = t.record(
+  t.string,
+  t.partial({
+    field: t.string,
+    value: t.union([t.string, t.array(t.string)]),
+  })
+);
+export type ECSMapping = t.TypeOf<typeof ecsMapping>;
+export const ecsMappingOrUndefined = t.union([ecsMapping, t.undefined]);
+export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;

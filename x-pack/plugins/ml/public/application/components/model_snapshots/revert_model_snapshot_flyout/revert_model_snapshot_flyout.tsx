@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -42,6 +42,7 @@ import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loa
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { CreateCalendar, CalendarEvent } from './create_calendar';
 import { timeFormatter } from '../../../../../common/util/date_utils';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -139,6 +140,10 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
             })
           );
           refresh();
+        })
+        .catch((error) => {
+          const { displayErrorToast } = toastNotificationServiceProvider(toasts);
+          displayErrorToast(error);
         });
       hideRevertModal();
       closeFlyout();

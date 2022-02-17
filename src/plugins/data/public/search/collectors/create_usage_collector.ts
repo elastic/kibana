@@ -7,9 +7,10 @@
  */
 
 import { first } from 'rxjs/operators';
-import { UiCounterMetricType } from '@kbn/analytics';
-import { StartServicesAccessor } from '../../../../../core/public';
-import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 
 export const createUsageCollector = (

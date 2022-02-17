@@ -7,7 +7,7 @@
 
 import { EuiBasicTableProps } from '@elastic/eui';
 
-import { ListSchema } from '../../../../../lists/common/schemas/response';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface TableItem extends ListSchema {
   isDeleting: boolean;

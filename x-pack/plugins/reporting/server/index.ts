@@ -6,17 +6,21 @@
  */
 
 import { PluginInitializerContext } from 'kibana/server';
-import { ReportingPlugin } from './plugin';
 import { ReportingConfigType } from './config';
+import { ReportingPlugin } from './plugin';
 
+export { config } from './config';
+
+/**
+ * Common types that are documented in the Public API
+ */
+export type { ReportingSetup, ReportingStart } from './types';
+
+// @internal
 export const plugin = (initContext: PluginInitializerContext<ReportingConfigType>) =>
   new ReportingPlugin(initContext);
 
-export { ReportingPlugin as Plugin };
-export { config } from './config';
-export { ReportingSetupDeps as PluginSetup } from './types';
-export { ReportingStartDeps as PluginStart } from './types';
-
-// internal imports
+// @internal
+export type { ReportingConfig } from './config/config';
+// @internal
 export { ReportingCore } from './core';
-export { ReportingConfig } from './config/config';

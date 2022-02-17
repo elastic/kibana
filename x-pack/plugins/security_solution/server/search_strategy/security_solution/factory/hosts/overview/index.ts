@@ -7,7 +7,7 @@
 
 import { get, getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   HostsOverviewStrategyResponse,
   HostsQueries,
@@ -24,7 +24,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
     options: HostOverviewRequestOptions,
     response: IEsSearchResponse<OverviewHostHit>
   ): Promise<HostsOverviewStrategyResponse> => {
-    // @ts-expect-error @elastic/elasticsearch no way to declare type for aggregations
+    // @ts-expect-error specify aggregations type explicitly
     const aggregations: OverviewHostHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewHostQuery(options))],

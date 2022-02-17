@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { Map as MapboxMap } from 'mapbox-gl';
+import type { Map as MapboxMap } from '@kbn/mapbox-gl';
 const MAX_WIDTH = 110;
 
 interface Props {

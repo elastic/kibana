@@ -12,10 +12,12 @@ const actualMocks = jest.requireActual('../mocks');
 
 jest.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');
 jest.spyOn(actualOperations.operationDefinitionMap.terms, 'onOtherColumnChanged');
+jest.spyOn(actualHelpers, 'copyColumn');
 jest.spyOn(actualHelpers, 'insertOrReplaceColumn');
 jest.spyOn(actualHelpers, 'insertNewColumn');
 jest.spyOn(actualHelpers, 'replaceColumn');
 jest.spyOn(actualHelpers, 'getErrorMessages');
+jest.spyOn(actualHelpers, 'getColumnOrder');
 
 export const {
   getAvailableOperationsByMetadata,
@@ -30,6 +32,7 @@ export const {
 } = actualOperations;
 
 export const {
+  copyColumn,
   insertOrReplaceColumn,
   insertNewColumn,
   replaceColumn,
@@ -46,8 +49,10 @@ export const {
   resetIncomplete,
   isOperationAllowedAsReference,
   canTransition,
+  isColumnValidAsReference,
+  getManagedColumnsFrom,
 } = actualHelpers;
 
 export const { adjustTimeScaleLabelSuffix, DEFAULT_TIME_SCALE } = actualTimeScaleUtils;
 
-export const { createMockedReferenceOperation } = actualMocks;
+export const { createMockedFullReference } = actualMocks;

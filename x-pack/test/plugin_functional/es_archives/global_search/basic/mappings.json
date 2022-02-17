@@ -1,7 +1,10 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana",
+    "aliases": {
+      ".kibana": {}
+    },
+    "index": ".kibana_1",
     "settings": {
       "index": {
         "number_of_shards": "1",
@@ -161,9 +164,9 @@
         },
         "map" : {
           "properties" : {
-            "bounds" : {
-              "type" : "geo_shape",
-              "tree" : "quadtree"
+            "bounds": {
+              "dynamic": false,
+              "properties": {}
             },
             "description" : {
               "type" : "text"
@@ -380,47 +383,6 @@
           "properties": {
             "enabled": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

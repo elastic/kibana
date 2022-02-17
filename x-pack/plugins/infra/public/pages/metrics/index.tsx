@@ -10,14 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/common';
+import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { RoutedTabs } from '../../components/navigation/routed_tabs';
-import { ColumnarPage } from '../../components/page';
-import { Header } from '../../components/header';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
   MetricsExplorerOptionsContainer,
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
@@ -27,10 +24,10 @@ import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
+import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
-import { AppNavigation } from '../../components/navigation/app_navigation';
 import { SourceLoadingPage } from '../../components/source_loading_page';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
@@ -40,8 +37,10 @@ import { SavedViewProvider } from '../../containers/saved_view/saved_view';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
-import { HeaderMenuPortal } from '../../../../observability/public';
+import { createExploratoryViewUrl, HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { useLinkProps } from '../../../../observability/public';
+import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -49,9 +48,39 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+
+  const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
+    defaultMessage: 'Settings',
+  });
 
   const kibana = useKibana();
+
+  useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
+
+  const settingsLinkProps = useLinkProps({
+    app: 'metrics',
+    pathname: 'settings',
+  });
+
+  const metricsExploratoryViewLink = createExploratoryViewUrl(
+    {
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          dataType: 'infra_metrics',
+          seriesType: 'area',
+          time: { to: 'now', from: 'now-15m' },
+          reportDefinitions: {
+            'agent.hostname': ['ALL_VALUES'],
+          },
+          selectedMetricField: 'system.cpu.total.norm.pct',
+          name: 'Metrics-series',
+        },
+      ],
+    },
+    kibana.services.http?.basePath.get()
+  );
 
   return (
     <EuiErrorBoundary>
@@ -61,122 +90,80 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
             <WaffleTimeProvider>
               <WaffleFiltersProvider>
                 <InfraMLCapabilitiesProvider>
-                  <ColumnarPage>
-                    <DocumentTitle
-                      title={i18n.translate('xpack.infra.homePage.documentTitle', {
-                        defaultMessage: 'Metrics',
-                      })}
-                    />
+                  <DocumentTitle
+                    title={i18n.translate('xpack.infra.homePage.documentTitle', {
+                      defaultMessage: 'Metrics',
+                    })}
+                  />
 
-                    <HelpCenterContent
-                      feedbackLink="https://discuss.elastic.co/c/metrics"
-                      appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                        defaultMessage: 'Metrics',
-                      })}
-                    />
+                  <HelpCenterContent
+                    feedbackLink="https://discuss.elastic.co/c/metrics"
+                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                      defaultMessage: 'Metrics',
+                    })}
+                  />
 
-                    {setHeaderActionMenu && (
-                      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-                        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <MetricsAlertDropdown />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              href={kibana.services?.application?.getUrlForApp(
-                                '/home#/tutorial_directory/metrics'
+                  {setHeaderActionMenu && theme$ && (
+                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+                      <EuiHeaderLinks gutterSize="xs">
+                        <EuiToolTip position="top" content={<p>{EXPLORE_MESSAGE}</p>}>
+                          <RedirectAppLinks application={kibana.services.application!}>
+                            <EuiHeaderLink
+                              aria-label={i18n.translate(
+                                'xpack.infra.metrics.pageHeader.analyzeData.label',
+                                {
+                                  defaultMessage:
+                                    'Navigate to the "Explore Data" view to visualize infra metrics data',
+                                }
                               )}
-                              size="s"
-                              color="primary"
-                              iconType="indexOpen"
+                              href={metricsExploratoryViewLink}
+                              color="text"
+                              iconType="visBarVerticalStacked"
                             >
-                              {ADD_DATA_LABEL}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </HeaderMenuPortal>
-                    )}
-
-                    <Header
-                      breadcrumbs={[
-                        {
-                          text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                            defaultMessage: 'Metrics',
-                          }),
-                        },
-                      ]}
-                      readOnlyBadge={!uiCapabilities?.infrastructure?.save}
-                    />
-                    <AppNavigation
-                      aria-label={i18n.translate(
-                        'xpack.infra.header.infrastructureNavigationTitle',
-                        {
-                          defaultMessage: 'Metrics',
-                        }
+                              {EXPLORE_DATA}
+                            </EuiHeaderLink>
+                          </RedirectAppLinks>
+                        </EuiToolTip>
+                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                          {settingsTabTitle}
+                        </EuiHeaderLink>
+                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        <MetricsAlertDropdown />
+                        <EuiHeaderLink
+                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+                          color="primary"
+                          iconType="indexOpen"
+                        >
+                          {ADD_DATA_LABEL}
+                        </EuiHeaderLink>
+                      </EuiHeaderLinks>
+                    </HeaderMenuPortal>
+                  )}
+                  <Switch>
+                    <Route path={'/inventory'} component={SnapshotPage} />
+                    <Route
+                      path={'/explorer'}
+                      render={(props) => (
+                        <WithSource>
+                          {({ configuration, createDerivedIndexPattern }) => (
+                            <MetricsExplorerOptionsContainer.Provider>
+                              <WithMetricsExplorerOptionsUrlState />
+                              {configuration ? (
+                                <PageContent
+                                  configuration={configuration}
+                                  createDerivedIndexPattern={createDerivedIndexPattern}
+                                />
+                              ) : (
+                                <SourceLoadingPage />
+                              )}
+                            </MetricsExplorerOptionsContainer.Provider>
+                          )}
+                        </WithSource>
                       )}
-                    >
-                      <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
-                        <EuiFlexItem>
-                          <RoutedTabs
-                            tabs={[
-                              {
-                                app: 'metrics',
-                                title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-                                  defaultMessage: 'Inventory',
-                                }),
-                                pathname: '/inventory',
-                              },
-                              {
-                                app: 'metrics',
-                                title: i18n.translate(
-                                  'xpack.infra.homePage.metricsExplorerTabTitle',
-                                  {
-                                    defaultMessage: 'Metrics Explorer',
-                                  }
-                                ),
-                                pathname: '/explorer',
-                              },
-                              {
-                                app: 'metrics',
-                                title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-                                  defaultMessage: 'Settings',
-                                }),
-                                pathname: '/settings',
-                              },
-                            ]}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </AppNavigation>
-
-                    <Switch>
-                      <Route path={'/inventory'} component={SnapshotPage} />
-                      <Route
-                        path={'/explorer'}
-                        render={(props) => (
-                          <WithSource>
-                            {({ configuration, createDerivedIndexPattern }) => (
-                              <MetricsExplorerOptionsContainer.Provider>
-                                <WithMetricsExplorerOptionsUrlState />
-                                {configuration ? (
-                                  <PageContent
-                                    configuration={configuration}
-                                    createDerivedIndexPattern={createDerivedIndexPattern}
-                                  />
-                                ) : (
-                                  <SourceLoadingPage />
-                                )}
-                              </MetricsExplorerOptionsContainer.Provider>
-                            )}
-                          </WithSource>
-                        )}
-                      />
-                      <Route path={'/settings'} component={MetricsSettingsPage} />
-                    </Switch>
-                  </ColumnarPage>
+                    />
+                    <Route path="/detail/:type/:node" component={MetricDetail} />
+                    <Route path={'/settings'} component={MetricsSettingsPage} />
+                  </Switch>
                 </InfraMLCapabilitiesProvider>
               </WaffleFiltersProvider>
             </WaffleTimeProvider>
@@ -189,7 +176,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
 const PageContent = (props: {
   configuration: MetricsSourceConfigurationProperties;
-  createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
+  createDerivedIndexPattern: CreateDerivedIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
   const { options } = useContext(MetricsExplorerOptionsContainer.Context);
@@ -201,10 +188,19 @@ const PageContent = (props: {
       defaultViewState={DEFAULT_METRICS_EXPLORER_VIEW_STATE}
     >
       <MetricsExplorerPage
-        derivedIndexPattern={createDerivedIndexPattern('metrics')}
+        derivedIndexPattern={createDerivedIndexPattern()}
         source={configuration}
         {...props}
       />
     </SavedViewProvider>
   );
 };
+
+const EXPLORE_DATA = i18n.translate('xpack.infra.metrics.exploreDataButtonLabel', {
+  defaultMessage: 'Explore data',
+});
+
+const EXPLORE_MESSAGE = i18n.translate('xpack.infra.metrics.exploreDataButtonLabel.message', {
+  defaultMessage:
+    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+});

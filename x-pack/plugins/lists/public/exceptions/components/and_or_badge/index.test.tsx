@@ -6,21 +6,18 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
-import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 import { AndOrBadge } from './';
-
-const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 
 describe('AndOrBadge', () => {
   test('it renders top and bottom antenna bars when "includeAntennas" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <AndOrBadge includeAntennas type="and" />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('AND');
@@ -30,9 +27,9 @@ describe('AndOrBadge', () => {
 
   test('it does not render top and bottom antenna bars when "includeAntennas" is false', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <AndOrBadge type="or" />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('OR');
@@ -42,9 +39,9 @@ describe('AndOrBadge', () => {
 
   test('it renders "and" when "type" is "and"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <AndOrBadge type="and" />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('AND');
@@ -52,9 +49,9 @@ describe('AndOrBadge', () => {
 
   test('it renders "or" when "type" is "or"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <AndOrBadge type="or" />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('OR');

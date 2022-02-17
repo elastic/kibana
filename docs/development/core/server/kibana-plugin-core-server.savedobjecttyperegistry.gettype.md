@@ -9,16 +9,16 @@ Return the [type](./kibana-plugin-core-server.savedobjectstype.md) definition fo
 <b>Signature:</b>
 
 ```typescript
-getType(type: string): SavedObjectsType | undefined;
+getType(type: string): SavedObjectsType<any> | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
+|  type | string |  |
 
 <b>Returns:</b>
 
-`SavedObjectsType | undefined`
+SavedObjectsType&lt;any&gt; \| undefined
 

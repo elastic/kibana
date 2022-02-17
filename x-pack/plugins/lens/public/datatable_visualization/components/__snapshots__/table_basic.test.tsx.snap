@@ -3,7 +3,6 @@
 exports[`DatatableComponent it renders actions column when there are row actions 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
-  reportTitle="My fanci metric chart"
 >
   <ContextProvider
     value={
@@ -12,6 +11,13 @@ exports[`DatatableComponent it renders actions column when there are row actions
           "a": "left",
           "b": "left",
           "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
         },
         "rowHasRowClickTriggerActions": Array [
           true,
@@ -119,7 +125,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -156,7 +166,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -193,7 +207,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
               },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },
@@ -234,7 +252,6 @@ exports[`DatatableComponent it renders actions column when there are row actions
 exports[`DatatableComponent it renders the title and value 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
-  reportTitle="My fanci metric chart"
 >
   <ContextProvider
     value={
@@ -243,6 +260,13 @@ exports[`DatatableComponent it renders the title and value 1`] = `
           "a": "left",
           "b": "left",
           "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
         },
         "rowHasRowClickTriggerActions": undefined,
         "table": Object {
@@ -346,7 +370,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
@@ -383,7 +411,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
@@ -420,7 +452,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
               },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },
@@ -449,10 +485,9 @@ exports[`DatatableComponent it renders the title and value 1`] = `
 </VisualizationContainer>
 `;
 
-exports[`DatatableComponent it should not render actions on header when it is in read only mode 1`] = `
+exports[`DatatableComponent it should render hide, reset, and sort actions on header even when it is in read only mode 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
-  reportTitle="My fanci metric chart"
 >
   <ContextProvider
     value={
@@ -461,6 +496,13 @@ exports[`DatatableComponent it should not render actions on header when it is in
           "a": "left",
           "b": "left",
           "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
         },
         "rowHasRowClickTriggerActions": Array [
           false,
@@ -537,43 +579,124 @@ exports[`DatatableComponent it should not render actions on header when it is in
         Array [
           Object {
             "actions": Object {
-              "additional": Array [],
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
-              "showSortAsc": false,
-              "showSortDesc": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
             },
             "cellActions": undefined,
-            "display": "a",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
             "displayAsText": "a",
             "id": "a",
           },
           Object {
             "actions": Object {
-              "additional": Array [],
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
-              "showSortAsc": false,
-              "showSortDesc": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
             },
             "cellActions": undefined,
-            "display": "b",
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
             "displayAsText": "b",
             "id": "b",
           },
           Object {
             "actions": Object {
-              "additional": Array [],
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
-              "showSortAsc": false,
-              "showSortDesc": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
             },
             "cellActions": undefined,
-            "display": "c",
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
             "displayAsText": "c",
             "id": "c",
           },

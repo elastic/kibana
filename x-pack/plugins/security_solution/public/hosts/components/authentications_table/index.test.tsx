@@ -12,7 +12,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
@@ -29,22 +28,10 @@ describe('Authentication Table Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
@@ -75,31 +62,31 @@ describe('Authentication Table Component', () => {
 
   describe('columns', () => {
     test('on hosts page, we expect to get all columns', () => {
-      expect(getAuthenticationColumnsCurated(hostsModel.HostsType.page).length).toEqual(9);
+      expect(getAuthenticationColumnsCurated(hostsModel.HostsType.page, false).length).toEqual(9);
     });
 
     test('on host details page, we expect to remove two columns', () => {
-      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details);
+      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details, false);
       expect(columns.length).toEqual(7);
     });
 
     test('on host details page, we should have Last Failed Destination column', () => {
-      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.page);
+      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.page, false);
       expect(columns.some((col) => col.name === i18n.LAST_FAILED_DESTINATION)).toEqual(true);
     });
 
     test('on host details page, we should not have Last Failed Destination column', () => {
-      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details);
+      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details, false);
       expect(columns.some((col) => col.name === i18n.LAST_FAILED_DESTINATION)).toEqual(false);
     });
 
     test('on host page, we should have Last Successful Destination column', () => {
-      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.page);
+      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.page, false);
       expect(columns.some((col) => col.name === i18n.LAST_SUCCESSFUL_DESTINATION)).toEqual(true);
     });
 
     test('on host details page, we should not have Last Successful Destination column', () => {
-      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details);
+      const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details, false);
       expect(columns.some((col) => col.name === i18n.LAST_SUCCESSFUL_DESTINATION)).toEqual(false);
     });
   });

@@ -9,9 +9,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects';
+} from '../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
 
-const ARCHIVE = 'uptime/full_heartbeat';
+const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
 export const deleteUptimeSettingsObject = async (server: any) => {
   // delete the saved object
@@ -42,7 +42,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup10');
 
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
@@ -50,19 +50,15 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
     describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
-        await esArchiver.load('uptime/blank');
+        await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       });
       afterEach('unload', async () => {
-        await esArchiver.unload('uptime/blank');
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
       loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
-    });
-
-    describe('with generated data but no data reset', () => {
-      loadTestFile(require.resolve('./ping_redirects'));
     });
 
     describe('with real-world data', () => {
@@ -75,9 +71,12 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./overview'));
-      loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
+    });
+
+    describe('mappings error state', () => {
+      loadTestFile(require.resolve('./missing_mappings'));
     });
   });
 };

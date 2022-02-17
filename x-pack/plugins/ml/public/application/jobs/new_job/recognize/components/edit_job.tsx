@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ModuleJobUI } from '../page';
 import { usePartialState } from '../../../../components/custom_hooks';
 import { composeValidators, maxLengthValidator } from '../../../../../../common/util/validators';
@@ -51,7 +51,7 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
   );
 
   const handleValidation = () => {
-    const jobGroupsValidationResult = formState.jobGroups
+    const jobGroupsValidationResult = (formState.jobGroups ?? [])
       .map((group) => groupValidator(group))
       .filter((result) => result !== null);
 
@@ -92,7 +92,7 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
           <EuiFormRow fullWidth>
             <JobGroupsInput
               existingGroups={existingGroupIds}
-              selectedGroups={formState.jobGroups}
+              selectedGroups={formState.jobGroups ?? []}
               onChange={(value) => {
                 setFormState({
                   jobGroups: value,

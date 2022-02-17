@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
@@ -14,7 +14,7 @@ import { SearchSource } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
-  setPreferredSearchStrategyId: jest.fn(),
+  setOverwriteDataViewType: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   removeField: jest.fn().mockReturnThis(),
@@ -40,15 +40,23 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  telemetry: jest.fn(),
+  getAllMigrations: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
 };
 
-export const createSearchSourceMock = (fields?: SearchSourceFields) =>
+export const createSearchSourceMock = (fields?: SearchSourceFields, response?: any) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
-    search: jest.fn(),
+    search: jest.fn().mockReturnValue(
+      of(
+        response ?? {
+          rawResponse: { hits: { hits: [], total: 0 } },
+          isPartial: false,
+          isRunning: false,
+        }
+      )
+    ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
-    legacy: {
-      callMsearch: jest.fn(),
-      loadingCount$: new BehaviorSubject(0),
-    },
   });

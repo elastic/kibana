@@ -8,10 +8,20 @@
 import React, { MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
 
-import { ComponentStrings } from '../../../../i18n';
-const { WorkpadHeaderRefreshControlSettings: strings } = ComponentStrings;
+const strings = {
+  getRefreshAriaLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshAriaLabel', {
+      defaultMessage: 'Refresh Elements',
+    }),
+  getRefreshTooltip: () =>
+    i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshTooltip', {
+      defaultMessage: 'Refresh data',
+    }),
+};
 
 export interface Props {
   doRefresh: MouseEventHandler<HTMLButtonElement>;

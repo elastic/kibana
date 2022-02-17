@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { MlLicense } from '../../../common/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
@@ -23,7 +24,7 @@ export interface MlSystemProvider {
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
-    mlAnomalySearch<T>(searchParams: any, jobIds: string[]): Promise<SearchResponse<T>>;
+    mlAnomalySearch<T>(searchParams: any, jobIds: string[]): Promise<estypes.SearchResponse<T>>;
   };
 }
 
@@ -61,7 +62,7 @@ export function getMlSystemProvider(
           return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
             .ok(async ({ mlClient }) => {
-              const { body: info } = await mlClient.info<MlInfoResponse>();
+              const info = await mlClient.info();
               const cloudId = cloud && cloud.cloudId;
               return {
                 ...info,
@@ -69,13 +70,15 @@ export function getMlSystemProvider(
               };
             });
         },
-        async mlAnomalySearch<T>(searchParams: any, jobIds: string[]): Promise<SearchResponse<T>> {
+        async mlAnomalySearch<T>(
+          searchParams: any,
+          jobIds: string[]
+        ): Promise<estypes.SearchResponse<T>> {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.anomalySearch<T>(searchParams, jobIds);
-              return body;
+              return await mlClient.anomalySearch<T>(searchParams, jobIds);
             });
         },
       };

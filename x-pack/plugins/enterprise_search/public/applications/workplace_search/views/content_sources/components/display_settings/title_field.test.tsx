@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -12,7 +14,10 @@ import { shallow } from 'enzyme';
 import { TitleField } from './title_field';
 
 describe('TitleField', () => {
-  const result = { foo: 'bar' };
+  const result = {
+    ...exampleResult.exampleDocuments[0],
+    foo: 'bar',
+  };
   it('renders', () => {
     const props = {
       result,
@@ -26,7 +31,10 @@ describe('TitleField', () => {
 
   it('handles title when array', () => {
     const props = {
-      result: { foo: ['baz', 'bar'] },
+      result: {
+        ...exampleResult.exampleDocuments[0],
+        foo: ['baz', 'bar'],
+      },
       titleField: 'foo',
       titleFieldHover: false,
     };

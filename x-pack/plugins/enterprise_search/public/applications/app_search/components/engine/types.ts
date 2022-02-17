@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types';
+import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/schema/types';
 import { ApiToken } from '../credentials/types';
 
 export enum EngineTypes {
@@ -20,6 +20,21 @@ export interface Engine {
   result_fields: {
     [key: string]: ResultField;
   };
+}
+
+interface CurationSuggestionDetails {
+  count: number;
+  pending: number;
+  applied: number;
+  automated: number;
+  rejected: number;
+  disabled: number;
+  last_updated: string;
+}
+
+interface SearchRelevanceSuggestionDetails {
+  count: number;
+  curation: CurationSuggestionDetails;
 }
 
 export interface EngineDetails extends Engine {
@@ -38,6 +53,8 @@ export interface EngineDetails extends Engine {
   isMeta: boolean;
   engine_count?: number;
   includedEngines?: EngineDetails[];
+  adaptive_relevance_suggestions?: SearchRelevanceSuggestionDetails;
+  adaptive_relevance_suggestions_active: boolean;
 }
 
 interface ResultField {

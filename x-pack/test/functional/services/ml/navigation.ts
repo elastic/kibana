@@ -13,15 +13,23 @@ export function MachineLearningNavigationProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const retry = getService('retry');
+  const appsMenu = getService('appsMenu');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   return {
     async navigateToMl() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('ml');
+        await testSubjects.existOrFail('mlApp', { timeout: 2000 });
+      });
+    },
+
+    async navigateToMlViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Machine Learning');
         await testSubjects.existOrFail('mlApp', { timeout: 2000 });
       });
     },
@@ -34,6 +42,13 @@ export function MachineLearningNavigationProvider({
         } else {
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
         }
+      });
+    },
+
+    async navigateToStackManagementViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Stack Management');
+        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
       });
     },
 
@@ -74,13 +89,15 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(tabSubject);
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected ML tab '${tabSubject}' to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(10000, async () => {
+        const isEnabled = await testSubjects.isEnabled(tabSubject);
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected ML tab '${tabSubject}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async assertOverviewTabEnabled(expectedValue: boolean) {
@@ -91,12 +108,36 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
     },
 
+    async assertAnomalyExplorerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~anomalyExplorer', expectedValue);
+    },
+
+    async assertSingleMetricViewerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~singleMetricViewer', expectedValue);
+    },
+
     async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalytics', expectedValue);
     },
 
+    async assertTrainedModelsNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~trainedModels', expectedValue);
+    },
+
+    async assertNodesNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~nodesOverview', expectedValue);
+    },
+
     async assertDataVisualizerTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
+    },
+
+    async assertFileDataVisualizerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~fileDataVisualizer', expectedValue);
+    },
+
+    async assertIndexDataVisualizerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~indexDataVisualizer', expectedValue);
     },
 
     async assertSettingsTabEnabled(expectedValue: boolean) {
@@ -113,6 +154,16 @@ export function MachineLearningNavigationProvider({
 
     async navigateToDataFrameAnalytics() {
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
+    },
+
+    async navigateToTrainedModels() {
+      await this.navigateToMl();
+      await this.navigateToArea('~mlMainTab & ~trainedModels', 'mlModelsTableContainer');
+    },
+
+    async navigateToModelManagementNodeList() {
+      await this.navigateToMl();
+      await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlNodesTableContainer');
     },
 
     async navigateToDataVisualizer() {
@@ -134,6 +185,24 @@ export function MachineLearningNavigationProvider({
         // verify that the overall page is present
         await testSubjects.existOrFail('mlPageStackManagementJobsList');
         // verify that the default tab with the anomaly detection jobs list got loaded
+        await testSubjects.existOrFail('ml-jobs-list');
+      });
+    },
+
+    async navigateToStackManagementInsuficientLicensePage() {
+      // clicks the jobsListLink and loads the jobs list page
+      await testSubjects.click('jobsListLink');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the overall page is present
+        await testSubjects.existOrFail('mlPageInsufficientLicense');
+      });
+    },
+
+    async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
+      // clicks the `Analytics` tab and loads the analytics list page
+      await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the empty prompt for analytics jobs list got loaded
         await testSubjects.existOrFail('ml-jobs-list');
       });
     },
@@ -170,6 +239,13 @@ export function MachineLearningNavigationProvider({
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.existOrFail('collapsibleNav');
+    },
+
+    async closeKibanaNav() {
+      if (await testSubjects.exists('collapsibleNav')) {
+        await testSubjects.click('toggleNavButton');
+      }
+      await testSubjects.missingOrFail('collapsibleNav');
     },
 
     async assertKibanaNavMLEntryExists() {
@@ -213,6 +289,12 @@ export function MachineLearningNavigationProvider({
         expectedUrlPart,
         `Expected the current URL "${currentUrl}" to not include ${expectedUrlPart}`
       );
+    },
+
+    async browserBackTo(backTestSubj: string) {
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail(backTestSubj, { timeout: 10 * 1000 });
     },
   };
 }

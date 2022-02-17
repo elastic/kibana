@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../../types';
 export const registerSearchRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.post(
     {
@@ -27,9 +27,10 @@ export const registerSearchRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
         const requests = request.body.map(({ index, query }: { index: string; query?: any }) =>
-          context.rollup.client.callAsCurrentUser('rollup.search', {
+          clusterClient.asCurrentUser.rollup.rollupSearch({
             index,
             rest_total_hits_as_int: true,
             body: query,
@@ -38,10 +39,7 @@ export const registerSearchRoute = ({
         const data = await Promise.all(requests);
         return response.ok({ body: data });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        throw err;
+        return handleEsError({ error: err, response });
       }
     })
   );

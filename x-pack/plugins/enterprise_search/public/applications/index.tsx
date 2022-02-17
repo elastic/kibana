@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -13,14 +13,18 @@ import { Router } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic } from './shared/flash_messages';
+import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -36,8 +40,11 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
@@ -45,31 +52,41 @@ export const renderApp = (
   const unmountKibanaLogic = mountKibanaLogic({
     config,
     charts: plugins.charts,
-    cloud: plugins.cloud || {},
+    cloud: plugins.cloud,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
+    security: plugins.security,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
+    setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
   });
   const unmountLicensingLogic = mountLicensingLogic({
     license$: plugins.licensing.license$,
+    canManageLicense: core.application.capabilities.management?.stack?.license_management,
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
-    errorConnecting,
+    errorConnectingMessage,
     readOnlyMode: initialData.readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
   ReactDOM.render(
     <I18nProvider>
-      <Provider store={store}>
-        <Router history={params.history}>
-          <App {...initialData} />
-        </Router>
-      </Provider>
+      <KibanaThemeProvider theme$={params.theme$}>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <CloudContext>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
+          </CloudContext>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     params.element
   );
@@ -86,7 +103,7 @@ export const renderApp = (
  * Render function for Kibana's header action menu chrome -
  * reusable by any Enterprise Search plugin simply by passing in
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
- * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ * @see https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
 export const renderHeaderActions = (

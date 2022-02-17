@@ -6,13 +6,10 @@
  */
 
 import { Location } from 'history';
+import { TimeRangeComparisonType } from '../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { pickKeys } from '../../../common/utils/pick_keys';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
-import { toQuery } from '../../components/shared/Links/url_helpers';
-import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
+import { toQuery } from '../../components/shared/links/url_helpers';
 import {
   getDateRange,
   removeUndefinedProps,
@@ -20,17 +17,19 @@ import {
   toNumber,
   toString,
 } from './helpers';
-import { IUrlParams } from './types';
+import { UrlParams } from './types';
 
 type TimeUrlParams = Pick<
-  IUrlParams,
-  'start' | 'end' | 'rangeFrom' | 'rangeTo'
+  UrlParams,
+  'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const query = toQuery(location.search);
 
   const {
+    sampleRangeFrom,
+    sampleRangeTo,
     traceId,
     transactionId,
     transactionName,
@@ -56,8 +55,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     comparisonType,
   } = query;
 
-  const localUIFilters = pickKeys(query, ...localUIFilterNames);
-
   return removeUndefinedProps({
     // date params
     ...getDateRange({ state, rangeFrom, rangeTo }),
@@ -74,11 +71,13 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),
     traceId: toString(traceId),
+    sampleRangeFrom: sampleRangeFrom ? toNumber(sampleRangeFrom) : undefined,
+    sampleRangeTo: sampleRangeTo ? toNumber(sampleRangeTo) : undefined,
     waterfallItemId: toString(waterfallItemId),
     detailTab: toString(detailTab),
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
-    kuery: kuery && decodeURIComponent(kuery),
+    kuery,
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),
@@ -88,7 +87,5 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
       ? toBoolean(comparisonEnabled)
       : undefined,
     comparisonType: comparisonType as TimeRangeComparisonType | undefined,
-    // ui filters
-    ...localUIFilters,
   });
 }

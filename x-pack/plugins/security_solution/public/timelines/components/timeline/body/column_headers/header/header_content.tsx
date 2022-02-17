@@ -8,8 +8,8 @@
 import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
+import { ColumnHeaderOptions } from '../../../../../../../common/types/timeline';
 
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { TruncatableText } from '../../../../../../common/components/truncatable_text';
 import { EventsHeading, EventsHeadingTitleButton, EventsHeadingTitleSpan } from '../../../styles';
 import { Sort } from '../../sort';
@@ -46,7 +46,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
             data-test-subj="header-tooltip"
             content={<HeaderToolTipContent header={header} />}
           >
-            <>{header.label ?? header.id}</>
+            <>
+              {React.isValidElement(header.display)
+                ? header.display
+                : header.displayAsText ?? header.id}
+            </>
           </EuiToolTip>
         </TruncatableText>
 
@@ -63,7 +67,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
             data-test-subj="header-tooltip"
             content={<HeaderToolTipContent header={header} />}
           >
-            <>{header.label ?? header.id}</>
+            <>
+              {React.isValidElement(header.display)
+                ? header.display
+                : header.displayAsText ?? header.id}
+            </>
           </EuiToolTip>
         </TruncatableText>
       </EventsHeadingTitleSpan>

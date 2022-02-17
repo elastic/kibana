@@ -20,8 +20,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
@@ -32,9 +32,20 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await testSubjects.find('pluginContent');
     });
 
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize.json'
+      );
+    });
+
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./tag_cloud'));
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./esaggs'));
+    loadTestFile(require.resolve('./esaggs_timeshift'));
+    loadTestFile(require.resolve('./esaggs_multiterms'));
+    loadTestFile(require.resolve('./esaggs_sampler'));
+    loadTestFile(require.resolve('./esaggs_significanttext'));
+    loadTestFile(require.resolve('./esaggs_rareterms'));
   });
 }

@@ -4,9 +4,18 @@
 <titleabbrev>Start or resume reindex</titleabbrev>
 ++++
 
-experimental[] Start a new reindex or resume a paused reindex.
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
 
-Start a new reindex or resume a paused reindex.
+Start a new reindex or resume a paused reindex. Following steps are performed during 
+a reindex task:
+
+. Setting the index to read-only
+. Creating a new index
+. {ref}/docs-reindex.html[Reindexing] documents into the new index
+. Creating an index alias for the new index
+. Deleting the old index
+
+
 
 [[start-resume-reindex-request]]
 ==== Request
@@ -40,6 +49,6 @@ The API returns the following:
 <1> The name of the new index.
 <2> The reindex status. For more information, refer to <<status-code,Status codes>>.
 <3> The last successfully completed step of the reindex. For more information, refer to <<step-code,Step codes>>.
-<4> The task ID of the reindex task in {es}. Appears when the reindexing starts.
-<5> The progress of the reindexing task in {es}. Appears in decimal form, from 0 to 1.
+<4> The task ID of the {ref}/docs-reindex.html[reindex] task in {es}. Appears when the reindexing starts.
+<5> The progress of the {ref}/docs-reindex.html[reindexing] task in {es}. Appears in decimal form, from 0 to 1.
 <6> The error that caused the reindex to fail, if it failed.

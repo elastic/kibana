@@ -15,23 +15,23 @@ export const PAGE_TITLE = i18n.translate(
 );
 
 export const BACK_TO_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesDescription',
+  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton',
   {
-    defaultMessage: 'Back to detection rules',
+    defaultMessage: 'Rules',
   }
 );
 
 export const EXPERIMENTAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.experimentalDescription',
   {
-    defaultMessage: 'Experimental',
+    defaultMessage: 'Technical preview',
   }
 );
 
-export const ACTIVATED_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.activatedRuleLabel',
+export const ACTIVATE_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.activateRuleLabel',
   {
-    defaultMessage: 'Activated',
+    defaultMessage: 'Activate',
   }
 );
 
@@ -39,20 +39,6 @@ export const UNKNOWN = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.unknownDescription',
   {
     defaultMessage: 'Unknown',
-  }
-);
-
-export const ERROR_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.errorCalloutTitle',
-  {
-    defaultMessage: 'Rule failure at',
-  }
-);
-
-export const PARTIAL_FAILURE_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.partialErrorCalloutTitle',
-  {
-    defaultMessage: 'Warning at',
   }
 );
 
@@ -102,5 +88,12 @@ export const EXCEPTIONS_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
   {
     defaultMessage: 'Exceptions',
+  }
+);
+
+export const DELETED_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
+  {
+    defaultMessage: 'Deleted rule',
   }
 );

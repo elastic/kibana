@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DefaultOperator } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -17,7 +17,7 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
-import { isPopulatedObject } from '../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../common/shared_imports';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 import { isIndexPattern } from '../../../common/types/index_pattern';
 
@@ -39,7 +39,7 @@ import {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator?: DefaultOperator;
+    default_operator?: estypes.QueryDslOperator;
   };
 }
 
@@ -59,14 +59,13 @@ export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
 }
 
 export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
-  return isPopulatedObject(arg) && arg.hasOwnProperty('query_string');
+  return isPopulatedObject(arg, ['query_string']);
 }
 
 export const matchAllQuery = { match_all: {} };
 export function isMatchAllQuery(query: unknown): boolean {
   return (
-    isPopulatedObject(query) &&
-    query.hasOwnProperty('match_all') &&
+    isPopulatedObject(query, ['match_all']) &&
     typeof query.match_all === 'object' &&
     query.match_all !== null &&
     Object.keys(query.match_all).length === 0
@@ -101,7 +100,7 @@ export function getCombinedRuntimeMappings(
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
 
-  if (isPopulatedObject<StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
+  if (isPopulatedObject<keyof StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
     return combinedRuntimeMappings;
   }
   return undefined;
@@ -220,6 +219,10 @@ export const getCreateTransformRequestBody = (
     : {}),
   dest: {
     index: transformDetailsState.destinationIndex,
+    // conditionally add optional ingest pipeline
+    ...(transformDetailsState.destinationIngestPipeline !== ''
+      ? { pipeline: transformDetailsState.destinationIngestPipeline }
+      : {}),
   },
   // conditionally add continuous mode config
   ...(transformDetailsState.isContinuousModeEnabled
@@ -243,6 +246,7 @@ export const getCreateTransformRequestBody = (
         },
       }
     : {}),
+  ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
   // conditionally add additional settings
   ...getCreateTransformSettingsRequestBody(transformDetailsState),
 });

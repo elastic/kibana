@@ -8,20 +8,23 @@
 import type {
   AssetReference,
   CategorySummaryList,
-  Installable,
-  RegistrySearchResult,
+  PackageList,
   PackageInfo,
   PackageUsageStats,
+  InstallType,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
   query: {
     experimental?: boolean;
+    include_policy_templates?: boolean;
   };
 }
 
 export interface GetCategoriesResponse {
-  response: CategorySummaryList;
+  items: CategorySummaryList;
+  // deprecated in 8.0
+  response?: CategorySummaryList;
 }
 
 export interface GetPackagesRequest {
@@ -32,28 +35,56 @@ export interface GetPackagesRequest {
 }
 
 export interface GetPackagesResponse {
-  response: Array<Installable<RegistrySearchResult>>;
+  items: PackageList;
+  // deprecated in 8.0
+  response?: PackageList;
 }
 
 export interface GetLimitedPackagesResponse {
-  response: string[];
+  items: string[];
+  // deprecated in 8.0
+  response?: string[];
 }
 
 export interface GetFileRequest {
   params: {
-    pkgkey: string;
+    pkgName: string;
+    pkgVersion: string;
     filePath: string;
   };
 }
 
 export interface GetInfoRequest {
   params: {
-    pkgkey: string;
+    // deprecated in 8.0
+    pkgkey?: string;
+    pkgName: string;
+    pkgVersion: string;
   };
 }
 
 export interface GetInfoResponse {
-  response: PackageInfo;
+  item: PackageInfo;
+  // deprecated in 8.0
+  response?: PackageInfo;
+}
+
+export interface UpdatePackageRequest {
+  params: {
+    // deprecated in 8.0
+    pkgkey?: string;
+    pkgName: string;
+    pkgVersion: string;
+  };
+  body: {
+    keepPoliciesUpToDate?: boolean;
+  };
+}
+
+export interface UpdatePackageResponse {
+  item: PackageInfo;
+  // deprecated in 8.0
+  response?: PackageInfo;
 }
 
 export interface GetStatsRequest {
@@ -68,12 +99,17 @@ export interface GetStatsResponse {
 
 export interface InstallPackageRequest {
   params: {
-    pkgkey: string;
+    // deprecated in 8.0
+    pkgkey?: string;
+    pkgName: string;
+    pkgVersion: string;
   };
 }
 
 export interface InstallPackageResponse {
-  response: AssetReference[];
+  items: AssetReference[];
+  // deprecated in 8.0
+  response?: AssetReference[];
 }
 
 export interface IBulkInstallPackageHTTPError {
@@ -83,8 +119,10 @@ export interface IBulkInstallPackageHTTPError {
 }
 
 export interface InstallResult {
-  assets: AssetReference[];
-  status: 'installed' | 'already_installed';
+  assets?: AssetReference[];
+  status?: 'installed' | 'already_installed';
+  error?: Error;
+  installType: InstallType;
 }
 
 export interface BulkInstallPackageInfo {
@@ -94,7 +132,9 @@ export interface BulkInstallPackageInfo {
 }
 
 export interface BulkInstallPackagesResponse {
-  response: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+  items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+  // deprecated in 8.0
+  response?: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
 }
 
 export interface BulkInstallPackagesRequest {
@@ -109,10 +149,15 @@ export interface MessageResponse {
 
 export interface DeletePackageRequest {
   params: {
-    pkgkey: string;
+    // deprecated in 8.0
+    pkgkey?: string;
+    pkgName: string;
+    pkgVersion: string;
   };
 }
 
 export interface DeletePackageResponse {
-  response: AssetReference[];
+  // deprecated in 8.0
+  response?: AssetReference[];
+  items: AssetReference[];
 }

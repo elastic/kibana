@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
-import {
+import type { CoreSetup } from 'kibana/public';
+import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
-import { Datasource, EditorFrameSetup } from '../types';
+import type { EditorFrameSetup } from '../types';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import type {
+  FieldFormatsStart,
+  FieldFormatsSetup,
+} from '../../../../../src/plugins/field_formats/public';
+
+export type { PersistedIndexPatternLayer, IndexPattern, FormulaPublicApi } from './types';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
+  fieldFormats: FieldFormatsSetup;
   data: DataPublicPluginSetup;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
@@ -25,39 +33,47 @@ export interface IndexPatternDatasourceSetupPlugins {
 
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  fieldFormats: FieldFormatsStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }
 
 export class IndexPatternDatasource {
-  constructor() {}
-
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
-    { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
+    {
+      fieldFormats: fieldFormatsSetup,
+      expressions,
+      editorFrame,
+      charts,
+    }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
-      const {
-        getIndexPatternDatasource,
-        renameColumns,
-        formatColumn,
-        counterRate,
-        getTimeScaleFunction,
-        getSuffixFormatter,
-      } = await import('../async_services');
-      return core.getStartServices().then(([coreStart, { data, indexPatternFieldEditor }]) => {
-        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
-        expressions.registerFunction(getTimeScaleFunction(data));
-        expressions.registerFunction(counterRate);
-        expressions.registerFunction(renameColumns);
-        expressions.registerFunction(formatColumn);
-        return getIndexPatternDatasource({
-          core: coreStart,
-          storage: new Storage(localStorage),
-          data,
-          charts,
-          indexPatternFieldEditor,
-        });
-      }) as Promise<Datasource>;
+      const { getIndexPatternDatasource, getSuffixFormatter, suffixFormatterId } = await import(
+        '../async_services'
+      );
+
+      if (!fieldFormatsSetup.has(suffixFormatterId)) {
+        const startServices = createStartServicesGetter(core.getStartServices);
+        const suffixFormatter = getSuffixFormatter(
+          () => startServices().plugins.fieldFormats.deserialize
+        );
+
+        fieldFormatsSetup.register([suffixFormatter]);
+      }
+
+      const [coreStart, { dataViewFieldEditor, uiActions, data, fieldFormats }] =
+        await core.getStartServices();
+
+      return getIndexPatternDatasource({
+        core: coreStart,
+        fieldFormats,
+        storage: new Storage(localStorage),
+        data,
+        charts,
+        dataViewFieldEditor,
+        uiActions,
+      });
     });
   }
 }

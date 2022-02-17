@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { MountPoint } from 'kibana/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 const dataShim = {
   ui: {
@@ -109,13 +109,18 @@ describe('TopNavMenu', () => {
     let dom: ReactWrapper;
 
     const refresh = () => {
-      new Promise(async (resolve) => {
-        if (dom) {
-          act(() => {
-            dom.update();
-          });
+      new Promise(async (resolve, reject) => {
+        try {
+          if (dom) {
+            act(() => {
+              dom.update();
+            });
+          }
+
+          setImmediate(() => resolve(dom)); // flushes any pending promises
+        } catch (error) {
+          reject(error);
         }
-        setImmediate(() => resolve(dom)); // flushes any pending promises
       });
     };
 

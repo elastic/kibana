@@ -5,26 +5,22 @@
  * 2.0.
  */
 
+import { PartialTheme } from '@elastic/charts';
 import moment from 'moment';
-import { EuiTheme } from 'src/plugins/kibana_react/common';
+import {
+  TimeRangeComparisonType,
+  TimeRangeComparisonEnum,
+} from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
 
-export enum TimeRangeComparisonType {
-  WeekBefore = 'week',
-  DayBefore = 'day',
-  PeriodBefore = 'period',
-}
-
-export function getComparisonChartTheme(theme: EuiTheme) {
+export function getComparisonChartTheme(): PartialTheme {
   return {
     areaSeriesStyle: {
       area: {
-        fill: theme.eui.euiColorLightestShade,
         visible: true,
-        opacity: 1,
+        opacity: 0.5,
       },
       line: {
-        stroke: theme.eui.euiColorMediumShade,
         strokeWidth: 1,
         visible: true,
       },
@@ -39,15 +35,17 @@ const oneDayInMilliseconds = moment.duration(1, 'day').asMilliseconds();
 const oneWeekInMilliseconds = moment.duration(1, 'week').asMilliseconds();
 
 export function getTimeRangeComparison({
+  comparisonEnabled,
   comparisonType,
   start,
   end,
 }: {
+  comparisonEnabled?: boolean;
   comparisonType?: TimeRangeComparisonType;
   start?: string;
   end?: string;
 }) {
-  if (!comparisonType || !start || !end) {
+  if (!comparisonEnabled || !comparisonType || !start || !end) {
     return {};
   }
 
@@ -58,23 +56,27 @@ export function getTimeRangeComparison({
   const endEpoch = endMoment.valueOf();
 
   let diff: number;
+  let offset: string;
 
   switch (comparisonType) {
-    case TimeRangeComparisonType.DayBefore:
+    case TimeRangeComparisonEnum.DayBefore:
       diff = oneDayInMilliseconds;
+      offset = '1d';
       break;
 
-    case TimeRangeComparisonType.WeekBefore:
+    case TimeRangeComparisonEnum.WeekBefore:
       diff = oneWeekInMilliseconds;
+      offset = '1w';
       break;
 
-    case TimeRangeComparisonType.PeriodBefore:
+    case TimeRangeComparisonEnum.PeriodBefore:
       diff = getDateDifference({
         start: startMoment,
         end: endMoment,
         unitOfTime: 'milliseconds',
         precise: true,
       });
+      offset = `${diff}ms`;
       break;
 
     default:
@@ -84,5 +86,6 @@ export function getTimeRangeComparison({
   return {
     comparisonStart: new Date(startEpoch - diff).toISOString(),
     comparisonEnd: new Date(endEpoch - diff).toISOString(),
+    offset,
   };
 }

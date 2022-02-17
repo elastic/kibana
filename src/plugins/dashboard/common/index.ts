@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { GridData } from './embeddable/types';
-export {
+export type { GridData } from './embeddable/types';
+export type {
   RawSavedDashboardPanel730ToLatest,
   DashboardDoc730ToLatest,
   DashboardDoc700To720,
   DashboardDocPre700,
 } from './bwc/types';
-export {
+export type {
+  DashboardContainerStateWithType,
   SavedDashboardPanelTo60,
   SavedDashboardPanel610,
   SavedDashboardPanel620,
@@ -23,3 +24,7 @@ export {
 } from './types';
 
 export { migratePanelsTo730 } from './migrate_to_730_panels';
+
+export const UI_SETTINGS = {
+  ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
+};

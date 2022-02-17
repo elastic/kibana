@@ -1,20 +1,26 @@
 ---
 id: kibMlPluginApi
-slug: /kibana-dev-docs/mlPluginApi
-title: ml
+slug: /kibana-dev-docs/api/ml
+title: "ml"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the ml plugin
-date: 2020-11-16
+date: 2022-02-11
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'ml']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
+import mlObj from './ml.devdocs.json';
 
-import mlObj from './ml.json';
+This plugin provides access to the machine learning features provided by Elastic.
+
+Contact [Machine Learning UI](https://github.com/orgs/elastic/teams/ml-ui) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 196 | 8 | 79 | 30 |
 
 ## Client
-
-### Setup
-<DocDefinitionList data={[mlObj.client.setup]}/>
 
 ### Start
 <DocDefinitionList data={[mlObj.client.start]}/>
@@ -64,9 +70,6 @@ import mlObj from './ml.json';
 
 ### Functions
 <DocDefinitionList data={mlObj.common.functions}/>
-
-### Interfaces
-<DocDefinitionList data={mlObj.common.interfaces}/>
 
 ### Enums
 <DocDefinitionList data={mlObj.common.enums}/>

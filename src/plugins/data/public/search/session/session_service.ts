@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublicContract } from '@kbn/utility-types';
+import { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import {
@@ -15,13 +15,13 @@ import {
   ToastsStart as ToastService,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
-import {
-  createSessionStateContainer,
+import { createSessionStateContainer } from './search_session_state';
+import type {
   SearchSessionState,
   SessionMeta,
   SessionStateContainer,
+  SessionStateInternal,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
@@ -31,14 +31,19 @@ import { formatSessionName } from './lib/session_name_formatter';
 
 export type ISessionService = PublicContract<SessionService>;
 
-export interface TrackSearchDescriptor {
+interface TrackSearchDescriptor {
   abort: () => void;
 }
 
 /**
+ * Represents a search session state in {@link SessionService} in any given moment of time
+ */
+export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
+
+/**
  * Provide info about current search session to be stored in the Search Session saved object
  */
-export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider<P extends SerializableRecord = SerializableRecord> {
   /**
    * User-facing name of the session.
    * e.g. will be displayed in saved Search Sessions management list
@@ -51,17 +56,17 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
    */
   appendSessionStartTimeToName?: boolean;
 
-  getUrlGeneratorData: () => Promise<{
-    urlGeneratorId: ID;
-    initialState: UrlGeneratorStateMapping[ID]['State'];
-    restoreState: UrlGeneratorStateMapping[ID]['State'];
+  getLocatorData: () => Promise<{
+    id: string;
+    initialState: P;
+    restoreState: P;
   }>;
 }
 
 /**
  * Configure a "Search session indicator" UI
  */
-export interface SearchSessionIndicatorUiConfig {
+interface SearchSessionIndicatorUiConfig {
   /**
    * App controls if "Search session indicator" UI should be disabled.
    * reasonText will appear in a tooltip.
@@ -73,7 +78,7 @@ export interface SearchSessionIndicatorUiConfig {
 }
 
 /**
- * Responsible for tracking a current search session. Supports only a single session at a time.
+ * Responsible for tracking a current search session. Supports a single session at a time.
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
@@ -88,6 +93,13 @@ export class SessionService {
 
   private toastService?: ToastService;
 
+  /**
+   * Holds snapshot of last cleared session so that it can be continued
+   * Can be used to re-use a session between apps
+   * @private
+   */
+  private lastSessionSnapshot?: SessionSnapshot;
+
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
@@ -95,13 +107,10 @@ export class SessionService {
     private readonly nowProvider: NowProviderInternalContract,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const {
-      stateContainer,
-      sessionState$,
-      sessionMeta$,
-    } = createSessionStateContainer<TrackSearchDescriptor>({
-      freeze: freezeState,
-    });
+    const { stateContainer, sessionState$, sessionMeta$ } =
+      createSessionStateContainer<TrackSearchDescriptor>({
+        freeze: freezeState,
+      });
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
@@ -173,6 +182,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
+    this.lastSessionSnapshot = undefined;
   }
 
   /**
@@ -213,7 +223,9 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
     this.state.transitions.start({ appName: this.currentApp });
+
     return this.getSessionId()!;
   }
 
@@ -224,6 +236,33 @@ export class SessionService {
   public restore(sessionId: string) {
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
+  }
+
+  /**
+   * Continue previous search session
+   * Can be used to share a running search session between different apps, so they can reuse search cache
+   *
+   * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
+   * @param sessionId
+   */
+  public continue(sessionId: string) {
+    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+      this.state.set({
+        ...this.lastSessionSnapshot,
+        // have to change a name, so that current app can cancel a session that it continues
+        appName: this.currentApp,
+        // also have to drop all pending searches which are used to derive client side state of search session indicator,
+        // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
+        // possible solution to this problem is to refactor session service to support multiple sessions
+        pendingSearches: [],
+      });
+      this.lastSessionSnapshot = undefined;
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
+      );
+    }
   }
 
   /**
@@ -242,6 +281,9 @@ export class SessionService {
       return;
     }
 
+    if (this.getSessionId()) {
+      this.lastSessionSnapshot = this.state.get();
+    }
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
@@ -273,9 +315,9 @@ export class SessionService {
     if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
-    const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
+    const [name, { initialState, restoreState, id: locatorId }] = await Promise.all([
       currentSessionInfoProvider.getName(),
-      currentSessionInfoProvider.getUrlGeneratorData(),
+      currentSessionInfoProvider.getLocatorData(),
     ]);
 
     const formattedName = formatSessionName(name, {
@@ -286,9 +328,9 @@ export class SessionService {
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
-      restoreState: (restoreState as unknown) as Record<string, unknown>,
-      initialState: (initialState as unknown) as Record<string, unknown>,
-      urlGeneratorId,
+      locatorId,
+      restoreState,
+      initialState,
       sessionId,
     });
 
@@ -368,8 +410,8 @@ export class SessionService {
    * @param searchSessionInfoProvider - info provider for saving a search session
    * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
    */
-  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
+  public enableStorage<P extends SerializableRecord>(
+    searchSessionInfoProvider: SearchSessionInfoProvider<P>,
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
     this.searchSessionInfoProvider = {

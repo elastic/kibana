@@ -11,6 +11,7 @@ $canvasElementCardWidth: 210px;
 .canvas.canvasContainer {
   display: flex;
   flex-grow: 1;
+  flex-direction: column;
   background-color: $euiPageBackgroundColor;
 }
 

@@ -6,8 +6,11 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-
-import { HostsSortField } from '../../graphql/types';
+import {
+  HostRiskSeverity,
+  HostsSortField,
+  HostRiskScoreSortField,
+} from '../../../common/search_strategy/security_solution/hosts';
 
 import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/hosts');
@@ -34,3 +37,13 @@ export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
+
+export const updateHostRiskScoreSort = actionCreator<{
+  sort: HostRiskScoreSortField;
+  hostsType: HostsType;
+}>('UPDATE_HOST_RISK_SCORE_SORT');
+
+export const updateHostRiskScoreSeverityFilter = actionCreator<{
+  severitySelection: HostRiskSeverity[];
+  hostsType: HostsType;
+}>('UPDATE_HOST_RISK_SCORE_SEVERITY');

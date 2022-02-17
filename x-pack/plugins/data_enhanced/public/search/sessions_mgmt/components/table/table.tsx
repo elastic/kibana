@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -14,7 +14,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../common/search';
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../../../src/plugins/data/common/';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
@@ -28,9 +28,18 @@ interface Props {
   timezone: string;
   config: SessionsConfigSchema;
   plugins: IManagementSectionsPluginsSetup;
+  kibanaVersion: string;
 }
 
-export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, ...props }: Props) {
+export function SearchSessionsMgmtTable({
+  core,
+  api,
+  timezone,
+  config,
+  plugins,
+  kibanaVersion,
+  ...props
+}: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
@@ -108,10 +117,11 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, 
       {...props}
       id={SEARCH_SESSIONS_TABLE_ID}
       data-test-subj={SEARCH_SESSIONS_TABLE_ID}
-      rowProps={() => ({
-        'data-test-subj': 'searchSessionsRow',
+      rowProps={(searchSession: UISession) => ({
+        'data-test-subj': `searchSessionsRow`,
+        'data-test-search-session-id': `id-${searchSession.id}`,
       })}
-      columns={getColumns(core, plugins, api, config, timezone, onActionComplete)}
+      columns={getColumns(core, plugins, api, config, timezone, onActionComplete, kibanaVersion)}
       items={tableData}
       pagination={pagination}
       search={search}

@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
 import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
@@ -19,6 +19,7 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
+  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
 } from '@elastic/charts';
@@ -80,12 +81,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     defaultPaginationOptions: { pageSize: 100 },
   };
 
-  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    anomalyParams
-  );
-  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults(
-    anomalyParams
-  );
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } =
+    useMetricsHostsAnomaliesResults(anomalyParams);
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } =
+    useMetricsK8sAnomaliesResults(anomalyParams);
 
   const getAnomalies = useMemo(() => {
     if (nodeType === 'host') {
@@ -141,7 +140,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const onClickPoint: ElementClickListener = useCallback(
     ([[geometryValue]]) => {
       if (!Array.isArray(geometryValue)) {
-        const { x: timestamp } = geometryValue;
+        // casting to GeometryValue as we are using cartesian charts
+        const { x: timestamp } = geometryValue as GeometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }
@@ -210,7 +210,9 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }
 
   return (
-    <TimelineContainer>
+    <TimelineContainer
+      data-test-subj={isVisible ? 'timelineContainerOpen' : 'timelineContainerClosed'}
+    >
       <TimelineHeader>
         <EuiFlexItem grow={true}>
           <EuiText>

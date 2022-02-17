@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fleet_agents_status', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       // 2 agents online
       await es.update({
         id: 'agent1',
@@ -64,11 +64,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return the status of agents', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent-status`).expect(200);
+      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
 
       expect(apiResponse).to.eql({
         results: {
@@ -82,6 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
           inactive: 0,
         },
       });
+    });
+
+    it('should work with deprecated api', async () => {
+      await supertest.get(`/api/fleet/agent-status`).expect(200);
     });
   });
 }

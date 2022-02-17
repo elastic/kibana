@@ -35,6 +35,7 @@ export default function ({ getPageObjects, getService }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     after(async () => {
@@ -69,18 +70,23 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('join example');
       await retry.try(async () => {
         const joinExampleRequestNames = await inspector.getRequestNames();
-        expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
+        expect(joinExampleRequestNames).to.equal(
+          'geo_shapes*,meta_for_geo_shapes*.runtime_shape_name'
+        );
       });
       await inspector.close();
 
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
-      const gridExampleRequestNames = await inspector.getRequestNames();
+      const singleExampleRequest = await inspector.hasSingleRequest();
+      const selectedExampleRequest = await inspector.getSelectedOption();
       await inspector.close();
-      expect(gridExampleRequestNames).to.equal('logstash-*');
+
+      expect(singleExampleRequest).to.be(true);
+      expect(selectedExampleRequest).to.equal('logstash-*');
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
-      const response = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: response } = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(response.aggregations.gridSplit.buckets.length).to.equal(6);
@@ -89,17 +95,24 @@ export default function ({ getPageObjects, getService }) {
     it('should apply new container state (time, query, filters) to embeddable', async () => {
       await filterBar.selectIndexPattern('logstash-*');
       await filterBar.addFilter('machine.os', 'is', 'win 8');
-      await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-      await filterBar.addFilter('shape_name', 'is', 'alpha');
+      await PageObjects.maps.waitForLayersToLoad();
 
-      const gridResponse = await PageObjects.maps.getResponseFromDashboardPanel(
+      // retry is fix for flaky test https://github.com/elastic/kibana/issues/113993
+      // timing issue where click for addFilter opens filter pill created above instead of clicking addFilter
+      await retry.try(async () => {
+        await filterBar.selectIndexPattern('meta_for_geo_shapes*');
+        await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
+      });
+      await PageObjects.maps.waitForLayersToLoad();
+
+      const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(gridResponse.aggregations.gridSplit.buckets.length).to.equal(1);
 
-      const joinResponse = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: joinResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'join example',
-        'meta_for_geo_shapes*.shape_name'
+        'meta_for_geo_shapes*.runtime_shape_name'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
     });

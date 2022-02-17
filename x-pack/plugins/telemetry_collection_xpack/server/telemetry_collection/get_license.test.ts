@@ -17,19 +17,20 @@ describe('getLicenseFromLocalOrMaster', () => {
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toBeUndefined();
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
     expect(esClient.license.get).toHaveBeenCalledTimes(1);
   });
 
   test('returns the license it fetches from Elasticsearch', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     // The local fetch succeeds
-    esClient.license.get.mockResolvedValue({ body: { license: { type: 'basic' } } } as any);
+    // @ts-expect-error it's enough to test with minimal payload
+    esClient.license.get.mockResponse({ license: { type: 'basic' } });
 
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toStrictEqual({ type: 'basic' });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
     expect(esClient.license.get).toHaveBeenCalledTimes(1);
   });
 
@@ -41,8 +42,8 @@ describe('getLicenseFromLocalOrMaster', () => {
 
     await expect(getLicenseFromLocalOrMaster(esClient)).rejects.toStrictEqual(error);
 
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: false, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: false });
     expect(esClient.license.get).toHaveBeenCalledTimes(2);
   });
 
@@ -51,13 +52,14 @@ describe('getLicenseFromLocalOrMaster', () => {
     // The local fetch fails
     esClient.license.get.mockRejectedValueOnce(new Error('Something went terribly wrong'));
     // The master fetch succeeds
-    esClient.license.get.mockResolvedValue({ body: { license: { type: 'basic' } } } as any);
+    // @ts-expect-error it's enough to test with minimal payload
+    esClient.license.get.mockResolvedValue({ license: { type: 'basic' } });
 
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toStrictEqual({ type: 'basic' });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: false, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: false });
     expect(esClient.license.get).toHaveBeenCalledTimes(2);
   });
 
@@ -70,14 +72,14 @@ describe('getLicenseFromLocalOrMaster', () => {
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toBeUndefined();
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: false, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: false });
     expect(esClient.license.get).toHaveBeenCalledTimes(2);
 
     // Now the cached license is cleared, next request only goes for local and gives up when failed
     esClient.license.get.mockClear();
     await expect(getLicenseFromLocalOrMaster(esClient)).resolves.toBeUndefined();
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
     expect(esClient.license.get).toHaveBeenCalledTimes(1);
   });
 });

@@ -12,14 +12,16 @@ import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
+import { FeaturePrivilegeCasesBuilder } from './cases';
 import { FeaturePrivilegeCatalogueBuilder } from './catalogue';
-import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
+import type { FeaturePrivilegeBuilder } from './feature_privilege_builder';
 import { FeaturePrivilegeManagementBuilder } from './management';
 import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
 import { FeaturePrivilegeUIBuilder } from './ui';
 
-export { FeaturePrivilegeBuilder };
+export type { CasesSupportedOperations } from './cases';
+export type { FeaturePrivilegeBuilder };
 
 export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivilegeBuilder => {
   const builders = [
@@ -31,6 +33,7 @@ export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivile
     new FeaturePrivilegeSavedObjectBuilder(actions),
     new FeaturePrivilegeUIBuilder(actions),
     new FeaturePrivilegeAlertingBuilder(actions),
+    new FeaturePrivilegeCasesBuilder(actions),
   ];
 
   return {

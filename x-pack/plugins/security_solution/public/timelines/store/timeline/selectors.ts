@@ -7,6 +7,7 @@
 
 import { createSelector } from 'reselect';
 
+export { getManageTimelineById } from '../../../../../timelines/public';
 import { State } from '../../../common/store/types';
 
 import { TimelineModel } from './model';

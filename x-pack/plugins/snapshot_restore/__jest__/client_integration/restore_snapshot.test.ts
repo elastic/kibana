@@ -22,6 +22,26 @@ describe('<RestoreSnapshot />', () => {
     server.restore();
   });
 
+  describe('wizard navigation', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+    });
+
+    it('does not allow navigation when the step is invalid', async () => {
+      const { actions } = testBed;
+      actions.goToStep(2);
+      expect(actions.canGoToADifferentStep()).toBe(true);
+      actions.toggleModifyIndexSettings();
+      expect(actions.canGoToADifferentStep()).toBe(false);
+    });
+  });
+
   describe('with data streams', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());

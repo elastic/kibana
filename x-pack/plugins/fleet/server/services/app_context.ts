@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { kibanaPackageJson } from '@kbn/utils';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -22,17 +21,27 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import type { SecurityPluginStart } from '../../../security/server';
+
+import type { SecurityPluginStart, SecurityPluginSetup } from '../../../security/server';
 import type { FleetConfigType } from '../../common';
-import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import type {
+  ExternalCallback,
+  ExternalCallbacksStorage,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../types';
+import type { FleetAppContext } from '../plugin';
 import type { CloudSetup } from '../../../cloud/server';
+import type { TelemetryEventsSender } from '../telemetry/sender';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private security: SecurityPluginStart | undefined;
+  private securitySetup: SecurityPluginSetup | undefined;
+  private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
@@ -43,18 +52,15 @@ class AppContextService {
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
+  private telemetryEventsSender: TelemetryEventsSender | undefined;
 
-  /**
-   * Temporary flag until v7.13 ships
-   */
-  public fleetServerEnabled: boolean = false;
-
-  public async start(appContext: FleetAppContext) {
+  public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
-    this.security = appContext.security;
+    this.securitySetup = appContext.securitySetup;
+    this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
@@ -62,10 +68,11 @@ class AppContextService {
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
+    this.telemetryEventsSender = appContext.telemetryEventsSender;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
-      const initialValue = await this.config$.pipe(first()).toPromise();
+      const initialValue = appContext.configInitialValue;
       this.configSubject$ = new BehaviorSubject(initialValue);
       this.config$.subscribe(this.configSubject$);
     }
@@ -90,14 +97,11 @@ class AppContextService {
   }
 
   public getSecurity() {
-    if (!this.security) {
-      throw new Error('Security service not set.');
-    }
-    return this.security;
+    return this.securityStart!;
   }
 
-  public hasSecurity() {
-    return !!this.security;
+  public getSecurityLicense() {
+    return this.securitySetup!.license;
   }
 
   public getCloud() {
@@ -171,10 +175,30 @@ class AppContextService {
     this.externalCallbacks.get(type)!.add(callback);
   }
 
-  public getExternalCallbacks(type: ExternalCallback[0]) {
+  public getExternalCallbacks<T extends ExternalCallback[0]>(
+    type: T
+  ):
+    | Set<
+        T extends 'packagePolicyCreate'
+          ? PostPackagePolicyCreateCallback
+          : T extends 'postPackagePolicyDelete'
+          ? PostPackagePolicyDeleteCallback
+          : PutPackagePolicyUpdateCallback
+      >
+    | undefined {
     if (this.externalCallbacks) {
-      return this.externalCallbacks.get(type);
+      return this.externalCallbacks.get(type) as Set<
+        T extends 'packagePolicyCreate'
+          ? PostPackagePolicyCreateCallback
+          : T extends 'postPackagePolicyDelete'
+          ? PostPackagePolicyDeleteCallback
+          : PutPackagePolicyUpdateCallback
+      >;
     }
+  }
+
+  public getTelemetryEventsSender() {
+    return this.telemetryEventsSender;
   }
 }
 

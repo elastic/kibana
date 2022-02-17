@@ -10,11 +10,16 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
-import { Detections } from './detections';
 import { Cases } from './cases';
+import { Detections } from './detections';
+import { Exceptions } from './exceptions';
+
 import { Hosts } from './hosts';
+import { Users } from './users';
 import { Network } from './network';
 import { Overview } from './overview';
+import { Rules } from './rules';
+
 import { Timelines } from './timelines';
 import { Management } from './management';
 
@@ -24,9 +29,13 @@ import { Management } from './management';
 const subPluginClasses = {
   Detections,
   Cases,
+  Exceptions,
   Hosts,
+  Users,
   Network,
+
   Overview,
+  Rules,
   Timelines,
   Management,
 };

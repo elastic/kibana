@@ -56,6 +56,7 @@ it(`logs out 401 responses`, async () => {
   await drainPromiseQueue();
   expect(fetchResolved).toBe(false);
   expect(fetchRejected).toBe(false);
+  expect(sessionExpired.logout).toHaveBeenCalledWith('AUTHENTICATION_ERROR');
 });
 
 it(`ignores anonymous paths`, async () => {

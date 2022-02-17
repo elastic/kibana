@@ -27,16 +27,20 @@ export interface ICommand {
 }
 
 import { BootstrapCommand } from './bootstrap';
+import { BuildCommand } from './build';
 import { CleanCommand } from './clean';
 import { ResetCommand } from './reset';
 import { RunCommand } from './run';
 import { WatchCommand } from './watch';
+import { PatchNativeModulesCommand } from './patch_native_modules';
 import { Kibana } from '../utils/kibana';
 
 export const commands: { [key: string]: ICommand } = {
   bootstrap: BootstrapCommand,
+  build: BuildCommand,
   clean: CleanCommand,
   reset: ResetCommand,
   run: RunCommand,
   watch: WatchCommand,
+  patch_native_modules: PatchNativeModulesCommand,
 };

@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterAggConfigRange } from '../types';
 
 const BUTTON_SIZE = 40;

@@ -8,15 +8,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/common';
+import {
+  SavedFieldNotFound,
+  SavedFieldTypeInvalidForAgg,
+} from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField } from '../../../index_patterns/fields';
+import { isNestedField, IndexPatternField, DataViewField } from '../../../../../data_views/common';
 
 const filterByType = propFilter('type');
 
 export type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+
+export type FilterFieldFn = (field: DataViewField) => boolean;
+
 // TODO need to make a more explicit interface for this
 export type IFieldParamType = FieldParamType;
 
@@ -26,11 +32,18 @@ export class FieldParamType extends BaseParamType {
   filterFieldTypes: FieldTypes;
   onlyAggregatable: boolean;
 
+  /**
+   * Filter available fields by passing filter fn on a {@link DataViewField}
+   * If used, takes precedence over filterFieldTypes and other filter params
+   */
+  filterField?: FilterFieldFn;
+
   constructor(config: Record<string, any>) {
     super(config);
 
     this.filterFieldTypes = config.filterFieldTypes || '*';
     this.onlyAggregatable = config.onlyAggregatable !== false;
+    this.filterField = config.filterField;
 
     if (!config.write) {
       this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
@@ -47,13 +60,49 @@ export class FieldParamType extends BaseParamType {
           );
         }
 
-        if (field.scripted) {
+        if (field.type === KBN_FIELD_TYPES.MISSING) {
+          throw new SavedFieldNotFound(
+            i18n.translate(
+              'data.search.aggs.paramTypes.field.notFoundSavedFieldParameterErrorMessage',
+              {
+                defaultMessage:
+                  'The field "{fieldParameter}" associated with this object no longer exists in the data view. Please use another field.',
+                values: {
+                  fieldParameter: field.name,
+                },
+              }
+            )
+          );
+        }
+
+        const validField = this.getAvailableFields(aggConfig).find(
+          (f: any) => f.name === field.name
+        );
+
+        if (!validField) {
+          throw new SavedFieldTypeInvalidForAgg(
+            i18n.translate(
+              'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
+              {
+                defaultMessage:
+                  'Saved field "{fieldParameter}" of data view "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
+                values: {
+                  fieldParameter: field.name,
+                  aggType: aggConfig?.type?.title,
+                  indexPatternTitle: aggConfig.getIndexPattern().title,
+                },
+              }
+            )
+          );
+        }
+
+        if (validField.scripted) {
           output.params.script = {
-            source: field.script,
-            lang: field.lang,
+            source: validField.script,
+            lang: validField.lang,
           };
         } else {
-          output.params.field = field.name;
+          output.params.field = validField.name;
         }
       };
     }
@@ -69,28 +118,15 @@ export class FieldParamType extends BaseParamType {
       const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
-        throw new SavedObjectNotFound('index-pattern-field', fieldName);
+        return new IndexPatternField({
+          type: KBN_FIELD_TYPES.MISSING,
+          name: fieldName,
+          searchable: false,
+          aggregatable: false,
+        });
       }
 
-      const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
-      if (!validField) {
-        throw new Error(
-          i18n.translate(
-            'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
-            {
-              defaultMessage:
-                'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
-              values: {
-                fieldParameter: fieldName,
-                aggType: aggConfig?.type?.title,
-                indexPatternTitle: aggConfig.getIndexPattern().title,
-              },
-            }
-          )
-        );
-      }
-
-      return validField;
+      return field;
     };
   }
 
@@ -100,7 +136,11 @@ export class FieldParamType extends BaseParamType {
   getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
     const filteredFields = fields.filter((field: IndexPatternField) => {
-      const { onlyAggregatable, scriptable, filterFieldTypes } = this;
+      const { onlyAggregatable, scriptable, filterFieldTypes, filterField } = this;
+
+      if (filterField) {
+        return filterField(field);
+      }
 
       if (
         (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||

@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('multi metric', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('job creation loads the multi metric wizard for the source data', async () => {
@@ -204,7 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(
@@ -299,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
       await ml.testExecution.logTestStep('job cloning persists custom urls');
-      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+      await ml.customUrls.assertCustomUrlLabel(0, 'check-kibana-dashboard');
 
       await ml.testExecution.logTestStep('job cloning persists assigned calendars');
       await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
@@ -337,7 +337,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 
       await ml.testExecution.logTestStep(

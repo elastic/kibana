@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithAppDependencies } from './setup_environment';
@@ -71,6 +71,13 @@ type TestSubjects =
   | 'compressToggle'
   | 'fsRepositoryType'
   | 'locationInput'
+  | 'clientInput'
+  | 'containerInput'
+  | 'basePathInput'
+  | 'bucketInput'
+  | 'pathInput'
+  | 'uriInput'
+  | 'bufferSizeInput'
   | 'maxRestoreBytesInput'
   | 'maxSnapshotBytesInput'
   | 'nameInput'

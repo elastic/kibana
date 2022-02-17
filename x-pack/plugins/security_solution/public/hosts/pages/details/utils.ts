@@ -15,7 +15,7 @@ import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_t
 import * as i18n from '../translations';
 import { HostRouteSpyState } from '../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 
 export const type = hostsModel.HostsType.details;
@@ -27,6 +27,7 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
+  [HostsTableType.risk]: i18n.NAVIGATION_HOST_RISK_TITLE,
 };
 
 export const getBreadcrumbs = (
@@ -37,8 +38,9 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      href: getUrlForApp(APP_UI_ID, {
         path: !isEmpty(search[0]) ? search[0] : '',
+        deepLinkId: SecurityPageName.hosts,
       }),
     },
   ];
@@ -48,12 +50,14 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.detailName,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        href: getUrlForApp(APP_UI_ID, {
           path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+          deepLinkId: SecurityPageName.hosts,
         }),
       },
     ];
   }
+
   if (params.tabName != null) {
     const tabName = get('tabName', params);
     if (!tabName) return breadcrumb;

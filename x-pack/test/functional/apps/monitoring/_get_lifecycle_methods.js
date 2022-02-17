@@ -8,12 +8,28 @@
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security']);
+  const client = getService('es');
+  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security', 'common']);
   let _archive;
 
+  const deleteDataStream = async (index) => {
+    await client.transport.request(
+      {
+        method: 'DELETE',
+        path: `_data_stream/${index}`,
+      },
+      {
+        ignore: [404],
+      }
+    );
+  };
+
   return {
-    async setup(archive, { from, to, useSuperUser = false }) {
+    async setup(archive, { from, to, useSuperUser = false, useCreate = false }) {
       _archive = archive;
+      if (!useSuperUser) {
+        await security.testUser.setRoles(['monitoring_user', 'kibana_admin', 'test_monitoring']);
+      }
 
       const kibanaServer = getService('kibanaServer');
       const browser = getService('browser');
@@ -21,10 +37,10 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       // provide extra height for the page and avoid clusters sending telemetry during tests
       await browser.setWindowSize(1600, 1000);
 
-      await esArchiver.load(archive);
+      await esArchiver.load(archive, { useCreate });
       await kibanaServer.uiSettings.replace({});
 
-      await PageObjects.monitoring.navigateTo(useSuperUser);
+      await PageObjects.common.navigateToApp('monitoring');
 
       // pause autorefresh in the time filter because we don't wait any ticks,
       // and we don't want ES to log a warning when data gets wiped out
@@ -34,8 +50,8 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
     },
 
     async tearDown() {
-      await PageObjects.security.forceLogout();
-      await security.user.delete('basic_monitoring_user');
+      await deleteDataStream('.monitoring-*-8-*');
+      await security.testUser.restoreDefaults();
       return esArchiver.unload(_archive);
     },
   };

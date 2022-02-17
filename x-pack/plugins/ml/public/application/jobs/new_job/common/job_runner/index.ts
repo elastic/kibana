@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { JobRunner, ProgressSubscriber } from './job_runner';
+export type { ProgressSubscriber } from './job_runner';
+export { JobRunner } from './job_runner';

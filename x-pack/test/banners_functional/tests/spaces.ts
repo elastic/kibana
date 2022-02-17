@@ -20,11 +20,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('per-spaces banners', () => {
     before(async () => {
-      await esArchiver.load('banners/multispace');
+      await esArchiver.load('x-pack/test/functional/es_archives/banners/multispace');
     });
 
     after(async () => {
-      await esArchiver.unload('banners/multispace');
+      await esArchiver.unload('x-pack/test/functional/es_archives/banners/multispace');
     });
 
     before(async () => {

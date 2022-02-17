@@ -22,7 +22,8 @@ interface SetupDependencies {
 }
 
 export class AdvancedUiActionsServerPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies>
+{
   protected readonly actionFactories: ActionFactoryRegistry = new Map();
 
   constructor() {}
@@ -52,7 +53,7 @@ export class AdvancedUiActionsServerPlugin
 
     this.actionFactories.set(definition.id, {
       id: definition.id,
-      telemetry: definition.telemetry || (() => ({})),
+      telemetry: definition.telemetry || ((state, stats) => stats),
       inject: definition.inject || identity,
       extract:
         definition.extract ||

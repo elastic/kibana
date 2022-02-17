@@ -5,55 +5,19 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import type { ElasticsearchClient } from 'kibana/server';
 
-import { appContextService } from '../app_context';
-import { licenseService } from '../license';
+import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
 
-import { setupFleetServerIndexes } from './elastic_index';
-import { runFleetServerMigration } from './saved_object_migrations';
-
-let _isFleetServerSetup = false;
-let _isPending = false;
-let _status: Promise<any> | undefined;
-let _onResolve: (arg?: any) => void;
-
-export function isFleetServerSetup() {
-  return _isFleetServerSetup;
-}
-
-export async function awaitIfFleetServerSetupPending() {
-  if (!_isPending) {
-    return;
-  }
-
-  return _status;
-}
-
-export async function startFleetServerSetup() {
-  _isPending = true;
-  _status = new Promise((resolve) => {
-    _onResolve = resolve;
+/**
+ * Check if at least one fleet server is connected
+ */
+export async function hasFleetServers(esClient: ElasticsearchClient) {
+  const res = await esClient.search<{}, {}>({
+    index: FLEET_SERVER_SERVERS_INDEX,
+    ignore_unavailable: true,
   });
-  const logger = appContextService.getLogger();
-  if (!appContextService.hasSecurity()) {
-    // Fleet will not work if security is not enabled
-    logger?.warn('Fleet requires the security plugin to be enabled.');
-    return;
-  }
 
-  try {
-    // We need licence to be initialized before using the SO service.
-    await licenseService.getLicenseInformation$()?.pipe(first())?.toPromise();
-    await setupFleetServerIndexes();
-    await runFleetServerMigration();
-    _isFleetServerSetup = true;
-  } catch (err) {
-    logger?.error('Setup for central management of agents failed.');
-    logger?.error(err);
-  }
-  _isPending = false;
-  if (_onResolve) {
-    _onResolve();
-  }
+  // @ts-expect-error value is number | TotalHits
+  return res.hits.total.value > 0;
 }

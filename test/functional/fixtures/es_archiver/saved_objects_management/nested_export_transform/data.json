@@ -1,0 +1,91 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "test-export-transform:type_1-obj_1",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+        {
+          "id": "type_1-obj_2",
+          "name": "ref-1",
+          "type": "test-export-transform"
+        },
+        {
+          "id": "type_2-obj_1",
+          "name": "ref-2",
+          "type": "test-export-add"
+        }
+      ],
+      "test-export-transform": {
+        "enabled": true,
+        "title": "test_1-obj_1"
+      },
+      "type": "test-export-transform",
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "test-export-transform:type_1-obj_2",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
+      "test-export-transform": {
+        "enabled": true,
+        "title": "test_1-obj_2"
+      },
+      "type": "test-export-transform",
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "test-export-add:type_2-obj_1",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
+      "test-export-add": {
+        "title": "test_2-obj_1"
+      },
+      "type": "test-export-add",
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "test-export-add-dep:type_dep-obj_1",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+        {
+          "id": "type_2-obj_1",
+          "type": "test-export-add"
+        }
+      ],
+      "test-export-add-dep": {
+        "title": "type_dep-obj_1"
+      },
+      "type": "test-export-add-dep",
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
+  }
+}

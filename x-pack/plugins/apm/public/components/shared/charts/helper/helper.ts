@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { XYBrushArea } from '@elastic/charts';
+import { XYBrushEvent } from '@elastic/charts';
 import { History } from 'history';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { fromQuery, toQuery } from '../../Links/url_helpers';
+import { fromQuery, toQuery } from '../../links/url_helpers';
 
 export const onBrushEnd = ({
   x,
   history,
 }: {
-  x: XYBrushArea['x'];
+  x: XYBrushEvent['x'];
   history: History;
 }) => {
   if (x) {

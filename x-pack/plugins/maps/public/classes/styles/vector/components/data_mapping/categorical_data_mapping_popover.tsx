@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiFormRow, EuiIcon, EuiSwitch, EuiSwitchEvent, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
 interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   onChange: (updatedOptions: DynamicOptions) => void;
-  switchDisabled: boolean;
+  supportsFieldMetaFromLocalData: boolean;
 }
 
 export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -39,8 +39,8 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
             })}
             checked={props.fieldMetaOptions.isEnabled}
             onChange={onIsEnabledChange}
+            disabled={!props.supportsFieldMetaFromLocalData}
             compressed
-            disabled={props.switchDisabled}
           />{' '}
           <EuiToolTip
             content={

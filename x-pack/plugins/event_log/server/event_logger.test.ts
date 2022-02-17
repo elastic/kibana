@@ -31,9 +31,10 @@ describe('EventLogger', () => {
     service = new EventLogService({
       esContext,
       systemLogger,
-      config: { enabled: true, logEntries: true, indexEntries: true },
+      config: { logEntries: true, indexEntries: true },
       kibanaUUID: KIBANA_SERVER_UUID,
       savedObjectProviderRegistry: savedObjectProviderRegistryMock.create(),
+      kibanaVersion: '1.0.1',
     });
     eventLogger = service.getLogger({});
   });
@@ -86,6 +87,7 @@ describe('EventLogger', () => {
       },
       kibana: {
         server_uuid: '424-24-2424',
+        version: '1.0.1',
       },
     });
 
@@ -186,7 +188,7 @@ describe('EventLogger', () => {
     service.registerProviderActions('provider', ['action-a']);
     eventLogger = service.getLogger({});
 
-    eventLogger.logEvent(({ event: { PROVIDER: 'provider' } } as unknown) as IEvent);
+    eventLogger.logEvent({ event: { PROVIDER: 'provider' } } as unknown as IEvent);
     let message = await waitForLogMessage(systemLogger);
     expect(message).toMatch(/invalid event logged.*provider.*undefined.*/);
 

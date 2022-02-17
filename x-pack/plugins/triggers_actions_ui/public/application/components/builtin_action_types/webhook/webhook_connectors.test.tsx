@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
 
@@ -35,6 +35,8 @@ describe('WebhookActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
@@ -62,6 +64,8 @@ describe('WebhookActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -92,9 +96,43 @@ describe('WebhookActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'http:\\test',
+        headers: { 'content-type': 'text' },
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+    const wrapper = mountWithIntl(
+      <WebhookActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], method: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 });

@@ -21,11 +21,12 @@ describe('expression_functions', () => {
       context = {
         getSearchContext: () => input,
         getSearchSessionId: () => undefined,
+        getExecutionContext: () => undefined,
         types: {},
         variables: { test: 1 },
-        abortSignal: {} as any,
-        inspectorAdapters: {} as any,
-      };
+        abortSignal: {},
+        inspectorAdapters: {},
+      } as unknown as typeof context;
     });
 
     it('returns the selected variable', () => {

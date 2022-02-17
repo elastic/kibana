@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic",
+    "Austin Songer"
+  ],
+  "description": "Identifies when an AWS Route Table has been modified or deleted.",
+  "false_positives": [
+    "Route Table could be modified or deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table being modified from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule. Also automated processes that use Terraform may lead to false positives."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS Route Table Modified or Deleted",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:(ReplaceRoute or ReplaceRouteTableAssociation or\nDeleteRouteTable or DeleteRoute or DisassociateRouteTable) and event.outcome:success\n",
+  "references": [
+    "https://github.com/easttimor/aws-incident-response#network-routing",
+    "https://docs.datadoghq.com/security_platform/default_rules/cloudtrail-aws-route-table-modified",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceRoute.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceRouteTableAssociation",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRoute.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateRouteTable.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "e7cd5982-17c8-4959-874c-633acde7d426",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

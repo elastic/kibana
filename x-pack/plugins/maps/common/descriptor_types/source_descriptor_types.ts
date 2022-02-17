@@ -19,11 +19,6 @@ import {
   SOURCE_TYPES,
 } from '../constants';
 
-export type AttributionDescriptor = {
-  attributionText?: string;
-  attributionUrl?: string;
-};
-
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
@@ -32,6 +27,7 @@ export type AbstractSourceDescriptor = {
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS TMS layer id. Used when !isAutoSelect
   isAutoSelect: boolean;
+  lightModeDefault: string;
 };
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
@@ -47,6 +43,7 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   geoField?: string;
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
+  applyForceRefresh: boolean;
 };
 
 type AbstractAggDescriptor = {
@@ -95,8 +92,8 @@ export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   geoField: string;
-  filterByMapBounds?: boolean;
-  tooltipProperties?: string[];
+  filterByMapBounds: boolean;
+  tooltipProperties: string[];
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -117,10 +114,6 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
-export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
-  name: string;
-};
-
 // This is for symmetry with other sources only.
 // It takes no additional configuration since  all params are in the .yml.
 export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
@@ -129,14 +122,11 @@ export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;
   styles: string;
-  attributionText: string;
-  attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
-  AttributionDescriptor & {
-    urlTemplate: string;
-  };
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
+  urlTemplate: string;
+};
 
 export type MVTFieldDescriptor = {
   name: string;

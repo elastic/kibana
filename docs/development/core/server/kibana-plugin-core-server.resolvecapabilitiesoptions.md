@@ -16,5 +16,5 @@ export interface ResolveCapabilitiesOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [useDefaultCapabilities](./kibana-plugin-core-server.resolvecapabilitiesoptions.usedefaultcapabilities.md) | <code>boolean</code> | Indicates if capability switchers are supposed to return a default set of capabilities. |
+|  [useDefaultCapabilities](./kibana-plugin-core-server.resolvecapabilitiesoptions.usedefaultcapabilities.md) | boolean | Indicates if capability switchers are supposed to return a default set of capabilities. |
 

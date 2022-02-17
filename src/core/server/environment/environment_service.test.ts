@@ -76,9 +76,9 @@ describe('UuidService', () => {
     jest.clearAllMocks();
   });
 
-  describe('#setup()', () => {
+  describe('#preboot()', () => {
     it('calls resolveInstanceUuid with correct parameters', async () => {
-      await service.setup();
+      await service.preboot();
 
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
@@ -89,7 +89,7 @@ describe('UuidService', () => {
     });
 
     it('calls createDataFolder with correct parameters', async () => {
-      await service.setup();
+      await service.preboot();
 
       expect(createDataFolder).toHaveBeenCalledTimes(1);
       expect(createDataFolder).toHaveBeenCalledWith({
@@ -99,7 +99,7 @@ describe('UuidService', () => {
     });
 
     it('calls writePidFile with correct parameters', async () => {
-      await service.setup();
+      await service.preboot();
 
       expect(writePidFile).toHaveBeenCalledTimes(1);
       expect(writePidFile).toHaveBeenCalledWith({
@@ -109,14 +109,14 @@ describe('UuidService', () => {
     });
 
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      const setup = await service.setup();
+      const preboot = await service.preboot();
 
-      expect(setup.instanceUuid).toEqual('SOME_UUID');
+      expect(preboot.instanceUuid).toEqual('SOME_UUID');
     });
 
     describe('process warnings', () => {
       it('logs warnings coming from the process', async () => {
-        await service.setup();
+        await service.preboot();
 
         const warning = new Error('something went wrong');
         process.emit('warning', warning);
@@ -126,7 +126,7 @@ describe('UuidService', () => {
       });
 
       it('does not log deprecation warnings', async () => {
-        await service.setup();
+        await service.preboot();
 
         const warning = new Error('something went wrong');
         warning.name = 'DeprecationWarning';
@@ -134,6 +134,40 @@ describe('UuidService', () => {
 
         expect(logger.get('process').warn).not.toHaveBeenCalled();
       });
+    });
+
+    // TODO: From Nodejs v16 emitting an unhandledRejection will kill the process
+    describe.skip('unhandledRejection warnings', () => {
+      it('logs warn for an unhandeld promise rejected with an Error', async () => {
+        await service.preboot();
+
+        const err = new Error('something went wrong');
+        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an unhandled Promise rejection: Error: something went wrong\n.*at /
+        );
+      });
+
+      it('logs warn for an unhandeld promise rejected with a string', async () => {
+        await service.preboot();
+
+        const err = 'something went wrong';
+        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an unhandled Promise rejection: "something went wrong"/
+        );
+      });
+    });
+  });
+
+  describe('#setup()', () => {
+    it('returns the uuid resolved from resolveInstanceUuid', async () => {
+      await expect(service.preboot()).resolves.toEqual({ instanceUuid: 'SOME_UUID' });
+      expect(service.setup()).toEqual({ instanceUuid: 'SOME_UUID' });
     });
   });
 });

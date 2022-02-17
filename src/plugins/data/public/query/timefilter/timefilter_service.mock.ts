@@ -9,6 +9,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
+import { TimeRange } from '../../../common';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 
@@ -20,8 +21,8 @@ const createSetupContractMock = () => {
     getEnabledUpdated$: jest.fn(),
     getTimeUpdate$: jest.fn(),
     getRefreshIntervalUpdate$: jest.fn(),
-    getAutoRefreshFetch$: jest.fn(() => new Observable<unknown>()),
-    getFetch$: jest.fn(),
+    getAutoRefreshFetch$: jest.fn(() => new Observable<() => void>()),
+    getFetch$: jest.fn(() => new Observable<() => void>()),
     getTime: jest.fn(),
     setTime: jest.fn(),
     setRefreshInterval: jest.fn(),
@@ -34,6 +35,7 @@ const createSetupContractMock = () => {
     getBounds: jest.fn(),
     calculateBounds: jest.fn(),
     createFilter: jest.fn(),
+    createRelativeFilter: jest.fn(),
     getRefreshIntervalDefaults: jest.fn(),
     getTimeDefaults: jest.fn(),
     getAbsoluteTime: jest.fn(),
@@ -42,6 +44,7 @@ const createSetupContractMock = () => {
   const historyMock: jest.Mocked<TimeHistoryContract> = {
     add: jest.fn(),
     get: jest.fn(),
+    get$: jest.fn(() => new Observable<TimeRange[]>()),
   };
 
   const setupContract = {

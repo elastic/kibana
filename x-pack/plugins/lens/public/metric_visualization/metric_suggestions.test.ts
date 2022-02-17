@@ -31,6 +31,18 @@ describe('metric_suggestions', () => {
     };
   }
 
+  function staticValueCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        label: `Static value: ${columnId}`,
+        isBucketed: false,
+        isStaticValue: true,
+      },
+    };
+  }
+
   function dateCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -50,43 +62,77 @@ describe('metric_suggestions', () => {
     };
 
     expect(
-      ([
-        {
-          columns: [dateCol('a')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [strCol('foo'), strCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          layerId: 'l1',
-          isMultiRow: true,
-          columns: [numCol('bar')],
-          changeType: 'unchanged',
-        },
-        {
-          columns: [unknownCol(), numCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [numCol('bar'), numCol('baz')],
-          isMultiRow: false,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-      ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
-      )
+      (
+        [
+          {
+            columns: [dateCol('a')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [strCol('foo'), strCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            layerId: 'l1',
+            isMultiRow: true,
+            columns: [numCol('bar')],
+            changeType: 'unchanged',
+          },
+          {
+            columns: [unknownCol(), numCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [numCol('bar'), numCol('baz')],
+            isMultiRow: false,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([]))
     );
   });
+  test('does not suggest for a static value', () => {
+    const suggestion = getSuggestions({
+      table: {
+        columns: [staticValueCol('id')],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
 
+    expect(suggestion).toHaveLength(0);
+  });
+
+  test('does not suggest for a bucketed value', () => {
+    const col = {
+      columnId: 'id',
+      operation: {
+        dataType: 'number',
+        label: `Top values`,
+        isBucketed: true,
+      },
+    } as const;
+    const suggestion = getSuggestions({
+      table: {
+        columns: [col],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestion).toHaveLength(0);
+  });
   test('suggests a basic metric chart', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -106,8 +152,44 @@ describe('metric_suggestions', () => {
         "state": Object {
           "accessor": "bytes",
           "layerId": "l1",
+          "layerType": "data",
         },
         "title": "Avg bytes",
+      }
+    `);
+  });
+
+  test('suggests a basic metric chart for non bucketed date value', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        columns: [
+          {
+            columnId: 'id',
+            operation: {
+              dataType: 'date',
+              label: 'Last value of x',
+              isBucketed: false,
+            },
+          },
+        ],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion).toMatchInlineSnapshot(`
+      Object {
+        "previewIcon": [Function],
+        "score": 0.1,
+        "state": Object {
+          "accessor": "id",
+          "layerId": "l1",
+          "layerType": "data",
+        },
+        "title": "Last value of x",
       }
     `);
   });

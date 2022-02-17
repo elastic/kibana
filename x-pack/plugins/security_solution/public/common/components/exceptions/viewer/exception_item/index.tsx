@@ -16,12 +16,12 @@ import {
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedComments } from '../../helpers';
 import { getFormattedEntries } from '../helpers';
-import { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
-import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
+import type { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   &.comments--show {
@@ -30,20 +30,28 @@ const MyFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-interface ExceptionItemProps {
+export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
+  showName?: boolean;
+  showModified?: boolean;
+  disableActions: boolean;
+  'data-test-subj'?: string;
 }
 
 const ExceptionItemComponent = ({
+  disableActions,
   loadingItemIds,
   exceptionItem,
   commentsAccordionId,
   onDeleteException,
   onEditException,
+  showModified = false,
+  showName = false,
+  'data-test-subj': dataTestSubj,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -72,13 +80,13 @@ const ExceptionItemComponent = ({
     return getFormattedComments(exceptionItem.comments);
   }, [exceptionItem.comments]);
 
-  const disableDelete = useMemo((): boolean => {
+  const disableItemActions = useMemo((): boolean => {
     const foundItems = loadingItemIds.filter(({ id }) => id === exceptionItem.id);
     return foundItems.length > 0;
   }, [loadingItemIds, exceptionItem.id]);
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
@@ -86,9 +94,11 @@ const ExceptionItemComponent = ({
               showComments={showComments}
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
+              showModified={showModified}
+              showName={showName}
             />
             <ExceptionEntries
-              disableDelete={disableDelete}
+              disableActions={disableItemActions || disableActions}
               entries={entryItems}
               onDelete={handleDelete}
               onEdit={handleEdit}

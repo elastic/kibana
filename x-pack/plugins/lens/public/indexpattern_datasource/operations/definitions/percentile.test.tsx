@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { shallow, mount } from 'enzyme';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -14,9 +14,19 @@ import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from './index';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiRange } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { TermsIndexPatternColumn } from './terms';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -31,6 +41,11 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('percentile', () => {
@@ -53,7 +68,7 @@ describe('percentile', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: '23rd percentile of a',
           dataType: 'number',
@@ -63,7 +78,7 @@ describe('percentile', () => {
           params: {
             percentile: 23,
           },
-        },
+        } as PercentileIndexPatternColumn,
       },
     };
   });
@@ -76,6 +91,7 @@ describe('percentile', () => {
           displayName: 'bytes',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -92,6 +108,7 @@ describe('percentile', () => {
           displayName: 'response_time',
           type: 'histogram',
           esTypes: ['histogram'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -108,6 +125,7 @@ describe('percentile', () => {
           displayName: 'origin',
           type: 'string',
           esTypes: ['keyword'],
+          searchable: true,
           aggregatable: true,
         })
       ).toBeUndefined();
@@ -122,7 +140,8 @@ describe('percentile', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -178,6 +197,41 @@ describe('percentile', () => {
       expect(percentileColumn.params.percentile).toEqual(95);
       expect(percentileColumn.label).toEqual('95th percentile of test');
     });
+
+    it('should create a percentile from formula', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn(
+        {
+          indexPattern,
+          field: bytesField,
+          layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        },
+        { percentile: 75 }
+      );
+      expect(percentileColumn.dataType).toEqual('number');
+      expect(percentileColumn.params.percentile).toEqual(75);
+      expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
+
+    it('should create a percentile from formula with filter', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn(
+        {
+          indexPattern,
+          field: bytesField,
+          layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        },
+        { percentile: 75, kql: 'bytes > 100' }
+      );
+      expect(percentileColumn.dataType).toEqual('number');
+      expect(percentileColumn.params.percentile).toEqual(75);
+      expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
+      expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
   });
 
   describe('isTransferable', () => {
@@ -202,7 +256,8 @@ describe('percentile', () => {
               percentile: 95,
             },
           },
-          indexPattern
+          indexPattern,
+          {}
         )
       ).toBeTruthy();
     });
@@ -226,8 +281,7 @@ describe('percentile', () => {
       expect(input.prop('value')).toEqual('23');
     });
 
-    it('should update state on change', async () => {
-      jest.useFakeTimers();
+    it('should update state on change', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -239,19 +293,18 @@ describe('percentile', () => {
         />
       );
 
-      jest.runAllTimers();
-
       const input = instance
         .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+        .find(EuiRange);
 
-      await act(async () => {
-        input.prop('onChange')!({ target: { value: '27' } } as React.ChangeEvent<HTMLInputElement>);
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '27' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
       });
 
       instance.update();
-
-      jest.runAllTimers();
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -268,7 +321,7 @@ describe('percentile', () => {
       });
     });
 
-    it('should not update on invalid input, but show invalid value locally', async () => {
+    it('should not update on invalid input, but show invalid value locally', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -280,21 +333,18 @@ describe('percentile', () => {
         />
       );
 
-      jest.runAllTimers();
-
       const input = instance
         .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+        .find(EuiRange);
 
-      await act(async () => {
-        input.prop('onChange')!({
-          target: { value: '12.12' },
-        } as React.ChangeEvent<HTMLInputElement>);
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '12.12' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
       });
 
       instance.update();
-
-      jest.runAllTimers();
 
       expect(updateLayerSpy).not.toHaveBeenCalled();
 
@@ -307,7 +357,7 @@ describe('percentile', () => {
       expect(
         instance
           .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .prop('value')
       ).toEqual('12.12');
     });

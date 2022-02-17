@@ -1,7 +1,0 @@
-.lnsConfigPanel__addLayerBtn {
-  color: transparentize($euiColorMediumShade, .3);
-  // Remove EuiButton's default shadow to make button more subtle
-  // sass-lint:disable-block no-important
-  box-shadow: none !important;
-  border-color: $euiColorLightShade;
-}

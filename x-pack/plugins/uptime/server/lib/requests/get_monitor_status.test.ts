@@ -85,9 +85,13 @@ describe('getMonitorStatus', () => {
       filters: exampleFilter,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-10m',
         to: 'now-1m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     });
     expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -101,6 +105,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -137,13 +146,28 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-10m",
                       "lte": "now-1m",
                     },
@@ -185,7 +209,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -202,8 +226,12 @@ describe('getMonitorStatus', () => {
       uptimeEsClient,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
-      timerange: {
+      timespanRange: {
         from: 'now-2m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
     });
@@ -218,6 +246,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -254,13 +287,28 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-2m",
                       "lte": "now",
                     },
@@ -287,7 +335,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -298,8 +346,12 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      timerange: {
+      timespanRange: {
         from: 'now-15m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
       numTimes: 5,
@@ -372,6 +424,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -408,13 +465,28 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-15m",
                       "lte": "now",
                     },
@@ -474,7 +546,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -485,8 +557,12 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      timerange: {
+      timespanRange: {
         from: 'now-15m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
       numTimes: 5,
@@ -519,6 +595,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -555,13 +636,28 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-15m",
                       "lte": "now",
                     },
@@ -581,7 +677,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -618,9 +714,13 @@ describe('getMonitorStatus', () => {
       filters: undefined,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-12m',
         to: 'now-2m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     };
 
@@ -641,6 +741,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -677,13 +782,28 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-12m",
                       "lte": "now-2m",
                     },
@@ -694,7 +814,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
     expect(result.length).toBe(3);
@@ -810,9 +930,13 @@ describe('getMonitorStatus', () => {
       uptimeEsClient,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-10m',
         to: 'now-1m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     });
     expect(result.length).toBe(8);

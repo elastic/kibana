@@ -33,6 +33,12 @@ export interface SavedObjectsExportResultDetails {
     id: string;
     type: string;
   }>;
+  excludedObjectsCount: number;
+  excludedObjects: Array<{
+    id: string;
+    type: string;
+    reason?: string;
+  }>;
 }
 
 function isExportDetails(object: any): object is SavedObjectsExportResultDetails {

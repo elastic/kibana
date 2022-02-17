@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { privilegesFactory, PrivilegesService } from './privileges';
-export { featurePrivilegeIterator } from './feature_privilege_iterator';
+export type { PrivilegesService } from './privileges';
+export type { CasesSupportedOperations } from './feature_privilege_builder';
+export { privilegesFactory } from './privileges';

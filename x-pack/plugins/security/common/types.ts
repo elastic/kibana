@@ -8,8 +8,18 @@
 import type { AuthenticationProvider } from './model';
 
 export interface SessionInfo {
-  now: number;
-  idleTimeoutExpiration: number | null;
-  lifespanExpiration: number | null;
+  expiresInMs: number | null;
+  canBeExtended: boolean;
   provider: AuthenticationProvider;
+}
+
+export enum LogoutReason {
+  'SESSION_EXPIRED' = 'SESSION_EXPIRED',
+  'AUTHENTICATION_ERROR' = 'AUTHENTICATION_ERROR',
+  'LOGGED_OUT' = 'LOGGED_OUT',
+  'UNAUTHENTICATED' = 'UNAUTHENTICATED',
+}
+
+export interface SecurityCheckupState {
+  displayAlert: boolean;
 }

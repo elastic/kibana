@@ -7,6 +7,10 @@
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { getUsageCollection } from '../kibana_services';
+import { APP_ID } from '../../common/constants';
+
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -17,10 +21,11 @@ import {
   getIndexPatternService,
   getData,
   getShareService,
-  getNavigateToApp,
+  getCore,
 } from '../kibana_services';
-import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES, APP_ID, MAP_PATH } from '../../common/constants';
+import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,
@@ -31,23 +36,32 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     }),
   isCompatible: async () => !!getVisualizeCapabilities().show,
   getHref: async (context) => {
-    const url = await getMapsLink(context);
-    return url;
+    const { app, path } = await getMapsLink(context);
+
+    return getCore().application.getUrlForApp(app, {
+      path,
+      absolute: false,
+    });
   },
   execute: async (context) => {
-    const url = await getMapsLink(context);
-    const hash = url.split('#')[1];
+    const { app, path, state } = await getMapsLink(context);
 
-    getNavigateToApp()(APP_ID, {
-      path: `${MAP_PATH}/#${hash}`,
+    const usageCollection = getUsageCollection();
+    usageCollection?.reportUiCounter(
+      APP_ID,
+      'visualize_geo_field',
+      context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'
+    );
+
+    getCore().application.navigateToApp(app, {
+      path,
+      state,
     });
   },
 });
 
 const getMapsLink = async (context: VisualizeFieldContext) => {
   const indexPattern = await getIndexPatternService().get(context.indexPatternId);
-  const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);
-  const supportsClustering = field?.aggregatable;
   // create initial layer descriptor
   const hasTooltips =
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
@@ -55,7 +69,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     {
       id: uuid(),
       visible: true,
-      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+      type: LAYER_TYPE.MVT_VECTOR,
       sourceDescriptor: {
         id: uuid(),
         type: SOURCE_TYPES.ES_SEARCH,
@@ -63,17 +77,18 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
         label: indexPattern.title,
         indexPatternId: context.indexPatternId,
         geoField: context.fieldName,
-        scalingType: supportsClustering ? SCALING_TYPES.CLUSTERS : SCALING_TYPES.LIMIT,
+        scalingType: SCALING_TYPES.MVT,
       },
     },
   ];
 
-  const generator = getShareService().urlGenerators.getUrlGenerator(MAPS_APP_URL_GENERATOR);
-  const urlState: MapsUrlGeneratorState = {
+  const locator = getShareService().url.locators.get(MAPS_APP_LOCATOR) as MapsAppLocator;
+  const location = await locator.getLocation({
     filters: getData().query.filterManager.getFilters(),
     query: getData().query.queryString.getQuery(),
-    initialLayers,
+    initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
-  };
-  return generator.createUrl(urlState);
+  });
+
+  return location;
 };

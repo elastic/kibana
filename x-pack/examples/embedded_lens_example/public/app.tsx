@@ -18,32 +18,32 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
-import { CoreStart } from 'kibana/public';
-import {
+
+import type { DataView } from 'src/plugins/data_views/public';
+import type { CoreStart } from 'kibana/public';
+import type { StartDependencies } from './plugin';
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
+  LensEmbeddableInput,
+  FormulaPublicApi,
+  DateHistogramIndexPatternColumn,
 } from '../../../plugins/lens/public';
-import { StartDependencies } from './plugin';
+
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
+import { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
 function getLensAttributes(
-  defaultIndexPattern: IndexPattern,
-  color: string
+  color: string,
+  dataView: DataView,
+  formula: FormulaPublicApi
 ): TypedLensByValueInput['attributes'] {
-  const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1', 'col2'],
+  const baseLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1'],
     columns: {
-      col2: {
-        dataType: 'number',
-        isBucketed: false,
-        label: 'Count of records',
-        operationType: 'count',
-        scale: 'ratio',
-        sourceField: 'Records',
-      },
       col1: {
         dataType: 'date',
         isBucketed: true,
@@ -51,10 +51,17 @@ function getLensAttributes(
         operationType: 'date_histogram',
         params: { interval: 'auto' },
         scale: 'interval',
-        sourceField: defaultIndexPattern.timeFieldName!,
-      },
+        sourceField: dataView.timeFieldName!,
+      } as DateHistogramIndexPatternColumn,
     },
   };
+
+  const dataLayer = formula.insertOrReplaceFormulaColumn(
+    'col2',
+    { formula: 'count()' },
+    baseLayer,
+    dataView
+  );
 
   const xyConfig: XYState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -64,6 +71,7 @@ function getLensAttributes(
       {
         accessors: ['col2'],
         layerId: 'layer1',
+        layerType: 'data',
         seriesType: 'bar_stacked',
         xAccessor: 'col1',
         yConfig: [{ forAccessor: 'col2', color }],
@@ -80,12 +88,12 @@ function getLensAttributes(
     title: 'Prefilled from example app',
     references: [
       {
-        id: defaultIndexPattern.id!,
+        id: dataView.id!,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: defaultIndexPattern.id!,
+        id: dataView.id!,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
@@ -94,7 +102,7 @@ function getLensAttributes(
       datasourceStates: {
         indexpattern: {
           layers: {
-            layer1: dataLayer,
+            layer1: dataLayer!,
           },
         },
       },
@@ -108,16 +116,22 @@ function getLensAttributes(
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  defaultIndexPattern: IndexPattern | null;
+  defaultDataView: DataView;
+  formula: FormulaPublicApi;
 }) => {
   const [color, setColor] = useState('green');
   const [isLoading, setIsLoading] = useState(false);
-  const LensComponent = props.plugins.lens.EmbeddableComponent;
-
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [time, setTime] = useState({
     from: 'now-5d',
     to: 'now',
   });
+
+  const LensComponent = props.plugins.lens.EmbeddableComponent;
+  const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
+
+  const attributes = getLensAttributes(color, props.defaultDataView, props.formula);
+
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -139,63 +153,137 @@ export const App = (props: {
               the series which causes Lens to re-render. The Edit button will take the current
               configuration and navigate to a prefilled editor.
             </p>
-            {props.defaultIndexPattern && props.defaultIndexPattern.isTimeBased() ? (
-              <>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      isLoading={isLoading}
-                      onClick={() => {
-                        // eslint-disable-next-line no-bitwise
-                        const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                        setColor(newColor);
-                      }}
-                    >
-                      Change color
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      isDisabled={!props.plugins.lens.canUseEditor()}
-                      onClick={() => {
-                        props.plugins.lens.navigateToPrefilledEditor({
-                          id: '',
-                          timeRange: time,
-                          attributes: getLensAttributes(props.defaultIndexPattern!, color),
-                        });
-                        // eslint-disable-next-line no-bitwise
-                        const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                        setColor(newColor);
-                      }}
-                    >
-                      Edit
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <LensComponent
-                  id=""
-                  style={{ height: 500 }}
-                  timeRange={time}
-                  attributes={getLensAttributes(props.defaultIndexPattern, color)}
-                  onLoad={(val) => {
-                    setIsLoading(val);
+
+            <EuiFlexGroup wrap>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="lns-example-change-color"
+                  isLoading={isLoading}
+                  onClick={() => {
+                    // eslint-disable-next-line no-bitwise
+                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                    setColor(newColor);
                   }}
-                  onBrushEnd={({ range }) => {
+                >
+                  Change color
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Open lens in new tab"
+                  isDisabled={!props.plugins.lens.canUseEditor()}
+                  onClick={() => {
+                    props.plugins.lens.navigateToPrefilledEditor(
+                      {
+                        id: '',
+                        timeRange: time,
+                        attributes,
+                      },
+                      {
+                        openInNewTab: true,
+                      }
+                    );
+                    // eslint-disable-next-line no-bitwise
+                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                    setColor(newColor);
+                  }}
+                >
+                  Edit in Lens (new tab)
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Open lens in same tab"
+                  data-test-subj="lns-example-open-editor"
+                  isDisabled={!props.plugins.lens.canUseEditor()}
+                  onClick={() => {
+                    props.plugins.lens.navigateToPrefilledEditor(
+                      {
+                        id: '',
+                        timeRange: time,
+                        attributes,
+                      },
+                      {
+                        openInNewTab: false,
+                      }
+                    );
+                  }}
+                >
+                  Edit in Lens (same tab)
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Save visualization into library or embed directly into any dashboard"
+                  data-test-subj="lns-example-save"
+                  isDisabled={!attributes}
+                  onClick={() => {
+                    setIsSaveModalVisible(true);
+                  }}
+                >
+                  Save Visualization
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Change time range"
+                  data-test-subj="lns-example-change-time-range"
+                  isDisabled={!attributes}
+                  onClick={() => {
                     setTime({
-                      from: new Date(range[0]).toISOString(),
-                      to: new Date(range[1]).toISOString(),
+                      from: '2015-09-18T06:31:44.000Z',
+                      to: '2015-09-23T18:31:44.000Z',
                     });
                   }}
-                  onFilter={(_data) => {
-                    // call back event for on filter event
-                  }}
-                  onTableRowClick={(_data) => {
-                    // call back event for on table row click event
-                  }}
-                />
-              </>
-            ) : (
-              <p>This demo only works if your default index pattern is set and time based</p>
+                >
+                  Change time range
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <LensComponent
+              id=""
+              withDefaultActions
+              style={{ height: 500 }}
+              timeRange={time}
+              attributes={attributes}
+              onLoad={(val) => {
+                setIsLoading(val);
+              }}
+              onBrushEnd={({ range }) => {
+                setTime({
+                  from: new Date(range[0]).toISOString(),
+                  to: new Date(range[1]).toISOString(),
+                });
+              }}
+              onFilter={(_data) => {
+                // call back event for on filter event
+              }}
+              onTableRowClick={(_data) => {
+                // call back event for on table row click event
+              }}
+              viewMode={ViewMode.VIEW}
+              extraActions={[
+                {
+                  id: 'testAction',
+                  type: 'link',
+                  getIconType: () => 'save',
+                  async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+                    return true;
+                  },
+                  execute: async (context: ActionExecutionContext<object>) => {
+                    alert('I am an extra action');
+                    return;
+                  },
+                  getDisplayName: () => 'Extra action',
+                },
+              ]}
+            />
+            {isSaveModalVisible && (
+              <LensSaveModalComponent
+                initialInput={attributes as unknown as LensEmbeddableInput}
+                onSave={() => {}}
+                onClose={() => setIsSaveModalVisible(false)}
+              />
             )}
           </EuiPageContentBody>
         </EuiPageContent>

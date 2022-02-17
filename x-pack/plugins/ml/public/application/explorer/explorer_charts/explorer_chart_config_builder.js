@@ -19,7 +19,7 @@ import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_typ
 
 // Builds the chart configuration for the provided anomaly record, returning
 // an object with properties used for the display (series function and field, aggregation interval etc),
-// and properties for the data feed used for the job (index pattern, time field etc).
+// and properties for the datafeed used for the job (indices, time field etc).
 export function buildConfig(record) {
   const job = mlJobService.getJob(record.job_id);
   const detectorIndex = record.detector_index;

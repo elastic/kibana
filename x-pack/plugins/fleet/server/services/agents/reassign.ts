@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 
 import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { AgentReassignmentError } from '../../errors';
+import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import {
   getAgentDocuments,
@@ -41,7 +41,7 @@ export async function reassignAgent(
     policy_revision: null,
   });
 
-  await createAgentAction(soClient, esClient, {
+  await createAgentAction(esClient, {
     agent_id: agentId,
     created_at: new Date().toISOString(),
     type: 'POLICY_REASSIGN',
@@ -56,21 +56,24 @@ export async function reassignAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new AgentReassignmentError(
-      `Cannot reassign an agent from managed agent policy ${agentPolicy.id}`
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
     );
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (newAgentPolicy?.is_managed) {
-    throw new AgentReassignmentError(
-      `Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
     );
   }
 
   return true;
 }
 
+function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
+}
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -89,7 +92,7 @@ export async function reassignAgents(
   } else if ('agentIds' in options) {
     const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
     for (const agentResult of givenAgentsResults) {
-      if (agentResult.found === false) {
+      if (isMgetDoc(agentResult) && agentResult.found === false) {
         outgoingErrors[agentResult._id] = new AgentReassignmentError(
           `Cannot find agent ${agentResult._id}`
         );
@@ -159,7 +162,6 @@ export async function reassignAgents(
 
   const now = new Date().toISOString();
   await bulkCreateAgentActions(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,

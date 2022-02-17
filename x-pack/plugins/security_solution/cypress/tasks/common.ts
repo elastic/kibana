@@ -7,6 +7,7 @@
 
 import { esArchiverResetKibana } from './es_archiver';
 import { RuleEcs } from '../../common/ecs/rule';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
 
@@ -91,34 +92,12 @@ export const cleanKibana = () => {
               type: 'alert',
             },
           },
-          {
-            match: {
-              'alert.alertTypeId': 'siem.signals',
-            },
-          },
-          {
-            match: {
-              'alert.consumer': 'siem',
-            },
-          },
         ],
       },
     },
   });
 
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'cases',
-            },
-          },
-        ],
-      },
-    },
-  });
+  deleteCases();
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
@@ -138,7 +117,7 @@ export const cleanKibana = () => {
     'POST',
     `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
     {
       query: {
         match_all: {},
@@ -149,4 +128,42 @@ export const cleanKibana = () => {
   esArchiverResetKibana();
 };
 
+export const deleteCases = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
+};
+
+export const postDataView = (indexPattern: string) => {
+  cy.request({
+    method: 'POST',
+    url: `/api/index_patterns/index_pattern`,
+    body: {
+      index_pattern: {
+        fieldAttrs: '{}',
+        title: indexPattern,
+        timeFieldName: '@timestamp',
+        fields: '{}',
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
 export const scrollToBottom = () => cy.scrollTo('bottom');
+
+export const waitForPageToBeLoaded = () => {
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
+};

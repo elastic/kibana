@@ -11,10 +11,10 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import { LogMeta } from '@kbn/logging';
-import { EcsEvent, Logger } from '../../logging';
+import { Logger } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
+import type { KibanaRequestState } from '../router';
 
-const ECS_VERSION = '1.7.0';
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
@@ -44,7 +44,7 @@ function cloneAndFilterHeaders(headers?: HapiHeaders) {
  *
  * @internal
  */
-export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
+export function getEcsResponseLog(request: Request, log: Logger) {
   const { path, response } = request;
   const method = request.method.toUpperCase();
 
@@ -66,9 +66,9 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
   const bytes = getResponsePayloadBytes(response, log);
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
-  const meta: EcsEvent = {
-    ecs: { version: ECS_VERSION },
-    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+  const traceId = (request.app as KibanaRequestState).traceId;
+
+  const meta: LogMeta = {
     client: {
       ip: request.info.remoteAddress,
     },
@@ -77,7 +77,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         method,
         mime_type: request.mime,
         referrer: request.info.referrer,
-        // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
+        // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: requestHeaders,
       },
       response: {
@@ -85,7 +85,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
           bytes,
         },
         status_code,
-        // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
+        // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: responseHeaders,
         // responseTime is a custom non-ECS field
         responseTime: !isNaN(responseTime) ? responseTime : undefined,
@@ -98,7 +98,11 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
     user_agent: {
       original: request.headers['user-agent'],
     },
+    trace: traceId ? { id: traceId } : undefined,
   };
 
-  return meta;
+  return {
+    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+    meta,
+  };
 }

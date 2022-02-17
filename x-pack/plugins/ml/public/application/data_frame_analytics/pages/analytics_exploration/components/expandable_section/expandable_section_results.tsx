@@ -8,17 +8,17 @@
 import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
 
 import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
-import { HITS_TOTAL_RELATION } from '../../../../../../../common/types/es_client';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
@@ -77,7 +77,7 @@ const getResultsSectionHeaderItems = (
               defaultMessage="Total docs"
             />
           ),
-          value: `${rowCountRelation === HITS_TOTAL_RELATION.GTE ? '>' : ''}${rowCount}`,
+          value: `${rowCountRelation === ES_CLIENT_TOTAL_HITS_RELATION.GTE ? '>' : ''}${rowCount}`,
         },
         ...(colorRange !== undefined
           ? [
@@ -104,7 +104,7 @@ const getResultsSectionHeaderItems = (
 interface ExpandableSectionResultsProps {
   colorRange?: ReturnType<typeof useColorRange>;
   indexData: UseIndexDataReturnType;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   jobConfig?: DataFrameAnalyticsConfig;
   needsDestIndexPattern: boolean;
   searchQuery: SavedSearchQuery;

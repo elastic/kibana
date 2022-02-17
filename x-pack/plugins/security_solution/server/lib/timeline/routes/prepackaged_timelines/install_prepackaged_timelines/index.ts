@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../../../common/constants';
 
 import { SetupPlugins } from '../../../../../plugin';
 import { ConfigType } from '../../../../../config';
-import { validate } from '../../../../../../common/validate';
 
-import { buildSiemResponse, transformError } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { installPrepackagedTimelines } from './helpers';
 

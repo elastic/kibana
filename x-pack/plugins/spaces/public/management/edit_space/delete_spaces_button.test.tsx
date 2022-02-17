@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { notificationServiceMock } from 'src/core/public/mocks';
 
 import type { SpacesManager } from '../../spaces_manager';
@@ -29,7 +29,7 @@ describe('DeleteSpacesButton', () => {
     const wrapper = shallowWithIntl(
       <DeleteSpacesButton
         space={space}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         onDelete={jest.fn()}
         notifications={notifications}
       />

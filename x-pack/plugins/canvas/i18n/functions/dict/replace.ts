@@ -27,8 +27,7 @@ export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
     flags: i18n.translate('xpack.canvas.functions.replace.args.flagsHelpText', {
       defaultMessage: 'Specify flags. See {url}.',
       values: {
-        url:
-          'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
       },
     }),
     replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {

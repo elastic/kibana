@@ -21,6 +21,7 @@ import {
 } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
  * Defines routes that are common to various authentication mechanisms.
@@ -40,7 +41,7 @@ export function defineCommonRoutes({
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
         // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
-        options: { authRequired: false },
+        options: { authRequired: false, tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW] },
       },
       async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;

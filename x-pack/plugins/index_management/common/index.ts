@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { API_BASE_PATH, BASE_PATH } from './constants';
+// TODO: https://github.com/elastic/kibana/issues/110892
+/* eslint-disable @kbn/eslint/no_export_all */
+
+export { API_BASE_PATH, BASE_PATH, MAJOR_VERSION } from './constants';
 
 export { getTemplateParameter } from './lib';
 

@@ -14,7 +14,6 @@ import { Subject } from 'rxjs';
 function createRoot() {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'test-console': {
           type: 'console',
@@ -49,6 +48,7 @@ describe('logging service', () => {
       mockConsoleLog = jest.spyOn(global.console, 'log');
       root = createRoot();
 
+      await root.preboot();
       await root.setup();
     }, 30000);
 
@@ -151,6 +151,7 @@ describe('logging service', () => {
       mockConsoleLog = jest.spyOn(global.console, 'log');
       root = kbnTestServer.createRoot();
 
+      await root.preboot();
       setup = await root.setup();
       setup.logging.configure(['plugins', 'myplugin'], loggingConfig$);
     }, 30000);

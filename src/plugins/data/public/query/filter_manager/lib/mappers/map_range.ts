@@ -7,14 +7,9 @@
  */
 
 import { get, hasIn } from 'lodash';
-import {
-  FilterValueFormatter,
-  RangeFilter,
-  isScriptedRangeFilter,
-  isRangeFilter,
-  Filter,
-  FILTERS,
-} from '../../../../../common';
+import { RangeFilter, isScriptedRangeFilter, isRangeFilter, Filter, FILTERS } from '@kbn/es-query';
+
+import { FilterValueFormatter } from '../../../../../common';
 
 const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: FilterValueFormatter) => {
@@ -27,14 +22,15 @@ const getFormattedValueFn = (left: any, right: any) => {
   };
 };
 
-const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
-const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
+const getFirstRangeKey = (filter: RangeFilter) =>
+  filter.query.range && Object.keys(filter.query.range)[0];
+const getRangeByKey = (filter: RangeFilter, key: string) => get(filter.query, ['range', key]);
 
 function getParams(filter: RangeFilter) {
   const isScriptedRange = isScriptedRangeFilter(filter);
   const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
   const params: any = isScriptedRange
-    ? get(filter, 'script.script.params')
+    ? get(filter.query, 'script.script.params')
     : getRangeByKey(filter, key);
 
   let left = hasIn(params, 'gte') ? params.gte : params.gt;

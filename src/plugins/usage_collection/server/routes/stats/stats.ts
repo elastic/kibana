@@ -15,7 +15,6 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
-  ISavedObjectsRepository,
   KibanaRequest,
   MetricsServiceSetup,
   SavedObjectsClientContract,
@@ -23,12 +22,13 @@ import {
   ServiceStatusLevels,
 } from '../../../../../core/server';
 import { CollectorSet } from '../../collector';
-
-const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMessage', {
-  defaultMessage: 'Stats are not ready yet. Please try again later.',
-});
-
 const SNAPSHOT_REGEX = /-snapshot/i;
+
+interface UsageObject {
+  kibana?: UsageObject;
+  xpack?: UsageObject;
+  [key: string]: unknown | UsageObject;
+}
 
 export function registerStatsRoute({
   router,
@@ -55,15 +55,15 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest
-  ): Promise<any> => {
+  ): Promise<UsageObject> => {
     const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
     return collectorSet.toObject(usage);
   };
 
   const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
-    const { body } = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
+    const body = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
     const { cluster_uuid: uuid } = body;
     return uuid;
   };
@@ -95,18 +95,10 @@ export function registerStatsRoute({
         const { asCurrentUser } = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
 
-        if (shouldGetUsage) {
-          const collectorsReady = await collectorSet.areAllCollectorsReady();
-          if (!collectorsReady) {
-            return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
-          }
-        }
-
-        const usagePromise = shouldGetUsage
-          ? getUsage(asCurrentUser, savedObjectsClient, req)
-          : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([
-          usagePromise,
+          shouldGetUsage
+            ? getUsage(asCurrentUser, savedObjectsClient, req)
+            : Promise.resolve<UsageObject>({}),
           getClusterUuid(asCurrentUser),
         ]);
 
@@ -138,7 +130,7 @@ export function registerStatsRoute({
             }
 
             return accum;
-          }, {} as any);
+          }, {} as UsageObject);
 
           extended = {
             usage: modifiedUsage,

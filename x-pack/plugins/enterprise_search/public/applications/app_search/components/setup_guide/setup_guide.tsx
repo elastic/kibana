@@ -9,23 +9,17 @@ import React from 'react';
 
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import { DOCS_PREFIX } from '../../routes';
 
 import GettingStarted from './assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (
-  <SetupGuideLayout
-    productName={APP_SEARCH_PLUGIN.NAME}
-    productEuiIcon="logoAppSearch"
-    standardAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-standard`}
-    elasticsearchNativeAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`}
-  >
+  <SetupGuideLayout productName={APP_SEARCH_PLUGIN.NAME} productEuiIcon="logoAppSearch">
     <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
     <SendTelemetry action="viewed" metric="setup_guide" />
 
@@ -50,7 +44,7 @@ export const SetupGuide: React.FC = () => (
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.appSearch.setupGuide.description"
-          defaultMessage="Elastic App Search provides tools to design and deploy a powerful search to your websites and mobile applications."
+          defaultMessage="Get tools to design and deploy a powerful search to your websites and mobile applications."
         />
       </p>
     </EuiTitle>

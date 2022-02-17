@@ -1,0 +1,18 @@
+{
+    "extends": "../../../../tsconfig.base.json",
+    "include": [
+      "**/*"
+    ],
+    "exclude": [
+      "target/**/*"
+    ],
+    "compilerOptions": {
+      "outDir": "target/types",
+      "types": [
+        "cypress",
+        "node"
+      ],
+      "resolveJsonModule": true,
+      "target": "ES2019",
+    },
+  }

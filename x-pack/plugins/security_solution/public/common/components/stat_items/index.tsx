@@ -222,7 +222,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <InspectButtonContainer>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiFlexGroup gutterSize={'none'}>
               <EuiFlexItem>
                 <EuiTitle size="xxxs">

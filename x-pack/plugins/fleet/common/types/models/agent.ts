@@ -66,15 +66,6 @@ export interface AgentPolicyAction extends NewAgentAction {
   ack_data?: any;
 }
 
-// Make policy change action renaming BWC with agent version <= 7.9
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type AgentPolicyActionV7_9 = Omit<AgentPolicyAction, 'type' | 'data'> & {
-  type: 'CONFIG_CHANGE';
-  data: {
-    config: FullAgentPolicy;
-  };
-};
-
 interface CommonAgentActionSOAttributes {
   type: AgentActionType;
   sent_at?: string;
@@ -92,38 +83,6 @@ export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
   policy_revision: number;
 };
 export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
-
-export interface NewAgentEvent {
-  type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
-  subtype: // State
-  | 'RUNNING'
-    | 'STARTING'
-    | 'IN_PROGRESS'
-    | 'CONFIG'
-    | 'FAILED'
-    | 'STOPPING'
-    | 'STOPPED'
-    | 'DEGRADED'
-    | 'UPDATING'
-    // Action results
-    | 'DATA_DUMP'
-    // Actions
-    | 'ACKNOWLEDGED'
-    | 'UNKNOWN';
-  timestamp: string;
-  message: string;
-  payload?: any;
-  agent_id: string;
-  action_id?: string;
-  policy_id?: string;
-  stream_id?: string;
-}
-
-export interface AgentEvent extends NewAgentEvent {
-  id: string;
-}
-
-export type AgentEventSOAttributes = NewAgentEvent;
 
 export interface AgentMetadata {
   [x: string]: any;
@@ -149,14 +108,12 @@ interface AgentBase {
 
 export interface Agent extends AgentBase {
   id: string;
-  current_error_events: AgentEvent[];
   access_api_key?: string;
-  status?: string;
+  status?: AgentStatus;
   packages: string[];
 }
 
 export interface AgentSOAttributes extends AgentBase {
-  current_error_events?: string;
   packages?: string[];
 }
 

@@ -20,7 +20,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -101,7 +101,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               // Ensure AAD isn't broken
               await checkAAD({
@@ -157,7 +157,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -217,7 +217,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -273,7 +273,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               break;
             default:
@@ -332,7 +332,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
-                expect(e.status).to.eql(404);
+                expect(e.meta.statusCode).to.eql(404);
               }
               // Ensure AAD isn't broken
               await checkAAD({

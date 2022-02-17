@@ -8,9 +8,9 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SectionLoading, attemptToURIDecode } from '../../shared_imports';
+import { PageLoading, attemptToURIDecode } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateCreate } from '../component_template_create';
 
@@ -24,13 +24,16 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
 
   const { toasts, api } = useComponentTemplatesContext();
 
-  const { error, data: componentTemplateToClone, isLoading } = api.useLoadComponentTemplate(
-    decodedSourceName
-  );
+  const {
+    error,
+    data: componentTemplateToClone,
+    isLoading,
+  } = api.useLoadComponentTemplate(decodedSourceName);
 
   useEffect(() => {
     if (error && !isLoading) {
-      toasts.addError(error, {
+      // Toasts expects a generic Error object, which is typed as having a required name property.
+      toasts.addError({ ...error, name: '' } as Error, {
         title: i18n.translate('xpack.idxMgmt.componentTemplateClone.loadComponentTemplateTitle', {
           defaultMessage: `Error loading component template '{sourceComponentTemplateName}'.`,
           values: { sourceComponentTemplateName },
@@ -42,12 +45,12 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
 
   if (isLoading) {
     return (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.componentTemplateEdit.loadingDescription"
           defaultMessage="Loading component template…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else {
     // We still show the create form (unpopulated) even if we were not able to load the

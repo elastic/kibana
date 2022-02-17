@@ -24,6 +24,7 @@ describe('default route provider', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import {
   LogEntryAfterCursor,
@@ -29,6 +29,7 @@ export const createGetLogEntriesQuery = (
   timestampField: string,
   tiebreakerField: string,
   fields: string[],
+  runtimeMappings?: estypes.MappingRuntimeFields,
   query?: JsonObject,
   highlightTerm?: string
 ): estypes.AsyncSearchSubmitRequest => {
@@ -51,8 +52,8 @@ export const createGetLogEntriesQuery = (
           ],
         },
       },
-      // @ts-expect-error @elastic/elasticsearch doesn't declare body.fields on AsyncSearchSubmitRequest
       fields,
+      runtime_mappings: runtimeMappings,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
       ...createSearchAfterClause(cursor),
@@ -85,7 +86,7 @@ const createHighlightClause = (highlightQuery: JsonObject | undefined, fields: s
   highlightQuery
     ? {
         highlight: {
-          boundary_scanner: 'word',
+          boundary_scanner: 'word' as const,
           fields: fields.reduce(
             (highlightFieldConfigs, fieldName) => ({
               ...highlightFieldConfigs,

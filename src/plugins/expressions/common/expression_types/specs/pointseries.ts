@@ -7,7 +7,7 @@
  */
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { Datatable } from './datatable';
+import { Datatable, DatatableRow } from './datatable';
 import { ExpressionValueRender } from './render';
 
 const name = 'pointseries';
@@ -31,7 +31,7 @@ export interface PointSeriesColumn {
  */
 export type PointSeriesColumns = Record<PointSeriesColumnName, PointSeriesColumn> | {};
 
-export type PointSeriesRow = Record<string, any>;
+export type PointSeriesRow = DatatableRow;
 
 /**
  * A `PointSeries` is a unique structure that represents dots on a chart.

@@ -5,25 +5,24 @@
  * 2.0.
  */
 
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { Type, LanguageOrUndefined, Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
-  LanguageOrUndefined,
   QueryOrUndefined,
-  Type,
   SavedIdOrUndefined,
   IndexOrUndefined,
-  Language,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
-import { BadRequestError } from '../errors/bad_request_error';
 import { QueryFilter } from './types';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface GetFilterArgs {
   type: Type;
@@ -67,9 +66,8 @@ export const getFilter = async ({
     if (savedId != null && index != null) {
       try {
         // try to get the saved object first
-        const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
-          'query',
-          savedId
+        const savedObject = await withSecuritySpan('getSavedFilter', () =>
+          services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
         return getQueryFilter(
           savedObject.attributes.query.query,
@@ -96,9 +94,7 @@ export const getFilter = async ({
 
   switch (type) {
     case 'threat_match':
-    case 'threshold': {
-      return savedId != null ? savedQueryFilter() : queryFilter();
-    }
+    case 'threshold':
     case 'query': {
       return queryFilter();
     }

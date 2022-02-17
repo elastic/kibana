@@ -11,7 +11,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   mockGlobalState,
-  apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
@@ -29,13 +28,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 describe('NewTemplateTimeline', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mockClosePopover = jest.fn();
   const mockTitle = 'NEW_TIMELINE';
   let wrapper: ReactWrapper;

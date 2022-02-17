@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-  ToolingLog,
-  createRecursiveSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, createRecursiveSerializer } from '@kbn/dev-utils';
+
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
@@ -101,7 +98,6 @@ const testRecords = [
 
 it('indexes documents using the bulk client helper', async () => {
   const client = new MockClient();
-  client.helpers.bulk.mockImplementation(async () => {});
 
   const progress = new Progress();
   const stats = createStats('test', log);
@@ -185,11 +181,11 @@ it('indexes documents using the bulk client helper', async () => {
       "results": Array [
         Object {
           "type": "return",
-          "value": Promise {},
+          "value": undefined,
         },
         Object {
           "type": "return",
-          "value": Promise {},
+          "value": undefined,
         },
       ],
     }

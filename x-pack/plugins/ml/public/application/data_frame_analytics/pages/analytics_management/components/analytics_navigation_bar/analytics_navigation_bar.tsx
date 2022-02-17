@@ -31,13 +31,7 @@ export const AnalyticsNavigationBar: FC<{
           defaultMessage: 'Jobs',
         }),
         path: '/data_frame_analytics',
-      },
-      {
-        id: 'models',
-        name: i18n.translate('xpack.ml.dataframe.modelsTabLabel', {
-          defaultMessage: 'Models',
-        }),
-        path: '/data_frame_analytics/models',
+        testSubj: 'mlAnalyticsJobsTab',
       },
     ];
     if (jobId !== undefined || modelId !== undefined) {
@@ -47,6 +41,7 @@ export const AnalyticsNavigationBar: FC<{
           defaultMessage: 'Map',
         }),
         path: '/data_frame_analytics/map',
+        testSubj: '',
       });
     }
     return navTabs;
@@ -67,6 +62,7 @@ export const AnalyticsNavigationBar: FC<{
             key={`tab-${tab.id}`}
             isSelected={tab.id === selectedTabId}
             onClick={onTabClick.bind(null, tab)}
+            data-test-subj={tab.testSubj}
           >
             {tab.name}
           </EuiTab>

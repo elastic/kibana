@@ -6,32 +6,31 @@
  */
 
 import expect from '@kbn/expect';
-import gql from 'graphql-tag';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { persistTimelineNoteMutation } from '../../../../../plugins/security_solution/public/timelines/containers/notes/persist.gql_query';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
 
   describe('Note - Saved Objects', () => {
-    beforeEach(() => esArchiver.load('empty_kibana'));
-    afterEach(() => esArchiver.unload('empty_kibana'));
+    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
     describe('create a note', () => {
       it('should return a timelineId, timelineVersion, noteId and version', async () => {
         const myNote = 'world test';
-        const response = await client.mutate<any>({
-          mutation: persistTimelineNoteMutation,
-          variables: {
+        const response = await supertest
+          .patch('/api/note')
+          .set('kbn-xsrf', 'true')
+          .send({
             noteId: null,
             version: null,
             note: { note: myNote, timelineId: null },
-          },
-        });
+          });
+
         const { note, noteId, timelineId, timelineVersion, version } =
-          response.data && response.data.persistNote.note;
+          response.body.data && response.body.data.persistNote.note;
 
         expect(note).to.be(myNote);
         expect(noteId).to.not.be.empty();
@@ -42,62 +41,32 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('if noteId exist update note and return existing noteId and new version', async () => {
         const myNote = 'world test';
-        const response = await client.mutate<any>({
-          mutation: persistTimelineNoteMutation,
-          variables: {
+        const response = await supertest
+          .patch('/api/note')
+          .set('kbn-xsrf', 'true')
+          .send({
             noteId: null,
             version: null,
             note: { note: myNote, timelineId: null },
-          },
-        });
+          });
 
-        const { noteId, timelineId, version } = response.data && response.data.persistNote.note;
+        const { noteId, timelineId, version } =
+          response.body.data && response.body.data.persistNote.note;
 
         const myNewNote = 'new world test';
-        const responseToTest = await client.mutate<any>({
-          mutation: persistTimelineNoteMutation,
-          variables: {
+        const responseToTest = await supertest
+          .patch('/api/note')
+          .set('kbn-xsrf', 'true')
+          .send({
             noteId,
             version,
             note: { note: myNewNote, timelineId },
-          },
-        });
+          });
 
-        expect(responseToTest.data!.persistNote.note.note).to.be(myNewNote);
-        expect(responseToTest.data!.persistNote.note.noteId).to.be(noteId);
-        expect(responseToTest.data!.persistNote.note.version).to.not.be.eql(version);
-      });
-    });
-
-    describe('Delete a note', () => {
-      it('one note', async () => {
-        const myNote = 'world test';
-        const response = await client.mutate<any>({
-          mutation: persistTimelineNoteMutation,
-          variables: {
-            noteId: null,
-            version: null,
-            note: { note: myNote, timelineId: null },
-          },
-        });
-
-        const { noteId } = response.data && response.data.persistNote.note;
-
-        const responseToTest = await client.mutate<any>({
-          mutation: deleteNoteMutation,
-          variables: {
-            id: [noteId],
-          },
-        });
-
-        expect(responseToTest.data!.deleteNote).to.be(true);
+        expect(responseToTest.body.data!.persistNote.note.note).to.be(myNewNote);
+        expect(responseToTest.body.data!.persistNote.note.noteId).to.be(noteId);
+        expect(responseToTest.body.data!.persistNote.note.version).to.not.be.eql(version);
       });
     });
   });
 }
-
-const deleteNoteMutation = gql`
-  mutation DeleteNoteMutation($id: [ID!]!) {
-    deleteNote(id: $id)
-  }
-`;

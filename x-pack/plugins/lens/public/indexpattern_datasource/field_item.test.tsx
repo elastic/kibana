@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { MouseEvent, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { documentField } from './document_field';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
+import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -28,7 +30,6 @@ describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
   let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
-  let data: DataPublicPluginStart;
 
   beforeEach(() => {
     indexPattern = {
@@ -83,11 +84,15 @@ describe('IndexPattern Field Item', () => {
     } as IndexPattern;
 
     core = coreMock.createSetup();
-    data = dataPluginMock.createStartContract();
     core.http.post.mockClear();
     defaultProps = {
       indexPattern,
-      data,
+      fieldFormats: {
+        ...fieldFormatsServiceMock.createStartContract(),
+        getDefaultInstance: jest.fn(() => ({
+          convert: jest.fn((s: unknown) => JSON.stringify(s)),
+        })),
+      } as unknown as FieldFormatsStart,
       core,
       highlight: '',
       dateRange: {
@@ -109,13 +114,8 @@ describe('IndexPattern Field Item', () => {
       itemIndex: 0,
       dropOntoWorkspace: () => {},
       hasSuggestionForField: () => false,
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
-
-    data.fieldFormats = ({
-      getDefaultInstance: jest.fn(() => ({
-        convert: jest.fn((s: unknown) => JSON.stringify(s)),
-      })),
-    } as unknown) as DataPublicPluginStart['fieldFormats'];
   });
 
   it('should display displayName of a field', () => {
@@ -140,7 +140,7 @@ describe('IndexPattern Field Item', () => {
       mountWithIntl(popoverContent as ReactElement)
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .first()
-        .prop('onClick')!({} as MouseEvent);
+        .simulate('click');
     });
     expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });
@@ -162,7 +162,7 @@ describe('IndexPattern Field Item', () => {
       body: JSON.stringify({
         dslQuery: {
           bool: {
-            must: [{ match_all: {} }],
+            must: [],
             filter: [],
             should: [],
             must_not: [],
@@ -216,7 +216,7 @@ describe('IndexPattern Field Item', () => {
         query: { query: 'geo.src : "US"', language: 'kuery' },
         filters: [
           {
-            match: { phrase: { 'geo.dest': 'US' } },
+            query: { match: { phrase: { 'geo.dest': 'US' } } },
           },
         ],
       });
@@ -255,7 +255,7 @@ describe('IndexPattern Field Item', () => {
   it('should not request field stats for document field', async () => {
     const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} field={documentField} />);
 
-    clickField(wrapper, 'Records');
+    clickField(wrapper, DOCUMENT_FIELD_NAME);
 
     expect(core.http.post).not.toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);

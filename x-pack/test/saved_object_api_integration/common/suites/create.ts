@@ -41,25 +41,41 @@ const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
 // we could create six separate test cases to test every permutation, but there's no real value in doing so
 const NEW_SINGLE_NAMESPACE_OBJ = Object.freeze({ type: 'dashboard', id: '' });
 const NEW_MULTI_NAMESPACE_OBJ = Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' });
-const NEW_EACH_SPACE_OBJ = Object.freeze({
+const INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE = Object.freeze({
+  type: 'isolatedtype',
+  id: 'new-other-space-id',
+  expectedNamespaces: ['other-space'], // expected namespaces of resulting object
+  initialNamespaces: ['other-space'], // args passed to the bulkCreate method
+});
+const INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE = Object.freeze({
+  type: 'sharecapabletype',
+  id: 'new-other-space-id',
+  expectedNamespaces: ['other-space'], // expected namespaces of resulting object
+  initialNamespaces: ['other-space'], // args passed to the bulkCreate method
+});
+const INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE = Object.freeze({
   type: 'sharedtype',
   id: 'new-each-space-id',
   expectedNamespaces: EACH_SPACE, // expected namespaces of resulting object
   initialNamespaces: EACH_SPACE, // args passed to the bulkCreate method
 });
-const NEW_ALL_SPACES_OBJ = Object.freeze({
+const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = Object.freeze({
   type: 'sharedtype',
   id: 'new-all-spaces-id',
   expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
   initialNamespaces: [ALL_SPACES_ID], // args passed to the bulkCreate method
 });
+const ALIAS_CONFLICT_OBJ = Object.freeze({ type: 'resolvetype', id: 'alias-match' }); // this fixture was created to test the resolve API, but we are reusing to test the alias conflict error
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
 export const TEST_CASES: Record<string, CreateTestCase> = Object.freeze({
   ...CASES,
   NEW_SINGLE_NAMESPACE_OBJ,
   NEW_MULTI_NAMESPACE_OBJ,
-  NEW_EACH_SPACE_OBJ,
-  NEW_ALL_SPACES_OBJ,
+  INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
+  INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
+  INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
+  INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ALIAS_CONFLICT_OBJ,
   NEW_NAMESPACE_AGNOSTIC_OBJ,
 });
 
@@ -71,23 +87,23 @@ const createRequest = ({ type, id, initialNamespaces }: CreateTestCase) => ({
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('create');
-  const expectResponseBody = (
-    testCase: CreateTestCase,
-    user?: TestUser
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    if (testCase.failure === 403) {
-      await expectSavedObjectForbidden(testCase.type)(response);
-    } else {
-      // permitted
-      const object = response.body;
-      await expectResponses.permitted(object, testCase);
-      if (!testCase.failure) {
-        expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
-        const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
-        expect(object.namespaces).to.eql(redactedNamespaces);
+  const expectResponseBody =
+    (testCase: CreateTestCase, user?: TestUser): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (testCase.failure === 403) {
+        await expectSavedObjectForbidden(testCase.type)(response);
+      } else {
+        // permitted
+        const object = response.body;
+        await expectResponses.permitted(object, testCase);
+        if (!testCase.failure) {
+          expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+          const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
+          expect(object.namespaces).to.eql(redactedNamespaces);
+          // TODO: improve assertions for redacted namespaces? (#112455)
+        }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: CreateTestCase | CreateTestCase[],
     forbidden: boolean,
@@ -112,35 +128,41 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeCreateTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: CreateTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeCreateTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: CreateTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const { type, id, initialNamespaces } = test.request;
-          const path = `${type}${id ? `/${id}` : ''}`;
-          const requestBody = {
-            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-            ...(initialNamespaces && { initialNamespaces }),
-          };
-          const query = test.overwrite ? '?overwrite=true' : '';
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${path}${query}`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const { type, id, initialNamespaces } = test.request;
+            const path = `${type}${id ? `/${id}` : ''}`;
+            const requestBody = {
+              attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+              ...(initialNamespaces && { initialNamespaces }),
+            };
+            const query = test.overwrite ? '?overwrite=true' : '';
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${path}${query}`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeCreateTest(describe);
   // @ts-ignore

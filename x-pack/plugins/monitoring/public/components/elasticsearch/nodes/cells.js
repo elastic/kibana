@@ -11,10 +11,9 @@ import { formatMetric } from '../../../lib/format_number';
 import {
   EuiText,
   EuiPopover,
-  EuiIcon,
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiSpacer,
-  EuiKeyboardAccessible,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -28,7 +27,7 @@ const TRENDING_UP = i18n.translate('xpack.monitoring.elasticsearch.node.cells.tr
 });
 
 function OfflineCell() {
-  return <div className="monTableCell__number monTableCell__offline">N/A</div>;
+  return <div className="monTableCell__offline">N/A</div>;
 }
 
 const getDirection = (slope) => {
@@ -40,7 +39,7 @@ const getDirection = (slope) => {
 
 const getIcon = (slope) => {
   if (slope || slope === 0) {
-    return slope > 0 ? 'arrowUp' : 'arrowDown';
+    return slope > 0 ? 'sortUp' : 'sortDown';
   }
   return null;
 };
@@ -57,83 +56,80 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  if (isOnline) {
-    const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
-    const format = get(metric, 'metric.format');
-    const units = get(metric, 'metric.units');
-
-    const tooltipItems = [
-      {
-        title: i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.trending', {
-          defaultMessage: 'Trending',
-        }),
-        description: getDirection(slope),
-      },
-      {
-        title: i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.max', {
-          defaultMessage: 'Max value',
-        }),
-        description: metricVal(maxVal, format, isPercent, units),
-      },
-      {
-        title: i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.min', {
-          defaultMessage: 'Min value',
-        }),
-        description: metricVal(minVal, format, isPercent, units),
-      },
-    ];
-
-    const button = (
-      <EuiKeyboardAccessible>
-        <EuiIcon
-          onClick={onButtonClick}
-          type={getIcon(slope)}
-          data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
-          title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
-            defaultMessage: 'More information about this metric',
-          })}
-        />
-      </EuiKeyboardAccessible>
-    );
-
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false} />
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup data-test-subj={props['data-test-subj']} gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                ownFocus
-                button={button}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-              >
-                <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
-                  <EuiDescriptionList
-                    type="column"
-                    compressed
-                    listItems={tooltipItems}
-                    style={{ maxWidth: '150px' }}
-                  />
-                  <EuiSpacer size="s" />
-                  <EuiText size="xs">
-                    {i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.preface', {
-                      defaultMessage: 'Applies to current time period',
-                    })}
-                  </EuiText>
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  if (!isOnline) {
+    return <OfflineCell />;
   }
 
-  return <OfflineCell />;
+  const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
+  const format = get(metric, 'metric.format');
+  const units = get(metric, 'metric.units');
+
+  const tooltipItems = [
+    {
+      title: i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.trending', {
+        defaultMessage: 'Trending',
+      }),
+      description: getDirection(slope),
+    },
+    {
+      title: i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.max', {
+        defaultMessage: 'Max value',
+      }),
+      description: metricVal(maxVal, format, isPercent, units),
+    },
+    {
+      title: i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.min', {
+        defaultMessage: 'Min value',
+      }),
+      description: metricVal(minVal, format, isPercent, units),
+    },
+  ];
+
+  const iconLabel = i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
+    defaultMessage: 'More information about this metric',
+  });
+
+  const button = (
+    <EuiButtonIcon
+      color="text"
+      onClick={onButtonClick}
+      iconType={getIcon(slope)}
+      data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
+      title={iconLabel}
+      aria-label={iconLabel}
+    />
+  );
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false} />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup data-test-subj={props['data-test-subj']} gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+              <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
+                <EuiDescriptionList
+                  type="column"
+                  compressed
+                  listItems={tooltipItems}
+                  style={{ maxWidth: '150px' }}
+                />
+                <EuiSpacer size="s" />
+                <EuiText size="xs">
+                  {i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.preface', {
+                    defaultMessage: 'Applies to current time period',
+                  })}
+                </EuiText>
+              </div>
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
 
 export { OfflineCell, MetricCell };

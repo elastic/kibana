@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { min } from 'lodash';
+import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import Mustache from 'mustache';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
+import { JsonObject } from '@kbn/utility-types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   StatusCheckFilters,
   Ping,
@@ -19,17 +19,52 @@ import {
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
 import { updateState } from './common';
-import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusCheckTranslations,
+} from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
-import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import {
+  GetMonitorStatusResult,
+  GetMonitorDownStatusMessageParams,
+  getMonitorDownStatusMessageParams,
+} from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { uptimeAlertWrapper } from './uptime_alert_wrapper';
-import { MonitorStatusTranslations } from '../../../common/translations';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs, UptimeESClient } from '../lib';
+import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
+/**
+ * Returns the appropriate range for filtering the documents by `@timestamp`.
+ *
+ * We check monitor status by `monitor.timespan`, but need to first cut down on the number of documents
+ * searched by filtering by `@timestamp`. To ensure that we catch as many documents as possible which could
+ * likely contain a down monitor with a `monitor.timespan` in the given timerange, we create a filter
+ * range for `@timestamp` that is the greater of either: from now to now - timerange interval - 24 hours
+ * OR from now to now - rule interval
+ * @param ruleScheduleLookback - string representing now minus the interval at which the rule is ran
+ * @param timerangeLookback - string representing now minus the timerange configured by the user for checking down monitors
+ */
+export function getTimestampRange({
+  ruleScheduleLookback,
+  timerangeLookback,
+}: Record<'ruleScheduleLookback' | 'timerangeLookback', string>) {
+  const scheduleIntervalAbsoluteTime = datemath.parse(ruleScheduleLookback)?.valueOf();
+  const defaultIntervalAbsoluteTime = datemath
+    .parse(timerangeLookback)
+    ?.subtract('24', 'hours')
+    .valueOf();
+  const from = min([scheduleIntervalAbsoluteTime, defaultIntervalAbsoluteTime]) ?? 'now-24h';
+
+  return {
+    to: 'now',
+    from,
+  };
+}
 
 const getMonIdByLoc = (monitorId: string, location: string) => {
   return monitorId + '-' + location;
@@ -71,7 +106,7 @@ export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
   filters: StatusCheckFilters,
   search: string
-): Promise<JsonObject | undefined> => {
+) => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
 
@@ -82,10 +117,7 @@ export const generateFilterDSL = async (
 
   const combinedString = combineFiltersAndUserSearch(filterString, search);
 
-  return esKuery.toElasticsearchQuery(
-    esKuery.fromKueryExpression(combinedString ?? ''),
-    await getIndexPattern()
-  );
+  return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
 export const formatFilterString = async (
@@ -105,8 +137,10 @@ export const formatFilterString = async (
     search
   );
 
-export const getMonitorSummary = (monitorInfo: Ping) => {
-  return {
+export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
+  const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
+  const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const summary = {
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
@@ -115,57 +149,56 @@ export const getMonitorSummary = (monitorInfo: Ping) => {
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
   };
+
+  return {
+    ...summary,
+    reason: `${monitorName} from ${observerLocation} ${statusMessage}`,
+  };
 };
 
-const generateMessageForOlderVersions = (fields: Record<string, any>) => {
-  const messageTemplate = MonitorStatusTranslations.defaultActionMessage;
-
-  // Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from
-  // {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}
-
-  return Mustache.render(messageTemplate, { state: { ...fields } });
-};
+export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
+  'monitor.id': monitorSummary.monitorId,
+  'monitor.type': monitorSummary.monitorType,
+  'monitor.name': monitorSummary.monitorName,
+  'url.full': monitorSummary.monitorUrl,
+  'observer.geo.name': monitorSummary.observerLocation,
+  'error.message': monitorSummary.latestErrorMessage,
+  'agent.name': monitorSummary.observerHostname,
+  [ALERT_REASON]: monitorSummary.reason,
+});
 
 export const getStatusMessage = (
-  downMonInfo?: Ping,
+  downMonParams?: GetMonitorDownStatusMessageParams,
   availMonInfo?: GetMonitorAvailabilityResult,
   availability?: GetMonitorAvailabilityParams
 ) => {
   let statusMessage = '';
-  if (downMonInfo) {
-    statusMessage = DOWN_LABEL;
+  if (downMonParams?.info) {
+    statusMessage = statusCheckTranslations.downMonitorsLabel(
+      downMonParams.count!,
+      downMonParams.interval!,
+      downMonParams.numTimes
+    );
   }
   let availabilityMessage = '';
 
   if (availMonInfo) {
-    availabilityMessage = i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
-      {
-        defaultMessage:
-          'below threshold with {availabilityRatio}% availability expected is {expectedAvailability}%',
-        values: {
-          availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
-          expectedAvailability: availability?.threshold,
-        },
-      }
+    availabilityMessage = statusCheckTranslations.availabilityBreachLabel(
+      (availMonInfo.availabilityRatio! * 100).toFixed(2),
+      availability?.threshold!,
+      formatDurationFromTimeUnitChar(availability?.range!, availability?.rangeUnit! as TimeUnitChar)
     );
   }
-  if (availMonInfo && downMonInfo) {
-    return i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
-      {
-        defaultMessage: '{statusMessage} and also {availabilityMessage}',
-        values: {
-          statusMessage,
-          availabilityMessage,
-        },
-      }
+  if (availMonInfo && downMonParams?.info) {
+    return statusCheckTranslations.downMonitorsAndAvailabilityBreachLabel(
+      statusMessage,
+      availabilityMessage
     );
   }
   return statusMessage + availabilityMessage;
 };
 
-const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
@@ -180,190 +213,228 @@ const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
-  uptimeAlertWrapper<ActionGroupIds>({
-    id: 'xpack.uptime.alerts.monitorStatus',
-    name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
-      defaultMessage: 'Uptime monitor status',
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+  id: 'xpack.uptime.alerts.monitorStatus',
+  producer: 'uptime',
+  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
+    defaultMessage: 'Uptime monitor status',
+  }),
+  validate: {
+    params: schema.object({
+      availability: schema.maybe(
+        schema.object({
+          range: schema.number(),
+          rangeUnit: schema.string(),
+          threshold: schema.string(),
+        })
+      ),
+      filters: schema.maybe(
+        schema.oneOf([
+          // deprecated
+          schema.object({
+            'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
+            'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
+            tags: schema.maybe(schema.arrayOf(schema.string())),
+            'url.port': schema.maybe(schema.arrayOf(schema.string())),
+          }),
+          schema.string(),
+        ])
+      ),
+      // deprecated
+      locations: schema.maybe(schema.arrayOf(schema.string())),
+      numTimes: schema.number(),
+      search: schema.maybe(schema.string()),
+      shouldCheckStatus: schema.boolean(),
+      shouldCheckAvailability: schema.boolean(),
+      timerangeCount: schema.maybe(schema.number()),
+      timerangeUnit: schema.maybe(schema.string()),
+      // deprecated
+      timerange: schema.maybe(
+        schema.object({
+          from: schema.string(),
+          to: schema.string(),
+        })
+      ),
+      version: schema.maybe(schema.number()),
+      isAutoGenerated: schema.maybe(schema.boolean()),
     }),
-    validate: {
-      params: schema.object({
-        availability: schema.maybe(
-          schema.object({
-            range: schema.number(),
-            rangeUnit: schema.string(),
-            threshold: schema.string(),
-          })
-        ),
-        filters: schema.maybe(
-          schema.oneOf([
-            // deprecated
-            schema.object({
-              'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
-              'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
-              tags: schema.maybe(schema.arrayOf(schema.string())),
-              'url.port': schema.maybe(schema.arrayOf(schema.string())),
-            }),
-            schema.string(),
-          ])
-        ),
-        // deprecated
-        locations: schema.maybe(schema.arrayOf(schema.string())),
-        numTimes: schema.number(),
-        search: schema.maybe(schema.string()),
-        shouldCheckStatus: schema.boolean(),
-        shouldCheckAvailability: schema.boolean(),
-        timerangeCount: schema.maybe(schema.number()),
-        timerangeUnit: schema.maybe(schema.string()),
-        // deprecated
-        timerange: schema.maybe(
-          schema.object({
-            from: schema.string(),
-            to: schema.string(),
-          })
-        ),
-        version: schema.maybe(schema.number()),
-        isAutoGenerated: schema.maybe(schema.boolean()),
-      }),
+  },
+  defaultActionGroupId: MONITOR_STATUS.id,
+  actionGroups: [
+    {
+      id: MONITOR_STATUS.id,
+      name: MONITOR_STATUS.name,
     },
-    defaultActionGroupId: MONITOR_STATUS.id,
-    actionGroups: [
+  ],
+  actionVariables: {
+    context: [
       {
-        id: MONITOR_STATUS.id,
-        name: MONITOR_STATUS.name,
+        name: 'message',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
+          {
+            defaultMessage: 'A generated message summarizing the currently down monitors',
+          }
+        ),
+      },
+      {
+        name: 'downMonitorsWithGeo',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
+          {
+            defaultMessage:
+              'A generated summary that shows some or all of the monitors detected as "down" by the alert',
+          }
+        ),
       },
     ],
-    actionVariables: {
-      context: [
-        {
-          name: 'message',
-          description: i18n.translate(
-            'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
-            {
-              defaultMessage: 'A generated message summarizing the currently down monitors',
-            }
-          ),
-        },
-        {
-          name: 'downMonitorsWithGeo',
-          description: i18n.translate(
-            'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-            {
-              defaultMessage:
-                'A generated summary that shows some or all of the monitors detected as "down" by the alert',
-            }
-          ),
-        },
-      ],
-      state: [...commonMonitorStateI18, ...commonStateTranslations],
+    state: [...commonMonitorStateI18, ...commonStateTranslations],
+  },
+  isExportable: true,
+  minimumLicenseRequired: 'basic',
+  async executor({
+    params: rawParams,
+    state,
+    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle },
+    rule: {
+      schedule: { interval },
     },
-    minimumLicenseRequired: 'basic',
-    async executor({
-      options: {
-        params: rawParams,
-        state,
-        services: { alertInstanceFactory },
-      },
-      dynamicSettings,
-      uptimeEsClient,
-    }) {
-      const {
-        filters,
-        search,
+  }) {
+    const {
+      filters,
+      search,
+      numTimes,
+      timerangeCount,
+      timerangeUnit,
+      availability,
+      shouldCheckAvailability,
+      shouldCheckStatus,
+      isAutoGenerated,
+      timerange: oldVersionTimeRange,
+    } = rawParams;
+
+    const uptimeEsClient = createUptimeESClient({
+      esClient: scopedClusterClient.asCurrentUser,
+      savedObjectsClient,
+    });
+
+    const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
+
+    const timespanInterval = `${String(timerangeCount)}${timerangeUnit}`;
+    // Range filter for `monitor.timespan`, the range of time the ping is valid
+    const timespanRange = oldVersionTimeRange || {
+      from: `now-${timespanInterval}`,
+      to: 'now',
+    };
+
+    // Range filter for `@timestamp`, the time the document was indexed
+    const timestampRange = getTimestampRange({
+      ruleScheduleLookback: `now-${interval}`,
+      timerangeLookback: timespanRange.from,
+    });
+
+    let downMonitorsByLocation: GetMonitorStatusResult[] = [];
+
+    // if oldVersionTimeRange present means it's 7.7 format and
+    // after that shouldCheckStatus should be explicitly false
+    if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
+      downMonitorsByLocation = await libs.requests.getMonitorStatus({
+        uptimeEsClient,
+        timespanRange,
+        timestampRange,
+        numTimes,
+        locations: [],
+        filters: filterString as JsonObject,
+      });
+    }
+
+    if (isAutoGenerated) {
+      for (const monitorLoc of downMonitorsByLocation) {
+        const monitorInfo = monitorLoc.monitorInfo;
+
+        const monitorStatusMessageParams = getMonitorDownStatusMessageParams(
+          monitorInfo,
+          monitorLoc.count,
+          numTimes,
+          timerangeCount,
+          timerangeUnit,
+          oldVersionTimeRange
+        );
+
+        const statusMessage = getStatusMessage(monitorStatusMessageParams);
+        const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+        const alert = alertWithLifecycle({
+          id: getInstanceId(monitorInfo, monitorLoc.location),
+          fields: getMonitorAlertDocument(monitorSummary),
+        });
+
+        alert.replaceState({
+          ...state,
+          ...monitorSummary,
+          statusMessage,
+          ...updateState(state, true),
+        });
+
+        alert.scheduleActions(MONITOR_STATUS.id);
+      }
+      return updateState(state, downMonitorsByLocation.length > 0);
+    }
+
+    let availabilityResults: GetMonitorAvailabilityResult[] = [];
+    if (shouldCheckAvailability) {
+      availabilityResults = await libs.requests.getMonitorAvailability({
+        uptimeEsClient,
+        ...availability,
+        filters: JSON.stringify(filterString) || undefined,
+      });
+    }
+
+    const mergedIdsByLoc = getUniqueIdsByLoc(downMonitorsByLocation, availabilityResults);
+
+    mergedIdsByLoc.forEach((monIdByLoc) => {
+      const availMonInfo = availabilityResults.find(
+        ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
+      );
+
+      const downMonInfo = downMonitorsByLocation.find(
+        ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
+      )?.monitorInfo;
+
+      const downMonCount = downMonitorsByLocation.find(
+        ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
+      )?.count;
+
+      const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
+
+      const monitorStatusMessageParams = getMonitorDownStatusMessageParams(
+        downMonInfo!,
+        downMonCount!,
         numTimes,
         timerangeCount,
         timerangeUnit,
-        availability,
-        shouldCheckAvailability,
-        shouldCheckStatus,
-        isAutoGenerated,
-        timerange: oldVersionTimeRange,
-      } = rawParams;
+        oldVersionTimeRange
+      );
 
-      const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
-
-      const timerange = oldVersionTimeRange || {
-        from: isAutoGenerated
-          ? state.lastCheckedAt
-          : `now-${String(timerangeCount) + timerangeUnit}`,
-        to: 'now',
-      };
-
-      let downMonitorsByLocation: GetMonitorStatusResult[] = [];
-
-      // if oldVersionTimeRange present means it's 7.7 format and
-      // after that shouldCheckStatus should be explicitly false
-      if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
-        downMonitorsByLocation = await libs.requests.getMonitorStatus({
-          uptimeEsClient,
-          timerange,
-          numTimes,
-          locations: [],
-          filters: filterString,
-        });
-      }
-
-      if (isAutoGenerated) {
-        for (const monitorLoc of downMonitorsByLocation) {
-          const monitorInfo = monitorLoc.monitorInfo;
-
-          const alertInstance = alertInstanceFactory(
-            getInstanceId(monitorInfo, monitorLoc.location)
-          );
-
-          const monitorSummary = getMonitorSummary(monitorInfo);
-          const statusMessage = getStatusMessage(monitorInfo);
-
-          alertInstance.replaceState({
-            ...state,
-            ...monitorSummary,
-            statusMessage,
-            ...updateState(state, true),
-          });
-
-          alertInstance.scheduleActions(MONITOR_STATUS.id);
-        }
-        return updateState(state, downMonitorsByLocation.length > 0);
-      }
-
-      let availabilityResults: GetMonitorAvailabilityResult[] = [];
-      if (shouldCheckAvailability) {
-        availabilityResults = await libs.requests.getMonitorAvailability({
-          uptimeEsClient,
-          ...availability,
-          filters: JSON.stringify(filterString) || undefined,
-        });
-      }
-
-      const mergedIdsByLoc = getUniqueIdsByLoc(downMonitorsByLocation, availabilityResults);
-
-      mergedIdsByLoc.forEach((monIdByLoc) => {
-        const availMonInfo = availabilityResults.find(
-          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
-        );
-
-        const downMonInfo = downMonitorsByLocation.find(
-          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
-        )?.monitorInfo;
-
-        const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
-
-        const monitorSummary = getMonitorSummary(monitorInfo);
-        const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
-
-        const alertInstance = alertInstanceFactory(getInstanceId(monitorInfo, monIdByLoc));
-
-        alertInstance.replaceState({
-          ...updateState(state, true),
-          ...monitorSummary,
-          statusMessage,
-        });
-
-        alertInstance.scheduleActions(MONITOR_STATUS.id, {
-          message: generateMessageForOlderVersions({ ...monitorSummary, statusMessage }),
-        });
+      const statusMessage = getStatusMessage(
+        monitorStatusMessageParams,
+        availMonInfo!,
+        availability
+      );
+      const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+      const alert = alertWithLifecycle({
+        id: getInstanceId(monitorInfo, monIdByLoc),
+        fields: getMonitorAlertDocument(monitorSummary),
       });
 
-      return updateState(state, downMonitorsByLocation.length > 0);
-    },
-  });
+      alert.replaceState({
+        ...updateState(state, true),
+        ...monitorSummary,
+        statusMessage,
+      });
+
+      alert.scheduleActions(MONITOR_STATUS.id);
+    });
+
+    return updateState(state, downMonitorsByLocation.length > 0);
+  },
+});

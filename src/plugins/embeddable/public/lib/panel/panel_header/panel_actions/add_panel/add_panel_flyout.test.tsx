@@ -16,7 +16,7 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mountWithIntl as mount } from '@kbn/test/jest';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -61,6 +61,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
       SavedObjectFinder={() => null}
+      showCreateNewMenu
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
@@ -112,6 +113,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
       SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
+      showCreateNewMenu
     />
   ) as ReactWrapper<any, {}, AddPanelFlyout>;
 

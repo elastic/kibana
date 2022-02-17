@@ -5,31 +5,35 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
-import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable } from 'src/plugins/expressions/server';
-import { ReportingConfig } from '../../..';
+import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type { IScopedSearchClient } from 'src/plugins/data/server';
+import type { Datatable } from 'src/plugins/expressions/server';
+import type { Writable } from 'stream';
+import type { ReportingConfig } from '../../..';
+import type {
+  DataView,
+  ISearchSource,
+  ISearchStartSearchSource,
+} from '../../../../../../../src/plugins/data/common';
 import {
+  cellHasFormulas,
   ES_SEARCH_STRATEGY,
+  tabifyDocs,
+} from '../../../../../../../src/plugins/data/common';
+import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
-  IndexPattern,
-  ISearchSource,
-  ISearchStartSearchSource,
-  SearchFieldValue,
-  tabifyDocs,
-} from '../../../../../../../src/plugins/data/common';
+} from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
-import { CancellationToken } from '../../../../common';
+import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { LevelLogger } from '../../../lib';
-import { TaskRunResult } from '../../../lib/tasks';
-import { JobParamsCSV } from '../types';
-import { cellHasFormulas } from './cell_has_formula';
+import type { LevelLogger } from '../../../lib';
+import type { TaskRunResult } from '../../../lib/tasks';
+import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
@@ -44,42 +48,24 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
-// Function to check if the field name values can be used as the header row
-function isPlainStringArray(
-  fields: SearchFieldValue[] | string | boolean | undefined
-): fields is string[] {
-  let result = true;
-  if (Array.isArray(fields)) {
-    fields.forEach((field) => {
-      if (typeof field !== 'string' || field === '*' || field === '_source') {
-        result = false;
-      }
-    });
-  }
-  return result;
-}
-
 export class CsvGenerator {
-  private _formatters: Record<string, FieldFormat> | null = null;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
 
   constructor(
-    private job: JobParamsCSV,
+    private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger
+    private logger: LevelLogger,
+    private stream: Writable
   ) {}
 
-  private async scan(
-    index: IndexPattern,
-    searchSource: ISearchSource,
-    scrollSettings: CsvExportSettings['scroll']
-  ) {
-    const searchBody = await searchSource.getSearchRequestBody();
+  private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
+    const { scroll: scrollSettings, includeFrozen } = settings;
+    const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
       params: {
@@ -87,34 +73,30 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
+        ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
+
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
-    ).rawResponse as SearchResponse<unknown>;
+    ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;
   }
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      })
-    ).body as SearchResponse<unknown>;
-    return results;
+
+    return await this.clients.es.asCurrentUser.scroll({
+      scroll: scrollSettings.duration,
+      scroll_id: scrollId,
+    });
   }
 
   /*
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
-    if (this._formatters) {
-      return this._formatters;
-    }
-
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
@@ -122,8 +104,7 @@ export class CsvGenerator {
       formatters[c.id] = fieldFormat;
     });
 
-    this._formatters = formatters;
-    return this._formatters;
+    return formatters;
   }
 
   private escapeValues(settings: CsvExportSettings) {
@@ -135,25 +116,8 @@ export class CsvGenerator {
     };
   }
 
-  // use fields/fieldsFromSource from the searchSource to get the ordering of columns
-  // otherwise use the table columns as they are
-  private getFields(searchSource: ISearchSource, table: Datatable): string[] {
-    const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
-      fields: searchSource.getField('fields'),
-      fieldsFromSource: searchSource.getField('fieldsFromSource'),
-    };
-    const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-    this.logger.debug(`Getting search source fields from: '${fieldSource}'`);
-
-    const fields = fieldValues[fieldSource];
-    // Check if field name values are string[] and if the fields are user-defined
-    if (isPlainStringArray(fields)) {
-      return fields;
-    }
-
-    // Default to using the table column IDs as the fields
+  private getColumnsFromTabify(table: Datatable) {
     const columnIds = table.columns.map((c) => c.id);
-    // Fields in the API response don't come sorted - they need to be sorted client-side
     columnIds.sort();
     return columnIds;
   }
@@ -164,7 +128,7 @@ export class CsvGenerator {
       data: dataTableCell,
     }: {
       column: string;
-      data: any;
+      data: unknown;
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc
@@ -202,20 +166,18 @@ export class CsvGenerator {
   }
 
   /*
-   * Use the list of fields to generate the header row
+   * Use the list of columns to generate the header row
    */
   private generateHeader(
-    fields: string[],
-    table: Datatable,
+    columns: string[],
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
-    const header = fields.map(this.escapeValues(settings)).join(settings.separator) + '\n';
+    const header = columns.map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -226,8 +188,8 @@ export class CsvGenerator {
   /*
    * Format a Datatable into rows of CSV content
    */
-  private generateRows(
-    fields: string[],
+  private async generateRows(
+    columns: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
     formatters: Record<string, FieldFormat>,
@@ -239,14 +201,38 @@ export class CsvGenerator {
         break;
       }
 
-      const row =
-        fields
-          .map((f) => ({ column: f, data: dataTableRow[f] }))
-          .map(this.formatCellValues(formatters))
-          .map(this.escapeValues(settings))
-          .join(settings.separator) + '\n';
+      /*
+       * Intrinsically, generating the rows is a synchronous process. Awaiting
+       * on a setImmediate call here partititions what could be a very long and
+       * CPU-intenstive synchronous process into an asychronous process. This
+       * give NodeJS to process other asychronous events that wait on the Event
+       * Loop.
+       *
+       * See: https://nodejs.org/en/docs/guides/dont-block-the-event-loop/
+       *
+       * It's likely this creates a lot of context switching, and adds to the
+       * time it would take to generate the CSV. There are alternatives to the
+       * chosen performance solution:
+       *
+       * 1. Partition the synchronous process with fewer partitions, by using
+       * the loop counter to call setImmediate only every N amount of rows.
+       * Testing is required to see what the best N value for most data will
+       * be.
+       *
+       * 2. Use a C++ add-on to generate the CSV using the Node Worker Pool
+       * instead of using the Event Loop
+       */
+      await new Promise(setImmediate);
 
-      if (!builder.tryAppend(row)) {
+      const rowDefinition: string[] = [];
+      const format = this.formatCellValues(formatters);
+      const escape = this.escapeValues(settings);
+
+      for (const column of columns) {
+        rowDefinition.push(escape(format({ column, data: dataTableRow[column] })));
+      }
+
+      if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
         this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
@@ -273,12 +259,12 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
 
     if (!index) {
-      throw new Error(`The search must have a revference to an index pattern!`);
+      throw new Error(`The search must have a reference to an index pattern!`);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
@@ -308,13 +294,13 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        let results: SearchResponse<unknown> | undefined;
+        let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
-            totalRecords = results.hits.total;
+            totalRecords = results.hits.total as number;
             this.logger.debug(`Total search results: ${totalRecords}`);
           }
         } else {
@@ -327,9 +313,18 @@ export class CsvGenerator {
           break;
         }
 
+        // TODO check for shard failures, log them and add a warning if found
+        {
+          const {
+            hits: { hits, ...hitsMeta },
+            ...header
+          } = results;
+          this.logger.debug('Results metadata: ' + JSON.stringify({ header, hitsMeta }));
+        }
+
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true, meta: true });
+          table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           this.logger.error(err);
         }
@@ -338,11 +333,16 @@ export class CsvGenerator {
           break;
         }
 
-        const fields = this.getFields(searchSource, table);
+        let columns: string[];
+        if (this.job.columns && this.job.columns.length > 0) {
+          columns = this.job.columns;
+        } else {
+          columns = this.getColumnsFromTabify(table);
+        }
 
         if (first) {
           first = false;
-          this.generateHeader(fields, table, builder, settings);
+          this.generateHeader(columns, builder, settings);
         }
 
         if (table.rows.length < 1) {
@@ -350,7 +350,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(fields, table, builder, formatters, settings);
+        await this.generateRows(columns, table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;
@@ -383,17 +383,22 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+
+    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+      this.logger.warning(
+        `ES scroll returned fewer total hits than expected! ` +
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
+    }
 
     return {
-      content: builder.getString(),
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
+      metrics: {
+        csv: { rows: this.csvRowCount },
+      },
       warnings,
     };
   }

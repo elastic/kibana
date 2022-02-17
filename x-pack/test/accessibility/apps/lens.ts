@@ -13,12 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     after(async () => {
@@ -27,8 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.checkListingSelectAllCheckbox();
       await listingTable.clickDeleteSelected();
       await PageObjects.common.clickConfirmOnModal();
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     it('lens', async () => {
@@ -67,6 +72,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lens datatable', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with dynamic cell colouring', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await PageObjects.lens.setTableDynamicColoring('cell');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with dynamic text colouring', async () => {
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with palette panel open', async () => {
+      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with custom palette stops', async () => {
+      await PageObjects.lens.changePaletteTo('custom');
+      await a11y.testAppSnapshot();
+      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('lens metric chart', async () => {
@@ -119,8 +147,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'ip',
+          operation: 'date_histogram',
+          field: '@timestamp',
         },
         1
       );

@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic",
+    "Austin Songer"
+  ],
+  "description": "Identifies the assignment of rights to access content from another mailbox. An adversary may use the compromised account to send messages to other accounts in the network of the target organization while creating inbox rules, so messages can evade spam/phishing detection mechanisms.",
+  "false_positives": [
+    "Assignment of rights to a service account."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "O365 Exchange Suspicious Mailbox Right Delegation",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.action:Add-MailboxPermission and \no365.audit.Parameters.AccessRights:(FullAccess or SendAs or SendOnBehalf) and event.outcome:success and\nnot user.id : \"NT AUTHORITY\\SYSTEM (Microsoft.Exchange.Servicehost)\"\n",
+  "risk_score": 21,
+  "rule_id": "0ce6487d-8069-4888-9ddd-61b52490cebc",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/",
+          "subtechnique": [
+            {
+              "id": "T1098.002",
+              "name": "Exchange Email Delegate Permissions",
+              "reference": "https://attack.mitre.org/techniques/T1098/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

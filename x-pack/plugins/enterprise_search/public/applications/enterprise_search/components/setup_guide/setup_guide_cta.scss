@@ -6,20 +6,7 @@
  */
 
 .enterpriseSearchSetupCta {
-  margin: $euiSize auto $euiSizeXL;
-
-  // Clickable EuiPanel override - line panel up with product cards
-  &.euiPanel--isClickable {
-    width: calc(100% - #{$euiSize});
-  }
-
-  &__text {
-    max-width: $euiSize * 40;
-  }
-
   &__image {
-    display: block;
-    max-width: 100%;
     width: $euiSize * 10;
     margin: 0 auto;
 

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart } from 'src/core/public';
+import { AppMountParameters, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { renderApp } from './';
-import { disableConsoleWarning } from '../utils/testHelpers';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
+import { renderApp as renderApmApp } from './';
+import { disableConsoleWarning } from '../utils/test_helpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
-jest.mock('../services/rest/index_pattern', () => ({
-  createStaticIndexPattern: () => Promise.resolve(undefined),
+jest.mock('../services/rest/data_view', () => ({
+  createStaticDataView: () => Promise.resolve(undefined),
 }));
 
-describe('renderApp', () => {
+describe('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
-
   beforeAll(() => {
     // The RUM agent logs an unnecessary message here. There's a couple open
     // issues need to be fixed to get the ability to turn off all of the logging:
@@ -39,12 +39,17 @@ describe('renderApp', () => {
     mockConsole.mockRestore();
   });
 
-  it('renders the app', () => {
-    const { core, config } = mockApmPluginContextValue;
-    const plugins = {
+  const getApmMountProps = () => {
+    const {
+      core: coreStart,
+      config,
+      observabilityRuleTypeRegistry,
+      corePlugins,
+    } = mockApmPluginContextValue;
+
+    const pluginsSetup = {
       licensing: { license$: new Observable() },
-      triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
-      usageCollection: { reportUiCounter: () => {} },
+      triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
       data: {
         query: {
           timefilter: {
@@ -53,26 +58,52 @@ describe('renderApp', () => {
         },
       },
     };
-    const params = {
+    const appMountParameters = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
+      theme$: new Observable(),
     };
 
     const data = dataPluginMock.createStartContract();
     const embeddable = embeddablePluginMock.createStartContract();
-    const startDeps = {
+
+    const pluginsStart = {
+      data,
+      embeddable,
+      observability: {
+        navigation: {
+          registerSections: () => jest.fn(),
+          PageTemplate: ({ children }: { children: React.ReactNode }) => (
+            <div>hello worlds {children}</div>
+          ),
+        },
+      },
       triggersActionsUi: {
         actionTypeRegistry: {},
-        alertTypeRegistry: {},
+        ruleTypeRegistry: {},
         getAddAlertFlyout: jest.fn(),
         getEditAlertFlyout: jest.fn(),
       },
-      data,
-      embeddable,
-    };
+      usageCollection: { reportUiCounter: () => {} },
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`,
+          get: () => `/basepath`,
+        },
+      } as HttpStart,
+      docLinks: {
+        DOC_LINK_VERSION: '0',
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        links: {
+          apm: {},
+          observability: { guide: '' },
+        },
+      } as unknown as DocLinksStart,
+    } as unknown as ApmPluginStartDeps;
+
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi((core as unknown) as CoreStart);
+    createCallApmApi(coreStart);
 
     jest
       .spyOn(window.console, 'warn')
@@ -84,16 +115,24 @@ describe('renderApp', () => {
         }
       });
 
+    return {
+      coreStart,
+      pluginsSetup: pluginsSetup as unknown as ApmPluginSetupDeps,
+      appMountParameters: appMountParameters as unknown as AppMountParameters,
+      pluginsStart,
+      config,
+      observabilityRuleTypeRegistry,
+      corePlugins,
+    };
+  };
+
+  it('renders the app', () => {
+    const mountProps = getApmMountProps();
+
     let unmount: () => void;
 
     act(() => {
-      unmount = renderApp(
-        (core as unknown) as CoreStart,
-        (plugins as unknown) as ApmPluginSetupDeps,
-        (params as unknown) as AppMountParameters,
-        config,
-        (startDeps as unknown) as ApmPluginStartDeps
-      );
+      unmount = renderApmApp(mountProps);
     });
 
     expect(() => {

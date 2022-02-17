@@ -80,6 +80,7 @@ export const createTrustedAppsListData = (
     totalItemsCount: fullPagination.totalItemCount,
     timestamp,
     filter: '',
+    includedPolicies: '',
   };
 };
 

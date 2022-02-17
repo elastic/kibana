@@ -7,8 +7,9 @@
 
 import React, { FC } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { RectAnnotation, LineAnnotation, AnnotationDomainTypes, Position } from '@elastic/charts';
+import { RectAnnotation, LineAnnotation, AnnotationDomainType, Position } from '@elastic/charts';
 import { timeFormatter } from '../../../../../../../../common/util/date_utils';
+import { useCurrentEuiTheme } from '../../../../../../components/color_range_legend';
 
 interface Props {
   overlayKey: number;
@@ -19,12 +20,14 @@ interface Props {
 }
 
 export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMarker = true }) => {
+  const { euiTheme } = useCurrentEuiTheme();
+
   return (
     <>
       <RectAnnotation
         id={`rect_annotation_${overlayKey}`}
         zIndex={1}
-        hideTooltips={true}
+        hideTooltips
         dataValues={[
           {
             coordinates: {
@@ -40,7 +43,7 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
       />
       <LineAnnotation
         id="annotation_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={[{ dataValue: start }]}
         style={{
           line: {
@@ -50,14 +53,12 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
           },
         }}
         markerPosition={Position.Bottom}
-        hideTooltips={true}
-        marker={
+        hideTooltips
+        marker={showMarker ? <EuiIcon type="arrowUp" /> : undefined}
+        markerBody={
           showMarker ? (
-            <div>
-              <div style={{ textAlign: 'center' }}>
-                <EuiIcon type="arrowUp" />
-              </div>
-              <div style={{ fontWeight: 'normal', color: '#343741' }}>{timeFormatter(start)}</div>
+            <div style={{ fontWeight: 'normal', color: euiTheme.euiTextColor }}>
+              {timeFormatter(start)}
             </div>
           ) : undefined
         }

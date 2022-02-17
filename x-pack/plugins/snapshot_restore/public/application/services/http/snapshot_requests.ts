@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from '../../../../common/constants';
+import { HttpFetchQuery } from 'kibana/public';
+import { API_BASE_PATH } from '../../../../common';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
+import { SnapshotListParams } from '../../lib';
 import { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
 
@@ -18,11 +20,12 @@ export const setUiMetricServiceSnapshot = (_uiMetricService: UiMetricService) =>
 };
 // End hack
 
-export const useLoadSnapshots = () =>
+export const useLoadSnapshots = (query: SnapshotListParams) =>
   useRequest({
     path: `${API_BASE_PATH}snapshots`,
     method: 'get',
     initialData: [],
+    query: query as unknown as HttpFetchQuery,
   });
 
 export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';
+export {
+  getServiceNowITSMActionType,
+  getServiceNowSIRActionType,
+  getServiceNowITOMActionType,
+} from './servicenow';

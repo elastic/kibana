@@ -12,6 +12,7 @@ import {
 } from '../../../../plugins/fleet/common';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -24,11 +25,12 @@ export default function (providerContext: FtrProviderContext) {
   const pkgUpdateVersion = '0.2.0';
   describe('setup checks packages completed install', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     describe('package install', async () => {
       before(async () => {
         if (!server.enabled) return;
         await supertest
-          .post(`/api/fleet/epm/packages/${pkgName}-0.1.0`)
+          .post(`/api/fleet/epm/packages/${pkgName}/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
@@ -90,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
       after(async () => {
         if (!server.enabled) return;
         await supertest
-          .delete(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
+          .delete(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
       });
@@ -99,12 +101,12 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         if (!server.enabled) return;
         await supertest
-          .post(`/api/fleet/epm/packages/${pkgName}-0.1.0`)
+          .post(`/api/fleet/epm/packages/${pkgName}/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
         await supertest
-          .post(`/api/fleet/epm/packages/${pkgName}-0.2.0`)
+          .post(`/api/fleet/epm/packages/${pkgName}/0.2.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
@@ -172,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
       after(async () => {
         if (!server.enabled) return;
         await supertest
-          .delete(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
+          .delete(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
       });

@@ -1,0 +1,317 @@
+{
+  "id": "rollup",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/rollup\""
+        ],
+        "path": "x-pack/plugins/rollup/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.CONFIG_ROLLUPS",
+        "type": "string",
+        "tags": [],
+        "label": "CONFIG_ROLLUPS",
+        "description": [],
+        "signature": [
+          "\"rollups:enableIndexPatterns\""
+        ],
+        "path": "x-pack/plugins/rollup/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.MAJOR_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "MAJOR_VERSION",
+        "description": [],
+        "signature": [
+          "\"8.0.0\""
+        ],
+        "path": "x-pack/plugins/rollup/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_APP_LOAD",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_APP_LOAD",
+        "description": [],
+        "signature": [
+          "\"app_load\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_APP_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_APP_NAME",
+        "description": [],
+        "signature": [
+          "\"rollup_jobs\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK",
+        "description": [],
+        "signature": [
+          "\"detail_panel_histogram_tab_click\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_DETAIL_PANEL_JSON_TAB_CLICK",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_DETAIL_PANEL_JSON_TAB_CLICK",
+        "description": [],
+        "signature": [
+          "\"detail_panel_json_tab_click\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_DETAIL_PANEL_METRICS_TAB_CLICK",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_DETAIL_PANEL_METRICS_TAB_CLICK",
+        "description": [],
+        "signature": [
+          "\"detail_panel_metrics_tab_click\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK",
+        "description": [],
+        "signature": [
+          "\"detail_panel_summary_tab_click\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_DETAIL_PANEL_TERMS_TAB_CLICK",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_DETAIL_PANEL_TERMS_TAB_CLICK",
+        "description": [],
+        "signature": [
+          "\"detail_panel_terms_tab_click\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_CREATE",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_CREATE",
+        "description": [],
+        "signature": [
+          "\"job_create\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_DELETE",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_DELETE",
+        "description": [],
+        "signature": [
+          "\"job_delete\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_DELETE_MANY",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_DELETE_MANY",
+        "description": [],
+        "signature": [
+          "\"job_delete_many\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_START",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_START",
+        "description": [],
+        "signature": [
+          "\"job_start\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_START_MANY",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_START_MANY",
+        "description": [],
+        "signature": [
+          "\"job_start_many\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_STOP",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_STOP",
+        "description": [],
+        "signature": [
+          "\"job_stop\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_JOB_STOP_MANY",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_JOB_STOP_MANY",
+        "description": [],
+        "signature": [
+          "\"job_stop_many\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.UIM_SHOW_DETAILS_CLICK",
+        "type": "string",
+        "tags": [],
+        "label": "UIM_SHOW_DETAILS_CLICK",
+        "description": [],
+        "signature": [
+          "\"show_details_click\""
+        ],
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "rollup",
+        "id": "def-common.PLUGIN",
+        "type": "Object",
+        "tags": [],
+        "label": "PLUGIN",
+        "description": [],
+        "path": "x-pack/plugins/rollup/common/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "rollup",
+            "id": "def-common.PLUGIN.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "path": "x-pack/plugins/rollup/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "rollup",
+            "id": "def-common.PLUGIN.minimumLicenseType",
+            "type": "string",
+            "tags": [],
+            "label": "minimumLicenseType",
+            "description": [],
+            "signature": [
+              "\"basic\""
+            ],
+            "path": "x-pack/plugins/rollup/common/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

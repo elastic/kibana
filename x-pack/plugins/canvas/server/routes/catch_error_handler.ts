@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler, RequestHandlerContext } from 'src/core/server';
 
-export const catchErrorHandler: <P, Q, B>(
-  fn: RequestHandler<P, Q, B>
-) => RequestHandler<P, Q, B> = (fn) => {
+export const catchErrorHandler: <P, Q, B, Context extends RequestHandlerContext>(
+  fn: RequestHandler<P, Q, B, Context>
+) => RequestHandler<P, Q, B, Context> = (fn) => {
   return async (context, request, response) => {
     try {
       return await fn(context, request, response);

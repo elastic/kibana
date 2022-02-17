@@ -21,7 +21,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
@@ -48,7 +48,7 @@ export function BeatsPanel(props) {
     />
   ) : null;
 
-  const beatTypes = props.beats.types.map((beat, index) => {
+  const beatTypes = get(props, 'beats.types', []).map((beat, index) => {
     return [
       <EuiDescriptionListTitle
         key={`beat-types-type-${index}`}

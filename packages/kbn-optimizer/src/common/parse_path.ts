@@ -9,17 +9,61 @@
 import normalizePath from 'normalize-path';
 import Qs from 'querystring';
 
+class ParsedPath {
+  constructor(
+    public readonly root: string,
+    public readonly dirs: string[],
+    public readonly query?: Record<string, unknown>,
+    public readonly filename?: string
+  ) {}
+
+  private indexOfDir(match: string | RegExp, fromIndex: number = 0) {
+    for (let i = fromIndex; i < this.dirs.length; i++) {
+      if (this.matchDir(i, match)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  private matchDir(i: number, match: string | RegExp) {
+    return typeof match === 'string' ? this.dirs[i] === match : match.test(this.dirs[i]);
+  }
+
+  matchDirs(...segments: Array<string | RegExp>) {
+    const [first, ...rest] = segments;
+    let fromIndex = 0;
+    while (true) {
+      // do the dirs include the first segment to match?
+      const startIndex = this.indexOfDir(first, fromIndex);
+      if (startIndex === -1) {
+        return;
+      }
+
+      // are all of the ...rest segments also matched at this point?
+      if (!rest.length || rest.every((seg, i) => this.matchDir(startIndex + 1 + i, seg))) {
+        return { startIndex, endIndex: startIndex + rest.length };
+      }
+
+      // no match, search again, this time looking at instances after the matched instance
+      fromIndex = startIndex + 1;
+    }
+  }
+}
+
 /**
  * Parse an absolute path, supporting normalized paths from webpack,
  * into a list of directories and root
  */
 export function parseDirPath(path: string) {
   const filePath = parseFilePath(path);
-  return {
-    ...filePath,
-    dirs: [...filePath.dirs, ...(filePath.filename ? [filePath.filename] : [])],
-    filename: undefined,
-  };
+  return new ParsedPath(
+    filePath.root,
+    [...filePath.dirs, ...(filePath.filename ? [filePath.filename] : [])],
+    filePath.query,
+    undefined
+  );
 }
 
 export function parseFilePath(path: string) {
@@ -32,10 +76,10 @@ export function parseFilePath(path: string) {
   }
 
   const [root, ...others] = normalized.split('/');
-  return {
-    root: root === '' ? '/' : root,
-    dirs: others.slice(0, -1),
+  return new ParsedPath(
+    root === '' ? '/' : root,
+    others.slice(0, -1),
     query,
-    filename: others[others.length - 1] || undefined,
-  };
+    others[others.length - 1] || undefined
+  );
 }

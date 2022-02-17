@@ -16,6 +16,7 @@ Note that when generating absolute urls, the origin (protocol, host and port) ar
 getUrlForApp(appId: string, options?: {
         path?: string;
         absolute?: boolean;
+        deepLinkId?: string;
     }): string;
 ```
 
@@ -23,10 +24,10 @@ getUrlForApp(appId: string, options?: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  appId | <code>string</code> |  |
-|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        absolute?: boolean;</code><br/><code>    }</code> |  |
+|  appId | string |  |
+|  options | { path?: string; absolute?: boolean; deepLinkId?: string; } |  |
 
 <b>Returns:</b>
 
-`string`
+string
 

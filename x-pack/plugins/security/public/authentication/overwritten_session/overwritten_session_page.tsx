@@ -9,9 +9,10 @@ import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart, IBasePath } from 'src/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AppMountParameters, CoreStart, IBasePath } from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { parseNext } from '../../../common/parse_next';
 import type { AuthenticationServiceSetup } from '../authentication_service';
 import { AuthenticationStatePage } from '../components';
@@ -53,12 +54,14 @@ export function OverwrittenSessionPage({ authc, basePath }: Props) {
 
 export function renderOverwrittenSessionPage(
   i18nStart: CoreStart['i18n'],
-  element: Element,
+  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
   props: Props
 ) {
   ReactDOM.render(
     <i18nStart.Context>
-      <OverwrittenSessionPage {...props} />
+      <KibanaThemeProvider theme$={theme$}>
+        <OverwrittenSessionPage {...props} />
+      </KibanaThemeProvider>
     </i18nStart.Context>,
     element
   );

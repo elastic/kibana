@@ -21,4 +21,7 @@ You can run `node scripts/jest --watch` to watch for changes and run the tests a
 You can run `node scripts/jest --coverage` to generate a code coverage report to see how
 fully-tested the code is.
 
+You can run `node scripts/jest --config path/to/plugin/jest.config.js --coverage` to generate
+a code coverage report for a single plugin.
+
 See the documentation in [`scripts/jest.js`](../scripts/jest.js) for more options.

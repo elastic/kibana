@@ -21,7 +21,7 @@ describe('Enterprise Search Config Data API', () => {
   beforeEach(() => {
     mockRouter = new MockRouter({
       method: 'get',
-      path: '/api/enterprise_search/config_data',
+      path: '/internal/enterprise_search/config_data',
     });
 
     registerConfigDataRoute({
@@ -30,7 +30,7 @@ describe('Enterprise Search Config Data API', () => {
     });
   });
 
-  describe('GET /api/enterprise_search/config_data', () => {
+  describe('GET /internal/enterprise_search/config_data', () => {
     it('returns an initial set of config data from Enterprise Search', async () => {
       const mockData = {
         ...DEFAULT_INITIAL_APP_DATA,

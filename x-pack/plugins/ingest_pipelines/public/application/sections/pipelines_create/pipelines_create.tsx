@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RouteComponentProps, useHistory } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
@@ -30,10 +22,14 @@ interface Props {
   sourcePipeline?: Pipeline;
 }
 
+interface LocationState {
+  sourcePipeline?: Pipeline;
+}
+
 export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
-  history,
   sourcePipeline,
 }) => {
+  const history = useHistory<LocationState>();
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -63,50 +59,54 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
 
+  const formDefaultValue = useMemo(() => {
+    if (sourcePipeline) {
+      return sourcePipeline;
+    }
+
+    if (history.location.state?.sourcePipeline) {
+      return history.location.state.sourcePipeline;
+    }
+  }, [sourcePipeline, history]);
+
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l" data-test-subj="pageTitle">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.create.pageTitle"
-                    defaultMessage="Create pipeline"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <span data-test-subj="pageTitle">
+            <FormattedMessage
+              id="xpack.ingestPipelines.create.pageTitle"
+              defaultMessage="Create pipeline"
+            />
+          </span>
+        }
+        rightSideItems={[
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            href={services.documentation.getPutPipelineApiUrl()}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.create.docsButtonLabel"
+              defaultMessage="Create pipeline docs"
+            />
+          </EuiButtonEmpty>,
+        ]}
+      />
 
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                flush="right"
-                href={services.documentation.getPutPipelineApiUrl()}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.ingestPipelines.create.docsButtonLabel"
-                  defaultMessage="Create pipeline docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
+      <EuiSpacer size="l" />
 
-        <EuiSpacer size="l" />
-
-        <PipelineForm
-          defaultValue={sourcePipeline}
-          onSave={onSave}
-          onCancel={onCancel}
-          isSaving={isSaving}
-          saveError={saveError}
-        />
-      </EuiPageContent>
-    </EuiPageBody>
+      <PipelineForm
+        defaultValue={formDefaultValue}
+        onSave={onSave}
+        onCancel={onCancel}
+        isSaving={isSaving}
+        saveError={saveError}
+      />
+    </>
   );
 };

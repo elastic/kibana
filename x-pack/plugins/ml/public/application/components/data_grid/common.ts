@@ -6,24 +6,18 @@
  */
 
 import moment from 'moment-timezone';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo } from 'react';
 
-import {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridSorting,
-  EuiDataGridStyle,
-} from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import {
-  IndexPattern,
-  IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+
+import type { DataView, DataViewField } from '../../../../../../../src/plugins/data_views/common';
 
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
@@ -49,9 +43,8 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { RuntimeMappings } from '../../../../common/types/fields';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;
@@ -67,12 +60,12 @@ export const euiDataGridStyle: EuiDataGridStyle = {
 
 export const euiDataGridToolbarSettings = {
   showColumnSelector: true,
-  showStyleSelector: false,
+  showDisplaySelector: false,
   showSortSelector: true,
   showFullScreenSelector: false,
 };
 
-export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): string[] => {
+export const getFieldsFromKibanaIndexPattern = (indexPattern: DataView): string[] => {
   const allFields = indexPattern.fields.map((f) => f.name);
   const indexPatternFields: string[] = allFields.filter((f) => {
     if (indexPattern.metaFields.includes(f)) {
@@ -94,34 +87,36 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
 /**
  * Return a map of runtime_mappings for each of the index pattern field provided
  * to provide in ES search queries
- * @param indexPatternFields
  * @param indexPattern
- * @param clonedRuntimeMappings
+ * @param RuntimeMappings
  */
-export const getRuntimeFieldsMapping = (
-  indexPatternFields: string[] | undefined,
-  indexPattern: IndexPattern | undefined,
-  clonedRuntimeMappings?: RuntimeMappings
-) => {
-  if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
-  const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
-  let combinedRuntimeMappings: RuntimeMappings = {};
+export function getCombinedRuntimeMappings(
+  indexPattern: DataView | undefined,
+  runtimeMappings?: RuntimeMappings
+): RuntimeMappings | undefined {
+  let combinedRuntimeMappings = {};
 
-  if (isPopulatedObject(ipRuntimeMappings)) {
-    indexPatternFields.forEach((ipField) => {
-      if (ipRuntimeMappings.hasOwnProperty(ipField)) {
-        // @ts-expect-error
-        combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
+  // Add runtime field mappings defined by index pattern
+  if (indexPattern) {
+    const computedFields = indexPattern?.getComputedFields();
+    if (computedFields?.runtimeFields !== undefined) {
+      const indexPatternRuntimeMappings = computedFields.runtimeFields;
+      if (isRuntimeMappings(indexPatternRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...indexPatternRuntimeMappings };
       }
-    });
+    }
   }
-  if (isPopulatedObject(clonedRuntimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
+
+  // Use runtime field mappings defined inline from API
+  // and override fields with same name from index pattern
+  if (isRuntimeMappings(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
-  return Object.keys(combinedRuntimeMappings).length > 0
-    ? { runtime_mappings: combinedRuntimeMappings }
-    : {};
-};
+
+  if (isRuntimeMappings(combinedRuntimeMappings)) {
+    return combinedRuntimeMappings;
+  }
+}
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
@@ -145,6 +140,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       case 'date':
         schema = 'datetime';
         break;
+      case 'nested':
       case 'geo_point':
         schema = 'json';
         break;
@@ -178,7 +174,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
+  fieldType: ES_FIELD_TYPES | undefined | estypes.MappingRuntimeField['type'] | 'number'
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
@@ -204,6 +200,7 @@ export const getDataGridSchemaFromESFieldType = (
     case ES_FIELD_TYPES.LONG:
     case ES_FIELD_TYPES.SCALED_FLOAT:
     case ES_FIELD_TYPES.SHORT:
+    case 'number':
       schema = 'numeric';
       break;
     // keep schema undefined for text based columns
@@ -216,7 +213,7 @@ export const getDataGridSchemaFromESFieldType = (
 };
 
 export const getDataGridSchemaFromKibanaFieldType = (
-  field: IFieldType | undefined
+  field: DataViewField | undefined
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
@@ -235,6 +232,9 @@ export const getDataGridSchemaFromKibanaFieldType = (
       break;
     case KBN_FIELD_TYPES.NUMBER:
       schema = 'numeric';
+      break;
+    case KBN_FIELD_TYPES.NESTED:
+      schema = 'json';
       break;
   }
 
@@ -306,7 +306,7 @@ export const getTopClasses = (row: Record<string, any>, mlResultsField: string):
 };
 
 export const useRenderCellValue = (
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   pagination: IndexPagination,
   tableItems: DataGridItem[],
   resultsField?: string,
@@ -414,6 +414,16 @@ export const useRenderCellValue = (
   return renderCellValue;
 };
 
+// Value can be nested or the fieldName itself might contain other special characters like `.`
+export const getNestedOrEscapedVal = (obj: any, sortId: string) =>
+  getNestedProperty(obj, sortId, null) ?? obj[sortId];
+
+export interface MultiColumnSorter {
+  id: string;
+  direction: 'asc' | 'desc';
+  type: string;
+}
+
 /**
  * Helper to sort an array of objects based on an EuiDataGrid sorting configuration.
  * `sortFn()` is recursive to support sorting on multiple columns.
@@ -421,17 +431,17 @@ export const useRenderCellValue = (
  * @param sortingColumns - The EUI data grid sorting configuration
  * @returns The sorting function which can be used with an array's sort() function.
  */
-export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['columns']) => {
-  const isString = (arg: any): arg is string => {
-    return typeof arg === 'string';
-  };
-
+export const multiColumnSortFactory = (sortingColumns: MultiColumnSorter[]) => {
   const sortFn = (a: any, b: any, sortingColumnIndex = 0): number => {
     const sort = sortingColumns[sortingColumnIndex];
-    const aValue = getNestedProperty(a, sort.id, null);
-    const bValue = getNestedProperty(b, sort.id, null);
 
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
+    // Value can be nested or the fieldName itself might contain `.`
+    let aValue = getNestedOrEscapedVal(a, sort.id);
+    let bValue = getNestedOrEscapedVal(b, sort.id);
+
+    if (sort.type === 'number') {
+      aValue = aValue ?? 0;
+      bValue = bValue ?? 0;
       if (aValue < bValue) {
         return sort.direction === 'asc' ? -1 : 1;
       }
@@ -440,7 +450,10 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
       }
     }
 
-    if (isString(aValue) && isString(bValue)) {
+    if (sort.type === 'string') {
+      aValue = aValue ?? '';
+      bValue = bValue ?? '';
+
       if (aValue.localeCompare(bValue) === -1) {
         return sort.direction === 'asc' ? -1 : 1;
       }

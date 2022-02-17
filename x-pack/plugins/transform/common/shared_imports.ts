@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-export type { HitsTotalRelation, SearchResponse7 } from '../../ml/common';
+export type { ChartData } from '../../ml/common';
 export {
   composeValidators,
+  isPopulatedObject,
+  isRuntimeMappings,
   patternValidator,
-  ChartData,
-  HITS_TOTAL_RELATION,
+  isRuntimeField,
 } from '../../ml/common';
+
+export { RUNTIME_FIELD_TYPES } from '../../../../src/plugins/data/common';

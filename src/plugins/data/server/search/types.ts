@@ -21,22 +21,24 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchClient,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  SearchSourceService,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
+import type { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
-  defaultStrategy: string;
   sessionService: ISearchSessionService;
 }
 
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
-  uiSettingsClient: IUiSettingsClient;
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
+  request: KibanaRequest;
 }
 
 export interface ISearchSetup {
@@ -62,6 +64,8 @@ export interface ISearchSetup {
    * @internal
    */
   __enhance: (enhancements: SearchEnhancements) => void;
+
+  searchSource: ReturnType<SearchSourceService['setup']>;
 }
 
 /**
@@ -102,6 +106,11 @@ export interface ISearchStart<
 > {
   aggs: AggsStart;
   /**
+   * Search as the internal Kibana system user. This is not a registered search strategy as we don't
+   * want to allow access from the client.
+   */
+  searchAsInternalUser: ISearchStrategy;
+  /**
    * Get other registered search strategies by name (or, by default, the Elasticsearch strategy).
    * For example, if a new strategy needs to use the already-registered ES search strategy, it can
    * use this function to accomplish that.
@@ -117,9 +126,6 @@ export interface ISearchStart<
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
 
-/**
- * @internal
- */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
   search: SearchRequestHandlerContext;
 }

@@ -53,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 
@@ -88,10 +89,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('feature controls', () => {
     before(async () => {
-      await esArchiver.load('functional_base');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
+      );
     });
     after(async () => {
-      await esArchiver.unload('functional_base');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
+      );
     });
 
     addFeatureControlSuite({

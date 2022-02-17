@@ -30,6 +30,11 @@ export class SimpleSavedObject<T = unknown> {
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
+  /**
+   * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
+   * `namespaceType: 'agnostic'`.
+   */
+  public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
     private client: SavedObjectsClientContract,
@@ -42,6 +47,7 @@ export class SimpleSavedObject<T = unknown> {
       references,
       migrationVersion,
       coreMigrationVersion,
+      namespaces,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -51,6 +57,7 @@ export class SimpleSavedObject<T = unknown> {
     this._version = version;
     this.migrationVersion = migrationVersion;
     this.coreMigrationVersion = coreMigrationVersion;
+    this.namespaces = namespaces;
     if (error) {
       this.error = error;
     }
@@ -71,7 +78,6 @@ export class SimpleSavedObject<T = unknown> {
   public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
       return this.client.update(this.type, this.id, this.attributes, {
-        migrationVersion: this.migrationVersion,
         references: this.references,
       });
     } else {

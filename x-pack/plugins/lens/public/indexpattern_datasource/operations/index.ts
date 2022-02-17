@@ -8,9 +8,12 @@
 export * from './operations';
 export * from './layer_helpers';
 export * from './time_scale_utils';
-export {
+
+export type {
   OperationType,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   IncompleteColumn,
   RequiredReference,
@@ -31,4 +34,11 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  StaticValueIndexPatternColumn,
 } from './definitions';

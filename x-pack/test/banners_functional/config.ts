@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -29,15 +28,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaFunctionalConfig.get('apps'),
     },
 
-    esArchiver: {
-      directory: path.resolve(__dirname, '..', 'functional', 'es_archives'),
-    },
-
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.banners.placement=header',
+        '--xpack.banners.placement=top',
         '--xpack.banners.textContent="global banner text"',
       ],
     },

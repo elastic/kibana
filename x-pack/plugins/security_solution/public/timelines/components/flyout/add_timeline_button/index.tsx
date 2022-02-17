@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
+import { ActionTimelineToShow } from '../../open_timeline/types';
 import * as i18n from '../../timeline/properties/translations';
 import { NewTimeline } from '../../timeline/properties/helpers';
 import { NewTemplateTimeline } from '../../timeline/properties/new_template_timeline';
@@ -19,6 +20,8 @@ interface AddTimelineButtonComponentProps {
 }
 
 export const ADD_TIMELINE_BUTTON_CLASS_NAME = 'add-timeline-button';
+
+const actionTimelineToHide: ActionTimelineToShow[] = ['createFrom'];
 
 const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({ timelineId }) => {
   const [showActions, setShowActions] = useState(false);
@@ -83,7 +86,9 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
         </EuiPopover>
       </EuiFlexItem>
 
-      {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} /> : null}
+      {showTimelineModal ? (
+        <OpenTimelineModal onClose={onCloseTimelineModal} hideActions={actionTimelineToHide} />
+      ) : null}
     </>
   );
 };

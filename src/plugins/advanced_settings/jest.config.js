@@ -10,4 +10,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/advanced_settings'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/advanced_settings',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/advanced_settings/{public,server}/**/*.{ts,tsx}'],
 };

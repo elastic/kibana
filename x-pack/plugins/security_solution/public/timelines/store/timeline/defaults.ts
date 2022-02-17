@@ -7,7 +7,6 @@
 
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
-import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { SubsetTimelineModel, TimelineModel } from './model';
@@ -16,10 +15,14 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
+  Pick<TimelineModel, 'filters' | 'eqlOptions' | 'resolveTimelineConfig'> = {
   activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
+  documentType: '',
+  defaultColumns: defaultHeaders,
   dataProviders: [],
+  dataViewId: null,
   dateRange: { start, end },
   deletedEventIds: [],
   description: '',
@@ -50,6 +53,8 @@ export const timelineDefaults: SubsetTimelineModel &
     filterQuery: null,
   },
   loadingEventIds: [],
+  resolveTimelineConfig: undefined,
+  queryFields: [],
   title: '',
   timelineType: TimelineType.default,
   templateTimelineId: null,
@@ -58,6 +63,7 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
@@ -65,7 +71,7 @@ export const timelineDefaults: SubsetTimelineModel &
     {
       columnId: '@timestamp',
       columnType: 'number',
-      sortDirection: Direction.desc,
+      sortDirection: 'desc',
     },
   ],
   status: TimelineStatus.draft,

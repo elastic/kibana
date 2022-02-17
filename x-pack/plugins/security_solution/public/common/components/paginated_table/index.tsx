@@ -17,6 +17,7 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  EuiTableRowCellProps,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
@@ -38,6 +39,8 @@ import {
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
+import { HostRiskScoreColumns } from '../../../hosts/components/host_risk_score_table';
+
 import { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
@@ -82,6 +85,7 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
+  | HostRiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -94,10 +98,12 @@ export interface BasicTableProps<T> {
   columns: T;
   dataTestSubj?: string;
   headerCount: number;
+  headerFilters?: string | React.ReactNode;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
-  headerUnit: string | React.ReactElement;
+  headerUnit?: string | React.ReactElement;
+  headerSubtitle?: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
   isInspect?: boolean;
@@ -109,6 +115,8 @@ export interface BasicTableProps<T> {
   pageOfItems: any[];
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
+  split?: boolean;
+  stackHeader?: boolean;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
@@ -118,8 +126,7 @@ type Func<T> = (arg: T) => string | number;
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
-  hideForMobile?: boolean;
-  isMobileHeader?: boolean;
+  mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
@@ -132,10 +139,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   columns,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   headerCount,
+  headerFilters,
   headerSupplement,
   headerTitle,
   headerTooltip,
   headerUnit,
+  headerSubtitle,
   id,
   isInspect,
   itemsPerRow,
@@ -146,6 +155,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   pageOfItems,
   showMorePagesIndicator,
   sorting = null,
+  split,
+  stackHeader,
   totalCount,
   updateActivePage,
   updateLimitPagination,
@@ -246,10 +257,17 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          headerFilters={headerFilters}
           id={id}
+          split={split}
+          stackHeader={stackHeader}
           subtitle={
-            !loadingInitial &&
-            `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
+            !loadingInitial && headerSubtitle
+              ? `${i18n.SHOWING}: ${headerSubtitle}`
+              : headerUnit &&
+                `${i18n.SHOWING}: ${
+                  headerCount >= 0 ? headerCount.toLocaleString() : 0
+                } ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}

@@ -4,12 +4,22 @@ exports[`xy_expression XYChart component it renders area 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
@@ -19,18 +29,25 @@ exports[`xy_expression XYChart component it renders area 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -40,17 +57,28 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -63,17 +91,25 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -133,7 +169,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -200,12 +236,22 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
@@ -215,18 +261,25 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -236,17 +289,28 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -259,17 +323,25 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -297,9 +369,12 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -333,7 +408,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -361,9 +436,12 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -404,12 +482,22 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={90}
     showLegend={false}
     showLegendExtra={false}
@@ -419,18 +507,25 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -440,17 +535,28 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -463,17 +569,25 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -501,9 +615,12 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -537,7 +654,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -565,9 +682,12 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -608,12 +728,22 @@ exports[`xy_expression XYChart component it renders line 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
@@ -623,18 +753,25 @@ exports[`xy_expression XYChart component it renders line 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -644,17 +781,28 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -667,17 +815,25 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <LineSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -737,7 +893,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <LineSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -804,12 +960,22 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
@@ -819,18 +985,25 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -840,17 +1013,28 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -863,17 +1047,25 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -937,7 +1129,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1008,12 +1200,22 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
@@ -1023,18 +1225,25 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -1044,17 +1253,28 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -1067,17 +1287,25 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1105,9 +1333,12 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1145,7 +1376,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1173,9 +1404,12 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1220,12 +1454,22 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
+    onPointerUpdate={[Function]}
     rotation={90}
     showLegend={false}
     showLegendExtra={false}
@@ -1235,18 +1479,25 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
       Object {
+        "boundary": undefined,
         "headerFormatter": [Function],
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -1256,17 +1507,28 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
           "visible": true,
         },
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "max": NaN,
+        "min": NaN,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -1279,17 +1541,25 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     style={
       Object {
         "axisTitle": Object {
+          "padding": undefined,
           "visible": true,
         },
         "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
-  <Connect(SpecInstance)
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1317,9 +1587,12 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1357,7 +1630,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1385,9 +1658,12 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }

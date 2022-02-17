@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -43,10 +43,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as JiraActionParams['subActionParams']),
+      } as unknown as JiraActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
@@ -63,6 +63,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     actionConnector,
     issueType: incident.issueType ?? '',
   });
+
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
       if (key === 'issueType') {
@@ -75,9 +76,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           index
         );
       }
+
       if (key === 'comments') {
         return editAction('subActionParams', { incident, comments: value }, index);
       }
+
       return editAction(
         'subActionParams',
         {
@@ -91,9 +94,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   );
   const editComment = useCallback(
     (key, value) => {
-      if (value.length > 0) {
-        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
-      }
+      editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
   );
@@ -124,6 +125,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       text: type.name ?? '',
     }));
   }, [editSubActionProperty, incident, issueTypes]);
+
   const prioritiesSelectOptions: EuiSelectOption[] = useMemo(() => {
     if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
@@ -141,12 +143,13 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     return [];
   }, [editSubActionProperty, fields, incident.issueType, incident.priority]);
+
   useEffect(() => {
-    if (!hasPriority && incident.priority != null) {
+    if (!isLoadingFields && !hasPriority && incident.priority != null) {
       editSubActionProperty('priority', null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasPriority]);
+  }, [hasPriority, isLoadingFields]);
 
   const labelOptions = useMemo(
     () => (incident.labels ? incident.labels.map((label: string) => ({ label })) : []),
@@ -167,6 +170,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
+
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
@@ -186,11 +190,12 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   const areLabelsInvalid =
     errors['subActionParams.incident.labels'] != null &&
+    errors['subActionParams.incident.labels'] !== undefined &&
     errors['subActionParams.incident.labels'].length > 0 &&
     incident.labels !== undefined;
 
   return (
-    <Fragment>
+    <>
       <>
         <EuiFormRow
           fullWidth
@@ -277,6 +282,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             fullWidth
             error={errors['subActionParams.incident.summary']}
             isInvalid={
+              errors['subActionParams.incident.summary'] !== undefined &&
               errors['subActionParams.incident.summary'].length > 0 &&
               incident.summary !== undefined
             }
@@ -376,7 +382,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           />
         </>
       </>
-    </Fragment>
+    </>
   );
 };
 

@@ -40,7 +40,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./execution_status'));
       loadTestFile(require.resolve('./get'));
       loadTestFile(require.resolve('./get_alert_state'));
-      loadTestFile(require.resolve('./get_alert_instance_summary'));
+      loadTestFile(require.resolve('./get_alert_summary'));
       loadTestFile(require.resolve('./rule_types'));
       loadTestFile(require.resolve('./mute_all'));
       loadTestFile(require.resolve('./mute_instance'));
@@ -51,6 +51,8 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./alerts'));
       loadTestFile(require.resolve('./event_log'));
       loadTestFile(require.resolve('./mustache_templates'));
+      loadTestFile(require.resolve('./health'));
+      loadTestFile(require.resolve('./excluded'));
     });
   });
 }

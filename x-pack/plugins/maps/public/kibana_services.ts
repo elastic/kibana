@@ -6,22 +6,25 @@
  */
 
 import type { CoreStart } from 'kibana/public';
-import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
-import type { EMSSettings } from '../common/ems_settings';
+import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
 import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
-
-let kibanaVersion: string;
-export const setKibanaVersion = (version: string) => (kibanaVersion = version);
-export const getKibanaVersion = () => kibanaVersion;
+import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
+let mapsEms: MapsEmsPluginPublicStart;
+let emsSettings: EMSSettings;
 export function setStartServices(core: CoreStart, plugins: MapsPluginStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
+  mapsEms = plugins.mapsEms;
+  emsSettings = mapsEms.createEMSSettings();
 }
+
+export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
+export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
@@ -49,43 +52,32 @@ export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
+export const getSecurityService = () => pluginsStart.security;
+export const getSpacesApi = () => pluginsStart.spaces;
+export const getTheme = () => coreStart.theme;
+export const getUsageCollection = () => pluginsStart.usageCollection;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
 export const setMapAppConfig = (config: MapsConfigType) => (mapAppConfig = config);
 export const getMapAppConfig = () => mapAppConfig;
 
-export const getEnabled = () => getMapAppConfig().enabled;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsEmsConfig;
-export const setKibanaCommonConfig = (config: MapsEmsConfig) => (kibanaCommonConfig = config);
-export const getKibanaCommonConfig = () => kibanaCommonConfig;
-
-let emsSettings: EMSSettings;
-export const setEMSSettings = (value: EMSSettings) => {
-  emsSettings = value;
+export const getMapsEmsStart: () => MapsEmsPluginPublicStart = () => {
+  return mapsEms;
 };
-export const getEMSSettings = () => {
+
+export const getEMSSettings: () => EMSSettings = () => {
   return emsSettings;
 };
 
-export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
+export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
-export const getRegionmapLayers = () => {
-  const config = getKibanaCommonConfig();
-  if (config.regionmap && config.regionmap.layers) {
-    return config.regionmap.layers;
-  } else {
-    return [];
-  }
-};
 export const getTilemap = () => {
-  const config = getKibanaCommonConfig();
-  if (config.tilemap) {
-    return config.tilemap;
+  if (mapsEms.config.tilemap) {
+    return mapsEms.config.tilemap;
   } else {
     return {};
   }
@@ -110,7 +102,7 @@ export async function getChartsPaletteServiceGetColor(): Promise<
   const chartConfiguration = { syncColors: true };
   return (value: string) => {
     const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
-    const color = paletteDefinition.getColor(series, chartConfiguration);
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
     return color ? color : '#3d3d3d';
   };
 }

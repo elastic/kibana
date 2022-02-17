@@ -6,51 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { TypeLiteralNode } from 'ts-morph';
-import { getApiSectionId } from '../utils';
-import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
-import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
-import { getSourceForNode } from './utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { BuildApiDecOpts } from './types';
+import { getOptsForChild } from './utils';
 
 /**
  * This captures function parameters that are object types, and makes sure their
  * properties are recursively walked so they are expandable in the docs.
  *
  * The test verifying `crazyFunction` will fail without this special handling.
- *
- * @param node
- * @param plugins
- * @param anchorLink
- * @param log
- * @param name
  */
-export function buildTypeLiteralDec(
-  node: TypeLiteralNode,
-  plugins: KibanaPlatformPlugin[],
-  anchorLink: AnchorLink,
-  log: ToolingLog,
-  name: string
-): ApiDeclaration {
+export function buildTypeLiteralDec(node: TypeLiteralNode, opts: BuildApiDecOpts): ApiDeclaration {
   return {
-    id: getApiSectionId(anchorLink),
+    ...buildBasicApiDeclaration(node, opts),
     type: TypeKind.ObjectKind,
-    label: name,
-    tags: getJSDocTagNames(node),
-    description: getCommentsFromNode(node),
-    children: node
-      .getMembers()
-      .map((m) =>
-        buildApiDeclaration(
-          m,
-          plugins,
-          log,
-          anchorLink.pluginName,
-          anchorLink.scope,
-          anchorLink.apiName
-        )
-      ),
-    source: getSourceForNode(node),
+    children: node.getMembers().map((m) => buildApiDeclaration(m, getOptsForChild(m, opts))),
+    // Override the signature, we don't want it for objects, it'll get too big.
+    signature: undefined,
   };
 }

@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { useMemo } from 'react';
 import styled from 'styled-components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   DataAccessLayer,

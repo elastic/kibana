@@ -7,35 +7,43 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { Query } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
 import {
   DrawState,
+  EditState,
   Goto,
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
-  MapRefreshConfig,
+  Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../../src/plugins/data/public';
 
-export type MapContext = {
-  zoom?: number;
-  center?: MapCenter;
+export interface MapExtentState {
+  zoom: number;
+  extent: MapExtent;
+  center: MapCenter;
+}
+
+export type MapViewContext = MapExtentState & {
+  buffer: MapExtent;
+};
+
+export type MapContext = Partial<MapViewContext> & {
   scrollZoom: boolean;
-  buffer?: MapExtent;
-  extent?: MapExtent;
   mouseCoordinates?: {
     lat: number;
     lon: number;
   };
   timeFilters?: TimeRange;
-  query?: MapQuery;
+  timeslice?: Timeslice;
+  query?: Query;
   filters: Filter[];
-  refreshConfig?: MapRefreshConfig;
-  refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
+  editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };
@@ -61,6 +69,7 @@ export type MapSettings = {
   minZoom: number;
   showScaleControl: boolean;
   showSpatialFilters: boolean;
+  showTimesliderToggleButton: boolean;
   spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;

@@ -7,7 +7,7 @@
 
 import React, { memo, ReactNode, useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
@@ -36,12 +36,10 @@ export const AppRootProvider = memo<{
     children,
   }) => {
     const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
-    const services = useMemo(() => ({ http, notifications, application, data }), [
-      application,
-      data,
-      http,
-      notifications,
-    ]);
+    const services = useMemo(
+      () => ({ http, notifications, application, data }),
+      [application, data, http, notifications]
+    );
     return (
       <Provider store={store}>
         <I18nProvider>

@@ -8,9 +8,9 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -271,18 +271,18 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
 interface WidthProp {
-  width?: number;
+  width: number;
 }
 
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
   role: 'dialog',
   style: {
-    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
 }))<WidthProp>``;
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__trSupplement ${className}`,
+  className: `siemEventsTable__trSupplement ${className}` as string,
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
@@ -299,10 +299,10 @@ export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   'aria-colindex': `${ACTIONS_COLUMN_ARIA_COL_INDEX}`,
   className: `siemEventsTable__tdGroupActions ${className}`,
   role: 'gridcell',
-}))<{ actionsColumnWidth: number }>`
+}))<{ width: number }>`
   align-items: center;
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  flex: 0 0 ${({ width }) => `${width}px`};
   min-width: 0;
 `;
 
@@ -410,7 +410,7 @@ export const EventsHeadingTitleSpan = styled.span.attrs(({ className }) => ({
 `;
 
 export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsHeading__extra ${className}`,
+  className: `siemEventsHeading__extra ${className}` as string,
 }))`
   margin-left: auto;
   margin-right: 2px;

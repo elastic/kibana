@@ -13,9 +13,9 @@ auditLogger.log({
   message: 'User is updating dashboard [id=123]',
   event: {
     action: 'saved_object_update',
-    category: EventCategory.DATABASE,
-    type: EventType.CHANGE,
-    outcome: EventOutcome.UNKNOWN,
+    category: ['database'],
+    type: ['change'],
+    outcome: 'unknown',
   },
   kibana: {
     saved_object: { type: 'dashboard', id: '123' },

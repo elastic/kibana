@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { LevelLogger as Logger } from '../lib';
-import { registerJobGenerationRoutes } from './generation';
-import { registerJobInfoRoutes } from './jobs';
-import { ReportingCore } from '../core';
+import { ReportingCore } from '..';
+import { LevelLogger } from '../lib';
+import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
+import {
+  registerGenerateCsvFromSavedObjectImmediate,
+  registerJobGenerationRoutes,
+} from './generate';
+import { registerJobInfoRoutes } from './management';
 
-export function registerRoutes(reporting: ReportingCore, logger: Logger) {
+export function registerRoutes(reporting: ReportingCore, logger: LevelLogger) {
+  registerDeprecationsRoutes(reporting, logger);
+  registerDiagnosticRoutes(reporting, logger);
+  registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);
-  registerDiagnosticRoutes(reporting, logger);
-}
-
-export interface ReportingRequestPre {
-  management: {
-    jobTypes: string[];
-  };
-  user: string;
 }

@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
@@ -15,17 +16,22 @@ import {
   httpServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../actions/server/mocks';
-import { alertsMock, alertsClientMock } from '../mocks';
+import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
-import { alertTypeRegistryMock } from '../alert_type_registry.mock';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 
-const alertType: UntypedNormalizedAlertType = {
+const executionContext = executionContextServiceMock.createSetupContract();
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -64,11 +70,11 @@ describe('Task Runner Factory', () => {
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
   const services = alertsMock.createAlertServices();
-  const alertsClient = alertsClientMock.create();
+  const rulesClient = rulesClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     getServices: jest.fn().mockReturnValue(services),
-    getAlertsClientWithRequest: jest.fn().mockReturnValue(alertsClient),
+    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingSystemMock.create().get(),
@@ -76,8 +82,13 @@ describe('Task Runner Factory', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
-    alertTypeRegistry: alertTypeRegistryMock.create(),
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
+    supportsEphemeralTasks: true,
+    maxEphemeralActionsPerRule: 10,
+    cancelAlertsOnRuleTimeout: true,
+    executionContext,
+    usageCounter: mockUsageCounter,
   };
 
   beforeEach(() => {
@@ -88,7 +99,7 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(alertType, { taskInstance: mockedTaskInstance })
+      factory.create(ruleType, { taskInstance: mockedTaskInstance })
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

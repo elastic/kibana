@@ -6,45 +6,56 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function FieldEditorProvider({ getService }: FtrProviderContext) {
-  const browser = getService('browser');
-  const testSubjects = getService('testSubjects');
+export class FieldEditorService extends FtrService {
+  private readonly browser = this.ctx.getService('browser');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  class FieldEditor {
-    public async setName(name: string) {
-      await testSubjects.setValue('nameField > input', name);
-    }
-    public async enableValue() {
-      await testSubjects.setEuiSwitch('valueRow > toggle', 'check');
-    }
-    public async disableValue() {
-      await testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
-    }
-    public async typeScript(script: string) {
-      const editor = await (await testSubjects.find('valueRow')).findByClassName(
-        'react-monaco-editor-container'
-      );
-      const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
+  public async setName(name: string, clearFirst = false, typeCharByChar = false) {
+    await this.testSubjects.setValue('nameField > input', name, {
+      clearWithKeyboard: clearFirst,
+      typeCharByChar,
+    });
+  }
+  public async enableCustomLabel() {
+    await this.testSubjects.setEuiSwitch('customLabelRow > toggle', 'check');
+  }
+  public async setCustomLabel(name: string) {
+    await this.testSubjects.setValue('customLabelRow > input', name);
+  }
+  public async enableValue() {
+    await this.testSubjects.setEuiSwitch('valueRow > toggle', 'check');
+  }
+  public async disableValue() {
+    await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
+  }
+  public async typeScript(script: string) {
+    const editor = await (
+      await this.testSubjects.find('valueRow')
+    ).findByClassName('react-monaco-editor-container');
+    const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
 
-      await textarea.click();
-      await browser.pressKeys(script);
-    }
-    public async save() {
-      await testSubjects.click('fieldSaveButton');
-    }
+    await textarea.click();
 
-    public async confirmSave() {
-      await testSubjects.setValue('saveModalConfirmText', 'change');
-      await testSubjects.click('confirmModalConfirmButton');
-    }
-
-    public async confirmDelete() {
-      await testSubjects.setValue('deleteModalConfirmText', 'remove');
-      await testSubjects.click('confirmModalConfirmButton');
+    // To avoid issue with the timing needed for Selenium to write the script and the monaco editor
+    // syntax validation kicking in, we loop through all the chars of the script and enter
+    // them one by one (instead of calling "await this.browser.pressKeys(script);").
+    for (const letter of script.split('')) {
+      await this.browser.pressKeys(letter);
     }
   }
+  public async save() {
+    await this.testSubjects.click('fieldSaveButton');
+  }
 
-  return new FieldEditor();
+  public async confirmSave() {
+    await this.testSubjects.setValue('saveModalConfirmText', 'change');
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
+
+  public async confirmDelete() {
+    await this.testSubjects.setValue('deleteModalConfirmText', 'remove');
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
 }

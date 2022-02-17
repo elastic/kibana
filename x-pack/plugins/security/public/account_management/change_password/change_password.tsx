@@ -8,7 +8,7 @@
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import React, { Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { NotificationsSetup } from 'src/core/public';
 
@@ -17,13 +17,16 @@ import { canUserChangePassword } from '../../../common/model';
 import type { UserAPIClient } from '../../management/users';
 import { ChangePasswordForm } from '../../management/users/components/change_password_form';
 
-interface Props {
+export interface ChangePasswordProps {
   user: AuthenticatedUser;
+}
+
+export interface ChangePasswordPropsInternal extends ChangePasswordProps {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsSetup;
 }
 
-export class ChangePassword extends Component<Props, {}> {
+export class ChangePassword extends Component<ChangePasswordPropsInternal, {}> {
   public render() {
     const canChangePassword = canUserChangePassword(this.props.user);
 

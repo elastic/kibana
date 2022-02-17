@@ -8,6 +8,7 @@
 import { curry, isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import moment from 'moment';
 import { postPagerduty } from './lib/post_pagerduty';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -85,12 +86,20 @@ const ParamsSchema = schema.object(
   { validate: validateParams }
 );
 
+function validateTimestamp(timestamp?: string): string | null {
+  if (timestamp) {
+    return timestamp.trim().length > 0 ? timestamp.trim() : null;
+  }
+  return null;
+}
+
 function validateParams(paramsObject: unknown): string | void {
   const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  if (timestamp != null) {
+  const validatedTimestamp = validateTimestamp(timestamp);
+  if (validatedTimestamp != null) {
     try {
-      const date = Date.parse(timestamp);
-      if (isNaN(date)) {
+      const date = moment(validatedTimestamp);
+      if (!date.isValid()) {
         return i18n.translate('xpack.actions.builtin.pagerduty.invalidTimestampErrorMessage', {
           defaultMessage: `error parsing timestamp "{timestamp}"`,
           values: {
@@ -135,7 +144,7 @@ export function getActionType({
     }),
     validate: {
       config: schema.object(configSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
       params: ParamsSchema,
@@ -144,7 +153,7 @@ export function getActionType({
   };
 }
 
-function valdiateActionTypeConfig(
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
@@ -279,11 +288,14 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     return data;
   }
 
+  const validatedTimestamp = validateTimestamp(params.timestamp);
+
   data.payload = {
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
-    ...omitBy(pick(params, ['timestamp', 'component', 'group', 'class']), isUndefined),
+    ...(validatedTimestamp ? { timestamp: moment(validatedTimestamp).toISOString() } : {}),
+    ...omitBy(pick(params, ['component', 'group', 'class']), isUndefined),
   };
 
   return data;

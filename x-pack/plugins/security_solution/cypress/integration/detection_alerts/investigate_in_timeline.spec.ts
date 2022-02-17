@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE } from '../../screens/timeline';
 
-import {
-  investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { investigateFirstAlertInTimeline } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Alerts timeline', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    loginAndWaitForPage(ALERTS_URL);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
   });
 
   it('Investigate alert in default timeline', () => {

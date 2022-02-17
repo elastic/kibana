@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Execution } from './execution';
+import { of, Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
+import { Adapters } from '../../../inspector/common/adapters';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
@@ -16,12 +19,16 @@ import { ExpressionAstExpression } from '../ast';
  */
 export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
   public get isPending(): boolean {
-    const state = this.execution.state.get().state;
-    const finished = state === 'error' || state === 'result';
+    const { state, result } = this.execution.state.get();
+    const finished = state === 'error' || (state === 'result' && !result?.partial);
     return !finished;
   }
 
-  constructor(protected readonly execution: Execution<Input, Output, InspectorAdapters>) {}
+  protected readonly execution: Execution<Input, Output, InspectorAdapters>;
+
+  constructor(execution: Execution<Input, Output, InspectorAdapters>) {
+    this.execution = execution;
+  }
 
   /**
    * Cancel the execution of the expression. This will set abort signal
@@ -37,19 +44,22 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * wraps that error into `ExpressionValueError` type and returns that.
    * This function never throws.
    */
-  getData = async (): Promise<Output | ExpressionValueError> => {
-    try {
-      return await this.execution.result;
-    } catch (e) {
-      return {
-        type: 'error',
-        error: {
-          name: e.name,
-          message: e.message,
-          stack: e.stack,
-        },
-      };
-    }
+  getData = (): Observable<ExecutionResult<Output | ExpressionValueError>> => {
+    return this.execution.result.pipe(
+      catchError(({ name, message, stack }) =>
+        of({
+          partial: false,
+          result: {
+            type: 'error',
+            error: {
+              name,
+              message,
+              stack,
+            },
+          } as ExpressionValueError,
+        })
+      )
+    );
   };
 
   /**
@@ -70,5 +80,5 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * Get Inspector adapters provided to all functions of expression through
    * execution context.
    */
-  inspect = () => this.execution.inspectorAdapters;
+  inspect = (): Adapters => this.execution.inspectorAdapters;
 }

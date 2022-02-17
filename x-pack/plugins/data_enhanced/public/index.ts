@@ -12,6 +12,9 @@ import { ConfigSchema } from '../config';
 export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
   new DataEnhancedPlugin(initializerContext);
 
-export { DataEnhancedSetup, DataEnhancedStart };
+export type { DataEnhancedSetup, DataEnhancedStart };
 
-export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
+export {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '../../../../src/plugins/data/common';

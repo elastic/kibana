@@ -14,7 +14,7 @@ import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metr
 import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
 export default function ({ getService }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const metricSets = [
     {

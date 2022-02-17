@@ -19,10 +19,15 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: 'Oct 5, 2017 @ 20:31:48.354',
-          to: 'Oct 5, 2017 @ 20:35:12.176',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          }
+        );
+
+        await overview.closeAlertsModal();
 
         // go to nodes listing
         await overview.clickEsNodes();
@@ -74,10 +79,12 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-red-platinum', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum', {
           from: 'Oct 6, 2017 @ 19:53:06.748',
           to: 'Oct 6, 2017 @ 20:15:30.212',
         });
+
+        await overview.closeAlertsModal();
 
         // go to nodes listing
         await overview.clickEsNodes();
@@ -110,10 +117,15 @@ export default function ({ getService, getPageObjects }) {
         const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
         before(async () => {
-          await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-            from: 'Oct 5, 2017 @ 20:31:48.354',
-            to: 'Oct 5, 2017 @ 20:35:12.176',
-          });
+          await setup(
+            'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+            {
+              from: 'Oct 5, 2017 @ 20:31:48.354',
+              to: 'Oct 5, 2017 @ 20:35:12.176',
+            }
+          );
+
+          await overview.closeAlertsModal();
 
           // go to nodes listing
           await overview.clickEsNodes();

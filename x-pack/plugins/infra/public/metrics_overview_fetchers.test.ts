@@ -31,21 +31,27 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
         hasData: true,
+        configuration: {
+          metricAlias: 'metric-*',
+        },
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
       expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(response).toBeTruthy();
+      expect(response.hasData).toBeTruthy();
     });
     it('should return false when false', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
         hasData: false,
+        configuration: {
+          metricAlias: 'metric-*',
+        },
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
       expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(response).toBeFalsy();
+      expect(response.hasData).toBeFalsy();
     });
   });
 
@@ -56,7 +62,8 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const fetchData = createMetricsFetchData(mockedGetStartServices);
       const endTime = moment('2020-07-02T13:25:11.629Z');
       const startTime = endTime.clone().subtract(1, 'h');
-      const bucketSize = '300s';
+      const bucketSize = 300;
+      const intervalString = '300s';
       const response = await fetchData({
         absoluteTime: {
           start: startTime.valueOf(),
@@ -67,11 +74,14 @@ describe('Metrics UI Observability Homepage Functions', () => {
           end: 'now',
         },
         bucketSize,
+        intervalString,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
-      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview', {
+      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',
+          bucketSize: intervalString,
+          size: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

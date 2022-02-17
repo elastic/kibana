@@ -5,41 +5,29 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-
-import { outputService, appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager, setupFleet } from '../../services/setup';
-import type { PostFleetSetupRequestSchema } from '../../types';
+import { appContextService } from '../../services';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
+import { formatNonFatalErrors, setupFleet } from '../../services/setup';
+import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
+import type { FleetRequestHandler } from '../../types';
 
-export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
-    const isProductionMode = appContextService.getIsProductionMode();
-    const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
-    const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
-    const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
+    const isFleetServerSetup = await hasFleetServers(
+      context.core.elasticsearch.client.asInternalUser
+    );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
-    if (!isAdminUserSetup) {
-      missingRequirements.push('fleet_admin_user');
-    }
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
-    if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
-      missingRequirements.push('tls_required');
-    }
 
-    if (!canEncrypt) {
-      missingRequirements.push('encrypted_saved_object_encryption_key_required');
+    if (!isFleetServerSetup) {
+      missingRequirements.push('fleet_server');
     }
 
     const body: GetFleetStatusResponse = {
@@ -55,37 +43,16 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const createFleetSetupHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PostFleetSetupRequestSchema.body>
-> = async (context, request, response) => {
+export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    await setupIngestManager(soClient, esClient);
-    await setupFleet(soClient, esClient, {
-      forceRecreate: request.body?.forceRecreate ?? false,
-    });
-
-    return response.ok({
-      body: { isInitialized: true },
-    });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-
-  try {
-    const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient);
-    return response.ok({
-      body,
-    });
+    const soClient = context.fleet.epm.internalSoClient;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const setupStatus = await setupFleet(soClient, esClient);
+    const body: PostFleetSetupResponse = {
+      ...setupStatus,
+      nonFatalErrors: formatNonFatalErrors(setupStatus.nonFatalErrors),
+    };
+    return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

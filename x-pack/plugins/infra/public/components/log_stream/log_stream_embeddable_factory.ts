@@ -19,7 +19,8 @@ import {
 } from './log_stream_embeddable';
 
 export class LogStreamEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput>
+{
   public readonly type = LOG_STREAM_EMBEDDABLE;
 
   constructor(private getStartServices: StartServicesAccessor<InfraClientStartDeps>) {}
@@ -38,6 +39,16 @@ export class LogStreamEmbeddableFactoryDefinition
     return i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
       defaultMessage: 'Log stream',
     });
+  }
+
+  public getDescription() {
+    return i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+      defaultMessage: 'Add a table of live streaming logs.',
+    });
+  }
+
+  public getIconType() {
+    return 'logsApp';
   }
 
   public async getExplicitInput() {

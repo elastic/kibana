@@ -96,6 +96,11 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
     flex-grow: 1;
   }
   /**
+  * Set to force base-height necessary for resolver to show up in timeline.
+  * Was previously set in events_viewer.tsx, but more appropriate here
+   */
+  min-height: 652px;
+  /**
    * The placeholder components use absolute positioning.
    */
   position: relative;

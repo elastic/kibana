@@ -16,7 +16,7 @@ export interface EmbeddableError {
   message: string;
 }
 
-export { EmbeddableInput };
+export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
@@ -61,6 +61,14 @@ export interface IEmbeddable<
   readonly id: string;
 
   /**
+   * If set to true, defer embeddable load tells the container that this embeddable
+   * type isn't completely loaded when the constructor returns. This embeddable
+   * will have to manually call setChildLoaded on its parent when all of its initial
+   * output is finalized. For instance, after loading a saved object.
+   */
+  readonly deferEmbeddableLoad: boolean;
+
+  /**
    * Unique ID an embeddable is assigned each time it is initialized. This ID
    * is different for different instances of the same embeddable. For example,
    * if the same dashboard is rendered twice on the screen, all embeddable
@@ -94,6 +102,20 @@ export interface IEmbeddable<
    * Examples: title, pie slice colors, custom search columns and sort order.
    **/
   getInput(): Readonly<I>;
+
+  /**
+   * Because embeddables can inherit input from their parents, they also need a way to separate their own
+   * input from input which is inherited. If the embeddable does not have a parent, getExplicitInput
+   * and getInput should return the same.
+   **/
+  getExplicitInput(): Readonly<Partial<I>>;
+
+  /**
+   * Some embeddables contain input that should not be persisted anywhere beyond their own state. This method
+   * is a way for containers to separate input to store from input which can be ephemeral. In most cases, this
+   * will be the same as getExplicitInput
+   **/
+  getPersistableInput(): Readonly<Partial<I>>;
 
   /**
    * Output state is:
@@ -162,4 +184,9 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): string[];
+
+  /**
+   * Used to diff explicit embeddable input
+   */
+  getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
 }

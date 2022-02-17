@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Aggregators } from '../types';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
-import { roundTimestamp } from '../../../../utils/round_timestamp';
-import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
-
-const MINIMUM_BUCKETS = 5;
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
   filterQuery
@@ -23,10 +20,10 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
-  timefield: string,
+  timeframe: { start: number; end: number },
+  compositeSize: number,
   groupBy?: string | string[],
-  filterQuery?: string,
-  timeframe?: { start: number; end: number }
+  filterQuery?: string
 ) => {
   if (aggType === Aggregators.COUNT && metric) {
     throw new Error('Cannot aggregate document count with a metric');
@@ -35,19 +32,8 @@ export const getElasticsearchMetricQuery = (
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
-  const intervalAsSeconds = getIntervalInSeconds(interval);
-
-  const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
-  // We need enough data for 5 buckets worth of data. We also need
-  // to convert the intervalAsSeconds to milliseconds.
-  const minimumFrom = to - intervalAsSeconds * 1000 * MINIMUM_BUCKETS;
-
-  const from = roundTimestamp(
-    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
-    timeUnit
-  );
-
-  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
+  const to = timeframe.end;
+  const from = timeframe.start;
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -64,26 +50,29 @@ export const getElasticsearchMetricQuery = (
           },
         };
 
-  const baseAggs = {
-    aggregatedIntervals: {
-      date_histogram: {
-        field: timefield,
-        fixed_interval: interval,
-        offset,
-        extended_bounds: {
-          min: from,
-          max: to,
-        },
-      },
-      aggregations,
-    },
-  };
+  const baseAggs =
+    aggType === Aggregators.RATE
+      ? {
+          aggregatedIntervals: {
+            date_histogram: {
+              field: TIMESTAMP_FIELD,
+              fixed_interval: interval,
+              offset: calculateDateHistogramOffset({ from, to, interval }),
+              extended_bounds: {
+                min: from,
+                max: to,
+              },
+            },
+            aggregations,
+          },
+        }
+      : aggregations;
 
   const aggs = groupBy
     ? {
         groupings: {
           composite: {
-            size: 10,
+            size: compositeSize,
             sources: Array.isArray(groupBy)
               ? groupBy.map((field, index) => ({
                   [`groupBy${index}`]: {
@@ -130,6 +119,7 @@ export const getElasticsearchMetricQuery = (
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   return {
+    track_total_hits: true,
     query: {
       bool: {
         filter: [

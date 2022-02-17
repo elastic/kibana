@@ -45,7 +45,7 @@ export default function ({ getService }) {
         });
 
         expect(body.statusCode).to.be(404);
-        expect(body.attributes.cause[0]).to.contain('no such remote cluster');
+        expect(body.attributes.error.reason).to.contain('no such remote cluster');
       });
     });
 
@@ -70,7 +70,7 @@ export default function ({ getService }) {
         it('should return a 404 when the auto-follow pattern is not found', async () => {
           const { body } = await getAutoFollowPattern('missing-pattern');
           expect(body.statusCode).to.be(404);
-          expect(body.attributes.cause).not.to.be(undefined);
+          expect(body.attributes.error.reason).not.to.be(undefined);
         });
 
         it('should return an auto-follow pattern that was created', async () => {

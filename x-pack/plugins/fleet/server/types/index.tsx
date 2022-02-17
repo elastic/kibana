@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-export {
-  // Object types
+export type {
   Agent,
   AgentMetadata,
   AgentSOAttributes,
   AgentStatus,
   AgentType,
-  NewAgentEvent,
-  AgentEvent,
-  AgentEventSOAttributes,
   AgentAction,
   AgentPolicyAction,
-  AgentPolicyActionV7_9,
   BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
   AgentPolicyActionSOAttributes,
@@ -26,9 +21,11 @@ export {
   PackagePolicyInputStream,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  DryRunPackagePolicy,
   PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
+  FullAgentPolicyOutput,
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
@@ -52,13 +49,11 @@ export {
   AssetReference,
   EsAssetReference,
   KibanaAssetReference,
-  ElasticsearchAssetType,
   RegistryPackage,
+  BundledPackage,
   InstallablePackage,
   AssetType,
   Installable,
-  KibanaAssetType,
-  KibanaSavedObjectType,
   AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -66,24 +61,25 @@ export {
   IndexTemplate,
   RegistrySearchResults,
   RegistrySearchResult,
-  DefaultPackages,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
   InstallType,
   InstallSource,
   InstallResult,
-  // Agent Request types
-  PostAgentEnrollRequest,
-  PostAgentCheckinRequest,
+  GetCategoriesRequest,
   DataType,
-  dataTypes,
-  // Fleet Server types
   FleetServerEnrollmentAPIKey,
   FleetServerAgent,
   FleetServerAgentAction,
   FleetServerPolicy,
+} from '../../common';
+export {
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  KibanaSavedObjectType,
+  dataTypes,
 } from '../../common';
 
 export type AgentPolicyUpdateHandler = (
@@ -99,3 +95,5 @@ export interface BulkActionResult {
 
 export * from './models';
 export * from './rest_spec';
+export * from './extensions';
+export type { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

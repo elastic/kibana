@@ -18,12 +18,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('no management privileges', () => {
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
+        expect(links.map((link) => link.text)).to.eql(['Dashboard']);
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {
@@ -64,18 +64,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions'],
+          sectionLinks: ['triggersActions', 'jobsListLink'],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: [
-            'indexPatterns',
-            'objects',
-            'tags',
-            'search_sessions',
-            'spaces',
-            'settings',
-          ],
+          sectionLinks: ['dataViews', 'objects', 'tags', 'search_sessions', 'spaces', 'settings'],
         });
       });
     });

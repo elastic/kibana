@@ -26,6 +26,7 @@ export const validationIndicesRequestPayloadRT = rt.type({
   data: rt.type({
     fields: rt.array(validationIndicesFieldSpecificationRT),
     indices: rt.array(rt.string),
+    runtimeMappings: rt.UnknownRecord,
   }),
 });
 

@@ -21,7 +21,7 @@ export const useLogAnalysisModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { spaceId, sourceId, timestampField } = sourceConfiguration;
+  const { spaceId, sourceId, timestampField, runtimeMappings } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
   const trackMetric = useUiTracker({ app: 'infra_logs' });
@@ -67,6 +67,7 @@ export const useLogAnalysisModule = <JobType extends string>({
             sourceId,
             spaceId,
             timestampField,
+            runtimeMappings,
           },
           services.http.fetch
         );
@@ -126,9 +127,10 @@ export const useLogAnalysisModule = <JobType extends string>({
     [spaceId, sourceId]
   );
 
-  const isCleaningUp = useMemo(() => cleanUpModuleRequest.state === 'pending', [
-    cleanUpModuleRequest.state,
-  ]);
+  const isCleaningUp = useMemo(
+    () => cleanUpModuleRequest.state === 'pending',
+    [cleanUpModuleRequest.state]
+  );
 
   const cleanUpAndSetUpModule = useCallback(
     (
@@ -153,11 +155,10 @@ export const useLogAnalysisModule = <JobType extends string>({
     dispatchModuleStatus({ type: 'viewedResults' });
   }, [dispatchModuleStatus]);
 
-  const jobIds = useMemo(() => moduleDescriptor.getJobIds(spaceId, sourceId), [
-    moduleDescriptor,
-    spaceId,
-    sourceId,
-  ]);
+  const jobIds = useMemo(
+    () => moduleDescriptor.getJobIds(spaceId, sourceId),
+    [moduleDescriptor, spaceId, sourceId]
+  );
 
   return {
     cleanUpAndSetUpModule,

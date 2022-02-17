@@ -24,10 +24,10 @@ import { TlsQueryTabBody } from './tls_query_tab_body';
 import { Anomaly } from '../../../common/components/ml/types';
 import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
 import { UpdateDateRange } from '../../../common/components/charts/common';
+import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
   ({
-    networkPagePath,
     docValueFields,
     type,
     to,
@@ -108,10 +108,10 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     return (
       <Switch>
-        <Route path={`/:tabName(${NetworkRouteType.dns})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
           <DnsQueryTabBody {...tabProps} docValueFields={docValueFields} />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.flows})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.flows})`}>
           <>
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
@@ -137,19 +137,19 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             </ConditionalFlexGroup>
           </>
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.http})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.http})`}>
           <HttpQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.tls})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.tls})`}>
           <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.anomalies})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.anomalies})`}>
           <AnomaliesQueryTabBody
             {...anomaliesProps}
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.alerts})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.alerts})`}>
           <NetworkAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

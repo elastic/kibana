@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies the deletion of a Frontdoor Web Application Firewall (WAF) Policy in Azure. An adversary may delete a Frontdoor Web Application Firewall (WAF) Policy in an attempt to evade defenses and/or to eliminate barriers to their objective.",
+  "false_positives": [
+    "Azure Front Web Application Firewall (WAF) Policy deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Azure Front Web Application Firewall (WAF) Policy deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Frontdoor Web Application Firewall (WAF) Policy Deleted",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.NETWORK/FRONTDOORWEBAPPLICATIONFIREWALLPOLICIES/DELETE\" and event.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#networking"
+  ],
+  "risk_score": 21,
+  "rule_id": "09d028a5-dcde-409f-8ae0-557cef1b7082",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

@@ -9,14 +9,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import type { estypes } from '@elastic/elasticsearch';
+import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
+import { ThemeServiceStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
-import { SearchRequest } from '..';
+import type { SearchRequest } from '..';
 
-export function handleResponse(request: SearchRequest, response: estypes.SearchResponse<any>) {
-  if (response.timed_out) {
+export function handleResponse(
+  request: SearchRequest,
+  response: IKibanaSearchResponse,
+  theme: ThemeServiceStart
+) {
+  const { rawResponse } = response;
+
+  if (rawResponse.timed_out) {
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
@@ -24,12 +31,12 @@ export function handleResponse(request: SearchRequest, response: estypes.SearchR
     });
   }
 
-  if (response._shards && response._shards.failed) {
+  if (rawResponse._shards && rawResponse._shards.failed) {
     const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
       defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
       values: {
-        shardsFailed: response._shards.failed,
-        shardsTotal: response._shards.total,
+        shardsFailed: rawResponse._shards.failed,
+        shardsTotal: rawResponse._shards.total,
       },
     });
     const description = i18n.translate(
@@ -43,8 +50,14 @@ export function handleResponse(request: SearchRequest, response: estypes.SearchR
       <>
         {description}
         <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton request={request.body} response={response} title={title} />
-      </>
+        <ShardFailureOpenModalButton
+          request={request.body}
+          response={rawResponse}
+          theme={theme}
+          title={title}
+        />
+      </>,
+      { theme$: theme.theme$ }
     );
 
     getNotifications().toasts.addWarning({ title, text });

@@ -10,7 +10,13 @@ import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '../task_running';
-import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
+import {
+  TaskEvent,
+  asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  TaskRun,
+  TaskPersistence,
+} from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import moment from 'moment';
@@ -18,10 +24,23 @@ import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_diction
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
+import apm from 'elastic-apm-node';
+import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import {
+  TASK_MANAGER_RUN_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+} from './task_runner';
 
+const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
+
+jest.mock('uuid', () => ({
+  v4: () => 'NEW_UUID',
+}));
 
 beforeAll(() => {
   fakeTimer = sinon.useFakeTimers();
@@ -32,8 +51,110 @@ afterAll(() => fakeTimer.restore());
 describe('TaskManagerRunner', () => {
   const pendingStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.PENDING, opts);
   const readyToRunStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.READY_TO_RUN, opts);
+  const mockApmTrans = {
+    end: jest.fn(),
+    addLabels: jest.fn(),
+    setLabel: jest.fn(),
+  };
+
+  test('execution ID', async () => {
+    const { runner } = await pendingStageSetup({
+      instance: {
+        id: 'foo',
+        taskType: 'bar',
+      },
+    });
+
+    expect(runner.taskExecutionId).toEqual(`foo::NEW_UUID`);
+    expect(runner.isSameTask(`foo::ANOTHER_UUID`)).toEqual(true);
+    expect(runner.isSameTask(`bar::ANOTHER_UUID`)).toEqual(false);
+  });
 
   describe('Pending Stage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest
+        .spyOn(apm, 'startTransaction')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockImplementation(() => mockApmTrans as any);
+    });
+    test('makes calls to APM as expected when task markedAsRunning is success', async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+      await runner.markTaskAsRunning();
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+    });
+    test('makes calls to APM as expected when task markedAsRunning fails', async () => {
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+      store.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
+      );
+      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+        `[Error: Saved object [type/id] not found]`
+      );
+      // await runner.markTaskAsRunning();
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
+    test('provides execution context on run', async () => {
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          description: 'run task',
+          id: 'foo',
+          name: 'run bar',
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
+    });
     test('provides details about the task that is running', async () => {
       const { runner } = await pendingStageSetup({
         instance: {
@@ -572,6 +693,80 @@ describe('TaskManagerRunner', () => {
   });
 
   describe('Ready To Run Stage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    test('makes calls to APM as expected when task runs successfully', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(apm.startTransaction).toHaveBeenCalledWith('bar', TASK_MANAGER_RUN_TRANSACTION_TYPE, {
+        childOf: 'apmTraceparent',
+      });
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+    });
+    test('makes calls to APM as expected when task fails', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new Error('rar');
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(apm.startTransaction).toHaveBeenCalledWith('bar', TASK_MANAGER_RUN_TRANSACTION_TYPE, {
+        childOf: 'apmTraceparent',
+      });
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
+    test('provides execution context on run', async () => {
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          description: 'run task',
+          id: 'foo',
+          name: 'run bar',
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
+    });
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -740,9 +935,18 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
+      const {
+        runner,
+        store,
+        instance: originalInstance,
+      } = await readyToRunStageSetup({
         onTaskEvent,
-        instance: { id, status: TaskStatus.Running, startedAt: new Date() },
+        instance: {
+          id,
+          schedule: { interval: '20m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
         definitions: {
           bar: {
             title: 'Bar!',
@@ -766,6 +970,7 @@ describe('TaskManagerRunner', () => {
             id,
             asErr({
               error,
+              persistence: TaskPersistence.Recurring,
               task: originalInstance,
               result: TaskRunResult.Failed,
             })
@@ -1097,7 +1302,16 @@ describe('TaskManagerRunner', () => {
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
-          withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Success,
+              })
+            )
+          )
         );
       });
 
@@ -1126,7 +1340,16 @@ describe('TaskManagerRunner', () => {
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
-          withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+              })
+            )
+          )
         );
       });
 
@@ -1156,7 +1379,12 @@ describe('TaskManagerRunner', () => {
           withAnyTiming(
             asTaskRunEvent(
               id,
-              asErr({ error, task: instance, result: TaskRunResult.RetryScheduled })
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.RetryScheduled,
+              })
             )
           )
         );
@@ -1192,7 +1420,12 @@ describe('TaskManagerRunner', () => {
           withAnyTiming(
             asTaskRunEvent(
               id,
-              asErr({ error, task: instance, result: TaskRunResult.RetryScheduled })
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.RetryScheduled,
+              })
             )
           )
         );
@@ -1203,7 +1436,11 @@ describe('TaskManagerRunner', () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
         const onTaskEvent = jest.fn();
-        const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
+        const {
+          runner,
+          store,
+          instance: originalInstance,
+        } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
             id,
@@ -1234,6 +1471,7 @@ describe('TaskManagerRunner', () => {
               asErr({
                 error,
                 task: originalInstance,
+                persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Failed,
               })
             )
@@ -1241,6 +1479,43 @@ describe('TaskManagerRunner', () => {
         );
         expect(onTaskEvent).toHaveBeenCalledTimes(1);
       });
+    });
+
+    test('does not update saved object if task expires', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const error = new Error('Dangit!');
+      const { runner, store, usageCounter, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '1m',
+            getRetry: () => false,
+            createTaskRunner: () => ({
+              async run() {
+                return { error, state: {}, runAt: moment().add(1, 'm').toDate() };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.update).not.toHaveBeenCalled();
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerUpdateSkippedDueToTaskExpiration',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping reschedule for task bar \"${id}\" due to the task expiring`
+      );
     });
   });
 
@@ -1266,7 +1541,7 @@ describe('TaskManagerRunner', () => {
         primaryTerm: 32,
         runAt: new Date(),
         scheduledAt: new Date(),
-        startedAt: null,
+        startedAt: new Date(),
         retryAt: null,
         attempts: 0,
         params: {},
@@ -1275,6 +1550,7 @@ describe('TaskManagerRunner', () => {
         status: 'idle',
         user: 'example',
         ownerId: null,
+        traceparent: 'apmTraceparent',
       },
       instance
     );
@@ -1288,6 +1564,7 @@ describe('TaskManagerRunner', () => {
     const instance = mockInstance(opts.instance);
 
     const store = taskStoreMock.create();
+    const usageCounter = usageCountersServiceMock.createSetupContract().createUsageCounter('test');
 
     store.update.mockResolvedValue(instance);
 
@@ -1311,6 +1588,8 @@ describe('TaskManagerRunner', () => {
       instance,
       definitions,
       onTaskEvent: opts.onTaskEvent,
+      executionContext,
+      usageCounter,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
@@ -1329,6 +1608,7 @@ describe('TaskManagerRunner', () => {
       logger,
       store,
       instance,
+      usageCounter,
     };
   }
 });

@@ -6,8 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/utils';
 
-const ARCHIVE = 'email_connectors_with_encryption_rotation';
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+const ARCHIVE = resolve(
+  INTEGRATION_TEST_ROOT,
+  'test/es_archives/email_connectors_with_encryption_rotation'
+);
 
 export default ({ getPageObjects, getService }) => {
   const esArchiver = getService('esArchiver');
@@ -37,8 +43,8 @@ export default ({ getPageObjects, getService }) => {
           await testConnector(connectorName);
           await retry.try(async () => {
             const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
-            expect(await executionFailureResultCallout.getVisibleText()).to.match(
-              /Internal Server Error/
+            expect(await executionFailureResultCallout.getVisibleText()).to.be(
+              'Test failed to run\nThe following error was found:\nerror validating action type connector: secrets must be defined'
             );
           });
           expect(true).to.be(true);

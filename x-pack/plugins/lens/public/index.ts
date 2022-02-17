@@ -7,34 +7,39 @@
 
 import { LensPlugin } from './plugin';
 
-export {
+export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-} from './editor_frame_service/embeddable/embeddable_component';
+} from './embeddable/embeddable_component';
+export type { XYState } from './xy_visualization/types';
+export type { DataType, OperationMetadata, Visualization } from './types';
 export type {
-  XYState,
+  MetricState,
   AxesSettingsConfig,
   XYLayerConfig,
   LegendConfig,
   SeriesType,
-  ValueLabelConfig,
   YAxisMode,
   XYCurveType,
-} from './xy_visualization/types';
-export type { DataType } from './types';
+  YConfig,
+} from '../common/expressions';
 export type {
+  ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
-} from './pie_visualization/types';
+} from '../common/types';
+
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { MetricState } from './metric_visualization/types';
+export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
-  IndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -52,7 +57,15 @@ export type {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  FormulaPublicApi,
+  StaticValueIndexPatternColumn,
 } from './indexpattern_datasource/types';
-export { LensPublicStart } from './plugin';
+export type { LensEmbeddableInput } from './embeddable';
+export { layerTypes } from '../common';
+
+export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

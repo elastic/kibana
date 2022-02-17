@@ -5,23 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
-import { EuiPage } from '@elastic/eui';
+
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
-
 import { ManagementRouter } from './management_router';
-import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { reactRouterNavigate } from '../../../../kibana_react/public';
+import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateProps,
+  reactRouterNavigate,
+  KibanaThemeProvider,
+} from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
-
-import './management_app.scss';
 
 interface ManagementAppProps {
   appBasePath: string;
   history: AppMountParameters['history'];
+  theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
 }
 
@@ -31,7 +36,7 @@ export interface ManagementAppDependencies {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
+export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
   const { setBreadcrumbs } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
@@ -64,18 +69,41 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
     return null;
   }
 
+  const solution: KibanaPageTemplateProps['solutionNav'] = {
+    name: i18n.translate('management.nav.label', {
+      defaultMessage: 'Management',
+    }),
+    icon: 'managementApp',
+    'data-test-subj': 'mgtSideBarNav',
+    items: managementSidebarNav({
+      selectedId,
+      sections,
+      history,
+    }),
+  };
+
   return (
     <I18nProvider>
-      <EuiPage>
-        <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
-        <ManagementRouter
-          history={history}
-          setBreadcrumbs={setBreadcrumbsScoped}
-          onAppMounted={onAppMounted}
-          sections={sections}
-          dependencies={dependencies}
-        />
-      </EuiPage>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaPageTemplate
+          restrictWidth={false}
+          // EUI TODO
+          // The different template options need to be manually recreated by the individual pages.
+          // These classes help enforce the layouts.
+          pageContentProps={{ className: 'kbnAppWrapper' }}
+          pageContentBodyProps={{ className: 'kbnAppWrapper' }}
+          solutionNav={solution}
+        >
+          <ManagementRouter
+            history={history}
+            theme$={theme$}
+            setBreadcrumbs={setBreadcrumbsScoped}
+            onAppMounted={onAppMounted}
+            sections={sections}
+            dependencies={dependencies}
+          />
+        </KibanaPageTemplate>
+      </KibanaThemeProvider>
     </I18nProvider>
   );
 };

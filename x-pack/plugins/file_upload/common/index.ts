@@ -5,5 +5,14 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './types';
+/**
+ * @internal
+ */
+export type {
+  AnalysisResult,
+  FindFileStructureErrorResponse,
+  FindFileStructureResponse,
+  InputOverrides,
+  IngestPipeline,
+  Mappings,
+} from './types';

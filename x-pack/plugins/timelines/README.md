@@ -3,9 +3,9 @@ Timelines is a plugin that provides a grid component with accompanying server si
 
 
 ## Using timelines in another plugin
-- Add `TimelinesPluginSetup` to Kibana plugin `SetupServices` dependencies:
+- Add `TimelinesPluginUI` to Kibana plugin `SetupServices` dependencies:
 
 ```ts
-timelines: TimelinesPluginSetup;
+timelines: TimelinesPluginUI;
 ```
 - Once `timelines` is added as a required plugin in the consuming plugin's kibana.json, timeline functionality will be available as any other kibana plugin, ie PluginSetupDependencies.timelines.getTimeline()

@@ -16,11 +16,11 @@ register(settings: Record<string, UiSettingsParams>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  settings | <code>Record&lt;string, UiSettingsParams&gt;</code> |  |
+|  settings | Record&lt;string, UiSettingsParams&gt; |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Example
 
@@ -35,6 +35,5 @@ setup(core: CoreSetup){
   },
  }]);
 }
-
 ```
 

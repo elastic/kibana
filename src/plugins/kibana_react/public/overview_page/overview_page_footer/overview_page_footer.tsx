@@ -8,7 +8,7 @@
 
 import React, { FC, MouseEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { RedirectAppLinks } from '../../app_links';
@@ -48,9 +48,11 @@ export const OverviewPageFooter: FC<Props> = ({
         className="kbnOverviewPageFooter__button"
         flush="both"
         iconType="home"
-        size="xs"
+        size="s"
         onClick={(event: MouseEvent) => {
-          application.navigateToUrl(addBasePath('/app/management/kibana/settings#defaultRoute'));
+          application.navigateToUrl(
+            addBasePath('/app/management/kibana/settings?query=default+route')
+          );
           if (onChangeDefaultRoute) {
             onChangeDefaultRoute(event);
           }
@@ -78,7 +80,7 @@ export const OverviewPageFooter: FC<Props> = ({
           onSetDefaultRoute(event);
         }
       }}
-      size="xs"
+      size="s"
     >
       <FormattedMessage
         id="kibana-react.pageFooter.makeDefaultRouteLink"

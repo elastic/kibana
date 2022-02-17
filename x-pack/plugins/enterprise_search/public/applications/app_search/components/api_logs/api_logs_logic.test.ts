@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
+import { mockApiLog } from './__mocks__/api_log.mock';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { POLLING_ERROR_MESSAGE } from './constants';
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { ApiLogsLogic } from './';
 
 describe('ApiLogsLogic', () => {
   const { mount, unmount } = new LogicMounter(ApiLogsLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
+  const { flashErrorToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -31,17 +36,7 @@ describe('ApiLogsLogic', () => {
   };
 
   const MOCK_API_RESPONSE = {
-    results: [
-      {
-        timestamp: '1970-01-01T12:00:00.000Z',
-        http_method: 'POST',
-        status: 200,
-        user_agent: 'some browser agent string',
-        full_request_path: '/api/as/v1/engines/national-parks-demo/search.json',
-        request_body: '{"someMockRequest":"hello"}',
-        response_body: '{"someMockResponse":"world"}',
-      },
-    ],
+    results: [mockApiLog, mockApiLog],
     meta: {
       page: {
         current: 1,
@@ -161,7 +156,7 @@ describe('ApiLogsLogic', () => {
 
         ApiLogsLogic.actions.fetchApiLogs();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/api_logs', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/api_logs', {
           query: {
             'page[current]': 1,
             'filters[date][from]': '1970-01-01T00:00:00.000Z',
@@ -183,14 +178,9 @@ describe('ApiLogsLogic', () => {
           expect(ApiLogsLogic.actions.updateView).toHaveBeenCalledWith(MOCK_API_RESPONSE);
         });
 
-        it('handles API errors', async () => {
-          http.get.mockReturnValueOnce(Promise.reject('error'));
+        itShowsServerErrorAsFlashMessage(http.get, () => {
           mount();
-
           ApiLogsLogic.actions.fetchApiLogs();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('error');
         });
       });
 
@@ -213,7 +203,10 @@ describe('ApiLogsLogic', () => {
           ApiLogsLogic.actions.fetchApiLogs({ isPoll: true });
           await nextTick();
 
-          expect(setErrorMessage).toHaveBeenCalledWith(POLLING_ERROR_MESSAGE);
+          expect(flashErrorToast).toHaveBeenCalledWith('Could not refresh API log data', {
+            text: expect.stringContaining('Please check your connection'),
+            toastLifeTimeMs: 3750,
+          });
         });
       });
 

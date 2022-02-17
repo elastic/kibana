@@ -7,16 +7,15 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
+import { LogMeta } from '@kbn/logging';
 import { OpsMetrics } from '..';
 
-const ECS_VERSION = '1.7.0';
 /**
  * Converts ops metrics into ECS-compliant `LogMeta` for logging
  *
  * @internal
  */
-export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
+export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
   const { process, os } = metrics;
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
@@ -31,10 +30,29 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
   // HH:mm:ss message format for backward compatibility
   const uptimeValMsg = uptimeVal ? `uptime: ${numeral(uptimeVal).format('00:00:00')} ` : '';
 
-  // Event loop delay is in ms
+  // Event loop delay metrics are in ms
   const eventLoopDelayVal = process?.event_loop_delay;
   const eventLoopDelayValMsg = eventLoopDelayVal
-    ? `delay: ${numeral(process?.event_loop_delay).format('0.000')}`
+    ? `mean delay: ${numeral(process?.event_loop_delay).format('0.000')}`
+    : '';
+
+  const eventLoopDelayPercentiles = process?.event_loop_delay_histogram?.percentiles;
+
+  // Extract 50th, 95th and 99th percentiles for log meta
+  const eventLoopDelayHistVals = eventLoopDelayPercentiles
+    ? {
+        50: eventLoopDelayPercentiles[50],
+        95: eventLoopDelayPercentiles[95],
+        99: eventLoopDelayPercentiles[99],
+      }
+    : undefined;
+  // Format message from 50th, 95th and 99th percentiles
+  const eventLoopDelayHistMsg = eventLoopDelayPercentiles
+    ? ` delay histogram: { 50: ${numeral(eventLoopDelayPercentiles['50']).format(
+        '0.000'
+      )}; 95: ${numeral(eventLoopDelayPercentiles['95']).format('0.000')}; 99: ${numeral(
+        eventLoopDelayPercentiles['99']
+      ).format('0.000')} }`
     : '';
 
   const loadEntries = {
@@ -51,13 +69,11 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
         })}] `
       : '';
 
-  return {
-    ecs: { version: ECS_VERSION },
-    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
+  const meta: LogMeta = {
     event: {
-      kind: EcsEventKind.METRIC,
-      category: [EcsEventCategory.PROCESS, EcsEventCategory.HOST],
-      type: EcsEventType.INFO,
+      kind: 'metric',
+      category: ['process', 'host'],
+      type: ['info'],
     },
     process: {
       uptime: uptimeVal,
@@ -68,11 +84,24 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
         },
       },
       eventLoopDelay: eventLoopDelayVal,
+      eventLoopDelayHistogram: eventLoopDelayHistVals,
     },
     host: {
       os: {
+        // @ts-expect-error custom fields not yet part of ECS
         load: loadEntries,
       },
     },
+  };
+
+  return {
+    message: [
+      processMemoryUsedInBytesMsg,
+      uptimeValMsg,
+      loadValsMsg,
+      eventLoopDelayValMsg,
+      eventLoopDelayHistMsg,
+    ].join(''),
+    meta,
   };
 }

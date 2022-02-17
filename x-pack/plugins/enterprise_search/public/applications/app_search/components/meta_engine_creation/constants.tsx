@@ -9,9 +9,9 @@ import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DOCS_PREFIX } from '../../routes';
+import { META_ENGINES_DOCS_URL } from '../../routes';
 
 export const DEFAULT_LANGUAGE = 'Universal';
 
@@ -57,7 +57,7 @@ export const META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION = (
     defaultMessage="{documentationLink} for information about how to get started."
     values={{
       documentationLink: (
-        <EuiLink href={`${DOCS_PREFIX}/meta-engines-guide.html`} target="_blank">
+        <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
           {META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK}
         </EuiLink>
       ),
@@ -111,9 +111,8 @@ export const META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE = (
     }
   );
 
-export const META_ENGINE_CREATION_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage',
-  {
-    defaultMessage: 'Successfully created meta engine.',
-  }
-);
+export const META_ENGINE_CREATION_SUCCESS_MESSAGE = (name: string) =>
+  i18n.translate('xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage', {
+    defaultMessage: "Meta engine '{name}' was created",
+    values: { name },
+  });

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ITagAssignmentService, TagAssignmentService } from './assignment_service';
+export type { ITagAssignmentService } from './assignment_service';
+export { TagAssignmentService } from './assignment_service';

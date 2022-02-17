@@ -1,8 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "./target/types",
   },
   "include": [
     "server/**/*.ts",

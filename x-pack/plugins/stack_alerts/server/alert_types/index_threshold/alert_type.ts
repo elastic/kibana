@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { RuleType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -18,12 +18,12 @@ import {
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
-const ActionGroupId = 'threshold met';
+export const ActionGroupId = 'threshold met';
 
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, {}, {}, ActionContext, typeof ActionGroupId> {
+): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -125,6 +125,7 @@ export function getAlertType(
       ],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
   };
@@ -133,6 +134,7 @@ export function getAlertType(
     options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId, name, services, params } = options;
+    const { alertFactory, search } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -146,7 +148,7 @@ export function getAlertType(
       );
     }
 
-    const esClient = services.scopedClusterClient.asCurrentUser;
+    const abortableEsClient = search.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -164,9 +166,11 @@ export function getAlertType(
       interval: undefined,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await (await data).timeSeriesQuery({
+    const result = await (
+      await data
+    ).timeSeriesQuery({
       logger,
-      esClient,
+      abortableEsClient,
       query: queryParams,
     });
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
@@ -175,7 +179,19 @@ export function getAlertType(
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
       const instanceId = groupResult.group;
-      const value = groupResult.metrics[0][1];
+      const metric =
+        groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
+      const value = metric && metric.length === 2 ? metric[1] : null;
+
+      if (value === null || value === undefined) {
+        logger.debug(
+          `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
+            groupResult
+          )}`
+        );
+        continue;
+      }
+
       const met = compareFn(value, params.threshold);
 
       if (!met) continue;
@@ -192,7 +208,7 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = options.services.alertInstanceFactory(instanceId);
+      const alertInstance = alertFactory.create(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }

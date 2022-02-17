@@ -7,12 +7,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 
-import type { IFieldType } from '../../../../../../../src/plugins/data/public';
-import { QueryStringInput, esKuery } from '../../../../../../../src/plugins/data/public';
-import { useStartServices } from '../hooks';
-import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
+import { fromKueryExpression } from '@kbn/es-query';
 
-const HIDDEN_FIELDS = [`${AGENT_SAVED_OBJECT_TYPE}.actions`, '_id', '_index'];
+import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { useStartServices } from '../hooks';
+import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
+
+const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
 
 interface Props {
   value: string;
@@ -30,7 +32,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   indexPattern = INDEX_NAME,
 }) => {
   const { data } = useStartServices();
-  const [indexPatternFields, setIndexPatternFields] = useState<IFieldType[]>();
+  const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
   const isQueryValid = useMemo(() => {
     if (!value || value === '') {
@@ -38,7 +40,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     }
 
     try {
-      esKuery.fromKueryExpression(value);
+      fromKueryExpression(value);
       return true;
     } catch (e) {
       return false;
@@ -48,7 +50,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const _fields: IFieldType[] = await data.indexPatterns.getFieldsForWildcard({
+        const _fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
           pattern: indexPattern,
         });
         const fields = (_fields || []).filter((field) => {
@@ -67,7 +69,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       }
     };
     fetchFields();
-  }, [data.indexPatterns, fieldPrefix, indexPattern]);
+  }, [data.dataViews, fieldPrefix, indexPattern]);
 
   return (
     <QueryStringInput
@@ -97,6 +99,8 @@ export const SearchBar: React.FunctionComponent<Props> = ({
         onChange(newQuery.query as string, true);
       }}
       submitOnBlur
+      isClearable
+      autoSubmit
     />
   );
 };

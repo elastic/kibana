@@ -6,89 +6,87 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
 
-export function DashboardReplacePanelProvider({ getService }: FtrProviderContext) {
-  const log = getService('log');
-  const testSubjects = getService('testSubjects');
-  const flyout = getService('flyout');
+export class DashboardReplacePanelService extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly flyout = this.ctx.getService('flyout');
 
-  return new (class DashboardReplacePanel {
-    async toggleFilterPopover() {
-      log.debug('DashboardReplacePanel.toggleFilter');
-      await testSubjects.click('savedObjectFinderFilterButton');
+  async toggleFilterPopover() {
+    this.log.debug('DashboardReplacePanel.toggleFilter');
+    await this.testSubjects.click('savedObjectFinderFilterButton');
+  }
+
+  async toggleFilter(type: string) {
+    this.log.debug(`DashboardReplacePanel.replaceToFilter(${type})`);
+    await this.waitForListLoading();
+    await this.toggleFilterPopover();
+    await this.testSubjects.click(`savedObjectFinderFilter-${type}`);
+    await this.toggleFilterPopover();
+  }
+
+  async isReplacePanelOpen() {
+    this.log.debug('DashboardReplacePanel.isReplacePanelOpen');
+    return await this.testSubjects.exists('dashboardReplacePanel');
+  }
+
+  async ensureReplacePanelIsShowing() {
+    this.log.debug('DashboardReplacePanel.ensureReplacePanelIsShowing');
+    const isOpen = await this.isReplacePanelOpen();
+    if (!isOpen) {
+      throw new Error('Replace panel is not open, trying again.');
     }
+  }
 
-    async toggleFilter(type: string) {
-      log.debug(`DashboardReplacePanel.replaceToFilter(${type})`);
-      await this.waitForListLoading();
-      await this.toggleFilterPopover();
-      await testSubjects.click(`savedObjectFinderFilter-${type}`);
-      await this.toggleFilterPopover();
-    }
+  async waitForListLoading() {
+    await this.testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
+  }
 
-    async isReplacePanelOpen() {
-      log.debug('DashboardReplacePanel.isReplacePanelOpen');
-      return await testSubjects.exists('dashboardReplacePanel');
-    }
+  async closeReplacePanel() {
+    await this.flyout.ensureClosed('dashboardReplacePanel');
+  }
 
-    async ensureReplacePanelIsShowing() {
-      log.debug('DashboardReplacePanel.ensureReplacePanelIsShowing');
-      const isOpen = await this.isReplacePanelOpen();
-      if (!isOpen) {
-        throw new Error('Replace panel is not open, trying again.');
-      }
-    }
+  async replaceSavedSearch(searchName: string) {
+    return this.replaceEmbeddable(searchName, 'search');
+  }
 
-    async waitForListLoading() {
-      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
+  async replaceSavedSearches(searches: string[]) {
+    for (const name of searches) {
+      await this.replaceSavedSearch(name);
     }
+  }
 
-    async closeReplacePanel() {
-      await flyout.ensureClosed('dashboardReplacePanel');
-    }
+  async replaceVisualization(vizName: string) {
+    return this.replaceEmbeddable(vizName, 'visualization');
+  }
 
-    async replaceSavedSearch(searchName: string) {
-      return this.replaceEmbeddable(searchName, 'search');
+  async replaceEmbeddable(embeddableName: string, embeddableType?: string) {
+    this.log.debug(
+      `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
+    );
+    await this.ensureReplacePanelIsShowing();
+    if (embeddableType) {
+      await this.toggleFilter(embeddableType);
     }
+    await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+    await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
+    await this.testSubjects.exists('addObjectToDashboardSuccess');
+    await this.closeReplacePanel();
+    return embeddableName;
+  }
 
-    async replaceSavedSearches(searches: string[]) {
-      for (const name of searches) {
-        await this.replaceSavedSearch(name);
-      }
-    }
+  async filterEmbeddableNames(name: string) {
+    // The search input field may be disabled while the table is loading so wait for it
+    await this.waitForListLoading();
+    await this.testSubjects.setValue('savedObjectFinderSearchInput', name);
+    await this.waitForListLoading();
+  }
 
-    async replaceVisualization(vizName: string) {
-      return this.replaceEmbeddable(vizName, 'visualization');
-    }
-
-    async replaceEmbeddable(embeddableName: string, embeddableType?: string) {
-      log.debug(
-        `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
-      );
-      await this.ensureReplacePanelIsShowing();
-      if (embeddableType) {
-        await this.toggleFilter(embeddableType);
-      }
-      await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
-      await testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
-      await testSubjects.exists('addObjectToDashboardSuccess');
-      await this.closeReplacePanel();
-      return embeddableName;
-    }
-
-    async filterEmbeddableNames(name: string) {
-      // The search input field may be disabled while the table is loading so wait for it
-      await this.waitForListLoading();
-      await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      await this.waitForListLoading();
-    }
-
-    async panelReplaceLinkExists(name: string) {
-      log.debug(`DashboardReplacePanel.panelReplaceLinkExists(${name})`);
-      await this.ensureReplacePanelIsShowing();
-      await this.filterEmbeddableNames(`"${name}"`);
-      return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
-    }
-  })();
+  async panelReplaceLinkExists(name: string) {
+    this.log.debug(`DashboardReplacePanel.panelReplaceLinkExists(${name})`);
+    await this.ensureReplacePanelIsShowing();
+    await this.filterEmbeddableNames(`"${name}"`);
+    return await this.testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
+  }
 }

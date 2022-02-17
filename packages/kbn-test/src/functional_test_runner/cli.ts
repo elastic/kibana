@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
@@ -27,8 +27,19 @@ const parseInstallDir = (flags: Flags) => {
 };
 
 export function runFtrCli() {
+  const runStartTime = Date.now();
+  const toolingLog = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
+      const esVersion = flags['es-version'] || undefined; // convert "" to undefined
+      if (esVersion !== undefined && typeof esVersion !== 'string') {
+        throw createFlagError('expected --es-version to be a string');
+      }
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
         makeAbsolutePath(flags.config as string),
@@ -51,7 +62,8 @@ export function runFtrCli() {
           },
           updateBaselines: flags.updateBaselines || flags.u,
           updateSnapshots: flags.updateSnapshots || flags.u,
-        }
+        },
+        esVersion
       );
 
       if (flags.throttle) {
@@ -68,9 +80,19 @@ export function runFtrCli() {
 
         teardownRun = true;
         if (err) {
-          log.indent(-log.indent());
+          await reportTime(runStartTime, 'total', {
+            success: false,
+            err: err.message,
+            ...flags,
+          });
+          log.indent(-log.getIndent());
           log.error(err);
           process.exitCode = 1;
+        } else {
+          await reportTime(runStartTime, 'total', {
+            success: true,
+            ...flags,
+          });
         }
 
         try {
@@ -115,6 +137,7 @@ export function runFtrCli() {
           'include-tag',
           'exclude-tag',
           'kibana-install-dir',
+          'es-version',
         ],
         boolean: [
           'bail',
@@ -134,6 +157,7 @@ export function runFtrCli() {
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
+          --es-version       the elasticsearch version, formatted as "x.y.z"
           --include=file     a test file to be included, pass multiple times for multiple files
           --exclude=file     a test file to be excluded, pass multiple times for multiple files
           --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only

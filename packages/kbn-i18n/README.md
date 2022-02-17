@@ -201,7 +201,7 @@ uses I18n engine under the hood:
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 ReactDOM.render(
   <I18nProvider>
@@ -216,7 +216,7 @@ ReactDOM.render(
 After that we can use `FormattedMessage` components inside `RootComponent`:
 ```jsx
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 class RootComponent extends Component {
   constructor(props) {
@@ -292,7 +292,7 @@ React component as a pure function:
 
 ```js
 import React from 'react';
-import { injectI18n, intlShape } from '@kbn/i18n/react';
+import { injectI18n, intlShape } from '@kbn/i18n-react';
 
 export const MyComponent = injectI18n({ intl }) => (
   <input
@@ -318,7 +318,7 @@ React component as a class:
 
 ```js
 import React from 'react';
-import { injectI18n, intlShape } from '@kbn/i18n/react';
+import { injectI18n, intlShape } from '@kbn/i18n-react';
 
 export const MyComponent = injectI18n(
   class MyComponent extends React.Component {
@@ -341,98 +341,6 @@ export const MyComponent = injectI18n(
     }
   }
 );
-```
-
-## AngularJS
-
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
-
-AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive`
-and `filter`. Both the directive and the filter use the translation `service`
-with i18n engine under the hood.
-
-The translation `provider` is used for `service` configuration and
-has the following methods:
-- `addMessages(messages: Map<string, string>, [locale: string])` - provides a way to register
-translations with the library
-- `setLocale(locale: string)` - tells the library which language to use by given
-language key
-- `getLocale()` - returns the current locale
-- `setDefaultLocale(locale: string)` - tells the library which language to fallback
-when missing translations
-- `getDefaultLocale()` - returns the default locale
-- `setFormats(formats: object)` - supplies a set of options to the underlying formatter
-- `getFormats()` - returns current formats
-- `getRegisteredLocales()` - returns array of locales having translations
-- `init(messages: Map<string, string>)` - initializes the engine
-
-The translation `service` provides only one method:
-- `i18n(id: string, { values: object, defaultMessage: string, description: string })` –
-translate message by id
-
-The translation `filter` is used for attributes translation and has
-the following syntax:
-```
-{{ ::'translationId' | i18n: { values: object, defaultMessage: string, description: string } }}
-```
-
-Where:
-- `translationId` - translation id to be translated
-- `values` - values to pass into translation
-- `defaultMessage` - will be used unless translation was successful (the final
-  fallback in english, will be used for generating `en.json`)
-- `description` - optional context comment that will be extracted by i18n tools
-and added as a comment next to translation message at `defaultMessages.json`
-
-The translation `directive` has the following syntax:
-```html
-<ANY
-  i18n-id="{string}"
-  i18n-default-message="{string}"
-  [i18n-values="{object}"]
-  [i18n-description="{string}"]
-></ANY>
-```
-
-Where:
-- `i18n-id` - translation id to be translated
-- `i18n-default-message` - will be used unless translation was successful
-- `i18n-values` - values to pass into translation
-- `i18n-description` - optional context comment that will be extracted by i18n tools
-and added as a comment next to translation message at `defaultMessages.json`
-
-If HTML rendering in `i18n-values` is required then value key in `i18n-values` object
-should have `html_` prefix. Otherwise the value will be inserted to the message without
-HTML rendering.\
-Example:
-```html
-<p
-  i18n-id="namespace.id"
-  i18n-default-message="Text with an emphasized {text}."
-  i18n-values="{
-    html_text: '<em>text</em>',
-  }"
-></p>
-```
-
-Angular `I18n` module is placed into `autoload` module, so it will be
-loaded automatically. After that we can use i18n directive in Angular templates:
-```html
-<span
-  i18n-id="welcome"
-  i18n-default-message="Hello!"
-></span>
-```
-
-In order to translate attributes in AngularJS we should use `i18nFilter`:
-```html
-<input
-  type="text"
-  placeholder="{{ ::'kbn.management.objects.searchAriaLabel' | i18n: {
-    defaultMessage: 'Search { title } Object',
-    values: { title }
-  } }}"
->
 ```
 
 ## I18n tools

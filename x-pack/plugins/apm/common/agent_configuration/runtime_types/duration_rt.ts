@@ -36,9 +36,8 @@ export function getDurationRt({ min, max }: { min?: string; max?: string }) {
       return either.chain(
         t.string.validate(input, context),
         (inputAsString) => {
-          const inputAsMilliseconds = amountAndUnitToMilliseconds(
-            inputAsString
-          );
+          const inputAsMilliseconds =
+            amountAndUnitToMilliseconds(inputAsString);
 
           const isValidAmount =
             inputAsMilliseconds !== undefined &&

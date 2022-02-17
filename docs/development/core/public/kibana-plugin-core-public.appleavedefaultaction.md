@@ -18,5 +18,5 @@ export interface AppLeaveDefaultAction
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [type](./kibana-plugin-core-public.appleavedefaultaction.type.md) | <code>AppLeaveActionType.default</code> |  |
+|  [type](./kibana-plugin-core-public.appleavedefaultaction.type.md) | AppLeaveActionType.default |  |
 

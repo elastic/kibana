@@ -8,46 +8,20 @@
 import * as t from 'io-ts';
 
 import {
-  description,
-  anomaly_threshold,
-  filters,
-  index,
-  saved_id,
-  timeline_id,
-  timeline_title,
-  meta,
+  Actions,
+  DefaultActionsArray,
+  DefaultFromString,
+  DefaultIntervalString,
+  DefaultMaxSignalsNumber,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+  DefaultThreatArray,
+  DefaultThrottleNull,
+  DefaultToString,
+  From,
+  RiskScoreMapping,
   machine_learning_job_id,
   risk_score,
-  MaxSignals,
-  name,
-  severity,
-  Tags,
-  To,
-  type,
-  Threats,
-  threshold,
-  ThrottleOrNull,
-  note,
-  References,
-  Actions,
-  Enabled,
-  FalsePositives,
-  From,
-  Interval,
-  language,
-  query,
-  rule_id,
-  version,
-  building_block_type,
-  license,
-  rule_name_override,
-  timestamp_override,
-  Author,
-  RiskScoreMapping,
-  SeverityMapping,
-  event_category_override,
-} from '../common/schemas';
-import {
   threat_index,
   concurrent_searches,
   items_per_search,
@@ -56,23 +30,49 @@ import {
   threat_mapping,
   threat_language,
   threat_indicator_path,
-} from '../types/threat_mapping';
-
+  Threats,
+  type,
+  language,
+  severity,
+  SeverityMapping,
+  ThrottleOrNull,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import {
+  version,
   DefaultStringArray,
-  DefaultActionsArray,
   DefaultBooleanFalse,
-  DefaultFromString,
-  DefaultIntervalString,
-  DefaultMaxSignalsNumber,
-  DefaultToString,
-  DefaultThreatArray,
-  DefaultThrottleNull,
-  DefaultListArray,
-  ListArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
-} from '../types';
+} from '@kbn/securitysolution-io-ts-types';
+
+import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  description,
+  anomaly_threshold,
+  filters,
+  index,
+  saved_id,
+  timeline_id,
+  timeline_title,
+  meta,
+  name,
+  Tags,
+  To,
+  threshold,
+  note,
+  References,
+  Enabled,
+  FalsePositives,
+  Interval,
+  query,
+  rule_id,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+  Author,
+  event_category_override,
+  namespace,
+} from '../common/schemas';
 
 /**
  * Big differences between this schema and the createRulesSchema
@@ -137,10 +137,10 @@ export const addPrepackagedRulesSchema = t.intersection([
       threat_indicator_path, // defaults "undefined" if not set during decode
       concurrent_searches, // defaults to "undefined" if not set during decode
       items_per_search, // defaults to "undefined" if not set during decode
+      namespace, // defaults to "undefined" if not set during decode
     })
   ),
 ]);
-
 export type AddPrepackagedRulesSchema = t.TypeOf<typeof addPrepackagedRulesSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
@@ -154,6 +154,7 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   | 'from'
   | 'interval'
   | 'max_signals'
+  | 'namespace'
   | 'risk_score_mapping'
   | 'severity_mapping'
   | 'tags'
@@ -177,4 +178,5 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   threat: Threats;
   throttle: ThrottleOrNull;
   exceptions_list: ListArray;
+  namespace?: string;
 };

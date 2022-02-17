@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { DropResult } from 'react-beautiful-dnd';
-
 import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEqual, differenceBy } from 'lodash';
 
+import { DropResult } from '@elastic/eui';
+
 import {
-  setSuccessMessage,
+  flashSuccessToast,
   clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
+import {
+  DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
+  DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
+  getContentSourcePath,
+} from '../../../../routes';
 import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
@@ -34,6 +40,8 @@ export interface DisplaySettingsInitialData extends DisplaySettingsResponseProps
   serverRoute: string;
 }
 
+export type TabId = 'search_results' | 'result_detail';
+
 interface DisplaySettingsActions {
   initializeDisplaySettings(): void;
   setServerData(): void;
@@ -47,10 +55,16 @@ interface DisplaySettingsActions {
   setUrlField(urlField: string): string;
   setSubtitleField(subtitleField: string | null): string | null;
   setDescriptionField(descriptionField: string | null): string | null;
+  setTypeField(typeField: string | null): string | null;
+  setMediaTypeField(mediaTypeField: string | null): string | null;
+  setCreatedByField(createdByField: string | null): string | null;
+  setUpdatedByField(updatedByField: string | null): string | null;
   setColorField(hex: string): string;
   setDetailFields(result: DropResult): { result: DropResult };
   openEditDetailField(editFieldIndex: number | null): number | null;
   removeDetailField(index: number): number;
+  setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
+  handleSelectedTabChanged(tabId: TabId): TabId;
   addDetailField(newField: DetailField): DetailField;
   updateDetailField(
     updatedField: DetailField,
@@ -60,6 +74,10 @@ interface DisplaySettingsActions {
   toggleTitleFieldHover(): void;
   toggleSubtitleFieldHover(): void;
   toggleDescriptionFieldHover(): void;
+  toggleTypeFieldHover(): void;
+  toggleMediaTypeFieldHover(): void;
+  toggleCreatedByFieldHover(): void;
+  toggleUpdatedByFieldHover(): void;
   toggleUrlFieldHover(): void;
 }
 
@@ -73,11 +91,16 @@ interface DisplaySettingsValues {
   serverRoute: string;
   editFieldIndex: number | null;
   dataLoading: boolean;
+  navigatingBetweenTabs: boolean;
   addFieldModalVisible: boolean;
   titleFieldHover: boolean;
   urlFieldHover: boolean;
   subtitleFieldHover: boolean;
   descriptionFieldHover: boolean;
+  typeFieldHover: boolean;
+  mediaTypeFieldHover: boolean;
+  createdByFieldHover: boolean;
+  updatedByFieldHover: boolean;
   fieldOptions: OptionValue[];
   optionalFieldOptions: OptionValue[];
   availableFieldOptions: OptionValue[];
@@ -89,6 +112,10 @@ export const defaultSearchResultConfig = {
   subtitleField: '',
   descriptionField: '',
   urlField: '',
+  typeField: '',
+  mediaTypeField: '',
+  createdByField: '',
+  updatedByField: '',
   color: '#000000',
   detailFields: [],
 };
@@ -96,6 +123,7 @@ export const defaultSearchResultConfig = {
 export const DisplaySettingsLogic = kea<
   MakeLogicType<DisplaySettingsValues, DisplaySettingsActions>
 >({
+  path: ['enterprise_search', 'workplace_search', 'display_settings_logic'],
   actions: {
     onInitializeDisplaySettings: (displaySettingsProps: DisplaySettingsInitialData) =>
       displaySettingsProps,
@@ -104,17 +132,27 @@ export const DisplaySettingsLogic = kea<
     setTitleField: (titleField: string) => titleField,
     setUrlField: (urlField: string) => urlField,
     setSubtitleField: (subtitleField: string | null) => subtitleField,
-    setDescriptionField: (descriptionField: string) => descriptionField,
+    setDescriptionField: (descriptionField: string | null) => descriptionField,
+    setTypeField: (typeField: string | null) => typeField,
+    setMediaTypeField: (mediaTypeField: string | null) => mediaTypeField,
+    setCreatedByField: (createdByField: string | null) => createdByField,
+    setUpdatedByField: (updatedByField: string | null) => updatedByField,
     setColorField: (hex: string) => hex,
     setDetailFields: (result: DropResult) => ({ result }),
     openEditDetailField: (editFieldIndex: number | null) => editFieldIndex,
     removeDetailField: (index: number) => index,
+    setNavigatingBetweenTabs: (navigatingBetweenTabs: boolean) => navigatingBetweenTabs,
+    handleSelectedTabChanged: (tabId: TabId) => tabId,
     addDetailField: (newField: DetailField) => newField,
     updateDetailField: (updatedField: DetailField, index: number) => ({ updatedField, index }),
     toggleFieldEditorModal: () => true,
     toggleTitleFieldHover: () => true,
     toggleSubtitleFieldHover: () => true,
     toggleDescriptionFieldHover: () => true,
+    toggleTypeFieldHover: () => true,
+    toggleMediaTypeFieldHover: () => true,
+    toggleCreatedByFieldHover: () => true,
+    toggleUpdatedByFieldHover: () => true,
     toggleUrlFieldHover: () => true,
     initializeDisplaySettings: () => true,
     setServerData: () => true,
@@ -167,6 +205,19 @@ export const DisplaySettingsLogic = kea<
         setDescriptionField: (searchResultConfig, descriptionField) => ({
           ...searchResultConfig,
           descriptionField,
+        }),
+        setTypeField: (searchResultConfig, typeField) => ({ ...searchResultConfig, typeField }),
+        setMediaTypeField: (searchResultConfig, mediaTypeField) => ({
+          ...searchResultConfig,
+          mediaTypeField,
+        }),
+        setCreatedByField: (searchResultConfig, createdByField) => ({
+          ...searchResultConfig,
+          createdByField,
+        }),
+        setUpdatedByField: (searchResultConfig, updatedByField) => ({
+          ...searchResultConfig,
+          updatedByField,
         }),
         setColorField: (searchResultConfig, color) => ({ ...searchResultConfig, color }),
         setDetailFields: (searchResultConfig, { result: { destination, source } }) => {
@@ -224,6 +275,12 @@ export const DisplaySettingsLogic = kea<
         onInitializeDisplaySettings: () => false,
       },
     ],
+    navigatingBetweenTabs: [
+      false,
+      {
+        setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
+      },
+    ],
     addFieldModalVisible: [
       false,
       {
@@ -254,7 +311,31 @@ export const DisplaySettingsLogic = kea<
     descriptionFieldHover: [
       false,
       {
-        toggleDescriptionFieldHover: (addFieldModalVisible) => !addFieldModalVisible,
+        toggleDescriptionFieldHover: (descriptionFieldHover) => !descriptionFieldHover,
+      },
+    ],
+    typeFieldHover: [
+      false,
+      {
+        toggleTypeFieldHover: (typeFieldHover) => !typeFieldHover,
+      },
+    ],
+    mediaTypeFieldHover: [
+      false,
+      {
+        toggleMediaTypeFieldHover: (mediaTypeFieldHover) => !mediaTypeFieldHover,
+      },
+    ],
+    createdByFieldHover: [
+      false,
+      {
+        toggleCreatedByFieldHover: (createdByFieldHover) => !createdByFieldHover,
+      },
+    ],
+    updatedByFieldHover: [
+      false,
+      {
+        toggleUpdatedByFieldHover: (updatedByFieldHover) => !updatedByFieldHover,
       },
     ],
   },
@@ -297,12 +378,14 @@ export const DisplaySettingsLogic = kea<
       } = SourceLogic.values;
 
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/display_settings/config`
-        : `/api/workplace_search/account/sources/${sourceId}/display_settings/config`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/display_settings/config`
+        : `/internal/workplace_search/account/sources/${sourceId}/display_settings/config`;
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<DisplaySettingsResponseProps>(route);
         actions.onInitializeDisplaySettings({
+          // isOrganization is not typed
+          // @ts-expect-error TS2345
           isOrganization,
           sourceId,
           serverRoute: route,
@@ -316,19 +399,40 @@ export const DisplaySettingsLogic = kea<
       const { searchResultConfig, serverRoute } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(serverRoute, {
-          body: JSON.stringify({ ...searchResultConfig }),
-        });
+        const response = await HttpLogic.values.http.post<DisplaySettingsResponseProps>(
+          serverRoute,
+          { body: JSON.stringify({ ...searchResultConfig }) }
+        );
         actions.setServerResponseData(response);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
     setServerResponseData: () => {
-      setSuccessMessage(SUCCESS_MESSAGE);
+      flashSuccessToast(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
       clearFlashMessages();
+    },
+
+    handleSelectedTabChanged: async (tabId, breakpoint) => {
+      const { isOrganization } = AppLogic.values;
+      const { sourceId } = values;
+      const path =
+        tabId === 'result_detail'
+          ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
+          : getContentSourcePath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, sourceId, isOrganization);
+
+      // This method is needed because the shared `UnsavedChangesPrompt` component is triggered
+      // when navigating between tabs. We set a boolean flag that tells the prompt there are no
+      // unsaved changes when navigating between the tabs and reset it one the transition is complete
+      // in order to restore the intended functionality when navigating away with unsaved changes.
+      actions.setNavigatingBetweenTabs(true);
+
+      await breakpoint();
+
+      KibanaLogic.values.navigateToUrl(path);
+      actions.setNavigatingBetweenTabs(false);
     },
   }),
 });

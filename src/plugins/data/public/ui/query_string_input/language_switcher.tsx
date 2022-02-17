@@ -19,7 +19,7 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../kibana_react/public';
@@ -32,7 +32,7 @@ export interface QueryLanguageSwitcherProps {
   nonKqlModeHelpText?: string;
 }
 
-export function QueryLanguageSwitcher({
+export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   language,
   anchorPosition,
   onSelectLanguage,
@@ -96,7 +96,7 @@ export function QueryLanguageSwitcher({
         />
       </EuiPopoverTitle>
       <div style={{ width: '350px' }}>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
@@ -148,4 +148,4 @@ export function QueryLanguageSwitcher({
       </div>
     </EuiPopover>
   );
-}
+});

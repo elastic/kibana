@@ -8,7 +8,12 @@
 import { IExternalUrl } from 'src/core/public';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
-import { IEmbeddable, VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
+import {
+  IEmbeddable,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../../../../src/plugins/embeddable/public';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 import { of } from '../../../../../../src/plugins/kibana_utils';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
@@ -49,19 +54,23 @@ const mockDataPoints = [
   },
 ];
 
-const mockEmbeddable = ({
+const mockEmbeddable = {
   getInput: () => ({
     filters: [],
     timeRange: { from: 'now-15m', to: 'now' },
     query: { query: 'test', language: 'kuery' },
   }),
   getOutput: () => ({}),
-} as unknown) as IEmbeddable;
+} as unknown as IEmbeddable;
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 
 class TextExternalUrl implements IExternalUrl {
   constructor(private readonly isCorrect: boolean = true) {}
+
+  public isInternalUrl(url: string): boolean {
+    return false;
+  }
 
   public validateUrl(url: string): URL | null {
     return this.isCorrect ? new URL(url) : null;
@@ -262,7 +271,7 @@ describe('UrlDrilldown', () => {
         indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
       }
     );
-    const data: any = {
+    const data = {
       data: [
         createPoint({ field: 'field0', value: 'value0' }),
         createPoint({ field: 'field1', value: 'value1' }),
@@ -443,6 +452,34 @@ describe('UrlDrilldown', () => {
           expect(!!list.find(({ label }) => label === expectedItem)).toBe(true);
         }
       });
+    });
+  });
+
+  describe('example url', () => {
+    it('provides the expected example urls based on the trigger', () => {
+      expect(urlDrilldown.getExampleUrl({ triggers: [] })).toMatchInlineSnapshot(
+        `"https://www.example.com/?{{event.key}}={{event.value}}"`
+      );
+
+      expect(urlDrilldown.getExampleUrl({ triggers: ['unknown'] })).toMatchInlineSnapshot(
+        `"https://www.example.com/?{{event.key}}={{event.value}}"`
+      );
+
+      expect(urlDrilldown.getExampleUrl({ triggers: [VALUE_CLICK_TRIGGER] })).toMatchInlineSnapshot(
+        `"https://www.example.com/?{{event.key}}={{event.value}}"`
+      );
+
+      expect(
+        urlDrilldown.getExampleUrl({ triggers: [SELECT_RANGE_TRIGGER] })
+      ).toMatchInlineSnapshot(`"https://www.example.com/?from={{event.from}}&to={{event.to}}"`);
+
+      expect(urlDrilldown.getExampleUrl({ triggers: [ROW_CLICK_TRIGGER] })).toMatchInlineSnapshot(
+        `"https://www.example.com/keys={{event.keys}}&values={{event.values}}"`
+      );
+
+      expect(
+        urlDrilldown.getExampleUrl({ triggers: [CONTEXT_MENU_TRIGGER] })
+      ).toMatchInlineSnapshot(`"https://www.example.com/?panel={{context.panel.title}}"`);
     });
   });
 });

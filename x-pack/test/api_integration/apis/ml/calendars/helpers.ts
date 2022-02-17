@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Calendar } from '../../../../../plugins/ml/server/models/calendar';
 
-type ScheduledEvent = estypes.ScheduledEvent;
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 export const assertAllEventsExistInCalendar = (
   eventsToCheck: ScheduledEvent[],

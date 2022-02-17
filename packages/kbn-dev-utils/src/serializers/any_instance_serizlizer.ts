@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export function createAnyInstanceSerializer(Class: Function, name?: string) {
+export function createAnyInstanceSerializer(
+  Class: Function,
+  name?: string | ((instance: any) => string)
+) {
   return {
     test: (v: any) => v instanceof Class,
-    serialize: () => `<${name ?? Class.name}>`,
+    serialize: (v: any) => `<${typeof name === 'function' ? name(v) : name ?? Class.name}>`,
   };
 }

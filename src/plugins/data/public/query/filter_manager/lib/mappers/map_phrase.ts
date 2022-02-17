@@ -9,17 +9,18 @@
 import { get } from 'lodash';
 import {
   PhraseFilter,
-  FilterValueFormatter,
   getPhraseFilterValue,
   getPhraseFilterField,
   FILTERS,
   isScriptedPhraseFilter,
   Filter,
   isPhraseFilter,
-} from '../../../../../common';
+} from '@kbn/es-query';
+
+import { FilterValueFormatter } from '../../../../../common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
-  get(filter, ['script', 'script', 'params', 'value']);
+  get(filter, ['query', 'script', 'script', 'params', 'value']);
 
 const getFormattedValueFn = (value: any) => {
   return (formatter?: FilterValueFormatter) => {

@@ -7,16 +7,18 @@
 
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
-  GEO_CONTAINMENT_ID,
   GeoContainmentInstanceState,
   GeoContainmentAlertType,
   GeoContainmentInstanceContext,
+  GeoContainmentState,
 } from './alert_type';
+
+import { GEO_CONTAINMENT_ID } from './alert_type';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
 
@@ -85,11 +87,11 @@ export function transformResults(
 export function getActiveEntriesAndGenerateAlerts(
   prevLocationMap: Map<string, LatestEntityLocation[]>,
   currLocationMap: Map<string, LatestEntityLocation[]>,
-  alertInstanceFactory: AlertServices<
+  alertFactory: AlertServices<
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext,
     typeof ActionGroupId
-  >['alertInstanceFactory'],
+  >['alertFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
   currIntervalEndTime: Date
 ) {
@@ -102,7 +104,7 @@ export function getActiveEntriesAndGenerateAlerts(
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
       const context = {
         entityId: entityName,
-        entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
+        entityDateTime: dateInShape || null,
         entityDocumentId: docId,
         detectionDateTime: new Date(currIntervalEndTime).toISOString(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
@@ -111,7 +113,7 @@ export function getActiveEntriesAndGenerateAlerts(
       };
       const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
-        alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+        alertFactory.create(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
 
@@ -141,7 +143,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     params,
     alertId,
     state,
-  }) {
+  }): Promise<GeoContainmentState> {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -176,8 +178,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     }
 
     const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
-      // @ts-expect-error body doesn't exist on currentIntervalResults
-      currentIntervalResults?.body,
+      currentIntervalResults,
       params.dateField,
       params.geoField
     );
@@ -188,7 +189,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
       prevLocationMap,
       currLocationMap,
-      services.alertInstanceFactory,
+      services.alertFactory,
       shapesIdsNamesMap,
       currIntervalEndTime
     );

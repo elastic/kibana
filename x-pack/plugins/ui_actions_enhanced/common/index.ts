@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './types';
+export type {
+  BaseActionConfig,
+  SerializedAction,
+  SerializedEvent,
+  DynamicActionsState,
+} from './types';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger, LoggerFactory } from 'src/core/server';
+import { CoreSetup, Logger, LoggerFactory } from '../../../../../src/core/server';
+import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
   FleetStartContract,
@@ -14,6 +15,7 @@ import {
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 import { ConfigType } from '../config';
+import { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -68,8 +70,10 @@ export class OsqueryAppContextService {
  */
 export interface OsqueryAppContext {
   logFactory: LoggerFactory;
-  config(): Promise<ConfigType>;
-
+  config(): ConfigType;
+  security: SecurityPluginStart;
+  getStartServices: CoreSetup['getStartServices'];
+  telemetryEventsSender: TelemetryEventsSender;
   /**
    * Object readiness is tied to plugin start method
    */

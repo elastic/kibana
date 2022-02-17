@@ -7,16 +7,28 @@
 
 import * as runtimeTypes from 'io-ts';
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { stringEnum, unionWithNullType } from '../../utility_types';
-import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
-import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
+import { NoteResult, NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
+import {
+  PinnedEventToReturnSavedObjectRuntimeType,
+  PinnedEventSavedObject,
+  PinnedEvent,
+} from './pinned_event';
 import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
 import { FlowTarget } from '../../search_strategy/security_solution/network';
-import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
+import { Direction, Maybe } from '../../search_strategy';
+
+export * from './actions';
+export * from './cells';
+export * from './columns';
+export * from './data_provider';
+export * from './rows';
+export * from './store';
 
 /*
  *  ColumnHeader Types
@@ -167,6 +179,8 @@ const SavedSortRuntimeType = runtimeTypes.union([
   SavedSortObject,
 ]);
 
+export type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
+
 /*
  *  Timeline Statuses
  */
@@ -206,6 +220,7 @@ export enum RowRendererId {
   system_fim = 'system_fim',
   system_security_event = 'system_security_event',
   system_socket = 'system_socket',
+  threat_match = 'threat_match',
   zeek = 'zeek',
 }
 
@@ -256,6 +271,7 @@ export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTyp
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
+  dataViewId: unionWithNullType(runtimeTypes.string),
   description: unionWithNullType(runtimeTypes.string),
   eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
@@ -281,7 +297,15 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
+export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
+
 export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
+
+/**
+ * This type represents a timeline type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
 
 /*
  *  Timeline IDs
@@ -311,21 +335,6 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
 
-/**
- * Timeline Saved object type with metadata
- */
-
-export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    id: runtimeTypes.string,
-    attributes: SavedTimelineRuntimeType,
-    version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    savedObjectId: runtimeTypes.string,
-  }),
-]);
-
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
   runtimeTypes.type({
@@ -343,6 +352,41 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
 
 export type TimelineSavedObject = runtimeTypes.TypeOf<
   typeof TimelineSavedToReturnObjectRuntimeType
+>;
+
+export const SingleTimelineResponseType = runtimeTypes.type({
+  data: runtimeTypes.type({
+    getOneTimeline: TimelineSavedToReturnObjectRuntimeType,
+  }),
+});
+
+export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
+
+/** Resolved Timeline Response */
+export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
+  runtimeTypes.type({
+    timeline: TimelineSavedToReturnObjectRuntimeType,
+    outcome: runtimeTypes.union([
+      runtimeTypes.literal('exactMatch'),
+      runtimeTypes.literal('aliasMatch'),
+      runtimeTypes.literal('conflict'),
+    ]),
+  }),
+  runtimeTypes.partial({
+    alias_target_id: runtimeTypes.string,
+  }),
+]);
+
+export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
+  typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
+>;
+
+export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
+  data: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
+});
+
+export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
+  typeof ResolvedSingleTimelineResponseType
 >;
 
 /**
@@ -435,6 +479,17 @@ export enum TimelineTabs {
   eql = 'eql',
 }
 
+/**
+ * Used for scrolling top inside a tab. Especially when swiching tabs.
+ */
+export interface ScrollToTopEvent {
+  /**
+   * Timestamp of the moment when the event happened.
+   * The timestamp might be necessary for the scenario where the event could happen multiple times.
+   */
+  timestamp: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Record<any, never>;
 
@@ -444,6 +499,7 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
+        refetch?: () => void;
       };
     }
   | EmptyObject;
@@ -467,11 +523,253 @@ export type TimelineExpandedNetworkType =
     }
   | EmptyObject;
 
+export type TimelineExpandedUserType =
+  | {
+      panelView?: 'userDetail';
+      params?: {
+        userName: string;
+      };
+    }
+  | EmptyObject;
+
 export type TimelineExpandedDetailType =
   | TimelineExpandedEventType
   | TimelineExpandedHostType
-  | TimelineExpandedNetworkType;
+  | TimelineExpandedNetworkType
+  | TimelineExpandedUserType;
 
 export type TimelineExpandedDetail = {
   [tab in TimelineTabs]?: TimelineExpandedDetailType;
 };
+
+export type ToggleDetailPanel = TimelineExpandedDetailType & {
+  tabType?: TimelineTabs;
+  timelineId: string;
+};
+
+export const pageInfoTimeline = runtimeTypes.type({
+  pageIndex: runtimeTypes.number,
+  pageSize: runtimeTypes.number,
+});
+
+export enum SortFieldTimeline {
+  title = 'title',
+  description = 'description',
+  updated = 'updated',
+  created = 'created',
+}
+
+export const sortFieldTimeline = runtimeTypes.union([
+  runtimeTypes.literal(SortFieldTimeline.title),
+  runtimeTypes.literal(SortFieldTimeline.description),
+  runtimeTypes.literal(SortFieldTimeline.updated),
+  runtimeTypes.literal(SortFieldTimeline.created),
+]);
+
+export const direction = runtimeTypes.union([
+  runtimeTypes.literal(Direction.asc),
+  runtimeTypes.literal(Direction.desc),
+]);
+
+export const sortTimeline = runtimeTypes.type({
+  sortField: sortFieldTimeline,
+  sortOrder: direction,
+});
+
+const favoriteTimelineResult = runtimeTypes.partial({
+  fullName: unionWithNullType(runtimeTypes.string),
+  userName: unionWithNullType(runtimeTypes.string),
+  favoriteDate: unionWithNullType(runtimeTypes.number),
+});
+
+export type FavoriteTimelineResult = runtimeTypes.TypeOf<typeof favoriteTimelineResult>;
+
+export const responseFavoriteTimeline = runtimeTypes.partial({
+  savedObjectId: runtimeTypes.string,
+  version: runtimeTypes.string,
+  code: unionWithNullType(runtimeTypes.number),
+  message: unionWithNullType(runtimeTypes.string),
+  templateTimelineId: unionWithNullType(runtimeTypes.string),
+  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+  favorite: unionWithNullType(runtimeTypes.array(favoriteTimelineResult)),
+});
+
+export type ResponseFavoriteTimeline = runtimeTypes.TypeOf<typeof responseFavoriteTimeline>;
+
+export const getTimelinesArgs = runtimeTypes.partial({
+  onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
+  pageInfo: unionWithNullType(pageInfoTimeline),
+  search: unionWithNullType(runtimeTypes.string),
+  sort: unionWithNullType(sortTimeline),
+  status: unionWithNullType(TimelineStatusLiteralRt),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+});
+
+export type GetTimelinesArgs = runtimeTypes.TypeOf<typeof getTimelinesArgs>;
+
+const responseTimelines = runtimeTypes.type({
+  timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntimeType),
+  totalCount: runtimeTypes.number,
+});
+
+export type ResponseTimelines = runtimeTypes.TypeOf<typeof responseTimelines>;
+
+export const allTimelinesResponse = runtimeTypes.intersection([
+  responseTimelines,
+  runtimeTypes.type({
+    defaultTimelineCount: runtimeTypes.number,
+    templateTimelineCount: runtimeTypes.number,
+    elasticTemplateTimelineCount: runtimeTypes.number,
+    customTemplateTimelineCount: runtimeTypes.number,
+    favoriteCount: runtimeTypes.number,
+  }),
+]);
+
+export type AllTimelinesResponse = runtimeTypes.TypeOf<typeof allTimelinesResponse>;
+
+export interface PageInfoTimeline {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface ColumnHeaderResult {
+  aggregatable?: Maybe<boolean>;
+  category?: Maybe<string>;
+  columnHeaderType?: Maybe<string>;
+  description?: Maybe<string>;
+  example?: Maybe<string | number>;
+  indexes?: Maybe<string[]>;
+  id?: Maybe<string>;
+  name?: Maybe<string>;
+  placeholder?: Maybe<string>;
+  searchable?: Maybe<boolean>;
+  type?: Maybe<string>;
+}
+
+export interface DataProviderResult {
+  id?: Maybe<string>;
+  name?: Maybe<string>;
+  enabled?: Maybe<boolean>;
+  excluded?: Maybe<boolean>;
+  kqlQuery?: Maybe<string>;
+  queryMatch?: Maybe<QueryMatchResult>;
+  type?: Maybe<DataProviderType>;
+  and?: Maybe<DataProviderResult[]>;
+}
+
+export interface QueryMatchResult {
+  field?: Maybe<string>;
+  displayField?: Maybe<string>;
+  value?: Maybe<string>;
+  displayValue?: Maybe<string>;
+  operator?: Maybe<string>;
+}
+
+export interface DateRangePickerResult {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  start?: Maybe<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  end?: Maybe<any>;
+}
+
+export interface EqlOptionsResult {
+  eventCategoryField?: Maybe<string>;
+  tiebreakerField?: Maybe<string>;
+  timestampField?: Maybe<string>;
+  query?: Maybe<string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  size?: Maybe<any>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+  meta?: Maybe<FilterMetaTimelineResult>;
+  match_all?: Maybe<string>;
+  missing?: Maybe<string>;
+  query?: Maybe<string>;
+  range?: Maybe<string>;
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+  controlledBy?: Maybe<string>;
+  disabled?: Maybe<boolean>;
+  field?: Maybe<string>;
+  formattedValue?: Maybe<string>;
+  index?: Maybe<string>;
+  key?: Maybe<string>;
+  negate?: Maybe<boolean>;
+  params?: Maybe<string>;
+  type?: Maybe<string>;
+  value?: Maybe<string>;
+}
+
+export interface SerializedFilterQueryResult {
+  filterQuery?: Maybe<SerializedKueryQueryResult>;
+}
+
+export interface SerializedKueryQueryResult {
+  kuery?: Maybe<KueryFilterQueryResult>;
+  serializedQuery?: Maybe<string>;
+}
+
+export interface KueryFilterQueryResult {
+  kind?: Maybe<string>;
+  expression?: Maybe<string>;
+}
+
+export interface TimelineResult {
+  columns?: Maybe<ColumnHeaderResult[]>;
+  created?: Maybe<number>;
+  createdBy?: Maybe<string>;
+  dataProviders?: Maybe<DataProviderResult[]>;
+  dataViewId?: Maybe<string>;
+  dateRange?: Maybe<DateRangePickerResult>;
+  description?: Maybe<string>;
+  eqlOptions?: Maybe<EqlOptionsResult>;
+  eventIdToNoteIds?: Maybe<NoteResult[]>;
+  eventType?: Maybe<string>;
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+  favorite?: Maybe<FavoriteTimelineResult[]>;
+  filters?: Maybe<FilterTimelineResult[]>;
+  kqlMode?: Maybe<string>;
+  kqlQuery?: Maybe<SerializedFilterQueryResult>;
+  indexNames?: Maybe<string[]>;
+  notes?: Maybe<NoteResult[]>;
+  noteIds?: Maybe<string[]>;
+  pinnedEventIds?: Maybe<string[]>;
+  pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
+  savedQueryId?: Maybe<string>;
+  savedObjectId: string;
+  sort?: Maybe<Sort>;
+  status?: Maybe<TimelineStatus>;
+  title?: Maybe<string>;
+  templateTimelineId?: Maybe<string>;
+  templateTimelineVersion?: Maybe<number>;
+  timelineType?: Maybe<TimelineType>;
+  updated?: Maybe<number>;
+  updatedBy?: Maybe<string>;
+  version: string;
+}
+
+export interface ResponseTimeline {
+  code?: Maybe<number>;
+  message?: Maybe<string>;
+  timeline: TimelineResult;
+}
+export interface SortTimeline {
+  sortField: SortFieldTimeline;
+  sortOrder: Direction;
+}
+
+export interface GetAllTimelineVariables {
+  pageInfo: PageInfoTimeline;
+  search?: Maybe<string>;
+  sort?: Maybe<SortTimeline>;
+  onlyUserFavorite?: Maybe<boolean>;
+  timelineType?: Maybe<TimelineType>;
+  status?: Maybe<TimelineStatus>;
+}

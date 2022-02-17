@@ -22,7 +22,8 @@ export const getFunctionExamples = (): FunctionExampleDict => ({
     syntax: `all {neq "foo"} {neq "bar"} {neq "fizz"}
 all condition={gt 10} condition={lt 20}`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | formatnumber "0.0%"
@@ -35,28 +36,28 @@ all condition={gt 10} condition={lt 20}`,
       align="center" lHeight=48
   }
 | render`,
-      help:
-        'This sets the color of the metric text to `"red"` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.',
+      help: 'This sets the color of the metric text to `"red"` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.',
     },
   },
   alterColumn: {
     syntax: `alterColumn "cost" type="string"
 alterColumn column="@timestamp" name="foo"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | alterColumn "time" name="time_in_ms" type="number"
 | table
 | render`,
-      help:
-        'This renames the `time` column to `time_in_ms` and converts the type of the column’s values from `date` to `number`.',
+      help: 'This renames the `time` column to `time_in_ms` and converts the type of the column’s values from `date` to `number`.',
     },
   },
   any: {
     syntax: `any {eq "foo"} {eq "bar"} {eq "fizz"}
 any condition={lte 10} condition={gt 30}`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | filterrows {
     getCell "project" | any {eq "elasticsearch"} {eq "kibana"} {eq "x-pack"}
@@ -64,8 +65,7 @@ any condition={lte 10} condition={gt 30}`,
 | pointseries color="project" size="max(price)"
 | pie
 | render`,
-      help:
-        'This filters out any rows that don’t contain `"elasticsearch"`, `"kibana"` or `"x-pack"` in the `project` field.',
+      help: 'This filters out any rows that don’t contain `"elasticsearch"`, `"kibana"` or `"x-pack"` in the `project` field.',
     },
   },
   as: {
@@ -73,7 +73,8 @@ any condition={lte 10} condition={gt 30}`,
 as "foo"
 as name="bar"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | ply by="project" fn={math "count(username)" | as "num_users"} fn={math "mean(price)" | as "price"}
 | pointseries x="project" y="num_users" size="price" color="project"
@@ -90,15 +91,15 @@ asset id="asset-498f7429-4d56-42a2-a7e4-8bf08d98d114"`,
     usage: {
       expression: `image dataurl={asset "asset-c661a7cc-11be-45a1-a401-d7592ea7917a"} mode="contain"
 | render`,
-      help:
-        'The image asset stored with the ID `"asset-c661a7cc-11be-45a1-a401-d7592ea7917a"` is passed into the `dataurl` argument of the `image` function to display the stored asset.',
+      help: 'The image asset stored with the ID `"asset-c661a7cc-11be-45a1-a401-d7592ea7917a"` is passed into the `dataurl` argument of the `image` function to display the stored asset.',
     },
   },
   axisConfig: {
     syntax: `axisConfig show=false
 axisConfig position="right" min=0 max=10 tickSize=1`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="size(cost)" y="project" color="project"
 | plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true}
@@ -106,8 +107,7 @@ axisConfig position="right" min=0 max=10 tickSize=1`,
   xaxis={axisConfig position="top" min=0 max=400 tickSize=100}
   yaxis={axisConfig position="right"}
 | render`,
-      help:
-        'This sets the `x-axis` to display on the top of the chart and sets the range of values to `0-400` with ticks displayed at `100` intervals. The `y-axis` is configured to display on the `right`.',
+      help: 'This sets the `x-axis` to display on the top of the chart and sets the range of values to `0-400` with ticks displayed at `100` intervals. The `y-axis` is configured to display on the `right`.',
     },
   },
   case: {
@@ -131,28 +131,28 @@ case if={lte 50} then="green"`,
       default="red"
   }
 | render`,
-      help:
-        'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
+      help: 'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
     },
   },
   columns: {
     syntax: `columns include="@timestamp, projects, cost"
 columns exclude="username, country, age"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | columns include="price, cost, state, project"
 | table
 | render`,
-      help:
-        'This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.',
+      help: 'This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.',
     },
   },
   compare: {
     syntax: `compare "neq" to="elasticsearch"
 compare op="lte" to=100`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | mapColumn project
   fn={getCell project |
@@ -164,8 +164,7 @@ compare op="lte" to=100`,
 | pointseries size="size(cost)" color="project"
 | pie
 | render`,
-      help:
-        'This maps all `project` values that aren’t `"kibana"` and `"elasticsearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.',
+      help: 'This maps all `project` values that aren’t `"kibana"` and `"elasticsearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.',
     },
   },
   containerStyle: {
@@ -197,8 +196,7 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
 | formatdate "LLLL"
 | markdown "Last updated: " {context}
 | render`,
-      help:
-        'Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.',
+      help: 'Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.',
     },
   },
   csv: {
@@ -212,8 +210,7 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
 | pointseries color=fruit size=stock
 | pie
 | render`,
-      help:
-        'This creates a `datatable` with `fruit` and `stock` columns with two rows. This is useful for quickly mocking data.',
+      help: 'This creates a `datatable` with `fruit` and `stock` columns with two rows. This is useful for quickly mocking data.',
     },
   },
   date: {
@@ -239,7 +236,8 @@ date "01/31/2019" format="MM/DD/YYYY"`,
 demodata "ci"
 demodata type="shirts"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | table
 | render`,
@@ -253,8 +251,7 @@ dropdownControl valueColumn=agent filterColumn=agent.keyword filterGroup=group1`
       expression: `demodata
 | dropdownControl valueColumn=project filterColumn=project
 | render`,
-      help:
-        'This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.',
+      help: 'This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.',
     },
   },
   eq: {
@@ -263,7 +260,8 @@ eq null
 eq 10
 eq "foo"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | mapColumn project
   fn={getCell project |
@@ -275,8 +273,7 @@ eq "foo"`,
 | pointseries size="size(cost)" color="project"
 | pie
 | render`,
-      help:
-        'This changes all values in the project column that don’t equal `"kibana"` or `"elasticsearch"` to `"other"`.',
+      help: 'This changes all values in the project column that don’t equal `"kibana"` or `"elasticsearch"` to `"other"`.',
     },
   },
   escount: {
@@ -284,7 +281,8 @@ eq "foo"`,
 escount "currency:\"EUR\"" index="kibana_sample_data_ecommerce"
 escount query="response:404" index="kibana_sample_data_logs"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | escount "Cancelled:true" index="kibana_sample_data_flights"
 | math "value"
 | progress shape="semicircle"
@@ -292,8 +290,7 @@ escount query="response:404" index="kibana_sample_data_logs"`,
   font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}
   max={filters | escount index="kibana_sample_data_flights"}
 | render`,
-      help:
-        'The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.',
+      help: 'The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.',
     },
   },
   esdocs: {
@@ -303,7 +300,8 @@ esdocs query="response:404" index="kibana_sample_data_logs"
 esdocs index="kibana_sample_data_flights" count=100
 esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | esdocs index="kibana_sample_data_ecommerce"
   fields="customer_gender, taxful_total_price, order_date"
   sort="order_date, asc"
@@ -315,20 +313,19 @@ esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
 | plot defaultStyle={seriesStyle lines=3}
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render`,
-      help:
-        'This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.',
+      help: 'This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.',
     },
   },
   essql: {
     syntax: `essql query="SELECT * FROM \"logstash*\""
 essql "SELECT * FROM \"apm*\"" count=10000`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   \"kibana_sample_data_flights\""
 | table
 | render`,
-      help:
-        'This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.',
+      help: 'This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.',
     },
   },
   exactly: {
@@ -336,21 +333,22 @@ essql "SELECT * FROM \"apm*\"" count=10000`,
 exactly "age" value=50 filterGroup="group2"
 exactly column="project" value="beats"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | exactly column=project value=elasticsearch
 | demodata
 | pointseries x=project y="mean(age)"
 | plot defaultStyle={seriesStyle bars=1}
 | render`,
-      help:
-        'The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.',
+      help: 'The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.',
     },
   },
   filterrows: {
     syntax: `filterrows {getCell "project" | eq "kibana"}
 filterrows fn={getCell "age" | gt 50}`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | filterrows {getCell "country" | any {eq "IN"} {eq "US"} {eq "CN"}}
 | mapColumn "@timestamp"
@@ -360,8 +358,7 @@ filterrows fn={getCell "age" | gt 50}`,
 | plot defaultStyle={seriesStyle points="2" lines="1"}
   palette={palette "#01A4A4" "#CC6666" "#D0D102" "#616161" "#00A1CB" "#32742C" "#F18D05" "#113F8C" "#61AE24" "#D70060" gradient=false}
 | render`,
-      help:
-        'This uses `filterrows` to only keep data from India (`IN`), the United States (`US`), and China (`CN`).',
+      help: 'This uses `filterrows` to only keep data from India (`IN`), the United States (`US`), and China (`CN`).',
     },
   },
   filters: {
@@ -383,8 +380,7 @@ filters group="timefilter2" group="dropdownfilter1" ungrouped=true`,
     italic=true
   }
 | render`,
-      help:
-        '`filters` sets the existing filters as context and accepts a `group` parameter to opt into specific filter groups. Setting `ungrouped` to `true` opts out of using global filters.',
+      help: '`filters` sets the existing filters as context and accepts a `group` parameter to opt into specific filter groups. Setting `ungrouped` to `true` opts out of using global filters.',
     },
   },
   font: {
@@ -397,7 +393,8 @@ font underline=true
 font italic=false
 font lHeight=32`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="project" y="size(cost)" color="project"
 | plot defaultStyle={seriesStyle bars=0.75} legend=false
@@ -417,29 +414,29 @@ font lHeight=32`,
     syntax: `formatdate format="YYYY-MM-DD"
 formatdate "MM/DD/YYYY"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | mapColumn "time" fn={getCell time | formatdate "MMM 'YY"}
 | pointseries x="time" y="sum(price)" color="state"
 | plot defaultStyle={seriesStyle points=5}
 | render`,
-      help:
-        'This transforms the dates in the `time` field into strings that look like `"Jan ‘19"`, `"Feb ‘19"`, etc. using a MomentJS format.',
+      help: 'This transforms the dates in the `time` field into strings that look like `"Jan ‘19"`, `"Feb ‘19"`, etc. using a MomentJS format.',
     },
   },
   formatnumber: {
     syntax: `formatnumber format="$0,0.00"
 formatnumber "0.0a"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | progress shape="gauge"
   label={formatnumber "0%"}
   font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
 | render`,
-      help:
-        'The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.',
+      help: 'The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.',
     },
   },
 });

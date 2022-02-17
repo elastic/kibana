@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
+import { createNewPackagePolicyMock, deletePackagePolicyMock } from '../../../fleet/common/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -14,20 +16,23 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
+  getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import { KibanaRequest } from 'kibana/server';
-import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListSchemaMock } from '../../../lists/common/schemas/response/exception_list_schema.mock';
 import { ExceptionListClient } from '../../../lists/server';
 import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
@@ -35,13 +40,15 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
+import { DeletePackagePoliciesResponse } from '../../../fleet/common';
+import { ARTIFACT_LISTS_IDS_TO_REMOVE } from './handlers/remove_policy_from_artifacts';
+import { createMockPolicyData } from '../endpoint/services/feature_usage';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
   let ctx: SecuritySolutionRequestHandlerContext;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
-  const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -55,11 +62,16 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+
+    jest
+      .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
+      .mockResolvedValue(createMockPolicyData());
   });
 
   afterEach(() => {
     licenseService.stop();
     licenseEmitter.complete();
+    jest.clearAllMocks();
   });
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
@@ -78,9 +90,7 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        endpointAppContextMock.appClientFactory,
-        maxTimelineImportExportSize,
-        endpointAppContextMock.security,
+        requestContextFactoryMock.create(),
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient
@@ -100,11 +110,11 @@ describe('ingest_integration tests ', () => {
     let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      const artifacts = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts();
       ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
       ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
-      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
-      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[3];
+      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[3];
+      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[4];
     });
 
     beforeEach(() => {
@@ -147,7 +157,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
 
@@ -170,7 +183,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 
@@ -197,10 +213,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 
@@ -238,7 +254,12 @@ describe('ingest_integration tests ', () => {
     it('returns an error if paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactory(); // defaults with paid features on
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
@@ -249,7 +270,12 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
       mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
@@ -265,11 +291,66 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+  });
+
+  describe('package policy delete callback', () => {
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient);
+      await callback(deletePackagePolicyMock());
+    };
+
+    let removedPolicies: DeletePackagePoliciesResponse;
+    let policyId: string;
+    let fakeArtifact: ExceptionListSchema;
+
+    beforeEach(() => {
+      removedPolicies = deletePackagePolicyMock();
+      policyId = removedPolicies[0].id;
+      fakeArtifact = {
+        ...getExceptionListSchemaMock(),
+        tags: [`policy:${policyId}`],
+      };
+
+      exceptionListClient.findExceptionListsItem = jest
+        .fn()
+        .mockResolvedValueOnce({ data: [fakeArtifact], total: 1 });
+      exceptionListClient.updateExceptionListItem = jest
+        .fn()
+        .mockResolvedValueOnce({ ...fakeArtifact, tags: [] });
+    });
+
+    it('removes policy from artifact', async () => {
+      await invokeDeleteCallback();
+
+      expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
+        listId: ARTIFACT_LISTS_IDS_TO_REMOVE,
+        filter: ARTIFACT_LISTS_IDS_TO_REMOVE.map(
+          () => `exception-list-agnostic.attributes.tags:"policy:${policyId}"`
+        ),
+        namespaceType: ARTIFACT_LISTS_IDS_TO_REMOVE.map(() => 'agnostic'),
+        page: 1,
+        perPage: 50,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+
+      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
+        ...fakeArtifact,
+        namespaceType: fakeArtifact.namespace_type,
+        osTypes: fakeArtifact.os_types,
+        tags: [],
+      });
     });
   });
 });

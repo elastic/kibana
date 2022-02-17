@@ -42,3 +42,17 @@
     margin-right: $euiSizeS;
   }
 }
+
+.lnsChangeIndexPatternPopover {
+  width: 320px;
+}
+
+.lnsChangeIndexPatternPopover__trigger {
+  padding: 0 $euiSize;
+}
+
+.lnsLayerPanelChartSwitch_title {
+  font-weight: 600;
+  display: inline;
+  padding-left: 8px;
+}

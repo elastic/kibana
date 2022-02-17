@@ -21,8 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { MultiInputRows } from '../../../multi_input_rows';
 
-import { CurationQueries } from '../../components';
+import { QUERY_INPUTS_BUTTON, QUERY_INPUTS_PLACEHOLDER } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 
 export const ManageQueriesModal: React.FC = () => {
@@ -35,7 +36,7 @@ export const ManageQueriesModal: React.FC = () => {
 
   return (
     <>
-      <EuiButton onClick={showModal} isLoading={queriesLoading}>
+      <EuiButton fill onClick={showModal} isLoading={queriesLoading}>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.curations.manageQueryButtonLabel',
           { defaultMessage: 'Manage queries' }
@@ -61,8 +62,11 @@ export const ManageQueriesModal: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer />
-            <CurationQueries
-              queries={queries}
+            <MultiInputRows
+              id="manageCurationQueries"
+              initialValues={queries}
+              addRowText={QUERY_INPUTS_BUTTON}
+              inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
               submitButtonText={SAVE_BUTTON_LABEL}
               onSubmit={(newQueries) => {
                 updateQueries(newQueries);

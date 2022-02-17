@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs/operators';
 
@@ -37,6 +38,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
   constructor() {
     return mockedDate;
   }
+
   static now() {
     return mockedDate.getTime();
   }
@@ -94,6 +96,7 @@ describe('TaskStore', () => {
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
+        traceparent: 'apmTraceparent',
       };
       const result = await testSchedule(task);
 
@@ -112,6 +115,7 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'report',
           user: undefined,
+          traceparent: 'apmTraceparent',
         },
         {
           id: 'id',
@@ -134,6 +138,7 @@ describe('TaskStore', () => {
         taskType: 'report',
         user: undefined,
         version: '123',
+        traceparent: 'apmTraceparent',
       });
     });
 
@@ -205,8 +210,10 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.Hit<unknown>> = []) {
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
+    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
+      esClient.search.mockResponse({
+        hits: { hits, total: hits.length },
+      } as estypes.SearchResponse);
 
       const result = await store.fetch(opts);
 
@@ -285,6 +292,7 @@ describe('TaskStore', () => {
         status: 'idle' as TaskStatus,
         version: '123',
         ownerId: null,
+        traceparent: 'myTraceparent',
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -318,6 +326,7 @@ describe('TaskStore', () => {
           taskType: task.taskType,
           user: undefined,
           ownerId: null,
+          traceparent: 'myTraceparent',
         },
         { version: '123', refresh: false }
       );
@@ -347,6 +356,7 @@ describe('TaskStore', () => {
         status: 'idle' as TaskStatus,
         version: '123',
         ownerId: null,
+        traceparent: '',
       };
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
@@ -384,6 +394,7 @@ describe('TaskStore', () => {
         status: 'idle' as TaskStatus,
         version: '123',
         ownerId: null,
+        traceparent: '',
       };
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
@@ -500,6 +511,7 @@ describe('TaskStore', () => {
             status: status as TaskStatus,
             version: '123',
             ownerId: null,
+            traceparent: 'myTraceparent',
           };
 
           savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
@@ -562,18 +574,5 @@ describe('TaskStore', () => {
     });
   });
 });
-
-const asApiResponse = (body: Pick<estypes.SearchResponse, 'hits'>) =>
-  elasticsearchServiceMock.createSuccessTransportRequestPromise({
-    hits: body.hits,
-    took: 0,
-    timed_out: false,
-    _shards: {
-      failed: 0,
-      successful: body.hits.hits.length,
-      total: 0,
-      skipped: 0,
-    },
-  });
 
 const randomId = () => `id-${_.random(1, 20)}`;

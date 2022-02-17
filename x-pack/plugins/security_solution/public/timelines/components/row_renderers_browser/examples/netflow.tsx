@@ -16,6 +16,7 @@ const NetflowExampleComponent: React.FC = () => (
     {netflowRowRenderer.renderRow({
       browserFields: {},
       data: getMockNetflowData(),
+      isDraggable: false,
       timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
   </>

@@ -42,7 +42,6 @@ describe('PingList component', () => {
         type: 'io',
       },
       monitor: {
-        duration: { us: 1370 },
         id: 'auto-tcp-0X81440A68E839814D',
         ip: '255.255.255.0',
         name: '',
@@ -62,7 +61,7 @@ describe('PingList component', () => {
       ...response,
       error: undefined,
       loading: false,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
   });
 
@@ -72,7 +71,7 @@ describe('PingList component', () => {
       total: 0,
       error: undefined,
       loading: true,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
     const { getByText } = render(<PingList />);
     expect(getByText('Loading history...')).toBeInTheDocument();
@@ -84,7 +83,7 @@ describe('PingList component', () => {
       total: 0,
       error: undefined,
       loading: false,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
     const { getByText } = render(<PingList />);
     expect(getByText('No history found')).toBeInTheDocument();
@@ -161,9 +160,6 @@ describe('PingList component', () => {
                 "type": "io",
               },
               "monitor": Object {
-                "duration": Object {
-                  "us": 1370,
-                },
                 "id": "auto-tcp-0X81440A68E839814D",
                 "ip": "255.255.255.0",
                 "name": "",
@@ -183,6 +179,13 @@ describe('PingList component', () => {
         const ping = pings[0];
         ping.monitor.type = 'browser';
         expect(rowShouldExpand(ping)).toBe(true);
+      });
+    });
+
+    describe('duration column', () => {
+      it('shows -- when duration is null', () => {
+        const { getByTestId } = render(<PingList />);
+        expect(getByTestId('ping-list-duration-unavailable-tool-tip')).toBeInTheDocument();
       });
     });
 

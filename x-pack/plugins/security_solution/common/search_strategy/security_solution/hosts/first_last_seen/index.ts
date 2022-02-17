@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe } from '../../../common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { Inspect, Maybe, Direction } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 import { HostsFields } from '../common';
 
 export interface HostFirstLastSeenRequestOptions
   extends Partial<RequestOptionsPaginated<HostsFields>> {
   hostName: string;
-  order: 'asc' | 'desc';
+  order: Direction.asc | Direction.desc;
 }
 
 export interface HostFirstLastSeenStrategyResponse extends IEsSearchResponse {

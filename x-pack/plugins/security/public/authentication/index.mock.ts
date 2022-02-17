@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import type { AuthenticationServiceSetup } from './authentication_service';
+import type {
+  AuthenticationServiceSetup,
+  AuthenticationServiceStart,
+} from './authentication_service';
 
 export const authenticationMock = {
   createSetup: (): jest.Mocked<AuthenticationServiceSetup> => ({
+    getCurrentUser: jest.fn(),
+    areAPIKeysEnabled: jest.fn(),
+  }),
+  createStart: (): jest.Mocked<AuthenticationServiceStart> => ({
     getCurrentUser: jest.fn(),
     areAPIKeysEnabled: jest.fn(),
   }),

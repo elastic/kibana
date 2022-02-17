@@ -7,18 +7,20 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet_agents_actions', () => {
     before(async () => {
-      await esArchiver.load('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return a 200 if this a valid actions request', async () => {
@@ -96,6 +98,20 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(404);
+    });
+
+    it('should return a 403 if user lacks fleet all permissions', async () => {
+      await supertestWithoutAuth
+        .post(`/api/fleet/agents/agent1/actions`)
+        .set('kbn-xsrf', 'xx')
+        .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+        .send({
+          action: {
+            type: 'POLICY_CHANGE',
+            data: { data: 'action_data' },
+          },
+        })
+        .expect(403);
     });
   });
 }

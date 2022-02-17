@@ -1,11 +1,9 @@
 {
   "indices.put_template": {
     "url_params": {
-      "include_type_name": "__flag__",
       "order": "",
       "create": "__flag__",
-      "master_timeout": "",
-      "flat_settings": "__flag__"
+      "master_timeout": ""
     },
     "methods": [
       "PUT",

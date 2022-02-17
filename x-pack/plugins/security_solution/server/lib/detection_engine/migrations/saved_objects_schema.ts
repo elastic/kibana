@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { IsoDateString, PositiveInteger } from '../../../../common/detection_engine/schemas/types';
+import { IsoDateString, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { unionWithNullType } from '../../../../common/utility_types';
 
 const status = t.keyof({ success: null, failure: null, pending: null });

@@ -6,14 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { importListItemQuerySchema, listSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
-import { importListItemQuerySchema, listSchema } from '../../common/schemas';
 import { ConfigType } from '../config';
 
+import { buildRouteValidation, buildSiemResponse } from './utils';
 import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
 
 import { getListClient } from '.';

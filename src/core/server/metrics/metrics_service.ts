@@ -17,13 +17,14 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 
-interface MetricsServiceSetupDeps {
+export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
 }
 
 /** @internal */
 export class MetricsService
-  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart> {
+  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart>
+{
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
@@ -73,7 +74,7 @@ export class MetricsService
 
   private async refreshMetrics() {
     const metrics = await this.metricsCollector!.collect();
-    const { message, ...meta } = getEcsOpsMetricsLog(metrics);
+    const { message, meta } = getEcsOpsMetricsLog(metrics);
     this.opsMetricsLogger.debug(message!, meta);
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);

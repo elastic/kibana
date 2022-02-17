@@ -25,6 +25,7 @@ import {
   UncommonProcessQueryTabBody,
   EventsQueryTabBody,
   HostAlertsQueryTabBody,
+  HostRiskTabBody,
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
@@ -70,7 +71,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       deleteQuery,
       endDate: to,
       filterQuery,
-      skip: isInitializing,
+      skip: isInitializing || filterQuery === undefined,
       setQuery,
       startDate: from,
       type,
@@ -101,6 +102,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
+          <HostRiskTabBody {...tabProps} />
         </Route>
       </Switch>
     );

@@ -8,7 +8,7 @@
 import type React from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
-import { NoteResult } from '../../../graphql/types';
+import { NoteResult } from '../../../../common/types/timeline/note';
 import {
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
@@ -16,6 +16,7 @@ import {
   TemplateTimelineTypeLiteral,
   RowRendererId,
   TimelineStatusLiteralWithNull,
+  SingleTimelineResolveResponse,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -194,12 +195,17 @@ export interface OpenTimelineProps {
   hideActions?: ActionTimelineToShow[];
 }
 
+export interface ResolveTimelineConfig {
+  alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
+  outcome: SingleTimelineResolveResponse['data']['outcome'];
+}
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
   forceNotes?: boolean;
   from: string;
   notes: NoteResult[] | null | undefined;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
@@ -210,6 +216,7 @@ export type DispatchUpdateTimeline = ({
   id,
   from,
   notes,
+  resolveTimelineConfig,
   timeline,
   to,
   ruleNote,
@@ -235,3 +242,5 @@ export interface TemplateTimelineFilter {
   withNext: boolean;
   count: number | undefined;
 }
+
+export type TimelineErrorCallback = (error: Error, timelineId: string) => void;

@@ -6,15 +6,20 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+export { CasesClient } from './client';
 import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
-export { CaseRequestContext } from './types';
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
+  exposeToBrowser: {
+    markdownPlugins: true,
+  },
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
+
+export type { PluginStartContract } from './plugin';

@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface InterimResultsControlProps {
   value: boolean;
@@ -25,7 +25,7 @@ export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
               defaultMessage="Include interim results"
             />
           }
-          checked={value}
+          checked={value ?? false}
           onChange={onChange.bind(null, !value)}
         />
       </EuiFormRow>

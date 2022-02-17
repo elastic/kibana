@@ -19,7 +19,7 @@ export interface Processor {
 
 export interface Pipeline {
   name: string;
-  description: string;
+  description?: string;
   version?: number;
   processors: Processor[];
   on_failure?: Processor[];
@@ -32,4 +32,9 @@ export interface PipelinesByName {
     processors: Processor[];
     on_failure?: Processor[];
   };
+}
+
+export enum FieldCopyAction {
+  Copy = 'copy',
+  Rename = 'rename',
 }

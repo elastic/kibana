@@ -8,9 +8,10 @@
 
 import { HomePublicPluginSetup, HomePublicPluginStart } from 'src/plugins/home/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { SharePluginStart } from '../../share/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
@@ -25,7 +26,8 @@ export interface AppPluginSetupDependencies {
 
 export interface AppPluginStartDependencies {
   home: HomePublicPluginStart;
-  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
+  share: SharePluginStart;
 }

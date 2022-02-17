@@ -17,12 +17,13 @@ import {
 } from './index';
 
 export default function ({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('creation_index_pattern', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
@@ -31,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
@@ -40,8 +42,8 @@ export default function ({ getService }: FtrProviderContext) {
         source: 'ft_ecommerce',
         groupByEntries: [
           {
-            identifier: 'terms(category.keyword)',
-            label: 'category.keyword',
+            identifier: 'terms(category)',
+            label: 'category',
           } as GroupByEntry,
           {
             identifier: 'date_histogram(order_date)',
@@ -85,15 +87,16 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         transformId: `ec_1_${Date.now()}`,
         transformDescription:
-          'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
+          'ecommerce batch transform with groups terms(category) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: true,
         expected: {
-          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
-              'category.keyword': {
+              category: {
                 terms: {
                   field: 'category.keyword',
                 },
@@ -155,30 +158,49 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           histogramCharts: [
-            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'category',
+              legend: '6 categories',
+              colorStats: [
+                { color: '#000000', percentage: 45 },
+                { color: '#54B399', percentage: 55 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'currency',
               legend: '1 category',
               colorStats: [
-                { key: '#000000', value: 10 },
-                { key: '#54B399', value: 90 },
+                { color: '#000000', percentage: 10 },
+                { color: '#54B399', percentage: 90 },
               ],
             },
             {
-              chartAvailable: false,
-              id: 'customer_birth_date',
-              legend: '0 documents contain field.',
+              chartAvailable: true,
+              id: 'customer_first_name',
+              legend: 'top 20 of 46 categories',
+              colorStats: [
+                { color: '#000000', percentage: 60 },
+                { color: '#54B399', percentage: 37 },
+              ],
             },
-            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
-            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'customer_full_name',
+              legend: 'top 20 of 3321 categories',
+              colorStats: [
+                { color: '#000000', percentage: 25 },
+                { color: '#54B399', percentage: 75 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'customer_gender',
               legend: '2 categories',
               colorStats: [
-                { key: '#000000', value: 15 },
-                { key: '#54B399', value: 85 },
+                { color: '#000000', percentage: 15 },
+                { color: '#54B399', percentage: 85 },
               ],
             },
             {
@@ -186,18 +208,26 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_id',
               legend: 'top 20 of 46 categories',
               colorStats: [
-                { key: '#54B399', value: 35 },
-                { key: '#000000', value: 60 },
+                { color: '#54B399', percentage: 37 },
+                { color: '#000000', percentage: 60 },
               ],
             },
-            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'customer_last_name',
+              legend: 'top 20 of 183 categories',
+              colorStats: [
+                { color: '#000000', percentage: 23 },
+                { color: '#54B399', percentage: 77 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'customer_phone',
               legend: '1 category',
               colorStats: [
-                { key: '#000000', value: 10 },
-                { key: '#54B399', value: 90 },
+                { color: '#000000', percentage: 10 },
+                { color: '#54B399', percentage: 90 },
               ],
             },
             {
@@ -205,11 +235,21 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'day_of_week',
               legend: '7 categories',
               colorStats: [
-                { key: '#000000', value: 20 },
-                { key: '#54B399', value: 75 },
+                { color: '#000000', percentage: 20 },
+                { color: '#54B399', percentage: 75 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'day_of_week_i',
+              legend: '0 - 6',
+              colorStats: [
+                { color: '#000000', percentage: 20 },
+                { color: '#54B399', percentage: 75 },
               ],
             },
           ],
+          discoverQueryHits: '7,270',
         },
       } as PivotTransformTestData,
       {
@@ -247,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: false,
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -293,7 +334,65 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
+          discoverQueryHits: '10',
+        },
+      } as PivotTransformTestData,
+      {
+        type: 'pivot',
+        suiteTitle: 'batch transform with terms group and terms agg',
+        source: 'ft_ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(customer_gender)',
+            label: 'customer_gender',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'terms(geoip.city_name)',
+            label: 'geoip.city_name.terms',
+          },
+        ],
+        transformId: `ec_3_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(customer_gender) and aggregation terms(geoip.city_name)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        discoverAdjustSuperDatePicker: false,
+        expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
+          pivotAdvancedEditorValue: {
+            group_by: {
+              customer_gender: {
+                terms: {
+                  field: 'customer_gender',
+                },
+              },
+            },
+            aggregations: {
+              'geoip.city_name': {
+                terms: {
+                  field: 'geoip.city_name',
+                  size: 3,
+                },
+              },
+            },
+          },
+          transformPreview: {
+            column: 0,
+            values: ['FEMALE', 'MALE'],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          discoverQueryHits: '2',
         },
       } as PivotTransformTestData,
       {
@@ -310,13 +409,14 @@ export default function ({ getService }: FtrProviderContext) {
           identifier: 'order_date',
           label: 'order_date',
         },
-        transformId: `ec_3_${Date.now()}`,
+        transformId: `ec_4_${Date.now()}`,
 
         transformDescription:
           'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        discoverAdjustSuperDatePicker: true,
         expected: {
           latestPreview: {
             column: 0,
@@ -331,7 +431,6 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
           transformPreview: {
             column: 0,
             values: [
@@ -342,6 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
               'July 12th 2019, 23:31:12',
             ],
           },
+          discoverQueryHits: '10',
         },
       } as LatestTransformTestData,
     ];
@@ -395,13 +495,22 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchExists();
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
 
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await canvasElement.disableAntiAliasing();
+
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
           await transform.wizard.enableIndexPreviewHistogramCharts(true);
 
-          await transform.testExecution.logTestStep('displays the index preview histogram charts');
-          await transform.wizard.assertIndexPreviewHistogramCharts(
-            testData.expected.histogramCharts
-          );
+          if (Array.isArray(testData.expected.histogramCharts)) {
+            await transform.testExecution.logTestStep(
+              'displays the index preview histogram charts'
+            );
+            await transform.wizard.assertIndexPreviewHistogramCharts(
+              testData.expected.histogramCharts
+            );
+          }
+
+          await canvasElement.resetAntiAliasing();
 
           if (isPivotTransformTestData(testData)) {
             await transform.testExecution.logTestStep('adds the group by entries');
@@ -478,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
+          await transform.testExecution.logTestStep('displays the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 
@@ -528,10 +637,31 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
           });
+        });
+
+        it('navigates to discover and displays results of the destination index', async () => {
+          await transform.testExecution.logTestStep('should show the actions popover');
+          await transform.table.assertTransformRowActions(testData.transformId, false);
+
+          await transform.testExecution.logTestStep('should navigate to discover');
+          await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
+
+          if (testData.discoverAdjustSuperDatePicker) {
+            await transform.discover.assertNoResults(testData.destinationIndex);
+            await transform.testExecution.logTestStep(
+              'should switch quick select lookback to years'
+            );
+            await transform.discover.assertSuperDatePickerToggleQuickMenuButtonExists();
+            await transform.discover.openSuperDatePicker();
+            await transform.discover.quickSelectYears();
+          }
+
+          await transform.discover.assertDiscoverQueryHits(testData.expected.discoverQueryHits);
         });
       });
     }

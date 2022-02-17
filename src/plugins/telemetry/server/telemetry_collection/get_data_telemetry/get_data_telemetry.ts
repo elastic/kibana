@@ -14,25 +14,45 @@ import {
   DataTelemetryType,
 } from './constants';
 
+/**
+ * Common counters for the {@link DataTelemetryDocument}s
+ */
 export interface DataTelemetryBasePayload {
+  /** How many indices match the declared pattern **/
   index_count: number;
+  /** How many indices match the declared pattern follow ECS conventions **/
   ecs_index_count?: number;
+  /** How many documents are among all the identified indices **/
   doc_count?: number;
+  /** Total size in bytes among all the identified indices **/
   size_in_bytes?: number;
 }
 
+/**
+ * Depending on the type of index, we'll populate different keys as we identify them.
+ */
 export interface DataTelemetryDocument extends DataTelemetryBasePayload {
+  /** For data-stream indices. Reporting their details **/
   data_stream?: {
+    /** Name of the dataset in the data-stream **/
     dataset?: string;
+    /** Type of the data-stream: "logs", "metrics", "traces" **/
     type?: DataTelemetryType | string; // The union of types is to help autocompletion with some known `data_stream.type`s
   };
+  /** When available, reporting the package details **/
   package?: {
+    /** The package's name. Typically populated in the indices' _meta.package.name by Fleet. **/
     name: string;
   };
+  /** What's the process indexing the data? (i.e.: "beats", "logstash") **/
   shipper?: string;
+  /** When the data comes from a matching index-pattern, the name of the pattern **/
   pattern_name?: DataPatternName;
 }
 
+/**
+ * The Data Telemetry is reported as an array of {@link DataTelemetryDocument}
+ */
 export type DataTelemetryPayload = DataTelemetryDocument[];
 
 export interface DataTelemetryIndex {
@@ -161,59 +181,6 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
   return [...acc.values()];
 }
 
-interface IndexStats {
-  indices: {
-    [indexName: string]: {
-      total: {
-        docs: {
-          count: number;
-          deleted: number;
-        };
-        store: {
-          size_in_bytes: number;
-        };
-      };
-    };
-  };
-}
-
-interface IndexMappings {
-  [indexName: string]: {
-    mappings: {
-      _meta?: {
-        beat?: string;
-
-        // Ingest Manager provided metadata
-        package?: {
-          name?: string;
-        };
-        managed_by?: string; // Typically "ingest-manager"
-      };
-      properties: {
-        data_stream?: {
-          properties: {
-            dataset?: {
-              type: string;
-              value?: string;
-            };
-            type?: {
-              type: string;
-              value?: string;
-            };
-          };
-        };
-        ecs?: {
-          properties: {
-            version?: {
-              type: string;
-            };
-          };
-        };
-      };
-    };
-  };
-}
-
 export async function getDataTelemetry(esClient: ElasticsearchClient) {
   try {
     const index = [
@@ -251,9 +218,9 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
       metric: ['docs', 'store'],
       filter_path: ['indices.*.total'],
     };
-    const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
-      esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
-      esClient.indices.stats<IndexStats>(indicesStatsParams),
+    const [indexMappings, indexStats] = await Promise.all([
+      esClient.indices.getMapping(indexMappingsParams),
+      esClient.indices.stats(indicesStatsParams),
     ]);
 
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });

@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiText, EuiButton, EuiLink, EuiCode, EuiButtonEmpty } from '@elastic/eui';
@@ -179,7 +179,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={`${services.documentation.getEsDocsBasePath()}/simulate-pipeline-api.html`}
+                    href={services.documentation.getSimulatePipelineApiUrl()}
                     target="_blank"
                     external
                   >

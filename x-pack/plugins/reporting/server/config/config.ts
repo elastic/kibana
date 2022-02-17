@@ -6,8 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { LevelLogger } from '../lib';
 import { createConfig$ } from './create_config';
@@ -43,7 +42,6 @@ interface Config<BaseType> {
 }
 
 interface KbnServerConfigType {
-  path: { data: Observable<string> };
   server: {
     basePath: string;
     host: string;
@@ -54,10 +52,20 @@ interface KbnServerConfigType {
   };
 }
 
+/**
+ * @internal
+ */
 export interface ReportingConfig extends Config<ReportingConfigType> {
   kbnConfig: Config<KbnServerConfigType>;
 }
 
+/**
+ * @internal
+ * @param {PluginInitializerContext<ReportingConfigType>} initContext
+ * @param {CoreSetup} core
+ * @param {LevelLogger} logger
+ * @returns {Promise<ReportingConfig>}
+ */
 export const buildConfig = async (
   initContext: PluginInitializerContext<ReportingConfigType>,
   core: CoreSetup,
@@ -68,9 +76,6 @@ export const buildConfig = async (
   const serverInfo = http.getServerInfo();
 
   const kbnConfig = {
-    path: {
-      data: initContext.config.legacy.globalConfig$.pipe(map((c) => c.path.data)),
-    },
     server: {
       basePath: core.http.basePath.serverBasePath,
       host: serverInfo.hostname,

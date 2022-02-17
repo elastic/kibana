@@ -10,11 +10,12 @@
 ```typescript
 export interface HttpInterceptorResponseError extends HttpResponse 
 ```
+<b>Extends:</b> HttpResponse
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.httpinterceptorresponseerror.error.md) | <code>Error &#124; IHttpFetchError</code> |  |
-|  [request](./kibana-plugin-core-public.httpinterceptorresponseerror.request.md) | <code>Readonly&lt;Request&gt;</code> |  |
+|  [error](./kibana-plugin-core-public.httpinterceptorresponseerror.error.md) | Error \| IHttpFetchError |  |
+|  [request](./kibana-plugin-core-public.httpinterceptorresponseerror.request.md) | Readonly&lt;Request&gt; |  |
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setMockValues, mockKibanaValues, mockHistory } from '../../__mocks__';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
+import { mockHistory } from '../../__mocks__/react_router';
 
 jest.mock('../react_router_helpers', () => ({
   letBrowserHandleEvent: jest.fn(() => false),
@@ -14,6 +15,7 @@ jest.mock('../react_router_helpers', () => ({
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import {
+  Breadcrumb,
   useGenerateBreadcrumbs,
   useEuiBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
@@ -40,6 +42,9 @@ describe('useGenerateBreadcrumbs', () => {
       { text: 'Groups', path: '/groups' },
       { text: 'Example Group Name', path: '/groups/{id}' },
       { text: 'Source Prioritization', path: '/groups/{id}/source_prioritization' },
+      // Note: We're still generating a path for the last breadcrumb even though useEuiBreadcrumbs
+      // will not render a link for it. This is because it's easier to keep our last-breadcrumb-specific
+      // logic in one place, & this way we still have a current path if (for some reason) we need it later.
     ]);
   });
 
@@ -89,48 +94,51 @@ describe('useEuiBreadcrumbs', () => {
       },
       {
         text: 'World',
-        href: '/app/enterprise_search/world',
-        onClick: expect.any(Function),
+        // Per EUI best practices, the last breadcrumb is inactive/is not a link
       },
     ]);
   });
 
-  it('prevents default navigation and uses React Router history on click', () => {
-    const breadcrumb = useEuiBreadcrumbs([{ text: '', path: '/test' }])[0] as any;
+  describe('link behavior for non-last breadcrumbs', () => {
+    // Test helper - adds a 2nd dummy breadcrumb so that paths from the first breadcrumb are generated
+    const useEuiBreadcrumb = (breadcrumb: Breadcrumb) =>
+      useEuiBreadcrumbs([breadcrumb, { text: '' }])[0] as any;
 
-    expect(breadcrumb.href).toEqual('/app/enterprise_search/test');
-    expect(mockHistory.createHref).toHaveBeenCalled();
+    it('prevents default navigation and uses React Router history on click', () => {
+      const breadcrumb = useEuiBreadcrumb({ text: '', path: '/test' });
 
-    const event = { preventDefault: jest.fn() };
-    breadcrumb.onClick(event);
+      expect(breadcrumb.href).toEqual('/app/enterprise_search/test');
+      expect(mockHistory.createHref).toHaveBeenCalled();
 
-    expect(event.preventDefault).toHaveBeenCalled();
-    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalled();
-  });
+      const event = { preventDefault: jest.fn() };
+      breadcrumb.onClick(event);
 
-  it('does not call createHref if shouldNotCreateHref is passed', () => {
-    const breadcrumb = useEuiBreadcrumbs([
-      { text: '', path: '/test', shouldNotCreateHref: true },
-    ])[0] as any;
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalled();
+    });
 
-    expect(breadcrumb.href).toEqual('/test');
-    expect(mockHistory.createHref).not.toHaveBeenCalled();
-  });
+    it('does not call createHref if shouldNotCreateHref is passed', () => {
+      const breadcrumb = useEuiBreadcrumb({ text: '', path: '/test', shouldNotCreateHref: true });
 
-  it('does not prevent default browser behavior on new tab/window clicks', () => {
-    const breadcrumb = useEuiBreadcrumbs([{ text: '', path: '/' }])[0] as any;
+      expect(breadcrumb.href).toEqual('/test');
+      expect(mockHistory.createHref).not.toHaveBeenCalled();
+    });
 
-    (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
-    breadcrumb.onClick();
+    it('does not prevent default browser behavior on new tab/window clicks', () => {
+      const breadcrumb = useEuiBreadcrumb({ text: '', path: '/' });
 
-    expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
-  });
+      (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
+      breadcrumb.onClick();
 
-  it('does not generate link behavior if path is excluded', () => {
-    const breadcrumb = useEuiBreadcrumbs([{ text: 'Unclickable breadcrumb' }])[0];
+      expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
+    });
 
-    expect(breadcrumb.href).toBeUndefined();
-    expect(breadcrumb.onClick).toBeUndefined();
+    it('does not generate link behavior if path is excluded', () => {
+      const breadcrumb = useEuiBreadcrumb({ text: 'Unclickable breadcrumb' });
+
+      expect(breadcrumb.href).toBeUndefined();
+      expect(breadcrumb.onClick).toBeUndefined();
+    });
   });
 });
 
@@ -164,8 +172,6 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
       },
       {
         text: 'Page 2',
-        href: '/app/enterprise_search/page2',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -174,8 +180,6 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
     expect(useEnterpriseSearchBreadcrumbs()).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -219,8 +223,6 @@ describe('useAppSearchBreadcrumbs', () => {
       },
       {
         text: 'Page 2',
-        href: '/app/enterprise_search/app_search/page2',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -234,8 +236,6 @@ describe('useAppSearchBreadcrumbs', () => {
       },
       {
         text: 'App Search',
-        href: '/app/enterprise_search/app_search/',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -279,8 +279,6 @@ describe('useWorkplaceSearchBreadcrumbs', () => {
       },
       {
         text: 'Page 2',
-        href: '/app/enterprise_search/workplace_search/page2',
-        onClick: expect.any(Function),
       },
     ]);
   });
@@ -294,8 +292,6 @@ describe('useWorkplaceSearchBreadcrumbs', () => {
       },
       {
         text: 'Workplace Search',
-        href: '/app/enterprise_search/workplace_search/',
-        onClick: expect.any(Function),
       },
     ]);
   });

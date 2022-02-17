@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { Exception } from '../objects/exception';
 import {
   FIELD_INPUT,
   OPERATOR_INPUT,
-  VALUES_INPUT,
   CANCEL_BTN,
-  BUILDER_MODAL_BODY,
   EXCEPTION_ITEM_CONTAINER,
+  EXCEPTION_FLYOUT_TITLE,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -25,38 +23,19 @@ export const addExceptionEntryFieldValueOfItemX = (
     .find(FIELD_INPUT)
     .eq(fieldIndex)
     .type(`${field}{enter}`);
-  cy.get(BUILDER_MODAL_BODY).click();
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(FIELD_INPUT).eq(index).type(`${field}{enter}`);
-  cy.get(BUILDER_MODAL_BODY).click();
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
-  cy.get(BUILDER_MODAL_BODY).click();
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const addExceptionEntryValue = (values: string[], index = 0) => {
-  values.forEach((value) => {
-    cy.get(VALUES_INPUT).eq(index).type(`${value}{enter}`);
-  });
-  cy.get(BUILDER_MODAL_BODY).click();
-};
-
-export const addExceptionEntry = (exception: Exception, index = 0) => {
-  addExceptionEntryFieldValue(exception.field, index);
-  addExceptionEntryOperatorValue(exception.operator, index);
-  addExceptionEntryValue(exception.values, index);
-};
-
-export const addNestedExceptionEntry = (exception: Exception, index = 0) => {
-  addExceptionEntryFieldValue(exception.field, index);
-  addExceptionEntryOperatorValue(exception.operator, index);
-  addExceptionEntryValue(exception.values, index);
-};
-
-export const closeExceptionBuilderModal = () => {
+export const closeExceptionBuilderFlyout = () => {
   cy.get(CANCEL_BTN).click();
 };

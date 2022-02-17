@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
@@ -83,7 +83,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
     // Act
     // Assert
-    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText('Data view')).toBeInTheDocument();
     expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
   });
 });

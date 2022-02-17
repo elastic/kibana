@@ -22,7 +22,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import { AppContextConsumer, AppDependencies } from '../../../app_context';
@@ -268,6 +268,8 @@ export class StartTrial extends Component<Props, State> {
           <EuiFlexItem>
             {this.acknowledgeModal(dependencies!.docLinks)}
             <EuiCard
+              // @ts-ignore - Known issue from EUI, while they fix their types I've been told that we can just ignore this for now.
+              hasBorder
               title={
                 <FormattedMessage
                   id="xpack.licenseMgmt.licenseDashboard.startTrialTitle"

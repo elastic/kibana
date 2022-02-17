@@ -13,10 +13,3 @@ export const NOT_AVAILABLE_LABEL = i18n.translate(
     defaultMessage: 'N/A',
   }
 );
-
-export const UNIDENTIFIED_SERVICE_NODES_LABEL = i18n.translate(
-  'xpack.apm.serviceNodeNameMissing',
-  {
-    defaultMessage: '(Empty)',
-  }
-);

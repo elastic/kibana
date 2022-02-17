@@ -8,7 +8,7 @@
 import { difference } from 'lodash';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
-import { getSavedObjectsClient } from '../../../../util/dependency_cache';
+import { getSavedObjectsClient, getDataViews } from '../../../../util/dependency_cache';
 import { ml } from '../../../../services/ml_api_service';
 
 export function saveJob(job, newJobData, finish) {
@@ -102,36 +102,9 @@ export function loadSavedDashboards(maxNumber) {
   });
 }
 
-export function loadIndexPatterns(maxNumber) {
-  // Loads the list of Kibana index patterns, as used in editing custom URLs.
-  // TODO - amend loadIndexPatterns in index_utils.js to do the request,
-  // without needing an Angular Provider.
-  return new Promise((resolve, reject) => {
-    const savedObjectsClient = getSavedObjectsClient();
-    savedObjectsClient
-      .find({
-        type: 'index-pattern',
-        fields: ['title'],
-        perPage: maxNumber,
-      })
-      .then((resp) => {
-        const savedObjects = resp.savedObjects;
-        if (savedObjects !== undefined) {
-          const indexPatterns = savedObjects.map((savedObj) => {
-            return { id: savedObj.id, title: savedObj.attributes.title };
-          });
-
-          indexPatterns.sort((dash1, dash2) => {
-            return dash1.title.localeCompare(dash2.title);
-          });
-
-          resolve(indexPatterns);
-        }
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
+export async function loadDataViewListItems() {
+  const dataViewsContract = getDataViews();
+  return (await dataViewsContract.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function extractDescription(job, newJobData) {

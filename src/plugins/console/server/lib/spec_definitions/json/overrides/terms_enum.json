@@ -1,0 +1,12 @@
+{
+  "terms_enum": {
+    "data_autocomplete_rules": {
+      "field": "",
+      "string": "",
+      "size": "",
+      "timeout": "",
+      "case_insensitive": { "__one_of": [true, false] },
+      "index_filter": ""
+    }
+  }
+}

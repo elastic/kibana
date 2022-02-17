@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
-import {
-  EventDetails,
-  EventsViewType,
-  View,
-} from '../../../../common/components/event_details/event_details';
+import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
+
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -38,15 +33,21 @@ interface Props {
   detailsData: TimelineEventsDetailsItem[] | null;
   event: { eventId: string; indexName: string };
   isAlert: boolean;
+  isDraggable?: boolean;
   loading: boolean;
   messageHeight?: number;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRisk | null;
+  handleOnEventClosed: HandleOnEventClosed;
 }
 
 interface ExpandableEventTitleProps {
   isAlert: boolean;
   loading: boolean;
+  ruleName?: string;
+  timestamp?: string;
   handleOnEventClosed?: HandleOnEventClosed;
 }
 
@@ -67,12 +68,23 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ isAlert, loading, handleOnEventClosed }) => (
+  ({ isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => (
     <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
-        </EuiTitle>
+        {!loading && (
+          <>
+            <EuiTitle size="s">
+              <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
+            </EuiTitle>
+            {timestamp && (
+              <>
+                <EuiSpacer size="s" />
+                <PreferenceFormattedDate value={new Date(timestamp)} />
+              </>
+            )}
+            <EuiSpacer size="m" />
+          </>
+        )}
       </EuiFlexItem>
       {handleOnEventClosed && (
         <EuiFlexItem grow={false}>
@@ -86,24 +98,19 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
-    const [view, setView] = useState<View>(EventsViewType.summaryView);
-
-    const message = useMemo(() => {
-      if (detailsData) {
-        const messageField = find({ category: 'base', field: 'message' }, detailsData) as
-          | TimelineEventsDetailsItem
-          | undefined;
-
-        if (messageField?.originalValue) {
-          return Array.isArray(messageField?.originalValue)
-            ? messageField?.originalValue.join()
-            : messageField?.originalValue;
-        }
-      }
-      return null;
-    }, [detailsData]);
-
+  ({
+    browserFields,
+    event,
+    timelineId,
+    timelineTabType,
+    isAlert,
+    isDraggable,
+    loading,
+    detailsData,
+    hostRisk,
+    rawEventData,
+    handleOnEventClosed,
+  }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
@@ -114,27 +121,19 @@ export const ExpandableEvent = React.memo<Props>(
 
     return (
       <StyledFlexGroup direction="column" gutterSize="none">
-        {message && (
-          <EuiFlexItem grow={false}>
-            <EuiDescriptionList data-test-subj="event-message" compressed>
-              <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <LineClamp content={message} />
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        )}
         <StyledEuiFlexItem grow={true}>
           <EventDetails
             browserFields={browserFields}
-            data={detailsData!}
-            id={event.eventId!}
+            data={detailsData ?? []}
+            id={event.eventId}
             isAlert={isAlert}
-            onViewSelected={setView}
-            timelineTabType={timelineTabType}
+            indexName={event.indexName}
+            isDraggable={isDraggable}
+            rawEventData={rawEventData}
             timelineId={timelineId}
-            view={view}
+            timelineTabType={timelineTabType}
+            hostRisk={hostRisk}
+            handleOnEventClosed={handleOnEventClosed}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

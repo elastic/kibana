@@ -14,31 +14,28 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  AGENT_ACTION_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
-  migrateAgentActionToV7100,
-  migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
-  migrateAgentToV7100,
-  migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
 } from './migrations/to_v7_10_0';
 
 import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
 
+import { migrateAgentPolicyToV7120, migratePackagePolicyToV7120 } from './migrations/to_v7_12_0';
 import {
-  migrateAgentPolicyToV7120,
-  migrateAgentToV7120,
-  migratePackagePolicyToV7120,
-} from './migrations/to_v7_12_0';
-import { migratePackagePolicyToV7130, migrateSettingsToV7130 } from './migrations/to_v7_13_0';
+  migratePackagePolicyToV7130,
+  migrateSettingsToV7130,
+  migrateOutputToV7130,
+} from './migrations/to_v7_13_0';
+import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
+import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
+import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
 
 /*
  * Saved object types and mappings
@@ -60,101 +57,12 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
-        // TODO remove as part of https://github.com/elastic/kibana/issues/94303
-        kibana_urls: { type: 'keyword' },
-        kibana_ca_sha256: { type: 'keyword' },
+        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
       '7.13.0': migrateSettingsToV7130,
-    },
-  },
-  [AGENT_SAVED_OBJECT_TYPE]: {
-    name: AGENT_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        type: { type: 'keyword' },
-        active: { type: 'boolean' },
-        enrolled_at: { type: 'date' },
-        unenrolled_at: { type: 'date' },
-        unenrollment_started_at: { type: 'date' },
-        upgraded_at: { type: 'date' },
-        upgrade_started_at: { type: 'date' },
-        access_api_key_id: { type: 'keyword' },
-        version: { type: 'keyword' },
-        user_provided_metadata: { type: 'flattened' },
-        local_metadata: { type: 'flattened' },
-        policy_id: { type: 'keyword' },
-        policy_revision: { type: 'integer' },
-        last_updated: { type: 'date' },
-        last_checkin: { type: 'date' },
-        last_checkin_status: { type: 'keyword' },
-        default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'binary' },
-        updated_at: { type: 'date' },
-        current_error_events: { type: 'text', index: false },
-        packages: { type: 'keyword' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentToV7100,
-      '7.12.0': migrateAgentToV7120,
-    },
-  },
-  [AGENT_ACTION_SAVED_OBJECT_TYPE]: {
-    name: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        agent_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        policy_revision: { type: 'integer' },
-        type: { type: 'keyword' },
-        data: { type: 'binary' },
-        ack_data: { type: 'text' },
-        sent_at: { type: 'date' },
-        created_at: { type: 'date' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
-    },
-  },
-  // TODO: Remove this saved object type. Core will drop any saved objects of
-  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
-  [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
-    name: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        type: { type: 'keyword' },
-        subtype: { type: 'keyword' },
-        agent_id: { type: 'keyword' },
-        action_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        stream_id: { type: 'keyword' },
-        timestamp: { type: 'date' },
-        message: { type: 'text' },
-        payload: { type: 'text' },
-        data: { type: 'text' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentEventToV7100,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -169,45 +77,24 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
+        is_managed: { type: 'boolean' },
         is_default: { type: 'boolean' },
         is_default_fleet_server: { type: 'boolean' },
-        is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
+        unenroll_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
-        preconfiguration_id: { type: 'keyword' },
+        is_preconfigured: { type: 'keyword' },
+        data_output_id: { type: 'keyword' },
+        monitoring_output_id: { type: 'keyword' },
       },
     },
     migrations: {
       '7.10.0': migrateAgentPolicyToV7100,
       '7.12.0': migrateAgentPolicyToV7120,
-    },
-  },
-  [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
-    name: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        name: { type: 'keyword' },
-        type: { type: 'keyword' },
-        api_key: { type: 'binary' },
-        api_key_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        created_at: { type: 'date' },
-        updated_at: { type: 'date' },
-        expire_at: { type: 'date' },
-        active: { type: 'boolean' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateEnrollmentApiKeysToV7100,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -219,16 +106,22 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
+        output_id: { type: 'keyword', index: false },
         name: { type: 'keyword' },
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_default_monitoring: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
-        fleet_enroll_username: { type: 'binary' },
-        fleet_enroll_password: { type: 'binary' },
+        ca_trusted_fingerprint: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
+        is_preconfigured: { type: 'boolean', index: false },
       },
+    },
+    migrations: {
+      '7.13.0': migrateOutputToV7130,
+      '8.0.0': migrateOutputToV800,
     },
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
@@ -253,11 +146,23 @@ const getSavedObjectTypes = (
             version: { type: 'keyword' },
           },
         },
+        elasticsearch: {
+          enabled: false,
+          properties: {
+            privileges: {
+              properties: {
+                cluster: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        vars: { type: 'flattened' },
         inputs: {
           type: 'nested',
           enabled: false,
           properties: {
             type: { type: 'keyword' },
+            policy_template: { type: 'keyword' },
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },
@@ -271,6 +176,11 @@ const getSavedObjectTypes = (
                   properties: {
                     dataset: { type: 'keyword' },
                     type: { type: 'keyword' },
+                    elasticsearch: {
+                      properties: {
+                        privileges: { type: 'flattened' },
+                      },
+                    },
                   },
                 },
                 vars: { type: 'flattened' },
@@ -292,6 +202,9 @@ const getSavedObjectTypes = (
       '7.11.0': migratePackagePolicyToV7110,
       '7.12.0': migratePackagePolicyToV7120,
       '7.13.0': migratePackagePolicyToV7130,
+      '7.14.0': migratePackagePolicyToV7140,
+      '7.15.0': migratePackagePolicyToV7150,
+      '7.16.0': migratePackagePolicyToV7160,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -307,6 +220,7 @@ const getSavedObjectTypes = (
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
         removable: { type: 'boolean' },
+        keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
           enabled: false,
           type: 'object',
@@ -325,6 +239,7 @@ const getSavedObjectTypes = (
             type: { type: 'keyword' },
           },
         },
+        installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
           type: 'nested',
           properties: {
@@ -337,6 +252,12 @@ const getSavedObjectTypes = (
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.14.0': migrateInstallationToV7140,
+      '7.14.1': migrateInstallationToV7140,
+      '7.16.0': migrateInstallationToV7160,
+      '8.0.0': migrateInstallationToV800,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
@@ -358,6 +279,19 @@ const getSavedObjectTypes = (
       },
     },
   },
+  [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
+    name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        id: { type: 'keyword' },
+      },
+    },
+  },
 });
 
 export function registerSavedObjects(
@@ -374,61 +308,4 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   // Encrypted saved objects
-  encryptedSavedObjects.registerType({
-    type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['api_key']),
-    attributesToExcludeFromAAD: new Set([
-      'name',
-      'type',
-      'api_key_id',
-      'policy_id',
-      'created_at',
-      'updated_at',
-      'expire_at',
-      'active',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['fleet_enroll_username', 'fleet_enroll_password']),
-    attributesToExcludeFromAAD: new Set([
-      'name',
-      'type',
-      'is_default',
-      'hosts',
-      'ca_sha256',
-      'config',
-      'config_yaml',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['default_api_key']),
-    attributesToExcludeFromAAD: new Set([
-      'type',
-      'active',
-      'enrolled_at',
-      'access_api_key_id',
-      'version',
-      'user_provided_metadata',
-      'local_metadata',
-      'policy_id',
-      'policy_revision',
-      'last_updated',
-      'last_checkin',
-      'last_checkin_status',
-      'updated_at',
-      'current_error_events',
-      'unenrolled_at',
-      'unenrollment_started_at',
-      'packages',
-      'upgraded_at',
-      'upgrade_started_at',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['data']),
-    attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
-  });
 }

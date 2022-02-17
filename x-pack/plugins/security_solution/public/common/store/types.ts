@@ -19,9 +19,12 @@ import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
 import { ManagementPluginState } from '../../management';
+import { UsersPluginState } from '../../users/store';
 
 export type StoreState = HostsPluginState &
+  UsersPluginState &
   NetworkPluginState &
+  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -36,18 +39,6 @@ export type StoreState = HostsPluginState &
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
 export type State = CombinedState<StoreState>;
-
-export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
-
-export interface KueryFilterQuery {
-  kind: KueryFilterQueryKind;
-  expression: string;
-}
-
-export interface SerializedFilterQuery {
-  kuery: KueryFilterQuery | null;
-  serializedQuery: string;
-}
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
@@ -158,8 +149,6 @@ export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
   selectorMap: SelectorMap
-) => (
-  state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never
-) => {
+) => (state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };

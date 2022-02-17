@@ -1,0 +1,20 @@
+{
+  "supportFile": "./cypress/support/commands.ts",
+  "pluginsFile": false,
+  "retries": {
+    "runMode": 2
+  },
+  "baseUrl": "http://localhost:5601",
+  "env": {
+    "username": "elastic",
+    "password": "changeme"
+  },
+  "screenshotsFolder": "../../../target/cypress/screenshots",
+  "videosFolder": "../../../target/cypress/videos",
+  "defaultCommandTimeout": 120000,
+  "execTimeout": 120000,
+  "pageLoadTimeout": 180000,
+  "viewportWidth": 1600,
+  "viewportHeight": 1200,
+  "video": false
+}

@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import { fromNullable, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -17,11 +17,11 @@ import {
   AlertStateNavigation,
   AlertUrlNavigation,
 } from '../../../../../../alerting/common';
-import { Alert } from '../../../../types';
+import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ViewInAppProps {
-  alert: Alert;
+  alert: Rule;
 }
 
 const NO_NAVIGATION = false;
@@ -82,7 +82,7 @@ function hasNavigation(
 
 function getNavigationHandler(
   alertNavigation: AlertNavigationLoadingState,
-  alert: Alert,
+  alert: Rule,
   navigateToApp: CoreStart['application']['navigateToApp']
 ): object {
   return hasNavigation(alertNavigation)

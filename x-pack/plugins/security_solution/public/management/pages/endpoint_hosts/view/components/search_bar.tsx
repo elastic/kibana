@@ -9,7 +9,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import styled from 'styled-components';
-import { Query, SearchBar, TimeHistory } from '../../../../../../../../../src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
+import { SearchBar, TimeHistory } from '../../../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/public';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
@@ -24,7 +25,7 @@ const AdminQueryBar = styled.div`
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
-  const queryParams = useEndpointSelector(selectors.uiQueryParams);
+  const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
   const clonedIndexPatterns = useMemo(
@@ -37,7 +38,11 @@ export const AdminSearchBar = memo(() => {
       history.push(
         urlFromQueryParams({
           ...queryParams,
-          admin_query: encode((params.query as unknown) as RisonValue),
+          // ensure we reset the page back to the first one, so that user id not (possibly) being left on an invalid page
+          page_index: '0',
+          ...(params.query?.query.trim()
+            ? { admin_query: encode(params.query as unknown as RisonValue) }
+            : {}),
         })
       );
     },
@@ -56,7 +61,9 @@ export const AdminSearchBar = memo(() => {
             indexPatterns={clonedIndexPatterns}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
+            fillSubmitButton={true}
             isLoading={false}
+            iconType="search"
             showFilterBar={false}
             showDatePicker={false}
             showQueryBar={true}

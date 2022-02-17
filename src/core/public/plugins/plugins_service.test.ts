@@ -13,7 +13,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName } from 'src/core/server';
+import { PluginName, PluginType } from 'src/core/server';
 import { coreMock } from '../mocks';
 import {
   PluginsService,
@@ -35,6 +35,7 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -59,10 +60,15 @@ function createManifest(
   return {
     id,
     version: 'some-version',
+    type: PluginType.standard,
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
   };
 }
 
@@ -83,6 +89,7 @@ describe('PluginsService', () => {
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
+      theme: themeServiceMock.createSetupContract(),
     };
     mockSetupContext = {
       ...mockSetupDeps,
@@ -103,6 +110,7 @@ describe('PluginsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,
@@ -112,7 +120,7 @@ describe('PluginsService', () => {
     };
 
     // Reset these for each test.
-    mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([
+    mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>([
       [
         'pluginA',
         jest.fn(() => ({
@@ -141,7 +149,7 @@ describe('PluginsService', () => {
           stop: jest.fn(),
         })),
       ],
-    ] as unknown) as [[PluginName, any]]);
+    ] as unknown as [[PluginName, any]]);
   });
 
   describe('#getOpaqueIds()', () => {

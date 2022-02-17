@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {
   Token,
@@ -61,7 +62,7 @@ export function categorizationExamplesProvider({
         }
       }
     }
-    const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
+    const body = await asCurrentUser.search<estypes.SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
@@ -125,9 +126,7 @@ export function categorizationExamplesProvider({
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const {
-      body: { tokens },
-    } = await asInternalUser.indices.analyze({
+    const { tokens } = await asInternalUser.indices.analyze({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,
@@ -135,7 +134,12 @@ export function categorizationExamplesProvider({
     });
 
     const lengths = examples.map((e) => e.length);
-    const sumLengths = lengths.map(((s) => (a: number) => (s += a))(0));
+    const sumLengths = lengths.map(
+      (
+        (s) => (a: number) =>
+          (s += a)
+      )(0)
+    );
 
     const tokensPerExample: Token[][] = examples.map((e) => []);
 
@@ -144,10 +148,11 @@ export function categorizationExamplesProvider({
         for (let g = 0; g < sumLengths.length; g++) {
           if (t.start_offset <= sumLengths[g] + g) {
             const offset = g > 0 ? sumLengths[g - 1] + g : 0;
+            const start = t.start_offset - offset;
             tokensPerExample[g].push({
               ...t,
-              start_offset: t.start_offset - offset,
-              end_offset: t.end_offset - offset,
+              start_offset: start,
+              end_offset: start + t.token.length,
             });
             break;
           }

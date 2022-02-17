@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('single metric without datafeed start', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('job creation loads the single metric wizard for the source data', async () => {
@@ -134,7 +135,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertCreateJobButtonExists();
       await ml.jobWizardCommon.createJobWithoutDatafeedStart();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(

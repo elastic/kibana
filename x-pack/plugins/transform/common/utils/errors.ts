@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from './object_utils';
+import { isPopulatedObject } from '../shared_imports';
 
 export interface ErrorResponse {
   body: {
@@ -18,7 +18,11 @@ export interface ErrorResponse {
 }
 
 export function isErrorResponse(arg: unknown): arg is ErrorResponse {
-  return isPopulatedObject(arg) && isPopulatedObject(arg.body) && arg?.body?.message !== undefined;
+  return (
+    isPopulatedObject(arg, ['body']) &&
+    isPopulatedObject(arg.body, ['message']) &&
+    arg.body.message !== undefined
+  );
 }
 
 export function getErrorMessage(error: unknown) {
@@ -26,7 +30,7 @@ export function getErrorMessage(error: unknown) {
     return `${error.body.error}: ${error.body.message}`;
   }
 
-  if (isPopulatedObject(error) && typeof error.message === 'string') {
+  if (isPopulatedObject(error, ['message']) && typeof error.message === 'string') {
     return error.message;
   }
 

@@ -12,35 +12,24 @@ import {
   mockReadPkcs12Truststore,
 } from './elasticsearch_config.test.mocks';
 
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { ElasticsearchConfig, config } from './elasticsearch_config';
+import { getDeprecationsFor } from '../config/test_utils';
 
 const CONFIG_PATH = 'elasticsearch';
 
-const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
-  const deprecations = config.deprecations!(configDeprecationFactory);
-  const deprecationMessages: string[] = [];
-  const _config: any = {};
-  _config[CONFIG_PATH] = settings;
-  const migrated = applyDeprecations(
-    _config,
-    deprecations.map((deprecation) => ({
-      deprecation,
-      path: CONFIG_PATH,
-    })),
-    () => ({ message }) => deprecationMessages.push(message)
-  );
-  return {
-    messages: deprecationMessages,
-    migrated,
-  };
-};
+const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) =>
+  getDeprecationsFor({
+    provider: config.deprecations!,
+    settings,
+    path: CONFIG_PATH,
+  });
 
 test('set correct defaults', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
       "apiVersion": "master",
+      "compression": false,
       "customHeaders": Object {},
       "healthCheckDelay": "PT2.5S",
       "hosts": Array [
@@ -53,7 +42,9 @@ test('set correct defaults', () => {
         "authorization",
       ],
       "requestTimeout": "PT30S",
+      "serviceAccountToken": undefined,
       "shardTimeout": "PT30S",
+      "skipStartupConnectionCheck": false,
       "sniffInterval": false,
       "sniffOnConnectionFault": false,
       "sniffOnStart": false,
@@ -328,20 +319,11 @@ describe('throws when config is invalid', () => {
 });
 
 describe('deprecations', () => {
-  it('logs a warning if elasticsearch.username is set to "elastic"', () => {
-    const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
-      ]
-    `);
-  });
-
   it('logs a warning if elasticsearch.username is set to "kibana"', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+        "Kibana is configured to authenticate to Elasticsearch with the \\"kibana\\" user. Use a service account token instead.",
       ]
     `);
   });
@@ -360,7 +342,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.key\\" and \\"elasticsearch.ssl.certificate\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -369,7 +351,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.certificate\\" and \\"elasticsearch.ssl.key\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -380,12 +362,59 @@ describe('deprecations', () => {
   });
 });
 
-test('#username throws if equal to "elastic", only while running from source', () => {
+test('#username throws if equal to "elastic"', () => {
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(
-    `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
+
+  expect(() => config.schema.validate(obj)).toThrow('[username]: value of "elastic" is forbidden');
+});
+
+test('serviceAccountToken throws if username is also set', () => {
+  const obj = {
+    username: 'kibana',
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set."`
   );
-  expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+});
+
+test('serviceAccountToken does not throw if username is not set', () => {
+  const obj = {
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).not.toThrow();
+});
+
+describe('skipStartupConnectionCheck', () => {
+  test('defaults to `false`', () => {
+    const obj = {};
+    expect(() => config.schema.validate(obj)).not.toThrow();
+    expect(config.schema.validate(obj)).toEqual(
+      expect.objectContaining({
+        skipStartupConnectionCheck: false,
+      })
+    );
+  });
+
+  test('accepts `false` on both prod and dev mode', () => {
+    const obj = {
+      skipStartupConnectionCheck: false,
+    };
+    expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
+    expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+  });
+
+  test('accepts `true` only when running from source to allow integration tests to run without an ES server', () => {
+    const obj = {
+      skipStartupConnectionCheck: true,
+    };
+    expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
+    expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(
+      `"[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"`
+    );
+  });
 });

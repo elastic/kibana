@@ -12,6 +12,7 @@ import { getContext } from 'kea';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
+import { securityMock } from '../../../security/public/mocks';
 
 import { AppSearch } from './app_search';
 import { EnterpriseSearch } from './enterprise_search';
@@ -22,11 +23,12 @@ import { renderApp, renderHeaderActions } from './';
 
 describe('renderApp', () => {
   const kibanaDeps = {
-    params: coreMock.createAppMountParamters(),
+    params: coreMock.createAppMountParameters(),
     core: coreMock.createStart(),
     plugins: {
       licensing: licensingMock.createStart(),
       charts: chartPluginMock.createStartContract(),
+      security: securityMock.createStart(),
     },
   } as any;
   const pluginData = {
@@ -62,7 +64,7 @@ describe('renderApp', () => {
 
     it('renders EnterpriseSearch', () => {
       mount(EnterpriseSearch);
-      expect(mockContainer.querySelector('.enterpriseSearchOverview')).not.toBeNull();
+      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 
     it('renders AppSearch', () => {

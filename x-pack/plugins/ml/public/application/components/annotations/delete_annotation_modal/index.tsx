@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   cancelAction: () => void;
@@ -50,6 +50,7 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           className="eui-textBreakWord"
+          data-test-subj={'mlAnnotationFlyoutConfirmDeleteModal'}
         />
       )}
     </Fragment>

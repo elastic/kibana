@@ -21,7 +21,6 @@
           "inventory-view": "84b320fd67209906333ffce261128462",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "lens": "21c3ea0763beb1ecb0162529706b88c5",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "maps-telemetry": "a4229f8b16a6820c6d724b7e0c1f729d",
           "metrics-explorer-view": "53c5365793677328df0ccb6138bf3cdd",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
@@ -37,7 +36,6 @@
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
           "telemetry": "e1c8bc94e443aefd9458932cc0697a4d",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
@@ -310,8 +308,8 @@
         "gis-map": {
           "properties": {
             "bounds": {
-              "strategy": "recursive",
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"
@@ -558,7 +556,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"
@@ -1110,47 +1109,6 @@
           "properties": {
             "enabled": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

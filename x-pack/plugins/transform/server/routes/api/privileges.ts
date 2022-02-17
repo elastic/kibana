@@ -29,22 +29,21 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       }
 
       // Get cluster privileges
-      const {
-        body: { has_all_requested: hasAllPrivileges, cluster },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-        body: {
-          cluster: APP_CLUSTER_PRIVILEGES,
-        },
-      });
+      const { has_all_requested: hasAllPrivileges, cluster } =
+        await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+          body: {
+            // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
+            cluster: APP_CLUSTER_PRIVILEGES,
+          },
+        });
 
       // Find missing cluster privileges and set overall app privileges
       privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
       privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
       // Get all index privileges the user has
-      const {
-        body: { indices },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges();
+      const { indices } =
+        await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges();
 
       // Check if they have all the required index privileges for at least one index
       const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {

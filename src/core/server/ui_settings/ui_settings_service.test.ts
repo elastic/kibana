@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import {
   MockUiSettingsClientConstructor,
+  MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
 } from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
@@ -19,6 +20,7 @@ import { savedObjectsClientMock } from '../mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { uiSettingsType } from './saved_objects';
+import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -54,16 +56,34 @@ describe('uiSettings', () => {
     getCoreSettingsMock.mockClear();
   });
 
+  describe('#preboot', () => {
+    it('calls `getCoreSettings`', async () => {
+      await service.preboot();
+      expect(getCoreSettingsMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('#createDefaultsClient', async () => {
+      const { createDefaultsClient } = await service.preboot();
+
+      const client = createDefaultsClient();
+      expect(client).toBeInstanceOf(UiSettingsDefaultsClient);
+
+      expect(MockUiSettingsDefaultsClientConstructor).toBeCalledTimes(1);
+      const [[constructorArgs]] = MockUiSettingsDefaultsClientConstructor.mock.calls;
+      expect(constructorArgs).toMatchObject({ overrides, defaults: {} });
+      expect(constructorArgs.overrides).toBe(overrides);
+    });
+  });
+
   describe('#setup', () => {
+    beforeEach(async () => {
+      await service.preboot();
+    });
+
     it('registers the uiSettings type to the savedObjects registry', async () => {
       await service.setup(setupDeps);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledTimes(1);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
-    });
-
-    it('calls `getCoreSettings`', async () => {
-      await service.setup(setupDeps);
-      expect(getCoreSettingsMock).toHaveBeenCalledTimes(1);
     });
 
     describe('#register', () => {
@@ -78,6 +98,10 @@ describe('uiSettings', () => {
   });
 
   describe('#start', () => {
+    beforeEach(async () => {
+      await service.preboot();
+    });
+
     describe('validation', () => {
       it('throws if validation schema is not provided', async () => {
         const { register } = await service.setup(setupDeps);

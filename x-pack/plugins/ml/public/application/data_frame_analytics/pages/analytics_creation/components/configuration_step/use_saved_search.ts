@@ -6,10 +6,16 @@
  */
 
 import { useState, useEffect } from 'react';
+import {
+  decorateQuery,
+  fromKueryExpression,
+  luceneStringToDsl,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlContext } from '../../../../../contexts/ml';
-import { esQuery, esKuery } from '../../../../../../../../../../src/plugins/data/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-import { getQueryFromSavedSearch } from '../../../../../util/index_utils';
+import { getQueryFromSavedSearchObject } from '../../../../../util/index_utils';
 
 // `undefined` is used for a non-initialized state
 // `null` is set if no saved search is used
@@ -27,23 +33,23 @@ export function useSavedSearch() {
   const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
   const mlContext = useMlContext();
-  const { currentSavedSearch, currentIndexPattern, kibanaConfig } = mlContext;
+  const { currentSavedSearch, currentDataView, kibanaConfig } = mlContext;
 
   const getQueryData = () => {
-    let qry;
+    let qry: estypes.QueryDslQueryContainer = {};
     let qryString;
 
     if (currentSavedSearch !== null) {
-      const { query } = getQueryFromSavedSearch(currentSavedSearch);
+      const { query } = getQueryFromSavedSearchObject(currentSavedSearch);
       const queryLanguage = query.language;
       qryString = query.query;
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+        const ast = fromKueryExpression(qryString);
+        qry = toElasticsearchQuery(ast, currentDataView);
       } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        qry = luceneStringToDsl(qryString);
+        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
       }
 
       setSavedSearchQuery(qry);

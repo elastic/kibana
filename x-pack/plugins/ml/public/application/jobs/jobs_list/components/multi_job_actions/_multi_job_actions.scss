@@ -1,10 +1,5 @@
 // SASSTODO: This looks like it needs some rewriting for all the pixel values
 .multi-select-actions {
-  padding-right: $euiSizeS;
-  padding-bottom: $euiSizeM;
-  display: inline-block;
-  white-space: nowrap;
-
   .actions-border, .actions-border-large {
     height: 20px;
     border-right: $euiBorderThin;
@@ -16,7 +11,6 @@
   .actions-border-large {
     height: 35px;
     margin: 0 15px;
-    margin-top: -5px;
   }
 
   .results-button {

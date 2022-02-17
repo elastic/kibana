@@ -5,7 +5,7 @@
 When running {kib} from source, you must have this version installed locally.
 
 The required version of Node.js is listed in several different files throughout the {kib} source code.
-Theses files must be updated when upgrading Node.js:
+These files must be updated when upgrading Node.js:
 
   - {kib-repo}blob/{branch}/.ci/Dockerfile[`.ci/Dockerfile`] - The version is specified in the `NODE_VERSION` constant.
     This is used to pull the relevant image from https://hub.docker.com/_/node[Docker Hub].
@@ -14,10 +14,14 @@ Theses files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/.node-version[`.node-version`]
   - {kib-repo}blob/{branch}/.nvmrc[`.nvmrc`]
   - {kib-repo}blob/{branch}/package.json[`package.json`] - The version is specified in the `engines.node` field.
+  - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
+    Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
+    These can be found on the https://nodejs.org[nodejs.org] website.
+    Example for Node.js v14.16.1: https://nodejs.org/dist/v14.16.1/SHASUMS256.txt.asc
 
-See PR {kib-repo}pull/86593[#86593] for an example of how the Node.js version has been upgraded previously.
+See PR {kib-repo}pull/96382[#96382] for an example of how the Node.js version has been upgraded previously.
 
-In the 6.8 branch, the `.ci/Dockerfile` file does not exist, so when upgrading Node.js in that branch, just skip that file.
+In the 6.8 branch, neither the `.ci/Dockerfile` file nor the `WORKSPACE.bazel` file exists, so when upgrading Node.js in that branch, just skip those files.
 
 === Backporting
 
@@ -25,7 +29,7 @@ The following rules are not set in stone.
 Use best judgement when backporting.
 
 Currently version 7.11 and newer run Node.js 14, while 7.10 and older run Node.js 10.
-Hence, upgrades to either Node.js 14 or Node.js 10 shold be done as separate PRs.
+Hence, upgrades to either Node.js 14 or Node.js 10 should be done as separate PRs.
 
 ==== Node.js patch upgrades
 

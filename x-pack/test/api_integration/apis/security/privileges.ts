@@ -7,7 +7,7 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -21,7 +21,25 @@ export default function ({ getService }: FtrProviderContext) {
         // If you're removing a privilege, this breaks backwards compatibility
         // Roles are associated with these privileges, and we shouldn't be removing them in a minor version.
         const expected = {
+          global: ['all', 'read'],
+          space: ['all', 'read'],
           features: {
+            graph: ['all', 'read', 'minimal_all', 'minimal_read'],
+            savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
+            canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
+            maps: ['all', 'read', 'minimal_all', 'minimal_read'],
+            observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
+            actions: ['all', 'read', 'minimal_all', 'minimal_read'],
+            stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+            ml: ['all', 'read', 'minimal_all', 'minimal_read'],
+            siem: ['all', 'read', 'minimal_all', 'minimal_read'],
+            uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
+            infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
+            logs: ['all', 'read', 'minimal_all', 'minimal_read'],
+            apm: ['all', 'read', 'minimal_all', 'minimal_read'],
             discover: [
               'all',
               'read',
@@ -39,28 +57,25 @@ export default function ({ getService }: FtrProviderContext) {
               'url_create',
               'store_search_session',
             ],
-            dev_tools: ['all', 'read'],
-            advancedSettings: ['all', 'read'],
-            indexPatterns: ['all', 'read'],
-            savedObjectsManagement: ['all', 'read'],
-            savedObjectsTagging: ['all', 'read'],
-            timelion: ['all', 'read'],
-            graph: ['all', 'read'],
-            maps: ['all', 'read'],
-            canvas: ['all', 'read'],
-            infrastructure: ['all', 'read'],
-            logs: ['all', 'read'],
-            uptime: ['all', 'read'],
-            apm: ['all', 'read'],
-            ml: ['all', 'read'],
-            siem: ['all', 'read'],
-            fleet: ['all', 'read'],
-            stackAlerts: ['all', 'read'],
-            actions: ['all', 'read'],
+            dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
+            advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
+            indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
+            savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            osquery: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'live_queries_all',
+              'live_queries_read',
+              'run_saved_queries',
+              'saved_queries_all',
+              'saved_queries_read',
+              'packs_all',
+              'packs_read',
+            ],
           },
-          global: ['all', 'read'],
-          space: ['all', 'read'],
-          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest

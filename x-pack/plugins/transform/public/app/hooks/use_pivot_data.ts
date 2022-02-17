@@ -11,14 +11,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { getFlattenedObject } from '@kbn/std';
 
+import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
-import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import { RenderCellValue, UseIndexDataReturnType, HITS_TOTAL_RELATION } from '../../shared_imports';
+import {
+  RenderCellValue,
+  UseIndexDataReturnType,
+  ES_CLIENT_TOTAL_HITS_RELATION,
+} from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -67,6 +72,29 @@ function sortColumnsForLatest(sortField: string) {
   };
 }
 
+/**
+ * Extracts missing mappings from docs.
+ */
+export function getCombinedProperties(
+  populatedProperties: PreviewMappingsProperties,
+  docs: Array<Record<string, unknown>>
+): PreviewMappingsProperties {
+  // Identify missing mappings
+  const missingMappings = difference(
+    // Create an array of unique flattened field names across all docs
+    [...new Set(docs.flatMap(Object.keys))],
+    Object.keys(populatedProperties)
+  );
+  return {
+    ...populatedProperties,
+    ...missingMappings.reduce((acc, curr) => {
+      const sampleDoc = docs.find((d) => typeof d[curr] !== 'undefined') ?? {};
+      acc[curr] = { type: typeof sampleDoc[curr] as ES_FIELD_TYPES };
+      return acc;
+    }, {} as PreviewMappingsProperties),
+  };
+}
+
 export const usePivotData = (
   indexPatternTitle: SearchItems['indexPattern']['title'],
   query: PivotQuery,
@@ -74,16 +102,15 @@ export const usePivotData = (
   requestPayload: StepDefineExposedState['previewRequest'],
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
-  const [
-    previewMappingsProperties,
-    setPreviewMappingsProperties,
-  ] = useState<PreviewMappingsProperties>({});
+  const [previewMappingsProperties, setPreviewMappingsProperties] =
+    useState<PreviewMappingsProperties>({});
   const api = useApi();
   const {
     ml: {
       getDataGridSchemaFromESFieldType,
       formatHumanReadableDateTimeSeconds,
       multiColumnSortFactory,
+      getNestedOrEscapedVal,
       useDataGrid,
       INDEX_STATUS,
     },
@@ -128,7 +155,7 @@ export const usePivotData = (
     if (!validationStatus.isValid) {
       setTableItems([]);
       setRowCount(0);
-      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+      setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
       setNoDataMessage(validationStatus.errorMessage!);
       return;
     }
@@ -149,19 +176,44 @@ export const usePivotData = (
       setErrorMessage(getErrorMessage(resp));
       setTableItems([]);
       setRowCount(0);
-      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+      setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
       setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
       return;
     }
 
-    setTableItems(resp.preview);
-    setRowCount(resp.preview.length);
-    setRowCountRelation(HITS_TOTAL_RELATION.EQ);
-    setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
+    // To improve UI performance with a latest configuration for indices with a large number
+    // of fields, we reduce the number of available columns to those populated with values.
+
+    // 1. Flatten the returned object structure object documents to match mapping properties
+    const docs = resp.preview.map(getFlattenedObject);
+
+    // 2. Get all field names for each returned doc and flatten it
+    //    to a list of unique field names used across all docs.
+    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))];
+
+    // 3. Filter mapping properties by populated fields
+    let populatedProperties: PreviewMappingsProperties = Object.entries(
+      resp.generated_dest_index.mappings.properties
+    )
+      .filter(([key]) => populatedFields.includes(key))
+      .reduce(
+        (p, [key, value]) => ({
+          ...p,
+          [key]: value,
+        }),
+        {}
+      );
+
+    populatedProperties = getCombinedProperties(populatedProperties, docs);
+
+    setTableItems(docs);
+    setRowCount(docs.length);
+    setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
+    setPreviewMappingsProperties(populatedProperties);
     setStatus(INDEX_STATUS.LOADED);
 
-    if (resp.preview.length === 0) {
+    if (docs.length === 0) {
       setNoDataMessage(
         i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
           defaultMessage:
@@ -184,7 +236,12 @@ export const usePivotData = (
   }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
 
   if (sortingColumns.length > 0) {
-    tableItems.sort(multiColumnSortFactory(sortingColumns));
+    const sortingColumnsWithTypes = sortingColumns.map((c) => ({
+      ...c,
+      // Since items might contain undefined/null values, we want to accurate find the data type
+      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
+    }));
+    tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
 
   const pageData = tableItems.slice(
@@ -197,7 +254,7 @@ export const usePivotData = (
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
       const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
-        ? getNestedProperty(pageData[adjustedRowIndex], columnId, null)
+        ? pageData[adjustedRowIndex][columnId] ?? null
         : null;
 
       if (typeof cellValue === 'object' && cellValue !== null) {

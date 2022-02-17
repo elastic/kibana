@@ -11,20 +11,23 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import { NowProviderInternalContract } from '../../now_provider';
 import {
   calculateBounds,
   getAbsoluteTimeRange,
   getTime,
+  getRelativeTime,
   IIndexPattern,
   RefreshInterval,
   TimeRange,
 } from '../../../common';
 import { TimeHistoryContract } from './time_history';
+import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+
+export type { AutoRefreshDoneFn };
 
 // TODO: remove!
-
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
@@ -32,8 +35,6 @@ export class Timefilter {
   private timeUpdate$ = new Subject();
   // Fired when a user changes the the autorefresh settings
   private refreshIntervalUpdate$ = new Subject();
-  // Used when an auto refresh is triggered
-  private autoRefreshFetch$ = new Subject();
   private fetch$ = new Subject();
 
   private _time: TimeRange;
@@ -45,10 +46,11 @@ export class Timefilter {
   private _isTimeRangeSelectorEnabled: boolean = false;
   private _isAutoRefreshSelectorEnabled: boolean = false;
 
-  private _autoRefreshIntervalId: number = 0;
-
   private readonly timeDefaults: TimeRange;
   private readonly refreshIntervalDefaults: RefreshInterval;
+
+  // Used when an auto refresh is triggered
+  private readonly autoRefreshLoop = createAutoRefreshLoop();
 
   constructor(
     config: TimefilterConfig,
@@ -86,9 +88,13 @@ export class Timefilter {
     return this.refreshIntervalUpdate$.asObservable();
   };
 
-  public getAutoRefreshFetch$ = () => {
-    return this.autoRefreshFetch$.asObservable();
-  };
+  /**
+   * Get an observable that emits when it is time to refetch data due to refresh interval
+   * Each subscription to this observable resets internal interval
+   * Emitted value is a callback {@link AutoRefreshDoneFn} that must be called to restart refresh interval loop
+   * Apps should use this callback to start next auto refresh loop when view finished updating
+   */
+  public getAutoRefreshFetch$ = () => this.autoRefreshLoop.loop$;
 
   public getFetch$ = () => {
     return this.fetch$.asObservable();
@@ -145,10 +151,16 @@ export class Timefilter {
   public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+    let shouldUnpauseRefreshLoop =
+      newRefreshInterval.pause === false && prevRefreshInterval != null;
+    if (prevRefreshInterval?.value > 0 && newRefreshInterval.value <= 0) {
+      shouldUnpauseRefreshLoop = false;
+    }
     // If the refresh interval is <= 0 handle that as a paused refresh
+    // unless the user has un-paused the refresh loop and the value is not going from > 0 to 0
     if (newRefreshInterval.value <= 0) {
       newRefreshInterval.value = 0;
-      newRefreshInterval.pause = true;
+      newRefreshInterval.pause = shouldUnpauseRefreshLoop ? false : true;
     }
     this._refreshInterval = {
       value: newRefreshInterval.value,
@@ -166,18 +178,36 @@ export class Timefilter {
       }
     }
 
-    // Clear the previous auto refresh interval and start a new one (if not paused)
-    clearInterval(this._autoRefreshIntervalId);
-    if (!newRefreshInterval.pause) {
-      this._autoRefreshIntervalId = window.setInterval(
-        () => this.autoRefreshFetch$.next(),
-        newRefreshInterval.value
-      );
+    this.autoRefreshLoop.stop();
+    if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
+      this.autoRefreshLoop.start(newRefreshInterval.value);
     }
   };
 
+  /**
+   * Create a time filter that coerces all time values to absolute time.
+   *
+   * This is useful for creating a filter that ensures all ES queries will fetch the exact same data
+   * and leverages ES query cache for performance improvement.
+   *
+   * One use case is keeping different elements embedded in the same UI in sync.
+   */
   public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.nowProvider.get(),
+    });
+  };
+
+  /**
+   * Create a time filter that converts only absolute time to ISO strings, it leaves relative time
+   * values unchanged (e.g. "now-1").
+   *
+   * This is useful for sending datemath values to ES endpoints to generate reports over time.
+   *
+   * @note Consumers of this function need to ensure that the ES endpoint supports datemath.
+   */
+  public createRelativeFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+    return getRelativeTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });
   };

@@ -16,9 +16,17 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 
 export const configSchema = schema.object({
   host: schema.maybe(schema.string()),
-  enabled: schema.boolean({ defaultValue: true }),
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  ssl: schema.object({
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
+    ),
+    verificationMode: schema.oneOf(
+      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+      { defaultValue: 'full' }
+    ),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;

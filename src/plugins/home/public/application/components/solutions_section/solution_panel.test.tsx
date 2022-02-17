@@ -13,9 +13,7 @@ import { SolutionPanel } from './solution_panel';
 const solutionEntry = {
   id: 'kibana',
   title: 'Kibana',
-  subtitle: 'Visualize & analyze',
   description: 'Explore and analyze your data',
-  appDescriptions: ['Analyze data in dashboards'],
   icon: 'logoKibana',
   path: 'kibana_landing_page',
   order: 1,

@@ -21,6 +21,7 @@ import { RelevanceTuningLogic } from '.';
 const emptyCallout = (
   <EuiEmptyPrompt
     data-test-subj="EmptyQueryPrompt"
+    iconType="glasses"
     body={i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
       {
@@ -43,12 +44,12 @@ const noResultsCallout = (
 );
 
 export const RelevanceTuningPreview: React.FC = () => {
-  const { updateSearchValue } = useActions(RelevanceTuningLogic);
+  const { setSearchQuery } = useActions(RelevanceTuningLogic);
   const { searchResults, schema } = useValues(RelevanceTuningLogic);
   const { engineName, isMetaEngine } = useValues(EngineLogic);
 
   return (
-    <EuiPanel>
+    <EuiPanel color="subdued">
       <EuiTitle size="m">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.title', {
@@ -58,7 +59,7 @@ export const RelevanceTuningPreview: React.FC = () => {
       </EuiTitle>
       <EuiSpacer />
       <EuiFieldSearch
-        onChange={(e) => updateSearchValue(e.target.value)}
+        onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.searchPlaceholder',
           {

@@ -6,24 +6,32 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHealthContext } from '../../context/health_context';
 
 interface AlertAddFooterProps {
   isSaving: boolean;
+  isFormLoading: boolean;
   onSave: () => void;
   onCancel: () => void;
 }
 
-export const AlertAddFooter = ({ isSaving, onSave, onCancel }: AlertAddFooterProps) => {
+export const AlertAddFooter = ({
+  isSaving,
+  onSave,
+  onCancel,
+  isFormLoading,
+}: AlertAddFooterProps) => {
   const { loadingHealthCheck } = useHealthContext();
 
   return (
@@ -36,10 +44,18 @@ export const AlertAddFooter = ({ isSaving, onSave, onCancel }: AlertAddFooterPro
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
+        {isFormLoading ? (
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        ) : (
+          <></>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            color="secondary"
+            color="success"
             data-test-subj="saveAlertButton"
             type="submit"
             iconType="check"

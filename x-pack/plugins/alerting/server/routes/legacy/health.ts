@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
-
-interface XPackUsageSecurity {
-  security?: {
-    enabled?: boolean;
-    ssl?: {
-      http?: {
-        enabled?: boolean;
-      };
-    };
-  };
-}
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { getSecurityHealth } from '../../lib/get_security_health';
 
 export function healthRoute(
   router: AlertingRouter,
   licenseState: ILicenseState,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  usageCounter?: UsageCounter
 ) {
   router.get(
     {
@@ -38,31 +30,40 @@ export function healthRoute(
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
+      trackLegacyRouteUsage('health', usageCounter);
       try {
-        const {
-          body: {
-            security: {
-              enabled: isSecurityEnabled = false,
-              ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
-            } = {},
-          },
-        }: ApiResponse<XPackUsageSecurity> = await context.core.elasticsearch.client.asInternalUser.transport // Do not augment with such input. // `transport.request` is potentially unsafe when combined with untrusted user input.
-          .request({
-            method: 'GET',
-            path: '/_xpack/usage',
+        // Verify that user has access to at least one rule type
+        const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+        if (ruleTypes.length > 0) {
+          const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
+
+          const securityHealth = await getSecurityHealth(
+            async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
+            async () => encryptedSavedObjects.canEncrypt,
+            context.alerting.areApiKeysEnabled
+          );
+
+          const frameworkHealth: AlertingFrameworkHealth = {
+            ...securityHealth,
+            alertingFrameworkHealth,
+          };
+
+          return res.ok({
+            body: {
+              ...frameworkHealth,
+              alertingFrameworkHeath: {
+                // Legacy: pre-v8.0 typo
+                ...alertingFrameworkHealth,
+                _deprecated:
+                  'This state property has a typo, use "alertingFrameworkHealth" instead.',
+              },
+            },
           });
-
-        const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
-
-        const frameworkHealth: AlertingFrameworkHealth = {
-          isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-          hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
-          alertingFrameworkHeath,
-        };
-
-        return res.ok({
-          body: frameworkHealth,
-        });
+        } else {
+          return res.forbidden({
+            body: { message: `Unauthorized to access alerting framework health` },
+          });
+        }
       } catch (error) {
         return res.badRequest({ body: error });
       }

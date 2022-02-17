@@ -35,9 +35,9 @@ test('should render EntityIndexExpression', async () => {
       errors={{} as IErrorObject}
       setAlertParamsDate={() => {}}
       setAlertParamsGeoField={() => {}}
-      setAlertProperty={() => {}}
+      setRuleProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={('' as unknown) as IIndexPattern}
+      indexPattern={'' as unknown as IIndexPattern}
       isInvalid={false}
       data={dataStartMock}
     />
@@ -54,9 +54,9 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
       errors={{} as IErrorObject}
       setAlertParamsDate={() => {}}
       setAlertParamsGeoField={() => {}}
-      setAlertProperty={() => {}}
+      setRuleProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={('' as unknown) as IIndexPattern}
+      indexPattern={'' as unknown as IIndexPattern}
       isInvalid={true}
       data={dataStartMock}
     />
@@ -68,9 +68,9 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
 test('should render BoundaryIndexExpression', async () => {
   const component = shallow(
     <BoundaryIndexExpression
-      alertParams={alertParams}
+      ruleParams={alertParams}
       errors={{} as IErrorObject}
-      boundaryIndexPattern={('' as unknown) as IIndexPattern}
+      boundaryIndexPattern={'' as unknown as IIndexPattern}
       setBoundaryIndexPattern={() => {}}
       setBoundaryGeoField={() => {}}
       setBoundaryNameField={() => {}}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 
 export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
@@ -33,7 +33,7 @@ export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
     >
       {children &&
         React.Children.map(children, (child) =>
-          React.isValidElement(child) ? <Fragment>{React.cloneElement(child, {})}</Fragment> : child
+          React.isValidElement(child) ? <>{React.cloneElement(child, {})}</> : child
         )}
     </EuiPopover>
   );

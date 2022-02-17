@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { EntityCell, EntityCellFilter } from './entity_cell';
+export type { EntityCellFilter } from './entity_cell';
+export { EntityCell } from './entity_cell';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ConsoleEvent } from './console_event';
 
@@ -15,9 +15,10 @@ describe('ConsoleEvent component', () => {
       shallowWithIntl(
         <ConsoleEvent
           event={{
-            timestamp: '123',
-            docId: '1',
+            '@timestamp': '123',
+            _id: '1',
             monitor: {
+              check_group: 'check_group',
               id: 'MONITOR_ID',
               duration: {
                 us: 123,
@@ -63,9 +64,10 @@ describe('ConsoleEvent component', () => {
       shallowWithIntl(
         <ConsoleEvent
           event={{
-            timestamp: '123',
-            docId: '1',
+            '@timestamp': '123',
+            _id: '1',
             monitor: {
+              check_group: 'check_group',
               id: 'MONITOR_ID',
               duration: {
                 us: 123,

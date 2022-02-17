@@ -11,10 +11,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
   const find = getService('find');
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'common',
@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'visualize',
     'lens',
+    'timePicker',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -30,17 +31,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens tagging', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
     });
 
+    after(async () => {
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+
     it('adds a new tag to a Lens visualization', async () => {
       // create lens
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickLensWidget();
+      await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -108,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(lensTag)}`
       );
       // click elsewhere to close the filter dropdown
-      const searchFilter = await find.byCssSelector('main .euiFieldSearch');
+      const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
       await searchFilter.click();
       // wait until the table refreshes
       await listingTable.waitUntilTableIsLoaded();

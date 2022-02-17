@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '../http';
 import type { DomainDeprecationDetails, DeprecationsGetResponse } from '../../server/types';
 
@@ -52,11 +53,13 @@ export class DeprecationsClient {
     if (typeof correctiveActions.api !== 'object') {
       return {
         status: 'fail',
-        reason: 'deprecation has no correctiveAction via api.',
+        reason: i18n.translate('core.deprecations.noCorrectiveAction', {
+          defaultMessage: 'This deprecation cannot be resolved automatically.',
+        }),
       };
     }
 
-    const { body, method, path } = correctiveActions.api;
+    const { body, method, path, omitContextFromBody = false } = correctiveActions.api;
     try {
       await this.http.fetch<void>({
         path,
@@ -64,7 +67,7 @@ export class DeprecationsClient {
         asSystemRequest: true,
         body: JSON.stringify({
           ...body,
-          deprecationDetails: { domainId },
+          ...(omitContextFromBody ? {} : { deprecationDetails: { domainId } }),
         }),
       });
       return { status: 'ok' };

@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../models';
+import {
+  CreatePackagePolicyRequestBodySchema,
+  UpdatePackagePolicyRequestBodySchema,
+} from '../models';
 
 import { ListWithKuerySchema } from './index';
 
@@ -22,16 +25,30 @@ export const GetOnePackagePolicyRequestSchema = {
 };
 
 export const CreatePackagePolicyRequestSchema = {
-  body: NewPackagePolicySchema,
+  body: CreatePackagePolicyRequestBodySchema,
 };
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
-  body: UpdatePackagePolicySchema,
+  body: UpdatePackagePolicyRequestBodySchema,
 };
 
 export const DeletePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const UpgradePackagePoliciesRequestSchema = {
+  body: schema.object({
+    packagePolicyIds: schema.arrayOf(schema.string()),
+  }),
+};
+
+export const DryRunPackagePoliciesRequestSchema = {
+  body: schema.object({
+    packagePolicyIds: schema.arrayOf(schema.string()),
+    packageVersion: schema.maybe(schema.string()),
   }),
 };

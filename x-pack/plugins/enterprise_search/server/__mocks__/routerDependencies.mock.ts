@@ -19,10 +19,10 @@ export const mockRequestHandler = {
 };
 
 export const mockConfig = {
-  enabled: true,
   host: 'http://localhost:3002',
   accessCheckTimeout: 5000,
   accessCheckTimeoutWarning: 300,
+  ssl: {},
 } as ConfigType;
 
 /**

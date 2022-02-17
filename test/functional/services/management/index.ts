@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ManagementMenuProvider } from './management_menu';
+export { ManagementMenuService } from './management_menu';

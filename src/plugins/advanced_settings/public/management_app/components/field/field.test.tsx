@@ -7,18 +7,19 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
+import { I18nProvider } from '@kbn/i18n-react';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType, StringValidation } from '../../../../../../core/public';
+import { UiSettingsType } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
+jest.mock('../../../../../kibana_react/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn(),
+}));
 
 const defaults = {
   requiresPageReload: false,
@@ -74,12 +75,6 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
-    validation: {
-      maxSize: {
-        length: 1000,
-        description: 'Description for 1 kB',
-      },
-    },
     ...defaults,
   },
   json: {
@@ -154,10 +149,6 @@ const settings: Record<string, FieldSetting> = {
     displayName: 'String test validation setting',
     description: 'Description for String test validation setting',
     type: 'string',
-    validation: {
-      regex: new RegExp('^foo'),
-      message: 'must start with "foo"',
-    },
     value: undefined,
     defVal: 'foo-default',
     isCustom: false,
@@ -188,10 +179,6 @@ const userValues = {
   string: 'foo',
   stringWithValidation: 'fooUserValue',
   color: '#FACF0C',
-};
-
-const invalidUserValues = {
-  stringWithValidation: 'invalidUserValue',
 };
 
 const handleChange = jest.fn();
@@ -367,7 +354,7 @@ describe('Field', () => {
         (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onImageChange(([userValue] as unknown) as FileList);
+          (component.instance() as Field).onImageChange([userValue] as unknown as FileList);
           expect(handleChange).toBeCalled();
           await wrapper.setProps({
             unsavedChanges: {
@@ -391,9 +378,9 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           const newUserValue = `${userValue}=`;
-          await (component.instance() as Field).onImageChange(([
+          await (component.instance() as Field).onImageChange([
             newUserValue,
-          ] as unknown) as FileList);
+          ] as unknown as FileList);
           expect(handleChange).toBeCalled();
         });
 
@@ -475,24 +462,6 @@ describe('Field', () => {
         // @ts-ignore
         const userValue = userValues[type];
         const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
-
-        if (setting.validation) {
-          // @ts-ignore
-          const invalidUserValue = invalidUserValues[type];
-          it('should display an error when validation fails', async () => {
-            await (component.instance() as Field).onFieldChange(invalidUserValue);
-            const expectedUnsavedChanges = {
-              value: invalidUserValue,
-              error: (setting.validation as StringValidation).message,
-              isInvalid: true,
-            };
-            expect(handleChange).toBeCalledWith(setting.name, expectedUnsavedChanges);
-            wrapper.setProps({ unsavedChanges: expectedUnsavedChanges });
-            const updated = wrapper.update();
-            const errorMessage = updated.find('.euiFormErrorText').text();
-            expect(errorMessage).toEqual(expectedUnsavedChanges.error);
-          });
-        }
 
         it('should be able to change value', async () => {
           await (component.instance() as Field).onFieldChange(fieldUserValue);

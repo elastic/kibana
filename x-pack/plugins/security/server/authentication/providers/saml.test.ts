@@ -10,6 +10,10 @@ import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
@@ -30,43 +34,22 @@ describe('SAMLAuthenticationProvider', () => {
 
     mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'saml', name: 'saml' } });
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-      securityMock.createApiResponse({ body: mockUser })
-    );
+    mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(mockUser);
     mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-    provider = new SAMLAuthenticationProvider(mockOptions, {
-      realm: 'test-realm',
-    });
-  });
-
-  it('throws if `realm` option is not specified', () => {
-    const providerOptions = mockAuthenticationProviderOptions();
-
-    expect(() => new SAMLAuthenticationProvider(providerOptions)).toThrowError(
-      'Realm name must be specified'
-    );
-    expect(() => new SAMLAuthenticationProvider(providerOptions, {})).toThrowError(
-      'Realm name must be specified'
-    );
-    expect(() => new SAMLAuthenticationProvider(providerOptions, { realm: '' })).toThrowError(
-      'Realm name must be specified'
-    );
+    provider = new SAMLAuthenticationProvider(mockOptions);
   });
 
   describe('`login` method', () => {
     it('gets token and redirects user to requested URL if SAML Response is valid.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'some-token',
-            refresh_token: 'some-refresh-token',
-            authentication: mockUser,
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+        realm: 'test-realm',
+        authentication: mockUser,
+      });
 
       await expect(
         provider.login(
@@ -99,18 +82,14 @@ describe('SAMLAuthenticationProvider', () => {
     it('gets token and redirects user to the requested URL if SAML Response is valid ignoring Relay State.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'some-token',
-            refresh_token: 'some-refresh-token',
-            authentication: mockUser,
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+        realm: 'test-realm',
+        authentication: mockUser,
+      });
 
       provider = new SAMLAuthenticationProvider(mockOptions, {
-        realm: 'test-realm',
         useRelayStateDeepLink: true,
       });
       await expect(
@@ -165,6 +144,10 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('fails if realm from state is different from the realm provider is configured with.', async () => {
       const request = httpServerMock.createKibanaRequest();
+      const customMockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
+      provider = new SAMLAuthenticationProvider(customMockOptions, {
+        realm: 'test-realm',
+      });
 
       await expect(
         provider.login(
@@ -180,21 +163,18 @@ describe('SAMLAuthenticationProvider', () => {
         )
       );
 
-      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+      expect(customMockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('redirects to the default location if state contains empty redirect URL.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'user-initiated-login-token',
-            refresh_token: 'user-initiated-login-refresh-token',
-            authentication: mockUser,
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        access_token: 'user-initiated-login-token',
+        refresh_token: 'user-initiated-login-refresh-token',
+        realm: 'test-realm',
+        authentication: mockUser,
+      });
 
       await expect(
         provider.login(
@@ -223,18 +203,14 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to the default location if state contains empty redirect URL ignoring Relay State.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'user-initiated-login-token',
-            refresh_token: 'user-initiated-login-refresh-token',
-            authentication: mockUser,
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        access_token: 'user-initiated-login-token',
+        refresh_token: 'user-initiated-login-refresh-token',
+        realm: 'test-realm',
+        authentication: mockUser,
+      });
 
       provider = new SAMLAuthenticationProvider(mockOptions, {
-        realm: 'test-realm',
         useRelayStateDeepLink: true,
       });
       await expect(
@@ -268,15 +244,12 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to the default location if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'idp-initiated-login-token',
-            refresh_token: 'idp-initiated-login-refresh-token',
-            authentication: mockUser,
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        realm: 'test-realm',
+        access_token: 'idp-initiated-login-token',
+        refresh_token: 'idp-initiated-login-refresh-token',
+        authentication: mockUser,
+      });
 
       await expect(
         provider.login(request, {
@@ -297,7 +270,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/authenticate',
-        body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+        body: { ids: [], content: 'saml-response-xml' },
       });
     });
 
@@ -332,26 +305,21 @@ describe('SAMLAuthenticationProvider', () => {
       beforeEach(() => {
         mockOptions.basePath.get.mockReturnValue(mockOptions.basePath.serverBasePath);
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-          securityMock.createApiResponse({
-            body: {
-              username: 'user',
-              access_token: 'valid-token',
-              refresh_token: 'valid-refresh-token',
-              authentication: mockUser,
-            },
-          })
-        );
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          username: 'user',
+          access_token: 'valid-token',
+          refresh_token: 'valid-refresh-token',
+          realm: 'test-realm',
+          authentication: mockUser,
+        });
 
         provider = new SAMLAuthenticationProvider(mockOptions, {
-          realm: 'test-realm',
           useRelayStateDeepLink: true,
         });
       });
 
       it('redirects to the home page if `useRelayStateDeepLink` is set to `false`.', async () => {
         provider = new SAMLAuthenticationProvider(mockOptions, {
-          realm: 'test-realm',
           useRelayStateDeepLink: false,
         });
 
@@ -450,12 +418,74 @@ describe('SAMLAuthenticationProvider', () => {
           )
         );
       });
+
+      it('uses `realm` name instead of `acs` if it is specified for SAML authenticate request.', async () => {
+        // Create new provider instance with additional `realm` option.
+        provider = new SAMLAuthenticationProvider(mockOptions, {
+          realm: 'test-realm',
+        });
+
+        await expect(
+          provider.login(httpServerMock.createKibanaRequest({ headers: {} }), {
+            type: SAMLLogin.LoginWithSAMLResponse,
+            samlResponse: 'saml-response-xml',
+          })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            state: {
+              accessToken: 'valid-token',
+              refreshToken: 'valid-refresh-token',
+              realm: 'test-realm',
+            },
+            user: mockUser,
+          })
+        );
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
+          body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+        });
+      });
     });
 
     describe('IdP initiated login with existing session', () => {
-      it('returns `notHandled` if new SAML Response is rejected.', async () => {
+      it('fails if new SAML Response is rejected and provider is not configured with specific realm.', async () => {
         const request = httpServerMock.createKibanaRequest({ headers: {} });
         const authorization = 'Bearer some-valid-token';
+
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 503, body: {} })
+        );
+        mockOptions.client.asInternalUser.transport.request.mockRejectedValue(failureReason);
+
+        await expect(
+          provider.login(
+            request,
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+            {
+              accessToken: 'some-valid-token',
+              refreshToken: 'some-valid-refresh-token',
+              realm: 'test-realm',
+            }
+          )
+        ).resolves.toEqual(AuthenticationResult.failed(failureReason));
+
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({ headers: { authorization } });
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
+          body: { ids: [], content: 'saml-response-xml' },
+        });
+      });
+
+      it('returns `notHandled` if new SAML Response is rejected and provider is configured with specific realm.', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
+        const authorization = 'Bearer some-valid-token';
+
+        provider = new SAMLAuthenticationProvider(mockOptions, {
+          realm: 'test-realm',
+        });
 
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 503, body: {} })
@@ -491,16 +521,12 @@ describe('SAMLAuthenticationProvider', () => {
         };
         const authorization = `Bearer ${state.accessToken}`;
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-          securityMock.createApiResponse({
-            body: {
-              username: 'user',
-              access_token: 'new-valid-token',
-              refresh_token: 'new-valid-refresh-token',
-              authentication: mockUser,
-            },
-          })
-        );
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          username: 'user',
+          access_token: 'new-valid-token',
+          refresh_token: 'new-valid-refresh-token',
+          authentication: mockUser,
+        });
 
         const failureReason = new Error('Failed to invalidate token!');
         mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
@@ -517,7 +543,7 @@ describe('SAMLAuthenticationProvider', () => {
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/authenticate',
-          body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+          body: { ids: [], content: 'saml-response-xml' },
         });
 
         expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
@@ -539,7 +565,7 @@ describe('SAMLAuthenticationProvider', () => {
           ),
         ],
         [
-          'current session is is expired',
+          'current session is expired',
           Promise.reject(
             new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
           ),
@@ -558,16 +584,13 @@ describe('SAMLAuthenticationProvider', () => {
           mockScopedClusterClient.asCurrentUser.security.authenticate.mockImplementationOnce(
             () => response
           );
-          mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-            securityMock.createApiResponse({
-              body: {
-                username: 'user',
-                access_token: 'new-valid-token',
-                refresh_token: 'new-valid-refresh-token',
-                authentication: mockUser,
-              },
-            })
-          );
+          mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+            username: 'user',
+            access_token: 'new-valid-token',
+            refresh_token: 'new-valid-refresh-token',
+            realm: 'test-realm',
+            authentication: mockUser,
+          });
           mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
           await expect(
@@ -591,7 +614,7 @@ describe('SAMLAuthenticationProvider', () => {
           expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
             method: 'POST',
             path: '/_security/saml/authenticate',
-            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+            body: { ids: [], content: 'saml-response-xml' },
           });
 
           expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
@@ -614,21 +637,17 @@ describe('SAMLAuthenticationProvider', () => {
           mockScopedClusterClient.asCurrentUser.security.authenticate.mockImplementationOnce(
             () => response
           );
-          mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-            securityMock.createApiResponse({
-              body: {
-                username: 'user',
-                access_token: 'new-valid-token',
-                refresh_token: 'new-valid-refresh-token',
-                authentication: mockUser,
-              },
-            })
-          );
+          mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+            username: 'user',
+            access_token: 'new-valid-token',
+            refresh_token: 'new-valid-refresh-token',
+            realm: 'test-realm',
+            authentication: mockUser,
+          });
 
           mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
           provider = new SAMLAuthenticationProvider(mockOptions, {
-            realm: 'test-realm',
             useRelayStateDeepLink: true,
           });
 
@@ -657,7 +676,7 @@ describe('SAMLAuthenticationProvider', () => {
           expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
             method: 'POST',
             path: '/_security/saml/authenticate',
-            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+            body: { ids: [], content: 'saml-response-xml' },
           });
 
           expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
@@ -690,24 +709,17 @@ describe('SAMLAuthenticationProvider', () => {
       it('redirects requests to the IdP remembering redirect URL with existing state.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-          securityMock.createApiResponse({
-            body: {
-              id: 'some-request-id',
-              redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
-            },
-          })
-        );
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
+        });
 
         await expect(
-          provider.login(
-            request,
-            {
-              type: SAMLLogin.LoginInitiatedByUser,
-              redirectURL: '/test-base-path/some-path#some-fragment',
-            },
-            { realm: 'test-realm' }
-          )
+          provider.login(request, {
+            type: SAMLLogin.LoginInitiatedByUser,
+            redirectURL: '/test-base-path/some-path#some-fragment',
+          })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
@@ -724,7 +736,9 @@ describe('SAMLAuthenticationProvider', () => {
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/prepare',
-          body: { realm: 'test-realm' },
+          body: {
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+          },
         });
 
         expect(mockOptions.logger.warn).not.toHaveBeenCalled();
@@ -733,14 +747,11 @@ describe('SAMLAuthenticationProvider', () => {
       it('redirects requests to the IdP remembering redirect URL without state.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-          securityMock.createApiResponse({
-            body: {
-              id: 'some-request-id',
-              redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
-            },
-          })
-        );
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
+        });
 
         await expect(
           provider.login(
@@ -767,10 +778,56 @@ describe('SAMLAuthenticationProvider', () => {
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/prepare',
-          body: { realm: 'test-realm' },
+          body: {
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+          },
         });
 
         expect(mockOptions.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('uses `realm` name instead of `acs` if it is specified for SAML prepare request.', async () => {
+        const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
+
+        // Create new provider instance with additional `realm` option.
+        const customMockOptions = mockAuthenticationProviderOptions();
+        provider = new SAMLAuthenticationProvider(customMockOptions, {
+          realm: 'test-realm',
+        });
+
+        customMockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
+        });
+
+        await expect(
+          provider.login(
+            request,
+            {
+              type: SAMLLogin.LoginInitiatedByUser,
+              redirectURL: '/test-base-path/some-path#some-fragment',
+            },
+            { realm: 'test-realm' }
+          )
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            'https://idp-host/path/login?SAMLRequest=some%20request%20',
+            {
+              state: {
+                requestId: 'some-request-id',
+                redirectURL: '/test-base-path/some-path#some-fragment',
+                realm: 'test-realm',
+              },
+            }
+          )
+        );
+
+        expect(customMockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/saml/prepare',
+          body: { realm: 'test-realm' },
+        });
       });
 
       it('fails if SAML request preparation fails.', async () => {
@@ -782,20 +839,18 @@ describe('SAMLAuthenticationProvider', () => {
         mockOptions.client.asInternalUser.transport.request.mockRejectedValue(failureReason);
 
         await expect(
-          provider.login(
-            request,
-            {
-              type: SAMLLogin.LoginInitiatedByUser,
-              redirectURL: '/test-base-path/some-path#some-fragment',
-            },
-            { realm: 'test-realm' }
-          )
+          provider.login(request, {
+            type: SAMLLogin.LoginInitiatedByUser,
+            redirectURL: '/test-base-path/some-path#some-fragment',
+          })
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/prepare',
-          body: { realm: 'test-realm' },
+          body: {
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+          },
         });
       });
     });
@@ -848,16 +903,58 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX request that can not be authenticated to the "capture URL" page.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue(
+        '/mock-server-basepath/s/foo/some-path?auth_provider_hint=saml'
+      );
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
-
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path&providerType=saml&providerName=saml',
+          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Dsaml',
           { state: null }
         )
       );
 
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request, [
+        [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'saml'],
+      ]);
+
       expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('initiates SAML handshake for non-AJAX request that can not be authenticated, but includes URL hash fragment.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/s/foo/some-path');
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        id: 'some-request-id',
+        redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/s/foo/some-path',
+        query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
+      });
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          {
+            state: {
+              requestId: 'some-request-id',
+              redirectURL: '/mock-server-basepath/s/foo/some-path#some-fragment',
+            },
+          }
+        )
+      );
+
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request);
+
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/saml/prepare',
+        body: {
+          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+        },
+      });
     });
 
     it('succeeds if state contains a valid token.', async () => {
@@ -1024,6 +1121,9 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('re-capture URL for non-AJAX requests if refresh token is expired.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue(
+        '/mock-server-basepath/s/foo/some-path?auth_provider_hint=saml'
+      );
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path', headers: {} });
       const state = {
         accessToken: 'expired-token',
@@ -1040,10 +1140,15 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path&providerType=saml&providerName=saml',
+          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Dsaml',
           { state: null }
         )
       );
+
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request, [
+        [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'saml'],
+      ]);
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
@@ -1055,6 +1160,13 @@ describe('SAMLAuthenticationProvider', () => {
 
     it('fails if realm from state is different from the realm provider is configured with.', async () => {
       const request = httpServerMock.createKibanaRequest();
+
+      // Create new provider instance with additional `realm` option.
+      const customMockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
+      provider = new SAMLAuthenticationProvider(customMockOptions, {
+        realm: 'test-realm',
+      });
+
       await expect(provider.authenticate(request, { realm: 'other-realm' })).resolves.toEqual(
         AuthenticationResult.failed(
           Boom.unauthorized(
@@ -1129,7 +1241,10 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: {
+          query_string: 'SAMLRequest=xxx%20yyy',
+          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+        },
       });
     });
 
@@ -1138,9 +1253,7 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: null } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({ redirect: null });
 
       await expect(
         provider.logout(request, {
@@ -1163,9 +1276,9 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: undefined } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        redirect: undefined,
+      });
 
       await expect(
         provider.logout(request, {
@@ -1190,9 +1303,7 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: null } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({ redirect: null });
 
       await expect(
         provider.logout(request, {
@@ -1213,9 +1324,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('relies on SAML invalidate call even if access token is presented.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: null } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({ redirect: null });
 
       await expect(
         provider.logout(request, {
@@ -1229,16 +1338,14 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: { query_string: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
     });
 
     it('redirects to `loggedOut` URL if `redirect` field in SAML invalidate response is null.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: null } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({ redirect: null });
 
       await expect(provider.logout(request)).resolves.toEqual(
         DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
@@ -1248,16 +1355,19 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: {
+          query_string: 'SAMLRequest=xxx%20yyy',
+          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+        },
       });
     });
 
     it('redirects to `loggedOut` URL if `redirect` field in SAML invalidate response is not defined.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: undefined } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        redirect: undefined,
+      });
 
       await expect(provider.logout(request)).resolves.toEqual(
         DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
@@ -1267,7 +1377,10 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: {
+          query_string: 'SAMLRequest=xxx%20yyy',
+          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+        },
       });
     });
 
@@ -1286,11 +1399,9 @@ describe('SAMLAuthenticationProvider', () => {
       const accessToken = 'x-saml-token';
       const refreshToken = 'x-saml-refresh-token';
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H',
+      });
 
       await expect(
         provider.logout(request, {
@@ -1308,11 +1419,9 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects user to the IdP if SLO is supported by IdP in case of IdP initiated logout.', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLRequest: 'xxx yyy' } });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        redirect: 'http://fake-idp/SLO?SAMLRequest=7zlH37H',
+      });
 
       await expect(
         provider.logout(request, {

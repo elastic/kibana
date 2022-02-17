@@ -18,12 +18,27 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
+
 import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
-const { DatasourceDatasourceComponent: strings } = ComponentStrings;
+const strings = {
+  getExpressionArgDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.expressionArgDescription', {
+      defaultMessage:
+        'The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.',
+    }),
+  getPreviewButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
+      defaultMessage: 'Preview data',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
@@ -46,6 +61,7 @@ export class DatasourceComponent extends PureComponent {
     setPreviewing: PropTypes.func,
     isInvalid: PropTypes.bool,
     setInvalid: PropTypes.func,
+    renderError: PropTypes.func,
   };
 
   state = { defaultIndex: '' };
@@ -72,14 +88,8 @@ export class DatasourceComponent extends PureComponent {
   });
 
   setSelectedDatasource = (value) => {
-    const {
-      datasource,
-      resetArgs,
-      updateArgs,
-      selectDatasource,
-      datasources,
-      setSelecting,
-    } = this.props;
+    const { datasource, resetArgs, updateArgs, selectDatasource, datasources, setSelecting } =
+      this.props;
 
     if (datasource.name === value) {
       // if selecting the current datasource, reset the arguments
@@ -111,6 +121,7 @@ export class DatasourceComponent extends PureComponent {
       setPreviewing,
       isInvalid,
       setInvalid,
+      renderError,
     } = this.props;
 
     const { defaultIndex } = this.state;
@@ -141,6 +152,7 @@ export class DatasourceComponent extends PureComponent {
         isInvalid,
         setInvalid,
         defaultIndex,
+        renderError,
       });
 
     const hasExpressionArgs = Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');
@@ -171,13 +183,7 @@ export class DatasourceComponent extends PureComponent {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    disabled={isInvalid}
-                    size="s"
-                    onClick={this.save}
-                    fill
-                    color="secondary"
-                  >
+                  <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="success">
                     {strings.getSaveButtonLabel()}
                   </EuiButton>
                 </EuiFlexItem>

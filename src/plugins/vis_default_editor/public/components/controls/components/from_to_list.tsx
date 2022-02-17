@@ -38,7 +38,7 @@ const defaultConfig = {
     from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
     to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
   },
-  validateClass: search.aggs.Ipv4Address,
+  validateClass: search.aggs.IpAddress,
   getModelValue: (item: FromToObject = {}) => ({
     from: {
       value: item.from || EMPTY_STRING,

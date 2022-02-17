@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { download, GlobalTask } from '../../lib';
+import { downloadToDisk, GlobalTask } from '../../lib';
 import { getNodeShasums } from './node_shasums';
 import { getNodeDownloadInfo } from './node_download_info';
 
@@ -18,12 +18,13 @@ export const DownloadNodeBuilds: GlobalTask = {
     await Promise.all(
       config.getNodePlatforms().map(async (platform) => {
         const { url, downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
-        await download({
+        await downloadToDisk({
           log,
           url,
-          sha256: shasums[downloadName],
+          shaChecksum: shasums[downloadName],
+          shaAlgorithm: 'sha256',
           destination: downloadPath,
-          retries: 3,
+          maxAttempts: 3,
         });
       })
     );

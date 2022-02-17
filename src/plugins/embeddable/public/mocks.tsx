@@ -20,7 +20,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../core/public/mocks';
 import { UiActionsService } from './lib/ui_actions';
 import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -43,6 +43,8 @@ interface CreateEmbeddablePanelMockArgs {
   SavedObjectFinder: React.ComponentType<any>;
 }
 
+const theme = themeServiceMock.createStartContract();
+
 export const createEmbeddablePanelMock = ({
   getActions,
   getEmbeddableFactory,
@@ -64,6 +66,7 @@ export const createEmbeddablePanelMock = ({
       overlays={overlays || ({} as any)}
       inspector={inspector || ({} as any)}
       SavedObjectFinder={SavedObjectFinder || (() => null)}
+      theme={theme}
     />
   );
 };
@@ -89,7 +92,8 @@ export const mockRefOrValEmbeddable = <
     mockedByValueInput: ValTypeInput;
   }
 ): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
-  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  const newEmbeddable: ReferenceOrValueEmbeddable =
+    embeddable as unknown as ReferenceOrValueEmbeddable;
   newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
     !!(input as RefTypeInput).savedObjectId;
   newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
@@ -113,7 +117,7 @@ const createStartContract = (): Start => {
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
-    migrate: jest.fn(),
+    getAllMigrations: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),

@@ -6,12 +6,12 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import {
-  Threshold,
+  ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -29,7 +29,7 @@ interface FindThresholdSignalsParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
-  threshold: Threshold;
+  threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
 }
@@ -51,22 +51,14 @@ export const findThresholdSignals = async ({
 }> => {
   // Leaf aggregations used below
   const leafAggs = {
-    top_threshold_hits: {
-      top_hits: {
-        sort: [
-          {
-            [timestampOverride ?? '@timestamp']: {
-              order: 'desc' as const,
-            },
-          },
-        ],
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-        ],
-        size: 1,
+    max_timestamp: {
+      max: {
+        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
+      },
+    },
+    min_timestamp: {
+      min: {
+        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
       },
     },
     ...(threshold.cardinality?.length
@@ -88,7 +80,14 @@ export const findThresholdSignals = async ({
       : {}),
   };
 
-  const thresholdFields = normalizeThresholdField(threshold.field);
+  const thresholdFields = threshold.field;
+
+  // order buckets by cardinality (https://github.com/elastic/kibana/issues/95258)
+  const thresholdFieldCount = thresholdFields.length;
+  const orderByCardinality = (i: number = 0) =>
+    (thresholdFieldCount === 0 || i === thresholdFieldCount - 1) && threshold.cardinality?.length
+      ? { order: { cardinality_count: 'desc' } }
+      : {};
 
   // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
@@ -105,6 +104,7 @@ export const findThresholdSignals = async ({
         set(acc, aggPath, {
           terms: {
             field,
+            ...orderByCardinality(i),
             min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
             size: 10000, // max 10k buckets
           },
@@ -122,6 +122,7 @@ export const findThresholdSignals = async ({
               source: '""', // Group everything in the same bucket
               lang: 'painless',
             },
+            ...orderByCardinality(),
             min_doc_count: threshold.value,
           },
           aggs: leafAggs,
@@ -139,9 +140,8 @@ export const findThresholdSignals = async ({
     logger,
     // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
-    pageSize: 1,
+    pageSize: 0,
     sortOrder: 'desc',
     buildRuleMessage,
-    excludeDocsWithTimestampOverride: false,
   });
 };

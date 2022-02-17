@@ -13,6 +13,7 @@ import { Cleanup } from './cleanup';
 import { getHelpForAllCommands, getCommandLevelHelp } from './help';
 import { createFlagError } from './fail';
 import { withProcRunner } from '../proc_runner';
+import { Metrics } from './metrics';
 
 export type CommandRunFn<T> = (context: RunContext & T) => Promise<void> | void;
 
@@ -46,16 +47,17 @@ export class RunWithCommands<T> {
     const globalFlags = getFlags(process.argv.slice(2), {
       allowUnexpected: true,
     });
-
-    const isHelpCommand = globalFlags._[0] === 'help';
-    const commandName = isHelpCommand ? globalFlags._[1] : globalFlags._[0];
-    const command = this.commands.find((c) => c.name === commandName);
     const log = new ToolingLog({
       level: pickLevelFromFlags(globalFlags, {
         default: this.options.log?.defaultLevel,
       }),
       writeTo: process.stdout,
     });
+    const metrics = new Metrics(log);
+
+    const isHelpCommand = globalFlags._[0] === 'help';
+    const commandName = isHelpCommand ? globalFlags._[1] : globalFlags._[0];
+    const command = this.commands.find((c) => c.name === commandName);
 
     const globalHelp = getHelpForAllCommands({
       description: this.options.description,
@@ -111,6 +113,7 @@ export class RunWithCommands<T> {
           log,
           flags: commandFlags,
           procRunner,
+          statsMeta: metrics.meta,
           addCleanupTask: cleanup.add.bind(cleanup),
         };
 
@@ -123,10 +126,13 @@ export class RunWithCommands<T> {
       });
     } catch (error) {
       cleanup.execute(error);
+      await metrics.reportError(error?.message, commandName);
       // exitCode is set by `cleanup` when necessary
       process.exit();
     } finally {
       cleanup.execute();
     }
+
+    await metrics.reportSuccess(commandName);
   }
 }

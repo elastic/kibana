@@ -26,12 +26,11 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
     const resp = await mlResultsService.getEventRateData(
       job.datafeed_config.indices.join(),
       job.datafeed_config.query,
-      job.data_description.time_field,
+      job.data_description.time_field!,
       job.data_counts.earliest_record_timestamp,
       job.data_counts.latest_record_timestamp,
       intervalMs,
       job.datafeed_config.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       job.datafeed_config.indices_options
     );
     if (resp.error !== undefined) {

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getSearchListItemResponseMock } from '../../../common/schemas/response/search_list_item_schema.mock';
 import { LIST_INDEX, LIST_ITEM_ID, TYPE, VALUE } from '../../../common/constants.mock';
 import {
   getSearchEsListItemMock,
   getSearchListItemMock,
-} from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { SearchListItemArraySchema } from '../../../common/schemas';
+} from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { transformElasticNamedSearchToListItem } from './transform_elastic_named_search_to_list_item';
 
@@ -67,7 +68,6 @@ describe('transform_elastic_named_search_to_list_item', () => {
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['1.0'],
       },
     ];
@@ -106,7 +106,6 @@ describe('transform_elastic_named_search_to_list_item', () => {
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['0.0'],
       },
     ];
@@ -137,7 +136,6 @@ describe('transform_elastic_named_search_to_list_item', () => {
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['1.0'],
       },
     ];

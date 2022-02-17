@@ -16,6 +16,32 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
+export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
+
+export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
+
+export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
+
+export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
+
+export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
+
+export const FROM_VALIDATION_ERROR = '.euiFormErrorText';
+
+export const CONNECTOR_NAME_INPUT = '[data-test-subj="nameInput"]';
+
+export const EMAIL_CONNECTOR_FROM_INPUT = '[data-test-subj="emailFromInput"]';
+
+export const EMAIL_CONNECTOR_HOST_INPUT = '[data-test-subj="emailHostInput"]';
+
+export const EMAIL_CONNECTOR_PORT_INPUT = '[data-test-subj="emailPortInput"]';
+
+export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
+
+export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
+
+export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -32,8 +58,6 @@ export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
-export const COMBO_BOX_RESULT = '.euiFilterSelectItem';
-
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
@@ -43,9 +67,6 @@ export const THREAT_MAPPING_COMBO_BOX_INPUT =
 
 export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
-
-export const THREAT_MATCH_INDICATOR_QUERY_INPUT =
-  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="queryInput"]';
 
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
@@ -83,9 +104,9 @@ export const DEFINE_INDEX_INPUT =
 
 export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
-export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+export const PREVIEW_HISTOGRAM = '[data-test-subj="preview-histogram-panel"]';
 
-export const EQL_QUERY_PREVIEW_HISTOGRAM = '[data-test-subj="queryPreviewEqlHistogram"]';
+export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
@@ -108,9 +129,8 @@ export const LOOK_BACK_INTERVAL =
 export const LOOK_BACK_TIME_TYPE =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
-export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
-
-export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+export const MACHINE_LEARNING_DROPDOWN_INPUT =
+  '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
@@ -127,6 +147,8 @@ export const MITRE_ATTACK_ADD_TACTIC_BUTTON = '[data-test-subj="addMitreAttackTa
 export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackTechnique"]';
 
 export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
+
+export const PREVIEW_HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
 
 export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 
@@ -148,7 +170,7 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW = '[data-test-subj="ruleCreationQueryPreview"]';
+export const RULES_CREATION_PREVIEW = '[data-test-subj="rule-preview"]';
 
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';
@@ -180,10 +202,10 @@ export const SCHEDULE_INTERVAL_UNITS_INPUT =
   '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="timeType"]';
 
 export const SCHEDULE_LOOKBACK_AMOUNT_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
 
 export const SCHEDULE_LOOKBACK_UNITS_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="schedule-units-input"]';
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';

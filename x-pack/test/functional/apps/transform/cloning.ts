@@ -11,6 +11,7 @@ import {
   isPivotTransform,
   TransformPivotConfig,
 } from '../../../../plugins/transform/common/types/transform';
+import { getLatestTransformConfig } from './index';
 
 interface TestData {
   type: 'pivot' | 'latest';
@@ -32,8 +33,9 @@ function getTransformConfig(): TransformPivotConfig {
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
     description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+      'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
     },
@@ -71,6 +73,7 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
     },
     description: 'ecommerce batch transform grouped by terms(rt_gender_lower)',
     frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
     },
@@ -85,10 +88,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const transformConfigWithLatest = getLatestTransformConfig('cloning');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
@@ -98,11 +101,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.id,
         transformConfigWithRuntimeMapping
       );
-
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -114,11 +116,12 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.dest.index
       );
 
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: TestData[] = [
@@ -155,6 +158,9 @@ export default function ({ getService }: FtrProviderContext) {
               `Women's Clothing`,
             ],
           },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '1d',
         },
       },
       {
@@ -184,35 +190,36 @@ export default function ({ getService }: FtrProviderContext) {
             column: 0,
             values: [`female`, `male`],
           },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '3d',
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   type: 'latest' as const,
-      //   suiteTitle: 'clone transform with latest function',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformId: `clone_${transformConfigWithLatest.id}`,
-      //   transformDescription: `a cloned transform`,
-      //   get destinationIndex(): string {
-      //     return `user-${this.transformId}`;
-      //   },
-      //   expected: {
-      //     indexPreview: {
-      //       columns: 10,
-      //       rows: 5,
-      //     },
-      //     transformPreview: {
-      //       column: 0,
-      //       values: [
-      //         'July 12th 2019, 22:16:19',
-      //         'July 12th 2019, 22:50:53',
-      //         'July 12th 2019, 23:06:43',
-      //         'July 12th 2019, 23:15:22',
-      //         'July 12th 2019, 23:31:12',
-      //       ],
-      //     },
-      //   },
-      // },
+      {
+        type: 'latest' as const,
+        suiteTitle: 'clone transform with latest function',
+        originalConfig: transformConfigWithLatest,
+        transformId: `clone_${transformConfigWithLatest.id}`,
+        transformDescription: `a cloned transform`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          transformPreview: {
+            column: 0,
+            values: [
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:31:12',
+              'July 12th 2019, 23:45:36',
+            ],
+          },
+          retentionPolicySwitchEnabled: false,
+        },
+      },
     ];
 
     for (const testData of testDataList) {
@@ -240,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
-          await transform.table.clickTransformRowAction('Clone');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Clone');
           await transform.wizard.assertSelectedTransformFunction(testData.type);
           await transform.wizard.assertDefineStepActive();
         });
@@ -304,6 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.transformPreview.values
           );
 
+          // assert details step form
           await transform.testExecution.logTestStep('should load the details step');
           await transform.wizard.advanceToDetailsStep();
 
@@ -324,15 +332,31 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep(
-            'should display the create index pattern switch'
-          );
+          await transform.testExecution.logTestStep('should display the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
+
+          await transform.testExecution.logTestStep(
+            'should display the retention policy settings with pre-filled configuration'
+          );
+          await transform.wizard.assertRetentionPolicySwitchExists();
+          await transform.wizard.assertRetentionPolicySwitchCheckState(
+            testData.expected.retentionPolicySwitchEnabled
+          );
+          if (testData.expected.retentionPolicySwitchEnabled) {
+            await transform.wizard.assertRetentionPolicyFieldSelectExists();
+            await transform.wizard.assertRetentionPolicyFieldSelectValue(
+              testData.expected.retentionPolicyField
+            );
+            await transform.wizard.assertRetentionPolicyMaxAgeInputExists();
+            await transform.wizard.assertRetentionsPolicyMaxAgeValue(
+              testData.expected.retentionPolicyMaxAge
+            );
+          }
 
           await transform.testExecution.logTestStep(
             'should display the advanced settings and show pre-filled configuration'

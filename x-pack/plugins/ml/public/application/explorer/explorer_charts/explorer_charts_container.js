@@ -6,7 +6,7 @@
  */
 import './_index.scss';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -28,13 +28,17 @@ import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
+import { useActiveCursor } from '../../../../../../../src/plugins/charts/public';
+import { Chart, Settings } from '@elastic/charts';
+import useObservable from 'react-use/lib/useObservable';
+
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
@@ -65,13 +69,14 @@ function ExplorerChartContainer({
   severity,
   tooManyBuckets,
   wrapLabel,
-  mlUrlGenerator,
-  basePath,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
   recentlyAccessed,
   tooManyBucketsCalloutMsg,
+  showSelectedInterval,
+  chartsService,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -79,19 +84,29 @@ function ExplorerChartContainer({
     let isCancelled = false;
     const generateLink = async () => {
       if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
-        const singleMetricViewerLink = await getExploreSeriesLink(
-          mlUrlGenerator,
-          series,
-          timefilter
-        );
-        setExplorerSeriesLink(singleMetricViewerLink);
+        try {
+          const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
+          setExplorerSeriesLink(singleMetricViewerLink);
+        } catch (error) {
+          setExplorerSeriesLink('');
+        }
       }
     };
     generateLink();
     return () => {
       isCancelled = true;
     };
-  }, [mlUrlGenerator, series]);
+  }, [mlLocator, series]);
+
+  const chartRef = useRef(null);
+
+  const chartTheme = chartsService.theme.useChartsTheme();
+
+  const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
+
+  const cursor = useObservable(chartsService.activeCursor.activeCursor$)?.cursor;
 
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
@@ -130,6 +145,13 @@ function ExplorerChartContainer({
 
   return (
     <React.Fragment>
+      {/* Creating an empty elastic chart container here */}
+      {/* so that we can use chart's ref which controls the activeCursor api */}
+      <div style={{ width: 0, height: 0 }}>
+        <Chart ref={chartRef}>
+          <Settings noResults={<div />} />
+        </Chart>
+      </div>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
@@ -162,7 +184,7 @@ function ExplorerChartContainer({
                   iconSide="right"
                   iconType="visLine"
                   size="xs"
-                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
@@ -199,6 +221,10 @@ function ExplorerChartContainer({
                   seriesConfig={series}
                   severity={severity}
                   tooltipService={tooltipService}
+                  showSelectedInterval={showSelectedInterval}
+                  onPointerUpdate={handleCursorUpdate}
+                  chartTheme={chartTheme}
+                  cursor={cursor}
                 />
               )}
             </MlTooltipComponent>
@@ -214,6 +240,10 @@ function ExplorerChartContainer({
                   seriesConfig={series}
                   severity={severity}
                   tooltipService={tooltipService}
+                  showSelectedInterval={showSelectedInterval}
+                  onPointerUpdate={handleCursorUpdate}
+                  chartTheme={chartTheme}
+                  cursor={cursor}
                 />
               )}
             </MlTooltipComponent>
@@ -232,16 +262,17 @@ export const ExplorerChartsContainerUI = ({
   tooManyBuckets,
   kibana,
   errorMessages,
-  mlUrlGenerator,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
   tooManyBucketsCalloutMsg,
+  showSelectedInterval,
+  chartsService,
 }) => {
   const {
     services: {
       chrome: { recentlyAccessed },
-      http: { basePath },
       embeddable: embeddablePlugin,
       maps: mapsPlugin,
     },
@@ -289,13 +320,14 @@ export const ExplorerChartsContainerUI = ({
                 severity={severity}
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
-                mlUrlGenerator={mlUrlGenerator}
-                basePath={basePath.get()}
+                mlLocator={mlLocator}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}
                 recentlyAccessed={recentlyAccessed}
                 tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
+                showSelectedInterval={showSelectedInterval}
+                chartsService={chartsService}
               />
             </EuiFlexItem>
           ))}

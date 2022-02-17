@@ -21,6 +21,7 @@ const ACTION_TYPE_IDS = [
   '.pagerduty',
   '.server-log',
   '.slack',
+  '.swimlane',
   '.teams',
   '.webhook',
 ];
