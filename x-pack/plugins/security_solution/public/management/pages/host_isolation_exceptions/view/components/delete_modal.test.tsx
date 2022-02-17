@@ -4,39 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { waitFor } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { act } from '@testing-library/react';
+import uuid from 'uuid';
+import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
+import { deleteOneHostIsolationExceptionItem } from '../../service';
 import { HostIsolationExceptionDeleteModal } from './delete_modal';
-import { isFailedResourceState, isLoadedResourceState } from '../../../../state';
-import { getHostIsolationExceptionItems, deleteHostIsolationExceptionItems } from '../../service';
-import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { fireEvent } from '@testing-library/dom';
 
 jest.mock('../../service');
-const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
-const deleteHostIsolationExceptionItemsMock = deleteHostIsolationExceptionItems as jest.Mock;
+const deleteOneHostIsolationExceptionItemMock = deleteOneHostIsolationExceptionItem as jest.Mock;
 
 describe('When on the host isolation exceptions delete modal', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let coreStart: AppContextTestRender['coreStart'];
+  let onCancel: (forceRefresh?: boolean) => void;
+  let itemToDelete: ExceptionListItemSchema;
 
   beforeEach(() => {
-    const itemToDelete = getExceptionListItemSchemaMock();
-    getHostIsolationExceptionItemsMock.mockReset();
-    deleteHostIsolationExceptionItemsMock.mockReset();
     const mockedContext = createAppRootMockRenderer();
-    mockedContext.store.dispatch({
-      type: 'hostIsolationExceptionsMarkToDelete',
-      payload: itemToDelete,
-    });
-    render = () => (renderResult = mockedContext.render(<HostIsolationExceptionDeleteModal />));
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
+    itemToDelete = getExceptionListItemSchemaMock();
+    deleteOneHostIsolationExceptionItemMock.mockReset();
+    onCancel = jest.fn();
+    render = () =>
+      (renderResult = mockedContext.render(
+        <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={onCancel} />
+      ));
     ({ coreStart } = mockedContext);
   });
 
@@ -48,8 +47,33 @@ describe('When on the host isolation exceptions delete modal', () => {
     ).toBeTruthy();
   });
 
+  it.each(['all', '0', '1', '2', '5'])(
+    'should display a warning banner with how many policies (%s) will be affected. skipping non-policy-tags',
+    (amount) => {
+      if (amount === 'all') {
+        itemToDelete.tags = ['policy:all', 'non-policy-tag'];
+      } else {
+        itemToDelete.tags = [
+          ...Array.from({ length: +amount }, (_) => `policy:${uuid.v4()}`),
+          'non-policy-tag',
+        ];
+      }
+      render();
+      expect(
+        renderResult.getByTestId('hostIsolationExceptionsDeleteModalCalloutMessage')
+      ).toHaveTextContent(`Deleting this entry will remove it from ${amount} associated`);
+    }
+  );
+
   it('should disable the buttons when confirm is pressed and show loading', async () => {
     render();
+
+    // fake a delay on a response
+    deleteOneHostIsolationExceptionItemMock.mockImplementationOnce(() => {
+      return new Promise((resolve) => {
+        setTimeout(resolve, 300);
+      });
+    });
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
@@ -59,77 +83,65 @@ describe('When on the host isolation exceptions delete modal', () => {
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
     ) as HTMLButtonElement;
 
-    act(() => {
-      fireEvent.click(submitButton);
-    });
+    userEvent.click(submitButton);
+
+    // wait for the mock API to be called
+    await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(submitButton.disabled).toBe(true);
     expect(cancelButton.disabled).toBe(true);
     expect(submitButton.querySelector('.euiLoadingSpinner')).not.toBeNull();
   });
 
-  it('should clear the item marked to delete when cancel is pressed', async () => {
+  it('should call the onCancel callback when cancel is pressed', async () => {
     render();
     const cancelButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
     ) as HTMLButtonElement;
 
-    const waiter = waitForAction('hostIsolationExceptionsMarkToDelete', {
-      validate: ({ payload }) => {
-        return payload === undefined;
-      },
+    userEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
-
-    act(() => {
-      fireEvent.click(cancelButton);
-    });
-    expect(await waiter).toBeTruthy();
   });
 
-  it('should show success toast after the delete is completed', async () => {
+  it('should show success toast after the delete is completed and call onCancel with forceRefresh', async () => {
+    deleteOneHostIsolationExceptionItemMock.mockResolvedValue({});
     render();
-    const updateCompleted = waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
-      validate(action) {
-        return isLoadedResourceState(action.payload);
-      },
-    });
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
     ) as HTMLButtonElement;
 
-    await act(async () => {
-      fireEvent.click(submitButton);
-      await updateCompleted;
-    });
+    userEvent.click(submitButton);
+
+    // wait for the mock API to be called
+    await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"some name" has been removed from the Host Isolation Exceptions list.'
+      '"some name" has been removed from the host isolation exceptions list.'
     );
+    expect(onCancel).toHaveBeenCalledWith(true);
   });
 
-  it('should show error toast if error is encountered', async () => {
-    deleteHostIsolationExceptionItemsMock.mockRejectedValue(
+  it('should show error toast if error is encountered and call onCancel with forceRefresh', async () => {
+    deleteOneHostIsolationExceptionItemMock.mockRejectedValue(
       new Error("That's not true. That's impossible")
     );
     render();
-    const updateFailure = waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
-      validate(action) {
-        return isFailedResourceState(action.payload);
-      },
-    });
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
     ) as HTMLButtonElement;
 
-    await act(async () => {
-      fireEvent.click(submitButton);
-      await updateFailure;
-    });
+    userEvent.click(submitButton);
+
+    // wait for the mock API to be called
+    await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "some name" from the Host Isolation Exceptions list. Reason: That\'s not true. That\'s impossible'
+      'Unable to remove "some name" from the host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
     );
+    expect(onCancel).toHaveBeenCalledWith(true);
   });
 });

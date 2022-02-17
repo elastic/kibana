@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Agent } from '../../fleet/common';
+export type { Agent } from '../../fleet/common';

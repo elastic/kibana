@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { MountPoint } from '../types';
+import { CoreTheme } from '../theme';
 import { Capabilities } from './capabilities';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
@@ -520,6 +521,29 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
+  /**
+   * An observable emitting {@link CoreTheme | Core's theme}.
+   * Should be used when mounting the application to include theme information.
+   *
+   * @example
+   * When mounting a react application:
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   *
+   * import { AppMountParameters } from 'src/core/public';
+   * import { wrapWithTheme } from 'src/plugins/kibana_react';
+   * import { MyApp } from './app';
+   *
+   * export renderApp = ({ element, theme$ }: AppMountParameters) => {
+   *    ReactDOM.render(wrapWithTheme(<MyApp/>, theme$), element);
+   *    return () => ReactDOM.unmountComponentAtNode(element);
+   * }
+   * ```
+   */
+  theme$: Observable<CoreTheme>;
 }
 
 /**
@@ -573,6 +597,8 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  confirmButtonText?: string;
+  buttonColor?: ButtonColor;
   callback?: () => void;
 }
 
@@ -597,9 +623,17 @@ export interface AppLeaveActionFactory {
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
    * @param callback (optional) to know that the user want to stay on the page
+   * @param confirmButtonText (optional) text for the confirmation button
+   * @param buttonColor (optional) color for the confirmation button
    * so we can show to the user the right UX for him to saved his/her/their changes
    */
-  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
+  confirm(
+    text: string,
+    title?: string,
+    callback?: () => void,
+    confirmButtonText?: string,
+    buttonColor?: ButtonColor
+  ): AppLeaveConfirmAction;
 
   /**
    * Returns a default action, resulting on executing the default behavior when
@@ -612,7 +646,6 @@ export interface AppLeaveActionFactory {
 export interface Mounter {
   appRoute: string;
   appBasePath: string;
-  deepLinkPaths: Record<string, string>;
   mount: AppMount;
   exactRoute: boolean;
   unmountBeforeMounting?: boolean;

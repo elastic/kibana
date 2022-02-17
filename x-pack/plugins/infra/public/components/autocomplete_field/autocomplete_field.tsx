@@ -73,6 +73,7 @@ export class AutocompleteField extends React.Component<
             placeholder={placeholder}
             value={value}
             aria-label={ariaLabel}
+            data-test-subj="infraSearchField"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
             <SuggestionsPanel>

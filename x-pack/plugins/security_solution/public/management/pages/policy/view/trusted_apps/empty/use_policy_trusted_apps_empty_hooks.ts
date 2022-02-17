@@ -10,17 +10,22 @@ import { i18n } from '@kbn/i18n';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { getPolicyTrustedAppsPath, getTrustedAppsListPath } from '../../../../../common/routing';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
+import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 
-export const useGetLinkTo = (policyId: string, policyName: string) => {
+export const useGetLinkTo = (
+  policyId: string,
+  policyName: string,
+  location?: Partial<TrustedAppsListPageLocation>
+) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = getTrustedAppsListPath();
+    const path = getTrustedAppsListPath(location);
     return {
       toRoutePath: path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [getAppUrl]);
+  }, [getAppUrl, location]);
 
   const policyTrustedAppsPath = useMemo(() => getPolicyTrustedAppsPath(policyId), [policyId]);
   const policyTrustedAppRouteState = useMemo(() => {
@@ -35,19 +40,19 @@ export const useGetLinkTo = (policyId: string, policyName: string) => {
         }
       ),
       onBackButtonNavigateTo: [
-        APP_ID,
+        APP_UI_ID,
         {
           path: policyTrustedAppsPath,
         },
       ],
       backButtonUrl: getAppUrl({
-        appId: APP_ID,
+        appId: APP_UI_ID,
         path: policyTrustedAppsPath,
       }),
     };
   }, [getAppUrl, policyName, policyTrustedAppsPath]);
 
-  const onClickHandler = useNavigateToAppEventHandler(APP_ID, {
+  const onClickHandler = useNavigateToAppEventHandler(APP_UI_ID, {
     state: policyTrustedAppRouteState,
     path: toRoutePath,
   });
@@ -55,5 +60,6 @@ export const useGetLinkTo = (policyId: string, policyName: string) => {
   return {
     onClickHandler,
     toRouteUrl,
+    state: policyTrustedAppRouteState,
   };
 };

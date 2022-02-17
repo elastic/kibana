@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
@@ -45,7 +45,11 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type EpmPackageInstallStatus =
+  | 'installed'
+  | 'installing'
+  | 'install_failed'
+  | 'installed_bundled';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -103,7 +107,13 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
-  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal'>;
+  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
+
+export interface BundledPackage {
+  name: string;
+  version: string;
+  buffer: Buffer;
+}
 
 export type RegistryPackage = PackageSpecManifest &
   Partial<RegistryOverridesToOptional> &
@@ -126,6 +136,11 @@ interface RegistryAdditionalProperties {
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
+  elasticsearch?: {
+    privileges?: {
+      cluster?: string[];
+    };
+  };
 }
 interface RegistryOverridePropertyValue {
   icons?: RegistryImage[];
@@ -397,18 +412,28 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
-  keep_policies_up_to_date: boolean;
+  installed_kibana_space_id?: string;
+  keep_policies_up_to_date?: boolean;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
+export type Installable<T> =
+  | InstalledRegistry<T>
+  | Installing<T>
+  | NotInstalled<T>
+  | InstallFailed<T>
+  | InstalledBundled<T>;
 
-export type Installed<T = {}> = T & {
+export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
+};
+
+export type InstalledBundled<T = {}> = T & {
+  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {

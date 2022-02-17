@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { InspectorViewProps, Adapters } from '../../../../src/plugins/inspector/public';
 import { AstDebugView } from './ast_debug_view';

@@ -18,7 +18,8 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
+import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -80,7 +81,9 @@ export const counterRateOperation: OperationDefinition<
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
-    const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
+    const counterRateColumnParams = columnParams as CounterRateIndexPatternColumn;
+    const timeScale =
+      previousColumn?.timeScale || counterRateColumnParams?.timeScale || DEFAULT_TIME_SCALE;
     return {
       label: ofName(
         metric && 'sourceField' in metric
@@ -104,13 +107,16 @@ export const counterRateOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return getErrorsForDateReference(
-      layer,
-      columnId,
-      i18n.translate('xpack.lens.indexPattern.counterRate', {
-        defaultMessage: 'Counter rate',
-      })
-    );
+    return combineErrorMessages([
+      getErrorsForDateReference(
+        layer,
+        columnId,
+        i18n.translate('xpack.lens.indexPattern.counterRate', {
+          defaultMessage: 'Counter rate',
+        })
+      ),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]);
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.counterRate', {

@@ -9,11 +9,13 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { Observable } from 'rxjs';
 
-import { I18nProvider } from '@kbn/i18n/react';
-import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { CoreSetup, CoreStart, CoreTheme, Plugin } from 'src/core/public';
 
 import { App } from './app';
+import { KibanaThemeProvider } from './theme'; // TODO: replace this with the one exported from `kibana_react` after https://github.com/elastic/kibana/issues/119204 is implemented.
 import { KibanaProvider } from './use_kibana';
 import { VerificationProvider } from './use_verification';
 
@@ -24,7 +26,7 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
       title: 'Configure Elastic to get started',
       appRoute: '/',
       chromeless: true,
-      mount: async (params) => {
+      mount: async ({ element, theme$ }) => {
         const url = new URL(window.location.href);
         const defaultCode = url.searchParams.get('code') || undefined;
         const onSuccess = () => {
@@ -34,12 +36,12 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
         const [services] = await core.getStartServices();
 
         ReactDOM.render(
-          <Providers defaultCode={defaultCode} services={services}>
+          <Providers defaultCode={defaultCode} services={services} theme$={theme$}>
             <App onSuccess={onSuccess} />
           </Providers>,
-          params.element
+          element
         );
-        return () => ReactDOM.unmountComponentAtNode(params.element);
+        return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
   }
@@ -49,17 +51,21 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
 
 export interface ProvidersProps {
   services: CoreStart;
+  theme$: Observable<CoreTheme>;
   defaultCode?: string;
 }
 
 export const Providers: FunctionComponent<ProvidersProps> = ({
   defaultCode,
   services,
+  theme$,
   children,
 }) => (
   <I18nProvider>
-    <KibanaProvider services={services}>
-      <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
-    </KibanaProvider>
+    <KibanaThemeProvider theme$={theme$}>
+      <KibanaProvider services={services}>
+        <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
+      </KibanaProvider>
+    </KibanaThemeProvider>
   </I18nProvider>
 );

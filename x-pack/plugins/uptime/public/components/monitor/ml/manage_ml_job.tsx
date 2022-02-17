@@ -30,6 +30,7 @@ import {
   isAnomalyAlertDeleting,
 } from '../../../state/alerts/alerts';
 import { UptimeEditAlertFlyoutComponent } from '../../common/alerts/uptime_edit_alert_flyout';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   hasMLJob: boolean;
@@ -38,6 +39,8 @@ interface Props {
 }
 
 export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Props) => {
+  const core = useKibana();
+
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -72,7 +75,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const button = (
     <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
-      onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
+      onClick={hasMLJob ? () => setIsPopOverOpen(!isPopOverOpen) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={showLoading}
       size="s"
@@ -81,6 +84,8 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       {showLoading ? '' : btnText}
     </EuiButton>
   );
+
+  const hasUptimeWrite = core.services.application?.capabilities.uptime?.save ?? false;
 
   const panels = [
     {
@@ -110,6 +115,10 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
                 name: labels.ENABLE_ANOMALY_ALERT,
                 'data-test-subj': 'uptimeEnableAnomalyAlertBtn',
                 icon: 'bell',
+                disabled: !hasUptimeWrite,
+                toolTipContent: !hasUptimeWrite
+                  ? labels.ENABLE_ANOMALY_NO_PERMISSIONS_TOOLTIP
+                  : null,
                 onClick: () => {
                   dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
                   dispatch(setAlertFlyoutVisible(true));

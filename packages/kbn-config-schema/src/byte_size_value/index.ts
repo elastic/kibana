@@ -22,7 +22,7 @@ function renderUnit(value: number, unit: string) {
 
 export class ByteSizeValue {
   public static parse(text: string): ByteSizeValue {
-    const match = /([1-9][0-9]*)(b|kb|mb|gb)/.exec(text);
+    const match = /([1-9][0-9]*)(b|kb|mb|gb)/i.exec(text);
     if (!match) {
       const number = Number(text);
       if (typeof number !== 'number' || isNaN(number)) {
@@ -35,7 +35,7 @@ export class ByteSizeValue {
     }
 
     const value = parseInt(match[1], 10);
-    const unit = match[2];
+    const unit = match[2].toLowerCase();
 
     return new ByteSizeValue(value * unitMultiplier[unit]);
   }

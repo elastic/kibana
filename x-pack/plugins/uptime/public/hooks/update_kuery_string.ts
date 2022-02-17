@@ -41,7 +41,7 @@ const getKueryString = (urlFilters: string, excludedFilters?: string): string =>
   return `NOT (${excludeKueryString})`;
 };
 
-export const useUpdateKueryString = (
+export const generateUpdatedKueryString = (
   indexPattern: IndexPattern | null,
   filterQueryString = '',
   urlFilters: string,

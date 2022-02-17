@@ -9,7 +9,7 @@
 import React, { Component, Fragment } from 'react';
 import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { DocLinksStart, ToastsStart } from 'src/core/public';
@@ -116,14 +116,14 @@ export class TelemetryManagementSection extends Component<Props, State> {
                 setting={{
                   type: 'boolean',
                   name: 'telemetry:enabled',
-                  displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
-                    defaultMessage: 'Provide usage statistics',
+                  displayName: i18n.translate('telemetry.provideUsageDataTitle', {
+                    defaultMessage: 'Provide usage data',
                   }),
                   value: enabled,
                   description: this.renderDescription(),
                   defVal: true,
-                  ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
-                    defaultMessage: 'Provide usage statistics',
+                  ariaName: i18n.translate('telemetry.provideUsageDataAriaName', {
+                    defaultMessage: 'Provide usage data',
                   }),
                   requiresPageReload: false,
                   category: [],

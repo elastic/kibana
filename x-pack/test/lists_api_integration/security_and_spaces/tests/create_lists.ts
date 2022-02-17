@@ -24,31 +24,16 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('create_lists', () => {
-    describe('validation errors', () => {
-      it('should give an error that the index must exist first if it does not exist before creating a list', async () => {
-        const { body } = await supertest
-          .post(LIST_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getCreateMinimalListSchemaMock())
-          .expect(400);
-
-        expect(body).to.eql({
-          message:
-            'To create a list, the index must exist first. Index ".lists-default" does not exist',
-          status_code: 400,
-        });
-      });
-    });
-
     describe('creating lists', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should create a simple list with a list_id', async () => {

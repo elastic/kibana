@@ -6,10 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { CommonProps, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { CardHeader, CardHeaderProps } from './components/card_header';
 import { CardSubHeader } from './components/card_sub_header';
-import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
@@ -19,6 +18,7 @@ import { CardSectionPanel } from './components/card_section_panel';
 import { CardComments } from './components/card_comments';
 import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { DescriptionField } from './components/description_field';
 
 export interface CommonArtifactEntryCardProps extends CommonProps {
   item: MaybeImmutable<AnyArtifact>;
@@ -33,6 +33,7 @@ export interface CommonArtifactEntryCardProps extends CommonProps {
    * `Record<policyId: string, ContextMenuItemNavByRouterProps>`.
    */
   policies?: MenuItemPropsByPolicyId;
+  loadingPoliciesList?: boolean;
 }
 
 export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
@@ -50,6 +51,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
   ({
     item,
     policies,
+    loadingPoliciesList = false,
     actions,
     hideDescription = false,
     hideComments = false,
@@ -62,7 +64,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
     return (
       <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
-        <CardSectionPanel>
+        <CardSectionPanel className="top-section">
           <CardHeader
             name={artifact.name}
             createdDate={artifact.created_at}
@@ -74,26 +76,30 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
             createdBy={artifact.created_by}
             updatedBy={artifact.updated_by}
             policies={policyNavLinks}
+            loadingPoliciesList={loadingPoliciesList}
             data-test-subj={getTestId('subHeader')}
           />
 
-          <EuiSpacer size="m" />
+          {!hideDescription && (
+            <>
+              <EuiSpacer size="l" />
+              <DescriptionField data-test-subj={getTestId('description')}>
+                {artifact.description}
+              </DescriptionField>
+            </>
+          )}
 
-          {!hideDescription ? (
-            <EuiText>
-              <p data-test-subj={getTestId('description')}>
-                {artifact.description || getEmptyValue()}
-              </p>
-            </EuiText>
-          ) : null}
           {!hideComments ? (
-            <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+            <>
+              {hideDescription && <EuiSpacer size="l" />}
+              <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+            </>
           ) : null}
         </CardSectionPanel>
 
         <EuiHorizontalRule margin="none" />
 
-        <CardSectionPanel>
+        <CardSectionPanel className="bottom-section">
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}

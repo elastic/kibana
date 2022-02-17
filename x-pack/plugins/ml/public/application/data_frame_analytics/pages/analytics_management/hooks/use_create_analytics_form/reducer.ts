@@ -112,11 +112,11 @@ const isSourceIndexNameValid = (
   sourceIndexName: string,
   sourceIndex: string | Array<string | undefined> | undefined
 ) => {
-  // general check against Kibana index pattern names, but since this is about the advanced editor
+  // general check against Kibana data view names, but since this is about the advanced editor
   // with support for arrays in the job config, we also need to check that each individual name
   // doesn't include a comma if index names are supplied as an array.
   // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
-  // If there are no messages, it means the index pattern is valid.
+  // If there are no messages, it means the source index name is valid.
   let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
   if (sourceIndexNameValid) {
     if (typeof sourceIndex === 'string') {
@@ -144,7 +144,7 @@ export const validateNumTopFeatureImportanceValues = (
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, includes } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -159,6 +159,8 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  const analyzedFields = jobConfig?.analyzed_fields?.includes || [];
 
   const resultsFieldEmptyString =
     typeof jobConfig?.dest?.results_field === 'string' &&
@@ -189,12 +191,10 @@ export const validateAdvancedEditor = (state: State): State => {
   ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
-
     if (
       !dependentVariableEmpty &&
-      includes !== undefined &&
-      includes.length > 0 &&
-      !includes.includes(dependentVariableName)
+      analyzedFields.length > 0 &&
+      !analyzedFields.includes(dependentVariableName)
     ) {
       includesValid = false;
 

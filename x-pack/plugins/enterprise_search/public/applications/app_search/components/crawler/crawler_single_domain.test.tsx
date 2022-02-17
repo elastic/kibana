@@ -15,6 +15,7 @@ import { shallow } from 'enzyme';
 
 import { getPageHeaderActions } from '../../../test_helpers';
 
+import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DeduplicationPanel } from './components/deduplication_panel';
@@ -28,9 +29,6 @@ const MOCK_VALUES = {
   domain: {
     url: 'https://elastic.co',
   },
-  // CrawlerOverviewLogic
-  domains: [],
-  crawlRequests: [],
 };
 
 const MOCK_ACTIONS = {
@@ -94,5 +92,11 @@ describe('CrawlerSingleDomain', () => {
     const wrapper = shallow(<CrawlerSingleDomain />);
 
     expect(wrapper.find(DeleteDomainPanel)).toHaveLength(1);
+  });
+
+  it('contains a modal to start a crawl with selected domains', () => {
+    const wrapper = shallow(<CrawlerSingleDomain />);
+
+    expect(wrapper.find(CrawlSelectDomainsModal)).toHaveLength(1);
   });
 });

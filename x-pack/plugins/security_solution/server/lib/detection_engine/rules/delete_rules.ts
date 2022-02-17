@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
 import { DeleteRuleOptions } from './types';
 
-export const deleteRules = async ({
-  rulesClient,
-  ruleStatusClient,
-  ruleStatuses,
-  id,
-}: DeleteRuleOptions) => {
-  await rulesClient.delete({ id });
-  await asyncForEach(ruleStatuses, async (obj) => {
-    await ruleStatusClient.delete(obj.id);
-  });
+export const deleteRules = async ({ ruleId, rulesClient, ruleExecutionLog }: DeleteRuleOptions) => {
+  await rulesClient.delete({ id: ruleId });
+  await ruleExecutionLog.clearExecutionSummary(ruleId);
 };

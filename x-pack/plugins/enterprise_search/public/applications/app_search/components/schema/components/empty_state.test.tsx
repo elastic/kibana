@@ -13,6 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
+import { docLinks } from '../../../../shared/doc_links';
+
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 
 import { EmptyState } from './';
@@ -25,7 +27,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Create a schema');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining('#indexing-documents-guide-schema')
+      expect.stringContaining(docLinks.appSearchIndexingDocsSchema)
     );
   });
 

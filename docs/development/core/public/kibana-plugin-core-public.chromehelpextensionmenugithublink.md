@@ -10,12 +10,13 @@
 ```typescript
 export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase 
 ```
+<b>Extends:</b> ChromeHelpExtensionLinkBase
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [labels](./kibana-plugin-core-public.chromehelpextensionmenugithublink.labels.md) | <code>string[]</code> | Include at least one app-specific label to be applied to the new github issue |
-|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenugithublink.linktype.md) | <code>'github'</code> | Creates a link to a new github issue in the Kibana repo |
-|  [title](./kibana-plugin-core-public.chromehelpextensionmenugithublink.title.md) | <code>string</code> | Provides initial text for the title of the issue |
+|  [labels](./kibana-plugin-core-public.chromehelpextensionmenugithublink.labels.md) | string\[\] | Include at least one app-specific label to be applied to the new github issue |
+|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenugithublink.linktype.md) | 'github' | Creates a link to a new github issue in the Kibana repo |
+|  [title?](./kibana-plugin-core-public.chromehelpextensionmenugithublink.title.md) | string | <i>(Optional)</i> Provides initial text for the title of the issue |
 

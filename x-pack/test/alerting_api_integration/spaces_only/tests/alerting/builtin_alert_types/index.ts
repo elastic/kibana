@@ -12,5 +12,7 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('builtin alertTypes', () => {
     loadTestFile(require.resolve('./index_threshold'));
     loadTestFile(require.resolve('./es_query'));
+    loadTestFile(require.resolve('./long_running'));
+    loadTestFile(require.resolve('./cancellable'));
   });
 }

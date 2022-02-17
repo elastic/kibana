@@ -32,7 +32,11 @@ import { getBaseTheme, getChartClasses } from './utils/theme';
 import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import { renderEndzoneTooltip, useActiveCursor } from '../../../../../../../charts/public';
+import {
+  MULTILAYER_TIME_AXIS_STYLE,
+  renderEndzoneTooltip,
+  useActiveCursor,
+} from '../../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -72,6 +76,8 @@ export const TimeSeries = ({
   palettesService,
   interval,
   isLastBucketDropped,
+  useLegacyTimeAxis,
+  ignoreDaylightTime,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -138,13 +144,26 @@ export const TimeSeries = ({
     },
     [palettesService, series, syncColors]
   );
+
+  const gridLineStyle = {
+    ...GRID_LINE_CONFIG,
+    visible: showGrid,
+  };
+
+  const shouldUseNewTimeAxis =
+    series.every(
+      ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
+    ) &&
+    !useLegacyTimeAxis &&
+    !ignoreDaylightTime;
+
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
-        allowBrushingLastHistogramBucket={true}
+        allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
         onElementClick={(args) => handleElementClick(args)}
@@ -315,10 +334,8 @@ export const TimeSeries = ({
           position={position}
           domain={domain}
           hide={hide}
-          gridLine={{
-            ...GRID_LINE_CONFIG,
-            visible: showGrid,
-          }}
+          gridLine={gridLineStyle}
+          ticks={5}
           tickFormat={tickFormatter}
         />
       ))}
@@ -328,10 +345,9 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
-        gridLine={{
-          ...GRID_LINE_CONFIG,
-          visible: showGrid,
-        }}
+        gridLine={gridLineStyle}
+        style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
     </Chart>
   );
@@ -357,4 +373,5 @@ TimeSeries.propTypes = {
   annotations: PropTypes.array,
   interval: PropTypes.number,
   isLastBucketDropped: PropTypes.bool,
+  useLegacyTimeAxis: PropTypes.bool,
 };

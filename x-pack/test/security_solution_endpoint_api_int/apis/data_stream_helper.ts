@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { AGENTS_INDEX } from '../../../plugins/fleet/common';
 import {
   metadataIndexPattern,
   eventsIndexPattern,
@@ -14,6 +15,7 @@ import {
   metadataCurrentIndexPattern,
   telemetryIndexPattern,
   METADATA_UNITED_INDEX,
+  METADATA_DATASTREAM,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 
 export function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
@@ -41,7 +43,7 @@ export async function deleteAllDocsFromIndex(
           match_all: {},
         },
       },
-      index: `${index}`,
+      index,
       wait_for_completion: true,
       refresh: true,
     },
@@ -60,8 +62,10 @@ export async function deleteMetadataStream(getService: (serviceName: 'es') => Cl
   await deleteDataStream(getService, metadataIndexPattern);
 }
 
-export async function deleteAllDocsFromMetadataIndex(getService: (serviceName: 'es') => Client) {
-  await deleteAllDocsFromIndex(getService, metadataIndexPattern);
+export async function deleteAllDocsFromMetadataDatastream(
+  getService: (serviceName: 'es') => Client
+) {
+  await deleteAllDocsFromIndex(getService, METADATA_DATASTREAM);
 }
 
 export async function deleteAllDocsFromMetadataCurrentIndex(
@@ -92,6 +96,10 @@ export async function deleteTelemetryStream(getService: (serviceName: 'es') => C
   await deleteDataStream(getService, telemetryIndexPattern);
 }
 
+export function deleteAllDocsFromFleetAgents(getService: (serviceName: 'es') => Client) {
+  return deleteAllDocsFromIndex(getService, AGENTS_INDEX);
+}
+
 export function stopTransform(getService: (serviceName: 'es') => Client, transformId: string) {
   const client = getService('es');
   const stopRequest = {
@@ -101,4 +109,35 @@ export function stopTransform(getService: (serviceName: 'es') => Client, transfo
     allow_no_match: true,
   };
   return client.transform.stopTransform(stopRequest);
+}
+
+export async function startTransform(
+  getService: (serviceName: 'es') => Client,
+  transformId: string
+) {
+  const client = getService('es');
+  const transformsResponse = await client.transform.getTransform({
+    transform_id: `${transformId}*`,
+  });
+  return Promise.all(
+    transformsResponse.transforms.map((transform) => {
+      const t = transform as unknown as { id: string };
+      return client.transform.startTransform({ transform_id: t.id });
+    })
+  );
+}
+
+export function bulkIndex(
+  getService: (serviceName: 'es') => Client,
+  index: string,
+  docs: unknown[]
+) {
+  const body = docs.flatMap((doc) => [{ create: { _index: index } }, doc]);
+  const client = getService('es');
+
+  return client.bulk({
+    index,
+    refresh: true,
+    body,
+  });
 }

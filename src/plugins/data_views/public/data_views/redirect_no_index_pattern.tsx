@@ -18,11 +18,12 @@ export const onRedirectNoIndexPattern =
   (
     capabilities: CoreStart['application']['capabilities'],
     navigateToApp: CoreStart['application']['navigateToApp'],
-    overlays: CoreStart['overlays']
+    overlays: CoreStart['overlays'],
+    theme: CoreStart['theme']
   ) =>
   () => {
     const canManageIndexPatterns = capabilities.management.kibana.indexPatterns;
-    const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
+    const redirectTarget = canManageIndexPatterns ? '/management/kibana/dataViews' : '/home';
     let timeoutId: NodeJS.Timeout | undefined;
 
     if (timeoutId) {
@@ -38,7 +39,9 @@ export const onRedirectNoIndexPattern =
     // give them a friendly info message instead of a terse error message
     bannerId = overlays.banners.replace(
       bannerId,
-      toMountPoint(<EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage} />)
+      toMountPoint(<EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage} />, {
+        theme$: theme.theme$,
+      })
     );
 
     // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around

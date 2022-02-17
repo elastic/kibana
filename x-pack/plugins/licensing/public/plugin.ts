@@ -14,6 +14,7 @@ import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
 import { FeatureUsageService } from './services';
+import type { PublicLicenseJSON } from '../common/types';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -148,9 +149,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
   }
 
-  private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
+  private fetchLicense = async (core: CoreSetup): Promise<License> => {
     try {
-      const response = await core.http.get({
+      const response = await core.http.get<PublicLicenseJSON>({
         path: this.infoEndpoint,
         asSystemRequest: true,
       });

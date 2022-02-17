@@ -67,10 +67,34 @@ describe('JSON', function () {
       aggParam.write(aggConfig, output);
       expect(aggConfig.params).toHaveProperty(paramName);
 
-      expect(output.params).toEqual({
-        existing: 'true',
-        new_param: 'should exist in output',
-      });
+      expect(output.params).toMatchInlineSnapshot(`
+        Object {
+          "existing": "true",
+          "new_param": "should exist in output",
+        }
+      `);
+    });
+
+    it('should append param when valid JSON with triple quotes', () => {
+      const aggParam = initAggParam();
+      const jsonData = `{
+      "a": """
+        multiline string - line 1
+      """
+      }`;
+
+      aggConfig.params[paramName] = jsonData;
+
+      aggParam.write(aggConfig, output);
+      expect(aggConfig.params).toHaveProperty(paramName);
+
+      expect(output.params).toMatchInlineSnapshot(`
+        Object {
+          "a": "
+                multiline string - line 1
+              ",
+        }
+      `);
     });
 
     it('should not overwrite existing params', () => {

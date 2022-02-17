@@ -66,15 +66,6 @@ export interface AgentPolicyAction extends NewAgentAction {
   ack_data?: any;
 }
 
-// Make policy change action renaming BWC with agent version <= 7.9
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type AgentPolicyActionV7_9 = Omit<AgentPolicyAction, 'type' | 'data'> & {
-  type: 'CONFIG_CHANGE';
-  data: {
-    config: FullAgentPolicy;
-  };
-};
-
 interface CommonAgentActionSOAttributes {
   type: AgentActionType;
   sent_at?: string;

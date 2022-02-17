@@ -13,11 +13,11 @@ import { Capabilities } from 'src/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { UserPrivilegesProvider } from '../../../common/components/user_privileges';
+import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('useUserInfo', () => {
   beforeAll(() => {
@@ -69,9 +69,7 @@ describe('useUserInfo', () => {
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
         <UserPrivilegesProvider
-          kibanaCapabilities={
-            { siem: { crud_alerts: true, read_alerts: true } } as unknown as Capabilities
-          }
+          kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}
         >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>

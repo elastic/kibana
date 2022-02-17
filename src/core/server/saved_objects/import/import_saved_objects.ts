@@ -15,6 +15,7 @@ import {
   SavedObjectsImportHook,
 } from './types';
 import {
+  checkReferenceOrigins,
   validateReferences,
   checkOriginConflicts,
   createSavedObjects,
@@ -72,20 +73,34 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
-  /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
-  let importIdMap = collectSavedObjectsResult.importIdMap;
+  // Map of all IDs for objects that we are attempting to import, and any references that are not included in the read stream;
+  // each value is empty by default
+  let importStateMap = collectSavedObjectsResult.importStateMap;
   let pendingOverwrites = new Set<string>();
 
-  // Validate references
-  const validateReferencesResult = await validateReferences(
-    collectSavedObjectsResult.collectedObjects,
+  // Check any references that aren't included in the import file and retries, to see if they have a match with a different origin
+  const checkReferenceOriginsResult = await checkReferenceOrigins({
     savedObjectsClient,
-    namespace
-  );
+    typeRegistry,
+    namespace,
+    importStateMap,
+  });
+  importStateMap = new Map([...importStateMap, ...checkReferenceOriginsResult.importStateMap]);
+
+  // Validate references
+  const validateReferencesResult = await validateReferences({
+    objects: collectSavedObjectsResult.collectedObjects,
+    savedObjectsClient,
+    namespace,
+    importStateMap,
+  });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
-    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
+    importStateMap = new Map([
+      ...importStateMap, // preserve any entries for references that aren't included in collectedObjects
+      ...regenerateIds(collectSavedObjectsResult.collectedObjects),
+    ]);
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
@@ -96,7 +111,7 @@ export async function importSavedObjectsFromStream({
     };
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
-    importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+    importStateMap = new Map([...importStateMap, ...checkConflictsResult.importStateMap]);
     pendingOverwrites = checkConflictsResult.pendingOverwrites;
 
     // Check multi-namespace object types for origin conflicts in this namespace
@@ -106,11 +121,12 @@ export async function importSavedObjectsFromStream({
       typeRegistry,
       namespace,
       ignoreRegularConflicts: overwrite,
-      importIdMap,
+      importStateMap,
+      pendingOverwrites,
     };
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
-    importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
+    importStateMap = new Map([...importStateMap, ...checkOriginConflictsResult.importStateMap]);
     pendingOverwrites = new Set([
       ...pendingOverwrites,
       ...checkOriginConflictsResult.pendingOverwrites,
@@ -122,7 +138,7 @@ export async function importSavedObjectsFromStream({
     objects: collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
-    importIdMap,
+    importStateMap,
     overwrite,
     namespace,
   };

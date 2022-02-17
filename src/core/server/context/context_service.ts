@@ -12,7 +12,7 @@ import { CoreContext } from '../core_context';
 
 type PrebootDeps = SetupDeps;
 
-interface SetupDeps {
+export interface SetupDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
 }
 

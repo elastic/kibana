@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.savedObjects.clickConfirmChanges();
       await PageObjects.savedObjects.clickImportDone();
       await PageObjects.savedObjects.waitTableIsLoaded();
+      await PageObjects.savedObjects.searchForObject('mysaved');
 
       //instead of asserting on count- am asserting on the titles- which is more accurate than count.
       const objects = await PageObjects.savedObjects.getRowTitles();

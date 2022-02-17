@@ -13,13 +13,43 @@ import { makeChecksWithStatus } from './helper/make_checks';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const client = getService('es');
+  const testDataStreamName = 'synthetics-http-default';
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/111240
-  describe.skip('telemetry collectors fleet', () => {
+  describe('telemetry collectors fleet', () => {
+    const createDataStream = async (name: string) => {
+      // A data stream requires an index template before it can be created.
+      await client.indices.putIndexTemplate({
+        name,
+        body: {
+          // We need to match the names of backing indices with this template.
+          index_patterns: [name + '*'],
+          template: {
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+              },
+            },
+          },
+          data_stream: {},
+        },
+      });
+
+      await client.indices.createDataStream({ name });
+    };
+
+    const deleteComposableIndexTemplate = async (name: string) => {
+      await client.indices.deleteIndexTemplate({ name });
+    };
+
+    const deleteDataStream = async (name: string) => {
+      await client.indices.deleteDataStream({ name });
+      await deleteComposableIndexTemplate(name);
+    };
+
     before('generating data', async () => {
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/uptime/blank_data_stream'
-      );
+      await createDataStream(testDataStreamName);
 
       const observer = {
         geo: {
@@ -51,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         'up',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -70,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -88,8 +118,9 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
+
       await makeChecksWithStatus(
         client,
         'downMonitorId',
@@ -106,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -119,24 +150,13 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
       await client.indices.refresh();
     });
 
-    after('unload heartbeat index', () => {
-      getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/uptime/blank_data_stream'
-      );
-      /**
-       * Data streams aren't included in the javascript elasticsearch client in kibana yet so we
-       * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
-       * is why we're using _data_stream here.
-       */
-      client.transport.request({
-        method: 'DELETE',
-        path: `_data_stream/synthetics-http-default`,
-      });
+    after('unload heartbeat index', async () => {
+      await deleteDataStream(testDataStreamName);
     });
 
     beforeEach(async () => {
@@ -155,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           dateEnd: 'now/d',
           autoRefreshEnabled: true,
           refreshTelemetryHistory: true,
+          refreshEsData: true,
         })
         .expect(200);
 
@@ -163,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitor_page: 1,
         no_of_unique_monitors: 4,
         settings_page: 0,
-        monitor_frequency: [120, 0.001, 60, 60],
+        monitor_frequency: [0.001, 0.001, 60, 60],
         monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
         no_of_unique_observer_locations: 3,
         observer_location_name_stats: { min_length: 2, max_length: 7, avg_length: 4.8 },
@@ -171,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         dateRangeEnd: ['now/d'],
         autoRefreshEnabled: true,
         autorefreshInterval: [100],
-        fleet_monitor_frequency: [120, 0.001, 60, 60],
+        fleet_monitor_frequency: [0.001, 0.001, 60, 60],
         fleet_monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
         fleet_no_of_unique_monitors: 4,
       });

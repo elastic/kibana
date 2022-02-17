@@ -14,7 +14,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Custom Integrations Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/master/src/plugins/custom_integrations',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/custom_integrations',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

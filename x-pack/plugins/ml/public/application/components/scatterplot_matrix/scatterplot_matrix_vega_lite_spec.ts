@@ -9,7 +9,7 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
@@ -104,6 +104,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
         domainColor: euiTheme.euiColorLightShade,
         gridColor: euiTheme.euiColorLightestShade,
         tickColor: euiTheme.euiColorLightestShade,
+        labelColor: euiTheme.euiTextSubduedColor,
+        titleColor: euiTheme.euiTextSubduedColor,
+      },
+      legend: {
+        orient: 'right',
         labelColor: euiTheme.euiTextSubduedColor,
         titleColor: euiTheme.euiTextSubduedColor,
       },

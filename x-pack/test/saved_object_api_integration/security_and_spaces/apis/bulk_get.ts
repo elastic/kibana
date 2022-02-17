@@ -60,7 +60,7 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, namespaces: [SPACE_1_ID] }, // second try searches for it in a single other space, which is valid
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespaces: [SPACE_2_ID], ...fail404() },
     { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [SPACE_2_ID, 'x'] }, // unknown space is allowed / ignored
-    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [ALL_SPACES_ID] }, // this is different than the same test case in the spaces_only and security_only suites, since MULTI_NAMESPACE_ONLY_SPACE_1 *may* return a 404 error to a partially authorized user
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [ALL_SPACES_ID] }, // this is different than the same test case in the spaces_only suite, since MULTI_NAMESPACE_ONLY_SPACE_1 *may* return a 404 error to a partially authorized user
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = [...normalTypes, ...crossNamespace, ...hiddenType];

@@ -28,9 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     generateRawID: (id: string, type: string) => string
   ) {
     async function getRawSavedObjectAttributes({ id, type }: SavedObject) {
-      const {
-        body: { _source },
-      } = await es.get<Record<string, any>>({
+      const { _source } = await es.get<Record<string, any>>({
         id: generateRawID(id, type),
         index: '.kibana',
       });

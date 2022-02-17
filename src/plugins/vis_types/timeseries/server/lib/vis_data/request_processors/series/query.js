@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { offsetTime } from '../../offset_time';
-import { esQuery } from '../../../../../../../data/server';
 
 export function query(
   req,
@@ -29,7 +29,7 @@ export function query(
     const queries = !ignoreGlobalFilter ? req.body.query : [];
     const filters = !ignoreGlobalFilter ? req.body.filters : [];
 
-    doc.query = esQuery.buildEsQuery(seriesIndex.indexPattern, queries, filters, esQueryConfig);
+    doc.query = buildEsQuery(seriesIndex.indexPattern, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
@@ -44,13 +44,13 @@ export function query(
 
     if (panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(seriesIndex.indexPattern, [panel.filter], [], esQueryConfig)
+        buildEsQuery(seriesIndex.indexPattern, [panel.filter], [], esQueryConfig)
       );
     }
 
     if (series.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(seriesIndex.indexPattern, [series.filter], [], esQueryConfig)
+        buildEsQuery(seriesIndex.indexPattern, [series.filter], [], esQueryConfig)
       );
     }
 

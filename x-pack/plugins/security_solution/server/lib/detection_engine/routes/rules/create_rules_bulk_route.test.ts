@@ -14,6 +14,8 @@ import {
   getEmptyFindResult,
   getAlertMock,
   createBulkMlRuleRequest,
+  getBasicEmptySearchResponse,
+  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
@@ -43,30 +45,15 @@ describe.each([
     ); // successful creation
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
+    test('returns 200', async () => {
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getReadBulkRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    test('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      // @ts-expect-error
-      const response = await server.inject(getReadBulkRequest(), contextWithoutSecuritySolution);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -93,7 +80,9 @@ describe.each([
 
     test('returns an error object if the index does not exist when rule registry not enabled', async () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          getBasicNoShardsSearchResponse()
+        )
       );
       const response = await server.inject(getReadBulkRequest(), context);
 

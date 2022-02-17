@@ -87,8 +87,7 @@ describe('Index Fields', () => {
             esTypes: [],
           },
           {
-            description:
-              'Deprecated - use agent.name or agent.id to identify an agent. Hostname of the agent. ',
+            description: 'Deprecated - use agent.name or agent.id to identify an agent. ',
             name: 'agent.hostname',
             searchable: true,
             type: 'string',
@@ -126,7 +125,7 @@ describe('Index Fields', () => {
           },
           {
             description:
-              'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+              'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
             example: 'filebeat',
             name: 'agent.type',
             type: 'string',
@@ -252,7 +251,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -337,8 +336,7 @@ describe('Index Fields', () => {
         },
         {
           category: 'agent',
-          description:
-            'Deprecated - use agent.name or agent.id to identify an agent. Hostname of the agent. ',
+          description: 'Deprecated - use agent.name or agent.id to identify an agent. ',
           name: 'agent.hostname',
           type: 'string',
           searchable: true,
@@ -426,7 +424,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -504,7 +502,7 @@ describe('Index Fields', () => {
         },
         {
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -641,7 +639,7 @@ describe('Index Fields', () => {
         },
         {
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -714,7 +712,7 @@ describe('Index Fields', () => {
         },
         {
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -795,19 +793,52 @@ describe('Fields Provider', () => {
   describe('search', () => {
     const getFieldsForWildcardMock = jest.fn();
     const esClientSearchMock = jest.fn();
+    const esClientFieldCapsMock = jest.fn();
+    const mockPattern = {
+      title: 'coolbro',
+      fields: {
+        toSpec: () => ({
+          coolio: {
+            name: 'nameio',
+            type: 'typeio',
+            searchable: true,
+            aggregatable: true,
+          },
+        }),
+      },
+      toSpec: () => ({
+        runtimeFieldMap: { runtimeField: { type: 'keyword' } },
+      }),
+    };
+    const getStartServices = jest.fn().mockReturnValue([
+      null,
+      {
+        data: {
+          indexPatterns: {
+            dataViewsServiceFactory: () => ({
+              get: jest.fn().mockReturnValue(mockPattern),
+            }),
+          },
+        },
+      },
+    ]);
 
     const deps = {
-      esClient: { asCurrentUser: { search: esClientSearchMock } },
+      esClient: { asCurrentUser: { search: esClientSearchMock, fieldCaps: esClientFieldCapsMock } },
     } as unknown as SearchStrategyDependencies;
 
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);
+
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 123 } } });
+      esClientFieldCapsMock.mockResolvedValue({ indices: ['value'] });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
     beforeEach(() => {
       getFieldsForWildcardMock.mockClear();
       esClientSearchMock.mockClear();
+      esClientFieldCapsMock.mockClear();
     });
 
     afterAll(() => {
@@ -821,10 +852,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
-
-      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });
@@ -836,12 +864,40 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
 
       expect(response.indexFields).not.toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should search index fields by data view id', async () => {
+      const dataViewId = 'id';
+      const request = {
+        dataViewId,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+
+      expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
+
+      expect(response.indexFields).not.toHaveLength(0);
+      expect(response.indicesExist).toEqual(['coolbro']);
+    });
+
+    it('onlyCheckIfIndicesExist by data view id', async () => {
+      const dataViewId = 'id';
+      const request = {
+        dataViewId,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual(['coolbro']);
     });
 
     it('should search apm index fields', async () => {
@@ -851,11 +907,9 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-      expect(esClientSearchMock).not.toHaveBeenCalled();
-
       expect(response.indexFields).not.toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });
@@ -867,10 +921,8 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 1 } } },
-      });
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 1 } } });
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
@@ -897,7 +949,7 @@ describe('Fields Provider', () => {
         body: { hits: { total: { value: 0 } } },
       });
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],

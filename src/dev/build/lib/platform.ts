@@ -49,5 +49,6 @@ export const ALL_PLATFORMS = [
   new Platform('linux', 'x64', 'linux-x86_64'),
   new Platform('linux', 'arm64', 'linux-aarch64'),
   new Platform('darwin', 'x64', 'darwin-x86_64'),
+  new Platform('darwin', 'arm64', 'darwin-aarch64'),
   new Platform('win32', 'x64', 'windows-x86_64'),
 ];

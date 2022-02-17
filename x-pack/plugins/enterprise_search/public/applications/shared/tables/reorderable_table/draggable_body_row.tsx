@@ -18,6 +18,7 @@ export interface DraggableBodyRowProps<Item> {
   rowIndex: number;
   additionalProps?: object;
   disableDragging?: boolean;
+  errors?: string[];
 }
 
 export const DraggableBodyRow = <Item extends object>({
@@ -26,6 +27,7 @@ export const DraggableBodyRow = <Item extends object>({
   rowIndex,
   additionalProps,
   disableDragging = false,
+  errors,
 }: DraggableBodyRowProps<Item>) => {
   const draggableId = `draggable_row_${rowIndex}`;
 
@@ -42,6 +44,7 @@ export const DraggableBodyRow = <Item extends object>({
         item={item}
         additionalProps={additionalProps}
         leftAction={!disableDragging ? <EuiIcon type="grab" /> : <></>}
+        errors={errors}
       />
     </EuiDraggable>
   );

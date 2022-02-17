@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 import { i18n } from '@kbn/i18n';
@@ -22,13 +22,14 @@ import {
 import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
 import {
   ActionResult,
   FindActionResult,
   RawAction,
   PreConfiguredAction,
   ActionTypeExecutorResult,
+  ConnectorTokenClientContract,
 } from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from './lib/action_executor';
@@ -77,6 +78,7 @@ interface ConstructorOptions {
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
+  connectorTokenClient: ConnectorTokenClientContract;
 }
 
 export interface UpdateOptions {
@@ -97,6 +99,7 @@ export class ActionsClient {
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
+  private readonly connectorTokenClient: ConnectorTokenClientContract;
 
   constructor({
     actionTypeRegistry,
@@ -111,6 +114,7 @@ export class ActionsClient {
     authorization,
     auditLogger,
     usageCounter,
+    connectorTokenClient,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
@@ -124,6 +128,7 @@ export class ActionsClient {
     this.authorization = authorization;
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
+    this.connectorTokenClient = connectorTokenClient;
   }
 
   /**
@@ -150,7 +155,9 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
-
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     this.auditLogger?.log(
@@ -221,6 +228,9 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -470,6 +480,17 @@ export class ActionsClient {
       })
     );
 
+    try {
+      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.DELETE,
+          savedObject: { type: 'action', id },
+          error,
+        })
+      );
+    }
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
@@ -585,7 +606,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
+  const aggregationResult = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,

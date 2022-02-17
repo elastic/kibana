@@ -9,10 +9,9 @@ import { useEffect, useState } from 'react';
 import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  getIndexPatternById,
-  getIndexPatternsContract,
-  getIndexPatternAndSavedSearch,
-  IndexPatternAndSavedSearch,
+  getDataViewById,
+  getDataViewAndSavedSearch,
+  DataViewAndSavedSearch,
 } from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
@@ -20,19 +19,21 @@ import { MlContextValue } from '../contexts/ml';
 import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 /**
  * Hook to resolve route specific requirements
- * @param indexPatternId optional Kibana index pattern id, used for wizards
+ * @param dataViewId optional Kibana data view id, used for wizards
  * @param savedSearchId optional Kibana saved search id, used for wizards
  * @param config Kibana UI Settings
  * @param resolvers an array of resolvers to be executed for the route
  * @return { context, results } returns the ML context and resolver results
  */
 export const useResolver = (
-  indexPatternId: string | undefined,
+  dataViewId: string | undefined,
   savedSearchId: string | undefined,
   config: IUiSettingsClient,
+  dataViewsContract: DataViewsContract,
   resolvers: Resolvers
 ): { context: MlContextValue; results: ResolverResults } => {
   const notifications = useNotifications();
@@ -63,38 +64,38 @@ export const useResolver = (
       }
 
       try {
-        if (indexPatternId === '') {
+        if (dataViewId === '') {
           throw new Error(
             i18n.translate('xpack.ml.useResolver.errorIndexPatternIdEmptyString', {
-              defaultMessage: 'indexPatternId must not be empty string.',
+              defaultMessage: 'dataViewId must not be empty string.',
             })
           );
         }
 
-        let indexPatternAndSavedSearch: IndexPatternAndSavedSearch = {
+        let dataViewAndSavedSearch: DataViewAndSavedSearch = {
           savedSearch: null,
-          indexPattern: null,
+          dataView: null,
         };
 
         if (savedSearchId !== undefined) {
-          indexPatternAndSavedSearch = await getIndexPatternAndSavedSearch(savedSearchId);
-        } else if (indexPatternId !== undefined) {
-          indexPatternAndSavedSearch.indexPattern = await getIndexPatternById(indexPatternId);
+          dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
+        } else if (dataViewId !== undefined) {
+          dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
 
-        const { savedSearch, indexPattern } = indexPatternAndSavedSearch;
+        const { savedSearch, dataView } = dataViewAndSavedSearch;
 
         const { combinedQuery } = createSearchItems(
           config,
-          indexPattern !== null ? indexPattern : undefined,
+          dataView !== null ? dataView : undefined,
           savedSearch
         );
 
         setContext({
           combinedQuery,
-          currentIndexPattern: indexPattern,
+          currentDataView: dataView,
           currentSavedSearch: savedSearch,
-          indexPatterns: getIndexPatternsContract(),
+          dataViewsContract,
           kibanaConfig: config,
         });
       } catch (error) {

@@ -6,22 +6,38 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButtonProps, EuiButton } from '@elastic/eui';
+import { EuiButtonProps, EuiButton, EuiLink } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-const STORE_URL = 'https://store.servicenow.com/';
+const getStoreURL = (appId: string): string =>
+  `https://store.servicenow.com/sn_appstore_store.do#!/store/application/${appId}`;
 
 interface Props {
+  appId: string;
   color: EuiButtonProps['color'];
 }
 
-const SNStoreButtonComponent: React.FC<Props> = ({ color }) => {
+const SNStoreButtonComponent: React.FC<Props> = ({ color, appId }) => {
   return (
-    <EuiButton href={STORE_URL} color={color} iconSide="right" iconType="popout">
+    <EuiButton
+      href={getStoreURL(appId)}
+      color={color}
+      iconSide="right"
+      iconType="popout"
+      target="_blank"
+    >
       {i18n.VISIT_SN_STORE}
     </EuiButton>
   );
 };
 
 export const SNStoreButton = memo(SNStoreButtonComponent);
+
+const SNStoreLinkComponent: React.FC<Pick<Props, 'appId'>> = ({ appId }) => (
+  <EuiLink href={getStoreURL(appId)} target="_blank">
+    {i18n.VISIT_SN_STORE}
+  </EuiLink>
+);
+
+export const SNStoreLink = memo(SNStoreLinkComponent);

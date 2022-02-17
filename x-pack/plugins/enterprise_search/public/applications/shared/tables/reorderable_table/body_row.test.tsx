@@ -9,6 +9,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiCallOut } from '@elastic/eui';
+
 import { BodyRow } from './body_row';
 import { Cell } from './cell';
 
@@ -71,5 +73,15 @@ describe('BodyRow', () => {
     );
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(3);
+  });
+
+  it('will render row errors', () => {
+    const wrapper = shallow(
+      <BodyRow columns={columns} item={item} errors={['first error', 'second error']} />
+    );
+    const callouts = wrapper.find(EuiCallOut);
+    expect(callouts.length).toBe(2);
+    expect(callouts.at(0).prop('title')).toEqual('first error');
+    expect(callouts.at(1).prop('title')).toEqual('second error');
   });
 });

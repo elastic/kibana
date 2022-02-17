@@ -18,9 +18,14 @@ const mockClient = {
   xpack: {
     info: jest.fn(),
   },
+  cluster: {
+    health: jest.fn(),
+  },
   security: {
     changePassword: jest.fn(),
     getUser: jest.fn(),
+    putRole: jest.fn(),
+    putUser: jest.fn(),
   },
 };
 Client.mockImplementation(() => mockClient);
@@ -38,15 +43,19 @@ afterAll(() => {
 
 function mockXPackInfo(available, enabled) {
   mockClient.xpack.info.mockImplementation(() => ({
-    body: {
-      features: {
-        security: {
-          available,
-          enabled,
-        },
+    features: {
+      security: {
+        available,
+        enabled,
       },
     },
   }));
+}
+
+function mockClusterStatus(status) {
+  mockClient.cluster.health.mockImplementation(() => {
+    return status;
+  });
 }
 
 describe('isSecurityEnabled', () => {
@@ -95,33 +104,32 @@ describe('isSecurityEnabled', () => {
 describe('setPasswords', () => {
   it('uses provided passwords', async () => {
     mockXPackInfo(true, true);
+    mockClusterStatus('green');
 
     mockClient.security.getUser.mockImplementation(() => ({
-      body: {
-        kibana_system: {
-          metadata: {
-            _reserved: true,
-          },
+      kibana_system: {
+        metadata: {
+          _reserved: true,
         },
-        non_native: {
-          metadata: {
-            _reserved: false,
-          },
+      },
+      non_native: {
+        metadata: {
+          _reserved: false,
         },
-        logstash_system: {
-          metadata: {
-            _reserved: true,
-          },
+      },
+      logstash_system: {
+        metadata: {
+          _reserved: true,
         },
-        elastic: {
-          metadata: {
-            _reserved: true,
-          },
+      },
+      elastic: {
+        metadata: {
+          _reserved: true,
         },
-        beats_system: {
-          metadata: {
-            _reserved: true,
-          },
+      },
+      beats_system: {
+        metadata: {
+          _reserved: true,
         },
       },
     }));
@@ -176,21 +184,19 @@ Array [
 describe('getReservedUsers', () => {
   it('returns array of reserved usernames', async () => {
     mockClient.security.getUser.mockImplementation(() => ({
-      body: {
-        kibana_system: {
-          metadata: {
-            _reserved: true,
-          },
+      kibana_system: {
+        metadata: {
+          _reserved: true,
         },
-        non_native: {
-          metadata: {
-            _reserved: false,
-          },
+      },
+      non_native: {
+        metadata: {
+          _reserved: false,
         },
-        logstash_system: {
-          metadata: {
-            _reserved: true,
-          },
+      },
+      logstash_system: {
+        metadata: {
+          _reserved: true,
         },
       },
     }));

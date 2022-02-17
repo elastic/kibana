@@ -132,7 +132,9 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}`);
+        const response = await http.get<EngineDetails>(
+          `/internal/app_search/engines/${engineName}`
+        );
         actions.setEngineData(response);
       } catch (error) {
         if (error?.response?.status >= 400 && error?.response?.status < 500) {

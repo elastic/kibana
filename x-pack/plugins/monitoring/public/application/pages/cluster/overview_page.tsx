@@ -14,7 +14,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';

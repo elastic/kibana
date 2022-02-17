@@ -42,7 +42,7 @@ describe('setupFleet', () => {
       soClient.find = mockedMethodThrowsError();
       soClient.get = mockedMethodThrowsError();
       soClient.update = mockedMethodThrowsError();
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = context.core.elasticsearch.client.asInternalUser;
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
@@ -55,7 +55,7 @@ describe('setupFleet', () => {
       soClient.find = mockedMethodThrowsCustom();
       soClient.get = mockedMethodThrowsCustom();
       soClient.update = mockedMethodThrowsCustom();
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = context.core.elasticsearch.client.asInternalUser;
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');

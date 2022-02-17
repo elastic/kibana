@@ -22,7 +22,7 @@ exports[`index table force merge button works from context menu 3`] = `"open"`;
 
 exports[`index table open index button works from context menu 1`] = `"opening..."`;
 
-exports[`index table open index button works from context menu 2`] = `"opening..."`;
+exports[`index table open index button works from context menu 2`] = `"open"`;
 
 exports[`index table refresh button works from context menu 1`] = `"refreshing..."`;
 
@@ -108,7 +108,6 @@ Array [
   "Refresh indices",
   "Clear indices cache",
   "Flush indices",
-  "Freeze indices",
   "Delete indices",
 ]
 `;
@@ -134,7 +133,6 @@ Array [
   "Refresh index",
   "Clear index cache",
   "Flush index",
-  "Freeze index",
   "Delete index",
 ]
 `;

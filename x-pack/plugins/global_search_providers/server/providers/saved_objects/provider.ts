@@ -7,9 +7,10 @@
 
 import { from, combineLatest, of } from 'rxjs';
 import { map, takeUntil, first } from 'rxjs/operators';
-import { SavedObjectsFindOptionsReference, ISavedObjectTypeRegistry } from 'src/core/server';
+import { SavedObjectsFindOptionsReference } from 'src/core/server';
 import { GlobalSearchResultProvider } from '../../../../global_search/server';
 import { mapToResults } from './map_object_to_result';
+import { getSearchableTypes } from './get_searchable_types';
 
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {
@@ -58,13 +59,4 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
   };
 };
 
-const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types?: string[]) =>
-  typeRegistry
-    .getVisibleTypes()
-    .filter(types ? (type) => includeIgnoreCase(types, type.name) : () => true)
-    .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
-
 const uniq = <T>(values: T[]): T[] => [...new Set(values)];
-
-const includeIgnoreCase = (list: string[], item: string) =>
-  list.find((e) => e.toLowerCase() === item.toLowerCase()) !== undefined;

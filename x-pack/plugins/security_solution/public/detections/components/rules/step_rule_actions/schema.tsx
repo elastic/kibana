@@ -20,17 +20,12 @@ import {
   ValidationError,
 } from '../../../../shared_imports';
 import { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
-import * as I18n from './translations';
-import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = async (
   actionItem: AlertAction,
   actionTypeRegistry: ActionTypeRegistryContract
 ): Promise<string[]> => {
-  if (!isUuid(actionItem.id)) {
-    return [I18n.NO_CONNECTOR_SELECTED];
-  }
-
   const actionParamsErrors = await validateActionParams(actionItem, actionTypeRegistry);
   const mustacheErrors = validateMustache(actionItem.params);
 

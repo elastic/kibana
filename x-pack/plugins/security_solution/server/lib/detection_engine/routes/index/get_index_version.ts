@@ -13,7 +13,7 @@ export const getIndexVersion = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<number> => {
-  const { body: indexAlias } = await esClient.indices.getAlias({
+  const indexAlias = await esClient.indices.getAlias({
     index,
   });
   const writeIndex = Object.keys(indexAlias).find(

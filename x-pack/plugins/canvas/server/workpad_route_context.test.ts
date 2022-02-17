@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { createWorkpadRouteContext } from './workpad_route_context';
 import { RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';

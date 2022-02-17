@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { DataRecognizer, RecognizeResult, dataRecognizerFactory } from './data_recognizer';
+export type { RecognizeResult } from './data_recognizer';
+export { DataRecognizer, dataRecognizerFactory } from './data_recognizer';

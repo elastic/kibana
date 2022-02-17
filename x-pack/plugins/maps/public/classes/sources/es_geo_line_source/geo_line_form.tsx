@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SingleFieldSelect } from '../../../components/single_field_select';
@@ -15,7 +15,7 @@ import { getTermsFields } from '../../../index_pattern_util';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   onSortFieldChange: (fieldName: string) => void;
   onSplitFieldChange: (fieldName: string) => void;
   sortField: string;

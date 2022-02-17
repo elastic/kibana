@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import sinon from 'sinon';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../../stats';
@@ -67,7 +67,7 @@ const createEsClientError = (errorType: string) => {
 const indexAlias = (aliases: Record<string, any>, index: string) =>
   Object.keys(aliases).find((k) => aliases[k] === index);
 
-type StubClient = KibanaClient;
+type StubClient = Client;
 
 export const createStubClient = (
   existingIndices: string[] = [],

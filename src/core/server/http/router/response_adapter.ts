@@ -15,6 +15,7 @@ import Boom from '@hapi/boom';
 import * as stream from 'stream';
 
 import { isResponseError as isElasticsearchResponseError } from '../../elasticsearch/client/errors';
+import { ElasticsearchErrorDetails } from '../../elasticsearch';
 
 import {
   HttpResponsePayload,
@@ -54,7 +55,8 @@ export class HapiResponseAdapter {
       statusCode: 500,
     });
 
-    error.output.payload.message = 'An internal server error occurred.';
+    error.output.payload.message =
+      'An internal server error occurred. Check Kibana server logs for details.';
 
     return error;
   }
@@ -154,7 +156,9 @@ function getErrorMessage(payload?: ResponseError): string {
   if (typeof payload === 'string') return payload;
   // for ES response errors include nested error reason message. it doesn't contain sensitive data.
   if (isElasticsearchResponseError(payload)) {
-    return `[${payload.message}]: ${payload.meta.body?.error?.reason}`;
+    return `[${payload.message}]: ${
+      (payload.meta.body as ElasticsearchErrorDetails)?.error?.reason
+    }`;
   }
 
   return getErrorMessage(payload.message);

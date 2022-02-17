@@ -16,10 +16,10 @@ checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObje
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObjectsCheckConflictsObject[]</code> |  |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  objects | SavedObjectsCheckConflictsObject\[\] |  |
+|  options | SavedObjectsBaseOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsCheckConflictsResponse>`
+Promise&lt;SavedObjectsCheckConflictsResponse&gt;
 

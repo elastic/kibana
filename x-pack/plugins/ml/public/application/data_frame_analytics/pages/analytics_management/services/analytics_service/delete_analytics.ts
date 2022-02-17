@@ -101,9 +101,9 @@ export const deleteAnalyticsAndDestIndex = async (
     if (status.destIndexPatternDeleted?.success) {
       toastNotificationService.displaySuccessToast(
         i18n.translate(
-          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
+          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithDataViewSuccessMessage',
           {
-            defaultMessage: 'Request to delete index pattern {destinationIndex} acknowledged.',
+            defaultMessage: 'Request to delete data view {destinationIndex} acknowledged.',
             values: { destinationIndex },
           }
         )
@@ -112,13 +112,10 @@ export const deleteAnalyticsAndDestIndex = async (
     if (status.destIndexPatternDeleted?.error) {
       const error = extractErrorMessage(status.destIndexPatternDeleted.error);
       toastNotificationService.displayDangerToast(
-        i18n.translate(
-          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternErrorMessage',
-          {
-            defaultMessage: 'An error occurred deleting index pattern {destinationIndex}: {error}',
-            values: { destinationIndex, error },
-          }
-        )
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithDataViewErrorMessage', {
+          defaultMessage: 'An error occurred deleting data view {destinationIndex}: {error}',
+          values: { destinationIndex, error },
+        })
       );
     }
   } catch (e) {

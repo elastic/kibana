@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
@@ -194,7 +194,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           title={i18n.IMPORT_TIMELINE}
         />
 
-        <EuiPanel className={OPEN_TIMELINE_CLASS_NAME} hasBorder>
+        <div className={OPEN_TIMELINE_CLASS_NAME}>
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"
@@ -272,7 +272,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
           />
-        </EuiPanel>
+        </div>
       </>
     );
   }

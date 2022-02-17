@@ -46,7 +46,10 @@ export function logHealthMetrics(
   }
 
   const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
-  const docLink = `https://www.elastic.co/guide/en/kibana/${kibanaPackageJson.branch}/task-manager-health-monitoring.html`;
+  // TODO: remove when docs support "main"
+  const docsBranch = kibanaPackageJson.branch === 'main' ? 'master' : 'main';
+
+  const docLink = `https://www.elastic.co/guide/en/kibana/${docsBranch}/task-manager-health-monitoring.html`;
   const detectedProblemMessage = `Task Manager detected a degradation in performance. This is usually temporary, and Kibana can recover automatically. If the problem persists, check the docs for troubleshooting information: ${docLink} .`;
   if (enabled) {
     const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;

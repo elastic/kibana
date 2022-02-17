@@ -7,57 +7,67 @@
 
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { first, map, take } from 'rxjs/operators';
-import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
-import {
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import type {
   BasePath,
   IClusterClient,
-  KibanaRequest,
+  PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  StatusServiceSetup,
   UiSettingsServiceStart,
-} from '../../../../src/core/server';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
+} from 'src/core/server';
+import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
+import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { LicensingPluginStart } from '../../licensing/server';
+import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { ReportingConfig, ReportingSetup } from './';
-import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import type { SpacesPluginSetup } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
+import { durationToNumber } from '../common/schema_utils';
+import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { ReportingStore } from './lib/store';
+import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import { ReportingPluginRouter } from './types';
+import type { ReportingPluginRouter, ScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
-  licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  screenshotMode: ScreenshotModePluginSetup;
   logger: LevelLogger;
+  status: StatusServiceSetup;
 }
 
 export interface ReportingInternalStart {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
   logger: LevelLogger;
+  screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
+/**
+ * @internal
+ */
 export class ReportingCore {
-  private kibanaVersion: string;
+  private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
@@ -72,7 +82,7 @@ export class ReportingCore {
   public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
-    this.kibanaVersion = context.env.packageInfo.version;
+    this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
@@ -85,8 +95,8 @@ export class ReportingCore {
     this.executing = new Set();
   }
 
-  public getKibanaVersion() {
-    return this.kibanaVersion;
+  public getKibanaPackageInfo() {
+    return this.packageInfo;
   }
 
   /*
@@ -110,10 +120,23 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
+    await this.assertKibanaIsAvailable();
+
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+  }
+
+  private async assertKibanaIsAvailable(): Promise<void> {
+    const { status } = this.getPluginSetupDeps();
+
+    await status.overall$
+      .pipe(
+        filter((current) => current.level === ServiceStatusLevels.available),
+        first()
+      )
+      .toPromise();
   }
 
   /*
@@ -227,18 +250,15 @@ export class ReportingCore {
   }
 
   public async getLicenseInfo() {
-    const { licensing } = this.getPluginSetupDeps();
-    return await licensing.license$
+    const { license$ } = (await this.getPluginStartDeps()).licensing;
+    const registry = this.getExportTypesRegistry();
+
+    return await license$
       .pipe(
-        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
+        map((license) => checkLicense(registry, license)),
         first()
       )
       .toPromise();
-  }
-
-  public getEnableScreenshotMode() {
-    const { screenshotMode } = this.getPluginSetupDeps();
-    return screenshotMode.setScreenshotModeEnabled;
   }
 
   /*
@@ -306,6 +326,16 @@ export class ReportingCore {
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
+  public async getDataViewsService(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    const savedObjectsClient = savedObjects.getScopedClient(request);
+    const { indexPatterns } = await this.getDataService();
+    const { asCurrentUser: esClient } = (await this.getEsClient()).asScoped(request);
+    const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+    return dataViews;
+  }
+
   public async getDataService() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.data;
@@ -314,6 +344,35 @@ export class ReportingCore {
   public async getEsClient() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.esClient;
+  }
+
+  public getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      switchMap(({ screenshotting }) => {
+        const config = this.getConfig();
+        return screenshotting.getScreenshots({
+          ...options,
+
+          timeouts: {
+            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
+            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
+            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
+            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
+          },
+
+          layout: {
+            zoom: config.get('capture', 'zoom'),
+            ...options.layout,
+          },
+
+          urls: options.urls.map((url) =>
+            typeof url === 'string'
+              ? url
+              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+          ),
+        });
+      })
+    );
   }
 
   public trackReport(reportId: string) {
@@ -326,5 +385,10 @@ export class ReportingCore {
 
   public countConcurrentReports(): number {
     return this.executing.size;
+  }
+
+  public getEventLogger(report: IReport, task?: { id: string }) {
+    const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
+    return new ReportingEventLogger(report, task);
   }
 }

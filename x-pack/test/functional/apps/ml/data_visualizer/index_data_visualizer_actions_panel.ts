@@ -40,6 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
+    after(async () => {
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle(indexPatternName);
+    });
+
     describe('create advanced job action', function () {
       it('loads the source data in the data visualizer', async () => {
         await ml.testExecution.logTestStep('loads the data visualizer selector page');

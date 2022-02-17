@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'fleet';
-export const INTEGRATIONS_PLUGIN_ID = 'integrations';
+export const PLUGIN_ID = 'fleet' as const;
+export const INTEGRATIONS_PLUGIN_ID = 'integrations' as const;

@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
+export type {
+  Error,
+  MissingPrivileges,
+  Privileges,
+  Authorization,
+} from '../../__packages_do_not_import__/authorization';
 export {
   AuthorizationContext,
   AuthorizationProvider,
-  Error,
-  MissingPrivileges,
   NotAuthorizedSection,
-  Privileges,
   SectionError,
   PageError,
   useAuthorizationContext,
   WithPrivileges,
-  Authorization,
 } from '../../__packages_do_not_import__/authorization';

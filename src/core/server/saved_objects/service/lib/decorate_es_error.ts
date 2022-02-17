@@ -8,17 +8,17 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { isSupportedEsServer } from '../../../elasticsearch';
+import { ElasticsearchErrorDetails, isSupportedEsServer } from '../../../elasticsearch';
 
 const responseErrors = {
-  isServiceUnavailable: (statusCode: number) => statusCode === 503,
-  isConflict: (statusCode: number) => statusCode === 409,
-  isNotAuthorized: (statusCode: number) => statusCode === 401,
-  isForbidden: (statusCode: number) => statusCode === 403,
-  isRequestEntityTooLarge: (statusCode: number) => statusCode === 413,
-  isNotFound: (statusCode: number) => statusCode === 404,
-  isBadRequest: (statusCode: number) => statusCode === 400,
-  isTooManyRequests: (statusCode: number) => statusCode === 429,
+  isServiceUnavailable: (statusCode?: number) => statusCode === 503,
+  isConflict: (statusCode?: number) => statusCode === 409,
+  isNotAuthorized: (statusCode?: number) => statusCode === 401,
+  isForbidden: (statusCode?: number) => statusCode === 403,
+  isRequestEntityTooLarge: (statusCode?: number) => statusCode === 413,
+  isNotFound: (statusCode?: number) => statusCode === 404,
+  isBadRequest: (statusCode?: number) => statusCode === 400,
+  isTooManyRequests: (statusCode?: number) => statusCode === 429,
 };
 const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
@@ -64,10 +64,10 @@ export function decorateEsError(error: EsErrors) {
   }
 
   if (responseErrors.isNotFound(error.statusCode)) {
-    const match = error?.meta?.body?.error?.reason?.match(
+    const match = (error?.meta?.body as ElasticsearchErrorDetails)?.error?.reason?.match(
       /no such index \[(.+)\] and \[require_alias\] request flag is \[true\] and \[.+\] is not an alias/
     );
-    if (match?.length > 0) {
+    if (match && match.length > 0) {
       return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(error, match[1]);
     }
     // Throw EsUnavailable error if the 404 is not from elasticsearch

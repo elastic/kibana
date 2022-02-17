@@ -40,8 +40,8 @@ export function SourcePicker({
         {
           type: 'index-pattern',
           getIconForSavedObject: () => 'indexPatternApp',
-          name: i18n.translate('xpack.graph.sourceModal.savedObjectType.indexPattern', {
-            defaultMessage: 'Index pattern',
+          name: i18n.translate('xpack.graph.sourceModal.savedObjectType.dataView', {
+            defaultMessage: 'Data view',
           }),
           showSavedObject: (indexPattern) => !indexPattern.attributes.type,
           includeFields: ['type'],

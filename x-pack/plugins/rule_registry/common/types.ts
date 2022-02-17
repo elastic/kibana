@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import * as t from 'io-ts';
 
@@ -275,6 +275,7 @@ export interface ClusterPutComponentTemplateBody {
   template: {
     settings: {
       number_of_shards: number;
+      'index.mapping.total_fields.limit'?: number;
     };
     mappings: estypes.MappingTypeMapping;
   };

@@ -37,22 +37,11 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
 };
 
 describe('deprecations', () => {
-  ['.foo', '.kibana_task_manager'].forEach((index) => {
-    it('logs a warning if index is set', () => {
-      const { messages } = applyTaskManagerDeprecations({ index });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "\\"xpack.task_manager.index\\" is deprecated. Multitenancy by changing \\"kibana.index\\" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details",
-        ]
-      `);
-    });
-  });
-
   it('logs a warning if max_workers is over limit', () => {
     const { messages } = applyTaskManagerDeprecations({ max_workers: 1000 });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated. Values greater than 100 will not be supported starting in 8.0.",
+        "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated.",
       ]
     `);
   });

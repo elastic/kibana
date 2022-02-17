@@ -18,42 +18,38 @@ import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_b
 
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { loadIndexPatterns } from '../../../util/index_utils';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'data_view_datavisualizer',
   path: '/jobs/new_job/datavisualizer',
+  title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
+    defaultMessage: 'Index Data Visualizer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.indexLabel', {
-        defaultMessage: 'Index',
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataViewLabel', {
+        defaultMessage: 'Data View',
       }),
-      href: '',
     },
   ],
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, {
+  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
     checkBasicLicense,
-    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   });
 
   return (

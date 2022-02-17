@@ -23,12 +23,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../../src/plugins/discover/public';
+import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
 
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
@@ -52,7 +50,8 @@ import {
 } from '../../../../../../common/api_schemas/transforms';
 import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
-import { isLatestTransform } from '../../../../../../common/types/transform';
+import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
+import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -86,6 +85,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [loading, setLoading] = useState(false);
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
+    const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
@@ -93,9 +93,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
+    const { share } = deps;
     const indexPatterns = deps.data.indexPatterns;
     const toastNotifications = useToastNotifications();
-    const { getUrlGenerator } = deps.share.urlGenerators;
     const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
@@ -104,19 +104,14 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       onChange({ created, started, indexPatternId });
 
       const getDiscoverUrl = async (): Promise<void> => {
-        const state: DiscoverUrlGeneratorState = {
+        const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+        if (!locator) return;
+
+        const discoverUrl = await locator.getUrl({
           indexPatternId,
-        };
+        });
 
-        let discoverUrlGenerator;
-        try {
-          discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-        } catch (error) {
-          // ignore error thrown when url generator is not available
-          return;
-        }
-
-        const discoverUrl = await discoverUrlGenerator.createUrl(state);
         if (!unmounted) {
           setDiscoverLink(discoverUrl);
         }
@@ -133,6 +128,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
+    const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
     async function createTransform() {
@@ -157,9 +153,11 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           }),
           text: toMountPoint(
             <ToastNotificationText
-              overlays={deps.overlays}
+              overlays={overlays}
+              theme={theme}
               text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
-            />
+            />,
+            { theme$: theme.theme$ }
           ),
         });
         setCreated(false);
@@ -211,7 +209,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           values: { transformId },
         }),
         text: toMountPoint(
-          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(errorMessage)} />
+          <ToastNotificationText
+            overlays={overlays}
+            theme={theme}
+            text={getErrorMessage(errorMessage)}
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       setStarted(false);
@@ -227,7 +230,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const createKibanaIndexPattern = async () => {
       setLoading(true);
-      const indexPatternName = transformConfig.dest.index;
+      const dataViewName = transformConfig.dest.index;
       const runtimeMappings = transformConfig.source.runtime_mappings as Record<
         string,
         RuntimeField
@@ -236,7 +239,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
-            title: indexPatternName,
+            title: dataViewName,
             timeFieldName,
             ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
               ? { runtimeFieldMap: runtimeMappings }
@@ -247,9 +250,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         );
 
         toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
-            values: { indexPatternName },
+          i18n.translate('xpack.transform.stepCreateForm.createDataViewSuccessMessage', {
+            defaultMessage: 'Kibana data view {dataViewName} created successfully.',
+            values: { dataViewName },
           })
         );
 
@@ -259,21 +262,21 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       } catch (e) {
         if (e instanceof DuplicateDataViewError) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
+            i18n.translate('xpack.transform.stepCreateForm.duplicateDataViewErrorMessage', {
               defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
-              values: { indexPatternName },
+                'An error occurred creating the Kibana data view {dataViewName}: The data view already exists.',
+              values: { dataViewName },
             })
           );
         } else {
           toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}:',
-              values: { indexPatternName },
+            title: i18n.translate('xpack.transform.stepCreateForm.createDataViewErrorMessage', {
+              defaultMessage: 'An error occurred creating the Kibana data view {dataViewName}:',
+              values: { dataViewName },
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
+              { theme$: theme.theme$ }
             ),
           });
           setLoading(false);
@@ -319,7 +322,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
               text: toMountPoint(
-                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(stats)} />
+                <ToastNotificationText
+                  overlays={overlays}
+                  theme={theme}
+                  text={getErrorMessage(stats)}
+                />,
+                { theme$: theme.theme$ }
               ),
             });
             clearInterval(interval);
@@ -398,6 +406,31 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
+          {isContinuousTransform(transformConfig) && created ? (
+            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+                <EuiButton
+                  fill
+                  isDisabled={loading}
+                  onClick={setAlertFlyoutVisible.bind(null, true)}
+                  data-test-subj="transformWizardCreateAlertButton"
+                >
+                  <FormattedMessage
+                    id="xpack.transform.stepCreateForm.createAlertRuleButton"
+                    defaultMessage="Create alert rule"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.transform.stepCreateForm.createAlertRuleDescription', {
+                    defaultMessage:
+                      'Opens a wizard to create an alert rule for monitoring transform health.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton
@@ -414,7 +447,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
                   defaultMessage:
-                    'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
+                    'Creates the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -503,9 +536,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                       <EuiText color="subdued" size="s">
                         <p>
                           {i18n.translate(
-                            'xpack.transform.stepCreateForm.creatingIndexPatternMessage',
+                            'xpack.transform.stepCreateForm.creatingDataViewMessage',
                             {
-                              defaultMessage: 'Creating Kibana index pattern ...',
+                              defaultMessage: 'Creating Kibana data view ...',
                             }
                           )}
                         </p>
@@ -535,6 +568,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             </Fragment>
           )}
         </EuiForm>
+        {alertFlyoutVisible ? (
+          <TransformAlertFlyout
+            ruleParams={{ includeTransforms: [transformId] }}
+            onCloseFlyout={setAlertFlyoutVisible.bind(null, false)}
+          />
+        ) : null}
       </div>
     );
   }

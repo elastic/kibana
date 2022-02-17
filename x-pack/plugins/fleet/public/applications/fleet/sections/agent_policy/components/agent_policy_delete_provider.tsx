@@ -8,20 +8,24 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENTS_PREFIX } from '../../../constants';
 import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
+  hasFleetServer: boolean;
 }
 
 export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallback) => void;
 
 type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 
-export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
+  children,
+  hasFleetServer,
+}) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -98,7 +102,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicyToCheck}`,
+        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyToCheck}`,
       },
     });
     setAgentsCount(data?.total || 0);
@@ -165,6 +169,11 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
               }}
             />
           </EuiCallOut>
+        ) : hasFleetServer ? (
+          <FormattedMessage
+            id="xpack.fleet.deleteAgentPolicy.confirmModal.fleetServerMessage"
+            defaultMessage="NOTE: This policy has Fleet Server integration, it is required for using Fleet."
+          />
         ) : (
           <FormattedMessage
             id="xpack.fleet.deleteAgentPolicy.confirmModal.irreversibleMessage"

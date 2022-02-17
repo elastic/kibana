@@ -27,7 +27,7 @@ describe('Index data visualizer locator', () => {
     });
   });
 
-  it('should prioritize savedSearchId even when index pattern id is available', async () => {
+  it('should prioritize savedSearchId even when data view id is available', async () => {
     const location = await definition.getLocation({
       indexPatternId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
       savedSearchId: '45014020-dffa-11eb-b120-a105fbbe93b3',

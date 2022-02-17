@@ -91,5 +91,47 @@ describe('Field', () => {
 
       expect(fields.length).toBe(2);
     });
+
+    it('should filter by KBN type', () => {
+      const aggParam = new FieldParamType({
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+      });
+
+      const fields = aggParam.getAvailableFields(agg);
+
+      expect(fields.length).toBe(1);
+      expect(fields[0]).toBe(indexPattern.fields[0]);
+    });
+
+    it('should filter by field filter predicate', () => {
+      const aggParam = new FieldParamType({
+        name: 'field',
+        type: 'field',
+        filterField: (field: typeof indexPattern['fields'][0]) =>
+          field.esTypes?.includes(ES_FIELD_TYPES.TEXT),
+      });
+
+      const fields = aggParam.getAvailableFields(agg);
+
+      expect(fields.length).toBe(1);
+      expect(fields[0]).toBe(indexPattern.fields[1]);
+    });
+
+    it('should filter by field filter predicate and ignore other filter settings', () => {
+      const aggParam = new FieldParamType({
+        name: 'field',
+        type: 'field',
+        filterField: (field: typeof indexPattern['fields'][0]) =>
+          field.esTypes?.includes(ES_FIELD_TYPES.TEXT),
+        filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+      });
+
+      const fields = aggParam.getAvailableFields(agg);
+
+      expect(fields.length).toBe(1);
+      expect(fields[0]).toBe(indexPattern.fields[1]);
+    });
   });
 });

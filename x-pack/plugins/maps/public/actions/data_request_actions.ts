@@ -32,7 +32,7 @@ import {
   getEventHandlers,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -61,7 +61,7 @@ export type DataRequestContext = {
   ): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   onJoinError(errorMessage: string): void;
-  updateSourceData(newData: unknown): void;
+  updateSourceData(newData: object): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: DataFilters;
@@ -280,27 +280,32 @@ function endDataLoad(
       throw new DataRequestAbortError();
     }
 
-    const features = data && 'features' in data ? (data as FeatureCollection).features : [];
-
-    const eventHandlers = getEventHandlers(getState());
-    if (eventHandlers && eventHandlers.onDataLoadEnd) {
+    if (dataId === SOURCE_DATA_REQUEST_ID) {
+      const features = data && 'features' in data ? (data as FeatureCollection).features : [];
       const layer = getLayerById(layerId, getState());
-      const resultMeta: ResultMeta = {};
-      if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
-        const featuresWithoutCentroids = features.filter((feature) => {
-          return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
+
+      const eventHandlers = getEventHandlers(getState());
+      if (eventHandlers && eventHandlers.onDataLoadEnd) {
+        const resultMeta: ResultMeta = {};
+        if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
+          const featuresWithoutCentroids = features.filter((feature) => {
+            return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
+          });
+          resultMeta.featuresCount = featuresWithoutCentroids.length;
+        }
+
+        eventHandlers.onDataLoadEnd({
+          layerId,
+          dataId,
+          resultMeta,
         });
-        resultMeta.featuresCount = featuresWithoutCentroids.length;
       }
 
-      eventHandlers.onDataLoadEnd({
-        layerId,
-        dataId,
-        resultMeta,
-      });
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer, features));
+      }
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId, features));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -331,16 +336,22 @@ function onDataLoadError(
   ) => {
     dispatch(unregisterCancelCallback(requestToken));
 
-    const eventHandlers = getEventHandlers(getState());
-    if (eventHandlers && eventHandlers.onDataLoadError) {
-      eventHandlers.onDataLoadError({
-        layerId,
-        dataId,
-        errorMessage,
-      });
+    if (dataId === SOURCE_DATA_REQUEST_ID) {
+      const eventHandlers = getEventHandlers(getState());
+      if (eventHandlers && eventHandlers.onDataLoadError) {
+        eventHandlers.onDataLoadError({
+          layerId,
+          dataId,
+          errorMessage,
+        });
+      }
+
+      const layer = getLayerById(layerId, getState());
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer));
+      }
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
@@ -353,13 +364,23 @@ function onDataLoadError(
 }
 
 export function updateSourceDataRequest(layerId: string, newData: object) {
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_REQUEST_ID,
       layerId,
       newData,
     });
+
+    if ('features' in newData) {
+      const layer = getLayerById(layerId, getState());
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer, (newData as FeatureCollection).features));
+      }
+    }
 
     dispatch(updateStyleMeta(layerId));
   };

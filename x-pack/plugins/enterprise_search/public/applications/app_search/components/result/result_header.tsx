@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
@@ -24,6 +24,7 @@ interface Props {
   actions: ResultAction[];
   documentLink?: string;
   resultPosition?: number;
+  showClick: boolean;
 }
 
 export const ResultHeader: React.FC<Props> = ({
@@ -33,6 +34,7 @@ export const ResultHeader: React.FC<Props> = ({
   actions,
   documentLink,
   resultPosition,
+  showClick,
 }) => {
   return (
     <header className="appSearchResultHeader">
@@ -65,6 +67,16 @@ export const ResultHeader: React.FC<Props> = ({
             type="id"
           />
         </EuiFlexItem>
+        {showClick && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultClicks"
+              field="clicks"
+              value={resultMeta.clicks}
+              type="clicks"
+            />
+          </EuiFlexItem>
+        )}
         {showScore && (
           <EuiFlexItem grow={false}>
             <ResultHeaderItem

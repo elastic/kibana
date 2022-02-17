@@ -20,12 +20,12 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
-  useCapabilities,
+  useAuthz,
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
@@ -42,13 +42,16 @@ import {
   ContextMenuActions,
 } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
+  FleetServerCloudUnhealthyCallout,
+  FleetServerOnPremUnhealthyCallout,
 } from '../components';
+import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/bulk_actions';
@@ -65,7 +68,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, agentPolicy, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
@@ -96,7 +99,7 @@ const RowActions = React.memo<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        disabled={!hasWriteCapabilites || !agent.active}
+        disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
         onClick={() => {
           onUnenrollClick();
@@ -145,11 +148,11 @@ function safeMetadata(val: any) {
 }
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
@@ -193,7 +196,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
 
   // Agent enrollment flyout state
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
+  const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
+    isOpen: boolean;
+    selectedPolicyId?: string;
+  }>({
+    isOpen: false,
+  });
 
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
@@ -207,7 +215,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       if (kueryBuilder) {
         kueryBuilder = `(${kueryBuilder}) and`;
       }
-      kueryBuilder = `${kueryBuilder} ${AGENT_SAVED_OBJECT_TYPE}.policy_id : (${selectedAgentPolicies
+      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
         .map((agentPolicy) => `"${agentPolicy}"`)
         .join(' or ')})`;
     }
@@ -233,7 +241,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .join(' or ');
 
       if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and ${kueryStatus}`;
+        kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
       } else {
         kueryBuilder = kueryStatus;
       }
@@ -300,7 +308,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        setAgents(agentsRequest.data.list);
+        setAgents(agentsRequest.data.items);
         setTotalAgents(agentsRequest.data.total);
         setTotalInactiveAgents(agentsRequest.data.totalInactive);
       } catch (error) {
@@ -368,6 +376,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
     );
   }, [agentToUnenroll, agentPoliciesIndexedById]);
+
+  // Fleet server unhealthy status
+  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+  const onClickAddFleetServer = useCallback(() => {
+    setEnrollmentFlyoutState({
+      isOpen: true,
+      selectedPolicyId: agentPolicies.length > 0 ? agentPolicies[0].id : undefined,
+    });
+  }, [agentPolicies]);
 
   const columns = [
     {
@@ -490,8 +507,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        hasWriteCapabilites ? (
-          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+        hasFleetAllPrivileges ? (
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => setEnrollmentFlyoutState({ isOpen: true })}
+          >
             <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
           </EuiButton>
         ) : null
@@ -501,11 +522,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
-      {isEnrollmentFlyoutOpen ? (
+      {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicies={agentPolicies}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+            agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
+            onClose={() => setEnrollmentFlyoutState({ isOpen: false })}
           />
         </EuiPortal>
       ) : null}
@@ -547,6 +568,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             version={kibanaVersion}
           />
         </EuiPortal>
+      )}
+
+      {isFleetServerUnhealthy && (
+        <>
+          {cloud?.deploymentUrl ? (
+            <FleetServerCloudUnhealthyCallout deploymentUrl={cloud.deploymentUrl} />
+          ) : (
+            <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
+          )}
+          <EuiSpacer size="l" />
+        </>
       )}
 
       {/* Search and filter bar */}

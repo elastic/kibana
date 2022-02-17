@@ -20,6 +20,7 @@ import {
   AboutStepRule,
   RuleStepsFormHooks,
   RuleStep,
+  DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -101,6 +102,68 @@ describe('StepAboutRuleComponent', () => {
 
       const result = await formHook();
       expect(result?.isValid).toEqual(false);
+    });
+  });
+
+  it('is invalid if threat match rule and threat_indicator_path is not present', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          defineRuleData={{ ruleType: 'threat_match' } as DefineStepRule}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          setForm={setFormHook}
+          isLoading={false}
+        />
+      </ThemeProvider>
+    );
+
+    await act(async () => {
+      if (!formHook) {
+        throw new Error('Form hook not set, but tests depend on it');
+      }
+      wrapper
+        .find('[data-test-subj="detectionEngineStepAboutThreatIndicatorPath"] input')
+        .first()
+        .simulate('change', { target: { value: '' } });
+
+      const result = await formHook();
+      expect(result?.isValid).toEqual(false);
+    });
+  });
+
+  it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          setForm={setFormHook}
+          isLoading={false}
+        />
+      </ThemeProvider>
+    );
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
+    await act(async () => {
+      if (!formHook) {
+        throw new Error('Form hook not set, but tests depend on it');
+      }
+
+      const result = await formHook();
+      expect(result?.isValid).toEqual(true);
     });
   });
 

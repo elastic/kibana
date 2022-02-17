@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitleSize } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -13,13 +14,14 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
+import { Filter, buildEsQuery, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
@@ -40,7 +42,7 @@ import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
-import { KpiPanel, StackBySelect } from '../common/components';
+import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
 
@@ -75,6 +77,7 @@ interface AlertsHistogramPanelProps {
   timelineId?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -99,6 +102,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
     titleSize = 'm',
+    runtimeMappings,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -108,7 +112,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
-    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsStackByField>(
+    const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
 
@@ -124,7 +128,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         selectedStackByOption,
         from,
         to,
-        buildCombinedQueries(combinedQueries)
+        buildCombinedQueries(combinedQueries),
+        runtimeMappings
       ),
       indexName: signalIndexName,
     });
@@ -147,7 +152,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(APP_ID, {
+        navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
@@ -214,12 +219,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         if (combinedQueries != null) {
           converted = parseCombinedQueries(combinedQueries);
         } else {
-          converted = esQuery.buildEsQuery(
+          converted = buildEsQuery(
             undefined,
             query != null ? [query] : [],
             filters?.filter((f) => f.meta.disabled === false) ?? [],
             {
-              ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              ...getEsQueryConfig(kibana.services.uiSettings),
               dateFormatTZ: undefined,
             }
           );
@@ -230,15 +235,18 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             selectedStackByOption,
             from,
             to,
-            !isEmpty(converted) ? [converted] : []
+            !isEmpty(converted) ? [converted] : [],
+            runtimeMappings
           )
         );
       } catch (e) {
         setIsInspectDisabled(true);
-        setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption, from, to, []));
+        setAlertsQuery(
+          getAlertsHistogramQuery(selectedStackByOption, from, to, [], runtimeMappings)
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedStackByOption, from, to, query, filters, combinedQueries]);
+    }, [selectedStackByOption, from, to, query, filters, combinedQueries, runtimeMappings]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
@@ -262,8 +270,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     );
 
     return (
-      <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
+      <InspectButtonContainer show={!isInitialLoading}>
+        <KpiPanel
+          height={PANEL_HEIGHT}
+          hasBorder
+          paddingSize={paddingSize}
+          data-test-subj="alerts-histogram-panel"
+        >
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
@@ -275,10 +288,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 {showStackBy && (
-                  <StackBySelect
-                    selected={selectedStackByOption}
-                    onSelect={setSelectedStackByOption}
-                  />
+                  <>
+                    <StackByComboBox
+                      selected={selectedStackByOption}
+                      onSelect={setSelectedStackByOption}
+                    />
+                  </>
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>

@@ -31,9 +31,14 @@ export interface ThreatIndicatorEcs {
   type?: string[];
 }
 
+export interface ThreatFeedEcs {
+  name?: string[];
+}
+
 export interface ThreatEnrichmentEcs {
   indicator?: ThreatIndicatorEcs;
   matched?: ThreatMatchEcs;
+  feed?: ThreatFeedEcs;
 }
 
 export interface ThreatEcs {

@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  Action,
-  IncompatibleActionError,
-  UiActionsSetup,
-  UiActionsStart,
-} from '../../../ui_actions/public';
+export type { Action, UiActionsSetup, UiActionsStart } from '../../../ui_actions/public';
+export { IncompatibleActionError } from '../../../ui_actions/public';

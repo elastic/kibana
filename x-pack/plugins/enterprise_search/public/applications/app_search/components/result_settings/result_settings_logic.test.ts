@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import { omit } from 'lodash';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { ServerFieldResultSettingObject } from './types';
 
@@ -508,7 +506,6 @@ describe('ResultSettingsLogic', () => {
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
-    const { flashAPIErrors } = mockFlashMessageHelpers;
     let confirmSpy: jest.SpyInstance;
 
     beforeAll(() => {
@@ -844,14 +841,9 @@ describe('ResultSettingsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-
         ResultSettingsLogic.actions.initializeResultSettingsData();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -923,14 +915,9 @@ describe('ResultSettingsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         mount();
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-
         ResultSettingsLogic.actions.saveResultSettings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
 
       it('does nothing if the user does not confirm', async () => {

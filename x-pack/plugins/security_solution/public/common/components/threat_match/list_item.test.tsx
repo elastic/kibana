@@ -14,7 +14,7 @@ import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 
 import { ListItemComponent } from './list_item';
 import { ThreatMapEntries } from './types';
-import { IndexPattern } from 'src/plugins/data/public';
+import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
@@ -81,14 +81,14 @@ describe('ListItemComponent', () => {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             threatIndexPatterns={
               {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             andLogicIncluded={true}
             isOnlyItem={false}
@@ -114,7 +114,7 @@ describe('ListItemComponent', () => {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             andLogicIncluded={true}
             isOnlyItem={false}
@@ -125,7 +125,7 @@ describe('ListItemComponent', () => {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
           />
         </ThemeProvider>
@@ -145,14 +145,14 @@ describe('ListItemComponent', () => {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             threatIndexPatterns={
               {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             andLogicIncluded={true}
             isOnlyItem={false}
@@ -178,14 +178,14 @@ describe('ListItemComponent', () => {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             threatIndexPatterns={
               {
                 id: '1234',
                 title: 'logstash-*',
                 fields,
-              } as IndexPattern
+              } as DataViewBase
             }
             andLogicIncluded={false}
             isOnlyItem={false}
@@ -219,14 +219,14 @@ describe('ListItemComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           andLogicIncluded={false}
           isOnlyItem={true}
@@ -250,14 +250,14 @@ describe('ListItemComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           andLogicIncluded={false}
           isOnlyItem={false}
@@ -281,14 +281,14 @@ describe('ListItemComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           andLogicIncluded={false}
           // if entryItemIndex is not 0, wouldn't make sense for
@@ -314,14 +314,14 @@ describe('ListItemComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           andLogicIncluded={false}
           isOnlyItem={true}
@@ -346,14 +346,14 @@ describe('ListItemComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           andLogicIncluded={false}
           isOnlyItem={true}

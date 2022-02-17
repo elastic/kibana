@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { storiesOf } from '@storybook/react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-theme';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';

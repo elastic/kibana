@@ -59,8 +59,8 @@ describe('fetch_all_from_scroll', () => {
         };
 
         mockScopedClusterClient.asCurrentUser.scroll
-          .mockResolvedValueOnce({ body: mockResponse1 })
-          .mockResolvedValueOnce({ body: mockResponse2 });
+          .mockResolvedValueOnce(mockResponse1)
+          .mockResolvedValueOnce(mockResponse2);
       });
 
       it('should return the hits from the response', () => {
@@ -76,10 +76,12 @@ describe('fetch_all_from_scroll', () => {
           expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenCalledTimes(2);
 
           expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenNthCalledWith(1, {
-            body: { scroll: '30s', scroll_id: 'originalScrollId' },
+            scroll: '30s',
+            scroll_id: 'originalScrollId',
           });
           expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenNthCalledWith(2, {
-            body: { scroll: '30s', scroll_id: 'newScrollId' },
+            scroll: '30s',
+            scroll_id: 'newScrollId',
           });
         });
       });

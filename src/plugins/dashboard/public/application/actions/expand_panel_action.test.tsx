@@ -7,12 +7,13 @@
  */
 
 import { ExpandPanelAction } from './expand_panel_action';
-import { DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { isErrorEmbeddable } from '../../services/embeddable';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -47,7 +48,9 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreMock.createStart().http,
+    theme: coreMock.createStart().theme,
     presentationUtil: getStubPluginServices(),
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   const input = getSampleDashboardInput({
     panels: {

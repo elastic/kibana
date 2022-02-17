@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import type { HttpSetup, IHttpFetchError } from 'src/core/public';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 
 export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
   const onCompleteSetup = async ({ shouldReloadConfig }: { shouldReloadConfig: boolean }) => {
@@ -41,7 +41,8 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
       .post('/api/preboot/connect_to_es', { body: JSON.stringify(elasticsearchConfig) })
       .then(
         (response) => setConnectResponse(JSON.stringify(response)),
-        (err: IHttpFetchError) => setConnectResponse(err?.body?.message || 'ERROR')
+        (err: IHttpFetchError<ResponseErrorBody>) =>
+          setConnectResponse(err?.body?.message || 'ERROR')
       );
   };
 

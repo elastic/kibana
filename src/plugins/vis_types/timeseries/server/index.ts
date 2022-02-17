@@ -10,7 +10,7 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 import { VisTypeTimeseriesConfig, config as configSchema } from './config';
 import { VisTypeTimeseriesPlugin } from './plugin';
 
-export { VisTypeTimeseriesSetup } from './plugin';
+export type { VisTypeTimeseriesSetup } from './plugin';
 
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   schema: configSchema,
@@ -20,5 +20,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);
 }
 
-export { TimeseriesVisData } from '../common/types';
+export type { TimeseriesVisData } from '../common/types';
 export { isVisSeriesData, isVisTableData } from '../common/vis_data_utils';

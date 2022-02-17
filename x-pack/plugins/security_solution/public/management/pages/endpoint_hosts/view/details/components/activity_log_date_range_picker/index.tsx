@@ -32,7 +32,6 @@ interface Range {
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
-  max-width: 350px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
   background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};

@@ -6,6 +6,11 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
 >
   <div>
     <InjectIntl(IntroductionUI)
+      basePath={
+        Object {
+          "prepend": [Function],
+        }
+      }
       description="tutorial used to drive jest tests"
       notices={null}
       title="jest test tutorial"
@@ -43,6 +48,11 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
 >
   <div>
     <InjectIntl(IntroductionUI)
+      basePath={
+        Object {
+          "prepend": [Function],
+        }
+      }
       description="tutorial used to drive jest tests"
       iconType="logoApache"
       notices={null}
@@ -113,6 +123,11 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
 >
   <div>
     <InjectIntl(IntroductionUI)
+      basePath={
+        Object {
+          "prepend": [Function],
+        }
+      }
       description="tutorial used to drive jest tests"
       iconType="logoApache"
       notices={null}

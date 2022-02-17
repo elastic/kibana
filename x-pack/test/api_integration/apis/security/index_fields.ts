@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not include runtime fields', async () => {
         // First, make sure the mapping actually includes a runtime field
-        const { body: mapping } = await es.indices.getMapping({
+        const mapping = await es.indices.getMapping({
           index: 'flstest',
         });
 

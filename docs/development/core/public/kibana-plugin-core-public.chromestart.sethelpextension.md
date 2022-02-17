@@ -16,9 +16,9 @@ setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  helpExtension | <code>ChromeHelpExtension</code> |  |
+|  helpExtension | ChromeHelpExtension |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

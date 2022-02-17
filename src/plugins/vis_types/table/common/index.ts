@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { AggTypes, TableVisParams, VIS_TYPE_TABLE } from './types';
+export type { TableVisParams } from './types';
+export { AggTypes, VIS_TYPE_TABLE } from './types';

@@ -36,7 +36,7 @@ describe('SaveCustom', () => {
     const wrapper = shallow(<SaveCustom {...props} />);
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(EuiTitle)).toHaveLength(5);
+    expect(wrapper.find(EuiTitle)).toHaveLength(4);
     expect(wrapper.find(EuiLinkTo)).toHaveLength(1);
   });
 

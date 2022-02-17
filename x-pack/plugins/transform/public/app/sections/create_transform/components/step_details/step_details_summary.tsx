@@ -26,6 +26,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
     transformFrequency,
     transformSettingsMaxPageSearchSize,
     destinationIndex,
+    destinationIngestPipeline,
     touched,
     indexPatternTimeField,
   } = props;
@@ -35,8 +36,8 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
   }
 
   const destinationIndexHelpText = createIndexPattern
-    ? i18n.translate('xpack.transform.stepDetailsSummary.createIndexPatternMessage', {
-        defaultMessage: 'A Kibana index pattern will be created for this transform.',
+    ? i18n.translate('xpack.transform.stepDetailsSummary.createDataViewMessage', {
+        defaultMessage: 'A Kibana data view will be created for this transform.',
       })
     : '';
 
@@ -70,11 +71,24 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
       </EuiFormRow>
       {createIndexPattern && indexPatternTimeField !== undefined && indexPatternTimeField !== '' && (
         <EuiFormRow
-          label={i18n.translate('xpack.transform.stepDetailsSummary.indexPatternTimeFieldLabel', {
-            defaultMessage: 'Kibana index pattern time field',
+          label={i18n.translate('xpack.transform.stepDetailsSummary.dataViewTimeFieldLabel', {
+            defaultMessage: 'Kibana data view time field',
           })}
         >
           <span>{indexPatternTimeField}</span>
+        </EuiFormRow>
+      )}
+
+      {destinationIngestPipeline !== undefined && destinationIngestPipeline !== '' && (
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.transform.stepDetailsSummary.destinationIngestPipelineLabel',
+            {
+              defaultMessage: 'Destination ingest pipeline',
+            }
+          )}
+        >
+          <span>{destinationIngestPipeline}</span>
         </EuiFormRow>
       )}
 

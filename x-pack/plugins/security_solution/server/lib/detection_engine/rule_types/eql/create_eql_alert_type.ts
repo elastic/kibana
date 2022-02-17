@@ -6,8 +6,10 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { EQL_RULE_TYPE_ID } from '../../../../../common/constants';
-import { EqlRuleParams, eqlRuleParams } from '../../schemas/rule_schemas';
+import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
+import { SERVER_APP_ID } from '../../../../../common/constants';
+import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -18,6 +20,7 @@ export const createEqlAlertType = (
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -44,13 +47,13 @@ export const createEqlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
           bulkCreate,
           exceptionItems,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -65,7 +68,7 @@ export const createEqlAlertType = (
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

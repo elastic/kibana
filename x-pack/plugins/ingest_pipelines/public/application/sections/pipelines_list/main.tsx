@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Location } from 'history';
 import { parse } from 'query-string';
 
@@ -160,7 +160,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         description={
           <FormattedMessage
             id="xpack.ingestPipelines.list.pipelinesDescription"
-            defaultMessage="Define a pipeline for preprocessing documents before indexing."
+            defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
           />
         }
         rightSideItems={[

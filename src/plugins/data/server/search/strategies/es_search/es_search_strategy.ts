@@ -11,7 +11,7 @@ import { first, tap } from 'rxjs/operators';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors';
-import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
+import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../../collectors/usage';
 import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
@@ -38,13 +38,17 @@ export const esSearchStrategyProvider = (
     const search = async () => {
       try {
         const config = await config$.pipe(first()).toPromise();
+        // @ts-expect-error params fall back to any, but should be valid SearchRequest params
+        const { terminateAfter, ...requestParams } = request.params ?? {};
         const params = {
           ...(await getDefaultSearchParams(uiSettingsClient)),
           ...getShardTimeout(config),
-          ...request.params,
+          ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
+          ...requestParams,
         };
-        const promise = esClient.asCurrentUser.search(params);
-        const { body } = await shimAbortSignal(promise, abortSignal);
+        const body = await esClient.asCurrentUser.search(params, {
+          signal: abortSignal,
+        });
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);
       } catch (e) {

@@ -4,10 +4,10 @@
 
 experimental::[]
 
-A rollup job is a periodic task that aggregates data from indices specified
-by an index pattern, and then rolls it into a new index. Rollup indices are a good way to
-compactly store months or years of historical
-data for use in visualizations and reports.
+A rollup job is a periodic task that aggregates data from indices specified by
+an index pattern, and then rolls it into a new index. Rollup indices are a good
+way to compactly store months or years of historical data for use in
+visualizations and reports.
 
 To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 
@@ -15,7 +15,8 @@ To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 image::images/management_rollup_list.png[][List of currently active rollup jobs]
 
 Before using this feature, you should be familiar with how rollups work.
-{ref}/xpack-rollup.html[Rolling up historical data] is a good source for more detailed information.
+{ref}/xpack-rollup.html[Rolling up historical data] is a good source for more
+detailed information.
 
 [float]
 === Required permissions
@@ -34,9 +35,9 @@ up the data.  Then you define a date histogram aggregation for the rollup job
 and optionally define terms, histogram, and metrics aggregations.
 
 When defining the index pattern, you must enter a name that is different than
-the output rollup index. Otherwise, the job
-will attempt to capture the data in the rollup index. For example, if your index pattern is `metricbeat-*`,
-you can name your rollup index `rollup-metricbeat`, but not `metricbeat-rollup`.
+the output rollup index. Otherwise, the job will attempt to capture the data in
+the rollup index. For example, if your index pattern is `metricbeat-*`, you can
+name your rollup index `rollup-metricbeat`, but not `metricbeat-rollup`.
 
 [role="screenshot"]
 image::images/management_create_rollup_job.png[][Wizard that walks you through creation of a rollup job]
@@ -53,11 +54,12 @@ You must first stop a rollup job before deleting it.
 [role="screenshot"]
 image::images/management_rollup_job_details.png[][Rollup job details]
 
-You can’t change a rollup job after you’ve created it. To select additional fields
-or redefine terms, you must delete the existing job, and then create a new one
-with the updated specifications. Be sure to use a different name for the new rollup
-job&mdash;reusing the same name can lead to problems with mismatched job configurations.
-You can read more at {ref}/rollup-job-config.html[rollup job configuration].
+You can’t change a rollup job after you’ve created it. To select additional
+fields or redefine terms, you must delete the existing job, and then create a
+new one with the updated specifications. Be sure to use a different name for the
+new rollup job&mdash;reusing the same name can lead to problems with mismatched
+job configurations. Refer to {ref}/rollup-job-config.html[rollup job
+configuration].
 
 [float]
 [[rollup-data-tutorial]]
@@ -66,10 +68,10 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 This example creates a rollup job to capture log data from sample web logs.
 Before you start, <<add-sample-data, add the web logs sample data set>>.
 
-In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
-to roll up into the `rollup_logstash` index. You’ll bucket the
-rolled up data on an hourly basis, using 60m for the time bucket configuration.
-This allows for more granular queries, such as 2h and 12h.
+In this example, you want data that is older than 7 days in the
+`kibana_sample_data_logs` index to roll up into the `rollup_logstash` index.
+You’ll bucket the rolled up data on an hourly basis, using `60m` for the time
+bucket configuration.
 
 For this example, the job will perform the rollup every minute. However, you'd
 typically roll up less frequently in production.
@@ -129,9 +131,10 @@ the key information to retain in the rolled up data: where visitors are from (ge
 what operating system they are using (machine.os.keyword),
 and how much data is being sent (bytes).
 
-You can now use the rolled up data for analysis at a fraction of the storage cost
-of the original index. The original data can live side by side with the new
-rollup index, or you can remove or archive it using <<creating-index-lifecycle-policies,Index Lifecycle Management>>.
+You can now use the rolled up data for analysis at a fraction of the storage
+cost of the original index. The original data can live side by side with the new
+rollup index, or you can remove or archive it using
+{ref}/index-lifecycle-management.html[{ilm} ({ilm-init})].
 
 [float]
 ==== Visualize the rolled up data
@@ -139,27 +142,23 @@ rollup index, or you can remove or archive it using <<creating-index-lifecycle-p
 Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Click *Create index pattern*, and select *Rollup index pattern* from the dropdown.
-+
-[role="screenshot"]
-image::images/management-rollup-index-pattern.png[][Create rollup index pattern]
+. Click *Create data view*, and select *Rollup data view* from the dropdown.
 
-. Enter *rollup_logstash,kibana_sample_logs* as your *Index Pattern* and `@timestamp`
+. Enter *rollup_logstash,kibana_sample_logs* as your *Data View* and `@timestamp`
 as the *Time Filter field name*.
 +
-The notation for a combination index pattern with both raw and rolled up data
-is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_logstash`
-matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
-pattern for raw data.
+The notation for a combination data view with both raw and rolled up data is
+`rollup_logstash,kibana_sample_data_logs`. In this data view, `rollup_logstash`
+matches the rollup index and `kibana_sample_data_logs` matches the raw data.
 
 . Open the main menu, click *Dashboard*, then *Create dashboard*.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
 
 . On the dashboard, click *Create visualization*.
- 
+
 . Choose `rollup_logstash,kibana_sample_data_logs`
 as your source to see both the raw and rolled up data.
 +

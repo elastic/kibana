@@ -15,17 +15,17 @@ export interface HttpSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [anonymousPaths](./kibana-plugin-core-public.httpsetup.anonymouspaths.md) | <code>IAnonymousPaths</code> | APIs for denoting certain paths for not requiring authentication |
-|  [basePath](./kibana-plugin-core-public.httpsetup.basepath.md) | <code>IBasePath</code> | APIs for manipulating the basePath on URL segments. See [IBasePath](./kibana-plugin-core-public.ibasepath.md) |
-|  [delete](./kibana-plugin-core-public.httpsetup.delete.md) | <code>HttpHandler</code> | Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [externalUrl](./kibana-plugin-core-public.httpsetup.externalurl.md) | <code>IExternalUrl</code> |  |
-|  [fetch](./kibana-plugin-core-public.httpsetup.fetch.md) | <code>HttpHandler</code> | Makes an HTTP request. Defaults to a GET request unless overridden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [get](./kibana-plugin-core-public.httpsetup.get.md) | <code>HttpHandler</code> | Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [head](./kibana-plugin-core-public.httpsetup.head.md) | <code>HttpHandler</code> | Makes an HTTP request with the HEAD method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [options](./kibana-plugin-core-public.httpsetup.options.md) | <code>HttpHandler</code> | Makes an HTTP request with the OPTIONS method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [patch](./kibana-plugin-core-public.httpsetup.patch.md) | <code>HttpHandler</code> | Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [post](./kibana-plugin-core-public.httpsetup.post.md) | <code>HttpHandler</code> | Makes an HTTP request with the POST method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
-|  [put](./kibana-plugin-core-public.httpsetup.put.md) | <code>HttpHandler</code> | Makes an HTTP request with the PUT method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [anonymousPaths](./kibana-plugin-core-public.httpsetup.anonymouspaths.md) | IAnonymousPaths | APIs for denoting certain paths for not requiring authentication |
+|  [basePath](./kibana-plugin-core-public.httpsetup.basepath.md) | IBasePath | APIs for manipulating the basePath on URL segments. See [IBasePath](./kibana-plugin-core-public.ibasepath.md) |
+|  [delete](./kibana-plugin-core-public.httpsetup.delete.md) | HttpHandler | Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [externalUrl](./kibana-plugin-core-public.httpsetup.externalurl.md) | IExternalUrl |  |
+|  [fetch](./kibana-plugin-core-public.httpsetup.fetch.md) | HttpHandler | Makes an HTTP request. Defaults to a GET request unless overridden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [get](./kibana-plugin-core-public.httpsetup.get.md) | HttpHandler | Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [head](./kibana-plugin-core-public.httpsetup.head.md) | HttpHandler | Makes an HTTP request with the HEAD method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [options](./kibana-plugin-core-public.httpsetup.options.md) | HttpHandler | Makes an HTTP request with the OPTIONS method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [patch](./kibana-plugin-core-public.httpsetup.patch.md) | HttpHandler | Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [post](./kibana-plugin-core-public.httpsetup.post.md) | HttpHandler | Makes an HTTP request with the POST method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [put](./kibana-plugin-core-public.httpsetup.put.md) | HttpHandler | Makes an HTTP request with the PUT method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
 
 ## Methods
 

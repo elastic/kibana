@@ -23,17 +23,17 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'haproxyMetrics',
     name: i18n.translate('home.tutorials.haproxyMetrics.nameTitle', {
-      defaultMessage: 'HAProxy metrics',
+      defaultMessage: 'HAProxy Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.haproxyMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the HAProxy server.',
+      defaultMessage: 'Collect metrics from HAProxy servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.haproxyMetrics.longDescription', {
       defaultMessage:
-        'The `haproxy` Metricbeat module fetches internal metrics from HAProxy. \
+        'The `haproxy` Metricbeat module fetches metrics from HAProxy. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-haproxy.html',
@@ -54,8 +54,8 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['network', 'web'],
   };
 }

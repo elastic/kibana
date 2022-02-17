@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
-import { useLinkProps } from '../../hooks/use_link_props';
 
 interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;
@@ -30,11 +29,6 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
     },
   } = useKibanaContextForPlugin();
 
-  const tutorialLinkProps = useLinkProps({
-    app: 'home',
-    hash: '/tutorial_directory/metrics',
-  });
-
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasData
     ? undefined
     : {
@@ -44,13 +38,12 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         actions: {
           beats: {
             title: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.title', {
-              defaultMessage: 'Add metrics with Beats',
+              defaultMessage: 'Add a metrics integration',
             }),
             description: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.description', {
               defaultMessage:
                 'Use Beats to send metrics data to Elasticsearch. We make it easy with modules for many popular systems and apps.',
             }),
-            ...tutorialLinkProps,
           },
         },
         docsLink: docLinks.links.observability.guide,

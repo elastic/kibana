@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
+import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
+import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
 
 export function ReportDefinitionCol({
   seriesId,
@@ -41,19 +44,64 @@ export function ReportDefinitionCol({
     }
   };
 
+  const hasFieldDataSelected = (field: string) => {
+    return !isEmpty(series.reportDefinitions?.[field]);
+  };
+
   return (
     <EuiFlexGroup gutterSize="s">
-      {definitionFields.map((field) => (
-        <EuiFlexItem key={field} grow={1}>
-          <ReportDefinitionField
-            seriesId={seriesId}
-            series={series}
-            seriesConfig={seriesConfig}
-            field={field}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-      ))}
+      {definitionFields.map((field) => {
+        const fieldStr = typeof field === 'string' ? field : field.field;
+        const singleSelection = typeof field !== 'string' && field.singleSelection;
+        const nestedField = typeof field !== 'string' && field.nested;
+        const filters = typeof field !== 'string' ? field.filters : undefined;
+
+        const isNonStepMetric = !isStepLevelMetric(series.selectedMetricField);
+
+        const hideNestedStep = nestedField === SYNTHETICS_STEP_NAME && isNonStepMetric;
+
+        if (hideNestedStep && nestedField && selectedReportDefinitions[nestedField]?.length > 0) {
+          setSeries(seriesId, {
+            ...series,
+            reportDefinitions: { ...selectedReportDefinitions, [nestedField]: [] },
+          });
+        }
+
+        let nestedFieldElement;
+
+        if (nestedField && hasFieldDataSelected(fieldStr) && !hideNestedStep) {
+          nestedFieldElement = (
+            <EuiFlexItem key={nestedField} grow={1}>
+              <ReportDefinitionField
+                seriesId={seriesId}
+                series={series}
+                seriesConfig={seriesConfig}
+                field={nestedField}
+                onChange={onChange}
+                keepHistory={false}
+                singleSelection={singleSelection}
+              />
+            </EuiFlexItem>
+          );
+        }
+
+        return (
+          <>
+            <EuiFlexItem key={fieldStr} grow={1}>
+              <ReportDefinitionField
+                seriesId={seriesId}
+                series={series}
+                seriesConfig={seriesConfig}
+                field={fieldStr}
+                onChange={onChange}
+                singleSelection={singleSelection}
+                filters={filters}
+              />
+            </EuiFlexItem>
+            {nestedFieldElement}
+          </>
+        );
+      })}
     </EuiFlexGroup>
   );
 }

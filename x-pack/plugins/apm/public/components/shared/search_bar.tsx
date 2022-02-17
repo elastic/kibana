@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexGroupProps,
@@ -17,7 +17,7 @@ import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../context/url_params_context/helpers';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
-import { DatePicker } from './DatePicker';
+import { DatePicker } from './date_picker';
 import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
 import { TransactionTypeSelect } from './transaction_type_select';

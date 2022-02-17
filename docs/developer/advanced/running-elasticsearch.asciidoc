@@ -71,14 +71,6 @@ elasticsearch.password: {{ password }}
 elasticsearch.ssl.verificationMode: none
 ----
 
-If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
-
-[source,bash]
-----
-kibana.index: '.{YourGitHubHandle}-kibana'
-xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
-----
-
 ==== Running remote clusters
 
 Setup remote clusters for cross cluster search (CCS) and cross cluster replication (CCR).

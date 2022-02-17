@@ -7,9 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { ApmMainTemplate } from './apm_main_template';
 import { SpanIcon } from '../../shared/span_icon';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useFetcher } from '../../../hooks/use_fetcher';
 
 interface Props {
   title: string;
@@ -18,11 +20,31 @@ interface Props {
 
 export function BackendDetailTemplate({ title, children }: Props) {
   const {
-    backendName,
-    metadata: { data },
-  } = useApmBackendContext();
+    query: { backendName, rangeFrom, rangeTo },
+  } = useApmParams('/backends/overview');
 
-  const metadata = data?.metadata;
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const backendMetadataFetch = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
+
+      return callApmApi('GET /internal/apm/backends/metadata', {
+        params: {
+          query: {
+            backendName,
+            start,
+            end,
+          },
+        },
+      });
+    },
+    [backendName, start, end]
+  );
+
+  const { data: { metadata } = {} } = backendMetadataFetch;
 
   return (
     <ApmMainTemplate

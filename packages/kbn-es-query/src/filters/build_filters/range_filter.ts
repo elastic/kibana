@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { Filter, FilterMeta } from './types';
-import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
+import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -128,9 +128,9 @@ const formatValue = (params: any[]) =>
  * @public
  */
 export const buildRangeFilter = (
-  field: IndexPatternFieldBase,
+  field: DataViewFieldBase,
   params: RangeFilterParams,
-  indexPattern: IndexPatternBase,
+  indexPattern: DataViewBase,
   formattedValue?: string
 ): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
@@ -174,7 +174,7 @@ export const buildRangeFilter = (
 /**
  * @internal
  */
-export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilterParams) => {
+export const getRangeScript = (field: DataViewFieldBase, params: RangeFilterParams) => {
   const knownParams: estypes.InlineScript['params'] = mapValues(
     pickBy(params, (val, key) => key in operators),
     (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)

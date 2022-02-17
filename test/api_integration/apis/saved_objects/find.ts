@@ -14,6 +14,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const SPACE_ID = 'ftr-so-find';
+  const UUID_PATTERN = new RegExp(
+    /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+  );
 
   describe('find', () => {
     before(async () => {
@@ -25,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await kibanaServer.spaces.create({ id: `${SPACE_ID}-foo`, name: `${SPACE_ID}-foo` });
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic/foo-ns.json',
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
         {
           space: `${SPACE_ID}-foo`,
         }
@@ -128,22 +131,25 @@ export default function ({ getService }: FtrProviderContext) {
     describe('wildcard namespace', () => {
       it('should return 200 with individual responses from the all namespaces', async () =>
         await supertest
-          .get(`/api/saved_objects/_find?type=visualization&fields=title&namespaces=*`)
+          .get(
+            `/api/saved_objects/_find?type=visualization&fields=title&fields=originId&namespaces=*`
+          )
           .expect(200)
           .then((resp) => {
             const knownDocuments = resp.body.saved_objects.filter((so: { namespaces: string[] }) =>
               so.namespaces.some((ns) => [SPACE_ID, `${SPACE_ID}-foo`].includes(ns))
             );
+            const [obj1, obj2] = knownDocuments.map(
+              ({ id, originId, namespaces }: SavedObject) => ({ id, originId, namespaces })
+            );
 
-            expect(
-              knownDocuments.map((so: { id: string; namespaces: string[] }) => ({
-                id: so.id,
-                namespaces: so.namespaces,
-              }))
-            ).to.eql([
-              { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: [SPACE_ID] },
-              { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: [`${SPACE_ID}-foo`] },
-            ]);
+            expect(obj1.id).to.equal('dd7caf20-9efd-11e7-acb3-3dab96693fab');
+            expect(obj1.originId).to.equal(undefined);
+            expect(obj1.namespaces).to.eql([SPACE_ID]);
+
+            expect(obj2.id).to.match(UUID_PATTERN); // this was imported to the second space and hit an unresolvable conflict, so the object ID was regenerated silently
+            expect(obj2.originId).to.equal('dd7caf20-9efd-11e7-acb3-3dab96693fab');
+            expect(obj2.namespaces).to.eql([`${SPACE_ID}-foo`]);
           }));
     });
 

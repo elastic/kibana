@@ -21,7 +21,9 @@ jest.mock('./crawler_logic', () => ({
   },
 }));
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { CrawlerLogic } from './crawler_logic';
 import { CrawlerSingleDomainLogic, CrawlerSingleDomainValues } from './crawler_single_domain_logic';
@@ -35,7 +37,7 @@ const DEFAULT_VALUES: CrawlerSingleDomainValues = {
 describe('CrawlerSingleDomainLogic', () => {
   const { mount } = new LogicMounter(CrawlerSingleDomainLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -176,13 +178,8 @@ describe('CrawlerSingleDomainLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler');
       });
 
-      it('calls flashApiErrors when there is an error', async () => {
-        http.delete.mockReturnValue(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         CrawlerSingleDomainLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -218,13 +215,8 @@ describe('CrawlerSingleDomainLogic', () => {
         });
       });
 
-      it('displays any errors to the user', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         CrawlerSingleDomainLogic.actions.fetchDomainData('507f1f77bcf86cd799439011');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -272,16 +264,11 @@ describe('CrawlerSingleDomainLogic', () => {
         });
       });
 
-      it('displays any errors to the user', async () => {
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CrawlerSingleDomainLogic.actions.submitDeduplicationUpdate(
           { id: '507f1f77bcf86cd799439011' } as CrawlerDomain,
           { fields: ['title'], enabled: true }
         );
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

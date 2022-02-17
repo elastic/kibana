@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiContext } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { getEuiContextMapping } from './i18n_eui_mapping';
 

@@ -19,6 +19,7 @@ import {
   updateVisualizationState,
   DatasourceStates,
   VisualizationState,
+  updateDatasourceState,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 
@@ -54,12 +55,22 @@ export function WorkspacePanelWrapper({
       dispatchLens(
         updateVisualizationState({
           visualizationId: activeVisualization.id,
-          updater: newState,
-          clearStagedPreview: false,
+          newState,
         })
       );
     },
     [dispatchLens, activeVisualization]
+  );
+  const setDatasourceState = useCallback(
+    (updater: unknown, datasourceId: string) => {
+      dispatchLens(
+        updateDatasourceState({
+          updater,
+          datasourceId,
+        })
+      );
+    },
+    [dispatchLens]
   );
   const warningMessages: React.ReactNode[] = [];
   if (activeVisualization?.getWarningMessages) {
@@ -71,7 +82,9 @@ export function WorkspacePanelWrapper({
     const datasource = datasourceMap[datasourceId];
     if (!datasourceState.isLoading && datasource.getWarningMessages) {
       warningMessages.push(
-        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI) || [])
+        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI, (updater) =>
+          setDatasourceState(updater, datasourceId)
+        ) || [])
       );
     }
   });

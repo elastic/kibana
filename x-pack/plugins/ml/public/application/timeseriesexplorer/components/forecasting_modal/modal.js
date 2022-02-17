@@ -26,7 +26,7 @@ import { MessageCallOut } from '../../../components/message_call_out';
 import { ForecastsList } from './forecasts_list';
 import { RunControls } from './run_controls';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function Modal(props) {
   return (

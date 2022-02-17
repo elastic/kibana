@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     describe('creating', function () {
@@ -57,7 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
@@ -89,7 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('should display created annotation in job list');
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationExists({
@@ -124,7 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(
@@ -178,7 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('should display edited annotation in job list');
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
@@ -199,7 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
 
@@ -220,7 +216,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
@@ -256,60 +251,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('does not show the deleted annotation in job list');
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
-      });
-    });
-
-    describe('with errors', function () {
-      before(async () => {
-        // Points the read/write aliases of annotations to an index with wrong mappings
-        // so we can simulate errors when requesting annotations.
-        await ml.testResources.setupBrokenAnnotationsIndexState(jobId);
-      });
-
-      it('displays error on broken annotation index and recovers after fix', async () => {
-        await ml.testExecution.logTestStep('loads from job list row link');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
-
-        await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(jobId, 1);
-
-        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
-        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section showing an error'
-        );
-        await ml.singleMetricViewer.assertAnnotationsExists('error');
-
-        await ml.testExecution.logTestStep('should navigate to anomaly explorer');
-        await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section showing an error'
-        );
-        await ml.anomalyExplorer.assertAnnotationsPanelExists('error');
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section without an error'
-        );
-        // restores the aliases to point to the original working annotations index
-        // so we can run tests against successfully loaded annotations sections.
-        await ml.testResources.restoreAnnotationsIndexState();
-        await ml.anomalyExplorer.refreshPage();
-        await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
-
-        await ml.testExecution.logTestStep('should navigate to single metric viewer');
-        await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section without an error'
-        );
-        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
       });
     });
   });

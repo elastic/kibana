@@ -1,7 +1,6 @@
 {
   "name": "@kbn/apm-utils",
   "main": "./target_node/index.js",
-  "types": "./target_types/index.d.ts",
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "private": true

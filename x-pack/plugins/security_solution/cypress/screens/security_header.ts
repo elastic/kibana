@@ -9,7 +9,7 @@ export const ALERTS = '[data-test-subj="navigation-alerts"]';
 
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
-export const CASES = '[data-test-subj="navigation-case"]';
+export const CASES = '[data-test-subj="navigation-cases"]';
 
 export const HOSTS = '[data-test-subj="navigation-hosts"]';
 

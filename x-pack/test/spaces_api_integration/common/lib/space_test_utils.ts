@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export function getUrlPrefix(spaceId?: string) {
@@ -34,4 +35,34 @@ export function getTestScenariosForSpace(spaceId: string) {
   }
 
   return [explicitScenario];
+}
+
+export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
+  return es.search({
+    index: '.kibana',
+    body: {
+      size: 0,
+      runtime_mappings: {
+        normalized_namespace: {
+          type: 'keyword',
+          script: `
+          if (doc["namespaces"].size() > 0) {
+            emit(doc["namespaces"].value);
+          } else if (doc["namespace"].size() > 0) {
+            emit(doc["namespace"].value);
+          } else if (doc["legacy-url-alias.targetNamespace"].size() > 0) {
+            emit(doc["legacy-url-alias.targetNamespace"].value);
+          }
+        `,
+        },
+      },
+      query: { terms: { type: objectTypes } },
+      aggs: {
+        count: {
+          terms: { field: 'normalized_namespace', missing: DEFAULT_SPACE_ID, size: 10 },
+          aggs: { countByType: { terms: { field: 'type', missing: 'UNKNOWN', size: 10 } } },
+        },
+      },
+    },
+  });
 }

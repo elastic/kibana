@@ -10,7 +10,7 @@ import Path from 'path';
 
 import execa from 'execa';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 export type Changes = Map<string, 'modified' | 'deleted'>;
 

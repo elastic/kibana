@@ -9,24 +9,6 @@ You do not need to configure any additional settings to use the
 {security-features} in {kib}. They are enabled by default.
 
 [float]
-[[general-security-settings]]
-==== General security settings
-
-[cols="2*<"]
-|===
-| `xpack.security.enabled`
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  By default, {kib} automatically detects whether to enable the
-  {security-features} based on the license and whether {es} {security-features}
-  are enabled. +
-  +
-  Do not set this to `false`; it disables the login form, user and role management
-  screens, and authorization using <<kibana-privileges>>. To disable
-  {security-features} entirely, see
-  {ref}/security-settings.html[{es} security settings].
-|===
-
-[float]
 [[authentication-security-settings]]
 ==== Authentication security settings
 
@@ -60,123 +42,80 @@ xpack.security.authc:
 <3> Specifies the settings for the SAML authentication provider with a `saml1` name.
 <4> Specifies the settings for the SAML authentication provider with a `saml2` name.
 
-The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to <<kibana-authentication>>.
-
 [float]
 [[authentication-provider-settings]]
-===== Valid settings for all authentication providers
+==== Valid settings for all authentication providers
 
-[cols="2*<"]
-|===
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.enabled` {ess-icon}
-| Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
+The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to <<kibana-authentication>>.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.order` {ess-icon}
-| Order of the provider in the authentication chain and on the Login Selector UI.
+xpack.security.authc.providers.<provider-type>.<provider-name>.enabled {ess-icon}::
+Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.description` {ess-icon}
-| Custom description of the provider entry displayed on the Login Selector UI.
+xpack.security.authc.providers.<provider-type>.<provider-name>.order {ess-icon}::
+Order of the provider in the authentication chain and on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.hint` {ess-icon}
-| Custom hint for the provider entry displayed on the Login Selector UI.
+xpack.security.authc.providers.<provider-type>.<provider-name>.description {ess-icon}::
+Custom description of the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.icon` {ess-icon}
-| Custom icon for the provider entry displayed on the Login Selector UI.
+xpack.security.authc.providers.<provider-type>.<provider-name>.hint {ess-icon}::
+Custom hint for the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.<provider-type>.`
-`<provider-name>.showInSelector` {ess-icon}
-| Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
+xpack.security.authc.providers.<provider-type>.<provider-name>.icon {ess-icon}::
+Custom icon for the provider entry displayed on the Login Selector UI.
 
-2+a|
-[TIP]
-[NOTE]
-============
-You are unable to set this setting to `false` for `basic` and `token` authentication providers.
-============
+xpack.security.authc.providers.<provider-type>.<provider-name>.showInSelector {ess-icon}::
+Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
++
+NOTE: You are unable to set this setting to `false` for `basic` and `token` authentication providers.
 
-| `xpack.security.authc.providers.<provider-type>.`
-`<provider-name>.accessAgreement.message` {ess-icon}
-| Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
+xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message {ess-icon}::
+Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
 
-| [[xpack-security-provider-session-idleTimeout]] `xpack.security.authc.providers.<provider-type>.`
-`<provider-name>.session.idleTimeout` {ess-icon}
-| Ensures that user sessions will expire after a period of inactivity. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is equal to <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>.
+[[xpack-security-provider-session-idleTimeout]] xpack.security.authc.providers.<provider-type>.<provider-name>.session.idleTimeout {ess-icon}::
+Ensures that user sessions will expire after a period of inactivity. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is equal to <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>.
++
+NOTE: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
-2+a|
-[TIP]
-============
-Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
-============
-
-| [[xpack-security-provider-session-lifespan]] `xpack.security.authc.providers.<provider-type>.`
-`<provider-name>.session.lifespan` {ess-icon}
-| Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
+[[xpack-security-provider-session-lifespan]] xpack.security.authc.providers.<provider-type>.<provider-name>.session.lifespan {ess-icon}::
+Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
 this is set to `0`, user sessions could stay active indefinitely. By default, this setting is equal to <<xpack-session-lifespan, `xpack.security.session.lifespan`>>.
-
-2+a|
-[TIP]
-============
-Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
-============
-
-|===
++
+NOTE: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
 [float]
 [[saml-authentication-provider-settings]]
-===== SAML authentication provider settings
+==== SAML authentication provider settings
 
 In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
 
-[cols="2*<"]
-|===
-| `xpack.security.authc.providers.`
-`saml.<provider-name>.realm` {ess-icon}
-| SAML realm in {es} that provider should use.
+xpack.security.authc.providers.saml.<provider-name>.realm {ess-icon}::
+SAML realm in {es} that provider should use.
 
-| `xpack.security.authc.providers.`
-`saml.<provider-name>.useRelayStateDeepLink` {ess-icon}
-| Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
-
-|===
+xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink {ess-icon}::
+Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
 
 [float]
 [[oidc-authentication-provider-settings]]
-===== OpenID Connect authentication provider settings
+==== OpenID Connect authentication provider settings
 
 In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
 
-[cols="2*<"]
-|===
-| `xpack.security.authc.providers.`
-`oidc.<provider-name>.realm` {ess-icon}
-| OpenID Connect realm in {es} that the provider should use.
-
-|===
+xpack.security.authc.providers.oidc.<provider-name>.realm {ess-icon}::
+OpenID Connect realm in {es} that the provider should use.
 
 [float]
 [[anonymous-authentication-provider-settings]]
-===== Anonymous authentication provider settings
+==== Anonymous authentication provider settings
 
 In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
 
-[NOTE]
-============
-You can configure only one anonymous provider per {kib} instance.
-============
+NOTE: You can configure only one anonymous provider per {kib} instance.
 
-[cols="2*<"]
-|===
-| `xpack.security.authc.providers.`
-`anonymous.<provider-name>.credentials` {ess-icon}
-| Credentials that {kib} should use internally to authenticate anonymous requests to {es}. Possible values are: username and password, API key, or the constant `elasticsearch_anonymous_user` if you want to leverage {ref}/anonymous-access.html[{es} anonymous access].
-
-2+a| For example:
-
+xpack.security.authc.providers.anonymous.<provider-name>.credentials {ess-icon}::
+Credentials that {kib} should use internally to authenticate anonymous requests to {es}. Possible values are: username and password, API key, or the constant `elasticsearch_anonymous_user` if you want to leverage {ref}/anonymous-access.html[{es} anonymous access].
++
+For example:
++
 [source,yaml]
 ----------------------------------------
 # Username and password credentials
@@ -201,45 +140,35 @@ xpack.security.authc.providers.anonymous.anonymous1:
   credentials: "elasticsearch_anonymous_user"
 ----------------------------------------
 
-|===
-
 [float]
 [[http-authentication-settings]]
-===== HTTP authentication settings
+==== HTTP authentication settings
 
 There is a very limited set of cases when you'd want to change these settings. For more information, refer to <<http-authentication>>.
 
-[cols="2*<"]
-|===
-| `xpack.security.authc.http.enabled`
-| Determines if HTTP authentication should be enabled. By default, this setting is set to `true`.
+xpack.security.authc.http.enabled::
+Determines if HTTP authentication should be enabled. By default, this setting is set to `true`.
 
-| `xpack.security.authc.http.autoSchemesEnabled`
-| Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
+xpack.security.authc.http.autoSchemesEnabled::
+Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
-| `xpack.security.authc.http.schemes[]`
-| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the <<api-keys, `ApiKey`>> and <<http-authentication, `Bearer`>> schemes.
-
-|===
+xpack.security.authc.http.schemes[]::
+List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the <<api-keys, `ApiKey`>> and <<http-authentication, `Bearer`>> schemes.
 
 [float]
 [[login-ui-settings]]
-===== Login user interface settings
+==== Login user interface settings
 
 You can configure the following settings in the `kibana.yml` file.
 
-[cols="2*<"]
-|===
-| `xpack.security.loginAssistanceMessage` {ess-icon}
-| Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
+xpack.security.loginAssistanceMessage {ess-icon}::
+Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
 
-| `xpack.security.loginHelp` {ess-icon}
-| Adds a message accessible at the login UI with additional help information for the login process.
+xpack.security.loginHelp {ess-icon}::
+Adds a message accessible at the login UI with additional help information for the login process.
 
-| `xpack.security.authc.selector.enabled` {ess-icon}
-| Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
-
-|===
+xpack.security.authc.selector.enabled {ess-icon}::
+Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
 
 [float]
 [[security-session-and-cookie-settings]]
@@ -247,81 +176,49 @@ You can configure the following settings in the `kibana.yml` file.
 
 You can configure the following settings in the `kibana.yml` file.
 
-[cols="2*<"]
-|===
-| `xpack.security.cookieName`
-  | Sets the name of the cookie used for the session. The default value is `"sid"`.
+xpack.security.cookieName::
+Sets the name of the cookie used for the session. The default value is `"sid"`.
 
-|[[xpack-security-encryptionKey]] `xpack.security.encryptionKey`
-  | An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {kib}. By
-  default, a value is automatically generated in memory. If you use that default
-  behavior, all sessions are invalidated when {kib} restarts.
-  In addition, high-availability deployments of {kib} will behave unexpectedly
-  if this setting isn't the same for all instances of {kib}.
+[[xpack-security-encryptionKey]] xpack.security.encryptionKey::
+An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {kib}. By default, a value is automatically generated in memory. If you use that default behavior, all sessions are invalidated when {kib} restarts. In addition, high-availability deployments of {kib} will behave unexpectedly if this setting isn't the same for all instances of {kib}.
 
-|[[xpack-security-secureCookies]] `xpack.security.secureCookies`
-  | Sets the `secure` flag of the session cookie. The default value is `false`. It
-  is automatically set to `true` if <<server-ssl-enabled, `server.ssl.enabled`>> is set to `true`. Set
-  this to `true` if SSL is configured outside of {kib} (for example, you are
-  routing requests through a load balancer or proxy).
+[[xpack-security-secureCookies]] xpack.security.secureCookies::
+Sets the `secure` flag of the session cookie. The default value is `false`. It
+is automatically set to `true` if <<server-ssl-enabled, `server.ssl.enabled`>> is set to `true`. Set this to `true` if SSL is configured outside of {kib} (for example, you are routing requests through a load balancer or proxy).
 
-| [[xpack-security-sameSiteCookies]] `xpack.security.sameSiteCookies` {ess-icon}
-  | Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context.
-  Valid values are `Strict`, `Lax`, `None`.
-  This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: `true`.
+[[xpack-security-sameSiteCookies]] xpack.security.sameSiteCookies {ess-icon}::
+Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context. 
+Valid values are `Strict`, `Lax`, `None`.
+This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: `true`.
 
-|[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
-  | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 1 hour.
+[[xpack-session-idleTimeout]] xpack.security.session.idleTimeout {ess-icon}::
+Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 8 hours.
++
+NOTE: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
-2+a|
-[TIP]
-============
-Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
-============
-
-|[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
-  | Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
-this is set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
+[[xpack-session-lifespan]] xpack.security.session.lifespan {ess-icon}::
+Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If this is set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
 recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this value is 30 days.
++
+TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
-2+a|
-[TIP]
-============
-Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
-============
-
-| `xpack.security.session.cleanupInterval` {ess-icon}
-| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
-
-2+a|
-[TIP]
-============
-Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
-============
-
-|===
+xpack.security.session.cleanupInterval {ess-icon}::
+Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
++
+TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
 [[security-encrypted-saved-objects-settings]]
 ==== Encrypted saved objects settings
 
 These settings control the encryption of saved objects with sensitive data. For more details, refer to <<xpack-security-secure-saved-objects>>.
 
-[IMPORTANT]
-============
-In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
-============
+IMPORTANT: In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
 
-[cols="2*<"]
-|===
-| [[xpack-encryptedSavedObjects-encryptionKey]] `xpack.encryptedSavedObjects.`
-`encryptionKey`
-| An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
+[[xpack-encryptedSavedObjects-encryptionKey]] xpack.encryptedSavedObjects.encryptionKey::
+An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
 
-| [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] `xpack.encryptedSavedObjects.`
-`keyRotation.decryptionOnlyKeys`
-| An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
-|===
+[[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys::
+An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
 
 [float]
 [[audit-logging-settings]]
@@ -329,179 +226,133 @@ In high-availability deployments, make sure you use the same encryption and decr
 
 You can enable audit logging to support compliance, accountability, and security. When enabled, {kib} will capture:
 
-- Who performed an action
-- What action was performed
-- When the action occurred
+* Who performed an action
+* What action was performed
+* When the action occurred
 
 For more details and a reference of audit events, refer to <<xpack-security-audit-logging>>.
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.enabled` {ess-icon}
-| Set to `true` _and_ configure an appender with `xpack.security.audit.appender` to enable ECS audit logging`. *Default:* `false`
-
-2+a| For example:
+xpack.security.audit.enabled {ess-icon}::
+Set to `true` to enable audit logging`. *Default:* `false`
++
+For example:
++
 [source,yaml]
 ----------------------------------------
 xpack.security.audit.enabled: true
-xpack.security.audit.appender:
+xpack.security.audit.appender: <1>
   type: rolling-file
-  fileName: ./audit.log
+  fileName: ./logs/audit.log
   policy:
     type: time-interval
-    interval: 24h <1>
+    interval: 24h <2>
   strategy:
     type: numeric
-    max: 10 <2>
+    max: 10 <3>
   layout:
     type: json
 ----------------------------------------
-<1> Rotates log files every 24 hours.
-<2> Keeps maximum of 10 log files before deleting older ones.
+<1> This appender is the default and will be used if no `appender.*` config options are specified.
+<2> Rotates log files every 24 hours.
+<3> Keeps maximum of 10 log files before deleting older ones.
 
-[NOTE]
-============
-{ess} does not support custom log file policies. To enable audit logging on {ess} only specify:
+xpack.security.audit.appender::
+Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).
 
-[source,yaml]
-----------------------------------------
-xpack.security.audit.enabled: true
-xpack.security.audit.appender.type: rolling-file
-----------------------------------------
-============
-
-[NOTE]
-============
-deprecated:[7.15.0,"In 8.0 and later, the legacy audit logger will be removed, and this setting will enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
-
-[source,yaml]
-----------------------------------------
-xpack.security.audit.enabled: true
-----------------------------------------
-============
-
-| `xpack.security.audit.appender` {ess-icon}
-| Optional. Specifies where audit logs should be written to and how they should be formatted.
-
-| `xpack.security.audit.appender.type` {ess-icon}
-| Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
-
+xpack.security.audit.appender.type::
+Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
++
 Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.
 
-| `xpack.security.audit.appender.layout.type`
-| Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
-
+xpack.security.audit.appender.layout.type::
+Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
++
 Refer to <<audit-logging-pattern-layout>> for layout specific settings.
-
-2+a| 
-[TIP]
-============
-We recommend using `json` format to allow ingesting {kib} audit logs into {es} using Filebeat.
-============
-
-|======
++
+TIP: We recommend using `json` format to allow ingesting {kib} audit logs into {es} using Filebeat.
 
 [float]
 [[audit-logging-file-appender,file appender]]
-===== File appender
+==== File appender
 
 The `file` appender writes to a file and can be configured using the following settings:
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.appender.fileName`
-| Required. Full file path the log file should be written to.
-|======
+xpack.security.audit.appender.fileName::
+Required. Full file path the log file should be written to.
 
 [float]
 [[audit-logging-rolling-file-appender, rolling file appender]]
-===== Rolling file appender
+==== Rolling file appender
 
 The `rolling-file` appender writes to a file and rotates it using a rolling strategy, when a particular policy is triggered:
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.appender.fileName`
-| Required. Full file path the log file should be written to.
+xpack.security.audit.appender.fileName::
+Required. Full file path the log file should be written to.
 
-| `xpack.security.audit.appender.policy.type`
-| Specifies when a rollover should occur. Allowed values are `size-limit` and `time-interval`. *Default:* `time-interval`.
-
+xpack.security.audit.appender.policy.type::
+Specifies when a rollover should occur. Allowed values are `size-limit` and `time-interval`. *Default:* `time-interval`.
++
 Refer to <<audit-logging-size-limit-policy>> and <<audit-logging-time-interval-policy>> for policy specific settings.
-| `xpack.security.audit.appender.strategy.type`
-| Specifies how the rollover should occur. Only allowed value is currently `numeric`. *Default:* `numeric`
 
+xpack.security.audit.appender.strategy.type::
+Specifies how the rollover should occur. Only allowed value is currently `numeric`. *Default:* `numeric`
++
 Refer to <<audit-logging-numeric-strategy>> for strategy specific settings.
-|======
 
 [float]
 [[audit-logging-size-limit-policy, size limit policy]]
-===== Size limit triggering policy
+==== Size limit triggering policy
 
 The `size-limit` triggering policy will rotate the file when it reaches a certain size:
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.appender.policy.size`
-| Maximum size the log file should reach before a rollover should be performed. *Default:* `100mb`
-|======
+xpack.security.audit.appender.policy.size::
+Maximum size the log file should reach before a rollover should be performed. *Default:* `100mb`
 
 [float]
 [[audit-logging-time-interval-policy, time interval policy]]
-===== Time interval triggering policy
+==== Time interval triggering policy
 
 The `time-interval` triggering policy will rotate the file every given interval of time:
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.appender.policy.interval`
-| How often a rollover should occur. *Default:* `24h`
+xpack.security.audit.appender.policy.interval::
+How often a rollover should occur. *Default:* `24h`
 
-| `xpack.security.audit.appender.policy.modulate`
-| Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. *Default:* `true`
-|======
+xpack.security.audit.appender.policy.modulate::
+Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. *Default:* `true`
 
 [float]
 [[audit-logging-numeric-strategy, numeric strategy]]
-===== Numeric rolling strategy
+==== Numeric rolling strategy
 
 The `numeric` rolling strategy will suffix the log file with a given pattern when rolling over, and will retain a fixed number of rolled files:
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.appender.strategy.pattern`
-| Suffix to append to the file name when rolling over. Must include `%i`. *Default:* `-%i`
+xpack.security.audit.appender.strategy.pattern::
+Suffix to append to the file name when rolling over. Must include `%i`. *Default:* `-%i`
 
-| `xpack.security.audit.appender.strategy.max`
-| Maximum number of files to keep. Once this number is reached, oldest files will be deleted. *Default:* `7`
-|======
+xpack.security.audit.appender.strategy.max::
+Maximum number of files to keep. Once this number is reached, oldest files will be deleted. *Default:* `7`
 
 [float]
 [[audit-logging-pattern-layout, pattern layout]]
-===== Pattern layout
+==== Pattern layout
 
 The `pattern` layout outputs a string, formatted using a pattern with special placeholders, which will be replaced with data from the actual log message:
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.appender.layout.pattern`
-| Optional. Specifies how the log line should be formatted. *Default:* `[%date][%level][%logger]%meta %message`
+xpack.security.audit.appender.layout.pattern::
+Optional. Specifies how the log line should be formatted. *Default:* `[%date][%level][%logger]%meta %message`
 
-| `xpack.security.audit.appender.layout.highlight`
-| Optional. Set to `true` to enable highlighting log messages with colors.
-|======
+xpack.security.audit.appender.layout.highlight::
+Optional. Set to `true` to enable highlighting log messages with colors.
 
 [float]
 [[audit-logging-ignore-filters]]
-===== Ignore filters
+==== Ignore filters
 
-[cols="2*<"]
-|======
-| `xpack.security.audit.ignore_filters[]` {ess-icon}
-| List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
-
-2+a| For example:
-
+xpack.security.audit.ignore_filters[] {ess-icon}::
+List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
++
+For example:
++
 [source,yaml]
 ----------------------------------------
 xpack.security.audit.ignore_filters:
@@ -512,15 +363,14 @@ xpack.security.audit.ignore_filters:
 <1> Filters out HTTP request events
 <2> Filters out any data write events
 
-| `xpack.security.audit.ignore_filters[].actions[]` {ess-icon}
-| List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
+xpack.security.audit.ignore_filters[].actions[] {ess-icon}::
+List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
 
-| `xpack.security.audit.ignore_filters[].categories[]` {ess-icon}
-| List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
+xpack.security.audit.ignore_filters[].categories[] {ess-icon}::
+List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
-| `xpack.security.audit.ignore_filters[].types[]` {ess-icon}
-| List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
+xpack.security.audit.ignore_filters[].types[] {ess-icon}::
+List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
-| `xpack.security.audit.ignore_filters[].outcomes[]` {ess-icon}
-| List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
-|======
+xpack.security.audit.ignore_filters[].outcomes[] {ess-icon}::
+List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.

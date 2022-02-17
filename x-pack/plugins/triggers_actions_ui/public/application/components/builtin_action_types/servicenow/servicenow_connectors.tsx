@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { EuiSpacer } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
@@ -15,135 +16,175 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { isRESTApiError, isLegacyConnector } from './helpers';
+import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnectorModal } from './update_connector_modal';
+import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
+import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
-  ({
-    action,
-    editActionSecrets,
-    editActionConfig,
-    errors,
-    consumer,
-    readOnly,
-    setCallbacks,
-    isEdit,
-  }) => {
-    const {
-      http,
-      notifications: { toasts },
-    } = useKibana().services;
-    const { apiUrl } = action.config;
-    const { username, password } = action.secrets;
-    const isOldConnector = isLegacyConnector(action);
+// eslint-disable-next-line import/no-default-export
+export { ServiceNowConnectorFields as default };
 
-    const [showModal, setShowModal] = useState(false);
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 
-    const { fetchAppInfo, isLoading } = useGetAppInfo({
-      actionTypeId: action.actionTypeId,
-    });
+const ServiceNowConnectorFields: React.FC<
+  ActionConnectorFieldsProps<ServiceNowActionConnector>
+> = ({
+  action,
+  editActionSecrets,
+  editActionConfig,
+  errors,
+  consumer,
+  readOnly,
+  setCallbacks,
+  isEdit,
+}) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const { apiUrl, usesTableApi } = action.config;
+  const { username, password } = action.secrets;
+  const requiresNewApplication = !checkConnectorIsDeprecated(action);
 
-    const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
-    const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
+  const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
-    const getApplicationInfo = useCallback(async () => {
-      setApplicationRequired(false);
-      setApplicationInfoErrorMsg(null);
+  const { fetchAppInfo, isLoading } = useGetAppInfo({
+    actionTypeId: action.actionTypeId,
+  });
 
-      try {
-        const res = await fetchAppInfo(action);
-        if (isRESTApiError(res)) {
-          throw new Error(res.error?.message ?? i18n.UNKNOWN);
-        }
+  const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
+    useState<boolean>(false);
+  const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
 
-        return res;
-      } catch (e) {
-        setApplicationRequired(true);
-        setApplicationInfoErrorMsg(e.message);
-        // We need to throw here so the connector will be not be saved.
-        throw e;
+  const getApplicationInfo = useCallback(async () => {
+    setShowApplicationRequiredCallout(false);
+    setApplicationInfoErrorMsg(null);
+
+    try {
+      const res = await fetchAppInfo(action);
+      if (isRESTApiError(res)) {
+        throw new Error(res.error?.message ?? i18n.UNKNOWN);
       }
-    }, [action, fetchAppInfo]);
 
-    const beforeActionConnectorSave = useCallback(async () => {
-      if (!isOldConnector) {
-        await getApplicationInfo();
-      }
-    }, [getApplicationInfo, isOldConnector]);
+      return res;
+    } catch (e) {
+      setShowApplicationRequiredCallout(true);
+      setApplicationInfoErrorMsg(e.message);
+      // We need to throw here so the connector will be not be saved.
+      throw e;
+    }
+  }, [action, fetchAppInfo]);
 
-    useEffect(
-      () => setCallbacks({ beforeActionConnectorSave }),
-      [beforeActionConnectorSave, setCallbacks]
-    );
-
-    const onMigrateClick = useCallback(() => setShowModal(true), []);
-    const onModalCancel = useCallback(() => setShowModal(false), []);
-
-    const onModalConfirm = useCallback(async () => {
+  const beforeActionConnectorSave = useCallback(async () => {
+    if (requiresNewApplication) {
       await getApplicationInfo();
+    }
+  }, [getApplicationInfo, requiresNewApplication]);
+
+  useEffect(
+    () => setCallbacks({ beforeActionConnectorSave }),
+    [beforeActionConnectorSave, setCallbacks]
+  );
+
+  const onMigrateClick = useCallback(() => setShowUpdateConnector(true), []);
+  const onModalCancel = useCallback(() => setShowUpdateConnector(false), []);
+
+  const onUpdateConnectorConfirm = useCallback(async () => {
+    try {
+      await getApplicationInfo();
+
       await updateActionConnector({
         http,
         connector: {
           name: action.name,
-          config: { apiUrl, isLegacy: false },
+          config: { apiUrl, usesTableApi: false },
           secrets: { username, password },
         },
         id: action.id,
       });
 
-      editActionConfig('isLegacy', false);
-      setShowModal(false);
+      editActionConfig('usesTableApi', false);
+      setShowUpdateConnector(false);
 
       toasts.addSuccess({
-        title: i18n.MIGRATION_SUCCESS_TOAST_TITLE(action.name),
-        text: i18n.MIGRATION_SUCCESS_TOAST_TEXT,
+        title: i18n.UPDATE_SUCCESS_TOAST_TITLE(action.name),
+        text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
       });
-    }, [
-      getApplicationInfo,
-      http,
-      action.name,
-      action.id,
-      apiUrl,
-      username,
-      password,
-      editActionConfig,
-      toasts,
-    ]);
+    } catch (err) {
+      /**
+       * getApplicationInfo may throw an error if the request
+       * fails or if there is a REST api error.
+       *
+       * We silent the errors as a callout will show and inform the user
+       */
+    }
+  }, [
+    getApplicationInfo,
+    http,
+    action.name,
+    action.id,
+    apiUrl,
+    username,
+    password,
+    editActionConfig,
+    toasts,
+  ]);
 
-    return (
-      <>
-        {showModal && (
-          <UpdateConnectorModal
-            action={action}
-            applicationInfoErrorMsg={applicationInfoErrorMsg}
-            errors={errors}
-            readOnly={readOnly}
-            isLoading={isLoading}
-            editActionSecrets={editActionSecrets}
-            editActionConfig={editActionConfig}
-            onConfirm={onModalConfirm}
-            onCancel={onModalCancel}
-          />
-        )}
-        {!isOldConnector && <InstallationCallout />}
-        {isOldConnector && <DeprecatedCallout onMigrate={onMigrateClick} />}
-        <Credentials
+  /**
+   * Defaults the usesTableApi attribute to false
+   * if it is not defined. The usesTableApi attribute
+   * will be undefined only at the creation of
+   * the connector.
+   */
+  useEffect(() => {
+    if (usesTableApi == null) {
+      editActionConfig('usesTableApi', false);
+    }
+  });
+
+  return (
+    <>
+      {showUpdateConnector && (
+        <UpdateConnector
           action={action}
+          applicationInfoErrorMsg={applicationInfoErrorMsg}
           errors={errors}
           readOnly={readOnly}
           isLoading={isLoading}
           editActionSecrets={editActionSecrets}
           editActionConfig={editActionConfig}
+          onConfirm={onUpdateConnectorConfirm}
+          onCancel={onModalCancel}
         />
-        {applicationRequired && !isOldConnector && (
-          <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
-        )}
-      </>
-    );
-  };
+      )}
+      {requiresNewApplication && (
+        <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''} />
+      )}
+      {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
+      <Credentials
+        action={action}
+        errors={errors}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        editActionSecrets={editActionSecrets}
+        editActionConfig={editActionConfig}
+      />
+      {showApplicationRequiredCallout && requiresNewApplication && (
+        <ApplicationRequiredCallout
+          message={applicationInfoErrorMsg}
+          appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
+        />
+      )}
+    </>
+  );
+};
 
-// eslint-disable-next-line import/no-default-export
-export { ServiceNowConnectorFields as default };
+const SpacedDeprecatedCallout = ({ onMigrate }: { onMigrate: () => void }) => (
+  <>
+    <EuiSpacer size="s" />
+    <DeprecatedCallout onMigrate={onMigrate} />
+  </>
+);

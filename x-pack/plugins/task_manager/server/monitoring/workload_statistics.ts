@@ -10,7 +10,7 @@ import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { AggregationResultOf } from '../../../../../src/core/types/elasticsearch';
@@ -216,7 +216,7 @@ export function createWorkloadAggregator(
         aggregations,
         hits: { total },
       } = result;
-      const count = typeof total === 'number' ? total : total.value;
+      const count = typeof total === 'number' ? total : total?.value ?? 0;
 
       if (!hasAggregations(aggregations)) {
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);
@@ -465,6 +465,7 @@ export interface WorkloadAggregationResponse {
   };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }
+// @ts-expect-error key doesn't accept a string
 export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
@@ -481,6 +482,8 @@ export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregat
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
+
+// @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;

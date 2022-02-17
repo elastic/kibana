@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiModal,
   EuiButton,
@@ -216,7 +216,7 @@ const ConnectorAddModal = ({
         {canSave ? (
           <EuiButton
             fill
-            color="secondary"
+            color="success"
             data-test-subj="saveActionButtonModal"
             type="submit"
             iconType="check"

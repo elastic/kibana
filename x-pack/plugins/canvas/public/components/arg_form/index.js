@@ -19,12 +19,10 @@ export const ArgForm = (props) => {
   const { argTypeInstance, label: labelFromProps, templateProps } = props;
   const [label, setLabel] = useState(getLabel(labelFromProps, argTypeInstance));
   const [resolvedArgValue, setResolvedArgValue] = useState(null);
-  const [renderError, setRenderError] = useState(false);
   const workpad = useSelector(getWorkpadInfo);
   const assets = useSelector(getAssets);
 
   useEffect(() => {
-    setRenderError(false);
     setResolvedArgValue();
   }, [templateProps?.argValue]);
 
@@ -37,8 +35,6 @@ export const ArgForm = (props) => {
       setLabel={setLabel}
       resolvedArgValue={resolvedArgValue}
       setResolvedArgValue={setResolvedArgValue}
-      renderError={renderError}
-      setRenderError={setRenderError}
     />
   );
 };

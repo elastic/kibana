@@ -11,7 +11,70 @@ Array [
 exports[`ModalService openConfirm() renders a mountpoint confirm message 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -23,7 +86,7 @@ Array [
           mount={[Function]}
         />
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -34,7 +97,120 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
 exports[`ModalService openConfirm() renders a string confirm message 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -43,7 +219,7 @@ Array [
       >
         Some message
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -54,7 +230,164 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `"<di
 exports[`ModalService openConfirm() with a currently active confirm replaces the current confirm with the new one 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -63,11 +396,168 @@ Array [
       >
         confirm 1
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -76,7 +566,7 @@ Array [
       >
         some confirm
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -85,7 +575,164 @@ Array [
 exports[`ModalService openConfirm() with a currently active modal replaces the current modal with the new confirm 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiModal
         onClose={[Function]}
       >
@@ -94,11 +741,168 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -107,7 +911,7 @@ Array [
       >
         some confirm
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -116,7 +920,21 @@ Array [
 exports[`ModalService openModal() renders a modal to the DOM 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction],
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiModal
         onClose={[Function]}
       >
@@ -125,7 +943,7 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -136,7 +954,70 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `"<div data-e
 exports[`ModalService openModal() with a currently active confirm replaces the current confirm with the new one 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -145,11 +1026,74 @@ Array [
       >
         confirm 1
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiConfirmModal
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
@@ -158,7 +1102,7 @@ Array [
       >
         some confirm
       </EuiConfirmModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -167,7 +1111,70 @@ Array [
 exports[`ModalService openModal() with a currently active modal replaces the current modal with a new one 1`] = `
 Array [
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiModal
         onClose={[Function]}
       >
@@ -176,11 +1183,74 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
   Array [
-    <mockConstructor>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <EuiModal
         onClose={[Function]}
       >
@@ -189,7 +1259,7 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </mockConstructor>,
+    </CoreContextProvider>,
     <div />,
   ],
 ]

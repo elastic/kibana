@@ -13,7 +13,7 @@ import {
   EuiScreenReaderOnly,
   EuiText,
 } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -26,8 +26,9 @@ import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { sourcererSelectors } from '../../../../common/store';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -45,11 +46,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   const handleClick = useCallback(() => {
     dispatch(
@@ -59,17 +56,17 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
         timelineId,
         params: {
           eventId,
-          indexName: existingIndexNames.join(','),
+          indexName: selectedPatterns.join(','),
         },
       })
     );
-  }, [dispatch, eventId, existingIndexNames, timelineId]);
+  }, [dispatch, eventId, selectedPatterns, timelineId]);
 
   return (
     <EuiButtonIcon
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
-      color="subdued"
+      color="text"
       iconType="arrowRight"
       onClick={handleClick}
     />

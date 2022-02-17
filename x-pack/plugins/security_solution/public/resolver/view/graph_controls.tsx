@@ -569,7 +569,7 @@ const NodeLegend = ({
             >
               <GeneratedText>
                 {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
-                  defaultMessage: 'Error',
+                  defaultMessage: 'Error Process',
                 })}
               </GeneratedText>
             </StyledEuiDescriptionListDescription>

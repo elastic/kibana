@@ -27,7 +27,7 @@ export interface ArtifactInfo
     'name' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'description' | 'comments'
   > {
   effectScope: EffectScope;
-  os: string;
+  os: string[];
   entries: ArtifactInfoEntries[];
 }
 

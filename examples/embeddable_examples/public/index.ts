@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+export type { HelloWorldEmbeddableFactory } from './hello_world';
 export {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
-  HelloWorldEmbeddableFactory,
 } from './hello_world';
-export { ListContainer, LIST_CONTAINER, ListContainerFactory } from './list_container';
-export { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
+export type { ListContainerFactory } from './list_container';
+export { ListContainer, LIST_CONTAINER } from './list_container';
+export type { TodoEmbeddableFactory } from './todo';
+export { TODO_EMBEDDABLE } from './todo';
 
 export { BOOK_EMBEDDABLE } from './book';
 
@@ -21,10 +23,8 @@ export { SIMPLE_EMBEDDABLE } from './migrations';
 
 import { EmbeddableExamplesPlugin } from './plugin';
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableListContainerFactory,
-} from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+export type { SearchableListContainerFactory } from './searchable_list_container';
+export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
+export type { MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
 export const plugin = () => new EmbeddableExamplesPlugin();

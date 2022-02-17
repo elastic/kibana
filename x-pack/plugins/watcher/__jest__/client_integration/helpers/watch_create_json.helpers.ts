@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
 import { withAppContext } from './app_context.mock';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/new-watch/${WATCH_TYPES.JSON}`],

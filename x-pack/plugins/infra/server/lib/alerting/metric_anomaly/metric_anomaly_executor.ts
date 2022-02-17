@@ -6,39 +6,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest } from 'kibana/server';
 import { first } from 'lodash';
 import moment from 'moment';
-import { stateToAlertMessage } from '../common/messages';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { MappedAnomalyHit } from '../../infra_ml';
-import { AlertStates } from '../common/types';
 import {
   ActionGroup,
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_alert_type';
+import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { MappedAnomalyHit } from '../../infra_ml';
 import { InfraBackendLibs } from '../../infra_types';
+import { stateToAlertMessage } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
+import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_rule_type';
 
 export const createMetricAnomalyExecutor =
-  (libs: InfraBackendLibs, ml?: MlPluginSetup) =>
+  (_libs: InfraBackendLibs, ml?: MlPluginSetup) =>
   async ({
     services,
     params,
     startedAt,
-  }: AlertExecutorOptions<
+  }: RuleExecutorOptions<
     /**
      * TODO: Remove this use of `any` by utilizing a proper type
      */
     Record<string, any>,
     Record<string, any>,
-    AlertInstanceState,
-    AlertInstanceContext,
+    AlertState,
+    AlertContext,
     MetricAnomalyAllowedActionGroups
   >) => {
     if (!ml) {
@@ -84,9 +83,9 @@ export const createMetricAnomalyExecutor =
         typical,
         influencers,
       } = first(data as MappedAnomalyHit[])!;
-      const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
+      const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
-      alertInstance.scheduleActions(FIRED_ACTIONS_ID, {
+      alert.scheduleActions(FIRED_ACTIONS_ID, {
         alertState: stateToAlertMessage[AlertStates.ALERT],
         timestamp: moment(anomalyStartTime).toISOString(),
         anomalyScore,

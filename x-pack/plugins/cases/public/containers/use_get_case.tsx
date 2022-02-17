@@ -10,7 +10,7 @@ import { useEffect, useReducer, useCallback, useRef } from 'react';
 import { Case, ResolvedCase } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
-import { resolveCase, getSubCase } from './api';
+import { resolveCase } from './api';
 
 interface CaseState {
   data: Case | null;
@@ -71,7 +71,7 @@ export interface UseGetCase extends CaseState {
   updateCase: (newCase: Case) => void;
 }
 
-export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
+export const useGetCase = (caseId: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -94,12 +94,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: { silent } });
 
-        const response: ResolvedCase = subCaseId
-          ? {
-              case: await getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal),
-              outcome: 'exactMatch', // sub-cases are not resolved, forced to exactMatch always
-            }
-          : await resolveCase(caseId, true, abortCtrlRef.current.signal);
+        const response: ResolvedCase = await resolveCase(caseId, true, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
@@ -116,7 +111,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
         }
       }
     },
-    [caseId, subCaseId, toasts]
+    [caseId, toasts]
   );
 
   useEffect(() => {
@@ -127,6 +122,6 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+  }, [caseId]);
   return { ...state, fetchCase: callFetch, updateCase };
 };

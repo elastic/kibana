@@ -26,17 +26,17 @@ import {
   EuiEmptyPrompt,
   EuiPageTemplate,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Alert, AlertType, ActionType, ActionConnector } from '../../../../types';
+import { Rule, RuleType, ActionType, ActionConnector } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
-import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { AlertsRouteWithApi } from './alerts_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
 import { routeToRuleDetails } from '../../../constants';
@@ -46,10 +46,11 @@ import { alertReducer } from '../../alert_form/alert_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 
 export type AlertDetailsProps = {
-  alert: Alert;
-  alertType: AlertType;
+  alert: Rule;
+  alertType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
+  refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
@@ -61,6 +62,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   unmuteAlert,
   muteAlert,
   requestRefresh,
+  refreshToken,
 }) => {
   const history = useHistory();
   const {
@@ -72,7 +74,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     http,
   } = useKibana().services;
   const [{}, dispatch] = useReducer(alertReducer, { alert });
-  const setInitialAlert = (value: Alert) => {
+  const setInitialAlert = (value: Rule) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
@@ -441,10 +443,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             {alert.enabled ? (
-              <AlertInstancesRouteWithApi
+              <AlertsRouteWithApi
                 requestRefresh={requestRefresh}
-                alert={alert}
-                alertType={alertType}
+                refreshToken={refreshToken}
+                rule={alert}
+                ruleType={alertType}
                 readOnly={!canSaveAlert}
               />
             ) : (

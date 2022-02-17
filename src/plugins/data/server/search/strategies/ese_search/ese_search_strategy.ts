@@ -9,7 +9,7 @@
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
 import { catchError, first, tap } from 'rxjs/operators';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -31,7 +31,6 @@ import {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
-  shimAbortSignal,
   shimHitsTotal,
 } from '../es_search';
 
@@ -68,10 +67,15 @@ export const enhancedEsSearchStrategyProvider = (
             )),
             ...request.params,
           };
-      const promise = id
-        ? client.asyncSearch.get({ ...params, id })
-        : client.asyncSearch.submit(params);
-      const { body, headers } = await shimAbortSignal(promise, options.abortSignal);
+      const { body, headers } = id
+        ? await client.asyncSearch.get(
+            { ...params, id },
+            { signal: options.abortSignal, meta: true }
+          )
+        : await client.asyncSearch.submit(params, {
+            signal: options.abortSignal,
+            meta: true,
+          });
 
       const response = shimHitsTotal(body.response, options);
 
@@ -115,14 +119,19 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     try {
-      const promise = client.transport.request({
-        method,
-        path,
-        body,
-        querystring,
-      });
+      const esResponse = await client.transport.request(
+        {
+          method,
+          path,
+          body,
+          querystring,
+        },
+        {
+          signal: options?.abortSignal,
+          meta: true,
+        }
+      );
 
-      const esResponse = await shimAbortSignal(promise, options?.abortSignal);
       const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),

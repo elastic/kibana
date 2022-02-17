@@ -43,6 +43,11 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
       key="wizard 1"
     >
       <EuiCard
+        betaBadgeProps={
+          Object {
+            "label": undefined,
+          }
+        }
         data-test-subj="wizard1"
         description="mock wizard without icon"
         isDisabled={false}
@@ -55,6 +60,11 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
       key="wizard 2"
     >
       <EuiCard
+        betaBadgeProps={
+          Object {
+            "label": undefined,
+          }
+        }
         data-test-subj="wizard2"
         description="mock wizard with icon"
         icon={

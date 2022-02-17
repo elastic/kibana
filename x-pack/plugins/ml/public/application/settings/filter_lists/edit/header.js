@@ -21,14 +21,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
+import { MlPageHeader } from '../../../components/page_header';
 
 export const EditFilterListHeader = ({
   canCreateFilter,
@@ -157,14 +157,11 @@ export const EditFilterListHeader = ({
 
   return (
     <React.Fragment>
+      <MlPageHeader>{title}</MlPageHeader>
+
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h1>{title}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
                 <p>
@@ -181,6 +178,7 @@ export const EditFilterListHeader = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer size="m" />
       {idField}
       <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>

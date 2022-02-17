@@ -6,9 +6,8 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { RowRenderer } from '../../..';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import { RowRenderer } from '../../../types';
 import { Ecs } from '../../../ecs';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 import { ColumnHeaderOptions } from '../columns';
@@ -23,6 +22,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   globalFilters?: Filter[];
   header: ColumnHeaderOptions;
   isDraggable: boolean;
+  isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
   linkValues: string[] | undefined;
   rowRenderers?: RowRenderer[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

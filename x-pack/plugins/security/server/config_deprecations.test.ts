@@ -182,73 +182,11 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.security?.showInsecureClusterWarning).not.toBeDefined();
     expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
-      ]
-    `);
-  });
-
-  it('warns when using the legacy audit logger', () => {
-    const config = {
-      xpack: {
-        security: {
-          audit: {
-            enabled: true,
-          },
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.xpack.security.audit.appender).not.toBeDefined();
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
-      ]
-    `);
-  });
-
-  it('does not warn when using the ECS audit logger', () => {
-    const config = {
-      xpack: {
-        security: {
-          audit: {
-            enabled: true,
-            appender: {
-              type: 'file',
-              fileName: './audit.log',
-            },
-          },
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
-  });
-
-  it('does not warn about using the legacy logger when using the ECS audit logger, even when using the deprecated ECS appender config', () => {
-    const config = {
-      xpack: {
-        security: {
-          audit: {
-            enabled: true,
-            appender: {
-              type: 'file',
-              path: './audit.log',
-            },
-          },
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
-    expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
       ]
     `);
   });
@@ -312,7 +250,7 @@ describe('Config Deprecations', () => {
     const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
+        "This setting is no longer used.",
       ]
     `);
 
@@ -333,7 +271,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        "Use the new object format instead of an array of provider types.",
       ]
     `);
   });
@@ -352,39 +290,9 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
-        "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
+        "Use the new object format instead of an array of provider types.",
+        "Use only one of these providers. When both providers are set, Kibana only uses the \\"token\\" provider.",
       ]
     `);
-  });
-
-  it('warns when the security plugin is disabled', () => {
-    const config = {
-      xpack: {
-        security: {
-          enabled: false,
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
-      ]
-    `);
-  });
-
-  it('does not warn when the security plugin is enabled', () => {
-    const config = {
-      xpack: {
-        security: {
-          enabled: true,
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
   });
 });

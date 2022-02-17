@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
 import { SectionError, Error } from '../../../../../shared_imports';

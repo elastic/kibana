@@ -24,7 +24,7 @@ import {
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
 import { ESGeoGridSource } from '../sources/es_geo_grid_source';
-import { VectorLayer } from './vector_layer';
+import { GeoJsonVectorLayer } from './vector_layer';
 import { HeatmapLayer } from './heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
@@ -162,7 +162,7 @@ export function createTileMapLayerDescriptor({
     };
   }
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label,
     sourceDescriptor: geoGridSourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),

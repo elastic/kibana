@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
     it('should display registered flights sample data sets', async () => {
@@ -74,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard', () => {
       beforeEach(async () => {
+        await time();
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
@@ -84,10 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(17);
       });
@@ -112,10 +110,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(13);
       });
@@ -124,10 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(15);
       });
@@ -160,5 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isInstalled).to.be(false);
       });
     });
+
+    async function time() {
+      const today = moment().format('MMM D, YYYY');
+      const from = `${today} @ 00:00:00.000`;
+      const to = `${today} @ 23:59:59.999`;
+      await PageObjects.common.setTime({ from, to });
+    }
   });
 }

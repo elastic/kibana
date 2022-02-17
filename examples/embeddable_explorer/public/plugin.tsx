@@ -34,7 +34,12 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        await depsStart.embeddableExamples.createSampleData();
+        try {
+          await depsStart.embeddableExamples.createSampleData();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to create sample data', error);
+        }
         return renderApp(
           {
             notifications: coreStart.notifications,
@@ -63,7 +68,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/embeddable/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/embeddable/README.asciidoc',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

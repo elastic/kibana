@@ -40,7 +40,7 @@ export class DataLoader {
     editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldHistograms({
-      indexPatternTitle: this._indexPatternTitle,
+      indexPattern: this._indexPatternTitle,
       query,
       fields,
       samplerShardSize,

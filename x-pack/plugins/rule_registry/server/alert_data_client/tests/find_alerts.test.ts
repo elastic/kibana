@@ -16,23 +16,20 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
-import { AuditLogger } from '../../../../security/server';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { AlertingAuthorizationEntity } from '../../../../alerting/server';
-import { ruleDataPluginServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { RuleDataPluginService } from '../../rule_data_plugin_service';
+import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
-const auditLogger = {
-  log: jest.fn(),
-} as jest.Mocked<AuditLogger>;
+const auditLogger = auditLoggerMock.create();
 
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
   auditLogger,
-  ruleDataService: ruleDataPluginServiceMock.create() as unknown as RuleDataPluginService,
+  ruleDataService: ruleDataServiceMock.create(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -75,42 +72,39 @@ beforeEach(() => {
 describe('find()', () => {
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _index: '.alerts-observability.apm.alerts',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _version: 1,
+            _seq_no: 362,
+            _primary_term: 2,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              message: 'hello world 1',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: ['test_default_space_id'],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _index: '.alerts-observability.apm.alerts',
-                _id: 'NoxgpHkBqbdrfX07MqXV',
-                _version: 1,
-                _seq_no: 362,
-                _primary_term: 2,
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                  message: 'hello world 1',
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [SPACE_IDS]: ['test_default_space_id'],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
+        ],
+      },
+    });
     const result = await alertsClient.find({
       query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
       index: '.alerts-observability.apm.alerts',
@@ -206,42 +200,39 @@ describe('find()', () => {
 
   test('logs successful event in audit logger', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _index: '.alerts-observability.apm.alerts',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _version: 1,
+            _seq_no: 362,
+            _primary_term: 2,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              message: 'hello world 1',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: ['test_default_space_id'],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _index: '.alerts-observability.apm.alerts',
-                _id: 'NoxgpHkBqbdrfX07MqXV',
-                _version: 1,
-                _seq_no: 362,
-                _primary_term: 2,
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                  message: 'hello world 1',
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [SPACE_IDS]: ['test_default_space_id'],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
+        ],
+      },
+    });
     await alertsClient.find({
       query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
       index: '.alerts-observability.apm.alerts',
@@ -260,41 +251,38 @@ describe('find()', () => {
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _version: 1,
+            _seq_no: 362,
+            _primary_term: 2,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _version: 1,
-                _seq_no: 362,
-                _primary_term: 2,
-                _id: fakeAlertId,
-                _index: indexName,
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
+        ],
+      },
+    });
 
     await expect(
       alertsClient.find({
@@ -339,42 +327,39 @@ describe('find()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      esClientMock.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            took: 5,
-            timed_out: false,
-            _shards: {
-              total: 1,
-              successful: 1,
-              failed: 0,
-              skipped: 0,
+      esClientMock.search.mockResponseOnce({
+        took: 5,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+          skipped: 0,
+        },
+        hits: {
+          total: 1,
+          max_score: 999,
+          hits: [
+            {
+              // @ts-expect-error incorrect fields
+              found: true,
+              _type: 'alert',
+              _index: '.alerts-observability.apm.alerts',
+              _id: 'NoxgpHkBqbdrfX07MqXV',
+              _version: 1,
+              _seq_no: 362,
+              _primary_term: 2,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                message: 'hello world 1',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['test_default_space_id'],
+              },
             },
-            hits: {
-              total: 1,
-              max_score: 999,
-              hits: [
-                {
-                  found: true,
-                  _type: 'alert',
-                  _index: '.alerts-observability.apm.alerts',
-                  _id: 'NoxgpHkBqbdrfX07MqXV',
-                  _version: 1,
-                  _seq_no: 362,
-                  _primary_term: 2,
-                  _source: {
-                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                    message: 'hello world 1',
-                    [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_WORKFLOW_STATUS]: 'open',
-                    [SPACE_IDS]: ['test_default_space_id'],
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
+          ],
+        },
+      });
     });
 
     test('returns alert if user is authorized to read alert under the consumer', async () => {

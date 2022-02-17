@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PIPELINE_EDITOR } from './constants';
 
 export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDeletePipeline }) {

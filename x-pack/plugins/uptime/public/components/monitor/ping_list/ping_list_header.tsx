@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { StatusFilter } from '../../overview/monitor_list/status_filter';
 import { FilterGroup } from '../../overview/filter_group/filter_group';

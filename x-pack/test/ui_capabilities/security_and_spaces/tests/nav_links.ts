@@ -42,7 +42,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('ml', 'monitoring', 'osquery')
+              navLinksBuilder.except('monitoring', 'osquery')
             );
             break;
           case 'everything_space_all at everything_space':
@@ -53,7 +53,6 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except(
-                'ml',
                 'monitoring',
                 'enterpriseSearch',
                 'appSearch',
@@ -62,11 +61,21 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
               )
             );
             break;
+          case 'foo_all at everything_space':
+          case 'foo_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('kibana', 'foo', 'management')
+            );
+            break;
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
+          case 'global_read at nothing_space':
+          case 'foo_all at nothing_space':
+          case 'foo_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
-          case 'global_read at nothing_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
           case 'no_kibana_privileges at everything_space':

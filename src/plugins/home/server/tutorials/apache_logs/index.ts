@@ -24,12 +24,12 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'apacheLogs',
     name: i18n.translate('home.tutorials.apacheLogs.nameTitle', {
-      defaultMessage: 'Apache logs',
+      defaultMessage: 'Apache HTTP Server Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.apacheLogs.shortDescription', {
-      defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
+      defaultMessage: 'Collect and parse logs from Apache HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.apacheLogs.longDescription', {
       defaultMessage:
@@ -57,8 +57,8 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/apache_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['web'],
   };
 }

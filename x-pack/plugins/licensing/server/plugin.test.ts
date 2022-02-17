@@ -6,7 +6,7 @@
  */
 
 import { take, toArray } from 'rxjs/operators';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError } from './types';
@@ -54,9 +54,7 @@ describe('licensing plugin', () => {
   const createEsClient = (response?: Record<string, any>) => {
     const client = elasticsearchServiceMock.createClusterClient();
     if (response) {
-      client.asInternalUser.xpack.info.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise(response as any)
-      );
+      client.asInternalUser.xpack.info.mockResponse(response as any);
     }
     return client;
   };
@@ -102,9 +100,6 @@ describe('licensing plugin', () => {
         await license$.pipe(take(1)).toPromise();
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
-        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledWith({
-          accept_enterprise: true,
-        });
       });
 
       it('observable receives updated licenses', async () => {
@@ -112,7 +107,7 @@ describe('licensing plugin', () => {
 
         const esClient = createEsClient();
         esClient.asInternalUser.xpack.info.mockImplementation(() => {
-          return elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          return Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
             features: {},
           } as estypes.XpackInfoResponse);
@@ -165,12 +160,12 @@ describe('licensing plugin', () => {
         esClient.asInternalUser.xpack.info.mockImplementation(() => {
           i++;
           if (i === 1) {
-            return elasticsearchServiceMock.createErrorTransportRequestPromise(error1);
+            return Promise.reject(error1);
           }
           if (i === 2) {
-            return elasticsearchServiceMock.createErrorTransportRequestPromise(error2);
+            return Promise.reject(error2);
           }
-          return elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          return Promise.resolve({
             license: buildRawLicense(),
             features: {},
           } as estypes.XpackInfoResponse);
@@ -230,7 +225,7 @@ describe('licensing plugin', () => {
 
         const esClient = createEsClient();
         esClient.asInternalUser.xpack.info.mockImplementation(() => {
-          return elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          return Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
             features: {},
           } as estypes.XpackInfoResponse);

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import Bluebird from 'bluebird';
 import { get } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
-import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
 
@@ -39,217 +39,230 @@ const getQueueTypes = (queueBuckets: Array<Bucket & { num_pipelines: { value: nu
  */
 export function getLogstashForClusters(
   req: LegacyRequest,
-  lsIndexPattern: string,
-  clusters: Array<{ cluster_uuid: string } | Cluster>
+  clusters: Array<{ cluster_uuid: string } | Cluster>,
+  ccs?: string
 ) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getLogstashForClusters');
-
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
+  const config = req.server.config;
 
-  return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
-    const params = {
-      index: lsIndexPattern,
-      size: 0,
-      ignore_unavailable: true,
-      body: {
-        query: createQuery({
-          types: ['stats', 'logstash_stats'],
-          start,
-          end,
-          clusterUuid,
-          metric: LogstashClusterMetric.getMetricFields(),
-        }),
-        aggs: {
-          logstash_uuids: {
-            terms: {
-              field: 'logstash_stats.logstash.uuid',
-              size: config.get('monitoring.ui.max_bucket_size'),
-            },
-            aggs: {
-              latest_report: {
-                terms: {
-                  field: 'logstash_stats.timestamp',
-                  size: 1,
-                  order: {
-                    _key: 'desc',
-                  },
-                },
-                aggs: {
-                  memory_used: {
-                    max: {
-                      field: 'logstash_stats.jvm.mem.heap_used_in_bytes',
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: ccs || req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
+  return Promise.all(
+    clusters.map((cluster) => {
+      const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
+      const maxBucketSize = config.ui.max_bucket_size;
+      const params = {
+        index: indexPatterns,
+        size: 0,
+        ignore_unavailable: true,
+        body: {
+          query: createQuery({
+            type,
+            dsDataset: `${moduleType}.${dataset}`,
+            metricset: dataset,
+            start,
+            end,
+            clusterUuid,
+            metric: LogstashClusterMetric.getMetricFields(),
+          }),
+          aggs: {
+            logstash_uuids: {
+              terms: {
+                field: 'logstash_stats.logstash.uuid',
+                size: maxBucketSize,
+              },
+              aggs: {
+                latest_report: {
+                  terms: {
+                    field: 'logstash_stats.timestamp',
+                    size: 1,
+                    order: {
+                      _key: 'desc',
                     },
                   },
-                  memory: {
-                    max: {
-                      field: 'logstash_stats.jvm.mem.heap_max_in_bytes',
+                  aggs: {
+                    memory_used: {
+                      max: {
+                        field: 'logstash_stats.jvm.mem.heap_used_in_bytes',
+                      },
                     },
-                  },
-                  events_in_total: {
-                    max: {
-                      field: 'logstash_stats.events.in',
+                    memory: {
+                      max: {
+                        field: 'logstash_stats.jvm.mem.heap_max_in_bytes',
+                      },
                     },
-                  },
-                  events_out_total: {
-                    max: {
-                      field: 'logstash_stats.events.out',
+                    events_in_total: {
+                      max: {
+                        field: 'logstash_stats.events.in',
+                      },
                     },
-                  },
-                },
-              },
-              memory_used_per_node: {
-                max_bucket: {
-                  buckets_path: 'latest_report>memory_used',
-                },
-              },
-              memory_per_node: {
-                max_bucket: {
-                  buckets_path: 'latest_report>memory',
-                },
-              },
-              events_in_total_per_node: {
-                max_bucket: {
-                  buckets_path: 'latest_report>events_in_total',
-                },
-              },
-              events_out_total_per_node: {
-                max_bucket: {
-                  buckets_path: 'latest_report>events_out_total',
-                },
-              },
-            },
-          },
-          logstash_versions: {
-            terms: {
-              field: 'logstash_stats.logstash.version',
-              size: config.get('monitoring.ui.max_bucket_size'),
-            },
-          },
-          pipelines_nested: {
-            nested: {
-              path: 'logstash_stats.pipelines',
-            },
-            aggs: {
-              pipelines: {
-                sum_bucket: {
-                  buckets_path: 'queue_types>num_pipelines',
-                },
-              },
-              queue_types: {
-                terms: {
-                  field: 'logstash_stats.pipelines.queue.type',
-                  size: config.get('monitoring.ui.max_bucket_size'),
-                },
-                aggs: {
-                  num_pipelines: {
-                    cardinality: {
-                      field: 'logstash_stats.pipelines.id',
+                    events_out_total: {
+                      max: {
+                        field: 'logstash_stats.events.out',
+                      },
                     },
                   },
                 },
-              },
-            },
-          },
-          pipelines_nested_mb: {
-            nested: {
-              path: 'logstash.node.stats.pipelines',
-            },
-            aggs: {
-              pipelines: {
-                sum_bucket: {
-                  buckets_path: 'queue_types>num_pipelines',
+                memory_used_per_node: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>memory_used',
+                  },
+                },
+                memory_per_node: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>memory',
+                  },
+                },
+                events_in_total_per_node: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>events_in_total',
+                  },
+                },
+                events_out_total_per_node: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>events_out_total',
+                  },
                 },
               },
-              queue_types: {
-                terms: {
-                  field: 'logstash.node.stats.pipelines.queue.type',
-                  size: config.get('monitoring.ui.max_bucket_size'),
+            },
+            logstash_versions: {
+              terms: {
+                field: 'logstash_stats.logstash.version',
+                size: maxBucketSize,
+              },
+            },
+            pipelines_nested: {
+              nested: {
+                path: 'logstash_stats.pipelines',
+              },
+              aggs: {
+                pipelines: {
+                  sum_bucket: {
+                    buckets_path: 'queue_types>num_pipelines',
+                  },
                 },
-                aggs: {
-                  num_pipelines: {
-                    cardinality: {
-                      field: 'logstash.node.stats.pipelines.id',
+                queue_types: {
+                  terms: {
+                    field: 'logstash_stats.pipelines.queue.type',
+                    size: maxBucketSize,
+                  },
+                  aggs: {
+                    num_pipelines: {
+                      cardinality: {
+                        field: 'logstash_stats.pipelines.id',
+                      },
                     },
                   },
                 },
               },
             },
-          },
-          events_in_total: {
-            sum_bucket: {
-              buckets_path: 'logstash_uuids>events_in_total_per_node',
+            pipelines_nested_mb: {
+              nested: {
+                path: 'logstash.node.stats.pipelines',
+              },
+              aggs: {
+                pipelines: {
+                  sum_bucket: {
+                    buckets_path: 'queue_types>num_pipelines',
+                  },
+                },
+                queue_types: {
+                  terms: {
+                    field: 'logstash.node.stats.pipelines.queue.type',
+                    size: maxBucketSize,
+                  },
+                  aggs: {
+                    num_pipelines: {
+                      cardinality: {
+                        field: 'logstash.node.stats.pipelines.id',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            events_in_total: {
+              sum_bucket: {
+                buckets_path: 'logstash_uuids>events_in_total_per_node',
+              },
+            },
+            events_out_total: {
+              sum_bucket: {
+                buckets_path: 'logstash_uuids>events_out_total_per_node',
+              },
+            },
+            memory_used: {
+              sum_bucket: {
+                buckets_path: 'logstash_uuids>memory_used_per_node',
+              },
+            },
+            memory: {
+              sum_bucket: {
+                buckets_path: 'logstash_uuids>memory_per_node',
+              },
+            },
+            max_uptime: {
+              max: {
+                field: 'logstash_stats.jvm.uptime_in_millis',
+              },
             },
           },
-          events_out_total: {
-            sum_bucket: {
-              buckets_path: 'logstash_uuids>events_out_total_per_node',
-            },
-          },
-          memory_used: {
-            sum_bucket: {
-              buckets_path: 'logstash_uuids>memory_used_per_node',
-            },
-          },
-          memory: {
-            sum_bucket: {
-              buckets_path: 'logstash_uuids>memory_per_node',
-            },
-          },
-          max_uptime: {
-            max: {
-              field: 'logstash_stats.jvm.uptime_in_millis',
-            },
-          },
-        },
-      },
-    };
-
-    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    return callWithRequest(req, 'search', params).then((result) => {
-      const aggregations = get(result, 'aggregations', {});
-      const logstashUuids = get(aggregations, 'logstash_uuids.buckets', []);
-      const logstashVersions = get(aggregations, 'logstash_versions.buckets', []);
-
-      // everything is initialized such that it won't impact any rollup
-      let eventsInTotal = 0;
-      let eventsOutTotal = 0;
-      let memory = 0;
-      let memoryUsed = 0;
-      let maxUptime = 0;
-
-      // if the cluster has logstash instances at all
-      if (logstashUuids.length) {
-        eventsInTotal = get(aggregations, 'events_in_total.value');
-        eventsOutTotal = get(aggregations, 'events_out_total.value');
-        memory = get(aggregations, 'memory.value');
-        memoryUsed = get(aggregations, 'memory_used.value');
-        maxUptime = get(aggregations, 'max_uptime.value');
-      }
-
-      let types = get(aggregations, 'pipelines_nested_mb.queue_types.buckets', []);
-      if (!types || types.length === 0) {
-        types = aggregations.pipelines_nested?.queue_types.buckets ?? [];
-      }
-
-      return {
-        clusterUuid,
-        stats: {
-          node_count: logstashUuids.length,
-          events_in_total: eventsInTotal,
-          events_out_total: eventsOutTotal,
-          avg_memory: memory,
-          avg_memory_used: memoryUsed,
-          max_uptime: maxUptime,
-          pipeline_count:
-            get(aggregations, 'pipelines_nested_mb.pipelines.value') ||
-            get(aggregations, 'pipelines_nested.pipelines.value', 0),
-          queue_types: getQueueTypes(types),
-          versions: logstashVersions.map((versionBucket: Bucket) => versionBucket.key),
         },
       };
-    });
-  });
+
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+      return callWithRequest(req, 'search', params).then((result) => {
+        const aggregations = get(result, 'aggregations', {});
+        const logstashUuids = get(aggregations, 'logstash_uuids.buckets', []);
+        const logstashVersions = get(aggregations, 'logstash_versions.buckets', []);
+
+        // everything is initialized such that it won't impact any rollup
+        let eventsInTotal = 0;
+        let eventsOutTotal = 0;
+        let memory = 0;
+        let memoryUsed = 0;
+        let maxUptime = 0;
+
+        // if the cluster has logstash instances at all
+        if (logstashUuids.length) {
+          eventsInTotal = get(aggregations, 'events_in_total.value');
+          eventsOutTotal = get(aggregations, 'events_out_total.value');
+          memory = get(aggregations, 'memory.value');
+          memoryUsed = get(aggregations, 'memory_used.value');
+          maxUptime = get(aggregations, 'max_uptime.value');
+        }
+
+        let types = get(aggregations, 'pipelines_nested_mb.queue_types.buckets', []);
+        if (!types || types.length === 0) {
+          types = aggregations.pipelines_nested?.queue_types.buckets ?? [];
+        }
+
+        return {
+          clusterUuid,
+          stats: {
+            node_count: logstashUuids.length,
+            events_in_total: eventsInTotal,
+            events_out_total: eventsOutTotal,
+            avg_memory: memory,
+            avg_memory_used: memoryUsed,
+            max_uptime: maxUptime,
+            pipeline_count:
+              get(aggregations, 'pipelines_nested_mb.pipelines.value') ||
+              get(aggregations, 'pipelines_nested.pipelines.value', 0),
+            queue_types: getQueueTypes(types),
+            versions: logstashVersions.map((versionBucket: Bucket) => versionBucket.key),
+          },
+        };
+      });
+    })
+  );
 }

@@ -23,16 +23,16 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: 'activemqMetrics',
     name: i18n.translate('home.tutorials.activemqMetrics.nameTitle', {
-      defaultMessage: 'ActiveMQ metrics',
+      defaultMessage: 'ActiveMQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.activemqMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from ActiveMQ instances.',
+      defaultMessage: 'Collect metrics from ActiveMQ instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.activemqMetrics.longDescription', {
       defaultMessage:
-        'The `activemq` Metricbeat module fetches monitoring metrics from ActiveMQ instances \
+        'The `activemq` Metricbeat module fetches metrics from ActiveMQ instances \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-activemq.html',
@@ -54,8 +54,8 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
 
     integrationBrowserCategories: ['web'],
   };

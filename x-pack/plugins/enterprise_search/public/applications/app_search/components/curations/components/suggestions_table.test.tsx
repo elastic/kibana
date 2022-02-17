@@ -88,7 +88,7 @@ describe('SuggestionsTable', () => {
     wrapper = renderColumn(0)('test', {});
     expect(wrapper.find(EuiBadge)).toHaveLength(0);
 
-    wrapper = renderColumn(0)('test', { override_curation_id: '1-2-3' });
+    wrapper = renderColumn(0)('test', { override_manual_curation: true });
     expect(wrapper.find(EuiBadge).prop('children')).toEqual('Overrides');
   });
 

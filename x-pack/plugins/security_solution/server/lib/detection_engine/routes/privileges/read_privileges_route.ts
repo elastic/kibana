@@ -35,7 +35,10 @@ export const readPrivilegesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const index = siemClient.getSignalsIndex();
+        const spaceId = context.securitySolution.getSpaceId();
+        const index = context.securitySolution
+          .getRuleDataService()
+          .getResourceName(`security.alerts-${spaceId}`);
         const clusterPrivileges = await readPrivileges(esClient, index);
         const privileges = merge(clusterPrivileges, {
           is_authenticated: request.auth.isAuthenticated ?? false,

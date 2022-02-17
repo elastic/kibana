@@ -32,9 +32,7 @@ export class DashboardExpectService extends FtrService {
 
   async visualizationsArePresent(vizList: string[]) {
     this.log.debug('Checking all visualisations are present on dashsboard');
-    let notLoaded = await this.dashboard.getNotLoadedVisualizations(vizList);
-    // TODO: Determine issue occasionally preventing 'geo map' from loading
-    notLoaded = notLoaded.filter((x) => x !== 'Rendering Test: geo map');
+    const notLoaded = await this.dashboard.getNotLoadedVisualizations(vizList);
     expect(notLoaded).to.be.empty();
   }
 
@@ -155,30 +153,34 @@ export class DashboardExpectService extends FtrService {
   async emptyTagCloudFound() {
     this.log.debug(`DashboardExpect.emptyTagCloudFound()`);
     const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
-    const tagCloudsHaveContent = await Promise.all(
-      tagCloudVisualizations.map(async (tagCloud) => {
-        return await this.find.descendantExistsByCssSelector('text', tagCloud);
-      })
-    );
-    expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
+    if (tagCloudVisualizations.length > 0) {
+      const tagCloudsHaveContent = await Promise.all(
+        tagCloudVisualizations.map(async (tagCloud) => {
+          return await this.find.descendantExistsByCssSelector('text', tagCloud);
+        })
+      );
+      expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
+    }
   }
 
   async tagCloudWithValuesFound(values: string[]) {
     this.log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
     const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
-    const matches = await Promise.all(
-      tagCloudVisualizations.map(async (tagCloud) => {
-        const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
-        for (let i = 0; i < values.length; i++) {
-          const valueExists = tagCloudData.includes(values[i]);
-          if (!valueExists) {
-            return false;
+    if (tagCloudVisualizations.length > 0) {
+      const matches = await Promise.all(
+        tagCloudVisualizations.map(async (tagCloud) => {
+          const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
+          for (let i = 0; i < values.length; i++) {
+            const valueExists = tagCloudData.includes(values[i]);
+            if (!valueExists) {
+              return false;
+            }
           }
-        }
-        return true;
-      })
-    );
-    expect(matches.indexOf(true)).to.be.greaterThan(-1);
+          return true;
+        })
+      );
+      expect(matches.indexOf(true)).to.be.greaterThan(-1);
+    }
   }
 
   async goalAndGuageLabelsExist(labels: string[]) {
@@ -224,12 +226,35 @@ export class DashboardExpectService extends FtrService {
   async savedSearchRowCount(expectedMinCount: number) {
     this.log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
     await this.retry.try(async () => {
-      const savedSearchRows = await this.testSubjects.findAll(
-        'docTableExpandToggleColumn',
-        this.findTimeout
-      );
-      expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      const gridExists = await this.find.existsByCssSelector('[data-document-number]');
+      if (gridExists) {
+        const grid = await this.find.byCssSelector('[data-document-number]');
+        // in this case it's the document explorer
+        const docNr = Number(await grid.getAttribute('data-document-number'));
+        expect(docNr).to.be.above(expectedMinCount);
+      } else {
+        // in this case it's the classic table
+        const savedSearchRows = await this.testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          this.findTimeout
+        );
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      }
     });
+  }
+
+  async savedSearchNoResult() {
+    const savedSearchTable = await this.testSubjects.find('embeddedSavedSearchDocTable');
+    const resultStr = await savedSearchTable.getVisibleText();
+    expect(resultStr).to.be('No results found');
+  }
+
+  async savedSearchRowsExist() {
+    this.testSubjects.existOrFail('docTableExpandToggleColumn');
+  }
+
+  async savedSearchRowsMissing() {
+    this.testSubjects.missingOrFail('docTableExpandToggleColumn');
   }
 
   async dataTableRowCount(expectedCount: number) {

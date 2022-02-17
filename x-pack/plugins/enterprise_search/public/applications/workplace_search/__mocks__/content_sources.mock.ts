@@ -7,6 +7,7 @@
 
 import { groups } from './groups.mock';
 
+import { IndexingRule } from '../types';
 import { staticSourceData } from '../views/content_sources/source_data';
 import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 
@@ -45,10 +46,25 @@ export const contentSources = [
   },
 ];
 
+const defaultIndexingRules: IndexingRule[] = [
+  {
+    filterType: 'object_type',
+    include: 'value',
+  },
+  {
+    filterType: 'path_template',
+    exclude: 'value',
+  },
+  {
+    filterType: 'file_extension',
+    include: 'value',
+  },
+];
+
 const defaultIndexing = {
   enabled: true,
   defaultAction: 'include',
-  rules: [],
+  rules: defaultIndexingRules,
   schedule: {
     full: 'P1D',
     incremental: 'PT2H',
@@ -123,6 +139,11 @@ export const fullContentSources = [
     urlFieldIsLinkable: true,
     createdAt: '2021-01-20',
     serviceName: 'myService',
+    secret: {
+      app_id: '99999',
+      fingerprint: '65xM7s0RE6tEWNhnuXpK5EvZ5OAMIcbDHIISm/0T23Y=',
+      base_url: 'http://github.com',
+    },
   },
   {
     ...contentSources[1],
@@ -370,7 +391,7 @@ export const exampleResult = {
       myLink: 'http://foo',
       otherTitle: 'foo',
       content_source_id: '60e85e7ea2564c265a88a4f0',
-      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      id: 'doc-60e85eb7a2564c937a88a4f3',
       last_updated: '2021-07-09T14:35:35+00:00',
       updated_at: '2021-07-09T14:35:35+00:00',
       source: 'custom',

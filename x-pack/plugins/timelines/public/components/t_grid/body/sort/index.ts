@@ -9,7 +9,7 @@ import { SortDirection } from '../../../../../common/types/timeline';
 import type { SortColumnTimeline } from '../../../../../common/types/timeline';
 
 // TODO: Cleanup this type to match SortColumnTimeline
-export { SortDirection };
+export type { SortDirection };
 
 /** Specifies which column the timeline is sorted on */
 export type Sort = SortColumnTimeline;

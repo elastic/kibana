@@ -15,9 +15,9 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-public.savedobjectsbulkupdateobject.attributes.md) | <code>T</code> |  |
-|  [id](./kibana-plugin-core-public.savedobjectsbulkupdateobject.id.md) | <code>string</code> |  |
-|  [references](./kibana-plugin-core-public.savedobjectsbulkupdateobject.references.md) | <code>SavedObjectReference[]</code> |  |
-|  [type](./kibana-plugin-core-public.savedobjectsbulkupdateobject.type.md) | <code>string</code> |  |
-|  [version](./kibana-plugin-core-public.savedobjectsbulkupdateobject.version.md) | <code>string</code> |  |
+|  [attributes](./kibana-plugin-core-public.savedobjectsbulkupdateobject.attributes.md) | T |  |
+|  [id](./kibana-plugin-core-public.savedobjectsbulkupdateobject.id.md) | string |  |
+|  [references?](./kibana-plugin-core-public.savedobjectsbulkupdateobject.references.md) | SavedObjectReference\[\] | <i>(Optional)</i> |
+|  [type](./kibana-plugin-core-public.savedobjectsbulkupdateobject.type.md) | string |  |
+|  [version?](./kibana-plugin-core-public.savedobjectsbulkupdateobject.version.md) | string | <i>(Optional)</i> |
 

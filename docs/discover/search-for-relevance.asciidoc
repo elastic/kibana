@@ -8,9 +8,9 @@ This example shows how to use *Discover* to list
 your documents from most relevant to least relevant. This example uses
 the <<gs-get-data-into-kibana, sample flights data set>>, or you can use your own data.
 
-.  In *Discover*, open the index pattern dropdown, and select that data you want to work with.
+.  In *Discover*, open the {data-source} dropdown, and select that data you want to work with.
 +
-For the sample flights data, set the index pattern to *kibana_sample_data_flights*.
+For the sample flights data, set the {data-source} to *kibana_sample_data_flights*.
 
 .  Run your search.  For the sample data, try:
 +

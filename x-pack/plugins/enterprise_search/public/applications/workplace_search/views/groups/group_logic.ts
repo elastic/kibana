@@ -122,6 +122,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       {
         showConfirmDeleteModal: () => true,
         hideConfirmDeleteModal: () => false,
+        deleteGroup: () => false,
       },
     ],
     groupNameInputValue: [
@@ -174,7 +175,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
   listeners: ({ actions, values }) => ({
     initializeGroup: async ({ groupId }) => {
       try {
-        const response = await HttpLogic.values.http.get(
+        const response = await HttpLogic.values.http.get<GroupDetails>(
           `/internal/workplace_search/groups/${groupId}`
         );
         actions.onInitializeGroup(response);
@@ -220,7 +221,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.put(
+        const response = await HttpLogic.values.http.put<GroupDetails>(
           `/internal/workplace_search/groups/${id}`,
           {
             body: JSON.stringify({ group: { name: groupNameInputValue } }),
@@ -247,7 +248,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(
+        const response = await HttpLogic.values.http.post<GroupDetails>(
           `/internal/workplace_search/groups/${id}/share`,
           {
             body: JSON.stringify({ content_source_ids: selectedGroupSources }),
@@ -279,7 +280,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       );
 
       try {
-        const response = await HttpLogic.values.http.put(
+        const response = await HttpLogic.values.http.put<GroupDetails>(
           `/internal/workplace_search/groups/${id}/boosts`,
           {
             body: JSON.stringify({ content_source_boosts: boosts }),

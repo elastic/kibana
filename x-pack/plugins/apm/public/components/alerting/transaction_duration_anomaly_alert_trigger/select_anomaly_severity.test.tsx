@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { SelectAnomalySeverity } from './select_anomaly_severity';
 

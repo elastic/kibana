@@ -18,7 +18,7 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
     },
     async (context, request, response) => {
       try {
-        const { body: indexMappings } =
+        const indexMappings =
           await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
             index: request.params.query,
             fields: '*',
@@ -39,11 +39,7 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
                 const mappingValues = Object.values(
                   // `FieldMapping` type from `TypeFieldMappings` --> `GetFieldMappingResponse` is not correct and
                   // doesn't have any properties.
-                  (
-                    indexMapping.mappings[fieldName] as {
-                      mapping: Record<string, { type: string }>;
-                    }
-                  ).mapping
+                  indexMapping.mappings[fieldName]?.mapping as Record<string, { type: string }>
                 );
                 const hasMapping = mappingValues.length > 0;
 

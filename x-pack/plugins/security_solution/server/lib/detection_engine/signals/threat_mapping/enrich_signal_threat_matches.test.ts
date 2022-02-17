@@ -116,14 +116,14 @@ describe('buildEnrichments', () => {
     expect(enrichments).toEqual([]);
   });
 
-  it('returns the value of the matched indicator as matched.atomic', () => {
+  it('returns the value of the matched indicator as undefined', () => {
     const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(enrichment, 'matched.atomic')).toEqual('domain_1');
+    expect(get(enrichment, 'matched.atomic')).toEqual(undefined);
   });
 
   it('does not enrich from other fields in the indicator document', () => {
@@ -132,7 +132,7 @@ describe('buildEnrichments', () => {
       threats,
       indicatorPath,
     });
-    expect(Object.keys(enrichment)).toEqual(['indicator', 'matched']);
+    expect(Object.keys(enrichment)).toEqual(['indicator', 'feed', 'matched']);
   });
 
   it('returns the _id of the matched indicator as matched.id', () => {
@@ -227,6 +227,7 @@ describe('buildEnrichments', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {
           domain: 'domain_1',
           other: 'other_1',
@@ -234,7 +235,7 @@ describe('buildEnrichments', () => {
           reference: 'https://test.com',
         },
         matched: {
-          atomic: 'domain_1',
+          atomic: undefined,
           id: '123',
           index: 'threat-index',
           field: 'event.field',
@@ -271,13 +272,14 @@ describe('buildEnrichments', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {
           indicator_field: 'indicator_field_1',
           reference: 'https://test3.com',
           type: 'indicator_type',
         },
         matched: {
-          atomic: 'domain_1',
+          atomic: undefined,
           id: '123',
           index: 'threat-index',
           field: 'event.field',
@@ -303,6 +305,7 @@ describe('buildEnrichments', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {},
         matched: {
           atomic: undefined,
@@ -331,6 +334,7 @@ describe('buildEnrichments', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {},
         matched: {
           atomic: undefined,
@@ -366,6 +370,7 @@ describe('buildEnrichments', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {
           domain: 'foo',
           reference: 'https://test4.com',
@@ -423,6 +428,53 @@ describe('buildEnrichments', () => {
       })
     ).toThrowError('Expected indicator field to be an object, but found: not an object');
   });
+
+  it('returns the feed data if it specified', () => {
+    threats = [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          event: { dataset: 'abuse.ch', reference: 'https://test.com' },
+          threat: {
+            feed: { name: 'feed name' },
+            indicator: {
+              domain: 'domain_1',
+              other: 'other_1',
+              reference: 'https://test.com',
+              type: 'type_1',
+            },
+          },
+        },
+      }),
+    ];
+
+    const enrichments = buildEnrichments({
+      queries,
+      threats,
+      indicatorPath,
+    });
+
+    expect(enrichments).toEqual([
+      {
+        feed: {
+          name: 'feed name',
+        },
+        indicator: {
+          domain: 'domain_1',
+          other: 'other_1',
+          reference: 'https://test.com',
+          type: 'type_1',
+        },
+        matched: {
+          atomic: undefined,
+          field: 'event.field',
+          id: '123',
+          index: 'threat-index',
+          type: 'indicator_match_rule',
+        },
+      },
+    ]);
+  });
 });
 
 describe('enrichSignalThreatMatches', () => {
@@ -447,7 +499,7 @@ describe('enrichSignalThreatMatches', () => {
       getNamedQueryMock({
         id: '123',
         index: 'indicator_index',
-        field: 'event.field',
+        field: 'event.domain',
         value: 'threat.indicator.domain',
       })
     );
@@ -468,7 +520,7 @@ describe('enrichSignalThreatMatches', () => {
     const signalHit = getSignalHitMock({
       _source: {
         '@timestamp': 'mocked',
-        event: { category: 'malware' },
+        event: { category: 'malware', domain: 'domain_1' },
         threat: { enrichments: [{ existing: 'indicator' }] },
       },
       matched_queries: [matchedQuery],
@@ -485,6 +537,7 @@ describe('enrichSignalThreatMatches', () => {
     expect(enrichments).toEqual([
       { existing: 'indicator' },
       {
+        feed: {},
         indicator: {
           domain: 'domain_1',
           other: 'other_1',
@@ -494,7 +547,7 @@ describe('enrichSignalThreatMatches', () => {
           atomic: 'domain_1',
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -517,12 +570,13 @@ describe('enrichSignalThreatMatches', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {},
         matched: {
           atomic: undefined,
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -533,7 +587,7 @@ describe('enrichSignalThreatMatches', () => {
     const signalHit = getSignalHitMock({
       _source: {
         '@timestamp': 'mocked',
-        event: { category: 'virus' },
+        event: { category: 'virus', domain: 'domain_1' },
         threat: {
           enrichments: [
             { indicator: { existing: 'indicator' } },
@@ -553,9 +607,14 @@ describe('enrichSignalThreatMatches', () => {
     const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
 
     expect(enrichments).toEqual([
-      { indicator: { existing: 'indicator' } },
-      { indicator: { existing: 'indicator2' } },
       {
+        indicator: { existing: 'indicator' },
+      },
+      {
+        indicator: { existing: 'indicator2' },
+      },
+      {
+        feed: {},
         indicator: {
           domain: 'domain_1',
           other: 'other_1',
@@ -565,7 +624,7 @@ describe('enrichSignalThreatMatches', () => {
           atomic: 'domain_1',
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -602,11 +661,16 @@ describe('enrichSignalThreatMatches', () => {
       getNamedQueryMock({
         id: '123',
         index: 'custom_index',
-        field: 'event.field',
+        field: 'event.domain',
         value: 'custom_threat.custom_indicator.domain',
       })
     );
     const signalHit = getSignalHitMock({
+      _source: {
+        event: {
+          domain: 'domain_1',
+        },
+      },
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
@@ -620,16 +684,17 @@ describe('enrichSignalThreatMatches', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {
           domain: 'custom_domain',
           other: 'custom_other',
           type: 'custom_type',
         },
         matched: {
-          atomic: 'custom_domain',
+          atomic: 'domain_1',
           id: '123',
           index: 'custom_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -655,10 +720,22 @@ describe('enrichSignalThreatMatches', () => {
     ];
     const signalHit = getSignalHitMock({
       _id: 'signal123',
+      _source: {
+        event: {
+          domain: 'domain_1',
+          other: 'test_val',
+        },
+      },
       matched_queries: [matchedQuery],
     });
     const otherSignalHit = getSignalHitMock({
       _id: 'signal123',
+      _source: {
+        event: {
+          domain: 'domain_1',
+          other: 'test_val',
+        },
+      },
       matched_queries: [
         encodeThreatMatchNamedQuery(
           getNamedQueryMock({
@@ -684,6 +761,7 @@ describe('enrichSignalThreatMatches', () => {
 
     expect(enrichments).toEqual([
       {
+        feed: {},
         indicator: {
           domain: 'domain_1',
           other: 'other_1',
@@ -693,18 +771,19 @@ describe('enrichSignalThreatMatches', () => {
           atomic: 'domain_1',
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
       {
+        feed: {},
         indicator: {
           domain: 'domain_2',
           other: 'other_2',
           type: 'type_2',
         },
         matched: {
-          atomic: 'domain_2',
+          atomic: 'test_val',
           id: '456',
           index: 'other_custom_index',
           field: 'event.other',

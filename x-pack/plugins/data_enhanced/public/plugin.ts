@@ -22,6 +22,7 @@ import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { ScreenshotModePluginStart } from '../../../../src/plugins/screenshot_mode/public';
 
 export interface DataEnhancedSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -31,6 +32,7 @@ export interface DataEnhancedSetupDependencies {
 export interface DataEnhancedStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
@@ -77,8 +79,10 @@ export class DataEnhancedPlugin
                 .duration(this.config.search.sessions.notTouchedTimeout)
                 .asMilliseconds(),
               usageCollector: this.usageCollector,
+              tourDisabled: plugins.screenshotMode.isScreenshotMode(),
             })
-          )
+          ),
+          { theme$: core.theme.theme$ }
         ),
       });
     }

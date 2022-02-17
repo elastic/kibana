@@ -24,7 +24,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getServices } from '../kibana_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
 
@@ -48,8 +48,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private redirecToAddData() {
-    const path = this.services.addBasePath('#/tutorial_directory');
-    window.location.href = path;
+    this.services.application.navigateToApp('integrations', { path: '/browse' });
   }
 
   private onSampleDataDecline = () => {
@@ -77,7 +76,11 @@ export class Welcome extends React.Component<Props> {
 
   private renderTelemetryEnabledOrDisabledText = () => {
     const { telemetry } = this.props;
-    if (!telemetry || !telemetry.telemetryService.userCanChangeSettings) {
+    if (
+      !telemetry ||
+      !telemetry.telemetryService.userCanChangeSettings ||
+      !telemetry.telemetryService.getCanChangeOptInStatus()
+    ) {
       return null;
     }
 

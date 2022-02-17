@@ -7,16 +7,24 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { HostsQueries } from '../../../../plugins/security_solution/common/search_strategy';
+import {
+  HostDetailsStrategyResponse,
+  HostsQueries,
+} from '../../../../plugins/security_solution/common/search_strategy';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Host Details', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -213,12 +221,9 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get HostDetails data', async () => {
-        const {
-          body: { hostDetails },
-        } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const { hostDetails } = await bsearch.send<HostDetailsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: HostsQueries.details,
             timerange: {
               interval: '12h',
@@ -229,9 +234,9 @@ export default function ({ getService }: FtrProviderContext) {
             docValueFields: [],
             hostName: 'raspberrypi',
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(hostDetails).to.eql(expectedResult.hostDetails);
       });
     });

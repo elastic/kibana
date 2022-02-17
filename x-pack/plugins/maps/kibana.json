@@ -25,6 +25,7 @@
     "presentationUtil"
   ],
   "optionalPlugins": [
+    "customIntegrations",
     "home",
     "savedObjectsTagging",
     "charts",
@@ -41,7 +42,6 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "home",
-    "mapsEms"
+    "home"
   ]
 }

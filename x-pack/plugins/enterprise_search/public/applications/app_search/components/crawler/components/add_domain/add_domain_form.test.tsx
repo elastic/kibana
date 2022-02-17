@@ -13,7 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiFieldText, EuiForm } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { rerender } from '../../../../../test_helpers';
 

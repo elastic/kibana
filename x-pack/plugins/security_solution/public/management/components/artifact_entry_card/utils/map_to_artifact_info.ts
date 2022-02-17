@@ -26,14 +26,9 @@ export const mapToArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactI
     description,
     comments: isTrustedApp(item) ? [] : item.comments,
     entries: entries as unknown as ArtifactInfo['entries'],
-    os: isTrustedApp(item) ? item.os : getOsFromExceptionItem(item),
+    os: isTrustedApp(item) ? [item.os] : item.os_types ?? [],
     effectScope: isTrustedApp(item) ? item.effectScope : getEffectScopeFromExceptionItem(item),
   };
-};
-
-const getOsFromExceptionItem = (item: ExceptionListItemSchema): string => {
-  // FYI: Exceptions seem to allow for items to be assigned to more than one OS, unlike Event Filters and Trusted Apps
-  return item.os_types.join(', ');
 };
 
 const getEffectScopeFromExceptionItem = (item: ExceptionListItemSchema): EffectScope => {

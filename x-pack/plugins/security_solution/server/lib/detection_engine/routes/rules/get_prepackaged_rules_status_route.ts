@@ -20,7 +20,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_asset_saved_objects_client';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -44,14 +44,10 @@ export const getPrepackagedRulesStatusRoute = (
       },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = context.alerting.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
 
       try {
         const latestPrepackagedRules = await getLatestPrepackagedRules(

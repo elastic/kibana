@@ -44,6 +44,8 @@ import {
   registerOrgSourceOauthConfigurationRoute,
   registerOrgSourceSynchronizeRoute,
   registerOauthConnectorParamsRoute,
+  registerAccountSourceValidateIndexingRulesRoute,
+  registerOrgSourceValidateIndexingRulesRoute,
 } from './sources';
 
 const mockConfig = {
@@ -180,7 +182,7 @@ describe('sources routes', () => {
             login: 'user',
             password: 'changeme',
             organizations: ['swiftype'],
-            indexPermissions: true,
+            index_permissions: true,
           },
         };
         mockRouter.shouldValidate(request);
@@ -303,6 +305,45 @@ describe('sources routes', () => {
             content_source: {
               name: 'foo',
             },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('POST /internal/workplace_search/account/sources/{id}/indexing_rules/validate', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/workplace_search/account/sources/{id}/indexing_rules/validate',
+      });
+
+      registerAccountSourceValidateIndexingRulesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/indexing_rules/validate',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            rules: [
+              {
+                filter_type: 'path_template',
+                exclude: '',
+              },
+            ],
           },
         };
         mockRouter.shouldValidate(request);
@@ -688,7 +729,7 @@ describe('sources routes', () => {
             login: 'user',
             password: 'changeme',
             organizations: ['swiftype'],
-            indexPermissions: true,
+            index_permissions: true,
           },
         };
         mockRouter.shouldValidate(request);
@@ -811,6 +852,45 @@ describe('sources routes', () => {
             content_source: {
               name: 'foo',
             },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('POST /internal/workplace_search/org/sources/{id}/indexing_rules/validate', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/workplace_search/org/sources/{id}/indexing_rules/validate',
+      });
+
+      registerOrgSourceValidateIndexingRulesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/indexing_rules/validate',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            rules: [
+              {
+                filter_type: 'path_template',
+                exclude: '',
+              },
+            ],
           },
         };
         mockRouter.shouldValidate(request);

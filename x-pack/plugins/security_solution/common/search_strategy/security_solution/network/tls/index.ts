@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 import { FlowTargetSourceDest } from '../common';

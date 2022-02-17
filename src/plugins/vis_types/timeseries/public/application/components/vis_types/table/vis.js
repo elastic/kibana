@@ -17,8 +17,9 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
+import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
@@ -53,11 +54,25 @@ class TableVis extends Component {
     const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
+
+    this.state = {
+      accessDeniedDrilldownUrl: null,
+    };
   }
 
   get visibleSeries() {
     return get(this.props, 'model.series', []).filter((series) => !series.hidden);
   }
+
+  createDrilldownUrlClickHandler = (url) => (event) => {
+    const validatedUrl = getCoreStart().http.externalUrl.validateUrl(url);
+    if (validatedUrl) {
+      this.setState({ accessDeniedDrilldownUrl: null });
+    } else {
+      event.preventDefault();
+      this.setState({ accessDeniedDrilldownUrl: url });
+    }
+  };
 
   renderRow = (row) => {
     const { model, fieldFormatMap, getConfig } = this.props;
@@ -73,8 +88,17 @@ class TableVis extends Component {
     }
 
     if (model.drilldown_url) {
-      const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
+      const url = replaceVars(model.drilldown_url, {}, { key: row.key }, { noEscape: true });
+      const handleDrilldownUrlClick = this.createDrilldownUrlClickHandler(url);
+      rowDisplay = (
+        <a
+          href={sanitizeUrl(url)}
+          onClick={handleDrilldownUrlClick}
+          onContextMenu={handleDrilldownUrlClick}
+        >
+          {rowDisplay}
+        </a>
+      );
     }
 
     const columns = row.series
@@ -213,42 +237,37 @@ class TableVis extends Component {
     );
   }
 
+  closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
+
   render() {
-    const { visData, model } = this.props;
+    const { visData } = this.props;
+    const { accessDeniedDrilldownUrl } = this.state;
     const header = this.renderHeader();
-    let rows;
+    let rows = null;
 
     if (isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
-    } else {
-      const message = model.pivot_id ? (
-        <FormattedMessage
-          id="visTypeTimeseries.table.noResultsAvailableMessage"
-          defaultMessage="No results available."
-        />
-      ) : (
-        <FormattedMessage
-          id="visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage"
-          defaultMessage="No results available. You must choose a group by field for this visualization."
-        />
-      );
-      rows = (
-        <tr>
-          <td colSpan={this.visibleSeries.length + 1}>{message}</td>
-        </tr>
-      );
     }
+
     return (
-      <RedirectAppLinks
-        application={getCoreStart().application}
-        className="tvbVis"
-        data-test-subj="tableView"
-      >
-        <table className="table">
-          <thead>{header}</thead>
-          <tbody>{rows}</tbody>
-        </table>
-      </RedirectAppLinks>
+      <>
+        <RedirectAppLinks
+          application={getCoreStart().application}
+          className="tvbVis"
+          data-test-subj="tableView"
+        >
+          <table className="table">
+            <thead>{header}</thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </RedirectAppLinks>
+        {accessDeniedDrilldownUrl && (
+          <ExternalUrlErrorModal
+            url={accessDeniedDrilldownUrl}
+            handleClose={this.closeExternalUrlErrorModal}
+          />
+        )}
+      </>
     );
   }
 }

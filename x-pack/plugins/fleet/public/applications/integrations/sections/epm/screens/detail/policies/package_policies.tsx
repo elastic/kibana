@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -33,6 +33,7 @@ import {
   AgentPolicyRefreshContext,
   useUIExtension,
   usePackageInstallations,
+  useAuthz,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -104,6 +105,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const { updatableIntegrations } = usePackageInstallations();
   const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
 
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicy: GetAgentPoliciesResponseItem;
     packagePolicy: InMemoryPackagePolicy;
@@ -134,6 +137,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     return newPolicies;
   }, [data?.items, updatableIntegrations]);
 
+  const showAddAgentHelpForPackagePolicyId = packageAndAgentPolicies.find(
+    ({ agentPolicy }) => agentPolicy.id === showAddAgentHelpForPolicyId
+  )?.packagePolicy?.id;
   // Handle the "add agent" link displayed in post-installation toast notifications in the case
   // where a user is clicking the link while on the package policies listing page
   useEffect(() => {
@@ -208,7 +214,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.name',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
-          defaultMessage: 'Integration',
+          defaultMessage: 'Integration policy',
         }),
         render(_, { packagePolicy }) {
           return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
@@ -223,7 +229,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false}>
-                <EuiText size="s" className="eui-textNoWrap">
+                <EuiText size="s" className="eui-textNoWrap" data-test-subj="packageVersionText">
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.packageVersion"
                     defaultMessage="v{version}"
@@ -241,6 +247,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                       policyId: agentPolicy.id,
                       packagePolicyId: packagePolicy.id,
                     })}?from=integrations-policy-list`}
+                    data-test-subj="integrationPolicyUpgradeBtn"
+                    isDisabled={!canWriteIntegrationPolicies}
                   >
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
@@ -266,7 +274,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.updated_by',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedBy', {
-          defaultMessage: 'Last Updated By',
+          defaultMessage: 'Last updated by',
         }),
         truncateText: true,
         render(updatedBy) {
@@ -276,7 +284,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.updated_at',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedAt', {
-          defaultMessage: 'Last Updated',
+          defaultMessage: 'Last updated',
         }),
         truncateText: true,
         render(updatedAt: InMemoryPackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {
@@ -292,13 +300,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
-        render({ agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+        render({ agentPolicy, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
           return (
             <PackagePolicyAgentsCell
-              agentPolicyId={agentPolicy.id}
+              agentPolicy={agentPolicy}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-              hasHelpPopover={showAddAgentHelpForPolicyId === agentPolicy.id}
+              hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
         },
@@ -326,7 +334,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, showAddAgentHelpForPolicyId, viewDataStep]
+    [getHref, showAddAgentHelpForPackagePolicyId, viewDataStep, canWriteIntegrationPolicies]
   );
 
   const noItemsMessage = useMemo(() => {

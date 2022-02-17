@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
-        await PageObjects.visChart.filterOnTableCell(1, 3);
+        await PageObjects.visChart.filterOnTableCell(0, 2);
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([

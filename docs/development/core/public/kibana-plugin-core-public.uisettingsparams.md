@@ -16,18 +16,18 @@ export interface UiSettingsParams<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [category](./kibana-plugin-core-public.uisettingsparams.category.md) | <code>string[]</code> | used to group the configured setting in the UI |
-|  [deprecation](./kibana-plugin-core-public.uisettingsparams.deprecation.md) | <code>DeprecationSettings</code> | optional deprecation information. Used to generate a deprecation warning. |
-|  [description](./kibana-plugin-core-public.uisettingsparams.description.md) | <code>string</code> | description provided to a user in UI |
-|  [metric](./kibana-plugin-core-public.uisettingsparams.metric.md) | <code>{</code><br/><code>        type: UiCounterMetricType;</code><br/><code>        name: string;</code><br/><code>    }</code> | Metric to track once this property changes |
-|  [name](./kibana-plugin-core-public.uisettingsparams.name.md) | <code>string</code> | title in the UI |
-|  [optionLabels](./kibana-plugin-core-public.uisettingsparams.optionlabels.md) | <code>Record&lt;string, string&gt;</code> | text labels for 'select' type UI element |
-|  [options](./kibana-plugin-core-public.uisettingsparams.options.md) | <code>string[]</code> | array of permitted values for this setting |
-|  [order](./kibana-plugin-core-public.uisettingsparams.order.md) | <code>number</code> | index of the settings within its category (ascending order, smallest will be displayed first). Used for ordering in the UI. settings without order defined will be displayed last and ordered by name |
-|  [readonly](./kibana-plugin-core-public.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
-|  [requiresPageReload](./kibana-plugin-core-public.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
-|  [schema](./kibana-plugin-core-public.uisettingsparams.schema.md) | <code>Type&lt;T&gt;</code> |  |
-|  [sensitive](./kibana-plugin-core-public.uisettingsparams.sensitive.md) | <code>boolean</code> | a flag indicating that value might contain user sensitive data. used by telemetry to mask the value of the setting when sent. |
-|  [type](./kibana-plugin-core-public.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element [UiSettingsType](./kibana-plugin-core-public.uisettingstype.md) |
-|  [value](./kibana-plugin-core-public.uisettingsparams.value.md) | <code>T</code> | default value to fall back to if a user doesn't provide any |
+|  [category?](./kibana-plugin-core-public.uisettingsparams.category.md) | string\[\] | <i>(Optional)</i> used to group the configured setting in the UI |
+|  [deprecation?](./kibana-plugin-core-public.uisettingsparams.deprecation.md) | DeprecationSettings | <i>(Optional)</i> optional deprecation information. Used to generate a deprecation warning. |
+|  [description?](./kibana-plugin-core-public.uisettingsparams.description.md) | string | <i>(Optional)</i> description provided to a user in UI |
+|  [metric?](./kibana-plugin-core-public.uisettingsparams.metric.md) | { type: UiCounterMetricType; name: string; } | <i>(Optional)</i> Metric to track once this property changes |
+|  [name?](./kibana-plugin-core-public.uisettingsparams.name.md) | string | <i>(Optional)</i> title in the UI |
+|  [optionLabels?](./kibana-plugin-core-public.uisettingsparams.optionlabels.md) | Record&lt;string, string&gt; | <i>(Optional)</i> text labels for 'select' type UI element |
+|  [options?](./kibana-plugin-core-public.uisettingsparams.options.md) | string\[\] | <i>(Optional)</i> array of permitted values for this setting |
+|  [order?](./kibana-plugin-core-public.uisettingsparams.order.md) | number | <i>(Optional)</i> index of the settings within its category (ascending order, smallest will be displayed first). Used for ordering in the UI. settings without order defined will be displayed last and ordered by name |
+|  [readonly?](./kibana-plugin-core-public.uisettingsparams.readonly.md) | boolean | <i>(Optional)</i> a flag indicating that value cannot be changed |
+|  [requiresPageReload?](./kibana-plugin-core-public.uisettingsparams.requirespagereload.md) | boolean | <i>(Optional)</i> a flag indicating whether new value applying requires page reloading |
+|  [schema](./kibana-plugin-core-public.uisettingsparams.schema.md) | Type&lt;T&gt; |  |
+|  [sensitive?](./kibana-plugin-core-public.uisettingsparams.sensitive.md) | boolean | <i>(Optional)</i> a flag indicating that value might contain user sensitive data. used by telemetry to mask the value of the setting when sent. |
+|  [type?](./kibana-plugin-core-public.uisettingsparams.type.md) | UiSettingsType | <i>(Optional)</i> defines a type of UI element [UiSettingsType](./kibana-plugin-core-public.uisettingstype.md) |
+|  [value?](./kibana-plugin-core-public.uisettingsparams.value.md) | T | <i>(Optional)</i> default value to fall back to if a user doesn't provide any |
 

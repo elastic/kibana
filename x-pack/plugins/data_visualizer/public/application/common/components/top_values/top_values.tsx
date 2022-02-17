@@ -15,7 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ import { IndexPatternField } from '../../../../../../../../src/plugins/data_view
 interface Props {
   stats: FieldVisStats | undefined;
   fieldFormat?: any;
-  barColor?: 'primary' | 'secondary' | 'danger' | 'subdued' | 'accent';
+  barColor?: 'primary' | 'success' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
@@ -43,7 +43,7 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 }
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
-  if (stats === undefined) return null;
+  if (stats === undefined || !stats.topValues) return null;
   const {
     topValues,
     topValuesSampleSize,
@@ -81,11 +81,11 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                   size="xs"
                   label={kibanaFieldFormat(value.key, fieldFormat)}
                   className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
-                  valueText={
+                  valueText={`${value.doc_count}${
                     progressBarMax !== undefined
-                      ? getPercentLabel(value.doc_count, progressBarMax)
-                      : undefined
-                  }
+                      ? ` (${getPercentLabel(value.doc_count, progressBarMax)})`
+                      : ''
+                  }`}
                 />
               </EuiFlexItem>
               {fieldName !== undefined && value.key !== undefined && onAddFilter !== undefined ? (

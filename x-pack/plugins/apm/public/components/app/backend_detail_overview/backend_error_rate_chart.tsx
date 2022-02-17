@@ -7,14 +7,16 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { useTheme } from '../../../hooks/use_theme';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -25,13 +27,9 @@ export function BackendFailedTransactionRateChart({
 }: {
   height: number;
 }) {
-  const { backendName } = useApmBackendContext();
-
-  const theme = useTheme();
-
   const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/backends/{backendName}/overview');
+    query: { backendName, kuery, environment, rangeFrom, rangeTo },
+  } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -43,13 +41,10 @@ export function BackendFailedTransactionRateChart({
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/backends/{backendName}/charts/error_rate',
+      return callApmApi('GET /internal/apm/backends/charts/error_rate', {
         params: {
-          path: {
-            backendName,
-          },
           query: {
+            backendName,
             start,
             end,
             offset,
@@ -62,6 +57,9 @@ export function BackendFailedTransactionRateChart({
     [backendName, start, end, offset, kuery, environment]
   );
 
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.FAILED_TRANSACTION_RATE
+  );
   const timeseries = useMemo(() => {
     const specs: Array<TimeSeries<Coordinate>> = [];
 
@@ -69,7 +67,7 @@ export function BackendFailedTransactionRateChart({
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis7,
+        color: currentPeriodColor,
         title: i18n.translate('xpack.apm.backendErrorRateChart.chartTitle', {
           defaultMessage: 'Failed transaction rate',
         }),
@@ -80,7 +78,7 @@ export function BackendFailedTransactionRateChart({
       specs.push({
         data: data.comparisonTimeseries,
         type: 'area',
-        color: theme.eui.euiColorMediumShade,
+        color: previousPeriodColor,
         title: i18n.translate(
           'xpack.apm.backendErrorRateChart.previousPeriodLabel',
           { defaultMessage: 'Previous period' }
@@ -89,7 +87,7 @@ export function BackendFailedTransactionRateChart({
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis7, theme.eui.euiColorMediumShade]);
+  }, [data, currentPeriodColor, previousPeriodColor]);
 
   return (
     <TimeseriesChart

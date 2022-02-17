@@ -5,70 +5,66 @@
  * 2.0.
  */
 
-import { debounce, omit } from 'lodash';
-import { Unit } from '@elastic/datemath';
-import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiFormRow,
+  EuiHealth,
+  EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiFormRow,
-  EuiButtonEmpty,
-  EuiFieldSearch,
-  EuiCheckbox,
   EuiToolTip,
-  EuiIcon,
-  EuiHealth,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce, omit } from 'lodash';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
-  ThresholdExpression,
   ForLastExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
-import {
   IErrorObject,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
+  ThresholdExpression,
 } from '../../../../../triggers_actions_ui/public';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
-import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
-import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
-import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
-import { rdsMetricTypes } from '../../../../common/inventory_models/aws_rds/toolbar_items';
-import { hostMetricTypes } from '../../../../common/inventory_models/host/toolbar_items';
-import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
-import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
+import {
+  Comparator,
+  FilterQuery,
+  InventoryMetricConditions,
+  QUERY_INVALID,
+} from '../../../../common/alerting/metrics';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api/snapshot_api';
 import { findInventoryModel } from '../../../../common/inventory_models';
+import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
+import { rdsMetricTypes } from '../../../../common/inventory_models/aws_rds/toolbar_items';
+import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
+import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
+import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
+import { hostMetricTypes } from '../../../../common/inventory_models/host/toolbar_items';
+import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
 import {
   InventoryItemType,
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '../../../../common/inventory_models/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-import {
-  SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../common/http_api/snapshot_api';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-
-import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
@@ -80,11 +76,11 @@ export interface AlertContextMeta {
 
 type Criteria = InventoryMetricConditions[];
 type Props = Omit<
-  AlertTypeParamsExpressionProps<
+  RuleTypeParamsExpressionProps<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string;
+      filterQuery?: FilterQuery;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
@@ -110,14 +106,14 @@ export const defaultExpression = {
 
 export const Expressions: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const { setAlertParams, alertParams, errors, metadata } = props;
+  const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
@@ -126,43 +122,47 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
-      const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
+      const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
-      setAlertParams('criteria', exp);
+      setRuleParams('criteria', exp);
     },
-    [setAlertParams, alertParams.criteria]
+    [setRuleParams, ruleParams.criteria]
   );
 
   const addExpression = useCallback(() => {
-    const exp = alertParams.criteria?.slice() || [];
+    const exp = ruleParams.criteria?.slice() || [];
     exp.push({
       ...defaultExpression,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
-    setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
+    setRuleParams('criteria', exp);
+  }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
-      const exp = alertParams.criteria.slice();
+      const exp = ruleParams.criteria.slice();
       if (exp.length > 1) {
         exp.splice(id, 1);
-        setAlertParams('criteria', exp);
+        setRuleParams('criteria', exp);
       }
     },
-    [setAlertParams, alertParams.criteria]
+    [setRuleParams, ruleParams.criteria]
   );
 
   const onFilterChange = useCallback(
     (filter: any) => {
-      setAlertParams('filterQueryText', filter || '');
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQueryText', filter || '');
+      try {
+        setRuleParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setRuleParams('filterQuery', QUERY_INVALID);
+      }
     },
-    [derivedIndexPattern, setAlertParams]
+    [derivedIndexPattern, setRuleParams]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -180,33 +180,33 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
-      const criteria = alertParams.criteria.map((c) => ({
+      const criteria = ruleParams.criteria.map((c) => ({
         ...c,
         timeSize: ts,
       }));
       setTimeSize(ts || undefined);
-      setAlertParams('criteria', criteria as Criteria);
+      setRuleParams('criteria', criteria as Criteria);
     },
-    [alertParams.criteria, setAlertParams]
+    [ruleParams.criteria, setRuleParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      const criteria = alertParams.criteria.map((c) => ({
+      const criteria = ruleParams.criteria.map((c) => ({
         ...c,
         timeUnit: tu,
       }));
-      setTimeUnit(tu as Unit);
-      setAlertParams('criteria', criteria as Criteria);
+      setTimeUnit(tu as TimeUnitChar);
+      setRuleParams('criteria', criteria as Criteria);
     },
-    [alertParams.criteria, setAlertParams]
+    [ruleParams.criteria, setRuleParams]
   );
 
   const updateNodeType = useCallback(
     (nt: any) => {
-      setAlertParams('nodeType', nt);
+      setRuleParams('nodeType', nt);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const handleFieldSearchChange = useCallback(
@@ -217,7 +217,7 @@ export const Expressions: React.FC<Props> = (props) => {
   const preFillAlertCriteria = useCallback(() => {
     const md = metadata;
     if (md && md.options) {
-      setAlertParams('criteria', [
+      setRuleParams('criteria', [
         {
           ...defaultExpression,
           metric: md.options.metric!.type,
@@ -227,44 +227,44 @@ export const Expressions: React.FC<Props> = (props) => {
         } as InventoryMetricConditions,
       ]);
     } else {
-      setAlertParams('criteria', [defaultExpression]);
+      setRuleParams('criteria', [defaultExpression]);
     }
-  }, [metadata, setAlertParams]);
+  }, [metadata, setRuleParams]);
 
   const preFillAlertFilter = useCallback(() => {
     const md = metadata;
     if (md && md.filter) {
-      setAlertParams('filterQueryText', md.filter);
-      setAlertParams(
+      setRuleParams('filterQueryText', md.filter);
+      setRuleParams(
         'filterQuery',
         convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
       );
     }
-  }, [metadata, derivedIndexPattern, setAlertParams]);
+  }, [metadata, derivedIndexPattern, setRuleParams]);
 
   useEffect(() => {
     const md = metadata;
-    if (!alertParams.nodeType) {
+    if (!ruleParams.nodeType) {
       if (md && md.nodeType) {
-        setAlertParams('nodeType', md.nodeType);
+        setRuleParams('nodeType', md.nodeType);
       } else {
-        setAlertParams('nodeType', 'host');
+        setRuleParams('nodeType', 'host');
       }
     }
 
-    if (alertParams.criteria && alertParams.criteria.length) {
-      setTimeSize(alertParams.criteria[0].timeSize);
-      setTimeUnit(alertParams.criteria[0].timeUnit);
+    if (ruleParams.criteria && ruleParams.criteria.length) {
+      setTimeSize(ruleParams.criteria[0].timeSize);
+      setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
       preFillAlertCriteria();
     }
 
-    if (!alertParams.filterQuery) {
+    if (!ruleParams.filterQuery) {
       preFillAlertFilter();
     }
 
-    if (!alertParams.sourceId) {
-      setAlertParams('sourceId', source?.id || 'default');
+    if (!ruleParams.sourceId) {
+      setRuleParams('sourceId', source?.id || 'default');
     }
   }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -284,33 +284,33 @@ export const Expressions: React.FC<Props> = (props) => {
           <NonCollapsibleExpression>
             <NodeTypeExpression
               options={nodeTypes}
-              value={alertParams.nodeType || 'host'}
+              value={ruleParams.nodeType || 'host'}
               onChange={updateNodeType}
             />
           </NonCollapsibleExpression>
         </StyledExpressionRow>
       </StyledExpression>
       <EuiSpacer size={'xs'} />
-      {alertParams.criteria &&
-        alertParams.criteria.map((e, idx) => {
+      {ruleParams.criteria &&
+        ruleParams.criteria.map((e, idx) => {
           return (
             <ExpressionRow
-              nodeType={alertParams.nodeType}
-              canDelete={alertParams.criteria.length > 1}
+              nodeType={ruleParams.nodeType}
+              canDelete={ruleParams.criteria.length > 1}
               remove={removeExpression}
               addExpression={addExpression}
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
               expressionId={idx}
-              setAlertParams={updateParams}
+              setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
               fields={derivedIndexPattern.fields}
             >
               <ExpressionChart
                 expression={e}
-                filterQuery={alertParams.filterQuery}
-                nodeType={alertParams.nodeType}
-                sourceId={alertParams.sourceId}
+                filterQuery={ruleParams.filterQuery}
+                nodeType={ruleParams.nodeType}
+                sourceId={ruleParams.sourceId}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
@@ -360,8 +360,8 @@ export const Expressions: React.FC<Props> = (props) => {
             </EuiToolTip>
           </>
         }
-        checked={alertParams.alertOnNoData}
-        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
+        checked={ruleParams.alertOnNoData}
+        onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
       />
 
       <EuiSpacer size={'m'} />
@@ -381,12 +381,12 @@ export const Expressions: React.FC<Props> = (props) => {
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}
-            value={alertParams.filterQueryText}
+            value={ruleParams.filterQueryText}
           />
         )) || (
           <EuiFieldSearch
             onChange={handleFieldSearchChange}
-            value={alertParams.filterQueryText}
+            value={ruleParams.filterQueryText}
             fullWidth
           />
         )}
@@ -407,12 +407,12 @@ interface ExpressionRowProps {
   expression: Omit<InventoryMetricConditions, 'metric'> & {
     metric?: SnapshotMetricType;
   };
-  errors: AlertTypeParamsExpressionProps['errors'];
+  errors: RuleTypeParamsExpressionProps['errors'];
   canDelete: boolean;
   addExpression(): void;
   remove(id: number): void;
-  setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  fields: IFieldType[];
+  setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
+  fields: DerivedIndexPattern['fields'];
 }
 
 const NonCollapsibleExpression = euiStyled.div`
@@ -437,7 +437,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
 
-  const { children, setAlertParams, expression, errors, expressionId, remove, canDelete, fields } =
+  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, fields } =
     props;
   const {
     metric,
@@ -456,68 +456,68 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     (m?: SnapshotMetricType | string) => {
       const newMetric = SnapshotMetricTypeRT.is(m) ? m : Boolean(m) ? 'custom' : undefined;
       const newAlertParams = { ...expression, metric: newMetric };
-      setAlertParams(expressionId, newAlertParams);
+      setRuleParams(expressionId, newAlertParams);
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateCustomMetric = useCallback(
     (cm?: SnapshotCustomMetricInput) => {
       if (SnapshotCustomMetricInputRT.is(cm)) {
-        setAlertParams(expressionId, { ...expression, customMetric: cm });
+        setRuleParams(expressionId, { ...expression, customMetric: cm });
       }
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setAlertParams(expressionId, { ...expression, comparator: c as Comparator | undefined });
+      setRuleParams(expressionId, { ...expression, comparator: c as Comparator | undefined });
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setAlertParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateThreshold = useCallback(
     (t) => {
       if (t.join() !== expression.threshold.join()) {
-        setAlertParams(expressionId, { ...expression, threshold: t });
+        setRuleParams(expressionId, { ...expression, threshold: t });
       }
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateWarningThreshold = useCallback(
     (t) => {
       if (t.join() !== expression.warningThreshold?.join()) {
-        setAlertParams(expressionId, { ...expression, warningThreshold: t });
+        setRuleParams(expressionId, { ...expression, warningThreshold: t });
       }
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const toggleWarningThreshold = useCallback(() => {
     if (!displayWarningThreshold) {
       setDisplayWarningThreshold(true);
-      setAlertParams(expressionId, {
+      setRuleParams(expressionId, {
         ...expression,
         warningComparator: comparator,
         warningThreshold: [],
       });
     } else {
       setDisplayWarningThreshold(false);
-      setAlertParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+      setRuleParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
     }
   }, [
     displayWarningThreshold,
     setDisplayWarningThreshold,
-    setAlertParams,
+    setRuleParams,
     comparator,
     expression,
     expressionId,
@@ -638,7 +638,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     }
                   )}
                   iconSize="s"
-                  color={'subdued'}
+                  color="text"
                   iconType={'crossInACircleFilled'}
                   onClick={toggleWarningThreshold}
                 />

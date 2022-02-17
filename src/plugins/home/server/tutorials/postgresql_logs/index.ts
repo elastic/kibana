@@ -24,12 +24,12 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'postgresqlLogs',
     name: i18n.translate('home.tutorials.postgresqlLogs.nameTitle', {
-      defaultMessage: 'PostgreSQL logs',
+      defaultMessage: 'PostgreSQL Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.postgresqlLogs.shortDescription', {
-      defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
+      defaultMessage: 'Collect and parse logs from PostgreSQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.postgresqlLogs.longDescription', {
       defaultMessage:
@@ -60,8 +60,8 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/postgresql_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['datastore'],
   };
 }

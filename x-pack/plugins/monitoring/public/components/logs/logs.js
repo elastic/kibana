@@ -12,22 +12,12 @@ import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Reason } from './reason';
 
 const getFormattedDateTimeLocal = (timestamp) => {
-  try {
-    const injector = Legacy.shims.getAngularInjector();
-    const timezone = injector.get('config').get('dateFormat:tz');
-    return formatDateTimeLocal(timestamp, timezone);
-  } catch (error) {
-    if (error.message === 'Angular has been removed.') {
-      const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
-      return formatDateTimeLocal(timestamp, timezone);
-    } else {
-      throw error;
-    }
-  }
+  const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
+  return formatDateTimeLocal(timestamp, timezone);
 };
 
 const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {

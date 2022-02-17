@@ -22,7 +22,7 @@ interface ListPrivileges {
   };
 }
 
-export const useFetchListPrivileges = () => {
+export const useFetchListPrivileges = (isAppAvailable: boolean = true) => {
   const http = useHttp();
   const { lists } = useKibana().services;
   const { start: fetchListPrivileges, ...listPrivileges } = useReadListPrivileges();
@@ -32,12 +32,12 @@ export const useFetchListPrivileges = () => {
   useEffect(() => {
     const { loading, result, error } = listPrivileges;
 
-    if (lists && !loading && !(result || error)) {
+    if (isAppAvailable && lists && !loading && !(result || error)) {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
       fetchListPrivileges({ http, signal: abortCtrlRef.current.signal });
     }
-  }, [http, lists, fetchListPrivileges, listPrivileges]);
+  }, [http, lists, fetchListPrivileges, listPrivileges, isAppAvailable]);
 
   useEffect(() => {
     return () => {

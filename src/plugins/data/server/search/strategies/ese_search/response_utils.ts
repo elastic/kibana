@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AsyncSearchResponse } from './types';
+import type { AsyncSearchResponse } from './types';
 import { getTotalLoaded } from '../es_search';
 
 /**

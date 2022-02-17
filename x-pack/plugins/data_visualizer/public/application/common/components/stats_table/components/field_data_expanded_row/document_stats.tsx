@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, HorizontalAlignment, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBasicTable, HorizontalAlignment, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
 import { roundToDecimalPlace } from '../../../utils';
@@ -20,12 +20,13 @@ const metaTableColumns = [
     name: '',
     render: (_: string, metaItem: { display: ReactNode }) => metaItem.display,
     width: '25px',
-    align: RIGHT_ALIGNMENT as HorizontalAlignment,
+    align: LEFT_ALIGNMENT as HorizontalAlignment,
   },
   {
     field: 'value',
     name: '',
     render: (v: string) => <strong>{v}</strong>,
+    align: RIGHT_ALIGNMENT as HorizontalAlignment,
   },
 ];
 

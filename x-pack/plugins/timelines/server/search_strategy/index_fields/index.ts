@@ -8,26 +8,30 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
-  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
 
-// TODO cleanup path
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
-} from '../../../common/search_strategy/index_fields';
+} from '../../../common/search_strategy';
+import { StartPlugins } from '../../types';
+import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
-export const indexFieldsProvider = (): ISearchStrategy<
-  IndexFieldsStrategyRequest,
+export const indexFieldsProvider = (
+  getStartServices: StartServicesAccessor<StartPlugins>
+): ISearchStrategy<
+  IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   IndexFieldsStrategyResponse
 > => {
   // require the fields once we actually need them, rather than ahead of time, and pass
@@ -36,61 +40,122 @@ export const indexFieldsProvider = (): ISearchStrategy<
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: (request, options, deps) => from(requestIndexFieldSearch(request, deps, beatFields)),
+    search: (request, options, deps) =>
+      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
   };
 };
 
-export const requestIndexFieldSearch = async (
-  request: IndexFieldsStrategyRequest,
-  { esClient }: SearchStrategyDependencies,
-  beatFields: BeatFields
-): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
-  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-
-  const dedupeIndices = dedupeIndexName(request.indices);
-
-  const responsesIndexFields = await Promise.all(
-    dedupeIndices
+export const findExistingIndices = async (
+  indices: string[],
+  esClient: ElasticsearchClient
+): Promise<boolean[]> =>
+  Promise.all(
+    indices
       .map(async (index) => {
-        if (
-          request.onlyCheckIfIndicesExist &&
-          (index.includes(apmIndexPattern) || index.includes(apmDataStreamsPattern))
-        ) {
-          // for apm index pattern check also if there's data https://github.com/elastic/kibana/issues/90661
-          const searchResponse = await esClient.asCurrentUser.search({
+        if ([apmIndexPattern, apmDataStreamsPattern].includes(index)) {
+          const searchResponse = await esClient.search({
             index,
             body: { query: { match_all: {} }, size: 0 },
           });
-          return get(searchResponse, 'body.hits.total.value', 0) > 0;
-        } else {
-          if (index.startsWith('.alerts-observability')) {
-            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-              pattern: index,
-            });
-          } else {
-            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
-              pattern: index,
-            });
-          }
+          return get(searchResponse, 'hits.total.value', 0) > 0;
         }
+        const searchResponse = await esClient.fieldCaps({
+          index,
+          fields: '_id',
+          ignore_unavailable: true,
+          allow_no_indices: false,
+        });
+        return searchResponse.indices.length > 0;
       })
       .map((p) => p.catch((e) => false))
   );
 
-  let indexFields: IndexField[] = [];
+export const requestIndexFieldSearch = async (
+  request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  beatFields: BeatFields,
+  getStartServices: StartServicesAccessor<StartPlugins>
+): Promise<IndexFieldsStrategyResponse> => {
+  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+  if ('dataViewId' in request && 'indices' in request) {
+    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
+  }
+  const [
+    ,
+    {
+      data: { indexPatterns },
+    },
+  ] = await getStartServices();
 
-  if (!request.onlyCheckIfIndicesExist) {
-    indexFields = await formatIndexFields(
-      beatFields,
-      responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-      dedupeIndices
+  const dataViewService = await indexPatterns.dataViewsServiceFactory(
+    savedObjectsClient,
+    esClient.asCurrentUser,
+    kRequest,
+    true
+  );
+
+  let indicesExist: string[] = [];
+  let indexFields: IndexField[] = [];
+  let runtimeMappings = {};
+
+  // if dataViewId is provided, get fields and indices from the Kibana Data View
+  if ('dataViewId' in request) {
+    let dataView;
+    try {
+      dataView = await dataViewService.get(request.dataViewId);
+    } catch (r) {
+      if (
+        r.output.payload.statusCode === 404 &&
+        // this is the only place this id is hard coded as there are no security_solution dependencies in timeline
+        // needs to match value in DEFAULT_DATA_VIEW_ID security_solution/common/constants.ts
+        r.output.payload.message.indexOf('security-solution') > -1
+      ) {
+        throw new Error(DELETED_SECURITY_SOLUTION_DATA_VIEW);
+      } else {
+        throw r;
+      }
+    }
+
+    const patternList = dataView.title.split(',');
+    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      []
     );
+
+    if (!request.onlyCheckIfIndicesExist) {
+      const dataViewSpec = dataView.toSpec();
+      const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
+      runtimeMappings = dataViewSpec.runtimeFieldMap ?? {};
+      indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
+    }
+  } else if ('indices' in request) {
+    const patternList = dedupeIndexName(request.indices);
+    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      []
+    );
+    if (!request.onlyCheckIfIndicesExist) {
+      const fieldDescriptor = await Promise.all(
+        indicesExist.map(async (index, n) => {
+          if (index.startsWith('.alerts-observability')) {
+            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+              pattern: index,
+            });
+          }
+          return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+            pattern: index,
+          });
+        })
+      );
+      indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
+    }
   }
 
   return {
     indexFields,
-    indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
+    runtimeMappings,
+    indicesExist,
     rawResponse: {
       timed_out: false,
       took: -1,
@@ -106,7 +171,6 @@ export const requestIndexFieldSearch = async (
         hits: [
           {
             _index: '',
-            _type: '',
             _id: '',
             _score: -1,
             _source: null,
@@ -125,7 +189,7 @@ export const dedupeIndexName = (indices: string[]) =>
     return acc;
   }, []);
 
-const missingFields: FieldDescriptor[] = [
+const missingFields: FieldSpec[] = [
   {
     name: '_id',
     type: 'string',
@@ -158,7 +222,7 @@ const missingFields: FieldDescriptor[] = [
 export const createFieldItem = (
   beatFields: BeatFields,
   indexesAlias: string[],
-  index: FieldDescriptor,
+  index: FieldSpec,
   indexesAliasIdx: number
 ): IndexField => {
   const alias = indexesAlias[indexesAliasIdx];
@@ -174,6 +238,9 @@ export const createFieldItem = (
   return {
     ...beatIndex,
     ...index,
+    // the format type on FieldSpec is SerializedFieldFormat
+    // and is a string on beatIndex
+    format: index.format?.id ?? beatIndex.format,
     indexes: [alias],
   };
 };
@@ -188,24 +255,24 @@ export const createFieldItem = (
  * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
- * @param responsesIndexFields The response index fields to loop over
+ * @param responsesFieldSpec The response index fields to loop over
  * @param indexesAlias The index aliases such as filebeat-*
  */
 export const formatFirstFields = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[][],
+  responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(
-        responsesIndexFields.reduce(
-          (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
+        responsesFieldSpec.reduce(
+          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasIdx: number) => {
             missingFields.forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
-            indexFields.forEach((index) => {
+            fieldSpec.forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
@@ -262,15 +329,15 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * NOTE: This will have array sizes up to 4.7 megs in size at a time when being called.
  * This function should be as optimized as possible and should avoid any and all creation
  * of new arrays, iterating over the arrays or performing any n^2 operations.
- * @param responsesIndexFields  The response index fields to format
+ * @param responsesFieldSpec  The response index fields to format
  * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[][],
+  responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
+  const fields = await formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };

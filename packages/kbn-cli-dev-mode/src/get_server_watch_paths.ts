@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 interface Options {
   pluginPaths: string[];
@@ -56,9 +56,10 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
     /\.(md|sh|txt)$/,
     /debug\.log$/,
     ...pluginInternalDirsIgnore,
-    fromRoot('x-pack/plugins/reporting/chromium'),
+    fromRoot('x-pack/plugins/screenshotting/chromium'),
     fromRoot('x-pack/plugins/security_solution/cypress'),
     fromRoot('x-pack/plugins/apm/scripts'),
+    fromRoot('x-pack/plugins/apm/ftr_e2e'), // prevents restarts for APM cypress tests
     fromRoot('x-pack/plugins/canvas/canvas_plugin_src'), // prevents server from restarting twice for Canvas plugin changes,
     fromRoot('x-pack/plugins/cases/server/scripts'),
     fromRoot('x-pack/plugins/lists/scripts'),

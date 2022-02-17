@@ -16,6 +16,9 @@ export interface Capabilities {
   canPreviewTransform: boolean;
   canCreateTransform: boolean;
   canStartStopTransform: boolean;
+  canCreateTransformAlerts: boolean;
+  canUseTransformAlerts: boolean;
+  canResetTransform: boolean;
 }
 
 export type Privilege = [string, string];
@@ -67,6 +70,14 @@ export function createCapabilityFailureMessage(
         defaultMessage: 'You do not have permission to create transforms.',
       });
       break;
+    case 'canCreateTransformAlerts':
+      message = i18n.translate(
+        'xpack.transform.capability.noPermission.canCreateTransformAlertsTooltip',
+        {
+          defaultMessage: 'You do not have permission to create transform alert rules.',
+        }
+      );
+      break;
     case 'canStartStopTransform':
       message = i18n.translate(
         'xpack.transform.capability.noPermission.startOrStopTransformTooltip',
@@ -78,6 +89,12 @@ export function createCapabilityFailureMessage(
     case 'canDeleteTransform':
       message = i18n.translate('xpack.transform.capability.noPermission.deleteTransformTooltip', {
         defaultMessage: 'You do not have permission to delete transforms.',
+      });
+      break;
+
+    case 'canResetTransform':
+      message = i18n.translate('xpack.transform.capability.noPermission.resetTransformTooltip', {
+        defaultMessage: 'You do not have permission to reset transforms.',
       });
       break;
 

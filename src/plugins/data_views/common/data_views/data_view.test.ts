@@ -10,7 +10,7 @@ import { map, last } from 'lodash';
 
 import { IndexPattern } from './data_view';
 
-import { DuplicateField } from '../../../kibana_utils/common';
+import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
 
 import { IndexPatternField } from '../fields';
 
@@ -77,9 +77,6 @@ describe('IndexPattern', () => {
     test('should have expected properties', () => {
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
-      expect(indexPattern).toHaveProperty('addScriptedField');
-      expect(indexPattern).toHaveProperty('removeScriptedField');
-      expect(indexPattern).toHaveProperty('addScriptedField');
       expect(indexPattern).toHaveProperty('removeScriptedField');
       expect(indexPattern).toHaveProperty('addRuntimeField');
       expect(indexPattern).toHaveProperty('removeRuntimeField');
@@ -173,11 +170,17 @@ describe('IndexPattern', () => {
         type: 'boolean',
       };
 
-      await indexPattern.addScriptedField(
-        scriptedField.name,
-        scriptedField.script,
-        scriptedField.type
-      );
+      indexPattern.fields.add({
+        name: scriptedField.name,
+        script: scriptedField.script,
+        type: scriptedField.type,
+        scripted: true,
+        lang: 'painless',
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
 
       const scriptedFields = indexPattern.getScriptedFields();
       expect(scriptedFields).toHaveLength(oldCount + 1);
@@ -195,17 +198,6 @@ describe('IndexPattern', () => {
 
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);
-    });
-
-    test('should not allow duplicate names', async () => {
-      const scriptedFields = indexPattern.getScriptedFields();
-      const scriptedField = last(scriptedFields) as any;
-      expect.assertions(1);
-      try {
-        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string');
-      } catch (e) {
-        expect(e).toBeInstanceOf(DuplicateField);
-      }
     });
   });
 
@@ -266,6 +258,14 @@ describe('IndexPattern', () => {
         runtime_field: runtimeField.runtimeField,
       });
       expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
+    });
+
+    test('should not allow runtime field with * in name', async () => {
+      try {
+        await indexPattern.addRuntimeField('test*123', runtime);
+      } catch (e) {
+        expect(e).toBeInstanceOf(CharacterNotAllowedInField);
+      }
     });
   });
 

@@ -13,7 +13,9 @@ import {
 } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../../test_helpers';
 
 import { CurationLogic } from './';
 
@@ -250,7 +252,7 @@ describe('CurationLogic', () => {
     });
 
     describe('onSelectPageTab', () => {
-      it('should set the selected page tab', () => {
+      it('should set the selected page tab and clears flash messages', () => {
         mount({
           selectedPageTab: 'promoted',
         });
@@ -261,6 +263,7 @@ describe('CurationLogic', () => {
           ...DEFAULT_VALUES,
           selectedPageTab: 'hidden',
         });
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
   });
@@ -294,7 +297,7 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -308,14 +311,8 @@ describe('CurationLogic', () => {
         expect(CurationLogic.actions.loadCuration).toHaveBeenCalled();
       });
 
-      it('flashes any error messages', async () => {
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-        mount({ activeQuery: 'some query' });
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationLogic.actions.convertToManual();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -335,14 +332,9 @@ describe('CurationLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      it('flashes any errors', async () => {
-        http.delete.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount({}, { curationId: 'cur-404' });
-
         CurationLogic.actions.deleteCuration();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -411,6 +403,7 @@ describe('CurationLogic', () => {
         expect(http.put).toHaveBeenCalledWith(
           '/internal/app_search/engines/some-engine/curations/cur-123456789',
           {
+            query: { skip_record_analytics: 'true' },
             body: '{"queries":["a","b","c"],"query":"b","promoted":["d","e","f"],"hidden":["g"]}', // Uses state currently in CurationLogic
           }
         );

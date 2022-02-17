@@ -7,10 +7,9 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
-import { shimAbortSignal } from '../search';
 import { ConfigSchema } from '../../config';
 
 export async function termsEnumSuggestions(
@@ -30,26 +29,30 @@ export async function termsEnumSuggestions(
     field = indexPattern && getFieldByName(fieldName, indexPattern);
   }
 
-  const promise = esClient.termsEnum({
-    index,
-    body: {
-      field: field?.name ?? fieldName,
-      string: query,
-      index_filter: {
-        bool: {
-          must: [
-            ...(filters ?? []),
-            {
-              terms: {
-                _tier: tiers,
+  const result = await esClient.termsEnum(
+    {
+      index,
+      body: {
+        field: field?.name ?? fieldName,
+        string: query,
+        index_filter: {
+          bool: {
+            must: [
+              ...(filters ?? []),
+              {
+                terms: {
+                  _tier: tiers,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     },
-  });
+    {
+      signal: abortSignal,
+    }
+  );
 
-  const result = await shimAbortSignal(promise, abortSignal);
-  return result.body.terms;
+  return result.terms;
 }

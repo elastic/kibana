@@ -36,14 +36,14 @@ declare global {
     interface Global {}
     interface InspectOptions {}
 
-    interface ConsoleConstructor
-      extends console.ConsoleConstructor {}
+    interface ConsoleConstructor extends console.ConsoleConstructor {}
   }
 }
 /* eslint-enable */
 
 export function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
+  const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({
     level: argv.verbose ? 'verbose' : 'info',
@@ -52,12 +52,13 @@ export function runJest(configName = 'jest.config.js') {
 
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/jest');
-  let cwd: string;
+
   let testFiles: string[];
 
+  const cwd: string = process.env.INIT_CWD || process.cwd();
+
   if (!argv.config) {
-    cwd = process.env.INIT_CWD || process.cwd();
-    testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
+    testFiles = argv._.splice(2).map((p) => resolve(cwd, p.toString()));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
@@ -66,16 +67,23 @@ export function runJest(configName = 'jest.config.js') {
     log.verbose('commonTestFiles:', commonTestFiles);
 
     let configPath;
+    let devConfigPath;
 
     // sets the working directory to the cwd or the common
     // base directory of the provided test files
     let wd = testFilesProvided ? commonTestFiles : cwd;
 
+    devConfigPath = resolve(wd, devConfigName);
     configPath = resolve(wd, configName);
 
-    while (!existsSync(configPath)) {
+    while (!existsSync(configPath) && !existsSync(devConfigPath)) {
       wd = resolve(wd, '..');
+      devConfigPath = resolve(wd, devConfigName);
       configPath = resolve(wd, configName);
+    }
+
+    if (existsSync(devConfigPath)) {
+      configPath = devConfigPath;
     }
 
     log.verbose(`no config provided, found ${configPath}`);

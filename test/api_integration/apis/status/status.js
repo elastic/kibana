@@ -25,7 +25,7 @@ export default function ({ getService }) {
           expect(body.version.build_number).to.be.a('number');
 
           expect(body.status.overall).to.be.an('object');
-          expect(body.status.overall.level).to.be('available');
+          expect(body.status.overall.level).to.be.a('string');
 
           expect(body.status.core).to.be.an('object');
           expect(body.status.plugins).to.be.an('object');

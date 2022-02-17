@@ -23,7 +23,6 @@ const validate = {
     id: schema.string(),
   }),
 };
-
 ```
 - Declare a function to respond to incoming request. The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`<!-- -->, `query`<!-- -->, `body`<!-- -->. And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status. Any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
 
@@ -40,7 +39,6 @@ const handler = async (context: RequestHandlerContext, request: KibanaRequest, r
     headers: { 'content-type': 'application/json' }
   });
 }
-
 ```
 \* - Acquire `preboot` [IRouter](./kibana-plugin-core-server.irouter.md) instance and register route handler for GET request to 'path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path.
 
@@ -65,15 +63,14 @@ httpPreboot.registerRoutes('my-plugin', (router) => {
     });
   });
 });
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [basePath](./kibana-plugin-core-server.httpservicepreboot.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
-|  [getServerInfo](./kibana-plugin-core-server.httpservicepreboot.getserverinfo.md) | <code>() =&gt; HttpServerInfo</code> | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running preboot http server. |
+|  [basePath](./kibana-plugin-core-server.httpservicepreboot.basepath.md) | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
+|  [getServerInfo](./kibana-plugin-core-server.httpservicepreboot.getserverinfo.md) | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running preboot http server. |
 
 ## Methods
 

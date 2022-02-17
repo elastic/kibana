@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Query } from '@kbn/es-query';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
-import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
@@ -84,9 +84,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
   indexPattern: {
     fields: [
       {
-        aggregatable: true,
         name: '@timestamp',
-        searchable: true,
         type: 'date',
       },
     ],

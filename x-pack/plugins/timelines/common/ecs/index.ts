@@ -31,6 +31,11 @@ import { SystemEcs } from './system';
 import { ThreatEcs } from './threat';
 import { Ransomware } from './ransomware';
 
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
+  building_block_type?: string[];
+  workflow_status?: string[];
+};
 export interface Ecs {
   _id: string;
   _index?: string;
@@ -46,6 +51,9 @@ export interface Ecs {
   registry?: RegistryEcs;
   rule?: RuleEcs;
   signal?: SignalEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
   source?: SourceEcs;
   suricata?: SuricataEcs;
   tls?: TlsEcs;

@@ -23,9 +23,12 @@ export const getIndexCount = async ({
   esClient: ElasticsearchClient;
   index: string;
 }): Promise<number> => {
-  const response = await esClient.count<{ count: number }>({
-    index,
-  });
+  const response = await esClient.count(
+    {
+      index,
+    },
+    { meta: true }
+  );
 
   return response.body.count;
 };

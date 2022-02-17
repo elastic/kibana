@@ -6,7 +6,7 @@
  */
 
 import type { SourceRegistryEntry } from '../classes/sources/source_registry';
-import type { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { LayerWizard } from '../classes/layers';
 
 export interface MapsSetupApi {
   registerLayerWizard(layerWizard: LayerWizard): void;

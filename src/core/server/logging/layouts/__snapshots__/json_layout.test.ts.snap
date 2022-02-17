@@ -88,3 +88,26 @@ Object {
   },
 }
 `;
+
+exports[`\`format()\` correctly formats record and includes correct ECS version. 7`] = `
+Object {
+  "@timestamp": "2012-02-01T09:30:22.011-05:00",
+  "log": Object {
+    "level": "TRACE",
+    "logger": "context-7",
+  },
+  "message": "message-6",
+  "process": Object {
+    "pid": 5355,
+  },
+  "span": Object {
+    "id": "spanId-1",
+  },
+  "trace": Object {
+    "id": "traceId-1",
+  },
+  "transaction": Object {
+    "id": "transactionId-1",
+  },
+}
+`;

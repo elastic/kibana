@@ -8,23 +8,28 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('main', () => {
-    it('can retrieve an index_pattern', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-        },
-      });
-      const response2 = await supertest.get(
-        '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id
-      );
+    configArray.forEach((config) => {
+      describe(config.name, () => {
+        it('can retrieve an index_pattern', async () => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
+          const response1 = await supertest.post(config.path).send({
+            [config.serviceKey]: {
+              title,
+            },
+          });
+          const response2 = await supertest.get(
+            `${config.path}/${response1.body[config.serviceKey].id}`
+          );
 
-      expect(response2.body.index_pattern.title).to.be(title);
+          expect(response2.body[config.serviceKey].title).to.be(title);
+        });
+      });
     });
   });
 }

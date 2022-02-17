@@ -7,13 +7,8 @@
 
 import { KibanaServices } from '../common/lib/kibana';
 
-import {
-  CASES_URL,
-  ConnectorTypes,
-  CommentType,
-  CaseStatuses,
-  SECURITY_SOLUTION_OWNER,
-} from '../../common';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 import {
   deleteCases,
@@ -234,6 +229,7 @@ describe('Case Configuration API', () => {
     });
 
     test('should return correct response', async () => {
+      fetchMock.mockResolvedValue(allCasesSnake);
       const resp = await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,

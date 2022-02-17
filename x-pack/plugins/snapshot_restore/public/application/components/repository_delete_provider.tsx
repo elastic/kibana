@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal } from '@elastic/eui';
 
 import { Repository } from '../../../common/types';

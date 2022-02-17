@@ -53,21 +53,19 @@ export const toSearchResult = (
   pkg: PackageListItem,
   application: ApplicationStart,
   basePath: IBasePath
-): GlobalSearchProviderResult => {
-  const pkgkey = `${pkg.name}-${pkg.version}`;
-  return {
-    id: pkgkey,
-    type: packageType,
-    title: pkg.title,
-    score: 80,
-    icon: getEuiIconType(pkg, basePath),
-    url: {
-      // prettier-ignore
-      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
-      prependBasePath: false,
-    },
-  };
-};
+): GlobalSearchProviderResult => ({
+  id: pkg.name,
+  type: packageType,
+  title: pkg.title,
+  score: 80,
+  icon: getEuiIconType(pkg, basePath),
+  url: {
+    path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${
+      pagePathGetters.integration_details_overview({ pkgkey: pkg.name })[1]
+    }`,
+    prependBasePath: false,
+  },
+});
 
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {
   const coreStart$ = from(core.getStartServices()).pipe(
@@ -107,7 +105,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
 
       const toSearchResults = (
         coreStart: CoreStart,
-        packagesResponse: GetPackagesResponse['response']
+        packagesResponse: GetPackagesResponse['items']
       ): GlobalSearchProviderResult[] => {
         return packagesResponse
           .flatMap(

@@ -7,7 +7,7 @@
 
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
 import { useAppDependencies } from '../../../../app_dependencies';
@@ -62,9 +62,9 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
               type: 'index-pattern',
               getIconForSavedObject: () => 'indexPatternApp',
               name: i18n.translate(
-                'xpack.transform.newTransform.searchSelection.savedObjectType.indexPattern',
+                'xpack.transform.newTransform.searchSelection.savedObjectType.dataView',
                 {
-                  defaultMessage: 'Index pattern',
+                  defaultMessage: 'Data view',
                 }
               ),
             },

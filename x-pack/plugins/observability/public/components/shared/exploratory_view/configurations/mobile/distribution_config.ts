@@ -22,7 +22,7 @@ import {
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
 
-import { CPU_USAGE, MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
+import { CPU_USAGE, SYSTEM_MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
@@ -57,7 +57,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
         id: TRANSACTION_DURATION,
       },
       {
-        label: MEMORY_USAGE,
+        label: SYSTEM_MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
       },

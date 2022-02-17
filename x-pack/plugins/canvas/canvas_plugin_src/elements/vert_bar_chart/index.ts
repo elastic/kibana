@@ -13,7 +13,8 @@ export const verticalBarChart: ElementFactory = () => ({
   type: 'chart',
   help: 'A customizable vertical bar chart',
   icon: 'visBarVertical',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="project" y="size(cost)" color="project"
 | plot defaultStyle={seriesStyle bars=0.75} legend=false

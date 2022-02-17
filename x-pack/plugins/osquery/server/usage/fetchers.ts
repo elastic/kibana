@@ -6,11 +6,11 @@
  */
 
 import {
-  AggregationsSingleBucketAggregate,
+  AggregationsSingleBucketAggregateBase,
   AggregationsTopHitsAggregate,
-  AggregationsValueAggregate,
+  AggregationsRateAggregate,
   SearchResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -42,7 +42,12 @@ export async function getPolicyLevelUsage(
     // TODO: figure out how to support dynamic keys in metrics
     // packageVersions: getPackageVersions(packagePolicies),
   };
-  const agentResponse = await esClient.search({
+  const agentResponse = await esClient.search<
+    unknown,
+    {
+      policied: AggregationsSingleBucketAggregateBase;
+    }
+  >({
     body: {
       size: 0,
       query: {
@@ -63,7 +68,7 @@ export async function getPolicyLevelUsage(
     index: '.fleet-agents',
     ignore_unavailable: true,
   });
-  const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
+  const policied = agentResponse.aggregations?.policied;
   if (policied && typeof policied.doc_count === 'number') {
     result.agent_info = {
       enrolled: policied.doc_count,
@@ -111,7 +116,12 @@ export async function getLiveQueryUsage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const { body: metricResponse } = await esClient.search({
+  const metricResponse = await esClient.search<
+    unknown,
+    {
+      queries: AggregationsSingleBucketAggregateBase;
+    }
+  >({
     body: {
       size: 0,
       aggs: {
@@ -130,7 +140,7 @@ export async function getLiveQueryUsage(
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
   };
-  const esQueries = metricResponse.aggregations?.queries as AggregationsSingleBucketAggregate;
+  const esQueries = metricResponse.aggregations?.queries;
   if (esQueries && typeof esQueries.doc_count === 'number') {
     // getting error stats out of ES is difficult due to a lack of error info on .fleet-actions
     // and a lack of indexable osquery specific info on .fleet-actions-results
@@ -142,10 +152,22 @@ export async function getLiveQueryUsage(
   return result;
 }
 
+interface BeatUsageAggs {
+  lastDay: {
+    max_rss?: AggregationsRateAggregate;
+    max_cpu?: AggregationsRateAggregate;
+    latest?: AggregationsTopHitsAggregate;
+
+    // not used in code, declared to satisfy type
+    avg_rss?: AggregationsRateAggregate;
+    avg_cpu?: AggregationsRateAggregate;
+  };
+}
+
 export function extractBeatUsageMetrics(
-  metricResponse: Pick<SearchResponse<unknown>, 'aggregations'>
+  metricResponse: Pick<SearchResponse<unknown, BeatUsageAggs>, 'aggregations'>
 ) {
-  const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
+  const lastDayAggs = metricResponse.aggregations?.lastDay;
   const result: BeatMetricsUsage = {
     memory: {
       rss: {},
@@ -154,25 +176,26 @@ export function extractBeatUsageMetrics(
   };
 
   if (lastDayAggs) {
-    if ('max_rss' in lastDayAggs) {
-      result.memory.rss.max = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
+    if (lastDayAggs.max_rss !== undefined) {
+      result.memory.rss.max = lastDayAggs.max_rss.value;
     }
 
-    if ('avg_rss' in lastDayAggs) {
-      result.memory.rss.avg = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
+    if (lastDayAggs.avg_rss !== undefined) {
+      // @ts-expect-error condition check another property, not idea why. consider fixing
+      result.memory.rss.avg = lastDayAggs.max_rss.value;
     }
 
-    if ('max_cpu' in lastDayAggs) {
-      result.cpu.max = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
+    if (lastDayAggs.max_cpu !== undefined) {
+      result.cpu.max = lastDayAggs.max_cpu.value;
     }
 
-    if ('avg_cpu' in lastDayAggs) {
-      result.cpu.avg = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
+    if (lastDayAggs.avg_cpu !== undefined) {
+      // @ts-expect-error condition check another property, not idea why. consider fixing
+      result.cpu.avg = lastDayAggs.max_cpu.value;
     }
 
-    if ('latest' in lastDayAggs) {
-      const latest = (lastDayAggs.latest as AggregationsTopHitsAggregate).hits.hits[0]?._source
-        ?.monitoring.metrics.beat;
+    if (lastDayAggs.latest !== undefined) {
+      const latest = lastDayAggs.latest.hits.hits[0]?._source?.monitoring.metrics.beat;
       if (latest) {
         result.cpu.latest = latest.cpu.total.time.ms;
         result.memory.rss.latest = latest.memstats.rss;
@@ -183,7 +206,7 @@ export function extractBeatUsageMetrics(
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
-  const { body: metricResponse } = await esClient.search({
+  const metricResponse = await esClient.search<unknown, BeatUsageAggs>({
     body: {
       size: 0,
       aggs: {

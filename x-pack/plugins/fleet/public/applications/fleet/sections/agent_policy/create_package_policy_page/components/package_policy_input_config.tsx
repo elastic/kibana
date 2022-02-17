@@ -7,7 +7,7 @@
 
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -105,7 +105,8 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-              const { value, frozen } = packagePolicyInput.vars![varName];
+              if (!packagePolicyInput.vars) return;
+              const { value, frozen } = packagePolicyInput.vars[varName];
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField

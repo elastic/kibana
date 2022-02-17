@@ -1,0 +1,8 @@
+.reportingRedirectApp {
+  &__interstitialPage {
+    /*
+      Create some padding above and below the page so that the errors (if any) display nicely.
+    */
+    margin: $euiSizeXXL auto;
+  }
+}

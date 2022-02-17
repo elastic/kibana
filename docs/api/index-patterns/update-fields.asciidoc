@@ -4,6 +4,8 @@
 <titleabbrev>Update index pattern fields metadata</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-fields-api-update>> instead.]
+
 experimental[] Update fields presentation metadata, such as `count`,
 `customLabel`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.

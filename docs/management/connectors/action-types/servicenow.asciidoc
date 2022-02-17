@@ -1,24 +1,81 @@
 [role="xpack"]
 [[servicenow-action-type]]
-=== ServiceNow connector and action
+=== ServiceNow ITSM connector and action
 ++++
 <titleabbrev>ServiceNow ITSM</titleabbrev>
 ++++
 
-The ServiceNow ITSM connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents.
+The {sn} ITSM connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create {sn} incidents.
+
+[float]
+[[servicenow-itsm-connector-prerequisites]]
+==== Prerequisites
+After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn} ITSM connector or <<servicenow-itsm-connector-update, updating an existing one>>:
+
+* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] from the {sn} Store.
+* Create a {sn} integration user and assign it the appropriate roles.
+* Create a Cross-Origin Resource Sharing (CORS) rule.
+
+*Create a {sn} integration user*
+
+To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles.
+
+. In your {sn} instance, go to *System Security -> Users and Groups -> Users*.
+. Click *New*.
+. Complete the form, then right-click on the menu bar and click *Save*.
+. Go to the *Roles* tab and click *Edit*.
+. Assign the integration user the following roles: 
+* `import_set_loader`
+* `import_transformer`
+* `personalize_choices`
+* `x_elas2_inc_int.integration_user`
+. Click *Save*.
+
+*Create a CORS rule*
+
+A CORS rule is required for communication between Elastic and {sn}. To create a CORS rule:
+
+. In your {sn} instance, go to *System Web Services -> REST -> CORS Rules*.
+. Click *New*.
+. Configure the rule as follows:
+* *Name*: Name the rule.
+* *REST API*: Set the rule to use the Elastic ITSM API by choosing `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
+* *Domain*: Enter the Kibana URL.
+. Go to the *HTTP methods* tab and select *GET*.
+. Click *Submit* to create the rule.
+
+[float]
+[[servicenow-itsm-connector-update]]
+==== Update a deprecated {sn} ITSM connector
+
+{sn} ITSM connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
+
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or <<creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
+
+To update a deprecated connector:
+
+. Open the main menu and go to *Stack Management -> Rules and connectors -> Connectors*.
+. Select the deprecated connector to open the *Edit connector* flyout.
+. In the warning message, click *Update this connector*.
+. Complete the guided steps in the *Edit connector* flyout.
+.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] and complete the <<servicenow-itsm-connector-prerequisites, required prerequisites>>.
+.. Enter the URL of your {sn} instance.
+.. Enter the username and password of your {sn} instance.
+. Click *Update*.
 
 [float]
 [[servicenow-connector-configuration]]
 ==== Connector configuration
 
-ServiceNow ITSM connectors have the following configuration properties.
+{sn} ITSM connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
-URL::       ServiceNow instance URL.
+URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
-
-The ServiceNow user requires at minimum read, create, and update access to the Incident table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
 
 [float]
 [[servicenow-connector-networking-configuration]]
@@ -36,7 +93,8 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    name: preconfigured-servicenow-connector-type
    actionTypeId: .servicenow
    config:
-     apiUrl: https://dev94428.service-now.com/
+     apiUrl: https://example.service-now.com/
+     usesTableApi: false
    secrets:
      username: testuser
      password: passwordkeystorevalue
@@ -45,6 +103,9 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
+`usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
+
+NOTE: If `usesTableApi` is set to false, the Elastic application should be installed in {sn}.
 
 Secrets defines sensitive information for the connector type.
 
@@ -55,12 +116,12 @@ Secrets defines sensitive information for the connector type.
 [[define-servicenow-ui]]
 ==== Define connector in Stack Management
 
-Define ServiceNow ITSM connector properties.
+Define {sn} ITSM connector properties.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-connector.png[ServiceNow connector]
 
-Test ServiceNow ITSM action parameters.
+Test {sn} ITSM action parameters.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-params-test.png[ServiceNow params test]
@@ -69,19 +130,24 @@ image::management/connectors/images/servicenow-params-test.png[ServiceNow params
 [[servicenow-action-configuration]]
 ==== Action configuration
 
-ServiceNow ITSM actions have the following configuration properties.
+{sn} ITSM actions have the following configuration properties.
 
 Urgency::              The extent to which the incident resolution can delay.
 Severity::             The severity of the incident.
 Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
 Category::             The category of the incident.
 Subcategory::          The category of the incident.
+Correlation ID::            Connectors using the same Correlation ID will be associated with the same {sn} incident. This value determines whether a new {sn} incident will be created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the Correlation ID value in {sn}. The maximum character length for this value is 100 characters.
+
+NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that {sn} will create a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, {sn} creates and continually updates a single incident record for the alert.
+
+Correlation Display::  A descriptive label of the alert for correlation purposes in {sn}.
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [float]
 [[configuring-servicenow]]
-==== Configure ServiceNow
+==== Configure {sn}
 
-ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.
+{sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

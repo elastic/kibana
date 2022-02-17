@@ -26,7 +26,7 @@ export const WithCopyToClipboard = React.memo<{
   showTooltip?: boolean;
   text: string;
   titleSummary?: string;
-}>(({ isHoverAction, keyboardShortcut = '', showTooltip = false, text, titleSummary }) => {
+}>(({ isHoverAction, keyboardShortcut = '', showTooltip = true, text, titleSummary }) => {
   return showTooltip ? (
     <EuiToolTip
       content={

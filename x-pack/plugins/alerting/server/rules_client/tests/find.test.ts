@@ -16,8 +16,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
@@ -28,7 +27,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -77,7 +76,6 @@ describe('find()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -295,7 +293,6 @@ describe('find()', () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,
@@ -491,7 +488,6 @@ describe('find()', () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     const injectReferencesFn = jest.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
@@ -628,7 +624,6 @@ describe('find()', () => {
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         filter,
         ensureRuleTypeIsAuthorized() {},
-        logSuccessfulAuthorization() {},
       });
 
       const rulesClient = new RulesClient(rulesClientParams);
@@ -651,10 +646,8 @@ describe('find()', () => {
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
       const ensureRuleTypeIsAuthorized = jest.fn();
-      const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized,
-        logSuccessfulAuthorization,
       });
 
       unsecuredSavedObjectsClient.find.mockReset();
@@ -704,7 +697,6 @@ describe('find()', () => {
         type: 'alert',
       });
       expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');
-      expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
 
@@ -748,7 +740,6 @@ describe('find()', () => {
         ensureRuleTypeIsAuthorized: jest.fn(() => {
           throw new Error('Unauthorized');
         }),
-        logSuccessfulAuthorization: jest.fn(),
       });
 
       await expect(async () => await rulesClient.find()).rejects.toThrow();

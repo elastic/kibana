@@ -24,12 +24,12 @@ export function infobloxLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'infobloxLogs',
     name: i18n.translate('home.tutorials.infobloxLogs.nameTitle', {
-      defaultMessage: 'Infoblox logs',
+      defaultMessage: 'Infoblox Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.infobloxLogs.shortDescription', {
-      defaultMessage: 'Collect Infoblox NIOS logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Infoblox NIOS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.infobloxLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function infobloxLogsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network'],
   };
 }

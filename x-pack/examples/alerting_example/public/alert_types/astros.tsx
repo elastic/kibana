@@ -22,7 +22,7 @@ import { flatten } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 import { SanitizedAlert } from '../../../../plugins/alerting/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerting/public';
-import { AlertTypeModel } from '../../../../plugins/triggers_actions_ui/public';
+import { RuleTypeModel } from '../../../../plugins/triggers_actions_ui/public';
 
 export function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
@@ -33,8 +33,8 @@ export function registerNavigation(alerting: AlertingSetup) {
 }
 
 interface PeopleinSpaceParamsProps {
-  alertParams: { outerSpaceCapacity?: number; craft?: string; op?: string };
-  setAlertParams: (property: string, value: any) => void;
+  ruleParams: { outerSpaceCapacity?: number; craft?: string; op?: string };
+  setRuleParams: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
 }
 
@@ -42,14 +42,14 @@ function isValueInEnum(enumeratin: Record<string, any>, value: any): boolean {
   return !!Object.values(enumeratin).find((enumVal) => enumVal === value);
 }
 
-export function getAlertType(): AlertTypeModel {
+export function getAlertType(): RuleTypeModel {
   return {
     id: 'example.people-in-space',
     description: 'Alert when people are in space right now',
     iconClass: 'globe',
     documentationUrl: null,
-    alertParamsExpression: PeopleinSpaceExpression,
-    validate: (alertParams: PeopleinSpaceParamsProps['alertParams']) => {
+    ruleParamsExpression: PeopleinSpaceExpression,
+    validate: (alertParams: PeopleinSpaceParamsProps['ruleParams']) => {
       const { outerSpaceCapacity, craft, op } = alertParams;
 
       const validationResult = {
@@ -93,24 +93,24 @@ export function getAlertType(): AlertTypeModel {
 }
 
 export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParamsProps> = ({
-  alertParams,
-  setAlertParams,
+  ruleParams,
+  setRuleParams,
   errors,
 }) => {
-  const { outerSpaceCapacity = 0, craft = Craft.OuterSpace, op = Operator.AreAbove } = alertParams;
+  const { outerSpaceCapacity = 0, craft = Craft.OuterSpace, op = Operator.AreAbove } = ruleParams;
 
   // store defaults
   useEffect(() => {
-    if (outerSpaceCapacity !== alertParams.outerSpaceCapacity) {
-      setAlertParams('outerSpaceCapacity', outerSpaceCapacity);
+    if (outerSpaceCapacity !== ruleParams.outerSpaceCapacity) {
+      setRuleParams('outerSpaceCapacity', outerSpaceCapacity);
     }
-    if (craft !== alertParams.craft) {
-      setAlertParams('craft', craft);
+    if (craft !== ruleParams.craft) {
+      setRuleParams('craft', craft);
     }
-    if (op !== alertParams.op) {
-      setAlertParams('op', op);
+    if (op !== ruleParams.op) {
+      setRuleParams('op', op);
     }
-  }, [alertParams, craft, op, outerSpaceCapacity, setAlertParams]);
+  }, [ruleParams, craft, op, outerSpaceCapacity, setRuleParams]);
 
   const [craftTrigger, setCraftTrigger] = useState<{ craft: string; isOpen: boolean }>({
     craft,
@@ -179,7 +179,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                 compressed
                 value={craftTrigger.craft}
                 onChange={(event) => {
-                  setAlertParams('craft', event.target.value);
+                  setRuleParams('craft', event.target.value);
                   setCraftTrigger({
                     craft: event.target.value,
                     isOpen: false,
@@ -228,7 +228,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                     compressed
                     value={outerSpaceCapacityTrigger.op}
                     onChange={(event) => {
-                      setAlertParams('op', event.target.value);
+                      setRuleParams('op', event.target.value);
                       setOuterSpaceCapacity({
                         ...outerSpaceCapacityTrigger,
                         op: event.target.value,
@@ -248,7 +248,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                     compressed
                     value={outerSpaceCapacityTrigger.outerSpaceCapacity}
                     onChange={(event) => {
-                      setAlertParams('outerSpaceCapacity', event.target.valueAsNumber);
+                      setRuleParams('outerSpaceCapacity', event.target.valueAsNumber);
                       setOuterSpaceCapacity({
                         ...outerSpaceCapacityTrigger,
                         outerSpaceCapacity: event.target.valueAsNumber,

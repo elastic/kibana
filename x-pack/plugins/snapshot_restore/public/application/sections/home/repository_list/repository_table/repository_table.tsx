@@ -6,7 +6,7 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -238,7 +238,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadButton"
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"

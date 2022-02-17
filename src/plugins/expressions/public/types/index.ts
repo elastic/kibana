@@ -14,6 +14,7 @@ import {
   ExpressionValue,
   ExpressionsService,
   RenderMode,
+  IInterpreterRenderEvent,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';
 
@@ -75,3 +76,6 @@ export type RenderErrorHandlerFnType = (
   error: ExpressionRenderError,
   handlers: IInterpreterRenderHandlers
 ) => void;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExpressionRendererEvent = IInterpreterRenderEvent<any>;

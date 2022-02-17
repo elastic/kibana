@@ -161,8 +161,25 @@ const getTimelineTypeFilter = (
       : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`;
 
   const filters = [typeFilter, draftFilter, immutableFilter];
-  return filters.filter((f) => f != null).join(' and ');
+  return combineFilters(filters);
 };
+
+const getTimelineFavoriteFilter = ({
+  onlyUserFavorite,
+  request,
+}: {
+  onlyUserFavorite: boolean | null;
+  request: FrameworkRequest;
+}) => {
+  if (!onlyUserFavorite) {
+    return null;
+  }
+  const username = request.user?.username ?? UNAUTHENTICATED_USER;
+  return `siem-ui-timeline.attributes.favorite.keySearch: ${convertStringToBase64(username)}`;
+};
+
+const combineFilters = (filters: Array<string | null>) =>
+  filters.filter((f) => f != null).join(' and ');
 
 export const getExistingPrepackagedTimelines = async (
   request: FrameworkRequest,
@@ -197,15 +214,19 @@ export const getAllTimeline = async (
   status: TimelineStatusLiteralWithNull,
   timelineType: TimelineTypeLiteralWithNull
 ): Promise<AllTimelinesResponse> => {
+  const searchTerm = search != null ? search : undefined;
+  const searchFields = ['title', 'description'];
+  const filter = combineFilters([
+    getTimelineTypeFilter(timelineType ?? null, status ?? null),
+    getTimelineFavoriteFilter({ onlyUserFavorite, request }),
+  ]);
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: pageInfo.pageSize,
     page: pageInfo.pageIndex,
-    search: search != null ? search : undefined,
-    searchFields: onlyUserFavorite
-      ? ['title', 'description', 'favorite.keySearch']
-      : ['title', 'description'],
-    filter: getTimelineTypeFilter(timelineType ?? null, status ?? null),
+    filter,
+    search: searchTerm,
+    searchFields,
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
@@ -233,10 +254,14 @@ export const getAllTimeline = async (
 
   const favoriteTimelineOptions = {
     type: timelineSavedObjectType,
-    searchFields: ['title', 'description', 'favorite.keySearch'],
+    search: searchTerm,
+    searchFields,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(timelineType ?? null, TimelineStatus.active),
+    filter: combineFilters([
+      getTimelineTypeFilter(timelineType ?? null, TimelineStatus.active),
+      getTimelineFavoriteFilter({ onlyUserFavorite: true, request }),
+    ]),
   };
 
   const result = await Promise.all([
@@ -623,11 +648,6 @@ const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) =
 const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = request.context.core.savedObjects.client;
-  if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
-    options.search = `${options.search != null ? options.search : ''} ${
-      userName != null ? convertStringToBase64(userName) : null
-    }`;
-  }
 
   const savedObjects = await savedObjectsClient.find<TimelineWithoutExternalRefs>(options);
 

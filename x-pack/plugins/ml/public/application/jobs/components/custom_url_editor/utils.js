@@ -10,17 +10,14 @@ import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import rison from 'rison-node';
 import url from 'url';
 
-import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard/public';
-
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
-import { getIndexPatternIdFromName } from '../../../util/index_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
+import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
-export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
+export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
   const kibanaSettings = {
@@ -32,23 +29,23 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   if (dashboards !== undefined && dashboards.length > 0) {
     urlType = URL_TYPE.KIBANA_DASHBOARD;
     kibanaSettings.dashboardId = dashboards[0].id;
-  } else if (indexPatterns !== undefined && indexPatterns.length > 0) {
+  } else if (dataViews !== undefined && dataViews.length > 0) {
     urlType = URL_TYPE.KIBANA_DISCOVER;
   }
 
-  // For the Discover option, set the default index pattern to that
+  // For the Discover option, set the default data view to that
   // which matches the indices configured in the job datafeed.
   const datafeedConfig = job.datafeed_config;
   if (
-    indexPatterns !== undefined &&
-    indexPatterns.length > 0 &&
+    dataViews !== undefined &&
+    dataViews.length > 0 &&
     datafeedConfig !== undefined &&
     datafeedConfig.indices !== undefined &&
     datafeedConfig.indices.length > 0
   ) {
-    const defaultIndexPatternId =
-      getIndexPatternIdFromName(datafeedConfig.indices.join()) ?? indexPatterns[0].id;
-    kibanaSettings.discoverIndexPatternId = defaultIndexPatternId;
+    const indicesName = datafeedConfig.indices.join();
+    const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
+    kibanaSettings.discoverIndexPatternId = defaultDataViewId;
   }
 
   return {
@@ -153,10 +150,10 @@ function buildDashboardUrlFromSettings(settings) {
           query = queryFromEntityFieldNames;
         }
 
-        const getUrlGenerator = getGetUrlGenerator();
-        const generator = getUrlGenerator(DASHBOARD_APP_URL_GENERATOR);
-        return generator
-          .createUrl({
+        const dashboard = getDashboard();
+
+        dashboard.locator
+          .getUrl({
             dashboardId,
             timeRange: {
               from: '$earliest$',

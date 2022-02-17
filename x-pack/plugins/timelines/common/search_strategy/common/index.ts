@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type Maybe<T> = T | null;
 
@@ -52,7 +52,7 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export type DocValueFields = estypes.SearchDocValueField;
+export type DocValueFields = estypes.QueryDslFieldAndFormat;
 
 export interface TimerangeFilter {
   range: {

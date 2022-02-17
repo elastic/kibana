@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { useMemo, useCallback } from 'react';
 import { DataFormatPicker } from './data_format_picker';
@@ -42,6 +42,19 @@ export const SeriesConfig = (props) => {
     [model.metrics, props.fields, seriesIndexPattern]
   );
   const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
+
+  const { indexPatternForQuery, onChange } = props;
+  const onChangeOverride = useCallback(
+    (partialState) => {
+      const stateUpdate = { ...partialState };
+      const isEnabling = partialState.override_index_pattern;
+      if (isEnabling && !model.series_index_pattern) {
+        stateUpdate.series_index_pattern = indexPatternForQuery;
+      }
+      onChange(stateUpdate);
+    },
+    [model.series_index_pattern, indexPatternForQuery, onChange]
+  );
 
   return (
     <div className="tvbAggRow">
@@ -119,19 +132,20 @@ export const SeriesConfig = (props) => {
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideIndexPatternLabel', {
-              defaultMessage: 'Override Index Pattern?',
+            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideDataViewLabel', {
+              defaultMessage: 'Override data view?',
             })}
           >
             <YesNo
               value={model.override_index_pattern}
               name="override_index_pattern"
-              onChange={props.onChange}
+              onChange={onChangeOverride}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <IndexPattern
+            baseIndexPattern={indexPatternForQuery}
             onChange={props.onChange}
             model={props.model}
             fields={props.fields}

@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   MINUTES_UNIT_LABEL,
@@ -53,6 +53,7 @@ export const FrequencyItem: React.FC<Props> = ({
   const estimateDisplay = durationEstimate && moment.duration(durationEstimate).humanize();
   const nextStartIsPast = moment().isAfter(nextStart);
   const nextStartTime = nextStartIsPast ? NEXT_SYNC_RUNNING_MESSAGE : moment(nextStart).fromNow();
+  const showEstimates = lastRun || nextStart || durationEstimate;
 
   const frequencyItemLabel = (
     <FormattedMessage
@@ -143,10 +144,15 @@ export const FrequencyItem: React.FC<Props> = ({
           <EuiIconTip title={label} type="iInCircle" content={description} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiText>
-        {lastRun && lastRunSummary} {nextStartSummary} {estimateDisplay && estimateSummary}
-      </EuiText>
+      {showEstimates && (
+        <>
+          <EuiSpacer />
+          <EuiText data-test-subj="SyncEstimates">
+            {lastRun && lastRunSummary} {nextStart && nextStartSummary}{' '}
+            {estimateDisplay && estimateSummary}
+          </EuiText>
+        </>
+      )}
       <EuiSpacer size="s" />
     </>
   );

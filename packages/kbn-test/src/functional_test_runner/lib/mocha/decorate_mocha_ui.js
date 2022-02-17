@@ -57,7 +57,7 @@ export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTa
         }
 
         argumentsList[1] = function () {
-          before(async () => {
+          before('beforeTestSuite.trigger', async () => {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
@@ -84,10 +84,13 @@ export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTa
 
             this._tags = [...this._tags, ...tagsToAdd];
           };
+          this.onlyEsVersion = (semver) => {
+            this._esVersionRequirement = semver;
+          };
 
           provider.call(this);
 
-          after(async () => {
+          after('afterTestSuite.trigger', async () => {
             await lifecycle.afterTestSuite.trigger(this);
           });
         };

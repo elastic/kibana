@@ -24,12 +24,12 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'oktaLogs',
     name: i18n.translate('home.tutorials.oktaLogs.nameTitle', {
-      defaultMessage: 'Okta logs',
+      defaultMessage: 'Okta Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.oktaLogs.shortDescription', {
-      defaultMessage: 'Collect the Okta system log via the Okta API.',
+      defaultMessage: 'Collect and parse logs from the Okta API with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oktaLogs.longDescription', {
       defaultMessage:
@@ -58,8 +58,8 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/okta_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

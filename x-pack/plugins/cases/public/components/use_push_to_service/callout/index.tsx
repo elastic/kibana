@@ -11,12 +11,11 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
-import { CasesNavigation } from '../../links';
+import { useConfigureCasesNavigation } from '../../../common/navigation';
 
 export * from './helpers';
 
 export interface CaseCallOutProps {
-  configureCasesNavigation: CasesNavigation;
   hasConnectors: boolean;
   hasLicenseError: boolean;
   messages?: ErrorMessage[];
@@ -30,23 +29,24 @@ type GroupByTypeMessages = {
   };
 };
 const CaseCallOutComponent = ({
-  configureCasesNavigation,
   hasConnectors,
   hasLicenseError,
   onEditClick,
   messages = [],
 }: CaseCallOutProps) => {
+  const { navigateToConfigureCases } = useConfigureCasesNavigation();
   const handleCallOut = useCallback(
     (e) => {
+      e.preventDefault();
       // if theres connectors open dropdown editor
       // if no connectors, redirect to create case page
       if (hasConnectors) {
         onEditClick();
       } else {
-        configureCasesNavigation.onClick(e);
+        navigateToConfigureCases();
       }
     },
-    [hasConnectors, onEditClick, configureCasesNavigation]
+    [hasConnectors, onEditClick, navigateToConfigureCases]
   );
 
   const groupedByTypeErrorMessages = useMemo(
@@ -89,5 +89,6 @@ const CaseCallOutComponent = ({
     </>
   );
 };
+CaseCallOutComponent.displayName = 'CaseCallOut';
 
 export const CaseCallOut = memo(CaseCallOutComponent);

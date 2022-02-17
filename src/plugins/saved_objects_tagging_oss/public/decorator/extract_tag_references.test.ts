@@ -81,4 +81,20 @@ describe('extractTagReferences', () => {
     expect(resultRefs).toEqual([refA, refB]);
     expect(resultAttrs).toEqual({ someString: 'foo', someNumber: 42 });
   });
+
+  it('removes duplicated tags', () => {
+    const attributes = {
+      __tags: ['tag-id-1', 'tag-id-1', 'tag-id-1', 'tag-id-1', 'tag-id-2'],
+    };
+
+    const { references: resultRefs } = extractTagReferences({
+      attributes,
+      references: [] as SavedObjectReference[],
+    });
+
+    expect(resultRefs).toEqual([
+      { id: 'tag-id-1', name: 'tag-tag-id-1', type: 'tag' },
+      { id: 'tag-id-2', name: 'tag-tag-id-2', type: 'tag' },
+    ]);
+  });
 });

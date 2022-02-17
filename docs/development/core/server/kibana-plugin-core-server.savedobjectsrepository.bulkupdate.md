@@ -16,12 +16,12 @@ bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>Array&lt;SavedObjectsBulkUpdateObject&lt;T&gt;&gt;</code> |  |
-|  options | <code>SavedObjectsBulkUpdateOptions</code> |  |
+|  objects | Array&lt;SavedObjectsBulkUpdateObject&lt;T&gt;&gt; | \[{ type, id, attributes, options: { version, namespace } references }<!-- -->\]  {<!-- -->string<!-- -->} options.version - ensures version matches that of persisted object  {<!-- -->string<!-- -->} \[options.namespace\] |
+|  options | SavedObjectsBulkUpdateOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBulkUpdateResponse<T>>`
+Promise&lt;SavedObjectsBulkUpdateResponse&lt;T&gt;&gt;
 
 {<!-- -->promise<!-- -->} - {<!-- -->saved\_objects: \[\[{ id, type, version, references, attributes, error: { message } }<!-- -->\]<!-- -->}
 

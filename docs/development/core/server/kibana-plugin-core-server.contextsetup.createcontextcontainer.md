@@ -13,5 +13,5 @@ createContextContainer(): IContextContainer;
 ```
 <b>Returns:</b>
 
-`IContextContainer`
+IContextContainer
 

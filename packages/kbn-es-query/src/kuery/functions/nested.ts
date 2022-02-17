@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import { DataViewBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(path: any, child: any) {
   const pathNode =
@@ -21,7 +21,7 @@ export function buildNodeParams(path: any, child: any) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {

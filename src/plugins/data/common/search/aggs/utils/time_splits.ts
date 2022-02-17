@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import _, { isArray } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
@@ -186,7 +186,7 @@ export function mergeTimeShifts(
         return;
       } else {
         // a sub-agg
-        const agg = requestAggs.find((requestAgg) => key.indexOf(requestAgg.id) === 0);
+        const agg = requestAggs.find((requestAgg) => key === requestAgg.getResponseId());
         if (agg && agg.type.type === AggGroupNames.Metrics) {
           const timeShift = agg.getTimeShift();
           if (
@@ -226,15 +226,17 @@ export function mergeTimeShifts(
               const bucketKey = bucketAgg.type.getShiftedKey(bucketAgg, bucket.key, shift);
               // if a bucket is missing in the map, create an empty one
               if (!baseBucketMap[bucketKey]) {
+                // @ts-expect-error 'number' is not comparable to type 'AggregationsAggregate'.
                 baseBucketMap[String(bucketKey)] = {
                   key: bucketKey,
                 } as GenericBucket;
               }
               mergeAggLevel(baseBucketMap[bucketKey], bucket, shift, aggIndex + 1);
             });
-            (baseSubAggregate as estypes.AggregationsMultiBucketAggregate).buckets = Object.values(
-              baseBucketMap
-            ).sort((a, b) => bucketAgg.type.orderBuckets(bucketAgg, a, b));
+            (baseSubAggregate as estypes.AggregationsMultiBucketAggregateBase<any>).buckets =
+              Object.values(baseBucketMap).sort((a, b) =>
+                bucketAgg.type.orderBuckets(bucketAgg, a, b)
+              );
           } else if (baseBuckets && buckets && !isArray(baseBuckets)) {
             Object.entries(buckets).forEach(([bucketKey, bucket]) => {
               // if a bucket is missing in the base response, create an empty one
@@ -261,11 +263,12 @@ export function mergeTimeShifts(
       if (hasMultipleTimeShifts && cursor.time_offset_split) {
         const timeShiftedBuckets = (
           cursor.time_offset_split as estypes.AggregationsFiltersAggregate
-        ).buckets as Record<string, estypes.AggregationsFiltersBucketItem>;
+        ).buckets;
         const subTree = {};
         Object.entries(timeShifts).forEach(([key, shift]) => {
           mergeAggLevel(
             subTree as GenericBucket,
+            // @ts-expect-error No index signature with a parameter of type 'string' was found on type 'AggregationsBuckets<AggregationsFiltersBucket>'
             timeShiftedBuckets[key] as GenericBucket,
             shift,
             aggIndex
@@ -292,7 +295,9 @@ export function mergeTimeShifts(
       if (isArray(subAgg.buckets)) {
         subAgg.buckets.forEach((bucket) => transformTimeShift(bucket, aggIndex + 1));
       } else {
-        Object.values(subAgg.buckets).forEach((bucket) => transformTimeShift(bucket, aggIndex + 1));
+        Object.values(subAgg.buckets).forEach((bucket: any) =>
+          transformTimeShift(bucket, aggIndex + 1)
+        );
       }
     });
   };
@@ -430,6 +435,7 @@ export function insertTimeShiftSplit(
       filters[key] = {
         range: {
           [timeField]: {
+            format: 'strict_date_optional_time',
             gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
             lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
           },

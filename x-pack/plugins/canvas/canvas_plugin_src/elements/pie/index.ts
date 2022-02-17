@@ -14,7 +14,8 @@ export const pie: ElementFactory = () => ({
   height: 300,
   help: 'A simple pie chart',
   icon: 'visPie',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | pointseries color="state" size="max(price)"
 | pie

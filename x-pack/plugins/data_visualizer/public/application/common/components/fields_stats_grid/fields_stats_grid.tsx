@@ -8,9 +8,9 @@
 import React, { useMemo, FC, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import type { DataVisualizerTableState } from '../../../../../common';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
-import type { FileBasedFieldVisConfig } from '../stats_table/types/field_vis_config';
+import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
 
 import { DataVisualizerFieldNamesFilter } from '../field_names_filter';

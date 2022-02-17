@@ -16,9 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
 import _ from 'lodash';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
-import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 function makeOption({
@@ -178,14 +178,14 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _renderFieldConfig() {
     return this.state.currentFields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
-        <>
-          <EuiFlexGroup key={index} gutterSize="xs" alignItems="center">
+        <Fragment key={index}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
             <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
             <EuiFlexItem grow={false}>{this._renderFieldButtonDelete(index)}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size={'xs'} />
-        </>
+        </Fragment>
       );
     });
   }

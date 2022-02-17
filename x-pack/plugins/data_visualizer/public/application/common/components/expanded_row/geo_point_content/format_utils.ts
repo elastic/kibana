@@ -8,7 +8,7 @@
 import { Feature, Point } from 'geojson';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { DEFAULT_GEO_REGEX } from './geo_point_content';
-import { SOURCE_TYPES } from '../../../../../../../maps/common';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../../../maps/common';
 
 export const convertWKTGeoToLonLat = (
   value: string | number
@@ -72,6 +72,6 @@ export const getGeoPointsLayer = (
         },
       },
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };

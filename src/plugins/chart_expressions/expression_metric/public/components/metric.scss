@@ -6,12 +6,15 @@
 //   mtrChart__legend-isLoading
 
 .mtrVis {
+  @include euiScrollBar;
+  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  overflow: auto;
 }
 
 .mtrVis__value {
@@ -22,6 +25,8 @@
 .mtrVis__container {
   text-align: center;
   padding: $euiSize;
+  display: flex;
+  flex-direction: column;
 }
 
 .mtrVis__container--light {

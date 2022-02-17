@@ -53,7 +53,7 @@ export class EnhancedDataServerPlugin
     });
 
     if (deps.usageCollection) {
-      registerUsageCollector(deps.usageCollection, this.initializerContext, this.logger);
+      registerUsageCollector(deps.usageCollection, core.savedObjects.getKibanaIndex(), this.logger);
     }
   }
 

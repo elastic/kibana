@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -69,8 +69,7 @@ export async function fetchElasticsearchStats(
     },
   };
 
-  const { body: response } = await callCluster.search<ESClusterStats>(params);
-  return response;
+  return await callCluster.search<ESClusterStats>(params);
 }
 
 export interface ESClusterStats {

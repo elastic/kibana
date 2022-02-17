@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
+import type { Query, TimeRange } from '../../../../../../src/plugins/data/common';
 import { TileMapVisConfig } from './types';
 import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
 import { MapComponent } from '../../embeddable/map_component';
@@ -19,7 +20,7 @@ interface Props {
   onInitialRenderComplete: () => void;
 }
 
-export function TileMapVisualization(props: Props) {
+function TileMapVisualization(props: Props) {
   const mapCenter = {
     lat: props.visConfig.mapCenter[0],
     lon: props.visConfig.mapCenter[1],
@@ -45,3 +46,7 @@ export function TileMapVisualization(props: Props) {
     />
   );
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export default TileMapVisualization;

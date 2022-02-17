@@ -32,7 +32,6 @@ export const hoveredRow$ = new BehaviorSubject<any | null>(null);
 
 export const BAR_COLOR = euiPaletteColorBlind()[0];
 const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];
-const MAX_CHART_COLUMNS = 20;
 
 type XScaleType = 'ordinal' | 'time' | 'linear' | undefined;
 export const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType => {
@@ -78,7 +77,8 @@ export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYP
 type LegendText = string | JSX.Element;
 export const getLegendText = (
   chartData: ChartData,
-  maxChartColumns = MAX_CHART_COLUMNS
+  maxChartColumns: number,
+  isNumeric = false
 ): LegendText => {
   if (chartData.type === 'unsupported') {
     return i18n.translate('xpack.dataVisualizer.dataGridChart.histogramNotAvailable', {
@@ -87,9 +87,7 @@ export const getLegendText = (
   }
 
   if (chartData.data.length === 0) {
-    return i18n.translate('xpack.dataVisualizer.dataGridChart.notEnoughData', {
-      defaultMessage: `0 documents contain field.`,
-    });
+    return '';
   }
 
   if (chartData.type === 'boolean') {
@@ -111,6 +109,17 @@ export const getLegendText = (
         </tbody>
       </table>
     );
+  }
+
+  if (isOrdinalChartData(chartData) && isNumeric) {
+    // The original data could be numerical but also ordinal (e.g. "2340")
+    return i18n.translate('xpack.dataVisualizer.dataGridChart.singleTopValueLegend', {
+      defaultMessage: `{cardinality, plural, one {# value {exampleValue}} other {# values}}`,
+      values: {
+        cardinality: chartData.cardinality,
+        exampleValue: chartData.data[0].key ? `(${chartData.data[0].key})` : '',
+      },
+    });
   }
 
   if (isOrdinalChartData(chartData) && chartData.cardinality <= maxChartColumns) {
@@ -146,7 +155,8 @@ interface ColumnChart {
 export const useColumnChart = (
   chartData: ChartData,
   columnType: EuiDataGridColumn,
-  maxChartColumns?: number
+  maxChartColumns: number,
+  isNumeric?: boolean
 ): ColumnChart => {
   const fieldType = getFieldType(columnType.schema);
 
@@ -210,7 +220,7 @@ export const useColumnChart = (
 
   return {
     data,
-    legendText: getLegendText(chartData, maxChartColumns),
+    legendText: getLegendText(chartData, maxChartColumns, isNumeric),
     xScaleType,
   };
 };

@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Repositories Tab', async () => {
       before(async () => {
         await es.snapshot.createRepository({
-          repository: 'my-repository',
+          name: 'my-repository',
           body: {
             type: 'fs',
             settings: {
@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await es.snapshot.deleteRepository({
-          repository: 'my-repository',
+          name: 'my-repository',
         });
       });
     });

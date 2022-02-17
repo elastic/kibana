@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { CommonWizardSteps } from './components';
 export {
   TabAliases,
   TabMappings,
@@ -12,6 +13,5 @@ export {
   StepAliasesContainer,
   StepMappingsContainer,
   StepSettingsContainer,
-  CommonWizardSteps,
   TemplateContentIndicator,
 } from './components';

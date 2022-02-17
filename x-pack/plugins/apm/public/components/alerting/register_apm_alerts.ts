@@ -8,37 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { stringify } from 'querystring';
-import type {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
-} from '@kbn/rule-data-utils';
-import {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import {
-  AlertType,
-  formatErrorCountReason,
-  formatTransactionDurationAnomalyReason,
-  formatTransactionDurationReason,
-  formatTransactionErrorRateReason,
-} from '../../../common/alert_types';
+import { AlertType } from '../../../common/alert_types';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
-
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
-  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
-  ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 
 const format = ({
   pathname,
@@ -61,11 +39,7 @@ export function registerApmAlerts(
     }),
     format: ({ fields }) => {
       return {
-        reason: formatErrorCountReason({
-          threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-          measured: fields[ALERT_EVALUATION_VALUE]!,
-          serviceName: String(fields[SERVICE_NAME][0]),
-        }),
+        reason: fields[ALERT_REASON]!,
         link: format({
           pathname: `/app/apm/services/${String(
             fields[SERVICE_NAME][0]
@@ -82,7 +56,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
+    ruleParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
@@ -110,12 +84,8 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields, formatters: { asDuration } }) => ({
-      reason: formatTransactionDurationReason({
-        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-        measured: fields[ALERT_EVALUATION_VALUE]!,
-        serviceName: String(fields[SERVICE_NAME][0]),
-        asDuration,
-      }),
+      reason: fields[ALERT_REASON]!,
+
       link: format({
         pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
         query: {
@@ -130,7 +100,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
     ),
     validate: () => ({
@@ -161,12 +131,7 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields, formatters: { asPercent } }) => ({
-      reason: formatTransactionErrorRateReason({
-        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-        measured: fields[ALERT_EVALUATION_VALUE]!,
-        serviceName: String(fields[SERVICE_NAME][0]),
-        asPercent,
-      }),
+      reason: fields[ALERT_REASON]!,
       link: format({
         pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0]!)}`,
         query: {
@@ -181,7 +146,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
     ),
     validate: () => ({
@@ -211,11 +176,7 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields }) => ({
-      reason: formatTransactionDurationAnomalyReason({
-        serviceName: String(fields[SERVICE_NAME][0]),
-        severityLevel: String(fields[ALERT_SEVERITY]),
-        measured: Number(fields[ALERT_EVALUATION_VALUE]),
-      }),
+      reason: fields[ALERT_REASON]!,
       link: format({
         pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}`,
         query: {
@@ -230,7 +191,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')
     ),
     validate: () => ({

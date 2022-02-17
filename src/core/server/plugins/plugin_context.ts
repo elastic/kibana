@@ -154,8 +154,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
@@ -197,6 +199,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
+      getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
     status: {
       core$: deps.status.core$,
@@ -238,6 +241,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,

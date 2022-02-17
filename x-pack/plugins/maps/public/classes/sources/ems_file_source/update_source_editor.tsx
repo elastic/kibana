@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEmsFileLayers } from '../../../util';
 import { IEmsFileSource } from './ems_file_source';

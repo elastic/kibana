@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow, mount, ReactWrapper } from 'enzyme';
 
-import { I18nProvider, __IntlProvider } from '@kbn/i18n/react';
+import { I18nProvider, __IntlProvider } from '@kbn/i18n-react';
 
 // Use fake component to extract `intl` property to use in tests.
 const { intl } = (

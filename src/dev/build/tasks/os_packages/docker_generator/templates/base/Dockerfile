@@ -14,12 +14,15 @@ FROM {{{baseOSImage}}} AS builder
 {{#ubi}}
 RUN {{packageManager}} install -y findutils tar gzip
 {{/ubi}}
+{{#ubuntu}}
+RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager}} install -y curl
+{{/ubuntu}}
 
 {{#usePublicArtifact}}
-RUN cd /opt && \
+RUN cd /tmp && \
   curl --retry 8 -s -L \
     --output kibana.tar.gz \
-     https://artifacts.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
+     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
 
@@ -55,18 +58,28 @@ FROM {{{baseOSImage}}}
 EXPOSE 5601
 
 {{#ubi}}
-  # https://github.com/rpm-software-management/microdnf/issues/50
-  RUN mkdir -p /run/user/$(id -u)
-{{/ubi}}
-
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss {{#ubi}}findutils{{/ubi}} && \
+        fontconfig freetype shadow-utils nss findutils && \
       {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
+{{/ubi}}
+{{#ubuntu}}
+RUN for iter in {1..10}; do \
+      export DEBIAN_FRONTEND=noninteractive && \
+      {{packageManager}} update  && \
+      {{packageManager}} upgrade -y  && \
+      {{packageManager}} install -y --no-install-recommends \
+       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
+      {{packageManager}} clean && \
+      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
+      sleep 10; \
+    done; \
+    (exit $exit_code)
+{{/ubuntu}}
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
@@ -164,7 +177,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    echo -e '#!/bin/sh\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

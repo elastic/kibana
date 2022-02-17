@@ -64,6 +64,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'visualization:useLegacyTimeAxis': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:regionmap:showWarnings': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -388,7 +392,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'bfetch:disable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:visualize:legacyPieChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -416,6 +428,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableComparisonByDefault': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -436,6 +456,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'labs:canvas:byValueEmbeddable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'labs:canvas:useDataService': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -445,6 +469,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:dashboardControls': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

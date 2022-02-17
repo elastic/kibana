@@ -62,7 +62,9 @@ function createBuckets(series: string[]) {
           timeField: 'timestamp',
           seriesId,
         },
-        buckets: createBucketsObjects(size, trend, seriesId),
+        timeseries: {
+          buckets: createBucketsObjects(size, trend, seriesId),
+        },
       };
     }
     return baseObj;
@@ -113,11 +115,13 @@ describe('processBucket(panel)', () => {
             timeField: 'timestamp',
             seriesId: SERIES_ID,
           },
-          buckets: [
-            // this is a flat case, but 0/0 has not a valid number result
-            createValueObject(0, 0, SERIES_ID),
-            createValueObject(1, 0, SERIES_ID),
-          ],
+          timeseries: {
+            buckets: [
+              // this is a flat case, but 0/0 has not a valid number result
+              createValueObject(0, 0, SERIES_ID),
+              createValueObject(1, 0, SERIES_ID),
+            ],
+          },
         },
       };
       const result = await bucketProcessor(bucketforNaNResult);

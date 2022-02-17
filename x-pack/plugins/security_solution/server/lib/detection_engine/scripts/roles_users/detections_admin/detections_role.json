@@ -5,6 +5,7 @@
       {
         "names": [
           ".siem-signals-*",
+          ".alerts-security*",
           ".lists*",
           ".items*",
           "apm-*-transaction*",

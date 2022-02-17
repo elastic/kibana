@@ -17,13 +17,13 @@ import { wrapErrorAndRejectPromise } from './utils';
  * @param version
  */
 export const enableFleetServerIfNecessary = async (esClient: Client, version: string = '8.0.0') => {
-  const res = await esClient.search<{}, {}>({
+  const res = await esClient.search({
     index: FLEET_SERVER_SERVERS_INDEX,
     ignore_unavailable: true,
     rest_total_hits_as_int: true,
   });
 
-  if (res.body.hits.total > 0) {
+  if (res.hits.total) {
     return;
   }
 

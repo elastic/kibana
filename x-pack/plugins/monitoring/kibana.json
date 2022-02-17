@@ -24,8 +24,6 @@
     "kibanaUtils",
     "home",
     "alerting",
-    "kibanaReact",
-    "licenseManagement",
-    "kibanaLegacy"
+    "kibanaReact"
   ]
 }

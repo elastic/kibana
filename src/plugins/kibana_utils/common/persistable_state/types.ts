@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
 
 /**
@@ -26,7 +26,7 @@ import { SavedObjectReference } from '../../../../core/types';
  * };
  * ```
  */
-export interface VersionedState<S extends SerializableRecord = SerializableRecord> {
+export interface VersionedState<S extends Serializable = Serializable> {
   version: string;
   state: S;
 }
@@ -82,8 +82,10 @@ export interface PersistableState<P extends SerializableRecord = SerializableRec
    * keyed by the Kibana version using semver, where the version indicates to
    * which version the state will be migrated to.
    */
-  migrations: MigrateFunctionsObject;
+  migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 }
+
+export type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
 
 /**
  * Collection of migrations that a given type of persistable state object has
@@ -92,8 +94,8 @@ export interface PersistableState<P extends SerializableRecord = SerializableRec
  */
 export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
-  FromVersion extends SerializableRecord = SerializableRecord,
-  ToVersion extends SerializableRecord = SerializableRecord
+  FromVersion extends Serializable = SerializableRecord,
+  ToVersion extends Serializable = SerializableRecord
 > = (state: FromVersion) => ToVersion;
 
 /**
@@ -106,9 +108,6 @@ export type PersistableStateMigrateFn = (
   version: string
 ) => SerializableRecord;
 
-/**
- * @todo Shall we remove this?
- */
 export type PersistableStateDefinition<P extends SerializableRecord = SerializableRecord> = Partial<
   PersistableState<P>
 >;
@@ -116,7 +115,7 @@ export type PersistableStateDefinition<P extends SerializableRecord = Serializab
 /**
  * @todo Add description.
  */
-export interface PersistableStateService<P extends SerializableRecord = SerializableRecord> {
+export interface PersistableStateService<P extends Serializable = Serializable> {
   /**
    * Function which reports telemetry information. This function is essentially
    * a "reducer" - it receives the existing "stats" object and returns an

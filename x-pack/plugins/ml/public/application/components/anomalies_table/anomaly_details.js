@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 import { get, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiDescriptionList,
@@ -313,7 +313,10 @@ export class AnomalyDetails extends Component {
           }),
           content: (
             <Fragment>
-              <div className="ml-anomalies-table-details">
+              <div
+                className="ml-anomalies-table-details"
+                data-test-subj="mlAnomaliesListRowDetails"
+              >
                 {this.renderDescription()}
                 <EuiSpacer size="m" />
                 {this.renderDetails()}
@@ -633,7 +636,7 @@ export class AnomalyDetails extends Component {
       );
     } else {
       return (
-        <div className="ml-anomalies-table-details">
+        <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
           {this.renderDescription()}
           <EuiSpacer size="m" />
           {this.renderDetails()}

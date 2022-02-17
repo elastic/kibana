@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import type { Agent } from '../../../types';
 
@@ -19,7 +19,7 @@ interface Props {
 
 const Status = {
   Healthy: (
-    <EuiBadge color="secondary">
+    <EuiBadge color="success">
       <FormattedMessage id="xpack.fleet.agentHealth.healthyStatusText" defaultMessage="Healthy" />
     </EuiBadge>
   ),
@@ -29,7 +29,7 @@ const Status = {
     </EuiBadge>
   ),
   Inactive: (
-    <EuiBadge color={euiVars.default.euiColorDarkShade}>
+    <EuiBadge color={euiVars.euiColorDarkShade}>
       <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiBadge>
   ),

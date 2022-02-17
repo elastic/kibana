@@ -5,23 +5,30 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiFormRow,
   EuiFieldText,
   EuiFieldPassword,
   EuiSpacer,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { usePolicyConfigContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
+import { ScriptRecorderFields } from './script_recorder_fields';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { MonacoEditorLangId } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
+  SCRIPT_RECORDER = 'syntheticsBrowserScriptRecorderConfig',
   ZIP = 'syntheticsBrowserZipURLConfig',
 }
 
@@ -33,6 +40,8 @@ interface SourceConfig {
   password: string;
   inlineScript: string;
   params: string;
+  isGeneratedScript?: boolean;
+  fileName?: string;
 }
 
 interface Props {
@@ -48,11 +57,24 @@ export const defaultValues = {
   password: '',
   inlineScript: '',
   params: '',
+  isGeneratedScript: false,
+  fileName: '',
+};
+
+const getDefaultTab = (defaultConfig: SourceConfig, isZipUrlSourceEnabled = true) => {
+  if (defaultConfig.inlineScript && defaultConfig.isGeneratedScript) {
+    return SourceType.SCRIPT_RECORDER;
+  } else if (defaultConfig.inlineScript) {
+    return SourceType.INLINE;
+  }
+
+  return isZipUrlSourceEnabled ? SourceType.ZIP : SourceType.INLINE;
 };
 
 export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
+  const { isZipUrlSourceEnabled } = usePolicyConfigContext();
   const [sourceType, setSourceType] = useState<SourceType>(
-    defaultConfig.inlineScript ? SourceType.INLINE : SourceType.ZIP
+    getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
   );
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
@@ -67,9 +89,10 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
     />
   );
 
-  const tabs = [
+  const zipUrlSourceTabId = 'syntheticsBrowserZipURLConfig';
+  const allTabs = [
     {
-      id: 'syntheticsBrowserZipURLConfig',
+      id: zipUrlSourceTabId,
       name: zipUrlLabel,
       'data-test-subj': `syntheticsSourceTab__zipUrl`,
       content: (
@@ -104,7 +127,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             label={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
-                defaultMessage="Zip Proxy URL"
+                defaultMessage="Proxy Zip URL"
               />
             }
             labelAppend={<OptionalLabel />}
@@ -264,7 +287,57 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
         </EuiFormRow>
       ),
     },
+    {
+      id: 'syntheticsBrowserScriptRecorderConfig',
+      name: (
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
+              defaultMessage="Script recorder"
+            />
+          </EuiFlexItem>
+          <StyledBetaBadgeWrapper grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
+                {
+                  defaultMessage: 'Tech preview',
+                }
+              )}
+              iconType="beaker"
+              tooltipContent={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
+                {
+                  defaultMessage:
+                    'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',
+                }
+              )}
+            />
+          </StyledBetaBadgeWrapper>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
+      content: (
+        <ScriptRecorderFields
+          onChange={({ scriptText, fileName }) =>
+            setConfig((prevConfig) => ({
+              ...prevConfig,
+              inlineScript: scriptText,
+              isGeneratedScript: true,
+              fileName,
+            }))
+          }
+          script={config.inlineScript}
+          fileName={config.fileName}
+        />
+      ),
+    },
   ];
+
+  const tabs = isZipUrlSourceEnabled
+    ? allTabs
+    : allTabs.filter((tab: EuiTabbedContentTab) => tab.id !== zipUrlSourceTabId);
 
   return (
     <EuiTabbedContent
@@ -272,11 +345,17 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       initialSelectedTab={tabs.find((tab) => tab.id === sourceType)}
       autoFocus="selected"
       onTabClick={(tab) => {
-        setSourceType(tab.id as SourceType);
         if (tab.id !== sourceType) {
           setConfig(defaultValues);
         }
+        setSourceType(tab.id as SourceType);
       }}
     />
   );
 };
+
+const StyledBetaBadgeWrapper = styled(EuiFlexItem)`
+  .euiToolTipAnchor {
+    display: flex;
+  }
+`;

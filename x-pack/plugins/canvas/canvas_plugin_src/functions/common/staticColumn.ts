@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getType } from '@kbn/interpreter/common';
+import { getType } from '@kbn/interpreter';
 import {
   ExpressionFunctionDefinition,
   Datatable,

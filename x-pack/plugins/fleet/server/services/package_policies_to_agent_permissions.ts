@@ -11,21 +11,7 @@ import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../constants';
 import { getPackageInfo } from '../../server/services/epm/packages';
 import type { PackagePolicy } from '../types';
 
-export const DEFAULT_PERMISSIONS = {
-  cluster: ['monitor'],
-  indices: [
-    {
-      names: [
-        'logs-*',
-        'metrics-*',
-        'traces-*',
-        'synthetics-*',
-        '.logs-endpoint.diagnostic.collection-*',
-      ],
-      privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
-    },
-  ],
-};
+export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
   soClient: SavedObjectsClientContract,
@@ -37,13 +23,15 @@ export async function storedPackagePoliciesToAgentPermissions(
 
   // I'm not sure what permissions to return for this case, so let's return the defaults
   if (typeof packagePolicies[0] === 'string') {
-    return { _fallback: DEFAULT_PERMISSIONS };
+    throw new Error(
+      'storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy'
+    );
   }
 
   const permissionEntries = (packagePolicies as PackagePolicy[]).map<Promise<[string, any]>>(
     async (packagePolicy) => {
       if (!packagePolicy.package) {
-        return [packagePolicy.name, DEFAULT_PERMISSIONS];
+        throw new Error(`No package for package policy ${packagePolicy.name}`);
       }
 
       const pkg = await getPackageInfo({
@@ -121,12 +109,21 @@ export async function storedPackagePoliciesToAgentPermissions(
             });
       }
 
+      let clusterRoleDescriptor = {};
+      const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
+      if (cluster.length > 0) {
+        clusterRoleDescriptor = {
+          cluster,
+        };
+      }
+
       return [
         packagePolicy.name,
         {
           indices: dataStreamsForPermissions.map((ds) =>
             getDataStreamPrivileges(ds, packagePolicy.namespace)
           ),
+          ...clusterRoleDescriptor,
         },
       ];
     }

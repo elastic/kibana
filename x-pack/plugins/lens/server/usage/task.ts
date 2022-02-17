@@ -6,8 +6,6 @@
  */
 
 import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import moment from 'moment';
 import {
   RunContext,
@@ -17,6 +15,7 @@ import {
 
 import { getVisualizationCounts } from './visualization_counts';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { getMultitermsCounts } from './multiterms_count';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
@@ -28,10 +27,9 @@ export const TASK_ID = `Lens-${TELEMETRY_TASK_TYPE}`;
 export function initializeLensTelemetry(
   logger: Logger,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>,
   taskManager: TaskManagerSetupContract
 ) {
-  registerLensTelemetryTask(logger, core, config, taskManager);
+  registerLensTelemetryTask(logger, core, taskManager);
 }
 
 export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -43,14 +41,13 @@ export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerS
 function registerLensTelemetryTask(
   logger: Logger,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>,
   taskManager: TaskManagerSetupContract
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens usage fetch task',
       timeout: '1m',
-      createTaskRunner: telemetryTaskRunner(logger, core, config),
+      createTaskRunner: telemetryTaskRunner(logger, core),
     },
   });
 }
@@ -80,7 +77,7 @@ export async function getDailyEvents(
     daily: {
       date_histogram: {
         field: 'lens-ui-telemetry.date',
-        calendar_interval: '1d',
+        calendar_interval: '1d' as const,
         min_doc_count: 1,
       },
       aggs: {
@@ -116,23 +113,23 @@ export async function getDailyEvents(
     },
   };
 
-  const { body: metrics } = await esClient.search<
-    ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>
-  >({
-    index: kibanaIndex,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'lens-ui-telemetry' } },
-            { range: { 'lens-ui-telemetry.date': { gte: 'now-90d/d' } } },
-          ],
+  const metrics = await esClient.search<ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>>(
+    {
+      index: kibanaIndex,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'lens-ui-telemetry' } },
+              { range: { 'lens-ui-telemetry.date': { gte: 'now-90d/d' } } },
+            ],
+          },
         },
+        aggs,
       },
-      aggs,
-    },
-    size: 0,
-  });
+      size: 0,
+    }
+  );
 
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};
@@ -177,11 +174,7 @@ export async function getDailyEvents(
   };
 }
 
-export function telemetryTaskRunner(
-  logger: Logger,
-  core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>
-) {
+export function telemetryTaskRunner(logger: Logger, core: CoreSetup) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = async () => {
@@ -191,19 +184,21 @@ export function telemetryTaskRunner(
 
     return {
       async run() {
-        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
+        const kibanaIndex = core.savedObjects.getKibanaIndex();
 
         return Promise.all([
           getDailyEvents(kibanaIndex, getEsClient),
           getVisualizationCounts(getEsClient, kibanaIndex),
+          getMultitermsCounts(getEsClient, kibanaIndex),
         ])
-          .then(([lensTelemetry, lensVisualizations]) => {
+          .then(([lensTelemetry, lensVisualizations, lensMultiterms]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
                 byDate: (lensTelemetry && lensTelemetry.byDate) || {},
                 suggestionsByDate: (lensTelemetry && lensTelemetry.suggestionsByDate) || {},
                 saved: lensVisualizations,
+                multiterms: lensMultiterms,
               },
               runAt: getNextMidnight(),
             };

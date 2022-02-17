@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Bluebird from 'bluebird';
 import { createSavedObjectClass } from './saved_object';
 import {
   SavedObject,
@@ -55,16 +54,16 @@ describe('Saved Object', () => {
    */
   function stubESResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
     // Stub out search for duplicate title:
-    savedObjectsClientStub.get = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
-    savedObjectsClientStub.update = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
+    savedObjectsClientStub.get = jest.fn().mockReturnValue(Promise.resolve(mockDocResponse));
+    savedObjectsClientStub.update = jest.fn().mockReturnValue(Promise.resolve(mockDocResponse));
 
     savedObjectsClientStub.find = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [], total: 0 }));
+      .mockReturnValue(Promise.resolve({ savedObjects: [], total: 0 }));
 
     savedObjectsClientStub.bulkGet = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
+      .mockReturnValue(Promise.resolve({ savedObjects: [mockDocResponse] }));
   }
 
   function stubSavedObjectsClientCreate(
@@ -73,7 +72,7 @@ describe('Saved Object', () => {
   ) {
     savedObjectsClientStub.create = jest
       .fn()
-      .mockReturnValue(resolve ? Bluebird.resolve(resp) : Bluebird.reject(resp));
+      .mockReturnValue(resolve ? Promise.resolve(resp) : Promise.reject(resp));
   }
 
   /**
@@ -262,7 +261,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard', id: myId }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.id).toBe(myId);
-            return Bluebird.resolve({ id: myId });
+            return Promise.resolve({ id: myId });
           });
           savedObject.copyOnSave = false;
 
@@ -296,7 +295,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard', id }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
-            return Bluebird.resolve({
+            return Promise.resolve({
               type: 'dashboard',
               id,
               _version: 'foo',
@@ -315,7 +314,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
-            return Bluebird.reject('');
+            return Promise.reject('');
           });
 
           expect(savedObject.isSaving).toBe(false);
@@ -745,7 +744,7 @@ describe('Saved Object', () => {
             },
           });
           savedObject.searchSource!.setField('index', indexPattern);
-          return Bluebird.resolve(indexPattern);
+          return Promise.resolve(indexPattern);
         });
         expect(!!savedObject.searchSource!.getField('index')).toBe(false);
 

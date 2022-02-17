@@ -171,12 +171,10 @@ describe('getNetworkEvents', () => {
   it('Uses the correct query', async () => {
     const { uptimeEsClient, esClient } = getUptimeESMockClient();
 
-    esClient.search.mockResolvedValueOnce({
-      body: {
-        hits: {
-          total: { value: 1 },
-          hits: mockHits,
-        },
+    esClient.search.mockResponseOnce({
+      hits: {
+        total: { value: 1 },
+        hits: mockHits,
       },
     } as any);
 
@@ -215,7 +213,10 @@ describe('getNetworkEvents', () => {
               "size": 1000,
               "track_total_hits": true,
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          },
+          Object {
+            "meta": true,
           },
         ],
       ]
@@ -225,12 +226,10 @@ describe('getNetworkEvents', () => {
   it('Returns the correct result', async () => {
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
-    esClient.search.mockResolvedValueOnce({
-      body: {
-        hits: {
-          total: { value: 1 },
-          hits: mockHits,
-        },
+    esClient.search.mockResponseOnce({
+      hits: {
+        total: { value: 1 },
+        hits: mockHits,
       },
     } as any);
 

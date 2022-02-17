@@ -15,10 +15,10 @@ import type {
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from 'src/core/server';
-import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { AuditEvent } from '../audit';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
@@ -65,8 +65,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
     errors,
     getSpacesService,
-    legacyAuditLogger: securityAuditLoggerMock.create(),
-    auditLogger: auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest()),
+    auditLogger: auditLoggerMock.create(),
     forbiddenError,
     generalError,
   };
@@ -81,8 +80,6 @@ const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
     clientOpts.generalError
   );
   expect(clientOpts.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 /**
@@ -98,51 +95,12 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
     clientOpts.forbiddenError
   );
-  const getCalls = (
-    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
-  ).mock.calls;
-  const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mock.calls[0][0];
-  const spaceId = args.options?.namespaces
-    ? args.options?.namespaces[0]
-    : args.options?.namespace || 'default';
-
-  const ACTION = getCalls[0][1];
-  const types = getCalls.map((x) => x[0]);
-  const missing = [{ spaceId, privilege: actions[0] }]; // if there was more than one type, only the first type was unauthorized
-  const spaceIds = [spaceId];
 
   expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-    USERNAME,
-    action ?? ACTION,
-    types,
-    spaceIds,
-    missing,
-    args
-  );
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 const expectSuccess = async (fn: Function, args: Record<string, any>, action?: string) => {
-  const result = await fn.bind(client)(...Object.values(args));
-  const getCalls = (
-    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
-  ).mock.calls;
-  const ACTION = getCalls[0][1];
-  const types = getCalls.map((x) => x[0]);
-  const spaceIds = args.options?.namespaces || [args.options?.namespace || 'default'];
-
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-    USERNAME,
-    action ?? ACTION,
-    types,
-    spaceIds,
-    args
-  );
-  return result;
+  return await fn.bind(client)(...Object.values(args));
 };
 
 const expectPrivilegeCheck = async (
@@ -795,15 +753,6 @@ describe('#find', () => {
     const result = await client.find(options);
 
     expect(clientOpts.baseClient.find).not.toHaveBeenCalled();
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      USERNAME,
-      'find',
-      [type1],
-      options.namespaces,
-      [{ spaceId: 'some-ns', privilege: 'mock-saved_object:foo/find' }],
-      { options }
-    );
     expect(result).toEqual({ page: 1, per_page: 20, total: 0, saved_objects: [] });
   });
 

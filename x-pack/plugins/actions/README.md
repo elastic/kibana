@@ -45,9 +45,12 @@ Table of Contents
       - [`subActionParams (getFields)`](#subactionparams-getfields-1)
       - [`subActionParams (getIncident)`](#subactionparams-getincident-1)
       - [`subActionParams (getChoices)`](#subactionparams-getchoices-1)
-  - [| fields   | An array of fields. Example: `[priority, category]`. | string[] |](#-fields----an-array-of-fields-example-priority-category--string-)
-  - [Jira](#jira)
+  - [ServiceNow ITOM](#servicenow-itom)
     - [`params`](#params-2)
+      - [`subActionParams (addEvent)`](#subactionparams-addevent)
+      - [`subActionParams (getChoices)`](#subactionparams-getchoices-2)
+  - [Jira](#jira)
+    - [`params`](#params-3)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
       - [`subActionParams (getIncident)`](#subactionparams-getincident-2)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
@@ -56,13 +59,13 @@ Table of Contents
       - [`subActionParams (issue)`](#subactionparams-issue)
       - [`subActionParams (getFields)`](#subactionparams-getfields-2)
   - [IBM Resilient](#ibm-resilient)
-    - [`params`](#params-3)
+    - [`params`](#params-4)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
       - [`subActionParams (getFields)`](#subactionparams-getfields-3)
       - [`subActionParams (incidentTypes)`](#subactionparams-incidenttypes)
       - [`subActionParams (severity)`](#subactionparams-severity)
   - [Swimlane](#swimlane)
-    - [`params`](#params-4)
+    - [`params`](#params-5)
   - [| severity    | The severity of the incident.    | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
@@ -355,6 +358,43 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 | Property | Description                                          | Type     |
 | -------- | ---------------------------------------------------- | -------- |
 | fields   | An array of fields. Example: `[priority, category]`. | string[] |
+
+---
+## ServiceNow ITOM
+
+The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
+### `params`
+
+| Property        | Description                                                       | Type   |
+| --------------- | ----------------------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `addEvent`, and `getChoices`. | string |
+| subActionParams | The parameters of the subaction.                                  | object |
+
+#### `subActionParams (addEvent)`
+
+
+| Property        | Description                                                                                                                      | Type                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| source          | The name of the event source type.                                                                                               | string _(optional)_ |
+| event_class     | Specific instance of the source.                                                                                                 | string _(optional)_ |
+| resource        | The name of the resource.                                                                                                        | string _(optional)_ |
+| node            | The Host that the event was triggered for.                                                                                       | string _(optional)_ |
+| metric_name     | Name of the metric.                                                                                                              | string _(optional)_ |
+| type            | The type of event.                                                                                                               | string _(optional)_ |
+| severity        | The category in ServiceNow.                                                                                                      | string _(optional)_ |
+| description     | The subcategory in ServiceNow.                                                                                                   | string _(optional)_ |
+| additional_info | Any additional information about the event.                                                                                      | string _(optional)_ |
+| message_key     | This value is used for de-duplication of events. All actions sharing this key will be associated with the same ServiceNow alert. | string _(optional)_ |
+| time_of_event   | The time of the event.                                                                                                           | string _(optional)_ |
+
+Refer to [ServiceNow documentation](https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html) for more information about the properties.
+
+#### `subActionParams (getChoices)`
+
+| Property | Description                                | Type     |
+| -------- | ------------------------------------------ | -------- |
+| fields   | An array of fields. Example: `[severity]`. | string[] |
+
 ---
 ## Jira
 
@@ -418,6 +458,7 @@ No parameters for the `issueTypes` subaction. Provide an empty object `{}`.
 No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ---
+
 ## IBM Resilient
 
 The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/kibana/master/resilient-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
@@ -514,6 +555,8 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
 When creating a new action type, your plugin will eventually call `server.plugins.actions.setup.registerType()` to register the type with the actions plugin, but there are some additional things to think about about and implement.
 
 Consider working with the alerting team on early structure /design feedback of new actions, especially as the APIs and infrastructure are still under development.
+
+Don't forget to ping @elastic/security-detections-response to see if the new connector should be enabled within their solution.
 
 ## licensing
 

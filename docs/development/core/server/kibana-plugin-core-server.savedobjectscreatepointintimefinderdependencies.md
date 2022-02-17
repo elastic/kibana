@@ -15,5 +15,5 @@ export interface SavedObjectsCreatePointInTimeFinderDependencies
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [client](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.client.md) | <code>Pick&lt;SavedObjectsClientContract, 'find' &#124; 'openPointInTimeForType' &#124; 'closePointInTime'&gt;</code> |  |
+|  [client](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.client.md) | Pick&lt;SavedObjectsClientContract, 'find' \| 'openPointInTimeForType' \| 'closePointInTime'&gt; |  |
 

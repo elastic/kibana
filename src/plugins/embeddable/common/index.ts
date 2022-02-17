@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109903
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './types';
-export * from './lib';
+export type {
+  EmbeddableInput,
+  CommonEmbeddableStartContract,
+  EmbeddableStateWithType,
+  PanelState,
+  EmbeddablePersistableStateService,
+} from './types';
+export { ViewMode } from './types';
+export type { SavedObjectEmbeddableInput } from './lib';
+export { isSavedObjectEmbeddableInput } from './lib';

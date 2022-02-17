@@ -2,14 +2,14 @@ import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
 import { defer, of, Subject } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
 import { createIndexPatternMock, createIndexPatternsMock } from '../../hooks/use_kibana_index_patterns.mock';
 import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
 import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
+import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 
 import { LogStream } from './';
 
@@ -145,13 +145,12 @@ export const Template = (args) => <LogStream {...args} />;
   decorators={[
     (story) => (
       <I18nProvider>
-        <EuiThemeProvider>
-          <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
-            {story()}
-          </KibanaContextProvider>
-        </EuiThemeProvider>
+        <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
+          {story()}
+        </KibanaContextProvider>
       </I18nProvider>
     ),
+    decorateWithGlobalStorybookThemeProviders,
   ]}
 />
 
@@ -172,7 +171,8 @@ To use the component your plugin needs to follow certain criteria:
 
 - Ensure `"infra"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
 - Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
-- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/common/eui_styled_components.tsx).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`KibanaThemeProvider`](https://github.com/elastic/kibana/blob/31d2db035c905fb5819fa6dc2354f3be795a34cf/src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx#L27).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/common/eui_styled_components.tsx). This is not the same as the provider exported by EUI. It bridges the gap between EUI and styled components and predates the css-in-js support in EUI.
 
 ## Usage
 

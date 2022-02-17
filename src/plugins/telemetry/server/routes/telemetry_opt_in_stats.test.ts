@@ -10,11 +10,14 @@ jest.mock('node-fetch');
 import fetch from 'node-fetch';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 import { StatsGetterConfig } from 'src/plugins/telemetry_collection_manager/server';
-import { TELEMETRY_ENDPOINT } from '../../common/constants';
+
 describe('sendTelemetryOptInStatus', () => {
+  const mockClusterUuid = 'mk_uuid';
   const mockStatsGetterConfig = { unencrypted: false } as StatsGetterConfig;
   const mockTelemetryCollectionManager = {
-    getOptInStats: jest.fn().mockResolvedValue(['mock_opt_in_hashed_value']),
+    getOptInStats: jest
+      .fn()
+      .mockResolvedValue([{ clusterUuid: mockClusterUuid, stats: 'mock_opt_in_hashed_value' }]),
   };
 
   beforeEach(() => {
@@ -35,11 +38,21 @@ describe('sendTelemetryOptInStatus', () => {
     );
     expect(result).toBeUndefined();
     expect(fetch).toBeCalledTimes(1);
-    expect(fetch).toBeCalledWith(TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD, {
-      method: 'post',
-      body: '["mock_opt_in_hashed_value"]',
-      headers: { 'X-Elastic-Stack-Version': mockConfig.currentKibanaVersion },
-    });
+    expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "https://telemetry.elastic.co/opt_in_status/v2/send",
+        Object {
+          "body": "mock_opt_in_hashed_value",
+          "headers": Object {
+            "Content-Type": "application/json",
+            "X-Elastic-Cluster-ID": "mk_uuid",
+            "X-Elastic-Content-Encoding": "aes256gcm",
+            "X-Elastic-Stack-Version": "mock_kibana_version",
+          },
+          "method": "post",
+        },
+      ]
+    `);
   });
 
   it('sends to staging endpoint on "sendUsageTo: staging"', async () => {
@@ -56,10 +69,20 @@ describe('sendTelemetryOptInStatus', () => {
     );
 
     expect(fetch).toBeCalledTimes(1);
-    expect(fetch).toBeCalledWith(TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING, {
-      method: 'post',
-      body: '["mock_opt_in_hashed_value"]',
-      headers: { 'X-Elastic-Stack-Version': mockConfig.currentKibanaVersion },
-    });
+    expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "https://telemetry-staging.elastic.co/opt_in_status/v2/send",
+        Object {
+          "body": "mock_opt_in_hashed_value",
+          "headers": Object {
+            "Content-Type": "application/json",
+            "X-Elastic-Cluster-ID": "mk_uuid",
+            "X-Elastic-Content-Encoding": "aes256gcm",
+            "X-Elastic-Stack-Version": "mock_kibana_version",
+          },
+          "method": "post",
+        },
+      ]
+    `);
   });
 });

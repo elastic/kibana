@@ -6,7 +6,7 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 import { createESJiraConnector, createJiraConnector } from './test_utils';
 import {
   findConnectorIdReference,

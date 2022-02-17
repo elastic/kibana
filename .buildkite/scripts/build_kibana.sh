@@ -7,6 +7,8 @@ export KBN_NP_PLUGINS_BUILT=true
 echo "--- Build Kibana Distribution"
 if [[ "${GITHUB_PR_LABELS:-}" == *"ci:build-all-platforms"* ]]; then
   node scripts/build --all-platforms --skip-os-packages
+elif [[ "${GITHUB_PR_LABELS:-}" == *"ci:build-os-packages"* ]]; then
+  node scripts/build --all-platforms
 else
   node scripts/build
 fi

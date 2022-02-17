@@ -14,7 +14,7 @@ import { dataVisualizerRefresh$, Refresh } from '../../services/timefilter_refre
 
 export interface DataVisualizerIndexPatternManagementProps {
   /**
-   * Currently selected index pattern
+   * Currently selected data view
    */
   currentIndexPattern?: IndexPattern;
   /**
@@ -27,12 +27,11 @@ export function DataVisualizerIndexPatternManagement(
   props: DataVisualizerIndexPatternManagementProps
 ) {
   const {
-    services: { indexPatternFieldEditor, application },
+    services: { dataViewFieldEditor, application },
   } = useDataVisualizerKibana();
 
   const { useNewFieldsApi, currentIndexPattern } = props;
-  const indexPatternFieldEditPermission =
-    indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 
@@ -46,14 +45,14 @@ export function DataVisualizerIndexPatternManagement(
     };
   }, []);
 
-  if (indexPatternFieldEditor === undefined || !currentIndexPattern || !canEditIndexPatternField) {
+  if (dataViewFieldEditor === undefined || !currentIndexPattern || !canEditIndexPatternField) {
     return null;
   }
 
   const addField = () => {
-    closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+    closeFieldEditor.current = dataViewFieldEditor.openEditor({
       ctx: {
-        indexPattern: currentIndexPattern,
+        dataView: currentIndexPattern,
       },
       onSave: () => {
         const refresh: Refresh = {
@@ -79,9 +78,9 @@ export function DataVisualizerIndexPatternManagement(
           iconType="boxesHorizontal"
           data-test-subj="dataVisualizerIndexPatternManagementButton"
           aria-label={i18n.translate(
-            'xpack.dataVisualizer.index.indexPatternManagement.actionsPopoverLabel',
+            'xpack.dataVisualizer.index.dataViewManagement.actionsPopoverLabel',
             {
-              defaultMessage: 'Index pattern settings',
+              defaultMessage: 'Data view settings',
             }
           )}
           onClick={() => {
@@ -103,8 +102,8 @@ export function DataVisualizerIndexPatternManagement(
               addField();
             }}
           >
-            {i18n.translate('xpack.dataVisualizer.index.indexPatternManagement.addFieldButton', {
-              defaultMessage: 'Add field to index pattern',
+            {i18n.translate('xpack.dataVisualizer.index.dataViewManagement.addFieldButton', {
+              defaultMessage: 'Add field to data view',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -118,8 +117,8 @@ export function DataVisualizerIndexPatternManagement(
               });
             }}
           >
-            {i18n.translate('xpack.dataVisualizer.index.indexPatternManagement.manageFieldButton', {
-              defaultMessage: 'Manage index pattern fields',
+            {i18n.translate('xpack.dataVisualizer.index.dataViewManagement.manageFieldButton', {
+              defaultMessage: 'Manage data view fields',
             })}
           </EuiContextMenuItem>,
         ]}

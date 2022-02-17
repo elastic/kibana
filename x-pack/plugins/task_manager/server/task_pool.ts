@@ -11,7 +11,6 @@
  */
 import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
-import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_running';
@@ -111,12 +110,23 @@ export class TaskPool {
   public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
-      performance.mark('attemptToRun_start');
       await Promise.all(
         tasksToRun
-          .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
+          .filter(
+            (taskRunner) =>
+              !Array.from(this.tasksInPool.keys()).some((executionId: string) =>
+                taskRunner.isSameTask(executionId)
+              )
+          )
           .map(async (taskRunner) => {
-            this.tasksInPool.set(taskRunner.id, taskRunner);
+            // We use taskRunner.taskExecutionId instead of taskRunner.id as key for the task pool map because
+            // task cancellation is a non-blocking procedure. We calculate the expiration and immediately remove
+            // the task from the task pool. There is a race condition that can occur when a recurring tasks's schedule
+            // matches its timeout value. A new instance of the task can be claimed and added to the task pool before
+            // the cancel function (meant for the previous instance of the task) is actually called. This means the wrong
+            // task instance is cancelled. We introduce the taskExecutionId to differentiate between these overlapping instances and
+            // ensure that the correct task instance is cancelled.
+            this.tasksInPool.set(taskRunner.taskExecutionId, taskRunner);
             return taskRunner
               .markTaskAsRunning()
               .then((hasTaskBeenMarkAsRunning: boolean) =>
@@ -130,9 +140,6 @@ export class TaskPool {
               .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
           })
       );
-
-      performance.mark('attemptToRun_stop');
-      performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
     }
 
     if (leftOverTasks.length) {
@@ -170,12 +177,12 @@ export class TaskPool {
         }
       })
       .then(() => {
-        this.tasksInPool.delete(taskRunner.id);
+        this.tasksInPool.delete(taskRunner.taskExecutionId);
       });
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
-    this.tasksInPool.delete(task.id);
+    this.tasksInPool.delete(task.taskExecutionId);
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
   }
 
@@ -203,7 +210,7 @@ export class TaskPool {
   private async cancelTask(task: TaskRunner) {
     try {
       this.logger.debug(`Cancelling task ${task.toString()}.`);
-      this.tasksInPool.delete(task.id);
+      this.tasksInPool.delete(task.taskExecutionId);
       await task.cancel();
     } catch (err) {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);

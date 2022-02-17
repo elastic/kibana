@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { ControlColumnProps } from '../../../../../../common/types/timeline';
 import { Actions } from '../actions';
-import { HeaderActions } from '../actions/header_actions';
+import { getActionsColumnWidth } from '../../../../../../../timelines/public';
+import * as i18n from '../../../../../common/components/events_viewer/translations';
 
-const DEFAULT_CONTROL_COLUMN_WIDTH = 108;
-
-export const defaultControlColumn: ControlColumnProps = {
-  id: 'default-timeline-control-column',
-  width: DEFAULT_CONTROL_COLUMN_WIDTH,
-  headerCellRender: HeaderActions,
-  rowCellRender: Actions,
-};
+export const getDefaultControlColumn = (actionButtonCount: number): ControlColumnProps[] => [
+  {
+    headerCellRender: () => <>{i18n.ACTIONS}</>,
+    id: 'default-timeline-control-column',
+    rowCellRender: Actions,
+    width: getActionsColumnWidth(actionButtonCount),
+  },
+];

@@ -230,4 +230,20 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Tagcloud visualization',
     }),
   },
+  metricVis: {
+    displayName: i18n.translate('xpack.canvas.elements.metricVisDisplayName', {
+      defaultMessage: '(New) Metric Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.metricVisHelpText', {
+      defaultMessage: 'Metric visualization',
+    }),
+  },
+  heatmap: {
+    displayName: i18n.translate('xpack.canvas.elements.heatmapDisplayName', {
+      defaultMessage: 'Heatmap',
+    }),
+    help: i18n.translate('xpack.canvas.elements.heatmapHelpText', {
+      defaultMessage: 'Heatmap visualization',
+    }),
+  },
 });

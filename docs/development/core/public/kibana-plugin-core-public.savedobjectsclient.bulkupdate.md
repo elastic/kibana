@@ -16,11 +16,11 @@ bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<Saved
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObjectsBulkUpdateObject[]</code> |  |
+|  objects | SavedObjectsBulkUpdateObject\[\] | \[{ type, id, attributes, options: { version, references } }<!-- -->\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBatchResponse<unknown>>`
+Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;
 
 The result of the update operation containing both failed and updated saved objects.
 

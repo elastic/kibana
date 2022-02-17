@@ -153,13 +153,19 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context, results } = useResolver(index, savedSearchId, deps.config, {
-    ...basicResolvers(deps),
-    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
-    jobCaps: () =>
-      loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns, ANOMALY_DETECTOR),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
-  });
+  const { context, results } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    {
+      ...basicResolvers(deps),
+      privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
+      jobCaps: () =>
+        loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
+      existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    }
+  );
 
   return (
     <PageLoader context={context}>

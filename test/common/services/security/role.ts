@@ -34,11 +34,9 @@ export class Role {
       path: `/api/security/role/${name}`,
       method: 'DELETE',
     });
-    if (status !== 204 && status !== 404) {
+    if (status !== 204) {
       throw new Error(
-        `Expected status code of 204 or 404, received ${status} ${statusText}: ${util.inspect(
-          data
-        )}`
+        `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
   }

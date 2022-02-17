@@ -17,6 +17,7 @@ import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions, RuleAction } from './alert_actions';
 import { Ping } from '../../../common/runtime_types/ping';
+import { DefaultEmail } from '../../../common/runtime_types';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
@@ -44,6 +45,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
 export interface NewAlertParams extends AlertTypeParams {
   selectedMonitor: Ping;
   defaultActions: ActionConnector[];
+  defaultEmail?: DefaultEmail;
 }
 
 type NewMonitorStatusAlert = Omit<
@@ -71,10 +73,12 @@ export const createAlert = async ({
   defaultActions,
   monitorId,
   selectedMonitor,
+  defaultEmail,
 }: NewAlertParams): Promise<Alert> => {
   const actions: RuleAction[] = populateAlertActions({
     defaultActions,
     selectedMonitor,
+    defaultEmail,
   });
 
   const data: NewMonitorStatusAlert = {
@@ -127,8 +131,11 @@ export const fetchAlertRecords = async ({
     sort_field: 'name.keyword',
     sort_order: 'asc',
   };
-  const alerts = await apiService.get(API_URLS.RULES_FIND, data);
-  return alerts.data.find((alert: Alert<NewAlertParams>) => alert.params.monitorId === monitorId);
+  const alerts = await apiService.get<{ data: Array<Alert<NewAlertParams>> }>(
+    API_URLS.RULES_FIND,
+    data
+  );
+  return alerts.data.find((alert) => alert.params.monitorId === monitorId) as Alert<NewAlertParams>;
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

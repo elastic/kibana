@@ -10,7 +10,7 @@ import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MaybePromise } from '@kbn/utility-types';
 import { isPromise } from '@kbn/std';
 import {
@@ -177,10 +177,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private fetchLicense = async (clusterClient: MaybePromise<IClusterClient>): Promise<ILicense> => {
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const { body: response } = await client.asInternalUser.xpack.info({
-        // @ts-expect-error `accept_enterprise` is not present in the client definition
-        accept_enterprise: true,
-      });
+      const response = await client.asInternalUser.xpack.info();
       const normalizedLicense =
         response.license && response.license.type !== 'missing'
           ? normalizeServerLicense(response.license)

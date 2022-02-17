@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobFieldType } from '../../../../../common';
+import type { JobFieldType } from '../../../../../common/types';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
 import { jobTypeLabels } from '../../../common/util/field_types_utils';
@@ -29,7 +29,7 @@ export const DataVisualizerFieldTypeFilter: FC<{
             <EuiFlexItem grow={true}> {label}</EuiFlexItem>
             {indexedFieldName && (
               <EuiFlexItem grow={false}>
-                <FieldTypeIcon type={indexedFieldName} tooltipEnabled={false} needsAria={true} />
+                <FieldTypeIcon type={indexedFieldName} tooltipEnabled={false} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

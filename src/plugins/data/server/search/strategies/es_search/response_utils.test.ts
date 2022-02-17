@@ -7,7 +7,7 @@
  */
 
 import { getTotalLoaded, toKibanaSearchResponse, shimHitsTotal } from './response_utils';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('response utils', () => {
   describe('getTotalLoaded', () => {

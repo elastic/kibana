@@ -1,0 +1,7 @@
+.promotedDocuments {
+  &--results {
+    border-radius: $euiSizeM;
+    border: $euiBorderWidthThick solid $euiColorPrimary;
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%); // Copied from @elastit/eui/src/global_styling/variables/_panels.scss
+  }
+}

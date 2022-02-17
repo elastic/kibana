@@ -8,12 +8,10 @@
 import { CoreSetup } from '../../../../src/core/server';
 
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
-import {
-  type as ruleStatusType,
-  ruleAssetType,
-} from './lib/detection_engine/rules/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
 import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions/legacy_saved_object_mappings';
+import { ruleExecutionType } from './lib/detection_engine/rule_execution_log';
+import { ruleAssetType } from './lib/detection_engine/rules/rule_asset/rule_asset_saved_object_mappings';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import {
   exceptionsArtifactType,
@@ -24,7 +22,7 @@ const types = [
   noteType,
   pinnedEventType,
   legacyRuleActionsType,
-  ruleStatusType,
+  ruleExecutionType,
   ruleAssetType,
   timelineType,
   exceptionsArtifactType,

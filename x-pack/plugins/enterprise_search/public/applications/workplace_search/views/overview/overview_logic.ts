@@ -97,7 +97,9 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
   listeners: ({ actions }) => ({
     initializeOverview: async () => {
       try {
-        const response = await HttpLogic.values.http.get('/internal/workplace_search/overview');
+        const response = await HttpLogic.values.http.get<OverviewServerData>(
+          '/internal/workplace_search/overview'
+        );
         actions.setServerData(response);
       } catch (e) {
         flashAPIErrors(e);

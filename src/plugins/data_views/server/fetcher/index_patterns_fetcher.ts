@@ -8,6 +8,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { keyBy } from 'lodash';
+import type { QueryDslQueryContainer } from '../../common/types';
 
 import {
   getFieldCapabilities,
@@ -57,43 +58,40 @@ export class IndexPatternsFetcher {
     fieldCapsOptions?: { allow_no_indices: boolean };
     type?: string;
     rollupIndex?: string;
+    filter?: QueryDslQueryContainer;
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
+    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
+    const allowNoIndices = fieldCapsOptions
+      ? fieldCapsOptions.allow_no_indices
+      : this.allowNoIndices;
     let patternListActive: string[] = patternList;
     // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
-    if (patternList.length > 1) {
+    if (patternList.length > 1 && !allowNoIndices) {
       patternListActive = await this.validatePatternListActive(patternList);
     }
-    const fieldCapsResponse = await getFieldCapabilities(
-      this.elasticsearchClient,
-      // if none of the patterns are active, pass the original list to get an error
-      patternListActive.length > 0 ? patternListActive : patternList,
+    const fieldCapsResponse = await getFieldCapabilities({
+      callCluster: this.elasticsearchClient,
+      indices: patternListActive,
       metaFields,
-      {
-        allow_no_indices: fieldCapsOptions
-          ? fieldCapsOptions.allow_no_indices
-          : this.allowNoIndices,
-      }
-    );
-
+      fieldCapsOptions: {
+        allow_no_indices: allowNoIndices,
+      },
+      filter,
+    });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
-        (
-          await this.elasticsearchClient.rollup.getRollupIndexCaps({
-            index: rollupIndex,
-          })
-        ).body
+        await this.elasticsearchClient.rollup.getRollupIndexCaps({
+          index: rollupIndex,
+        })
       )[rollupIndex].aggs;
       const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
-
       // Keep meta fields
       metaFields!.forEach(
         (field: string) =>
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
-
       return mergeCapabilitiesWithFields(
         rollupIndexCapabilities,
         fieldCapsResponseObj,
@@ -125,7 +123,11 @@ export class IndexPatternsFetcher {
     if (indices.length === 0) {
       throw createNoMatchingIndicesError(pattern);
     }
-    return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
+    return await getFieldCapabilities({
+      callCluster: this.elasticsearchClient,
+      indices,
+      metaFields,
+    });
   }
 
   /**
@@ -137,23 +139,24 @@ export class IndexPatternsFetcher {
   async validatePatternListActive(patternList: string[]) {
     const result = await Promise.all(
       patternList
-        .map((pattern) =>
-          this.elasticsearchClient.count({
-            index: pattern,
-          })
-        )
-        .map((p) =>
-          p.catch((e) => {
-            if (e.body.error.type === 'index_not_found_exception') {
-              return { body: { count: 0 } };
-            }
-            throw e;
-          })
-        )
+        .map(async (index) => {
+          // perserve negated patterns
+          if (index.startsWith('-')) {
+            return true;
+          }
+          const searchResponse = await this.elasticsearchClient.fieldCaps({
+            index,
+            fields: '_id',
+            ignore_unavailable: true,
+            allow_no_indices: false,
+          });
+          return searchResponse.indices.length > 0;
+        })
+        .map((p) => p.catch(() => false))
     );
     return result.reduce(
-      (acc: string[], { body: { count } }, patternListIndex) =>
-        count > 0 ? [...acc, patternList[patternListIndex]] : acc,
+      (acc: string[], isValid, patternListIndex) =>
+        isValid ? [...acc, patternList[patternListIndex]] : acc,
       []
     );
   }

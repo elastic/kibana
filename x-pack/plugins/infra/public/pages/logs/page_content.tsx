@@ -23,12 +23,12 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useLinkProps } from '../../hooks/use_link_props';
+import { useLinkProps } from '../../../../observability/public';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   const { initialize } = useLogSourceContext();
 
@@ -76,15 +76,15 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
-      {setHeaderActionMenu && (
-        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+      {setHeaderActionMenu && theme$ && (
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
           <EuiHeaderLinks gutterSize="xs">
             <EuiHeaderLink color={'text'} {...settingsLinkProps}>
               {settingsTabTitle}
             </EuiHeaderLink>
             <AlertDropdown />
             <EuiHeaderLink
-              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
+              href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
               color="primary"
               iconType="indexOpen"
             >

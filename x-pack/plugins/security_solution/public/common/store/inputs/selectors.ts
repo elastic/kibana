@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import type { Filter, Query } from '@kbn/es-query';
 import { State } from '../types';
 
 import { InputsModel, InputsRange, GlobalQuery } from './model';

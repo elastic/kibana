@@ -7,7 +7,8 @@
 
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { FieldSpec, IndexPattern } from '../../../../../../../src/plugins/data/common';
+import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
+import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 
 import {
@@ -24,12 +25,12 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): IndexPattern =>
+const getMockIndexPattern = (): DataViewBase =>
   ({
     id: '1234',
     title: 'logstash-*',
     fields,
-  } as IndexPattern);
+  } as DataViewBase);
 
 const getMockEntry = (): FormattedEntry => ({
   id: '123',
@@ -51,7 +52,7 @@ describe('Helpers', () => {
 
   describe('#getFormattedEntry', () => {
     test('it returns entry with a value when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: IndexPattern = {
+      const payloadIndexPattern: DataViewBase = {
         ...getMockIndexPattern(),
         fields: [
           ...fields,
@@ -66,7 +67,7 @@ describe('Helpers', () => {
             readFromDocValues: true,
           },
         ],
-      } as IndexPattern;
+      } as DataViewBase;
       const payloadItem: Entry = {
         field: 'machine.os.raw.text',
         type: 'mapping',
@@ -171,7 +172,7 @@ describe('Helpers', () => {
     });
 
     test('it returns formatted entries', () => {
-      const payloadIndexPattern: IndexPattern = getMockIndexPattern();
+      const payloadIndexPattern: DataViewBase = getMockIndexPattern();
       const payloadItems: Entry[] = [
         { field: 'machine.os', type: 'mapping', value: 'machine.os' },
         { field: 'ip', type: 'mapping', value: 'ip' },

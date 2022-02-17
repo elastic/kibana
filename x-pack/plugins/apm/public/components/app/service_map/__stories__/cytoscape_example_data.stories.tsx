@@ -22,7 +22,7 @@ import {
   CodeEditor,
   createKibanaReactContext,
 } from '../../../../../../../../src/plugins/kibana_react/public';
-import { Cytoscape } from '../Cytoscape';
+import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
 import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';

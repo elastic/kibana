@@ -17,7 +17,7 @@ export async function deleteAlerts({
   const successes: string[] = [];
   const errors: string[] = [];
   await Promise.all(
-    ids.map((id) => http.delete(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`))
+    ids.map((id) => http.delete<string>(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`))
   ).then(
     function (fulfilled) {
       successes.push(...fulfilled);

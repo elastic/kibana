@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuditLogger } from '../../../../plugins/security/server';
+import { auditLoggerMock } from '../../../../plugins/security/server/audit/mocks';
 import { Operations } from '.';
 import { AuthorizationAuditLogger } from './audit_logger';
 import { ReadOperations } from './types';
@@ -30,10 +30,7 @@ describe('audit_logger', () => {
   });
 
   describe('log function', () => {
-    const mockLogger: jest.Mocked<AuditLogger> = {
-      log: jest.fn(),
-    };
-
+    const mockLogger = auditLoggerMock.create();
     let logger: AuthorizationAuditLogger;
 
     beforeEach(() => {

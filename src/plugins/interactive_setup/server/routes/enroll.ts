@@ -12,12 +12,15 @@ import { schema } from '@kbn/config-schema';
 
 import {
   ElasticsearchConnectionStatus,
+  ERROR_COMPATIBILITY_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
   ERROR_ENROLL_FAILURE,
   ERROR_KIBANA_CONFIG_FAILURE,
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
 } from '../../common';
+import { CompatibilityError } from '../compatibility_error';
+import { ElasticsearchService } from '../elasticsearch_service';
 import type { EnrollResult } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
 import type { RouteDefinitionParams } from './';
@@ -92,22 +95,26 @@ export function defineEnrollRoutes({
         });
       }
 
-      // Convert a plain hex string returned in the enrollment token to a format that ES client
-      // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
-      const colonFormattedCaFingerprint =
-        request.body.caFingerprint
-          .toUpperCase()
-          .match(/.{1,2}/g)
-          ?.join(':') ?? '';
-
       let configToWrite: WriteConfigParameters & EnrollResult;
       try {
         configToWrite = await elasticsearch.enroll({
           apiKey: request.body.apiKey,
           hosts: request.body.hosts,
-          caFingerprint: colonFormattedCaFingerprint,
+          caFingerprint: ElasticsearchService.formatFingerprint(request.body.caFingerprint),
         });
-      } catch {
+      } catch (error) {
+        if (error instanceof CompatibilityError) {
+          return response.badRequest({
+            body: {
+              message: 'Failed to enroll due to version incompatibility.',
+              attributes: {
+                type: ERROR_COMPATIBILITY_FAILURE,
+                elasticsearchVersion: error.elasticsearchVersion,
+                kibanaVersion: error.kibanaVersion,
+              },
+            },
+          });
+        }
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
         // request or we just couldn't connect to any of the provided hosts.
         return response.customError({

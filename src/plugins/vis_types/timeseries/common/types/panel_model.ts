@@ -78,7 +78,7 @@ export interface Series {
   chart_type: string;
   color: string;
   color_rules?: ColorRules[];
-  fill?: number;
+  fill?: string;
   filter?: Query;
   formatter: string;
   hidden?: boolean;
@@ -115,7 +115,6 @@ export interface Series {
   terms_size?: string;
   time_range_mode?: string;
   trend_arrows?: number;
-  type?: string;
   value_template?: string;
   var_name?: string;
 }

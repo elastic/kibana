@@ -22,6 +22,7 @@ const buildRuleMessage = buildRuleMessageFactory({
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
+// Failing with rule registry enabled
 describe('findThresholdSignals', () => {
   let mockService: AlertServicesMock;
 
@@ -63,6 +64,11 @@ describe('findThresholdSignals', () => {
                   field: '@timestamp',
                 },
               },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
+                },
+              },
             },
           },
         },
@@ -97,6 +103,11 @@ describe('findThresholdSignals', () => {
             aggs: {
               max_timestamp: {
                 max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
                   field: '@timestamp',
                 },
               },
@@ -142,6 +153,11 @@ describe('findThresholdSignals', () => {
                 aggs: {
                   max_timestamp: {
                     max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
                       field: '@timestamp',
                     },
                   },
@@ -211,6 +227,11 @@ describe('findThresholdSignals', () => {
                       field: '@timestamp',
                     },
                   },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
+                    },
+                  },
                 },
               },
             },
@@ -269,6 +290,11 @@ describe('findThresholdSignals', () => {
               },
               max_timestamp: {
                 max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
                   field: '@timestamp',
                 },
               },

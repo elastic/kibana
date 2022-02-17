@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
-import { TabbedResponseWriterOptions } from './types';
+import type { TabbedResponseWriterOptions } from './types';
 import { AggResponseBucket } from './types';
 import { AggGroupNames, IAggConfigs } from '../aggs';
 
@@ -37,13 +37,21 @@ export function tabifyAggResponse(
 
     if (column) {
       const agg = column.aggConfig;
-      const aggInfo = agg.write(aggs);
-      aggScale *= aggInfo.metricScale || 1;
+      if (agg.getParam('scaleMetricValues')) {
+        const aggInfo = agg.write(aggs);
+        aggScale *= aggInfo.metricScale || 1;
+      }
 
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
-          const aggBucket = get(bucket, agg.id);
+          const aggBucket = get(bucket, agg.id) as Record<string, unknown>;
           const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
+          const precisionError = agg.type.hasPrecisionError?.(aggBucket);
+
+          if (precisionError) {
+            // "сolumn" mutation, we have to do this here as this value is filled in based on aggBucket value
+            column.hasPrecisionError = true;
+          }
 
           if (tabifyBuckets.length) {
             tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {

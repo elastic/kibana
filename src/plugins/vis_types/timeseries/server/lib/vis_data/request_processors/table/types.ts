@@ -7,8 +7,8 @@
  */
 
 import type { IUiSettingsClient } from 'kibana/server';
+import { EsQueryConfig } from '@kbn/es-query';
 import type { FetchedIndexPattern, Panel } from '../../../../../common/types';
-import type { EsQueryConfig } from '../../../../../../../data/common';
 import type { SearchCapabilities } from '../../../search_strategies';
 import type { VisTypeTimeseriesVisDataRequest } from '../../../../types';
 
@@ -32,6 +32,7 @@ export interface TableRequestProcessorsParams {
 export interface TableSearchRequestMeta extends BaseMeta {
   panelId?: string;
   timeField?: string;
+  normalized?: boolean;
 }
 
 export type TableSearchRequest = Record<string, any>;

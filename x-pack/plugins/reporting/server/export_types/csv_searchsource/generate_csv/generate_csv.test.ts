@@ -20,7 +20,7 @@ import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig } from '../../../';
-import { CancellationToken } from '../../../../common';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -49,6 +49,10 @@ const searchSourceMock = { ...searchSourceInstanceMock };
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
+  telemetry: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
+  getAllMigrations: jest.fn(),
 };
 const mockDataClientSearchDefault = jest.fn().mockImplementation(
   (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
@@ -65,21 +69,6 @@ const mockDataClientSearchDefault = jest.fn().mockImplementation(
       },
     })
 );
-const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: string) => {
-  switch (key) {
-    case 'fields':
-      return ['date', 'ip', 'message'];
-    case 'index':
-      return {
-        fields: {
-          getByName: jest.fn().mockImplementation(() => []),
-          getByType: jest.fn().mockImplementation(() => []),
-        },
-        metaFields: ['_id', '_index', '_type', '_score'],
-        getFormatterForField: jest.fn(),
-      };
-  }
-});
 
 const mockFieldFormatsRegistry = {
   deserialize: jest
@@ -119,14 +108,26 @@ beforeEach(async () => {
     })
   );
 
-  searchSourceMock.getField = mockSearchSourceGetFieldDefault;
+  searchSourceMock.getField = jest.fn((key: string) => {
+    switch (key) {
+      case 'index':
+        return {
+          fields: {
+            getByName: jest.fn(() => []),
+            getByType: jest.fn(() => []),
+          },
+          metaFields: ['_id', '_index', '_type', '_score'],
+          getFormatterForField: jest.fn(),
+        };
+    }
+  });
 });
 
 const logger = createMockLevelLogger();
 
 it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
-    createMockJob({}),
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -166,7 +167,7 @@ it('formats a search result to CSV content', async () => {
     })
   );
   const generateCsv = new CsvGenerator(
-    createMockJob({}),
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -189,12 +190,6 @@ it('formats a search result to CSV content', async () => {
 const HITS_TOTAL = 100;
 
 it('calculates the bytes of the content', async () => {
-  searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
-    if (key === 'fields') {
-      return ['message'];
-    }
-    return mockSearchSourceGetFieldDefault(key);
-  });
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
       rawResponse: {
@@ -211,7 +206,7 @@ it('calculates the bytes of the content', async () => {
   );
 
   const generateCsv = new CsvGenerator(
-    createMockJob({}),
+    createMockJob({ columns: ['message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -263,7 +258,7 @@ it('warns if max size was reached', async () => {
   );
 
   const generateCsv = new CsvGenerator(
-    createMockJob({}),
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -303,21 +298,19 @@ it('uses the scrollId to page all the data', async () => {
     })
   );
   mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
-    body: {
-      hits: {
-        hits: range(0, HITS_TOTAL / 10).map(() => ({
-          fields: {
-            date: ['2020-12-31T00:14:28.000Z'],
-            ip: ['110.135.176.89'],
-            message: ['hit from a subsequent scroll'],
-          },
-        })),
-      },
+    hits: {
+      hits: range(0, HITS_TOTAL / 10).map(() => ({
+        fields: {
+          date: ['2020-12-31T00:14:28.000Z'],
+          ip: ['110.135.176.89'],
+          message: ['hit from a subsequent scroll'],
+        },
+      })),
     },
   });
 
   const generateCsv = new CsvGenerator(
-    createMockJob({}),
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -338,30 +331,25 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: true, scroll: '30s', size: 500 } },
+    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
-    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+    scroll: '30s',
+    scroll_id: 'awesome-scroll-hero',
   });
 
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
-    body: { scroll_id: ['awesome-scroll-hero'] },
+    scroll_id: ['awesome-scroll-hero'],
   });
 });
 
 describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   it('cells can be multi-value', async () => {
-    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
-      if (key === 'fields') {
-        return ['_id', 'sku'];
-      }
-      return mockSearchSourceGetFieldDefault(key);
-    });
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {
@@ -383,7 +371,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      createMockJob({ searchSource: {} }),
+      createMockJob({ searchSource: {}, columns: ['_id', 'sku'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -404,12 +392,6 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   });
 
   it('provides top-level underscored fields as columns', async () => {
-    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
-      if (key === 'fields') {
-        return ['_id', '_index', 'date', 'message'];
-      }
-      return mockSearchSourceGetFieldDefault(key);
-    });
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {
@@ -440,6 +422,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
           fields: ['_id', '_index', '@date', 'message'],
           filter: [],
         },
+        columns: ['_id', '_index', 'date', 'message'],
       }),
       mockConfig,
       {
@@ -463,12 +446,6 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   });
 
   it('sorts the fields when they are to be used as table column names', async () => {
-    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
-      if (key === 'fields') {
-        return ['*'];
-      }
-      return mockSearchSourceGetFieldDefault(key);
-    });
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {
@@ -615,13 +592,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
     expect(content).toMatchSnapshot();
   });
 
-  it('empty columns defaults to using searchSource.getFields()', async () => {
-    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
-      if (key === 'fields') {
-        return ['product'];
-      }
-      return mockSearchSourceGetFieldDefault(key);
-    });
+  it('default column names come from tabify', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {
@@ -689,7 +660,7 @@ describe('formulas', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      createMockJob({}),
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -731,15 +702,8 @@ describe('formulas', () => {
       })
     );
 
-    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
-      if (key === 'fields') {
-        return ['date', 'ip', TEST_FORMULA];
-      }
-      return mockSearchSourceGetFieldDefault(key);
-    });
-
     const generateCsv = new CsvGenerator(
-      createMockJob({}),
+      createMockJob({ columns: ['date', 'ip', TEST_FORMULA] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -792,7 +756,7 @@ describe('formulas', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      createMockJob({}),
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -813,4 +777,31 @@ describe('formulas', () => {
     expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(true);
   });
+});
+
+it('can override ignoring frozen indices', async () => {
+  const originalGet = uiSettingsClient.get;
+  uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    if (key === 'search:includeFrozen') {
+      return true;
+    }
+    return originalGet(key);
+  });
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({}),
+    mockConfig,
+    { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
+    { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+
+  await generateCsv.generateData();
+
+  expect(mockDataClient.search).toBeCalledWith(
+    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
+    { strategy: 'es' }
+  );
 });

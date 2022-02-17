@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ToastsApi } from 'kibana/public';
 import { EuiSpacer } from '@elastic/eui';
-import { AlertType, ActionType, ResolvedRule } from '../../../../types';
+import { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
 import {
@@ -47,7 +47,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const { basePath } = http;
 
   const [alert, setAlert] = useState<ResolvedRule | null>(null);
-  const [alertType, setAlertType] = useState<AlertType | null>(null);
+  const [alertType, setAlertType] = useState<RuleType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
   const [refreshToken, requestRefresh] = React.useState<number>();
   useEffect(() => {
@@ -117,6 +117,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
         alertType={alertType}
         actionTypes={actionTypes}
         requestRefresh={async () => requestRefresh(Date.now())}
+        refreshToken={refreshToken}
       />
     </>
   ) : (
@@ -130,7 +131,7 @@ export async function getRuleData(
   resolveRule: AlertApis['resolveRule'],
   loadActionTypes: ActionApis['loadActionTypes'],
   setAlert: React.Dispatch<React.SetStateAction<ResolvedRule | null>>,
-  setAlertType: React.Dispatch<React.SetStateAction<AlertType | null>>,
+  setAlertType: React.Dispatch<React.SetStateAction<RuleType | null>>,
   setActionTypes: React.Dispatch<React.SetStateAction<ActionType[] | null>>,
   toasts: Pick<ToastsApi, 'addDanger'>
 ) {
@@ -138,7 +139,7 @@ export async function getRuleData(
     const loadedRule: ResolvedRule = await resolveRule(ruleId);
     setAlert(loadedRule);
 
-    const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
+    const [loadedAlertType, loadedActionTypes] = await Promise.all([
       loadAlertTypes()
         .then((types) => types.find((type) => type.id === loadedRule.alertTypeId))
         .then(throwIfAbsent(`Invalid Rule Type: ${loadedRule.alertTypeId}`)),

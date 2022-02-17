@@ -15,6 +15,7 @@ import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
+import type { ThemeServiceStart } from '../theme';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -44,6 +45,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  theme: ThemeServiceStart;
   overlays: OverlayStart;
 }
 
@@ -65,8 +67,9 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   return appendAppPath(appBasePath, path);
 };
 
-const getAppDeepLinkPath = (mounters: Map<string, Mounter>, appId: string, deepLinkId: string) => {
-  return mounters.get(appId)?.deepLinkPaths[deepLinkId];
+const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) => {
+  const flattenedLinks = flattenDeepLinks(app.deepLinks);
+  return flattenedLinks[deepLinkId];
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -180,7 +183,6 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
-          deepLinkPaths: toDeepLinkPaths(app.deepLinks),
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
@@ -191,7 +193,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -240,15 +242,17 @@ export class ApplicationService {
         ? true
         : await this.shouldNavigate(overlays, appId);
 
+      const targetApp = applications$.value.get(appId);
+
       if (shouldNavigate) {
-        if (deepLinkId) {
-          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
           if (deepLinkPath) {
             path = appendAppPath(deepLinkPath, path);
           }
         }
         if (path === undefined) {
-          path = applications$.value.get(appId)?.defaultPath;
+          path = targetApp?.defaultPath;
         }
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
@@ -288,8 +292,9 @@ export class ApplicationService {
           deepLinkId,
         }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
-        if (deepLinkId) {
-          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+        const targetApp = applications$.value.get(appId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
           if (deepLinkPath) {
             path = appendAppPath(deepLinkPath, path);
           }
@@ -314,6 +319,7 @@ export class ApplicationService {
         return (
           <AppRouter
             history={this.history}
+            theme$={theme.theme$}
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
@@ -359,6 +365,8 @@ export class ApplicationService {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
+        confirmButtonText: action.confirmButtonText,
+        buttonColor: action.buttonColor,
       });
       if (!confirmed) {
         if (action.callback) {
@@ -436,12 +444,12 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }));
 };
 
-const toDeepLinkPaths = (deepLinks?: AppDeepLink[]): Mounter['deepLinkPaths'] => {
+const flattenDeepLinks = (deepLinks?: AppDeepLink[]): Record<string, string> => {
   if (!deepLinks) {
     return {};
   }
-  return deepLinks.reduce((deepLinkPaths: Mounter['deepLinkPaths'], deepLink) => {
+  return deepLinks.reduce((deepLinkPaths: Record<string, string>, deepLink) => {
     if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
-    return { ...deepLinkPaths, ...toDeepLinkPaths(deepLink.deepLinks) };
+    return { ...deepLinkPaths, ...flattenDeepLinks(deepLink.deepLinks) };
   }, {});
 };

@@ -9,7 +9,7 @@ import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getAlertingCapabilities } from '../../alerting/get_alerting_capabilities';
-import { getAPMHref } from '../Links/apm/APMLink';
+import { getLegacyApmHref } from '../links/apm/apm_link';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
@@ -33,7 +33,7 @@ export function ApmHeaderActionMenu() {
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
-    return getAPMHref({ basePath, path, search });
+    return getLegacyApmHref({ basePath, path, search });
   }
 
   function kibanaHref(path: string) {

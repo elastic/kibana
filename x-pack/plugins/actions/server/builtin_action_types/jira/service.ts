@@ -27,7 +27,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request, getErrorMessage } from '../lib/axios_utils';
+import { request, getErrorMessage, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
@@ -111,19 +111,15 @@ export const createExternalService = (
       .filter((item) => !isEmpty(item))
       .join(', ');
 
-  const createErrorMessage = (errorResponse: ResponseError | string | null | undefined): string => {
+  const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
     if (errorResponse == null) {
-      return '';
-    }
-    if (typeof errorResponse === 'string') {
-      // Jira error.response.data can be string!!
-      return errorResponse;
+      return 'unknown: errorResponse was null';
     }
 
     const { errorMessages, errors } = errorResponse;
 
     if (errors == null) {
-      return '';
+      return 'unknown: errorResponse.errors was null';
     }
 
     if (Array.isArray(errorMessages) && errorMessages.length > 0) {
@@ -185,9 +181,14 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      const { fields, ...rest } = res.data;
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'key'],
+      });
 
-      return { ...rest, ...fields };
+      const { fields, id: incidentId, key } = res.data;
+
+      return { id: incidentId, key, created: fields.created, updated: fields.updated, ...fields };
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -234,6 +235,11 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id'],
+      });
+
       const updatedIncident = await getIncident(res.data.id);
 
       return {
@@ -266,13 +272,17 @@ export const createExternalService = (
     const fields = createFields(projectKey, incidentWithoutNullValues);
 
     try {
-      await request({
+      const res = await request({
         axios: axiosInstance,
         method: 'put',
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { fields },
         configurationUtilities,
+      });
+
+      throwIfResponseIsNotValid({
+        res,
       });
 
       const updatedIncident = await getIncident(incidentId as string);
@@ -309,6 +319,11 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'created'],
+      });
+
       return {
         commentId: comment.commentId,
         externalCommentId: res.data.id,
@@ -334,6 +349,11 @@ export const createExternalService = (
         url: capabilitiesUrl,
         logger,
         configurationUtilities,
+      });
+
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['capabilities'],
       });
 
       return { ...res.data };
@@ -362,6 +382,10 @@ export const createExternalService = (
           configurationUtilities,
         });
 
+        throwIfResponseIsNotValid({
+          res,
+        });
+
         const issueTypes = res.data.projects[0]?.issuetypes ?? [];
         return normalizeIssueTypes(issueTypes);
       } else {
@@ -371,6 +395,10 @@ export const createExternalService = (
           url: getIssueTypesUrl,
           logger,
           configurationUtilities,
+        });
+
+        throwIfResponseIsNotValid({
+          res,
         });
 
         const issueTypes = res.data.values;
@@ -401,6 +429,10 @@ export const createExternalService = (
           configurationUtilities,
         });
 
+        throwIfResponseIsNotValid({
+          res,
+        });
+
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
         return normalizeFields(fields);
       } else {
@@ -410,6 +442,10 @@ export const createExternalService = (
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
           logger,
           configurationUtilities,
+        });
+
+        throwIfResponseIsNotValid({
+          res,
         });
 
         const fields = res.data.values.reduce(
@@ -471,6 +507,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfResponseIsNotValid({
+        res,
+      });
+
       return normalizeSearchResults(res.data?.issues ?? []);
     } catch (error) {
       throw new Error(
@@ -493,6 +533,10 @@ export const createExternalService = (
         url: getIssueUrl,
         logger,
         configurationUtilities,
+      });
+
+      throwIfResponseIsNotValid({
+        res,
       });
 
       return normalizeIssue(res.data ?? {});

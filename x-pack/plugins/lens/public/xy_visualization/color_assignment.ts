@@ -8,7 +8,7 @@
 import { uniq, mapValues } from 'lodash';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import type { Datatable } from 'src/plugins/expressions';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory, LayerType, layerTypes } from '../../common';
@@ -108,7 +108,7 @@ export function getAccessorColorConfig(
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
+  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
   return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
@@ -132,17 +132,19 @@ export function getAccessorColorConfig(
     );
     const customColor =
       currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getCategoricalColor(
-        [
-          {
-            name: columnToLabel[accessor] || accessor,
-            rankAtDepth: rank,
-            totalSeriesAtDepth: totalSeriesCount,
-          },
-        ],
-        { maxDepth: 1, totalSeries: totalSeriesCount },
-        currentPalette.params
-      );
+      (totalSeriesCount != null
+        ? paletteService.get(currentPalette.name).getCategoricalColor(
+            [
+              {
+                name: columnToLabel[accessor] || accessor,
+                rankAtDepth: rank,
+                totalSeriesAtDepth: totalSeriesCount,
+              },
+            ],
+            { maxDepth: 1, totalSeries: totalSeriesCount },
+            currentPalette.params
+          )
+        : undefined);
     return {
       columnId: accessor as string,
       triggerIcon: customColor ? 'color' : 'disabled',

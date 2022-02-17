@@ -9,59 +9,87 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { SetupDependencies, StartDependencies, AppServicesContext } from './types';
-import { Config } from '../common/config';
+import { apiService } from './application/lib/api';
+import { breadcrumbService } from './application/lib/breadcrumbs';
+import { uiMetricService } from './application/lib/ui_metric';
+import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
-    const { readonly } = this.ctx.config.get<Config>();
 
-    const appRegistrar = management.sections.section.stack;
-    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+  setup(
+    coreSetup: CoreSetup<StartDependencies>,
+    { management, cloud, share, usageCollection }: SetupDependencies
+  ) {
+    const {
+      readonly,
+      ui: { enabled: isUpgradeAssistantUiEnabled },
+    } = this.ctx.config.get<ClientConfigType>();
 
-    const kibanaVersionInfo = {
-      currentMajor: kibanaVersion.major,
-      prevMajor: kibanaVersion.major - 1,
-      nextMajor: kibanaVersion.major + 1,
-    };
+    if (isUpgradeAssistantUiEnabled) {
+      const appRegistrar = management.sections.section.stack;
+      const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
-    const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
-      defaultMessage: '{version} Upgrade Assistant',
-      values: { version: `${kibanaVersionInfo.nextMajor}.0` },
-    });
+      const kibanaVersionInfo = {
+        currentMajor: kibanaVersion.major,
+        prevMajor: kibanaVersion.major - 1,
+        nextMajor: kibanaVersion.major + 1,
+      };
 
-    appRegistrar.registerApp({
-      id: 'upgrade_assistant',
-      title: pluginName,
-      order: 1,
-      async mount(params) {
-        const [coreStart, { discover, data }] = await coreSetup.getStartServices();
-        const services: AppServicesContext = { discover, data, cloud };
+      const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
+        defaultMessage: 'Upgrade Assistant',
+      });
 
-        const {
-          chrome: { docTitle },
-        } = coreStart;
+      if (usageCollection) {
+        uiMetricService.setup(usageCollection);
+      }
 
-        docTitle.change(pluginName);
+      appRegistrar.registerApp({
+        id: 'upgrade_assistant',
+        title: pluginName,
+        order: 1,
+        async mount(params) {
+          const [coreStart, { data, ...plugins }] = await coreSetup.getStartServices();
 
-        const { mountManagementSection } = await import('./application/mount_management_section');
-        const unmountAppCallback = await mountManagementSection(
-          coreSetup,
-          params,
-          kibanaVersionInfo,
-          readonly,
-          services
-        );
+          const {
+            chrome: { docTitle },
+          } = coreStart;
 
-        return () => {
-          docTitle.reset();
-          unmountAppCallback();
-        };
-      },
-    });
+          docTitle.change(pluginName);
+
+          const appDependencies: AppDependencies = {
+            kibanaVersionInfo,
+            isReadOnlyMode: readonly,
+            plugins: {
+              cloud,
+              share,
+              // Infra plugin doesnt export anything as a public interface. So the only
+              // way we have at this stage for checking if the plugin is available or not
+              // is by checking if the startServices has the `infra` key.
+              infra: plugins.hasOwnProperty('infra') ? {} : undefined,
+            },
+            services: {
+              core: coreStart,
+              data,
+              history: params.history,
+              api: apiService,
+              breadcrumbs: breadcrumbService,
+            },
+            theme$: params.theme$,
+          };
+
+          const { mountManagementSection } = await import('./application/mount_management_section');
+          const unmountAppCallback = mountManagementSection(params, appDependencies);
+
+          return () => {
+            docTitle.reset();
+            unmountAppCallback();
+          };
+        },
+      });
+    }
   }
 
   start() {}

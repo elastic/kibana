@@ -28,7 +28,7 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
       name: field.getName(),
       origin: field.getOrigin(),
       type: await field.getDataType(),
-      supportsAutoDomain: field.supportsAutoDomain(),
+      supportsAutoDomain: field.supportsFieldMetaFromLocalData() || field.supportsFieldMetaFromEs(),
     };
   });
   const styleFields = await Promise.all(promises);

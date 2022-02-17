@@ -12,4 +12,10 @@
 export const PLUGIN_ID = 'presentationUtil';
 export const PLUGIN_NAME = 'presentationUtil';
 
+/**
+ * The unique identifier for the Expressions Language for use in the ExpressionInput
+ * and CodeEditor components.
+ */
+export const EXPRESSIONS_LANGUAGE_ID = 'kibana-expressions';
+
 export * from './labs';

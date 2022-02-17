@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import type { DataViewBase } from '@kbn/es-query';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
@@ -38,5 +38,5 @@ export type TlsQueryTableComponentProps = OwnProps & {
 
 export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
 };

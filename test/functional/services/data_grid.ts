@@ -72,7 +72,7 @@ export class DataGridService extends FtrService {
    * Returns an array of data grid headers names
    */
   public async getHeaders() {
-    const header = await this.testSubjects.find('dataGridWrapper > dataGridHeader');
+    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
     const $ = await header.parseDomContent();
     return $('.euiDataGridHeaderCell__content')
       .toArray()
@@ -81,18 +81,12 @@ export class DataGridService extends FtrService {
 
   /**
    * Returns a grid cell element by row & column indexes.
-   * The row offset equals 1 since the first row of data grid is the header row.
-   * @param rowIndex data row index starting from 1 (1 means 1st row)
-   * @param columnIndex column index starting from 1 (1 means 1st column)
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
    */
-  public async getCellElement(rowIndex: number, columnIndex: number) {
-    const table = await this.find.byCssSelector('.euiDataGrid');
-    const $ = await table.parseDomContent();
-    const columnNumber = $('.euiDataGridHeaderCell__content').length;
+  public async getCellElement(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.byCssSelector(
-      `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"]:nth-of-type(${
-        columnNumber * (rowIndex - 1) + columnIndex + 1
-      })`
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`
     );
   }
 
@@ -161,7 +155,7 @@ export class DataGridService extends FtrService {
     options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<void> {
     const row = await this.getRow(options);
-    const toggle = await row[0];
+    const toggle = await row[0].findByTestSubject('~docTableExpandToggleColumn');
     await toggle.click();
   }
 

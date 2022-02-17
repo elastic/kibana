@@ -75,6 +75,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'client.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'client.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -100,12 +105,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'client.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'client.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'client.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'client.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -235,6 +250,61 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'cloud.origin.account.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.account.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.availability_zone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.instance.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.instance.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.machine.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.project.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.project.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.provider': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.region': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.origin.service.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'cloud.project.id': {
     type: 'keyword',
     array: false,
@@ -251,6 +321,66 @@ export const ecsFieldMap = {
     required: false,
   },
   'cloud.region': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.service.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.account.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.account.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.availability_zone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.instance.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.instance.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.machine.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.project.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.project.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.provider': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.region': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'cloud.target.service.name': {
     type: 'keyword',
     array: false,
     required: false,
@@ -315,6 +445,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'destination.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'destination.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -340,12 +475,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'destination.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'destination.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'destination.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'destination.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -445,8 +590,18 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'dll.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'dll.code_signature.exists': {
     type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'dll.code_signature.signing_id': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -457,6 +612,16 @@ export const ecsFieldMap = {
   },
   'dll.code_signature.subject_name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.code_signature.timestamp': {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -486,6 +651,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'dll.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.hash.ssdeep': {
     type: 'keyword',
     array: false,
     required: false,
@@ -641,12 +811,12 @@ export const ecsFieldMap = {
     required: false,
   },
   'error.message': {
-    type: 'text',
+    type: 'match_only_text',
     array: false,
     required: false,
   },
   'error.stack_trace': {
-    type: 'keyword',
+    type: 'wildcard',
     array: false,
     required: false,
   },
@@ -785,6 +955,31 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'faas.coldstart': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'faas.execution': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.trigger': {
+    type: 'nested',
+    array: false,
+    required: false,
+  },
+  'faas.trigger.request_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.trigger.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.accessed': {
     type: 'date',
     array: false,
@@ -795,8 +990,18 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'file.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.code_signature.exists': {
     type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'file.code_signature.signing_id': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -807,6 +1012,16 @@ export const ecsFieldMap = {
   },
   'file.code_signature.subject_name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.code_signature.timestamp': {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -845,7 +1060,157 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'file.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'file.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'file.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'file.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'file.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'file.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.fork_name': {
     type: 'keyword',
     array: false,
     required: false,
@@ -876,6 +1241,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.hash.ssdeep': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1110,12 +1480,33 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.cpu.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
+  'host.disk.read.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'host.disk.write.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'host.domain': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'host.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.geo.continent_code': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1145,12 +1536,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'host.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1177,6 +1578,26 @@ export const ecsFieldMap = {
   },
   'host.name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.network.egress.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'host.network.egress.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'host.network.ingress.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'host.network.ingress.packets': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -1225,68 +1646,23 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'host.user.domain': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.email': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.full_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.group.domain': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.group.id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.group.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.hash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.user.roles': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
   'http.request.body.bytes': {
     type: 'long',
     array: false,
     required: false,
   },
   'http.request.body.content': {
-    type: 'keyword',
+    type: 'wildcard',
     array: false,
     required: false,
   },
   'http.request.bytes': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'http.request.id': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1311,7 +1687,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'http.response.body.content': {
-    type: 'keyword',
+    type: 'wildcard',
     array: false,
     required: false,
   },
@@ -1356,7 +1732,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'log.origin.file.line': {
-    type: 'integer',
+    type: 'long',
     array: false,
     required: false,
   },
@@ -1366,11 +1742,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'log.origin.function': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'log.original': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1406,7 +1777,7 @@ export const ecsFieldMap = {
     required: false,
   },
   message: {
-    type: 'text',
+    type: 'match_only_text',
     array: false,
     required: false,
   },
@@ -1530,6 +1901,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'observer.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'observer.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -1555,12 +1931,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'observer.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'observer.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'observer.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'observer.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1680,6 +2066,51 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'orchestrator.api_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.cluster.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.cluster.url': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.cluster.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.namespace': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.organization': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.resource.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.resource.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'organization.id': {
     type: 'keyword',
     array: false,
@@ -1765,8 +2196,18 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.code_signature.exists': {
     type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.code_signature.signing_id': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1777,6 +2218,16 @@ export const ecsFieldMap = {
   },
   'process.code_signature.subject_name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.code_signature.timestamp': {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -1791,7 +2242,157 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.elf.architecture': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.end': {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -1830,6 +2431,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.name': {
     type: 'keyword',
     array: false,
@@ -1845,8 +2451,18 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.code_signature.exists': {
     type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.code_signature.signing_id': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1857,6 +2473,16 @@ export const ecsFieldMap = {
   },
   'process.parent.code_signature.subject_name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.code_signature.timestamp': {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -1871,7 +2497,157 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.parent.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.architecture': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.parent.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.parent.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.parent.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.parent.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.end': {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -1906,6 +2682,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.parent.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.hash.ssdeep': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1956,11 +2737,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.parent.pid': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.ppid': {
     type: 'long',
     array: false,
     required: false,
@@ -2040,11 +2816,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'process.ppid': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
   'process.start': {
     type: 'date',
     array: false,
@@ -2081,7 +2852,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'registry.data.strings': {
-    type: 'keyword',
+    type: 'wildcard',
     array: true,
     required: false,
   },
@@ -2148,7 +2919,7 @@ export const ecsFieldMap = {
   'rule.id': {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   'rule.license': {
     type: 'keyword',
@@ -2210,6 +2981,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'server.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'server.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -2235,12 +3011,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'server.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'server.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'server.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'server.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2340,6 +3126,16 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'service.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.environment': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'service.ephemeral_id': {
     type: 'keyword',
     array: false,
@@ -2360,7 +3156,97 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'service.origin.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.environment': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.ephemeral_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.node.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.state': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'service.state': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.environment': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.ephemeral_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.node.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.state': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2405,6 +3291,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'source.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -2430,12 +3321,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'source.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'source.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2545,7 +3446,1772 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'threat.enrichments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.confidence': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.email.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.accessed': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.attributes': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.created': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.ctime': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.device': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.drive_letter': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.fork_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.gid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.group': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.inode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.mime_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.mode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.mtime': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.owner': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.target_path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.uid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.alternative_names': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.issuer.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.not_after': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.not_before': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.public_key_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.public_key_curve': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.public_key_exponent': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.public_key_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.serial_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.signature_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.subject.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.x509.version_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.first_seen': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.last_seen': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.marking.tlp': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.modified_at': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.provider': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.data.bytes': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.data.strings': {
+    type: 'wildcard',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.data.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.hive': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.key': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.value': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.scanner_stats': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.sightings': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.fragment': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.full': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.original': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.password': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.path': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.query': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.scheme': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.username': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.alternative_names': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.issuer.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.not_after': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.not_before': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.public_key_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.public_key_curve': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.public_key_exponent': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.public_key_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.serial_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.signature_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.subject.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.x509.version_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.atomic': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.field': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.index': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.framework': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.group.alias': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.group.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.confidence': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.email.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.accessed': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.attributes': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.created': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.ctime': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.device': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.drive_letter': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.fork_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.gid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.group': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.inode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.mime_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.mode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.mtime': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.owner': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.target_path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.uid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.alternative_names': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.issuer.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.not_after': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.not_before': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.public_key_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.public_key_curve': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.public_key_exponent': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.public_key_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.serial_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.signature_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.subject.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.x509.version_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.first_seen': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.last_seen': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.marking.tlp': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.modified_at': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.provider': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.registry.data.bytes': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.registry.data.strings': {
+    type: 'wildcard',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.registry.data.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.registry.hive': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.registry.key': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.registry.path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.registry.value': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.scanner_stats': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.sightings': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.fragment': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.full': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.original': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.password': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.path': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.query': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.scheme': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.url.username': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.alternative_names': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.issuer.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.not_after': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.not_before': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.public_key_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.public_key_curve': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.public_key_exponent': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.public_key_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.serial_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.signature_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.subject.common_name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.subject.country': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.subject.distinguished_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.x509.subject.locality': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.subject.organization': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.subject.organizational_unit': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.subject.state_or_province': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.x509.version_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.software.alias': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.software.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.software.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.software.platforms': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.software.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.software.type': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3006,12 +5672,12 @@ export const ecsFieldMap = {
     required: false,
   },
   'url.full': {
-    type: 'keyword',
+    type: 'wildcard',
     array: false,
     required: false,
   },
   'url.original': {
-    type: 'keyword',
+    type: 'wildcard',
     array: false,
     required: false,
   },
@@ -3021,7 +5687,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'url.path': {
-    type: 'keyword',
+    type: 'wildcard',
     array: false,
     required: false,
   },

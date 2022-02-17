@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { I18nProvider } from '@kbn/i18n/react';
+import { euiDarkVars } from '@kbn/ui-theme';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';

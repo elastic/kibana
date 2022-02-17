@@ -42,8 +42,9 @@ export async function createActionConnector({
   http: HttpSetup;
   connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
 }): Promise<ActionConnector> {
-  const res = await http.post(`${BASE_ACTION_API_PATH}/connector`, {
-    body: JSON.stringify(rewriteBodyRequest(connector)),
-  });
+  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
+    `${BASE_ACTION_API_PATH}/connector`,
+    { body: JSON.stringify(rewriteBodyRequest(connector)) }
+  );
   return rewriteBodyRes(res);
 }

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ISearchRequestParams } from 'src/plugins/data/common';
+import type { ISearchRequestParams } from 'src/plugins/data/common';
 import {
   TimelineEventsLastEventTimeRequestOptions,
   LastEventIndexKey,
@@ -28,6 +28,7 @@ export const buildLastEventTimeQuery = ({
     hosts: defaultIndex,
     network: defaultIndex,
   };
+  const getUserDetailsFilter = (userName: string) => [{ term: { 'user.name': userName } }];
   const getHostDetailsFilter = (hostName: string) => [{ term: { 'host.name': hostName } }];
   const getIpDetailsFilter = (ip: string) => [
     { term: { 'source.ip': ip } },
@@ -38,9 +39,9 @@ export const buildLastEventTimeQuery = ({
       case LastEventIndexKey.ipDetails:
         if (details.ip) {
           return {
-            allowNoIndices: true,
+            allow_no_indices: true,
             index: indicesToQuery.network,
-            ignoreUnavailable: true,
+            ignore_unavailable: true,
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
@@ -61,9 +62,9 @@ export const buildLastEventTimeQuery = ({
       case LastEventIndexKey.hostDetails:
         if (details.hostName) {
           return {
-            allowNoIndices: true,
+            allow_no_indices: true,
             index: indicesToQuery.hosts,
-            ignoreUnavailable: true,
+            ignore_unavailable: true,
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
@@ -81,13 +82,36 @@ export const buildLastEventTimeQuery = ({
           };
         }
         throw new Error('buildLastEventTimeQuery - no hostName argument provided');
+      case LastEventIndexKey.userDetails:
+        if (details.userName) {
+          return {
+            allow_no_indices: true,
+            index: indicesToQuery.hosts,
+            ignore_unavailable: true,
+            track_total_hits: false,
+            body: {
+              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+              query: { bool: { filter: getUserDetailsFilter(details.userName) } },
+              _source: ['@timestamp'],
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+          };
+        }
+        throw new Error('buildLastEventTimeQuery - no userName argument provided');
       case LastEventIndexKey.hosts:
       case LastEventIndexKey.network:
-      case LastEventIndexKey.ueba:
+      case LastEventIndexKey.users:
         return {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: indicesToQuery[indexKey],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),

@@ -19,6 +19,7 @@ interface ManagementSectionWrapperProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], history?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   history: AppMountParameters['history'];
+  theme$: AppMountParameters['theme$'];
 }
 
 export class ManagementAppWrapper extends Component<ManagementSectionWrapperProps> {
@@ -26,7 +27,7 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
   private mountElementRef = createRef<HTMLDivElement>();
 
   componentDidMount() {
-    const { setBreadcrumbs, app, onAppMounted, history } = this.props;
+    const { setBreadcrumbs, app, onAppMounted, history, theme$ } = this.props;
     const { mount, basePath } = app;
     const appHistory = history.createSubHistory(app.basePath);
 
@@ -35,6 +36,7 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
       setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, appHistory),
       element: this.mountElementRef.current!,
       history: appHistory,
+      theme$,
     });
 
     onAppMounted(app.id);

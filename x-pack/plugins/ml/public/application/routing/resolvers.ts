@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
+import { cacheDataViewsContract, loadSavedSearches } from '../util/index_utils';
 import { checkFullLicense } from '../license';
 import { checkGetJobsCapabilitiesResolver } from '../capabilities/check_capabilities';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
@@ -21,18 +21,18 @@ export interface ResolverResults {
 }
 
 interface BasicResolverDependencies {
-  indexPatterns: DataViewsContract;
+  dataViewsContract: DataViewsContract;
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const basicResolvers = ({
-  indexPatterns,
+  dataViewsContract,
   redirectToMlAccessDeniedPage,
 }: BasicResolverDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  loadIndexPatterns: () => loadIndexPatterns(indexPatterns),
+  cacheDataViewsContract: () => cacheDataViewsContract(dataViewsContract),
   checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   loadSavedSearches,
 });

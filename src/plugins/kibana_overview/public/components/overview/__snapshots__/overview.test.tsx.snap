@@ -1,1097 +1,1100 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview render 1`] = `
-<mockConstructor
-  pageHeader={
+exports[`Overview during loading 1`] = `
+<Overview
+  features={
+    Array [
+      Object {
+        "category": "data",
+        "description": "Description of dashboard",
+        "icon": "dashboardApp",
+        "id": "dashboard",
+        "path": "dashboard_landing_page",
+        "showOnHomePage": false,
+        "title": "Dashboard",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of discover",
+        "icon": "discoverApp",
+        "id": "discover",
+        "path": "discover_landing_page",
+        "showOnHomePage": false,
+        "title": "Discover",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of canvas",
+        "icon": "canvasApp",
+        "id": "canvas",
+        "path": "canvas_landing_page",
+        "showOnHomePage": false,
+        "title": "Canvas",
+      },
+    ]
+  }
+  intl={
     Object {
-      "iconType": "logoKibana",
-      "pageTitle": <FormattedMessage
-        defaultMessage="Analytics"
-        id="kibanaOverview.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
     }
   }
-  template="empty"
+  newsFetchResult={
+    Object {
+      "error": null,
+      "feedItems": Array [
+        Object {
+          "badge": null,
+          "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "8e18fcedbc",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+          "publishOn": "2020-08-31T10:23:47.000Z",
+          "title": "The Go client for Elasticsearch: Introduction",
+        },
+        Object {
+          "badge": null,
+          "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "fb3e3d42ef",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+          "publishOn": "2020-08-14T10:23:47.000Z",
+          "title": "Alerting and anomaly detection for uptime and reliability",
+        },
+        Object {
+          "badge": null,
+          "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "b2fc7d47d5",
+          "linkText": "Learn more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+          "publishOn": "2020-08-01T10:23:47.000Z",
+          "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+        },
+      ],
+      "hasNew": true,
+      "kibanaVersion": "8.0.0",
+    }
+  }
+  solutions={
+    Array [
+      Object {
+        "description": "Description of Kibana",
+        "icon": "logoKibana",
+        "id": "kibana",
+        "order": 1,
+        "path": "kibana_landing_page",
+        "title": "Analytics",
+      },
+      Object {
+        "description": "Description of solution two",
+        "icon": "empty",
+        "id": "solution-2",
+        "order": 2,
+        "path": "path-to-solution-two",
+        "title": "Solution two",
+      },
+      Object {
+        "description": "Description of solution three",
+        "icon": "empty",
+        "id": "solution-3",
+        "order": 3,
+        "path": "path-to-solution-three",
+        "title": "Solution three",
+      },
+      Object {
+        "description": "Description of solution four",
+        "icon": "empty",
+        "id": "solution-4",
+        "order": 4,
+        "path": "path-to-solution-four",
+        "title": "Solution four",
+      },
+    ]
+  }
 >
-  <section
-    aria-labelledby="kbnOverviewApps__title"
-    className="kbnOverviewApps"
-  >
-    <EuiScreenReaderOnly>
-      <h2
-        id="kbnOverviewApps__title"
-      >
-        <FormattedMessage
-          defaultMessage="Explore these apps"
-          id="kibanaOverview.apps.title"
-          values={Object {}}
-        />
-      </h2>
-    </EuiScreenReaderOnly>
-    <EuiFlexGroup
-      className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-      justifyContent="center"
-    />
-    <EuiSpacer
-      size="l"
-    />
-  </section>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
   <EuiFlexGroup
-    alignItems="flexStart"
-    className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    alignItems="center"
+    justifyContent="center"
   >
-    <EuiFlexItem
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <NewsFeed
-        newsFetchResult={
-          Object {
-            "error": null,
-            "feedItems": Array [
-              Object {
-                "badge": null,
-                "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "8e18fcedbc",
-                "linkText": "Read more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
-                "publishOn": "2020-08-31T10:23:47.000Z",
-                "title": "The Go client for Elasticsearch: Introduction",
-              },
-              Object {
-                "badge": null,
-                "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "fb3e3d42ef",
-                "linkText": "Read more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
-                "publishOn": "2020-08-14T10:23:47.000Z",
-                "title": "Alerting and anomaly detection for uptime and reliability",
-              },
-              Object {
-                "badge": null,
-                "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "b2fc7d47d5",
-                "linkText": "Learn more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
-                "publishOn": "2020-08-01T10:23:47.000Z",
-                "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
-              },
-            ],
-            "hasNew": true,
-            "kibanaVersion": "8.0.0",
-          }
-        }
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={3}
-    >
-      <section
-        aria-labelledby="kbnOverviewMore__title"
-        className="kbnOverviewMore"
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiTitle
-          size="s"
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <h2
-            id="kbnOverviewMore__title"
+          <EuiLoadingSpinner
+            size="xl"
           >
-            <FormattedMessage
-              defaultMessage="Do more with Elastic"
-              id="kibanaOverview.more.title"
-              values={Object {}}
+            <span
+              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
             />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer
-          size="m"
-        />
-        <EuiFlexGroup
-          className="kbnOverviewMore__content"
-        >
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="kibana"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution kibana"
-                description="Description of Kibana"
-                href="kibana_landing_page"
-                icon={
-                  <mockConstructor
-                    iconType="logoKibana"
-                    name="Analytics"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_kibana.svg"
-                onClick={[Function]}
-                title="Analytics"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="solution-2"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution solution-2"
-                description="Description of solution two"
-                href="path-to-solution-two"
-                icon={
-                  <mockConstructor
-                    iconType="empty"
-                    name="Solution two"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_solution_2.svg"
-                onClick={[Function]}
-                title="Solution two"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="solution-3"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution solution-3"
-                description="Description of solution three"
-                href="path-to-solution-three"
-                icon={
-                  <mockConstructor
-                    iconType="empty"
-                    name="Solution three"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_solution_3.svg"
-                onClick={[Function]}
-                title="Solution three"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="solution-4"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution solution-4"
-                description="Description of solution four"
-                href="path-to-solution-four"
-                icon={
-                  <mockConstructor
-                    iconType="empty"
-                    name="Solution four"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_solution_4.svg"
-                onClick={[Function]}
-                title="Solution four"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </section>
-    </EuiFlexItem>
+          </EuiLoadingSpinner>
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
+</Overview>
+`;
+
+exports[`Overview render 1`] = `
+<Overview
+  features={
+    Array [
+      Object {
+        "category": "data",
+        "description": "Description of dashboard",
+        "icon": "dashboardApp",
+        "id": "dashboard",
+        "path": "dashboard_landing_page",
+        "showOnHomePage": false,
+        "title": "Dashboard",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of discover",
+        "icon": "discoverApp",
+        "id": "discover",
+        "path": "discover_landing_page",
+        "showOnHomePage": false,
+        "title": "Discover",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of canvas",
+        "icon": "canvasApp",
+        "id": "canvas",
+        "path": "canvas_landing_page",
+        "showOnHomePage": false,
+        "title": "Canvas",
+      },
+    ]
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  newsFetchResult={
+    Object {
+      "error": null,
+      "feedItems": Array [
+        Object {
+          "badge": null,
+          "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "8e18fcedbc",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+          "publishOn": "2020-08-31T10:23:47.000Z",
+          "title": "The Go client for Elasticsearch: Introduction",
+        },
+        Object {
+          "badge": null,
+          "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "fb3e3d42ef",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+          "publishOn": "2020-08-14T10:23:47.000Z",
+          "title": "Alerting and anomaly detection for uptime and reliability",
+        },
+        Object {
+          "badge": null,
+          "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "b2fc7d47d5",
+          "linkText": "Learn more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+          "publishOn": "2020-08-01T10:23:47.000Z",
+          "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+        },
+      ],
+      "hasNew": true,
+      "kibanaVersion": "8.0.0",
+    }
+  }
+  solutions={
+    Array [
+      Object {
+        "description": "Description of Kibana",
+        "icon": "logoKibana",
+        "id": "kibana",
+        "order": 1,
+        "path": "kibana_landing_page",
+        "title": "Analytics",
+      },
+      Object {
+        "description": "Description of solution two",
+        "icon": "empty",
+        "id": "solution-2",
+        "order": 2,
+        "path": "path-to-solution-two",
+        "title": "Solution two",
+      },
+      Object {
+        "description": "Description of solution three",
+        "icon": "empty",
+        "id": "solution-3",
+        "order": 3,
+        "path": "path-to-solution-three",
+        "title": "Solution three",
+      },
+      Object {
+        "description": "Description of solution four",
+        "icon": "empty",
+        "id": "solution-4",
+        "order": 4,
+        "path": "path-to-solution-four",
+        "title": "Solution four",
+      },
+    ]
+  }
+>
   <mockConstructor
-    addBasePath={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            "/app/home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
-            "kibana_landing_page",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          ],
-          Array [
-            "path-to-solution-two",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          ],
-          Array [
-            "path-to-solution-three",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          ],
-          Array [
-            "path-to-solution-four",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": "/app/home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "kibana_landing_page",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-two",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-three",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-four",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          },
-        ],
+    pageHeader={
+      Object {
+        "iconType": "logoKibana",
+        "pageTitle": <FormattedMessage
+          defaultMessage="Analytics"
+          id="kibanaOverview.header.title"
+          values={Object {}}
+        />,
+        "rightSideItems": Array [],
       }
     }
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/kibana_overview"
+    template="empty"
   />
-</mockConstructor>
+</Overview>
+`;
+
+exports[`Overview when there is no user data view 1`] = `
+<Overview
+  features={
+    Array [
+      Object {
+        "category": "data",
+        "description": "Description of dashboard",
+        "icon": "dashboardApp",
+        "id": "dashboard",
+        "path": "dashboard_landing_page",
+        "showOnHomePage": false,
+        "title": "Dashboard",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of discover",
+        "icon": "discoverApp",
+        "id": "discover",
+        "path": "discover_landing_page",
+        "showOnHomePage": false,
+        "title": "Discover",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of canvas",
+        "icon": "canvasApp",
+        "id": "canvas",
+        "path": "canvas_landing_page",
+        "showOnHomePage": false,
+        "title": "Canvas",
+      },
+    ]
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  newsFetchResult={
+    Object {
+      "error": null,
+      "feedItems": Array [
+        Object {
+          "badge": null,
+          "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "8e18fcedbc",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+          "publishOn": "2020-08-31T10:23:47.000Z",
+          "title": "The Go client for Elasticsearch: Introduction",
+        },
+        Object {
+          "badge": null,
+          "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "fb3e3d42ef",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+          "publishOn": "2020-08-14T10:23:47.000Z",
+          "title": "Alerting and anomaly detection for uptime and reliability",
+        },
+        Object {
+          "badge": null,
+          "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "b2fc7d47d5",
+          "linkText": "Learn more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+          "publishOn": "2020-08-01T10:23:47.000Z",
+          "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+        },
+      ],
+      "hasNew": true,
+      "kibanaVersion": "8.0.0",
+    }
+  }
+  solutions={
+    Array [
+      Object {
+        "description": "Description of Kibana",
+        "icon": "logoKibana",
+        "id": "kibana",
+        "order": 1,
+        "path": "kibana_landing_page",
+        "title": "Analytics",
+      },
+      Object {
+        "description": "Description of solution two",
+        "icon": "empty",
+        "id": "solution-2",
+        "order": 2,
+        "path": "path-to-solution-two",
+        "title": "Solution two",
+      },
+      Object {
+        "description": "Description of solution three",
+        "icon": "empty",
+        "id": "solution-3",
+        "order": 3,
+        "path": "path-to-solution-three",
+        "title": "Solution three",
+      },
+      Object {
+        "description": "Description of solution four",
+        "icon": "empty",
+        "id": "solution-4",
+        "order": 4,
+        "path": "path-to-solution-four",
+        "title": "Solution four",
+      },
+    ]
+  }
+>
+  <mockConstructor
+    noDataConfig={
+      Object {
+        "actions": Object {
+          "elasticAgent": Object {
+            "description": "Use Elastic Agent or Beats to collect data and build out Analytics solutions.",
+            "title": "Add integrations",
+          },
+        },
+        "docsLink": "kibana_docs_url",
+        "logo": "logoKibana",
+        "pageTitle": "Welcome to Analytics!",
+        "solution": "Analytics",
+      }
+    }
+    pageHeader={
+      Object {
+        "iconType": "logoKibana",
+        "pageTitle": <FormattedMessage
+          defaultMessage="Analytics"
+          id="kibanaOverview.header.title"
+          values={Object {}}
+        />,
+        "rightSideItems": Array [],
+      }
+    }
+    template="empty"
+  />
+</Overview>
 `;
 
 exports[`Overview without features 1`] = `
-<mockConstructor
-  pageHeader={
+<Overview
+  features={Array []}
+  intl={
     Object {
-      "iconType": "logoKibana",
-      "pageTitle": <FormattedMessage
-        defaultMessage="Analytics"
-        id="kibanaOverview.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
     }
   }
-  template="empty"
+  newsFetchResult={
+    Object {
+      "error": null,
+      "feedItems": Array [
+        Object {
+          "badge": null,
+          "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "8e18fcedbc",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+          "publishOn": "2020-08-31T10:23:47.000Z",
+          "title": "The Go client for Elasticsearch: Introduction",
+        },
+        Object {
+          "badge": null,
+          "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "fb3e3d42ef",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+          "publishOn": "2020-08-14T10:23:47.000Z",
+          "title": "Alerting and anomaly detection for uptime and reliability",
+        },
+        Object {
+          "badge": null,
+          "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "b2fc7d47d5",
+          "linkText": "Learn more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+          "publishOn": "2020-08-01T10:23:47.000Z",
+          "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+        },
+      ],
+      "hasNew": true,
+      "kibanaVersion": "8.0.0",
+    }
+  }
+  solutions={
+    Array [
+      Object {
+        "description": "Description of Kibana",
+        "icon": "logoKibana",
+        "id": "kibana",
+        "order": 1,
+        "path": "kibana_landing_page",
+        "title": "Analytics",
+      },
+      Object {
+        "description": "Description of solution two",
+        "icon": "empty",
+        "id": "solution-2",
+        "order": 2,
+        "path": "path-to-solution-two",
+        "title": "Solution two",
+      },
+      Object {
+        "description": "Description of solution three",
+        "icon": "empty",
+        "id": "solution-3",
+        "order": 3,
+        "path": "path-to-solution-three",
+        "title": "Solution three",
+      },
+      Object {
+        "description": "Description of solution four",
+        "icon": "empty",
+        "id": "solution-4",
+        "order": 4,
+        "path": "path-to-solution-four",
+        "title": "Solution four",
+      },
+    ]
+  }
 >
-  <section
-    aria-labelledby="kbnOverviewApps__title"
-    className="kbnOverviewApps"
-  >
-    <EuiScreenReaderOnly>
-      <h2
-        id="kbnOverviewApps__title"
-      >
-        <FormattedMessage
-          defaultMessage="Explore these apps"
-          id="kibanaOverview.apps.title"
-          values={Object {}}
-        />
-      </h2>
-    </EuiScreenReaderOnly>
-    <EuiFlexGroup
-      className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-      justifyContent="center"
-    />
-    <EuiSpacer
-      size="l"
-    />
-  </section>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <EuiFlexGroup
-    alignItems="flexStart"
-    className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
-  >
-    <EuiFlexItem
-      grow={1}
-    >
-      <NewsFeed
-        newsFetchResult={
-          Object {
-            "error": null,
-            "feedItems": Array [
-              Object {
-                "badge": null,
-                "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "8e18fcedbc",
-                "linkText": "Read more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
-                "publishOn": "2020-08-31T10:23:47.000Z",
-                "title": "The Go client for Elasticsearch: Introduction",
-              },
-              Object {
-                "badge": null,
-                "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "fb3e3d42ef",
-                "linkText": "Read more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
-                "publishOn": "2020-08-14T10:23:47.000Z",
-                "title": "Alerting and anomaly detection for uptime and reliability",
-              },
-              Object {
-                "badge": null,
-                "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "b2fc7d47d5",
-                "linkText": "Learn more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
-                "publishOn": "2020-08-01T10:23:47.000Z",
-                "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
-              },
-            ],
-            "hasNew": true,
-            "kibanaVersion": "8.0.0",
-          }
-        }
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={3}
-    >
-      <section
-        aria-labelledby="kbnOverviewMore__title"
-        className="kbnOverviewMore"
-      >
-        <EuiTitle
-          size="s"
-        >
-          <h2
-            id="kbnOverviewMore__title"
-          >
-            <FormattedMessage
-              defaultMessage="Do more with Elastic"
-              id="kibanaOverview.more.title"
-              values={Object {}}
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer
-          size="m"
-        />
-        <EuiFlexGroup
-          className="kbnOverviewMore__content"
-        >
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="kibana"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution kibana"
-                description="Description of Kibana"
-                href="kibana_landing_page"
-                icon={
-                  <mockConstructor
-                    iconType="logoKibana"
-                    name="Analytics"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_kibana.svg"
-                onClick={[Function]}
-                title="Analytics"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="solution-2"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution solution-2"
-                description="Description of solution two"
-                href="path-to-solution-two"
-                icon={
-                  <mockConstructor
-                    iconType="empty"
-                    name="Solution two"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_solution_2.svg"
-                onClick={[Function]}
-                title="Solution two"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="solution-3"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution solution-3"
-                description="Description of solution three"
-                href="path-to-solution-three"
-                icon={
-                  <mockConstructor
-                    iconType="empty"
-                    name="Solution three"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_solution_3.svg"
-                onClick={[Function]}
-                title="Solution three"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="kbnOverviewMore__item"
-            key="solution-4"
-          >
-            <mockConstructor>
-              <EuiCard
-                className="kbnOverviewSolution solution-4"
-                description="Description of solution four"
-                href="path-to-solution-four"
-                icon={
-                  <mockConstructor
-                    iconType="empty"
-                    name="Solution four"
-                    size="xl"
-                  />
-                }
-                image="/plugins/kibanaReact/assets/solutions_solution_4.svg"
-                onClick={[Function]}
-                title="Solution four"
-                titleElement="h3"
-                titleSize="xs"
-              />
-            </mockConstructor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </section>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
   <mockConstructor
-    addBasePath={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            "/app/home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
-            "kibana_landing_page",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          ],
-          Array [
-            "path-to-solution-two",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          ],
-          Array [
-            "path-to-solution-three",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          ],
-          Array [
-            "path-to-solution-four",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          ],
-          Array [
-            "/app/home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
-            "/app/home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
-            "kibana_landing_page",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          ],
-          Array [
-            "path-to-solution-two",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          ],
-          Array [
-            "path-to-solution-three",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          ],
-          Array [
-            "path-to-solution-four",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": "/app/home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "kibana_landing_page",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-two",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-three",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-four",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "/app/home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "/app/home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "kibana_landing_page",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-two",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-three",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-four",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          },
-        ],
+    pageHeader={
+      Object {
+        "iconType": "logoKibana",
+        "pageTitle": <FormattedMessage
+          defaultMessage="Analytics"
+          id="kibanaOverview.header.title"
+          values={Object {}}
+        />,
+        "rightSideItems": Array [],
       }
     }
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/kibana_overview"
+    template="empty"
   />
-</mockConstructor>
+</Overview>
 `;
 
 exports[`Overview without solutions 1`] = `
-<mockConstructor
-  pageHeader={
+<Overview
+  features={
+    Array [
+      Object {
+        "category": "data",
+        "description": "Description of dashboard",
+        "icon": "dashboardApp",
+        "id": "dashboard",
+        "path": "dashboard_landing_page",
+        "showOnHomePage": false,
+        "title": "Dashboard",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of discover",
+        "icon": "discoverApp",
+        "id": "discover",
+        "path": "discover_landing_page",
+        "showOnHomePage": false,
+        "title": "Discover",
+      },
+      Object {
+        "category": "data",
+        "description": "Description of canvas",
+        "icon": "canvasApp",
+        "id": "canvas",
+        "path": "canvas_landing_page",
+        "showOnHomePage": false,
+        "title": "Canvas",
+      },
+    ]
+  }
+  intl={
     Object {
-      "iconType": "logoKibana",
-      "pageTitle": <FormattedMessage
-        defaultMessage="Analytics"
-        id="kibanaOverview.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
     }
   }
-  template="empty"
+  newsFetchResult={
+    Object {
+      "error": null,
+      "feedItems": Array [
+        Object {
+          "badge": null,
+          "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "8e18fcedbc",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+          "publishOn": "2020-08-31T10:23:47.000Z",
+          "title": "The Go client for Elasticsearch: Introduction",
+        },
+        Object {
+          "badge": null,
+          "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "fb3e3d42ef",
+          "linkText": "Read more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+          "publishOn": "2020-08-14T10:23:47.000Z",
+          "title": "Alerting and anomaly detection for uptime and reliability",
+        },
+        Object {
+          "badge": null,
+          "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+          "expireOn": "2050-12-31T11:59:59.000Z",
+          "hash": "b2fc7d47d5",
+          "linkText": "Learn more on the blog",
+          "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+          "publishOn": "2020-08-01T10:23:47.000Z",
+          "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+        },
+      ],
+      "hasNew": true,
+      "kibanaVersion": "8.0.0",
+    }
+  }
+  solutions={Array []}
 >
-  <section
-    aria-labelledby="kbnOverviewApps__title"
-    className="kbnOverviewApps"
-  >
-    <EuiScreenReaderOnly>
-      <h2
-        id="kbnOverviewApps__title"
-      >
-        <FormattedMessage
-          defaultMessage="Explore these apps"
-          id="kibanaOverview.apps.title"
-          values={Object {}}
-        />
-      </h2>
-    </EuiScreenReaderOnly>
-    <EuiFlexGroup
-      className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-      justifyContent="center"
-    />
-    <EuiSpacer
-      size="l"
-    />
-  </section>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <EuiFlexGroup
-    alignItems="flexStart"
-    className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
-  >
-    <EuiFlexItem
-      grow={1}
-    >
-      <NewsFeed
-        newsFetchResult={
-          Object {
-            "error": null,
-            "feedItems": Array [
-              Object {
-                "badge": null,
-                "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "8e18fcedbc",
-                "linkText": "Read more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
-                "publishOn": "2020-08-31T10:23:47.000Z",
-                "title": "The Go client for Elasticsearch: Introduction",
-              },
-              Object {
-                "badge": null,
-                "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "fb3e3d42ef",
-                "linkText": "Read more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
-                "publishOn": "2020-08-14T10:23:47.000Z",
-                "title": "Alerting and anomaly detection for uptime and reliability",
-              },
-              Object {
-                "badge": null,
-                "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
-                "expireOn": "2050-12-31T11:59:59.000Z",
-                "hash": "b2fc7d47d5",
-                "linkText": "Learn more on the blog",
-                "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
-                "publishOn": "2020-08-01T10:23:47.000Z",
-                "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
-              },
-            ],
-            "hasNew": true,
-            "kibanaVersion": "8.0.0",
-          }
-        }
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={3}
-    >
-      <EuiFlexGroup
-        className="kbnOverviewData kbnOverviewData--expanded"
-      >
-        <EuiFlexItem>
-          <AddData
-            addBasePath={
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "/app/home#/tutorial_directory",
-                  ],
-                  Array [
-                    "home#/tutorial_directory",
-                  ],
-                  Array [
-                    "kibana_landing_page",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                  ],
-                  Array [
-                    "path-to-solution-two",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                  ],
-                  Array [
-                    "path-to-solution-three",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                  ],
-                  Array [
-                    "path-to-solution-four",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                  ],
-                  Array [
-                    "/app/home#/tutorial_directory",
-                  ],
-                  Array [
-                    "home#/tutorial_directory",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "/app/home#/tutorial_directory",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "kibana_landing_page",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "path-to-solution-two",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "path-to-solution-three",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "path-to-solution-four",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/app/home#/tutorial_directory",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
-                  },
-                ],
-              }
-            }
-            features={Array []}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ManageData
-            addBasePath={
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "/app/home#/tutorial_directory",
-                  ],
-                  Array [
-                    "home#/tutorial_directory",
-                  ],
-                  Array [
-                    "kibana_landing_page",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                  ],
-                  Array [
-                    "path-to-solution-two",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                  ],
-                  Array [
-                    "path-to-solution-three",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                  ],
-                  Array [
-                    "path-to-solution-four",
-                  ],
-                  Array [
-                    "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                  ],
-                  Array [
-                    "/app/home#/tutorial_directory",
-                  ],
-                  Array [
-                    "home#/tutorial_directory",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "/app/home#/tutorial_directory",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "kibana_landing_page",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "path-to-solution-two",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "path-to-solution-three",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "path-to-solution-four",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "/app/home#/tutorial_directory",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
-                  },
-                ],
-              }
-            }
-            features={Array []}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
   <mockConstructor
-    addBasePath={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            "/app/home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
-            "kibana_landing_page",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          ],
-          Array [
-            "path-to-solution-two",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          ],
-          Array [
-            "path-to-solution-three",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          ],
-          Array [
-            "path-to-solution-four",
-          ],
-          Array [
-            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          ],
-          Array [
-            "/app/home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": "/app/home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "kibana_landing_page",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-two",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-three",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-four",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "/app/home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-        ],
+    pageHeader={
+      Object {
+        "iconType": "logoKibana",
+        "pageTitle": <FormattedMessage
+          defaultMessage="Analytics"
+          id="kibanaOverview.header.title"
+          values={Object {}}
+        />,
+        "rightSideItems": Array [],
       }
     }
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/kibana_overview"
+    template="empty"
   />
-</mockConstructor>
+</Overview>
 `;

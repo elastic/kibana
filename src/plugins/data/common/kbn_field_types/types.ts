@@ -8,4 +8,5 @@
 
 import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
-export { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES };
+export type { KbnFieldTypeOptions };
+export { ES_FIELD_TYPES, KBN_FIELD_TYPES };

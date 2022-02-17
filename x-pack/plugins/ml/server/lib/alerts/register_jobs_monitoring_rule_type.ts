@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from 'kibana/server';
-import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
+import {
+  MlDatafeedState,
+  MlJobState,
+  MlJobStats,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -155,7 +159,7 @@ export function registerJobsMonitoringRuleType({
         );
 
         executionResult.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = services.alertInstanceFactory(alertInstanceName);
+          const alertInstance = services.alertFactory.create(alertInstanceName);
           alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
         });
       }

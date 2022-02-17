@@ -13,11 +13,8 @@ import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
   getApmIndices,
-} from '../settings/apm_indices/get_apm_indices';
-import {
-  APMEventClient,
-  createApmEventClient,
-} from './create_es_client/create_apm_event_client';
+} from '../../routes/settings/apm_indices/get_apm_indices';
+import { APMEventClient } from './create_es_client/create_apm_event_client';
 import {
   APMInternalClient,
   createInternalESClient,
@@ -58,7 +55,7 @@ export async function setupRequest({
 
     return {
       indices,
-      apmEventClient: createApmEventClient({
+      apmEventClient: new APMEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
         debug: query._inspect,
         request,

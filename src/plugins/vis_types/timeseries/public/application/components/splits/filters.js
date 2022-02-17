@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import { FilterItems } from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+const RESET_STATE = {
+  split_filters: undefined,
+};
 
 export const SplitByFilters = (props) => {
   const { onChange, model, uiRestrictions, indexPattern } = props;
   const htmlId = htmlIdGenerator();
-  const handleSelectChange = createSelectHandler(onChange);
   return (
     <div>
       <EuiFlexGroup alignItems="center">
@@ -33,7 +35,12 @@ export const SplitByFilters = (props) => {
           >
             <GroupBySelect
               value={model.split_mode}
-              onChange={handleSelectChange('split_mode')}
+              onChange={([{ value: newSplitMode = null }]) => {
+                onChange({
+                  split_mode: newSplitMode,
+                  ...RESET_STATE,
+                });
+              }}
               uiRestrictions={uiRestrictions}
             />
           </EuiFormRow>

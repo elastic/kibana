@@ -19,11 +19,11 @@ renegotiate(options: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        rejectUnauthorized?: boolean;</code><br/><code>        requestCert?: boolean;</code><br/><code>    }</code> | The options may contain the following fields: rejectUnauthorized, requestCert (See tls.createServer() for details). |
+|  options | { rejectUnauthorized?: boolean; requestCert?: boolean; } | The options may contain the following fields: rejectUnauthorized, requestCert (See tls.createServer() for details). |
 
 <b>Returns:</b>
 
-`Promise<void>`
+Promise&lt;void&gt;
 
 A Promise that will be resolved if renegotiation succeeded, or will be rejected if renegotiation failed.
 

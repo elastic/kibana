@@ -19,10 +19,7 @@ export { ConfigurationProvider, useConfiguration } from './configuration_context
 
 export { FormErrorsProvider, useFormErrorsContext } from './form_errors_context';
 
-export {
-  PhaseTimingsProvider,
-  usePhaseTimings,
-  PhaseTimingConfiguration,
-} from './phase_timings_context';
+export type { PhaseTimingConfiguration } from './phase_timings_context';
+export { PhaseTimingsProvider, usePhaseTimings } from './phase_timings_context';
 
 export { useGlobalFields, globalFields } from './global_fields_context';

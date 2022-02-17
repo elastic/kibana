@@ -10,10 +10,11 @@
 ```typescript
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions 
 ```
+<b>Extends:</b> SavedObjectsBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [refresh](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.refresh.md) | MutatingOperationRefreshSetting | <i>(Optional)</i> The Elasticsearch Refresh setting for this operation |
 

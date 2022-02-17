@@ -6,13 +6,13 @@
  */
 import React, { createContext } from 'react';
 import { GlobalState } from '../../url_state';
-import { MonitoringStartPluginDependencies } from '../../types';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
-  toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'];
+  toasts: MonitoringStartServices['notifications']['toasts'];
 }
 
 export interface State {
@@ -32,31 +32,8 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
   toasts,
   children,
 }) => {
-  // TODO: remove fakeAngularRootScope and fakeAngularLocation when angular is removed
-  const fakeAngularRootScope: Partial<ng.IRootScopeService> = {
-    $on:
-      (name: string, listener: (event: ng.IAngularEvent, ...args: any[]) => any): (() => void) =>
-      () => {},
-    $applyAsync: () => {},
-  };
-
-  const fakeAngularLocation: Partial<ng.ILocationService> = {
-    search: () => {
-      return {} as any;
-    },
-    replace: () => {
-      return {} as any;
-    },
-  };
-
   const localState: State = {};
-  const state = new GlobalState(
-    query,
-    toasts,
-    fakeAngularRootScope,
-    fakeAngularLocation,
-    localState as { [key: string]: unknown }
-  );
+  const state = new GlobalState(query, toasts, localState as { [key: string]: unknown });
 
   const initialState: any = state.getState();
   for (const key in initialState) {

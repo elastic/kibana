@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, TimelineEqlRequestOptions } from '../../../../common/search_strategy';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
-
+const defaultArgs = {
+  defaultIndex: ['logs-endpoint.events*'],
+  docValueFields: [],
+  runtimeMappings: {},
+  fieldRequested: [
+    '@timestamp',
+    'message',
+    'event.category',
+    'event.action',
+    'host.name',
+    'source.ip',
+    'destination.ip',
+  ],
+  fields: [],
+  filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
+  id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
+  language: 'eql' as TimelineEqlRequestOptions['language'],
+};
 describe('Search Strategy EQL helper', () => {
   describe('#buildEqlDsl', () => {
     it('happy path with no options', () => {
       expect(
         buildEqlDsl({
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 0, querySize: 25 },
           sort: [
             {
@@ -78,21 +81,7 @@ describe('Search Strategy EQL helper', () => {
     it('happy path with EQL options', () => {
       expect(
         buildEqlDsl({
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 1, querySize: 2 },
           sort: [
             {
@@ -148,21 +137,7 @@ describe('Search Strategy EQL helper', () => {
     it('format events', async () => {
       const result = await parseEqlResponse(
         {
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 0, querySize: 2 },
           sort: [
             {
@@ -439,21 +414,7 @@ describe('Search Strategy EQL helper', () => {
     it('sequence events', async () => {
       const result = await parseEqlResponse(
         {
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 3, querySize: 2 },
           sort: [
             {

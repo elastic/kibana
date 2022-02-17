@@ -7,15 +7,17 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation } from '../types';
-import type { State } from './types';
+import { Operation, VisualizeEditorContext, Suggestion } from '../types';
+import type { State, XYSuggestion } from './types';
 import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
+import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { Datatable } from 'src/plugins/expressions';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function exampleState(): State {
   return {
@@ -40,6 +42,8 @@ const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
+  useLegacyTimeAxis: false,
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -353,6 +357,243 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#updateLayersConfigurationFromContext', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+    let context: VisualizeEditorLayersContext;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
+
+      context = {
+        chartType: 'area',
+        axisPosition: 'right',
+        palette: {
+          name: 'temperature',
+          type: 'palette',
+        },
+        metrics: [
+          {
+            agg: 'count',
+            isFullReference: false,
+            fieldName: 'document',
+            params: {},
+            color: '#68BC00',
+          },
+        ],
+        timeInterval: 'auto',
+        format: 'bytes',
+      } as VisualizeEditorLayersContext;
+    });
+
+    it('sets the context configuration correctly', () => {
+      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
+        prevState: {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'line',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        },
+        layerId: 'first',
+        context,
+      });
+      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
+      expect(state?.layers[0].yConfig).toStrictEqual([
+        {
+          axisMode: 'right',
+          color: '#68BC00',
+          forAccessor: 'a',
+        },
+      ]);
+
+      expect(state?.layers[0].palette).toStrictEqual({
+        name: 'temperature',
+        type: 'palette',
+      });
+    });
+  });
+
+  describe('#getVisualizationSuggestionFromContext', () => {
+    let context: VisualizeEditorContext;
+    let suggestions: Suggestion[];
+
+    beforeEach(() => {
+      suggestions = [
+        {
+          title: 'Average of AvgTicketPrice over timestamp',
+          score: 0.3333333333333333,
+          hide: true,
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            legend: {
+              isVisible: true,
+              position: 'right',
+            },
+            valueLabels: 'hide',
+            fittingFunction: 'None',
+            axisTitlesVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            tickLabelsVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            labelsOrientation: {
+              x: 0,
+              yLeft: 0,
+              yRight: 0,
+            },
+            gridlinesVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                layerId: 'e71c3459-ddcf-4a13-94a1-bf91f7b40175',
+                seriesType: 'bar_stacked',
+                xAccessor: '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
+                accessors: ['0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b'],
+                layerType: 'data',
+              },
+            ],
+          },
+          keptLayerIds: [],
+          datasourceState: {
+            layers: {
+              'e71c3459-ddcf-4a13-94a1-bf91f7b40175': {
+                indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+                columns: {
+                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1': {
+                    label: 'timestamp',
+                    dataType: 'date',
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                    isBucketed: true,
+                    scale: 'interval',
+                    params: {
+                      interval: 'auto',
+                    },
+                  },
+                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b': {
+                    label: 'Average of AvgTicketPrice',
+                    dataType: 'number',
+                    operationType: 'average',
+                    sourceField: 'AvgTicketPrice',
+                    isBucketed: false,
+                    scale: 'ratio',
+                  },
+                },
+                columnOrder: [
+                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
+                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b',
+                ],
+                incompleteColumns: {},
+              },
+            },
+          },
+          datasourceId: 'indexpattern',
+          columns: 2,
+          changeType: 'initial',
+        },
+      ] as unknown as Suggestion[];
+
+      context = {
+        layers: [
+          {
+            indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            timeFieldName: 'order_date',
+            chartType: 'area',
+            axisPosition: 'left',
+            palette: {
+              type: 'palette',
+              name: 'default',
+            },
+            metrics: [
+              {
+                agg: 'count',
+                isFullReference: false,
+                fieldName: 'document',
+                params: {},
+                color: '#68BC00',
+              },
+            ],
+            timeInterval: 'auto',
+          },
+        ],
+        type: 'lnsXY',
+        configuration: {
+          fill: '0.5',
+          legend: {
+            isVisible: true,
+            position: 'right',
+            shouldTruncate: true,
+            maxLines: true,
+          },
+          gridLinesVisibility: {
+            x: true,
+            yLeft: true,
+            yRight: true,
+          },
+          extents: {
+            yLeftExtent: {
+              mode: 'full',
+            },
+            yRightExtent: {
+              mode: 'full',
+            },
+          },
+        },
+        isVisualizeAction: true,
+      } as VisualizeEditorContext;
+    });
+
+    it('updates the visualization state correctly based on the context', () => {
+      const suggestion = xyVisualization?.getVisualizationSuggestionFromContext?.({
+        suggestions,
+        context,
+      }) as XYSuggestion;
+      expect(suggestion?.visualizationState?.fillOpacity).toEqual(0.5);
+      expect(suggestion?.visualizationState?.yRightExtent).toEqual({ mode: 'full' });
+      expect(suggestion?.visualizationState?.legend).toEqual({
+        isVisible: true,
+        maxLines: true,
+        position: 'right',
+        shouldTruncate: true,
+      });
+    });
+  });
+
   describe('#removeDimension', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -538,6 +779,214 @@ describe('xy_visualization', () => {
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
     });
 
+    describe('breakdown group: percentage chart checks', () => {
+      const baseState = exampleState();
+
+      it('should require break down group with one accessor + one split accessor configuration', () => {
+        const [, , splitGroup] = xyVisualization.getConfiguration({
+          state: {
+            ...baseState,
+            layers: [
+              { ...baseState.layers[0], accessors: ['a'], seriesType: 'bar_percentage_stacked' },
+            ],
+          },
+          frame,
+          layerId: 'first',
+        }).groups;
+        expect(splitGroup.required).toBe(true);
+      });
+
+      test.each([
+        [
+          'multiple accessors on the same layer',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on compatible layers',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              xAccessor: 'd',
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+            },
+          ],
+        ],
+      ] as Array<[string, State['layers']]>)(
+        'should not require break down group for %s',
+        (_, layers) => {
+          const [, , splitGroup] = xyVisualization.getConfiguration({
+            state: { ...baseState, layers },
+            frame,
+            layerId: 'first',
+          }).groups;
+          expect(splitGroup.required).toBe(false);
+        }
+      );
+
+      it.each([
+        [
+          'one accessor only',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'one accessor only with split accessor',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'one accessor only with xAccessor',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different xAccessor)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different splitAccessor)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different seriesType)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar',
+            },
+          ],
+        ],
+        [
+          'one data layer with one accessor + one reference layer',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              layerType: layerTypes.REFERENCELINE,
+            },
+          ],
+        ],
+
+        [
+          'multiple accessors on the same layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [
+                { forAccessor: 'a', axisMode: 'left' },
+                { forAccessor: 'b', axisMode: 'right' },
+              ],
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on multiple layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'a', axisMode: 'left' }],
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['b'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'b', axisMode: 'right' }],
+            },
+          ],
+        ],
+      ] as Array<[string, State['layers']]>)(
+        'should require break down group for %s',
+        (_, layers) => {
+          const [, , splitGroup] = xyVisualization.getConfiguration({
+            state: { ...baseState, layers },
+            frame,
+            layerId: 'first',
+          }).groups;
+          expect(splitGroup.required).toBe(true);
+        }
+      );
+    });
+
     describe('reference lines', () => {
       beforeEach(() => {
         frame.datasourceLayers = {
@@ -573,13 +1022,12 @@ describe('xy_visualization', () => {
         const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = [];
         state.layers[1].yConfig = undefined;
-
         expect(
           xyVisualization.getConfiguration({
             state: getStateWithBaseReferenceLine(),
             frame,
             layerId: 'referenceLine',
-          }).supportStaticValue
+          }).groups[0].supportStaticValue
         ).toBeTruthy();
       });
 
@@ -829,6 +1277,21 @@ describe('xy_visualization', () => {
             expect.objectContaining({ groupId: 'yReferenceLineRight' }),
           ])
         );
+      });
+
+      it('should be excluded and not crash when a custom palette is used for data layer', () => {
+        const state = getStateWithBaseReferenceLine();
+        // now add a breakdown on the data layer with a custom palette
+        state.layers[0].palette = { type: 'palette', name: 'custom', params: {} };
+        state.layers[0].splitAccessor = 'd';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+        // it should not crash basically
+        expect(options).toHaveLength(1);
       });
     });
 

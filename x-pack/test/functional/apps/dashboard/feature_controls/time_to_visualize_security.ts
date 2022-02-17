@@ -70,15 +70,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await security.role.delete('dashboard_write_vis_read');
       await security.user.delete('dashboard_write_vis_read_user');
 
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
       );
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
     describe('lens by value works without library save permissions', () => {
@@ -102,8 +103,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.lens.saveAndReturn();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
-        expect(pieExists).to.be(true);
+        const partitionVisExists = await testSubjects.exists('partitionVisChart');
+        expect(partitionVisExists).to.be(true);
       });
 
       it('disables save to library button without visualize save permissions', async () => {

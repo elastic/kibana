@@ -6,10 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
 
@@ -59,19 +59,24 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="connector-card-loading" />}
       {!isLoading && (
-        <EuiCard
-          data-test-subj={`connector-card`}
-          description={description}
-          display="plain"
-          icon={icon}
-          layout="horizontal"
-          paddingSize="none"
-          title={title}
-          titleSize="xs"
-        />
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj={`connector-card`}
+              description={description}
+              display="plain"
+              layout="horizontal"
+              paddingSize="none"
+              title={title}
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </>
   );
 };
+ConnectorCardDisplay.displayName = 'ConnectorCardDisplay';
 
 export const ConnectorCard = memo(ConnectorCardDisplay);

@@ -7,7 +7,7 @@
 
 import { cloneDeep, merge, unionBy } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   EventHit,
   TimelineEventsQueries,
@@ -24,20 +24,31 @@ import {
   getDataFromSourceHits,
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
+import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
-    const { indexName, eventId, docValueFields = [] } = options;
-    return buildTimelineDetailsQuery(indexName, eventId, docValueFields, authFilter);
+    const { indexName, eventId, docValueFields = [], runtimeMappings = {} } = options;
+    return buildTimelineDetailsQuery({
+      indexName,
+      id: eventId,
+      docValueFields,
+      runtimeMappings,
+      authFilter,
+    });
   },
   parse: async (
     options: TimelineEventsDetailsRequestOptions,
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
-    const { indexName, eventId, docValueFields = [] } = options;
+    const { indexName, eventId, docValueFields = [], runtimeMappings = {} } = options;
     const { _source, fields, ...hitsData } = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
     const inspect = {
-      dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
+      dsl: [
+        inspectStringifyObject(
+          buildTimelineDetailsQuery({ indexName, id: eventId, docValueFields, runtimeMappings })
+        ),
+      ],
     };
     if (response.isRunning) {
       return {
@@ -57,10 +68,15 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     );
 
     const data = unionBy('field', fieldsData, sourceData);
+    const rawEventData = response.rawResponse.hits.hits[0];
+    const ecs = buildEcsObjects(rawEventData as EventHit);
+
     return {
       ...response,
       data,
+      ecs,
       inspect,
+      rawEventData,
     };
   },
 };

@@ -35,7 +35,8 @@ export const createExternalService: ServiceFactory = (
   configurationUtilities: ActionsConfigurationUtilities,
   { table, importSetTable, useImportAPI, appScope }: SNProductsConfigValue
 ): ExternalService => {
-  const { apiUrl: url, isLegacy } = config as ServiceNowPublicConfigurationType;
+  const { apiUrl: url, usesTableApi: usesTableApiConfigValue } =
+    config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
@@ -57,11 +58,11 @@ export const createExternalService: ServiceFactory = (
     auth: { username, password },
   });
 
-  const useOldApi = !useImportAPI || isLegacy;
+  const useTableApi = !useImportAPI || usesTableApiConfigValue;
 
-  const getCreateIncidentUrl = () => (useOldApi ? tableApiIncidentUrl : importSetTableUrl);
+  const getCreateIncidentUrl = () => (useTableApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
-    useOldApi ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
+    useTableApi ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
 
   const getIncidentViewURL = (id: string) => {
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
@@ -73,7 +74,7 @@ export const createExternalService: ServiceFactory = (
       .slice(1)
       .reduce((acc, field) => `${acc}^ORelement=${field}`, `element=${fields[0]}`);
 
-    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}&sysparm_fields=label,value,dependent_value,element`;
+    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element`;
   };
 
   const checkInstance = (res: AxiosResponse) => {
@@ -105,7 +106,7 @@ export const createExternalService: ServiceFactory = (
 
   /**
    * Gets the Elastic SN Application information including the current version.
-   * It should not be used on legacy connectors.
+   * It should not be used on connectors that use the old API.
    */
   const getApplicationInformation = async (): Promise<GetApplicationInfoResponse> => {
     try {
@@ -129,7 +130,7 @@ export const createExternalService: ServiceFactory = (
     logger.debug(`Create incident: Application scope: ${scope}: Application version${version}`);
 
   const checkIfApplicationIsInstalled = async () => {
-    if (!useOldApi) {
+    if (!useTableApi) {
       const { version, scope } = await getApplicationInformation();
       logApplicationInfo(scope, version);
     }
@@ -180,17 +181,17 @@ export const createExternalService: ServiceFactory = (
         url: getCreateIncidentUrl(),
         logger,
         method: 'post',
-        data: prepareIncident(useOldApi, incident),
+        data: prepareIncident(useTableApi, incident),
         configurationUtilities,
       });
 
       checkInstance(res);
 
-      if (!useOldApi) {
+      if (!useTableApi) {
         throwIfImportSetApiResponseIsAnError(res.data);
       }
 
-      const incidentId = useOldApi ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const incidentId = useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
       const insertedIncident = await getIncident(incidentId);
 
       return {
@@ -212,23 +213,23 @@ export const createExternalService: ServiceFactory = (
         axios: axiosInstance,
         url: getUpdateIncidentUrl(incidentId),
         // Import Set API supports only POST.
-        method: useOldApi ? 'patch' : 'post',
+        method: useTableApi ? 'patch' : 'post',
         logger,
         data: {
-          ...prepareIncident(useOldApi, incident),
+          ...prepareIncident(useTableApi, incident),
           // elastic_incident_id is used to update the incident when using the Import Set API.
-          ...(useOldApi ? {} : { elastic_incident_id: incidentId }),
+          ...(useTableApi ? {} : { elastic_incident_id: incidentId }),
         },
         configurationUtilities,
       });
 
       checkInstance(res);
 
-      if (!useOldApi) {
+      if (!useTableApi) {
         throwIfImportSetApiResponseIsAnError(res.data);
       }
 
-      const id = useOldApi ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const id = useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
       const updatedIncident = await getIncident(id);
 
       return {

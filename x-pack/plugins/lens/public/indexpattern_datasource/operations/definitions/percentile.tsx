@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from 'src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
@@ -17,10 +17,13 @@ import {
   getSafeName,
   isValidNumber,
   getFilter,
+  isColumnOfType,
+  combineErrorMessages,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { useDebounceWithOptions } from '../../../shared_components';
+import { useDebouncedValue } from '../../../shared_components';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -53,7 +56,11 @@ const DEFAULT_PERCENTILE_VALUE = 95;
 
 const supportedFieldTypes = ['number', 'histogram'];
 
-export const percentileOperation: OperationDefinition<PercentileIndexPatternColumn, 'field'> = {
+export const percentileOperation: OperationDefinition<
+  PercentileIndexPatternColumn,
+  'field',
+  { percentile: number }
+> = {
   type: 'percentile',
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
     defaultMessage: 'Percentile',
@@ -91,9 +98,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
-      previousColumn?.operationType === 'percentile' &&
-      previousColumn.params &&
-      'percentile' in previousColumn.params &&
+      previousColumn &&
+      isColumnOfType<PercentileIndexPatternColumn>('percentile', previousColumn) &&
       previousColumn.params.percentile;
     const newPercentileParam =
       columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
@@ -138,7 +144,10 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     ).toAst();
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]),
   paramEditor: function PercentileParamEditor({
     layer,
     updateLayer,
@@ -146,16 +155,14 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     columnId,
     indexPattern,
   }) {
-    const [inputValue, setInputValue] = useState(String(currentColumn.params.percentile));
-
-    const inputValueAsNumber = Number(inputValue);
-    // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (exclusive)
-    // and is an integer
-    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
-
-    useDebounceWithOptions(
-      () => {
-        if (!inputValueIsValid) return;
+    const onChange = useCallback(
+      (value) => {
+        if (
+          !isValidNumber(value, true, 99, 1) ||
+          Number(value) === currentColumn.params.percentile
+        ) {
+          return;
+        }
         updateLayer({
           ...layer,
           columns: {
@@ -167,33 +174,39 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
                 : ofName(
                     indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                       currentColumn.sourceField,
-                    inputValueAsNumber,
+                    Number(value),
                     currentColumn.timeShift
                   ),
               params: {
                 ...currentColumn.params,
-                percentile: inputValueAsNumber,
+                percentile: Number(value),
               },
-            },
+            } as PercentileIndexPatternColumn,
           },
         });
       },
-      { skipFirstRender: true },
-      256,
-      [inputValue]
+      [updateLayer, layer, columnId, currentColumn, indexPattern]
+    );
+    const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
+      string | undefined
+    >({
+      onChange,
+      value: String(currentColumn.params.percentile),
+    });
+    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
+
+    const handleInputChange: EuiRangeProps['onChange'] = useCallback(
+      (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
+      [handleInputChangeWithoutValidation]
     );
 
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = String(e.target.value);
-      setInputValue(val);
-    }, []);
     return (
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
           defaultMessage: 'Percentile',
         })}
         data-test-subj="lns-indexPattern-percentile-form"
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
         isInvalid={!inputValueIsValid}
         error={
@@ -203,14 +216,18 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
           })
         }
       >
-        <EuiFieldNumber
+        <EuiRange
           data-test-subj="lns-indexPattern-percentile-input"
           compressed
-          value={inputValue}
+          value={inputValue ?? ''}
           min={1}
           max={99}
           step={1}
           onChange={handleInputChange}
+          showInput
+          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+            defaultMessage: 'Percentile',
+          })}
         />
       </EuiFormRow>
     );

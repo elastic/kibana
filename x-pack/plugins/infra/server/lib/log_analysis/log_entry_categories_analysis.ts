@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'src/core/server';
 import {
   compareDatasetsByMaximumAnomalyScore,
@@ -416,20 +416,18 @@ async function fetchLogEntryCategoryExamples(
   const {
     hits: { hits },
   } = decodeOrThrow(logEntryCategoryExamplesResponseRT)(
-    (
-      await requestContext.core.elasticsearch.client.asCurrentUser.search(
-        createLogEntryCategoryExamplesQuery(
-          indices,
-          runtimeMappings,
-          timestampField,
-          tiebreakerField,
-          startTime,
-          endTime,
-          categoryQuery,
-          exampleCount
-        )
+    await requestContext.core.elasticsearch.client.asCurrentUser.search(
+      createLogEntryCategoryExamplesQuery(
+        indices,
+        runtimeMappings,
+        timestampField,
+        tiebreakerField,
+        startTime,
+        endTime,
+        categoryQuery,
+        exampleCount
       )
-    ).body
+    )
   );
 
   const esSearchSpan = finalizeEsSearchSpan();

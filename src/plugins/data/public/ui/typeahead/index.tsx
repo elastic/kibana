@@ -7,12 +7,13 @@
  */
 
 import React from 'react';
-import type { SuggestionsComponentProps } from './suggestions_component';
 
 const Fallback = () => <div />;
 
 const LazySuggestionsComponent = React.lazy(() => import('./suggestions_component'));
-export const SuggestionsComponent = (props: SuggestionsComponentProps) => (
+export const SuggestionsComponent = (
+  props: React.ComponentProps<typeof LazySuggestionsComponent>
+) => (
   <React.Suspense fallback={<Fallback />}>
     <LazySuggestionsComponent {...props} />
   </React.Suspense>

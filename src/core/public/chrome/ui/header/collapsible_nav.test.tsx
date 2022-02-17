@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
@@ -71,7 +71,10 @@ function expectNavIsClosed(component: ReactWrapper) {
 }
 
 function clickGroup(component: ReactWrapper, group: string) {
-  component.find(`[data-test-subj="collapsibleNavGroup-${group}"] button`).simulate('click');
+  component
+    .find(`[data-test-subj="collapsibleNavGroup-${group}"] button`)
+    .first()
+    .simulate('click');
 }
 
 describe('CollapsibleNav', () => {

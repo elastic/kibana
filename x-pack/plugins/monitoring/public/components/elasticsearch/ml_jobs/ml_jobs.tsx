@@ -19,7 +19,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';

@@ -6,14 +6,24 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiIcon, EuiText } from '@elastic/eui';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
+import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartCreationInfo } from './chart_creation_info';
+
+export interface ChartTimeRange {
+  lastUpdated: number;
+  to?: number;
+  from?: number;
+}
 
 interface Props {
-  lastUpdated?: number;
+  chartTimeRange?: ChartTimeRange;
 }
-export function LastUpdated({ lastUpdated }: Props) {
+
+export function LastUpdated({ chartTimeRange }: Props) {
+  const { lastUpdated } = chartTimeRange || {};
   const [refresh, setRefresh] = useState(() => Date.now());
 
   useEffect(() => {
@@ -39,7 +49,13 @@ export function LastUpdated({ lastUpdated }: Props) {
 
   return (
     <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">
-      <EuiIcon type="clock" />
+      <StyledToolTipWrapper
+        as={EuiToolTip}
+        position="top"
+        content={<ChartCreationInfo {...chartTimeRange} />}
+      >
+        <EuiIcon type="iInCircle" />
+      </StyledToolTipWrapper>{' '}
       <FormattedMessage
         id="xpack.observability.expView.lastUpdated.label"
         defaultMessage="Last Updated: {updatedDate}"
@@ -50,3 +66,7 @@ export function LastUpdated({ lastUpdated }: Props) {
     </EuiText>
   );
 }
+
+export const StyledToolTipWrapper = styled.div`
+  min-width: 30vw;
+`;

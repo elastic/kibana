@@ -13,7 +13,7 @@ import HeaderMenuPortal from '../../shared/header_menu_portal';
 
 export function ObservabilityHeaderMenu(): React.ReactElement | null {
   const {
-    appMountParameters: { setHeaderActionMenu },
+    appMountParameters: { setHeaderActionMenu, theme$ },
     core: {
       http: {
         basePath: { prepend },
@@ -22,11 +22,11 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
   } = usePluginContext();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <EuiHeaderLinks>
         <EuiHeaderLink
           color="primary"
-          href={prepend('/app/home#/tutorial_directory/logging')}
+          href={prepend('/app/integrations/browse')}
           iconType="indexOpen"
         >
           {addDataLinkText}
@@ -37,5 +37,5 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
 }
 
 const addDataLinkText = i18n.translate('xpack.observability.home.addData', {
-  defaultMessage: 'Add data',
+  defaultMessage: 'Add integrations',
 });

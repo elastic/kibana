@@ -7,7 +7,7 @@
 
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { ActionProps, HeaderActionProps } from '../../../../../common';
+import type { ActionProps, HeaderActionProps } from '../../../../../common/types';
 import * as i18n from './translations';
 
 export const RowCheckBox = ({
@@ -35,7 +35,7 @@ export const RowCheckBox = ({
     <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
   ) : (
     <EuiCheckbox
-      data-test-subj="select-event"
+      data-test-subj={`select-event select-event-${eventId}`}
       id={eventId}
       checked={checked && !disabled}
       disabled={disabled}

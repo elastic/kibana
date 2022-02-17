@@ -12,17 +12,17 @@ export function plugin() {
 }
 
 export { AdvancedUiActionsServerPlugin as Plugin };
-export {
+export type {
   SetupContract as AdvancedUiActionsSetup,
   StartContract as AdvancedUiActionsStart,
 } from './plugin';
 
-export {
+export type {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
   ActionFactory as UiActionsEnhancedActionFactory,
 } from './types';
 
-export {
+export type {
   DynamicActionsState,
   BaseActionConfig as UiActionsEnhancedBaseActionConfig,
   SerializedAction as UiActionsEnhancedSerializedAction,

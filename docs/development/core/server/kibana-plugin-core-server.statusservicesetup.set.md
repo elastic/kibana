@@ -16,11 +16,11 @@ set(status$: Observable<ServiceStatus>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  status$ | <code>Observable&lt;ServiceStatus&gt;</code> |  |
+|  status$ | Observable&lt;ServiceStatus&gt; |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Remarks
 

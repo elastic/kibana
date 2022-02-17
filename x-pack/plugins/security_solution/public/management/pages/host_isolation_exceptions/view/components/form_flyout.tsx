@@ -16,23 +16,23 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { omit } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { Dispatch } from 'redux';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { useMutation, useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
-import { useToasts } from '../../../../../common/lib/kibana';
-import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
+import { useHttp, useToasts } from '../../../../../common/lib/kibana';
+import { ServerApiError } from '../../../../../common/types';
+import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
 import {
-  isLoadedResourceState,
-  isLoadingResourceState,
-} from '../../../../state/async_resource_state';
+  createHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
+} from '../../service';
+import { useGetHostIsolationExceptionFormEntry } from '../hooks';
+import { HostIsolationExceptionsForm } from './form';
 import {
   getCreateErrorMessage,
   getCreationSuccessMessage,
@@ -40,216 +40,164 @@ import {
   getUpdateErrorMessage,
   getUpdateSuccessMessage,
 } from './translations';
-import { HostIsolationExceptionsPageAction } from '../../store/action';
-import { getCurrentLocation, getExceptionToEdit, getFormStatusFailure } from '../../store/selector';
-import { createEmptyHostIsolationException } from '../../utils';
-import {
-  useHostIsolationExceptionsNavigateCallback,
-  useHostIsolationExceptionsSelector,
-} from '../hooks';
-import { HostIsolationExceptionsForm } from './form';
 
-export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
-  const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
-  const toasts = useToasts();
+export const HostIsolationExceptionsFormFlyout = memo(
+  ({ onCancel, id }: { onCancel: () => void; id?: string }) => {
+    const http = useHttp();
+    const toasts = useToasts();
+    const queryClient = useQueryClient();
 
-  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
+    const isEditing = id !== undefined;
+    const [exception, setException] = useState<
+      CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
+    >(undefined);
 
-  const creationInProgress = useHostIsolationExceptionsSelector((state) =>
-    isLoadingResourceState(state.form.status)
-  );
-  const creationSuccessful = useHostIsolationExceptionsSelector((state) =>
-    isLoadedResourceState(state.form.status)
-  );
-  const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
-
-  const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
-
-  const navigateCallback = useHostIsolationExceptionsNavigateCallback();
-
-  const history = useHistory();
-
-  const [formHasError, setFormHasError] = useState(true);
-  const [exception, setException] = useState<
-    CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
-  >(undefined);
-
-  const onCancel = useCallback(
-    () =>
-      navigateCallback({
-        show: undefined,
-        id: undefined,
-      }),
-    [navigateCallback]
-  );
-
-  // load data to edit or create
-  useEffect(() => {
-    if (location.show === 'create' && exception === undefined) {
-      setException(createEmptyHostIsolationException());
-    } else if (location.show === 'edit') {
-      // prevent flyout to show edit without an id
-      if (!location.id) {
+    // Load the entry to create or edit
+    useGetHostIsolationExceptionFormEntry({
+      id,
+      onSuccess: (data) => setException(data),
+      onError: (error) => {
+        toasts.addWarning(getLoadErrorMessage(error));
         onCancel();
-        return;
-      }
-      // load the exception to edit
-      if (!exceptionToEdit || location.id !== exceptionToEdit.id) {
-        dispatch({
-          type: 'hostIsolationExceptionsMarkToEdit',
-          payload: { id: location.id },
-        });
-      } else {
-        setException(exceptionToEdit);
-      }
-    }
-  }, [dispatch, exception, exceptionToEdit, location.id, location.show, onCancel]);
+      },
+    });
 
-  // handle creation and edit success
-  useEffect(() => {
-    if (creationSuccessful && exception?.name) {
+    // load the list of policies>
+    const policiesRequest = useGetEndpointSpecificPolicies({
+      onError: (error) => {
+        toasts.addWarning(getLoadErrorMessage(error));
+        onCancel();
+      },
+    });
+
+    const mutation = useMutation(
+      () => {
+        if (isEditing) {
+          return updateOneHostIsolationExceptionItem(
+            http,
+            exception as UpdateExceptionListItemSchema
+          );
+        } else {
+          return createHostIsolationExceptionItem(http, exception as CreateExceptionListItemSchema);
+        }
+      },
+      {
+        onSuccess: () => {
+          if (exception?.name) {
+            if (isEditing) {
+              toasts.addSuccess(getUpdateSuccessMessage(exception.name));
+            } else {
+              toasts.addSuccess(getCreationSuccessMessage(exception.name));
+            }
+          }
+          queryClient.invalidateQueries('hostIsolationExceptions');
+          onCancel();
+        },
+        onError: (error: ServerApiError) => {
+          if (isEditing) {
+            toasts.addDanger(getUpdateErrorMessage(error));
+          } else {
+            toasts.addDanger(getCreateErrorMessage(error));
+          }
+        },
+      }
+    );
+
+    const [formHasError, setFormHasError] = useState(true);
+
+    const handleOnCancel = useCallback(() => {
+      if (mutation.isLoading) return;
       onCancel();
-      dispatch({
-        type: 'hostIsolationExceptionsFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
-      if (exception?.item_id) {
-        toasts.addSuccess(getUpdateSuccessMessage(exception.name));
-      } else {
-        toasts.addSuccess(getCreationSuccessMessage(exception.name));
-      }
-    }
-  }, [creationSuccessful, dispatch, exception?.item_id, exception?.name, onCancel, toasts]);
+    }, [mutation, onCancel]);
 
-  // handle load item to edit error
-  useEffect(() => {
-    if (creationFailure && location.show === 'edit' && !exception?.item_id) {
-      toasts.addWarning(getLoadErrorMessage(creationFailure));
-      history.replace(getHostIsolationExceptionsListPath(omit(location, ['show', 'id'])));
-      dispatch({
-        type: 'hostIsolationExceptionsFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
-    }
-  }, [creationFailure, dispatch, exception?.item_id, history, location, toasts]);
+    const handleOnSubmit = useCallback(() => {
+      mutation.mutate();
+    }, [mutation]);
 
-  // handle edit or creation error
-  useEffect(() => {
-    if (creationFailure) {
-      // failed to load the entry
-      if (exception?.item_id) {
-        toasts.addDanger(getUpdateErrorMessage(creationFailure));
-      } else {
-        toasts.addDanger(getCreateErrorMessage(creationFailure));
-      }
-      dispatch({
-        type: 'hostIsolationExceptionsFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
-    }
-  }, [creationFailure, dispatch, exception?.item_id, toasts]);
-
-  const handleOnCancel = useCallback(() => {
-    if (creationInProgress) return;
-    onCancel();
-  }, [creationInProgress, onCancel]);
-
-  const handleOnSubmit = useCallback(() => {
-    if (exception?.item_id) {
-      dispatch({
-        type: 'hostIsolationExceptionsSubmitEdit',
-        payload: exception,
-      });
-    } else {
-      dispatch({
-        type: 'hostIsolationExceptionsCreateEntry',
-        payload: exception,
-      });
-    }
-  }, [dispatch, exception]);
-
-  const confirmButtonMemo = useMemo(
-    () => (
-      <EuiButton
-        data-test-subj="add-exception-confirm-button"
-        fill
-        disabled={formHasError || creationInProgress}
-        onClick={handleOnSubmit}
-        isLoading={creationInProgress}
-      >
-        {exception?.item_id ? (
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-            defaultMessage="Edit Host Isolation Exception"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
-            defaultMessage="Add Host Isolation Exception"
-          />
-        )}
-      </EuiButton>
-    ),
-    [formHasError, creationInProgress, handleOnSubmit, exception?.item_id]
-  );
-
-  return exception ? (
-    <EuiFlyout
-      size="m"
-      onClose={handleOnCancel}
-      data-test-subj="hostIsolationExceptionsCreateEditFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          {exception?.item_id ? (
-            <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
-                defaultMessage="Edit Host Isolation Exception"
-              />
-            </h2>
+    const confirmButtonMemo = useMemo(
+      () => (
+        <EuiButton
+          data-test-subj="add-exception-confirm-button"
+          fill
+          disabled={formHasError || mutation.isLoading}
+          onClick={handleOnSubmit}
+          isLoading={mutation.isLoading}
+        >
+          {isEditing ? (
+            <FormattedMessage
+              id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
+              defaultMessage="Save"
+            />
           ) : (
-            <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
-                defaultMessage="Add Host Isolation Exception"
-              />
-            </h2>
+            <FormattedMessage
+              id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
+              defaultMessage="Add host isolation exception"
+            />
           )}
-        </EuiTitle>
-      </EuiFlyoutHeader>
+        </EuiButton>
+      ),
+      [formHasError, handleOnSubmit, isEditing, mutation.isLoading]
+    );
 
-      <EuiFlyoutBody>
-        <HostIsolationExceptionsForm
-          onChange={setException}
-          exception={exception}
-          onError={setFormHasError}
-        />
-      </EuiFlyoutBody>
+    const handleFormChange = (
+      change: Partial<CreateExceptionListItemSchema> | Partial<UpdateExceptionListItemSchema>
+    ) => {
+      setException(Object.assign(exception, change));
+    };
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="add-exception-cancel-button" onClick={handleOnCancel}>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolationExceptions.flyout.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  ) : (
-    <Loader size="xl" />
-  );
-});
+    return exception && policiesRequest.data?.items ? (
+      <EuiFlyout
+        size="m"
+        onClose={handleOnCancel}
+        data-test-subj="hostIsolationExceptionsCreateEditFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            {isEditing ? (
+              <h2>
+                <FormattedMessage
+                  id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
+                  defaultMessage="Edit host isolation exception"
+                />
+              </h2>
+            ) : (
+              <h2>
+                <FormattedMessage
+                  id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
+                  defaultMessage="Add host isolation exception"
+                />
+              </h2>
+            )}
+          </EuiTitle>
+        </EuiFlyoutHeader>
+
+        <EuiFlyoutBody>
+          <HostIsolationExceptionsForm
+            policies={policiesRequest.data?.items}
+            onChange={handleFormChange}
+            exception={exception}
+            onError={setFormHasError}
+          />
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="add-exception-cancel-button" onClick={handleOnCancel}>
+                <FormattedMessage
+                  id="xpack.securitySolution.hostIsolationExceptions.flyout.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    ) : (
+      <Loader size="xl" />
+    );
+  }
+);
 
 HostIsolationExceptionsFormFlyout.displayName = 'HostIsolationExceptionsFormFlyout';

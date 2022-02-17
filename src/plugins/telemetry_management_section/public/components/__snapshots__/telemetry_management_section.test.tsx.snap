@@ -53,7 +53,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           loading={false}
           setting={
             Object {
-              "ariaName": "Provide usage statistics",
+              "ariaName": "Provide usage data",
               "category": Array [],
               "defVal": true,
               "description": <React.Fragment>
@@ -109,7 +109,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   />
                 </p>
               </React.Fragment>,
-              "displayName": "Provide usage statistics",
+              "displayName": "Provide usage data",
               "isCustom": true,
               "isOverridden": false,
               "name": "telemetry:enabled",
@@ -258,6 +258,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "sendUsageTo": "staging",
       },
       "fetchExample": [Function],
+      "fetchLastReported": [Function],
       "fetchTelemetry": [Function],
       "getCanChangeOptInStatus": [Function],
       "getIsOptedIn": [Function],
@@ -279,6 +280,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "delete": [MockFunction],
         "externalUrl": Object {
+          "isInternalUrl": [MockFunction],
           "validateUrl": [MockFunction],
         },
         "fetch": [MockFunction],
@@ -308,6 +310,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "reportOptInStatusChange": false,
       "setOptIn": [Function],
       "setUserHasSeenNotice": [Function],
+      "updateLastReported": [Function],
       "updatedConfig": undefined,
     }
   }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { SectionError, Error } from './section_error';
+export type { Error } from './section_error';
+export { SectionError } from './section_error';
 export { NoMatch } from './no_match';
 export { TemplateDeleteModal } from './template_delete_modal';
 export { TemplateForm } from './template_form';

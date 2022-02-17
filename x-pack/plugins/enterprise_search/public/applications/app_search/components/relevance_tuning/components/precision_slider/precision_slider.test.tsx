@@ -11,6 +11,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { rerender } from '../../../../../test_helpers';
 
 import { STEP_DESCRIPTIONS } from './constants';
@@ -25,7 +27,7 @@ const MOCK_VALUES = {
 
 const MOCK_ACTIONS = {
   // RelevanceTuningLogic
-  updatePrecision: jest.fn(),
+  setPrecision: jest.fn(),
 };
 
 describe('PrecisionSlider', () => {
@@ -49,12 +51,12 @@ describe('PrecisionSlider', () => {
       expect(wrapper.find('[data-test-subj="PrecisionRange"]').prop('value')).toEqual(2);
     });
 
-    it('calls updatePrecision on change', () => {
+    it('updates the precision on change', () => {
       wrapper
         .find('[data-test-subj="PrecisionRange"]')
         .simulate('change', { target: { value: 10 } });
 
-      expect(MOCK_ACTIONS.updatePrecision).toHaveBeenCalledWith(10);
+      expect(MOCK_ACTIONS.setPrecision).toHaveBeenCalledWith(10);
     });
   });
 
@@ -82,7 +84,7 @@ describe('PrecisionSlider', () => {
   it('contains a documentation link', () => {
     const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');
 
-    expect(documentationLink.prop('href')).toContain('/precision-tuning.html');
+    expect(documentationLink.prop('href')).toContain(docLinks.appSearchPrecision);
     expect(documentationLink.prop('target')).toEqual('_blank');
   });
 });

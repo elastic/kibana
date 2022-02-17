@@ -74,6 +74,9 @@ The health API response contains the following properties:
 | `alerting_framework_health`
 | This state property has three substates that identify the health of the alerting framework API: `decryption_health`, `execution_health`, and `read_health`.
 
+| deprecated::`alerting_framework_heath`
+| This state property has a typo, use `alerting_framework_health` instead. It has three substates that identify the health of the alerting framework API: `decryption_health`, `execution_health`, and `read_health`.
+
 |===
 
 `alerting_framework_health` consists of the following properties:

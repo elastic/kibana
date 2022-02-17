@@ -13,38 +13,42 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { AdvancedUiActionsPublicPlugin as Plugin };
-export {
+export type {
   SetupContract as AdvancedUiActionsSetup,
   StartContract as AdvancedUiActionsStart,
 } from './plugin';
 
-export {
+export type {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
-  ActionFactory as UiActionsEnhancedActionFactory,
   SerializedAction as UiActionsEnhancedSerializedAction,
   SerializedEvent as UiActionsEnhancedSerializedEvent,
-  AbstractActionStorage as UiActionsEnhancedAbstractActionStorage,
-  DynamicActionManager as UiActionsEnhancedDynamicActionManager,
   DynamicActionManagerParams as UiActionsEnhancedDynamicActionManagerParams,
   DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
-  MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
   BaseActionFactoryContext as UiActionsEnhancedBaseActionFactoryContext,
   BaseActionConfig as UiActionsEnhancedBaseActionConfig,
 } from './dynamic_actions';
-
-export { DynamicActionsState } from './services/ui_actions_service_enhancements';
-
 export {
+  ActionFactory as UiActionsEnhancedActionFactory,
+  AbstractActionStorage as UiActionsEnhancedAbstractActionStorage,
+  DynamicActionManager as UiActionsEnhancedDynamicActionManager,
+  MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
+} from './dynamic_actions';
+
+export type { DynamicActionsState } from './services/ui_actions_service_enhancements';
+
+export type {
   DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
   DrilldownTemplate as UiActionsEnhancedDrilldownTemplate,
 } from './drilldowns';
+export type {
+  UrlDrilldownConfig,
+  UrlDrilldownGlobalScope,
+  UrlDrilldownScope,
+} from './drilldowns/url_drilldown';
 export {
   urlDrilldownCompileUrl,
   UrlDrilldownCollectConfig,
-  UrlDrilldownConfig,
-  UrlDrilldownGlobalScope,
   urlDrilldownGlobalScopeProvider,
-  UrlDrilldownScope,
   urlDrilldownValidateUrl,
   urlDrilldownValidateUrlTemplate,
 } from './drilldowns/url_drilldown';

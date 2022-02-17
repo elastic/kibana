@@ -21,6 +21,7 @@ import { storeHistogram } from './saved_objects';
  * The monitoring of the event loop starts immediately.
  * The first collection of the histogram happens after 1 minute.
  * The daily histogram data is updated every 1 hour.
+ * The histogram metrics are in milliseconds.
  */
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
@@ -52,6 +53,10 @@ export function startTrackingEventLoopDelaysUsage(
       if (shouldReset) {
         eventLoopDelaysMonitor.reset();
       }
-      await storeHistogram(histogram, internalRepository, instanceUuid);
+      try {
+        await storeHistogram(histogram, internalRepository, instanceUuid);
+      } catch (e) {
+        // do not crash if cannot store a histogram.
+      }
     });
 }

@@ -8,7 +8,6 @@
 import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
-import { SecurityPluginStart } from '../../../security/server';
 import {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
@@ -18,15 +17,17 @@ import {
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
 
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
-import { ManifestManager } from '../endpoint/services';
-import { AppClientFactory } from '../client';
 import { LicenseService } from '../../common/license';
+import { ManifestManager } from '../endpoint/services';
+import { IRequestContextFactory } from '../request_context_factory';
 import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
-import { removePolicyFromTrustedApps } from './handlers/remove_policy_from_trusted_apps';
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
+import { FeatureUsageService } from '../endpoint/services/feature_usage/service';
+import { EndpointMetadataService } from '../endpoint/services/metadata';
+import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -40,11 +41,7 @@ const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
 export const getPackagePolicyCreateCallback = (
   logger: Logger,
   manifestManager: ManifestManager,
-  appClientFactory: AppClientFactory,
-  maxTimelineImportExportSize: number,
-  prebuiltRulesFromFileSystem: boolean,
-  prebuiltRulesFromSavedObjects: boolean,
-  securityStart: SecurityPluginStart,
+  securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertsStartContract,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined
@@ -59,20 +56,23 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    // In this callback we are handling an HTTP request to the fleet plugin. Since we use
+    // code from the security_solution plugin to handle it (installPrepackagedRules),
+    // we need to build the context that is native to security_solution and pass it there.
+    const securitySolutionContext = await securitySolutionRequestContextFactory.create(
+      context,
+      request
+    );
+
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
       // Install Detection Engine prepackaged rules
       exceptionsClient &&
         installPrepackagedRules({
           logger,
-          appClientFactory,
-          context,
+          context: securitySolutionContext,
           request,
-          securityStart,
           alerts,
-          maxTimelineImportExportSize,
-          prebuiltRulesFromFileSystem,
-          prebuiltRulesFromSavedObjects,
           exceptionsClient,
         }),
 
@@ -108,7 +108,9 @@ export const getPackagePolicyCreateCallback = (
 
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
-  licenseService: LicenseService
+  licenseService: LicenseService,
+  featureUsageService: FeatureUsageService,
+  endpointMetadataService: EndpointMetadataService
 ): PutPackagePolicyUpdateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy
@@ -128,13 +130,14 @@ export const getPackagePolicyUpdateCallback = (
       logger
     );
 
+    notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
+
     return newPackagePolicy;
   };
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined,
-  experimentalFeatures: ExperimentalFeatures | undefined
+  exceptionsClient: ExceptionListClient | undefined
 ): PostPackagePolicyDeleteCallback => {
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
@@ -142,8 +145,8 @@ export const getPackagePolicyDeleteCallback = (
     }
     const policiesToRemove: Array<Promise<void>> = [];
     for (const policy of deletePackagePolicy) {
-      if (isEndpointPackagePolicy(policy) && experimentalFeatures?.trustedAppsByPolicyEnabled) {
-        policiesToRemove.push(removePolicyFromTrustedApps(exceptionsClient, policy));
+      if (isEndpointPackagePolicy(policy)) {
+        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
       }
     }
     await Promise.all(policiesToRemove);

@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { IndexPatternColumn } from '../indexpattern';
+import { GenericIndexPatternColumn } from '../indexpattern';
 import { IndexPatternField } from '../types';
 
 const fieldMap: Record<string, IndexPatternField> = {
@@ -20,7 +20,7 @@ const fieldMap: Record<string, IndexPatternField> = {
 const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap[name];
 
 describe('BucketNestingEditor', () => {
-  function mockCol(col: Partial<IndexPatternColumn> = {}): IndexPatternColumn {
+  function mockCol(col: Partial<GenericIndexPatternColumn> = {}): GenericIndexPatternColumn {
     const result = {
       dataType: 'string',
       isBucketed: true,
@@ -35,7 +35,7 @@ describe('BucketNestingEditor', () => {
       ...col,
     };
 
-    return result as IndexPatternColumn;
+    return result as GenericIndexPatternColumn;
   }
 
   it('should display the top level grouping when at the root', () => {

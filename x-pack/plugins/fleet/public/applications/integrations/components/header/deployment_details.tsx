@@ -19,27 +19,12 @@ export const DeploymentDetails = () => {
     return null;
   }
 
-  const { isCloudEnabled, cloudId, cname } = cloud;
+  const { isCloudEnabled, cloudId } = cloud;
 
-  // If cloud isn't enabled, we don't have a cloudId or a cname, we can't display the flyout.
-  if (!isCloudEnabled || !cloudId || !cname) {
+  // If cloud isn't enabled or we don't have a cloudId we can't display the flyout.
+  if (!isCloudEnabled || !cloudId) {
     return null;
   }
-
-  // If the cname doesn't start with a known prefix, we can't display the flyout.
-  // TODO: dover - this is a short term solution, see https://github.com/elastic/kibana/pull/114287#issuecomment-940111026
-  if (
-    !(
-      cname.endsWith('elastic-cloud.com') ||
-      cname.endsWith('found.io') ||
-      cname.endsWith('found.no')
-    )
-  ) {
-    return null;
-  }
-
-  const cnameNormalized = cname.startsWith('.') ? cname.substring(1) : cname;
-  const endpointUrl = `https://${cloudId}.${cnameNormalized}`;
 
   const managementUrl = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
@@ -47,5 +32,5 @@ export const DeploymentDetails = () => {
 
   const learnMoreUrl = docLinks.links.fleet.apiKeysLearnMore;
 
-  return <Component {...{ cloudId, endpointUrl, managementUrl, learnMoreUrl }} />;
+  return <Component {...{ cloudId, managementUrl, learnMoreUrl }} />;
 };

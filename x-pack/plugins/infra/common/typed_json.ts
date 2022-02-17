@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 
-export { JsonArray, JsonObject, JsonValue };
+export type { JsonArray, JsonObject, JsonValue };
 
 export const jsonScalarRT = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
 export type JsonScalar = rt.TypeOf<typeof jsonScalarRT>;

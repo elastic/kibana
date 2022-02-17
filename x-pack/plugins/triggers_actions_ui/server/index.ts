@@ -8,10 +8,9 @@ import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server'
 import { configSchema, ConfigSchema } from '../config';
 import { TriggersActionsPlugin } from './plugin';
 
-export { PluginStartContract } from './plugin';
+export type { PluginStartContract } from './plugin';
+export type { TimeSeriesQuery, CoreQueryParams } from './data';
 export {
-  TimeSeriesQuery,
-  CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,

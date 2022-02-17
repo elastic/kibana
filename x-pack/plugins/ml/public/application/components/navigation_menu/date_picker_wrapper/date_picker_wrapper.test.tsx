@@ -13,6 +13,7 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 
 import { useUrlState } from '../../../util/url_state';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 
 import { DatePickerWrapper } from './date_picker_wrapper';
 
@@ -20,7 +21,17 @@ jest.mock('@elastic/eui', () => {
   const EuiSuperDatePickerMock = jest.fn(() => {
     return null;
   });
-  return { EuiSuperDatePicker: EuiSuperDatePickerMock };
+  const EuiFlexGroupMock = jest.fn(({ children }) => {
+    return <>{children}</>;
+  });
+  const EuiFlexItemMock = jest.fn(({ children }) => {
+    return <>{children}</>;
+  });
+  return {
+    EuiSuperDatePicker: EuiSuperDatePickerMock,
+    EuiFlexGroup: EuiFlexGroupMock,
+    EuiFlexItem: EuiFlexItemMock,
+  };
 });
 
 jest.mock('../../../util/url_state', () => {
@@ -31,8 +42,14 @@ jest.mock('../../../util/url_state', () => {
   };
 });
 
+jest.mock('../../../contexts/kibana/use_timefilter');
+
+jest.mock('../../../services/toast_notification_service');
+
 jest.mock('../../../contexts/kibana', () => ({
   useMlKibana: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { of } = require('rxjs');
     return {
       services: {
         uiSettings: {
@@ -68,6 +85,14 @@ jest.mock('../../../contexts/kibana', () => ({
             },
           },
         },
+        mlServices: {
+          httpService: {
+            getLoadingCount$: of(0),
+          },
+        },
+        theme: {
+          theme$: of(),
+        },
       },
     };
   },
@@ -100,11 +125,39 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     // arrange
     (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 0 } }]);
 
+    const displayWarningSpy = jest.fn(() => {});
+
+    (useToastNotificationService as jest.Mock).mockReturnValueOnce({
+      displayWarningToast: displayWarningSpy,
+    });
+
     // act
     render(<DatePickerWrapper />);
 
     // assert
+    expect(displayWarningSpy).not.toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
     expect(calledWith.isPaused).toBe(true);
+    expect(calledWith.refreshInterval).toBe(5000);
+  });
+
+  test('should show a warning when configured interval is too short', () => {
+    // arrange
+    (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 10 } }]);
+
+    const displayWarningSpy = jest.fn(() => {});
+
+    (useToastNotificationService as jest.Mock).mockReturnValueOnce({
+      displayWarningToast: displayWarningSpy,
+    });
+
+    // act
+    render(<DatePickerWrapper />);
+
+    // assert
+    expect(displayWarningSpy).toHaveBeenCalled();
+    const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
+    expect(calledWith.isPaused).toBe(false);
+    expect(calledWith.refreshInterval).toBe(10);
   });
 });

@@ -62,7 +62,7 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       types: ['index_pattern'],
       required: true,
       help: i18n.translate('data.search.functions.esaggs.index.help', {
-        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+        defaultMessage: 'Data view retrieved with indexPatternLoad',
       }),
     },
     aggs: {

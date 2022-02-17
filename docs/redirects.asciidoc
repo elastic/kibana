@@ -7,6 +7,18 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="snapshot-repositories"]
+== Snapshot and Restore
+Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
+
+[role="exclude",id="snapshot-restore-tutorial"]
+== Tutorial: Snapshot and Restore
+Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
+
+[role="exclude",id="configuring-tls-communication"]
+== Encrypt communications in {kib}
+Refer to <<using-kibana-with-security,Configure security in {kib}>>.
+
 [role="exclude",id="configuring-tls"]
 == Encrypt TLS communications in {kib}
 Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].
@@ -358,3 +370,38 @@ This content has moved. Refer to <<xpack-profiler>>.
 == Rendering pre-captured profiler JSON
 
 This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views>>.
+
+[role="exclude",id="managing-index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<managing-data-views>>.
+
+[role="exclude",id="xpack-kibana-role-management"]
+== Kibana role management.
+
+This content has moved. Refer to <<kibana-role-management>>.
+
+[role="exclude",id="upgrade-migrations"]
+== Upgrade migrations
+
+This content has moved. Refer to <<saved-object-migrations>>.
+
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
+
+[role="exclude",id="upgrade-assistant"]
+== Upgrade Assistant
+
+This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
+
+[role="exclude",id="brew"]
+== Install {kib} on macOS with Homebrew
+
+This page has been deleted. Refer to <<install>>.

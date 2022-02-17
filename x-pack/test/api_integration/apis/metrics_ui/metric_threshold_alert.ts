@@ -6,18 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  evaluateAlert,
-  EvaluatedAlertParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_alert';
 import {
   Aggregators,
+  Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-import { Comparator } from '../../../../plugins/infra/server/lib/alerting/common/types';
+} from '../../../../plugins/infra/common/alerting/metrics';
+import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
+import {
+  EvaluatedRuleParams,
+  evaluateRule,
+} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const { gauge, rate } = DATES['alert-test-data'];
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
 
-  const baseParams: EvaluatedAlertParams = {
+  const baseParams: EvaluatedRuleParams = {
     groupBy: void 0,
     filterQuery: void 0,
     criteria: [
@@ -53,11 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
     metricsExplorerDefaultView: 'default',
     anomalyThreshold: 70,
     fields: {
-      container: 'container.id',
-      host: 'host.name',
-      pod: 'kubernetes.od.uid',
-      tiebreaker: '_doc',
-      timestamp: '@timestamp',
       message: ['message'],
     },
     logColumns: [
@@ -81,10 +76,95 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Metric Threshold Alerts Executor', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-
+    describe('with 10K plus docs', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      describe('without group by', () => {
+        it('should alert on document count', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [10000],
+                comparator: Comparator.LT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(esClient, params, config, [], 10000, timeFrame);
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [10000],
+                comparator: '<=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 20895,
+                timestamp: '2021-10-19T00:48:59.997Z',
+                shouldFire: [false],
+                shouldWarn: [false],
+                isNoData: [false],
+                isError: false,
+              },
+            },
+          ]);
+        });
+      });
+      describe('with group by', () => {
+        it('should alert on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['event.category'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [10000],
+                comparator: Comparator.LT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(esClient, params, config, [], 10000, timeFrame);
+          expect(results).to.eql([
+            {
+              web: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [10000],
+                comparator: '<=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 20895,
+                timestamp: '2021-10-19T00:48:59.997Z',
+                shouldFire: [false],
+                shouldWarn: [false],
+                isNoData: [false],
+                isError: false,
+              },
+            },
+          ]);
+        });
+      });
+    });
     describe('with gauge data', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       describe('without groupBy', () => {
         it('should alert on document count', async () => {
           const params = {
@@ -100,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(esClient, params, configuration, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -123,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(esClient, params, configuration, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -160,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(esClient, params, configuration, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               dev: {
@@ -200,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(esClient, params, configuration, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               dev: {
@@ -241,11 +321,12 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.midpoint };
-          const results = await evaluateAlert(
+          const results = await evaluateRule(
             esClient,
             params,
             configuration,
             ['dev', 'prod'],
+            10000,
             timeFrame
           );
           expect(results).to.eql([
@@ -285,6 +366,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with rate data', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
       describe('without groupBy', () => {
         it('should alert on rate', async () => {
           const params = {
@@ -301,7 +384,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(esClient, params, configuration, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -341,7 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(esClient, params, configuration, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               dev: {

@@ -8,7 +8,7 @@
 
 import { MockElasticsearchClient } from './core_service.test.mocks';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { InternalElasticsearchServiceStart } from '../../elasticsearch';
 
@@ -205,7 +205,7 @@ describe('http service', () => {
 
       esClient.ping.mockImplementation(() =>
         elasticsearchClientMock.createErrorTransportRequestPromise(
-          new ResponseError({
+          new errors.ResponseError({
             statusCode: 401,
             body: {
               error: {
@@ -243,7 +243,7 @@ describe('http service', () => {
 
       esClient.ping.mockImplementation(() =>
         elasticsearchClientMock.createErrorTransportRequestPromise(
-          new ResponseError({
+          new errors.ResponseError({
             statusCode: 401,
             body: {
               error: {
@@ -279,7 +279,7 @@ describe('http service', () => {
 
       esClient.ping.mockImplementation(() =>
         elasticsearchClientMock.createErrorTransportRequestPromise(
-          new ResponseError({
+          new errors.ResponseError({
             statusCode: 404,
             body: {
               error: {
@@ -297,7 +297,9 @@ describe('http service', () => {
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         try {
-          const result = await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          const result = await elasticsearch.client
+            .asScoped(req)
+            .asInternalUser.ping({}, { meta: true });
           return res.ok({
             body: result,
           });

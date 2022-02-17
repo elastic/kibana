@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { some } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
@@ -112,6 +114,7 @@ export const useLensButtonToggle = ({
             ) {
               if (child.type === 'text') break outer; // don't dive into `text` nodes
               node = child;
+              // eslint-disable-next-line no-continue
               continue outer;
             }
           }

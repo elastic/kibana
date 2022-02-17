@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/schema/types';
+import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
+  ServerFieldResultSetting,
   ServerFieldResultSettingObject,
 } from './types';
 
@@ -299,7 +300,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           schema,
           schemaConflicts,
           searchSettings: { result_fields: serverFieldResultSettings },
-        } = await http.get(url);
+        } = await http.get<{
+          schema: Record<string, SchemaType>;
+          schemaConflicts?: SchemaConflicts;
+          searchSettings: { result_fields: Record<string, ServerFieldResultSetting> };
+        }>(url);
 
         actions.initializeResultFields(serverFieldResultSettings, schema, schemaConflicts);
       } catch (e) {
@@ -322,7 +327,9 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         actions.saving();
 
         try {
-          const response = await http.put(url, {
+          const response = await http.put<{
+            result_fields: Record<string, ServerFieldResultSetting>;
+          }>(url, {
             body: JSON.stringify({
               result_fields: values.reducedServerResultFields,
             }),

@@ -11,6 +11,15 @@ import {
   MatrixHistogramType,
 } from '../../../../../../../common/search_strategy';
 
+const runtimeMappings: MatrixHistogramRequestOptions['runtimeMappings'] = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radically mocked dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};
+
 export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
@@ -27,6 +36,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
   histogramType: MatrixHistogramType.events,
   timerange: { interval: '12h', from: '2020-09-08T16:11:26.215Z', to: '2020-09-09T16:11:26.215Z' },
   stackByField: 'event.action',
+  runtimeMappings,
 };
 
 export const expectedDsl = {
@@ -40,8 +50,8 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -80,6 +90,7 @@ export const expectedDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -95,8 +106,8 @@ export const expectedThresholdDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -137,6 +148,7 @@ export const expectedThresholdDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -152,8 +164,8 @@ export const expectedThresholdMissingFieldDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -192,12 +204,13 @@ export const expectedThresholdMissingFieldDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
 
 export const expectedThresholdWithCardinalityDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   body: {
     aggregations: {
       eventActionGroup: {
@@ -242,9 +255,10 @@ export const expectedThresholdWithCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -269,8 +283,8 @@ export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -311,12 +325,13 @@ export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
 
 export const expectedThresholdGroupWithCardinalityDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   body: {
     aggregations: {
       eventActionGroup: {
@@ -363,9 +378,10 @@ export const expectedThresholdGroupWithCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -390,8 +406,8 @@ export const expectedIpIncludingMissingDataDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -438,6 +454,7 @@ export const expectedIpIncludingMissingDataDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -453,8 +470,8 @@ export const expectedIpNotIncludingMissingDataDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -496,6 +513,7 @@ export const expectedIpNotIncludingMissingDataDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };

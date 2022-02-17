@@ -22,6 +22,7 @@ import {
   getFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -38,7 +39,16 @@ function ofName(name: string, timeShift: string | undefined) {
   );
 }
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'ip',
+  'date',
+  'ip_range',
+  'number_range',
+  'date_range',
+]);
 
 export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
   if (!indexPattern) {
@@ -134,7 +144,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     const hasDateFields = indexPattern && getDateFields(indexPattern).length;
     if (!hasDateFields) {
       return i18n.translate('xpack.lens.indexPattern.lastValue.disabled', {
-        defaultMessage: 'This function requires the presence of a date field in your index',
+        defaultMessage: 'This function requires the presence of a date field in your data view',
       });
     }
   },
@@ -152,9 +162,11 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     if (invalidSortFieldMessage) {
       errorMessages = [invalidSortFieldMessage];
     }
+    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
+    const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];
     const sortField = isTimeFieldNameDateField(indexPattern)
       ? indexPattern.timeFieldName
       : indexPattern.fields.find((f) => f.type === 'date')?.name;
@@ -162,7 +174,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     if (!sortField) {
       throw new Error(
         i18n.translate('xpack.lens.functions.lastValue.missingSortField', {
-          defaultMessage: 'This index pattern does not contain any date fields',
+          defaultMessage: 'This data view does not contain any date fields',
         })
       );
     }
@@ -177,7 +189,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
-        sortField,
+        sortField: lastValueParams?.sortField || sortField,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
@@ -206,7 +218,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       newField &&
         newField.type === column.dataType &&
         !newField.aggregationRestrictions &&
-        newTimeField?.type === 'date'
+        newTimeField?.type === 'date' &&
+        supportedTypes.has(newField.type)
     );
   },
 
@@ -222,10 +235,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
           label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
             defaultMessage: 'Sort by date field',
           })}
-          display="columnCompressed"
+          display="rowCompressed"
           fullWidth
           error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
-            defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
+            defaultMessage: 'Invalid field. Check your data view or pick another field.',
           })}
           isInvalid={isSortFieldInvalid}
         >
@@ -284,7 +297,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }),
     description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
       defaultMessage: `
-Returns the value of a field from the last document, ordered by the default time field of the index pattern.
+Returns the value of a field from the last document, ordered by the default time field of the data view.
 
 This function is usefull the retrieve the latest state of an entity.
 

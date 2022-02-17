@@ -11,6 +11,7 @@ import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
+  getEnrichmentIdentifiers,
 } from './helpers';
 
 describe('parseExistingEnrichments', () => {
@@ -353,6 +354,26 @@ describe('getEnrichmentFields', () => {
     ];
     expect(getEnrichmentFields(data)).toEqual({
       'source.ip': '192.168.1.1',
+    });
+  });
+});
+
+describe('getEnrichmentIdentifiers', () => {
+  it(`return feed name as feedName if it's present in enrichment`, () => {
+    expect(
+      getEnrichmentIdentifiers({
+        'matched.id': [1],
+        'matched.field': ['matched field'],
+        'matched.atomic': ['matched atomic'],
+        'matched.type': ['matched type'],
+        'feed.name': ['feed name'],
+      })
+    ).toEqual({
+      id: 1,
+      field: 'matched field',
+      value: 'matched atomic',
+      type: 'matched type',
+      feedName: 'feed name',
     });
   });
 });

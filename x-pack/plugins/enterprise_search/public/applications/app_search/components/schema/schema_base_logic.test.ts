@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SchemaType } from '../../../shared/schema/types';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { SchemaBaseLogic } from './schema_base_logic';
 
 describe('SchemaBaseLogic', () => {
   const { mount } = new LogicMounter(SchemaBaseLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const MOCK_SCHEMA = {
     some_text_field: SchemaType.Text,
@@ -99,14 +96,9 @@ describe('SchemaBaseLogic', () => {
         expect(SchemaBaseLogic.actions.onSchemaLoad).toHaveBeenCalledWith(MOCK_RESPONSE);
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         SchemaBaseLogic.actions.loadSchema();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

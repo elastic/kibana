@@ -7,5 +7,5 @@
  */
 
 export { SavedObjectsManagementAction } from './action';
-export { SavedObjectsManagementColumn } from './column';
-export { SavedObjectsManagementRecord } from './record';
+export type { SavedObjectsManagementColumn } from './column';
+export type { SavedObjectsManagementRecord } from './record';

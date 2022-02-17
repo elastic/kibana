@@ -21,6 +21,7 @@ import {
   getListPagination,
   isListLoading,
   getMapOfPoliciesById,
+  isLoadingListOfPolicies,
 } from '../../../store/selectors';
 
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
@@ -36,7 +37,7 @@ import {
   ArtifactEntryCardProps,
 } from '../../../../../components/artifact_entry_card';
 import { AppAction } from '../../../../../../common/store/actions';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 
 export interface PaginationBarProps {
@@ -82,6 +83,7 @@ export const TrustedAppsGrid = memo(() => {
   const error = useTrustedAppsSelector(getListErrorMessage);
   const location = useTrustedAppsSelector(getCurrentLocation);
   const policyListById = useTrustedAppsSelector(getMapOfPoliciesById);
+  const loadingPoliciesList = useTrustedAppsSelector(isLoadingListOfPolicies);
 
   const handlePaginationChange: PaginatedContentProps<
     TrustedApp,
@@ -113,7 +115,7 @@ export const TrustedAppsGrid = memo(() => {
             backLink: {
               label: BACK_TO_TRUSTED_APPS_LABEL,
               navigateTo: [
-                APP_ID,
+                APP_UI_ID,
                 {
                   path: currentPagePath,
                 },
@@ -121,7 +123,7 @@ export const TrustedAppsGrid = memo(() => {
               href: getAppUrl({ path: currentPagePath }),
             },
             onCancelNavigateTo: [
-              APP_ID,
+              APP_UI_ID,
               {
                 path: currentPagePath,
               },
@@ -129,13 +131,14 @@ export const TrustedAppsGrid = memo(() => {
           };
 
           policyToNavOptionsMap[policyId] = {
-            navigateAppId: APP_ID,
+            navigateAppId: APP_UI_ID,
             navigateOptions: {
               path: policyDetailsPath,
               state: routeState,
             },
             href: getAppUrl({ path: policyDetailsPath }),
             children: policyListById[policyId]?.name ?? policyId,
+            target: '_blank',
           };
           return policyToNavOptionsMap;
         }, {});
@@ -144,6 +147,7 @@ export const TrustedAppsGrid = memo(() => {
       cachedCardProps[trustedApp.id] = {
         item: trustedApp,
         policies,
+        loadingPoliciesList,
         hideComments: true,
         'data-test-subj': 'trustedAppCard',
         actions: [
@@ -173,11 +177,12 @@ export const TrustedAppsGrid = memo(() => {
             children: DELETE_TRUSTED_APP_ACTION_LABEL,
           },
         ],
+        hideDescription: !trustedApp.description,
       };
     }
 
     return cachedCardProps;
-  }, [dispatch, getAppUrl, history, listItems, location, policyListById]);
+  }, [dispatch, getAppUrl, history, listItems, location, policyListById, loadingPoliciesList]);
 
   const handleArtifactCardProps = useCallback(
     (trustedApp: TrustedApp) => {

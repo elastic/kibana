@@ -9,24 +9,34 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { EuiComment, EuiText, EuiAvatarProps, EuiCommentProps, IconType } from '@elastic/eui';
-import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
+import {
+  Immutable,
+  ActivityLogEntry,
+  ActivityLogItemTypes,
+} from '../../../../../../../common/endpoint/types';
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { LogEntryTimelineIcon } from './log_entry_timeline_icon';
+import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
 
 import * as i18 from '../../translations';
 
 const useLogEntryUIProps = (
-  logEntry: Immutable<ActivityLogEntry>
+  logEntry: Immutable<ActivityLogEntry>,
+  theme: ReturnType<typeof useEuiTheme>
 ): {
   actionEventTitle: string;
+  avatarColor: EuiAvatarProps['color'];
+  avatarIconColor: EuiAvatarProps['iconColor'];
   avatarSize: EuiAvatarProps['size'];
   commentText: string;
   commentType: EuiCommentProps['type'];
   displayComment: boolean;
   displayResponseEvent: boolean;
+  failedActionEventTitle: string;
   iconType: IconType;
   isResponseEvent: boolean;
   isSuccessful: boolean;
+  isCompleted: boolean;
   responseEventTitle: string;
   username: string | React.ReactNode;
 } => {
@@ -34,15 +44,19 @@ const useLogEntryUIProps = (
     let iconType: IconType = 'dot';
     let commentType: EuiCommentProps['type'] = 'update';
     let commentText: string = '';
+    let avatarColor: EuiAvatarProps['color'] = theme.euiColorLightestShade;
+    let avatarIconColor: EuiAvatarProps['iconColor'];
     let avatarSize: EuiAvatarProps['size'] = 's';
+    let failedActionEventTitle: string = '';
     let isIsolateAction: boolean = false;
     let isResponseEvent: boolean = false;
     let isSuccessful: boolean = false;
+    let isCompleted: boolean = false;
     let displayComment: boolean = false;
     let displayResponseEvent: boolean = true;
     let username: EuiCommentProps['username'] = '';
 
-    if (logEntry.type === 'action') {
+    if (logEntry.type === ActivityLogItemTypes.FLEET_ACTION) {
       avatarSize = 'm';
       commentType = 'regular';
       commentText = logEntry.item.data.data.comment?.trim() ?? '';
@@ -59,13 +73,51 @@ const useLogEntryUIProps = (
           displayComment = true;
         }
       }
-    } else if (logEntry.type === 'response') {
+    }
+    if (logEntry.type === ActivityLogItemTypes.ACTION) {
+      avatarSize = 'm';
+      commentType = 'regular';
+      commentText = logEntry.item.data.EndpointActions.data.comment?.trim() ?? '';
+      displayResponseEvent = false;
+      iconType = 'lockOpen';
+      username = logEntry.item.data.user.id;
+      avatarIconColor = theme.euiColorVis9_behindText;
+      failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointReleaseAction;
+      if (logEntry.item.data.EndpointActions.data) {
+        const data = logEntry.item.data.EndpointActions.data;
+        if (data.command === 'isolate') {
+          iconType = 'lock';
+          failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointIsolateAction;
+        }
+        if (commentText) {
+          displayComment = true;
+        }
+      }
+    } else if (logEntry.type === ActivityLogItemTypes.FLEET_RESPONSE) {
       isResponseEvent = true;
       if (logEntry.item.data.action_data.command === 'isolate') {
         isIsolateAction = true;
       }
       if (!!logEntry.item.data.completed_at && !logEntry.item.data.error) {
         isSuccessful = true;
+      } else {
+        avatarColor = theme.euiColorVis9_behindText;
+      }
+    } else if (logEntry.type === ActivityLogItemTypes.RESPONSE) {
+      iconType = 'check';
+      isResponseEvent = true;
+      if (logEntry.item.data.EndpointActions.data.command === 'isolate') {
+        isIsolateAction = true;
+      }
+      if (logEntry.item.data.EndpointActions.completed_at) {
+        isCompleted = true;
+        if (!logEntry.item.data.error) {
+          isSuccessful = true;
+          avatarColor = theme.euiColorVis0_behindText;
+        } else {
+          isSuccessful = false;
+          avatarColor = theme.euiColorVis9_behindText;
+        }
       }
     }
 
@@ -75,13 +127,23 @@ const useLogEntryUIProps = (
 
     const getResponseEventTitle = () => {
       if (isIsolateAction) {
-        if (isSuccessful) {
+        if (isCompleted) {
+          if (isSuccessful) {
+            return i18.ACTIVITY_LOG.LogEntry.response.isolationCompletedAndSuccessful;
+          }
+          return i18.ACTIVITY_LOG.LogEntry.response.isolationCompletedAndUnsuccessful;
+        } else if (isSuccessful) {
           return i18.ACTIVITY_LOG.LogEntry.response.isolationSuccessful;
         } else {
           return i18.ACTIVITY_LOG.LogEntry.response.isolationFailed;
         }
       } else {
-        if (isSuccessful) {
+        if (isCompleted) {
+          if (isSuccessful) {
+            return i18.ACTIVITY_LOG.LogEntry.response.unisolationCompletedAndSuccessful;
+          }
+          return i18.ACTIVITY_LOG.LogEntry.response.unisolationCompletedAndUnsuccessful;
+        } else if (isSuccessful) {
           return i18.ACTIVITY_LOG.LogEntry.response.unisolationSuccessful;
         } else {
           return i18.ACTIVITY_LOG.LogEntry.response.unisolationFailed;
@@ -91,18 +153,22 @@ const useLogEntryUIProps = (
 
     return {
       actionEventTitle,
+      avatarColor,
+      avatarIconColor,
       avatarSize,
       commentText,
       commentType,
       displayComment,
       displayResponseEvent,
+      failedActionEventTitle,
       iconType,
       isResponseEvent,
       isSuccessful,
+      isCompleted,
       responseEventTitle: getResponseEventTitle(),
       username,
     };
-  }, [logEntry]);
+  }, [logEntry, theme]);
 };
 
 const StyledEuiComment = styled(EuiComment)`
@@ -126,28 +192,41 @@ const StyledEuiComment = styled(EuiComment)`
 `;
 
 export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEntry> }) => {
+  const theme = useEuiTheme();
   const {
     actionEventTitle,
+    avatarColor,
+    avatarIconColor,
     avatarSize,
     commentText,
     commentType,
     displayComment,
     displayResponseEvent,
+    failedActionEventTitle,
     iconType,
     isResponseEvent,
-    isSuccessful,
     responseEventTitle,
     username,
-  } = useLogEntryUIProps(logEntry);
+  } = useLogEntryUIProps(logEntry, theme);
 
   return (
     <StyledEuiComment
       type={(commentType ?? 'regular') as EuiCommentProps['type']}
       username={username}
       timestamp={<FormattedRelativePreferenceDate value={logEntry.item.data['@timestamp']} />}
-      event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
+      event={
+        <b>
+          {displayResponseEvent
+            ? responseEventTitle
+            : failedActionEventTitle
+            ? failedActionEventTitle
+            : actionEventTitle}
+        </b>
+      }
       timelineIcon={
-        <LogEntryTimelineIcon {...{ avatarSize, iconType, isResponseEvent, isSuccessful }} />
+        <LogEntryTimelineIcon
+          {...{ avatarSize, iconType, isResponseEvent, avatarColor, avatarIconColor }}
+        />
       }
       data-test-subj="timelineEntry"
     >

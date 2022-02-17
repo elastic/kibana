@@ -14,9 +14,10 @@ export const getSavedObjects = (): SavedObject[] => [
   {
     id: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
     type: 'visualization',
-    updated_at: '2018-08-29T13:22:17.617Z',
+    updated_at: '2021-10-28T15:07:36.622Z',
     version: '1',
-    migrationVersion: {},
+    coreMigrationVersion: '8.0.0',
+    migrationVersion: { visualization: '8.0.0' },
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.visitorsMapTitle', {
         defaultMessage: '[Logs] Visitors Map',
@@ -28,10 +29,16 @@ export const getSavedObjects = (): SavedObject[] => [
       version: 1,
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
+          '{"filter":[],"query":{"query":"","language":"kuery"},"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
       },
     },
-    references: [],
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
   },
   {
     id: 'cb099a20-ea66-11eb-9425-113343a037e3',
@@ -88,25 +95,32 @@ export const getSavedObjects = (): SavedObject[] => [
   {
     id: '69a34b00-9ee8-11e7-8711-e7a007dcef99',
     type: 'visualization',
-    updated_at: '2018-08-29T13:24:46.136Z',
+    updated_at: '2021-10-28T14:38:21.435Z',
     version: '2',
-    migrationVersion: {},
+    coreMigrationVersion: '8.0.0',
+    migrationVersion: { visualization: '8.0.0' },
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.goalsTitle', {
         defaultMessage: '[Logs] Goals',
       }),
       visState:
-        '{"title":"[Logs] Goals","type":"gauge","params":{"type":"gauge","addTooltip":true,"addLegend":false,"gauge":{"verticalSplit":false,"extendRange":true,"percentageMode":false,"gaugeType":"Arc","gaugeStyle":"Full","backStyle":"Full","orientation":"vertical","colorSchema":"Green to Red","gaugeColorMode":"Labels","colorsRange":[{"from":0,"to":500},{"from":500,"to":1000},{"from":1000,"to":1500}],"invertColors":true,"labels":{"show":false,"color":"black"},"scale":{"show":true,"labels":false,"color":"#333"},"type":"meter","style":{"bgWidth":0.9,"width":0.9,"mask":false,"bgMask":false,"maskBars":50,"bgFill":"#eee","bgColor":false,"subText":"visitors","fontSize":60,"labelColor":true}},"isDisplayWarning":false},"aggs":[{"id":"1","enabled":true,"type":"cardinality","schema":"metric","params":{"field":"clientip","customLabel":"Unique Visitors"}}]}',
+        '{"title":"[Logs] Goals","type":"gauge","params":{"type":"gauge","addTooltip":true,"addLegend":false,"gauge":{"extendRange":true,"percentageMode":false,"gaugeType":"Arc","gaugeStyle":"Full","backStyle":"Full","orientation":"vertical","colorSchema":"Green to Red","gaugeColorMode":"Labels","colorsRange":[{"from":0,"to":500},{"from":500,"to":1000},{"from":1000,"to":1500}],"invertColors":true,"labels":{"show":false,"color":"black"},"scale":{"show":true,"labels":false,"color":"#333"},"type":"meter","style":{"bgWidth":0.9,"width":0.9,"mask":false,"bgMask":false,"maskBars":50,"bgFill":"#eee","bgColor":false,"subText":"visitors","fontSize":60,"labelColor":true},"alignment":"horizontal"},"isDisplayWarning":false},"aggs":[{"id":"1","enabled":true,"type":"cardinality","schema":"metric","params":{"field":"clientip","customLabel":"Unique Visitors"}}]}',
       uiStateJSON:
         '{"vis":{"defaultColors":{"0 - 500":"rgb(165,0,38)","500 - 1000":"rgb(255,255,190)","1000 - 1500":"rgb(0,104,55)"},"colors":{"75 - 100":"#629E51","50 - 75":"#EAB839","0 - 50":"#E24D42","0 - 100":"#E24D42","200 - 300":"#7EB26D","500 - 1000":"#E5AC0E","0 - 500":"#E24D42","1000 - 1500":"#7EB26D"},"legendOpen":true}}',
       description: '',
       version: 1,
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
+          '{"filter":[],"query":{"query":"","language":"kuery"},"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
       },
     },
-    references: [],
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
   },
   {
     id: '7cbd2350-2223-11e8-b802-5bcf64c2cfb4',
@@ -235,7 +249,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Part of count() / overall_sum(count())',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1': {
                     customLabel: true,
@@ -244,7 +258,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Part of count() / overall_sum(count())',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2': {
                     customLabel: true,
@@ -366,13 +380,13 @@ export const getSavedObjects = (): SavedObject[] => [
   {
     id: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     type: 'dashboard',
-    updated_at: '2021-07-21T21:43:43.870Z',
+    updated_at: '2021-10-28T15:07:36.622Z',
     version: '3',
     references: [
       {
         id: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
         name: '4:panel_4',
-        type: 'map',
+        type: 'visualization',
       },
       {
         id: '4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b',

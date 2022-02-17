@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { formulaOperation, FormulaIndexPatternColumn } from './formula';
-export { regenerateLayerFromAst } from './parse';
-export { mathOperation, MathIndexPatternColumn } from './math';
+export type { FormulaIndexPatternColumn } from './formula';
+export { formulaOperation } from './formula';
+
+export { insertOrReplaceFormulaColumn } from './parse';
+
+export type { MathIndexPatternColumn } from './math';
+export { mathOperation } from './math';

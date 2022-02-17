@@ -16,7 +16,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { DRAW_SHAPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';

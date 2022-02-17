@@ -14,8 +14,8 @@ import {
 
 import {
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
 import {
@@ -35,11 +35,11 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
+  INDICATOR_PREFIX_OVERRIDE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -58,8 +58,6 @@ import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeli
 import {
   goToManageAlertsDetectionRules,
   investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
@@ -111,10 +109,10 @@ import {
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable } from '../../tasks/rule_details';
+import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-import { DEFAULT_THREAT_MATCH_QUERY } from '../../../common/constants';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -411,8 +409,6 @@ describe('indicator match', () => {
       });
 
       it('Creates and activates a new Indicator Match rule', () => {
-        waitForAlertsPanelToBeLoaded();
-        waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
@@ -447,6 +443,10 @@ describe('indicator match', () => {
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
           getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
+            'have.text',
+            getNewThreatIndicatorRule().threatIndicatorPath
+          );
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -500,12 +500,10 @@ describe('indicator match', () => {
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(ALERT_RULE_SEVERITY)
+        cy.get(ALERT_SEVERITY)
           .first()
           .should('have.text', getNewThreatIndicatorRule().severity.toLowerCase());
-        cy.get(ALERT_RULE_RISK_SCORE)
-          .first()
-          .should('have.text', getNewThreatIndicatorRule().riskScore);
+        cy.get(ALERT_RISK_SCORE).first().should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
       it('Investigate alert in timeline', () => {
@@ -537,7 +535,8 @@ describe('indicator match', () => {
             getNewThreatIndicatorRule().indicatorMappingField
           }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
             getNewThreatIndicatorRule().atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}`
+          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
+            ` byfeed.nameAbuseCH malware${accessibilityText}`
         );
       });
     });

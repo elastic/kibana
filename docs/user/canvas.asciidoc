@@ -19,14 +19,7 @@ With *Canvas*, you can:
 
 * Focus the data you want to display with filters.
 
-++++
-<iframe width="560" height="315" 
-src="https://www.youtube.com/embed/ZqvF_5-1xjQ" 
-frameborder="0" 
-allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-allowfullscreen></iframe>
-</br>
-++++
+image::images/canvas_logWebTrafficWorkpadTemplate_7.17.0.png[Logs Web Traffic workpad template]
 
 [float]
 [[create-workpads]]
@@ -43,7 +36,7 @@ To create workpads, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
@@ -112,9 +105,6 @@ Choose the type of element you want to use, then use the preconfigured demo data
 By default, most of the elements you create use the demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
 
 . Click *Add element*, then select the element you want to use.
-+
-[role="screenshot"]
-image::images/canvas-element-select.gif[Canvas elements]
 
 . To connect the element to your data, select *Data*, then select one of the following data sources:
 
@@ -141,15 +131,13 @@ To access your saved elements, click *Add element > My elements*.
 
 Add a panel that you saved in *Visualize Library* to your workpad. 
 
-. Click *Add element > Add from {kib}*.
-
-. Select the panel you want to add.
+. Click *Add from library*, then select the panel you want to add.
 
 . To use the customization options, open the panel menu, then select one of the following options:
 
 * *Edit map* &mdash; Opens <<maps,Maps>> so that you can edit the panel.
 
-* *Edit visualization* &mdash; Opens the visualization editor so that you can edit the panel.
+* *Edit Visualization* &mdash; Opens the visualization editor so that you can edit the panel.
 
 * *Edit panel title* &mdash; Allows you to change the panel title.
 
@@ -167,7 +155,7 @@ To personalize your workpad, add your own logos and graphics.
 
 . On the *Manage workpad assets* window, drag and drop your images.
 
-. To add the image to the workpad, click the *Create image element* icon.
+. To add the image to the workpad, click *Create image element*.
 
 [float]
 [[add-more-pages]]
@@ -178,9 +166,6 @@ Organize and separate your ideas by adding more pages.
 . Click *Page 1*, then click *+*.
 
 . On the *Page* editor panel, select the page transition from the *Transition* dropdown.
-+
-[role="screenshot"]
-image::images/canvas-add-pages.gif[Add pages]
 
 [float]
 [[workpad-share-options]]

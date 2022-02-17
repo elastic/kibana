@@ -1,4 +1,5 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-ui-framework"
 PKG_REQUIRE_NAME = "@kbn/ui-framework"
@@ -19,14 +20,14 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-DEPS = []
+RUNTIME_DEPS = []
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
   ],
-  deps = DEPS,
+  deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

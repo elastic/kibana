@@ -6,37 +6,44 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
+import { KibanaDataView, SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
+import { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
-export const setSource = actionCreator<{
-  id: SourcererScopeName;
-  payload: ManageScopeInit;
-}>('SET_SOURCE');
+export const setDataView = actionCreator<{
+  browserFields: SourcererDataView['browserFields'];
+  docValueFields: SourcererDataView['docValueFields'];
+  id: SourcererDataView['id'];
+  indexFields: SourcererDataView['indexFields'];
+  loading: SourcererDataView['loading'];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
+}>('SET_DATA_VIEW');
 
-export const setIndexPatternsList = actionCreator<{
-  kibanaIndexPatterns: KibanaIndexPatterns;
-  configIndexPatterns: string[];
-}>('SET_INDEX_PATTERNS_LIST');
+export const setDataViewLoading = actionCreator<{
+  id: string;
+  loading: boolean;
+}>('SET_DATA_VIEW_LOADING');
 
 export const setSignalIndexName =
   actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
-export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
-  'SET_SOURCERER_SCOPE_LOADING'
-);
+export const setSourcererDataViews = actionCreator<SecurityDataView>('SET_SOURCERER_DATA_VIEWS');
 
-export const setSelectedIndexPatterns = actionCreator<{
-  id: SourcererScopeName;
-  selectedPatterns: string[];
-  eventType?: TimelineEventsType;
-}>('SET_SELECTED_INDEX_PATTERNS');
+export const setSourcererScopeLoading = actionCreator<{
+  id?: SourcererScopeName;
+  loading: boolean;
+}>('SET_SOURCERER_SCOPE_LOADING');
 
-export const initTimelineIndexPatterns = actionCreator<{
+export interface SelectedDataViewPayload {
   id: SourcererScopeName;
-  selectedPatterns: string[];
-  eventType?: TimelineEventsType;
-}>('INIT_TIMELINE_INDEX_PATTERNS');
+  selectedDataViewId: SelectedDataView['dataViewId'];
+  selectedPatterns: SelectedDataView['selectedPatterns'];
+  shouldValidateSelectedPatterns?: boolean;
+}
+export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
+
+export const updateSourcererDataViews = actionCreator<{
+  dataView: KibanaDataView;
+}>('UPDATE_SOURCERER_DATA_VIEWS');

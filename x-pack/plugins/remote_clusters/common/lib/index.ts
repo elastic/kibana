@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export {
-  deserializeCluster,
-  serializeCluster,
-  Cluster,
-  ClusterInfoEs,
-  ClusterPayloadEs,
-} from './cluster_serialization';
+export type { Cluster, ClusterInfoEs, ClusterPayloadEs } from './cluster_serialization';
+export { deserializeCluster, serializeCluster } from './cluster_serialization';

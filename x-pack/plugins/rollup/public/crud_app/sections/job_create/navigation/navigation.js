@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -79,7 +79,7 @@ export const Navigation = ({
   const saveButton = (
     <EuiFlexItem grow={false}>
       <EuiButton
-        color="secondary"
+        color="success"
         iconType="check"
         onClick={save}
         fill

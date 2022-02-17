@@ -7,9 +7,8 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
-import { uniq } from 'lodash';
 
 import {
   EuiCallOut,
@@ -23,6 +22,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from 'kibana/public';
+
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -35,8 +37,8 @@ import {
 } from '../../../../../hooks';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AUTO_UPDATE_PACKAGES,
-  DEFAULT_PACKAGES,
+  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
+  AUTO_UPGRADE_POLICIES_PACKAGES,
 } from '../../../../../constants';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
@@ -91,9 +93,10 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
+  theme$: Observable<CoreTheme>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
+export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
   const { name, title, removable, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
@@ -107,11 +110,11 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { notifications } = useStartServices();
 
   const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
-    const packages = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES];
+    return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
+  }, [name]);
 
-    const packageNames = uniq(packages.map((pkg) => pkg.name));
-
-    return packageNames.includes(name);
+  const isShowKeepPoliciesUpToDateSwitchDisabled = useMemo(() => {
+    return AUTO_UPGRADE_POLICIES_PACKAGES.some((pkg) => pkg.name === name);
   }, [name]);
 
   const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
@@ -123,7 +126,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       try {
         setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
-        await sendUpdatePackage(`${packageInfo.name}-${packageInfo.version}`, {
+        await sendUpdatePackage(packageInfo.name, packageInfo.version, {
           keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
         });
 
@@ -249,7 +252,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs">
+                      <EuiTitle size="xs" data-test-subj="installedVersion">
                         <span>{installedVersion}</span>
                       </EuiTitle>
                     </td>
@@ -262,7 +265,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs">
+                      <EuiTitle size="xs" data-test-subj="latestVersion">
                         <span>{latestVersion}</span>
                       </EuiTitle>
                     </td>
@@ -274,6 +277,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <KeepPoliciesUpToDateSwitch
                     checked={keepPoliciesUpToDateSwitchValue}
                     onChange={handleKeepPoliciesUpToDateSwitchChange}
+                    disabled={isShowKeepPoliciesUpToDateSwitchDisabled}
                   />
                   <EuiSpacer size="l" />
                 </>
@@ -291,6 +295,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       dryRunData={dryRunData}
                       isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                       setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
+                      theme$={theme$}
                     />
                   </p>
                 </>

@@ -6,11 +6,13 @@
  */
 
 import React, { FC, useRef, useEffect } from 'react';
+import { Observable } from 'rxjs';
 import PropTypes from 'prop-types';
 import { History } from 'history';
 // @ts-expect-error
 import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
 import { ScopedHistory } from 'kibana/public';
+import { skipWhile, timeout, take } from 'rxjs/operators';
 import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
@@ -40,14 +42,50 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
     });
   });
 
-  // We are using our own history due to needing pushState functionality not yet available on standard history
-  // This effect will listen for changes on the scoped history and push that to our history
-  // This is needed for SavedObject.resolve redirects
   useEffect(() => {
-    return history.listen((location) => {
-      historyRef.current.replace(location.hash.substr(1));
+    return history.listen(({ pathname, hash }) => {
+      // The scoped history could have something that triggers a url change, and that change is not seen by
+      // our hash router.  For example, a scopedHistory.replace() as done as part of the saved object resolve
+      // alias match flow will do the replace on the scopedHistory, and our app doesn't react appropriately
+
+      // So, to work around this, whenever we see a url on the scoped history, we're going to wait a beat and see
+      // if it shows up in our hash router. If it doesn't, then we're going to force it onto our hash router
+
+      // I don't like this at all, and to overcome this we should switch away from hash router sooner rather than later
+      // and just use scopedHistory as our history object
+      const expectedPath = hash.substr(1);
+      const action = history.action;
+
+      // Observable of all the path
+      const hashPaths$ = new Observable<string>((subscriber) => {
+        subscriber.next(historyRef.current.location.pathname);
+
+        const unsubscribeHashListener = historyRef.current.listen(({ pathname: newPath }) => {
+          subscriber.next(newPath);
+        });
+
+        return unsubscribeHashListener;
+      });
+
+      const subscription = hashPaths$
+        .pipe(
+          skipWhile((value) => value !== expectedPath),
+          timeout(100),
+          take(1)
+        )
+        .subscribe({
+          error: (e) => {
+            if (action === 'REPLACE') {
+              historyRef.current.replace(expectedPath);
+            } else {
+              historyRef.current.push(expectedPath);
+            }
+          },
+        });
+
+      window.setTimeout(() => subscription.unsubscribe(), 150);
     });
-  }, [history]);
+  }, [history, historyRef]);
 
   return (
     <ShortcutManagerContextWrapper>

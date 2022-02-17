@@ -25,7 +25,6 @@ import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
 
 import {
   LABEL_BORDER_SIZES,
-  LAYER_TYPE,
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
@@ -49,8 +48,10 @@ import { IStyleProperty } from '../properties/style_property';
 import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
 import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
 import { StaticTextProperty } from '../properties/static_text_property';
+import { DynamicTextProperty } from '../properties/dynamic_text_property';
 import { StaticSizeProperty } from '../properties/static_size_property';
 import { IVectorLayer } from '../../../layers/vector_layer';
+import { getHasLabel } from '../style_util';
 
 export interface StyleProperties {
   [key: string]: IStyleProperty<StylePropertyOptions>;
@@ -168,14 +169,6 @@ export class VectorStyleEditor extends Component<Props, State> {
     return iconSize.isDynamic() || (iconSize as StaticSizeProperty).getOptions().size > 0;
   }
 
-  _hasLabel() {
-    const label = this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT];
-    return label.isDynamic()
-      ? label.isComplete()
-      : (label as StaticTextProperty).getOptions().value != null &&
-          (label as StaticTextProperty).getOptions().value.length;
-  }
-
   _hasLabelBorder() {
     const labelBorderSize = this.props.styleProperties[
       VECTOR_STYLES.LABEL_BORDER_SIZE
@@ -258,19 +251,12 @@ export class VectorStyleEditor extends Component<Props, State> {
     );
   }
 
-  _renderLabelProperties(isPoints: boolean) {
-    if (
-      !isPoints &&
-      this.props.layer.getType() === LAYER_TYPE.TILED_VECTOR &&
-      !this.props.layer.getSource().isESSource()
-    ) {
-      // This handles and edge-case
-      // 3rd party lines and polygons from mvt sources cannot be labeled, because they do not have label-centroid geometries inside the tile.
-      // These label-centroids are only added for ES-sources
-      return;
-    }
-
-    const hasLabel = this._hasLabel();
+  _renderLabelProperties() {
+    const hasLabel = getHasLabel(
+      this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT] as
+        | StaticTextProperty
+        | DynamicTextProperty
+    );
     const hasLabelBorder = this._hasLabelBorder();
     return (
       <Fragment>
@@ -468,7 +454,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         />
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties(true)}
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -482,7 +468,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties(false)}
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -499,7 +485,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties(false)}
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }

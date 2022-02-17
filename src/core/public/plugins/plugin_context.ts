@@ -94,6 +94,7 @@ export function createPluginSetupContext<
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
 }
@@ -140,5 +141,6 @@ export function createPluginStartContext<
     },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
+    theme: deps.theme,
   };
 }

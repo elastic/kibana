@@ -1,0 +1,45 @@
+---
+id: kibDevTutorialSetupDevWindows
+slug: /kibana-dev-docs/tutorial/setup-dev-windows
+title: Development on Windows
+summary: Learn how to setup a development environment on Windows
+date: 2021-08-11
+tags: ['kibana', 'onboarding', 'dev', 'windows', 'setup']
+---
+
+
+# Overview
+
+Development on Windows is recommended through WSL2.  WSL lets users run a Linux environment on Windows, providing a supported development environment for Kibana.
+
+## Install WSL
+
+The latest setup instructions can be found at https://docs.microsoft.com/en-us/windows/wsl/install-win10
+
+1) Open Powershell as an administrator
+1) Enable WSL
+    ```
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+    ```
+1) Enable Virtual Machine Platform
+    ```
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+    ```
+1) Download and install the [Linux kernel update package](https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
+1) Set WSL 2 as the default version
+    ```
+    wsl --set-default-version 2
+    ```
+1) Open the Micrsoft Store application and install a Linux distribution
+
+## Setup Kibana
+
+1. <DocLink id="kibDevTutorialSetupDevEnv" text="Set up your development environment" />
+
+## Install VS Code
+
+Remote development is supported with an extension.  [Reference](https://code.visualstudio.com/docs/remote/wsl).
+
+1) Install VS Code on Windows
+1) Check the "Add to PATH" option during setup
+1) Install the [Remote Development](https://aka.ms/vscode-remote/download/extension) package

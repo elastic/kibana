@@ -122,4 +122,10 @@ describe('FrequencyItem', () => {
       expect(setSyncFrequency).toHaveBeenCalledWith('full', '3', 'minutes');
     });
   });
+
+  it('handles edge case where estimate is empty', () => {
+    const wrapper = shallow(<FrequencyItem {...props} estimate={{}} />);
+
+    expect(wrapper.find('[data-test-subj="SyncEstimates"]')).toHaveLength(0);
+  });
 });

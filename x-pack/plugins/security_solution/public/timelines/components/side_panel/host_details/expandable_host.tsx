@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { HostItem } from '../../../../../common/search_strategy';
@@ -20,7 +19,6 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -57,9 +55,8 @@ export const ExpandableHostDetails = ({
   isDraggable = false,
 }: ExpandableHostProps & { contextID: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
-  const { docValueFields } = useSourcererScope();
   /*
-    Normally `selectedPatterns` from useSourcerScope would be where we obtain the indices,
+    Normally `selectedPatterns` from useSourcererDataView would be where we obtain the indices,
     but those indices are only loaded when viewing the pages where the sourcerer is initialized (i.e. Hosts and Overview)
     When a user goes directly to the detections page, the patterns have not been loaded yet
     as that information isn't used for the detections page. With this details component being accessible
@@ -67,15 +64,12 @@ export const ExpandableHostDetails = ({
     Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
     (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
   */
-  const allExistingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const allPatterns = useDeepEqualSelector<string[]>(allExistingIndexNamesSelector);
+  const { docValueFields, selectedPatterns } = useSourcererDataView();
+
   const [loading, { hostDetails: hostOverview }] = useHostDetails({
     endDate: to,
     hostName,
-    indexNames: allPatterns,
+    indexNames: selectedPatterns,
     startDate: from,
   });
   return (
@@ -95,7 +89,7 @@ export const ExpandableHostDetails = ({
           anomaliesData={anomaliesData}
           isDraggable={isDraggable}
           isLoadingAnomaliesData={isLoadingAnomaliesData}
-          indexNames={allPatterns}
+          indexNames={selectedPatterns}
           loading={loading}
           startDate={from}
           endDate={to}
@@ -107,6 +101,7 @@ export const ExpandableHostDetails = ({
               to: fromTo.to,
             });
           }}
+          hostName={hostName}
         />
       )}
     </AnomalyTableProvider>

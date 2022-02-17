@@ -36,16 +36,10 @@ export const tilemapConfigSchema = schema.object({
   options: tileMapConfigOptionsSchema,
 });
 
-export const emsConfigSchema = schema.object({
+export const mapConfigSchema = schema.object({
   tilemap: tilemapConfigSchema,
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
-  proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
-  emsUrl: schema.conditional(
-    schema.siblingRef('proxyElasticMapsServiceInMaps'),
-    true,
-    schema.never(),
-    schema.string({ defaultValue: '' })
-  ),
+  emsUrl: schema.string({ defaultValue: '' }),
   emsFileApiUrl: schema.string({ defaultValue: DEFAULT_EMS_FILE_API_URL }),
   emsTileApiUrl: schema.string({ defaultValue: DEFAULT_EMS_TILE_API_URL }),
   emsLandingPageUrl: schema.string({ defaultValue: DEFAULT_EMS_LANDING_PAGE_URL }),
@@ -59,5 +53,5 @@ export const emsConfigSchema = schema.object({
   }),
 });
 
-export type MapsEmsConfig = TypeOf<typeof emsConfigSchema>;
+export type MapConfig = TypeOf<typeof mapConfigSchema>;
 export type TileMapConfig = TypeOf<typeof tilemapConfigSchema>;

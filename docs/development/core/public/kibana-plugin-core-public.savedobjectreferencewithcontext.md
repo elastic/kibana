@@ -16,10 +16,10 @@ export interface SavedObjectReferenceWithContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-public.savedobjectreferencewithcontext.id.md) | <code>string</code> | The ID of the referenced object |
-|  [inboundReferences](./kibana-plugin-core-public.savedobjectreferencewithcontext.inboundreferences.md) | <code>Array&lt;{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>        name: string;</code><br/><code>    }&gt;</code> | References to this object; note that this does not contain \_all inbound references everywhere for this object\_, it only contains inbound references for the scope of this operation |
-|  [isMissing](./kibana-plugin-core-public.savedobjectreferencewithcontext.ismissing.md) | <code>boolean</code> | Whether or not this object or reference is missing |
-|  [spaces](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaces.md) | <code>string[]</code> | The space(s) that the referenced object exists in |
-|  [spacesWithMatchingAliases](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaceswithmatchingaliases.md) | <code>string[]</code> | The space(s) that legacy URL aliases matching this type/id exist in |
-|  [type](./kibana-plugin-core-public.savedobjectreferencewithcontext.type.md) | <code>string</code> | The type of the referenced object |
+|  [id](./kibana-plugin-core-public.savedobjectreferencewithcontext.id.md) | string | The ID of the referenced object |
+|  [inboundReferences](./kibana-plugin-core-public.savedobjectreferencewithcontext.inboundreferences.md) | Array&lt;{ type: string; id: string; name: string; }&gt; | References to this object; note that this does not contain \_all inbound references everywhere for this object\_, it only contains inbound references for the scope of this operation |
+|  [isMissing?](./kibana-plugin-core-public.savedobjectreferencewithcontext.ismissing.md) | boolean | <i>(Optional)</i> Whether or not this object or reference is missing |
+|  [spaces](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaces.md) | string\[\] | The space(s) that the referenced object exists in |
+|  [spacesWithMatchingAliases?](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaceswithmatchingaliases.md) | string\[\] | <i>(Optional)</i> The space(s) that legacy URL aliases matching this type/id exist in |
+|  [type](./kibana-plugin-core-public.savedobjectreferencewithcontext.type.md) | string | The type of the referenced object |
 

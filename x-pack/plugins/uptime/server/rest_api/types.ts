@@ -17,6 +17,7 @@ import {
 } from 'kibana/server';
 import { UMServerLibs, UptimeESClient } from '../lib/lib';
 import type { UptimeRequestHandlerContext } from '../types';
+import { UptimeServerSetup } from '../lib/adapters';
 
 /**
  * Defines the basic properties employed by Uptime routes.
@@ -58,7 +59,10 @@ export type UMRestApiRouteFactory = (libs: UMServerLibs) => UptimeRoute;
  * Functions of this type accept our internal route format and output a route
  * object that the Kibana platform can consume.
  */
-export type UMKibanaRouteWrapper = (uptimeRoute: UptimeRoute) => UMKibanaRoute;
+export type UMKibanaRouteWrapper = (
+  uptimeRoute: UptimeRoute,
+  server: UptimeServerSetup
+) => UMKibanaRoute;
 
 /**
  * This is the contract we specify internally for route handling.
@@ -68,6 +72,7 @@ export type UMRouteHandler = ({
   context,
   request,
   response,
+  server,
   savedObjectsClient,
 }: {
   uptimeEsClient: UptimeESClient;
@@ -75,4 +80,5 @@ export type UMRouteHandler = ({
   request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
   response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
+  server: UptimeServerSetup;
 }) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

@@ -39,6 +39,7 @@ import {
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { UrlInputsModel } from '../../store/inputs/model';
+import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -60,9 +61,10 @@ export const useUrlStateHooks = ({
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const { pathname: browserPathName } = useLocation();
-  const prevProps = usePrevious({ pathName, pageName, urlState });
+  const prevProps = usePrevious({ pathName, pageName, urlState, search });
 
-  const setInitialStateFromUrl = useSetInitialStateFromUrl();
+  const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
+    useSetInitialStateFromUrl();
 
   const handleInitialize = useCallback(
     (type: UrlStateType) => {
@@ -189,6 +191,16 @@ export const useUrlStateHooks = ({
   useEffect(() => {
     document.title = `${getTitle(pageName, navTabs)} - Kibana`;
   }, [pageName, navTabs]);
+
+  useEffect(() => {
+    queryTimelineByIdOnUrlChange({
+      oldSearch: prevProps.search,
+      search,
+      timelineIdFromReduxStore: urlState.timeline.id,
+      updateTimeline,
+      updateTimelineIsLoading,
+    });
+  }, [search, prevProps.search, urlState.timeline.id, updateTimeline, updateTimelineIsLoading]);
 
   return null;
 };

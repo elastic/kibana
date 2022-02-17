@@ -10,15 +10,25 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
+import { CoreStart } from 'src/core/public';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../services/embeddable';
+import { KibanaThemeProvider } from '../../../services/kibana_react';
 
 export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
+
+export interface PlaceholderEmbeddableServices {
+  theme: CoreStart['theme'];
+}
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
   private node?: HTMLElement;
 
-  constructor(initialInput: EmbeddableInput, parent?: IContainer) {
+  constructor(
+    initialInput: EmbeddableInput,
+    private readonly services: PlaceholderEmbeddableServices,
+    parent?: IContainer
+  ) {
     super(initialInput, {}, parent);
     this.input = initialInput;
   }
@@ -30,9 +40,11 @@ export class PlaceholderEmbeddable extends Embeddable {
 
     const classes = classNames('embPanel', 'embPanel-isLoading');
     ReactDOM.render(
-      <div className={classes}>
-        <EuiLoadingChart size="l" mono />
-      </div>,
+      <KibanaThemeProvider theme$={this.services.theme.theme$}>
+        <div className={classes}>
+          <EuiLoadingChart size="l" mono />
+        </div>
+      </KibanaThemeProvider>,
       node
     );
   }

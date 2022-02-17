@@ -99,7 +99,7 @@ export const getDeprecatedSettingWarning = (
 ): ReindexWarning | undefined => {
   const { settings } = flatSettings;
 
-  const deprecatedSettingsInUse = Object.keys(settings).filter((setting) => {
+  const deprecatedSettingsInUse = Object.keys(settings || {}).filter((setting) => {
     return deprecatedSettings.indexOf(setting) > -1;
   });
 
@@ -177,6 +177,9 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.uuid',
     'index.verified_before_close',
     'index.version.created',
+
+    // Ignored since 6.x and forbidden in 7.x
+    'index.mapper.dynamic',
 
     // Deprecated in 9.0
     'index.version.upgraded',

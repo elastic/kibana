@@ -29,7 +29,13 @@ export function extractReferences({
 
   const extractedReferences: SavedObjectReference[] = [];
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer, layerIndex) => {
     // Extract index-pattern references from source descriptor
     if (layer.sourceDescriptor && 'indexPatternId' in layer.sourceDescriptor) {
@@ -92,7 +98,13 @@ export function injectReferences({
     return { attributes };
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer) => {
     // Inject index-pattern references into source descriptor
     if (layer.sourceDescriptor && 'indexPatternRefName' in layer.sourceDescriptor) {

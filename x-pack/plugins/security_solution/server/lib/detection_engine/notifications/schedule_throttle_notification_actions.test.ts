@@ -71,7 +71,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -82,7 +82,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -100,14 +100,14 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [],
             total: 0,
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [
@@ -130,14 +130,14 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [],
             total: 0,
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -155,7 +155,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -166,7 +166,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -184,7 +184,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -197,7 +197,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -224,7 +224,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -235,7 +235,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -260,7 +260,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -271,14 +271,14 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [],
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      'The notification throttle "from" and/or "to" range values could not be constructed as valid. Tried to construct the values of "from": now-invalid "to": 2021-08-24T19:19:22.094Z. This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected.'
+      'The notification throttle "from" and/or "to" range values could not be constructed as valid. Tried to construct the values of "from": now-invalid "to": 2021-08-24T19:19:22.094Z. This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected. Check your rule with ruleId: "rule-123" for data integrity issues'
     );
   });
 
@@ -291,7 +291,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -313,7 +313,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [
@@ -353,7 +353,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -375,7 +375,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [
@@ -420,7 +420,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -435,7 +435,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [
@@ -475,7 +475,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -497,7 +497,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [
@@ -537,7 +537,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -559,7 +559,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory.create(),
       notificationRuleParams,
       logger,
       signals: [

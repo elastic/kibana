@@ -10,7 +10,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
 const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',
@@ -18,7 +18,6 @@ const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
 const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
 });
-const initialAppLinks = [] as AppLinkSchema[];
 
 export const flightsSpecProvider = function (): SampleDatasetSchema {
   return {
@@ -28,7 +27,6 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
     previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-    appLinks: initialAppLinks,
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
     savedObjects: getSavedObjects(),
     dataIndices: [

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
@@ -31,9 +31,9 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -77,17 +77,18 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: IndexPatternBase;
+  indexPatterns: DataViewBase;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
+  isOrHidden?: boolean;
   listId: string;
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IndexPatternBase,
+    pattern: DataViewBase,
     type: ExceptionListType
-  ) => IndexPatternBase;
+  ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
@@ -103,6 +104,7 @@ export const ExceptionBuilderComponent = ({
   isAndDisabled,
   isNestedDisabled,
   isOrDisabled,
+  isOrHidden = false,
   listId,
   listNamespaceType,
   listType,
@@ -423,6 +425,8 @@ export const ExceptionBuilderComponent = ({
         </EuiFlexItem>
       ))}
 
+      <EuiSpacer size="m" />
+
       <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">
           {andLogicIncluded && (
@@ -433,6 +437,7 @@ export const ExceptionBuilderComponent = ({
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
+              isOrHidden={isOrHidden}
               isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
               isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}

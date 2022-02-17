@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { commonSearchSuccessResponseFieldsRT } from '../../../../utils/elasticsearch_runtime_types';
 
@@ -29,6 +29,7 @@ export const createLogEntryDatasetsQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },
@@ -65,10 +66,10 @@ export const createLogEntryDatasetsQuery = (
 });
 
 const defaultRequestParameters = {
-  allowNoIndices: true,
-  ignoreUnavailable: true,
-  trackScores: false,
-  trackTotalHits: false,
+  allow_no_indices: true,
+  ignore_unavailable: true,
+  track_scores: false,
+  track_total_hits: false,
 };
 
 const compositeDatasetKeyRT = rt.type({

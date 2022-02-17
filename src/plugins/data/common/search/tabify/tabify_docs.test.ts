@@ -8,7 +8,7 @@
 
 import { tabifyDocs, flattenHit } from './tabify_docs';
 import { IndexPattern, DataView } from '../..';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { stubbedSavedObjectIndexPattern } from '../../../../data_views/common/data_view.stub';
@@ -41,6 +41,11 @@ function create(id: string) {
   });
 }
 
+const meta = {
+  _index: 'index-name',
+  _id: '1',
+};
+
 describe('tabify_docs', () => {
   describe('flattenHit', () => {
     let indexPattern: DataView;
@@ -66,9 +71,53 @@ describe('tabify_docs', () => {
         },
         indexPattern
       );
-      const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
+      const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score'];
       expect(Object.keys(response)).toEqual(expectedOrder);
       expect(Object.entries(response).map(([key]) => key)).toEqual(expectedOrder);
+    });
+
+    it('does merge values from ignored_field_values and fields correctly', () => {
+      const flatten = flattenHit(
+        {
+          ...meta,
+          fields: { 'extension.keyword': ['foo'], extension: ['foo', 'ignored'] },
+          ignored_field_values: {
+            'extension.keyword': ['ignored'],
+            fully_ignored: ['some', 'value'],
+          },
+        },
+        indexPattern,
+        { includeIgnoredValues: true }
+      );
+      expect(flatten).toHaveProperty(['extension.keyword'], ['foo', 'ignored']);
+      expect(flatten).toHaveProperty('extension', ['foo', 'ignored']);
+      expect(flatten).toHaveProperty('fully_ignored', ['some', 'value']);
+    });
+
+    it('does not merge values from ignored_field_values into _source', () => {
+      const flatten = flattenHit(
+        {
+          ...meta,
+          _source: { 'extension.keyword': ['foo', 'ignored'] },
+          ignored_field_values: { 'extension.keyword': ['ignored'] },
+        },
+        indexPattern,
+        { includeIgnoredValues: true, source: true }
+      );
+      expect(flatten).toHaveProperty(['extension.keyword'], ['foo', 'ignored']);
+    });
+
+    it('does merge ignored_field_values when no _source was present, even when parameter was on', () => {
+      const flatten = flattenHit(
+        {
+          ...meta,
+          fields: { 'extension.keyword': ['foo'] },
+          ignored_field_values: { 'extension.keyword': ['ignored'] },
+        },
+        indexPattern,
+        { includeIgnoredValues: true, source: true }
+      );
+      expect(flatten).toHaveProperty(['extension.keyword'], ['foo', 'ignored']);
     });
   });
 
@@ -130,7 +179,7 @@ describe('tabify_docs', () => {
     it('combines meta fields from index pattern', () => {
       const table = tabifyDocs(response, index);
       expect(table.columns.map((col) => col.id)).toEqual(
-        expect.arrayContaining(['_id', '_index', '_score', '_type'])
+        expect.arrayContaining(['_id', '_index', '_score'])
       );
     });
 

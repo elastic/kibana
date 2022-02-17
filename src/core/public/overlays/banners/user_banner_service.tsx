@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 
 import { I18nStart } from '../../i18n';

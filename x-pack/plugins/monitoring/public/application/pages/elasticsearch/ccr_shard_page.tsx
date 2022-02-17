@@ -13,9 +13,9 @@ import { PageTemplate } from '../page_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
-import { CcrShardReact } from '../../../components/elasticsearch/ccr_shard';
+import { CcrShard } from '../../../components/elasticsearch/ccr_shard';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
@@ -119,7 +119,7 @@ export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = ({ clusters }
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <CcrShardReact {...data} alerts={alerts} />
+            <CcrShard {...data} alerts={alerts} />
             {bottomBarComponent}
           </SetupModeContext.Provider>
         )}

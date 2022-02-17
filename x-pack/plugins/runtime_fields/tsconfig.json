@@ -13,6 +13,5 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json"}
   ]
 }

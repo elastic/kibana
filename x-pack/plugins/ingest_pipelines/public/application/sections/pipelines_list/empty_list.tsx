@@ -5,19 +5,47 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiLink, EuiPageContent, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiPageContent,
+  EuiButton,
+  EuiPopover,
+  EuiContextMenu,
+} from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../../../shared_imports';
-import { getCreatePath } from '../../services/navigation';
+import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
 
 export const EmptyList: FunctionComponent = () => {
   const { services } = useKibana();
   const history = useHistory() as ScopedHistory;
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+
+  const createMenuItems = [
+    {
+      name: i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
+        defaultMessage: 'New pipeline',
+      }),
+      ...reactRouterNavigate(history, getCreatePath()),
+      'data-test-subj': `emptyStateCreatePipelineButton`,
+    },
+    {
+      name: i18n.translate(
+        'xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel.createPipelineFromCsvButtonLabel',
+        {
+          defaultMessage: 'New pipeline from CSV',
+        }
+      ),
+      ...reactRouterNavigate(history, getCreateFromCsvPath()),
+      'data-test-subj': `emptyStatecreatePipelineFromCsvButton`,
+    },
+  ];
 
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
@@ -35,7 +63,7 @@ export const EmptyList: FunctionComponent = () => {
           <p>
             <FormattedMessage
               id="xpack.ingestPipelines.list.table.emptyPromptDescription"
-              defaultMessage="For example, you might create a pipeline with one processor that removes a field and another processor that renames a field."
+              defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
             />{' '}
             <EuiLink href={services.documentation.getIngestNodeUrl()} target="_blank" external>
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptDocumentionLink', {
@@ -45,16 +73,40 @@ export const EmptyList: FunctionComponent = () => {
           </p>
         }
         actions={
-          <EuiButton
-            data-test-subj="emptyStateCreatePipelineButton"
-            {...reactRouterNavigate(history, getCreatePath())}
-            iconType="plusInCircle"
-            fill
+          <EuiPopover
+            isOpen={showPopover}
+            closePopover={() => setShowPopover(false)}
+            button={
+              <EuiButton
+                fill
+                iconSide="right"
+                iconType="arrowDown"
+                data-test-subj="emptyStateCreatePipelineDropdown"
+                key="emptyStateCreatePipelineDropdown"
+                onClick={() => setShowPopover((previousBool) => !previousBool)}
+              >
+                {i18n.translate(
+                  'xpack.ingestPipelines.list.table.emptyCreatePipelineDropdownLabel',
+                  {
+                    defaultMessage: 'Create pipeline',
+                  }
+                )}
+              </EuiButton>
+            }
+            panelPaddingSize="none"
+            repositionOnScroll
           >
-            {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
-              defaultMessage: 'Create a pipeline',
-            })}
-          </EuiButton>
+            <EuiContextMenu
+              initialPanelId={0}
+              data-test-subj="autoFollowPatternActionContextMenu"
+              panels={[
+                {
+                  id: 0,
+                  items: createMenuItems,
+                },
+              ]}
+            />
+          </EuiPopover>
         }
       />
     </EuiPageContent>

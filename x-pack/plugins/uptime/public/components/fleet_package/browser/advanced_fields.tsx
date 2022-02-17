@@ -5,31 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiSelect,
   EuiFieldText,
   EuiCheckbox,
   EuiFormRow,
-  EuiDescribedFormGroup,
   EuiSpacer,
 } from '@elastic/eui';
 import { ComboBox } from '../combo_box';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
-import { ConfigKeys, ScreenshotOption } from '../types';
+import { ConfigKey, Validation, ScreenshotOption } from '../types';
 
 import { OptionalLabel } from '../optional_label';
+import { ThrottlingFields } from './throttling_fields';
 
-export const BrowserAdvancedFields = () => {
+interface Props {
+  validate: Validation;
+  children?: React.ReactNode;
+  minColumnWidth?: string;
+}
+
+export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColumnWidth }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
   const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
@@ -42,8 +49,9 @@ export const BrowserAdvancedFields = () => {
       data-test-subj="syntheticsBrowserAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
-      {simpleFields[ConfigKeys.SOURCE_ZIP_URL] && (
-        <EuiDescribedFormGroup
+      {simpleFields[ConfigKey.SOURCE_ZIP_URL] && (
+        <DescribedFormGroupWithWrap
+          minColumnWidth={minColumnWidth}
           title={
             <h4>
               <FormattedMessage
@@ -76,11 +84,11 @@ export const BrowserAdvancedFields = () => {
             }
           >
             <EuiFieldText
-              value={fields[ConfigKeys.JOURNEY_FILTERS_MATCH]}
+              value={fields[ConfigKey.JOURNEY_FILTERS_MATCH]}
               onChange={(event) =>
                 handleInputChange({
                   value: event.target.value,
-                  configKey: ConfigKeys.JOURNEY_FILTERS_MATCH,
+                  configKey: ConfigKey.JOURNEY_FILTERS_MATCH,
                 })
               }
               data-test-subj="syntheticsBrowserJourneyFiltersMatch"
@@ -102,16 +110,17 @@ export const BrowserAdvancedFields = () => {
             }
           >
             <ComboBox
-              selectedOptions={fields[ConfigKeys.JOURNEY_FILTERS_TAGS]}
+              selectedOptions={fields[ConfigKey.JOURNEY_FILTERS_TAGS]}
               onChange={(value) =>
-                handleInputChange({ value, configKey: ConfigKeys.JOURNEY_FILTERS_TAGS })
+                handleInputChange({ value, configKey: ConfigKey.JOURNEY_FILTERS_TAGS })
               }
               data-test-subj="syntheticsBrowserJourneyFiltersTags"
             />
           </EuiFormRow>
-        </EuiDescribedFormGroup>
+        </DescribedFormGroupWithWrap>
       )}
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -141,7 +150,7 @@ export const BrowserAdvancedFields = () => {
         >
           <EuiCheckbox
             id="syntheticsBrowserIgnoreHttpsErrorsCheckbox"
-            checked={fields[ConfigKeys.IGNORE_HTTPS_ERRORS]}
+            checked={fields[ConfigKey.IGNORE_HTTPS_ERRORS]}
             label={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.label"
@@ -151,11 +160,12 @@ export const BrowserAdvancedFields = () => {
             onChange={(event) =>
               handleInputChange({
                 value: event.target.checked,
-                configKey: ConfigKeys.IGNORE_HTTPS_ERRORS,
+                configKey: ConfigKey.IGNORE_HTTPS_ERRORS,
               })
             }
           />
         </EuiFormRow>
+
         <EuiFormRow
           label={
             <FormattedMessage
@@ -173,11 +183,11 @@ export const BrowserAdvancedFields = () => {
         >
           <EuiSelect
             options={requestMethodOptions}
-            value={fields[ConfigKeys.SCREENSHOTS]}
+            value={fields[ConfigKey.SCREENSHOTS]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.SCREENSHOTS,
+                configKey: ConfigKey.SCREENSHOTS,
               })
             }
             data-test-subj="syntheticsBrowserScreenshots"
@@ -199,17 +209,18 @@ export const BrowserAdvancedFields = () => {
           }
         >
           <ComboBox
-            selectedOptions={fields[ConfigKeys.SYNTHETICS_ARGS]}
-            onChange={(value) =>
-              handleInputChange({ value, configKey: ConfigKeys.SYNTHETICS_ARGS })
-            }
+            selectedOptions={fields[ConfigKey.SYNTHETICS_ARGS]}
+            onChange={(value) => handleInputChange({ value, configKey: ConfigKey.SYNTHETICS_ARGS })}
             data-test-subj="syntheticsBrowserSyntheticsArgs"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
+
+      <ThrottlingFields validate={validate} minColumnWidth={minColumnWidth} />
+      {children}
     </EuiAccordion>
   );
-};
+});
 
 const requestMethodOptions = Object.values(ScreenshotOption).map((option) => ({
   value: option,

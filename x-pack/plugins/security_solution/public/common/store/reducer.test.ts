@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { parseExperimentalConfigValue } from '../../..//common/experimental_features';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
+import { mockIndexPattern, mockSourcererState } from '../mock';
+import { useSourcererDataView } from '../containers/sourcerer';
+import { useDeepEqualSelector } from '../hooks/use_selector';
+import { renderHook } from '@testing-library/react-hooks';
 
+jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => ({
   KibanaServices: {
     get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
   },
+}));
+jest.mock('../containers/source', () => ({
+  useFetchIndex: () => [
+    false,
+    { indexes: [], indicesExist: true, indexPatterns: mockIndexPattern },
+  ],
 }));
 
 describe('createInitialState', () => {
@@ -21,26 +32,42 @@ describe('createInitialState', () => {
       SecuritySubPlugins['store']['initialState'],
       'app' | 'dragAndDrop' | 'inputs' | 'sourcerer'
     >;
-    test('indicesExist should be TRUE if configIndexPatterns is NOT empty', () => {
-      const initState = createInitialState(mockPluginState, {
-        kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
-        configIndexPatterns: ['auditbeat-*', 'filebeat'],
-        signalIndexName: 'siem-signals-default',
-        enableExperimental: parseExperimentalConfigValue([]),
-      });
-
-      expect(initState.sourcerer?.sourcererScopes.default.indicesExist).toEqual(true);
+    const defaultState = {
+      defaultDataView: mockSourcererState.defaultDataView,
+      enableExperimental: parseExperimentalConfigValue([]),
+      kibanaDataViews: [mockSourcererState.defaultDataView],
+      signalIndexName: 'siem-signals-default',
+    };
+    const initState = createInitialState(mockPluginState, defaultState);
+    beforeEach(() => {
+      (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
+    });
+    afterEach(() => {
+      (useDeepEqualSelector as jest.Mock).mockClear();
     });
 
-    test('indicesExist should be FALSE if configIndexPatterns is empty', () => {
-      const initState = createInitialState(mockPluginState, {
-        kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
-        configIndexPatterns: [],
-        signalIndexName: 'siem-signals-default',
-        enableExperimental: parseExperimentalConfigValue([]),
-      });
+    test('indicesExist should be TRUE if patternList is NOT empty', async () => {
+      const { result } = renderHook(() => useSourcererDataView());
+      expect(result.current.indicesExist).toEqual(true);
+    });
 
-      expect(initState.sourcerer?.sourcererScopes.default.indicesExist).toEqual(false);
+    test('indicesExist should be FALSE if patternList is empty', () => {
+      const state = createInitialState(mockPluginState, {
+        ...defaultState,
+        defaultDataView: {
+          ...defaultState.defaultDataView,
+          patternList: [],
+        },
+        kibanaDataViews: [
+          {
+            ...defaultState.defaultDataView,
+            patternList: [],
+          },
+        ],
+      });
+      (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));
+      const { result } = renderHook(() => useSourcererDataView());
+      expect(result.current.indicesExist).toEqual(false);
     });
   });
 });

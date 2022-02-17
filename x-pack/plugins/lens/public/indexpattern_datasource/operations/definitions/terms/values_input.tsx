@@ -13,13 +13,20 @@ import { useDebounceWithOptions } from '../../../../shared_components';
 export const ValuesInput = ({
   value,
   onChange,
+  minValue = 1,
+  maxValue = 1000,
+  label = i18n.translate('xpack.lens.indexPattern.terms.size', {
+    defaultMessage: 'Number of values',
+  }),
+  disabled,
 }: {
   value: number;
   onChange: (value: number) => void;
+  minValue?: number;
+  maxValue?: number;
+  label?: string;
+  disabled?: boolean;
 }) => {
-  const MIN_NUMBER_OF_VALUES = 1;
-  const MAX_NUMBER_OF_VALUES = 1000;
-
   const [inputValue, setInputValue] = useState(String(value));
 
   useDebounceWithOptions(
@@ -28,7 +35,7 @@ export const ValuesInput = ({
         return;
       }
       const inputNumber = Number(inputValue);
-      onChange(Math.min(MAX_NUMBER_OF_VALUES, Math.max(inputNumber, MIN_NUMBER_OF_VALUES)));
+      onChange(Math.min(maxValue, Math.max(inputNumber, minValue)));
     },
     { skipFirstRender: true },
     256,
@@ -36,15 +43,13 @@ export const ValuesInput = ({
   );
 
   const isEmptyString = inputValue === '';
-  const isHigherThanMax = !isEmptyString && Number(inputValue) > MAX_NUMBER_OF_VALUES;
-  const isLowerThanMin = !isEmptyString && Number(inputValue) < MIN_NUMBER_OF_VALUES;
+  const isHigherThanMax = !isEmptyString && Number(inputValue) > maxValue;
+  const isLowerThanMin = !isEmptyString && Number(inputValue) < minValue;
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.lens.indexPattern.terms.size', {
-        defaultMessage: 'Number of values',
-      })}
-      display="columnCompressed"
+      label={label}
+      display="rowCompressed"
       fullWidth
       isInvalid={isHigherThanMax || isLowerThanMin}
       error={
@@ -54,7 +59,7 @@ export const ValuesInput = ({
                 defaultMessage:
                   'Value is higher than the maximum {max}, the maximum value is used instead.',
                 values: {
-                  max: MAX_NUMBER_OF_VALUES,
+                  max: maxValue,
                 },
               }),
             ]
@@ -64,7 +69,7 @@ export const ValuesInput = ({
                 defaultMessage:
                   'Value is lower than the minimum {min}, the minimum value is used instead.',
                 values: {
-                  min: MIN_NUMBER_OF_VALUES,
+                  min: minValue,
                 },
               }),
             ]
@@ -72,24 +77,21 @@ export const ValuesInput = ({
       }
     >
       <EuiFieldNumber
-        min={MIN_NUMBER_OF_VALUES}
-        max={MAX_NUMBER_OF_VALUES}
+        min={minValue}
+        max={maxValue}
         step={1}
         value={inputValue}
         compressed
         isInvalid={isHigherThanMax || isLowerThanMin}
+        disabled={disabled}
         onChange={({ currentTarget }) => setInputValue(currentTarget.value)}
-        aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
-          defaultMessage: 'Number of values',
-        })}
+        aria-label={label}
         onBlur={() => {
           if (inputValue === '') {
             return setInputValue(String(value));
           }
           const inputNumber = Number(inputValue);
-          setInputValue(
-            String(Math.min(MAX_NUMBER_OF_VALUES, Math.max(inputNumber, MIN_NUMBER_OF_VALUES)))
-          );
+          setInputValue(String(Math.min(maxValue, Math.max(inputNumber, minValue))));
         }}
       />
     </EuiFormRow>

@@ -43,10 +43,12 @@
     top: $headerHeight;
   }
 
-  .kbnStickyMenu {
-    position: sticky;
-    max-height: calc(100vh - #{$headerHeight + $euiSize});
-    top: $headerHeight + $euiSize;
+  @include euiBreakpoint('xl', 'l') {
+    .kbnStickyMenu {
+      position: sticky;
+      max-height: calc(100vh - #{$headerHeight + $euiSize});
+      top: $headerHeight + $euiSize;
+    }
   }
 }
 

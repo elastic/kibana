@@ -2,7 +2,7 @@
   "author": [
     "Austin Songer"
   ],
-  "description": "Identifies when Microsoft Cloud App Security reported when a user uploads files to the cloud that might be infected with ransomware.",
+  "description": "Identifies when Microsoft Cloud App Security reports that a user has uploaded files to the cloud that might be infected with ransomware.",
   "false_positives": [
     "If Cloud App Security identifies, for example, a high rate of file uploads or file deletion activities it may represent an adverse encryption process."
   ],
@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Microsoft 365 Potential ransomware activity",
-  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n",
   "query": "event.dataset:o365.audit and event.provider:SecurityComplianceCenter and event.category:web and event.action:\"Potential ransomware activity\" and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/cloud-app-security/anomaly-detection-policy",
@@ -50,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

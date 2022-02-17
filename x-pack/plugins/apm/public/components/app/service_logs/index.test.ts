@@ -7,26 +7,53 @@
 import { getInfrastructureKQLFilter } from './';
 
 describe('service logs', () => {
+  const serviceName = 'opbeans-node';
+
   describe('getInfrastructureKQLFilter', () => {
-    it('filter by container id', () => {
+    it('filter by service name', () => {
       expect(
-        getInfrastructureKQLFilter({
-          serviceInfrastructure: {
-            containerIds: ['foo', 'bar'],
-            hostNames: ['baz', `quz`],
+        getInfrastructureKQLFilter(
+          {
+            serviceInfrastructure: {
+              containerIds: [],
+              hostNames: [],
+            },
           },
-        })
-      ).toEqual('container.id: "foo" or container.id: "bar"');
+          serviceName
+        )
+      ).toEqual('service.name: "opbeans-node"');
     });
-    it('filter by host names', () => {
+
+    it('filter by container id as fallback', () => {
       expect(
-        getInfrastructureKQLFilter({
-          serviceInfrastructure: {
-            containerIds: [],
-            hostNames: ['baz', `quz`],
+        getInfrastructureKQLFilter(
+          {
+            serviceInfrastructure: {
+              containerIds: ['foo', 'bar'],
+              hostNames: ['baz', `quz`],
+            },
           },
-        })
-      ).toEqual('host.name: "baz" or host.name: "quz"');
+          serviceName
+        )
+      ).toEqual(
+        'service.name: "opbeans-node" or (not service.name and (container.id: "foo" or container.id: "bar"))'
+      );
+    });
+
+    it('filter by host names as fallback', () => {
+      expect(
+        getInfrastructureKQLFilter(
+          {
+            serviceInfrastructure: {
+              containerIds: [],
+              hostNames: ['baz', `quz`],
+            },
+          },
+          serviceName
+        )
+      ).toEqual(
+        'service.name: "opbeans-node" or (not service.name and (host.name: "baz" or host.name: "quz"))'
+      );
     });
   });
 });

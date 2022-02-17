@@ -55,6 +55,8 @@ exports[`EditLayerPanel is rendered 1`] = `
         <EuiAccordion
           arrowDisplay="left"
           buttonContent="Source details"
+          buttonElement="button"
+          element="div"
           id="accordion1"
           initialIsOpen={false}
           isLoading={false}
@@ -98,7 +100,9 @@ exports[`EditLayerPanel is rendered 1`] = `
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
               "getLayerTypeIconName": [Function],
+              "getType": [Function],
               "hasErrors": [Function],
+              "hasJoins": [Function],
               "renderSourceSettingsEditor": [Function],
               "showJoinEditor": [Function],
               "supportsElasticsearchFilters": [Function],
@@ -119,7 +123,9 @@ exports[`EditLayerPanel is rendered 1`] = `
                 "getId": [Function],
                 "getImmutableSourceProperties": [Function],
                 "getLayerTypeIconName": [Function],
+                "getType": [Function],
                 "hasErrors": [Function],
+                "hasJoins": [Function],
                 "renderSourceSettingsEditor": [Function],
                 "showJoinEditor": [Function],
                 "supportsElasticsearchFilters": [Function],

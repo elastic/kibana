@@ -7,12 +7,18 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject, nextTick } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+  nextTick,
+} from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}component_templates`],
     componentRoutePath: `${BASE_PATH}component_templates`,

@@ -10,16 +10,15 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { IndexPatternFieldBase } from '@kbn/es-query';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
 
 interface EntryItemProps {
   entry: FormattedEntry;
-  indexPattern: IndexPattern;
-  threatIndexPatterns: IndexPattern;
+  indexPattern: DataViewBase;
+  threatIndexPatterns: DataViewBase;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
 }
@@ -41,7 +40,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   onChange,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
-    ([newField]: IndexPatternFieldBase[]): void => {
+    ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
@@ -49,7 +48,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleThreatFieldChange = useCallback(
-    ([newField]: IndexPatternFieldBase[]): void => {
+    ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnThreatFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },

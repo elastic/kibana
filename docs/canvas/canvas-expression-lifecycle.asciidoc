@@ -14,6 +14,7 @@ To use demo dataset available in Canvas to produce a table, run the following ex
 
 [source,text]
 ----
+/* Simple demo table */
 filters
 | demodata
 | table
@@ -24,6 +25,7 @@ This expression starts out with the <<filters_fn, filters>> function, which prov
 
 The filtered <<demodata_fn, demo data>> becomes the _context_ of the next function, <<table_fn, table>>, which creates a table visualization from this data set. The <<table_fn, table>> function isn’t strictly required, but by being explicit, you have the option of providing arguments to control things like the font used in the table. The output of the <<table_fn, table>> function becomes the _context_ of the <<render_fn, render>> function. Like the <<table_fn, table>>, the <<render_fn, render>> function isn’t required either, but it allows access to other arguments, such as styling the border of the element or injecting custom CSS.
 
+It is possible to add comments to the expression by starting them with a `//` sequence or by using `/*` and `*/` to enclose multi-line comments.
 
 [[canvas-function-arguments]]
 === Function arguments

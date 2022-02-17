@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import { exportExceptionListQuerySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
@@ -14,7 +13,7 @@ import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
-export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
+export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
   router.post(
     {
       options: {
@@ -30,43 +29,28 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
 
       try {
         const { id, list_id: listId, namespace_type: namespaceType } = request.query;
-        const exceptionLists = getExceptionListClient(context);
-        const exceptionList = await exceptionLists.getExceptionList({
+        const exceptionListsClient = getExceptionListClient(context);
+
+        const exportContent = await exceptionListsClient.exportExceptionListAndItems({
           id,
           listId,
           namespaceType,
         });
 
-        if (exceptionList == null) {
+        if (exportContent == null) {
           return siemResponse.error({
-            body: `exception list with list_id: ${listId} does not exist`,
+            body: `exception list with list_id: ${listId} or id: ${id} does not exist`,
             statusCode: 400,
           });
-        } else {
-          const listItems = await exceptionLists.findExceptionListItem({
-            filter: undefined,
-            listId,
-            namespaceType,
-            page: 1,
-            perPage: 10000,
-            sortField: 'exception-list.created_at',
-            sortOrder: 'desc',
-          });
-          const exceptionItems = listItems?.data ?? [];
-
-          const { exportData } = getExport([exceptionList, ...exceptionItems]);
-          const { exportDetails } = getExportDetails(exceptionItems);
-
-          // TODO: Allow the API to override the name of the file to export
-          const fileName = exceptionList.list_id;
-          return response.ok({
-            body: `${exportData}${exportDetails}`,
-            headers: {
-              'Content-Disposition': `attachment; filename="${fileName}"`,
-              'Content-Type': 'application/ndjson',
-            },
-          });
         }
+
+        return response.ok({
+          body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,
+          headers: {
+            'Content-Disposition': `attachment; filename="${listId}"`,
+            'Content-Type': 'application/ndjson',
+          },
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
@@ -76,25 +60,4 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
       }
     }
   );
-};
-
-export const getExport = (
-  data: unknown[]
-): {
-  exportData: string;
-} => {
-  const ndjson = transformDataToNdjson(data);
-
-  return { exportData: ndjson };
-};
-
-export const getExportDetails = (
-  items: unknown[]
-): {
-  exportDetails: string;
-} => {
-  const exportDetails = JSON.stringify({
-    exported_list_items_count: items.length,
-  });
-  return { exportDetails: `${exportDetails}\n` };
 };

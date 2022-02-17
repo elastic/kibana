@@ -41,7 +41,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -49,20 +48,19 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
 } from './types';
-export { DataViewType, IndexPatternType } from './types';
+export { DataViewType } from './types';
+export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export { IndexPatternsService, DataViewsService } from './data_views';
+export type { DataViewListItem, TimeBasedDataView } from './data_views';
+export { IndexPattern, DataView } from './data_views';
 export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  DataViewsService,
-  DataViewsContract,
-} from './data_views';
-export { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
-export { DuplicateDataViewError, DataViewSavedObjectConflictError } from './errors';
+  DuplicateDataViewError,
+  DataViewSavedObjectConflictError,
+  DataViewInsufficientAccessError,
+} from './errors';
 export type {
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,

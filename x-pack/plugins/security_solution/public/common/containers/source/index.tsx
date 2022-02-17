@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
+import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';
 import {
-  IndexField,
-  IndexFieldsStrategyResponse,
-  IndexFieldsStrategyRequest,
   BrowserField,
   BrowserFields,
-} from '../../../../common/search_strategy/index_fields';
-import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+  DocValueFields,
+  IndexField,
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+} from '../../../../../timelines/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-export { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields, DocValueFields };
 
 export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
   Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
@@ -45,7 +41,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): IIndexPattern =>
+  (title: string, fields: IndexField[]): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -82,8 +78,7 @@ export const getBrowserFields = memoizeOne(
       return accumulator;
     }, {});
   },
-  // Update the value only if _title has changed
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const getDocValueFields = memoizeOne(
@@ -95,15 +90,13 @@ export const getDocValueFields = memoizeOne(
               ...accumulator,
               {
                 field: field.name,
-                format: field.format ? field.format : undefined,
               },
             ];
           }
           return accumulator;
         }, [])
       : [],
-  // Update the value only if _title has changed
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const indicesExistOrDataTemporarilyUnavailable = (
@@ -119,9 +112,13 @@ interface FetchIndexReturn {
   docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: IIndexPattern;
+  indexPatterns: DataViewBase;
 }
 
+/**
+ * Independent index fields hook/request
+ * returns state directly, no redux
+ */
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false
@@ -147,7 +144,7 @@ export const useFetchIndex = (
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,
@@ -161,7 +158,6 @@ export const useFetchIndex = (
 
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -204,91 +200,4 @@ export const useFetchIndex = (
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];
-};
-
-export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
-  const { data } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const dispatch = useDispatch();
-  const indexNamesSelectedSelector = useMemo(
-    () => sourcererSelectors.getIndexNamesSelectedSelector(),
-    []
-  );
-  const { indexNames, previousIndexNames } = useDeepEqualSelector<{
-    indexNames: string[];
-    previousIndexNames: string;
-  }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
-  const { addError, addWarning } = useAppToasts();
-
-  const setLoading = useCallback(
-    (loading: boolean) => {
-      dispatch(sourcererActions.setSourcererScopeLoading({ id: sourcererScopeName, loading }));
-    },
-    [dispatch, sourcererScopeName]
-  );
-
-  const indexFieldsSearch = useCallback(
-    (indicesName) => {
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: indicesName, onlyCheckIfIndicesExist: false },
-            {
-              abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                const stringifyIndices = response.indicesExist.sort().join();
-                dispatch(
-                  sourcererActions.setSource({
-                    id: sourcererScopeName,
-                    payload: {
-                      browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                      docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                      errorMessage: null,
-                      id: sourcererScopeName,
-                      indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                      indicesExist: response.indicesExist.length > 0,
-                      loading: false,
-                    },
-                  })
-                );
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-    },
-    [data.search, dispatch, addError, addWarning, setLoading, sourcererScopeName]
-  );
-
-  useEffect(() => {
-    if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
-      indexFieldsSearch(indexNames);
-    }
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [indexNames, indexFieldsSearch, previousIndexNames]);
 };

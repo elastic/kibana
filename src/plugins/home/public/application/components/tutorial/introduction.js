@@ -9,9 +9,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
-import { EuiImage, EuiLink, EuiBetaBadge, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiImage,
+  EuiLink,
+  EuiBetaBadge,
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiBadge,
+} from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { TutorialsCategory } from '../../../../common/constants';
 
 function IntroductionUI({
   description,
@@ -22,6 +31,8 @@ function IntroductionUI({
   isBeta,
   intl,
   notices,
+  basePath,
+  category,
 }) {
   let rightSideItems;
   if (previewUrl) {
@@ -64,28 +75,56 @@ function IntroductionUI({
     );
   }
   return (
-    <EuiPageHeader
-      iconType={iconType}
-      pageTitle={
-        <>
-          {title}
-          {betaBadge && (
-            <>
-              &nbsp;
-              {betaBadge}
-            </>
-          )}
-        </>
-      }
-      description={
-        <>
-          <Content text={description} />
-          {exportedFields}
-          {notices}
-        </>
-      }
-      rightSideItems={rightSideItems}
-    />
+    <>
+      <div>
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          size="xs"
+          flush="left"
+          href={basePath.prepend(`/app/integrations`)}
+        >
+          <FormattedMessage
+            id="home.tutorial.introduction.browseAllIntegrationsButton"
+            defaultMessage="Browse all integrations"
+          />
+        </EuiButtonEmpty>
+      </div>
+      <EuiSpacer />
+      <EuiPageHeader
+        iconType={iconType}
+        pageTitle={
+          <>
+            {title}
+            {betaBadge && (
+              <>
+                &nbsp;
+                {betaBadge}
+              </>
+            )}
+
+            {category === TutorialsCategory.LOGGING || category === TutorialsCategory.METRICS ? (
+              <>
+                &nbsp;
+                <EuiBadge>
+                  <FormattedMessage
+                    id="home.tutorial.introduction.beatsBadgeLabel"
+                    defaultMessage="Beats"
+                  />
+                </EuiBadge>
+              </>
+            ) : null}
+          </>
+        }
+        description={
+          <>
+            <Content text={description} />
+            {exportedFields}
+            {notices}
+          </>
+        }
+        rightSideItems={rightSideItems}
+      />
+    </>
   );
 }
 

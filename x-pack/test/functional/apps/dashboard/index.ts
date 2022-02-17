@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboard', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup19');
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./preserve_url'));
@@ -20,8 +20,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dashboard_tagging'));
     loadTestFile(require.resolve('./dashboard_lens_by_value'));
     loadTestFile(require.resolve('./dashboard_maps_by_value'));
+    loadTestFile(require.resolve('./panel_titles'));
 
     loadTestFile(require.resolve('./migration_smoke_tests/lens_migration_smoke_test'));
+    loadTestFile(require.resolve('./migration_smoke_tests/controls_migration_smoke_test'));
     loadTestFile(require.resolve('./migration_smoke_tests/visualize_migration_smoke_test'));
     loadTestFile(require.resolve('./migration_smoke_tests/tsvb_migration_smoke_test'));
   });

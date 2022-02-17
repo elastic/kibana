@@ -17,7 +17,8 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
+import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -101,13 +102,16 @@ export const cumulativeSumOperation: OperationDefinition<
     return true;
   },
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return getErrorsForDateReference(
-      layer,
-      columnId,
-      i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-        defaultMessage: 'Cumulative sum',
-      })
-    );
+    return combineErrorMessages([
+      getErrorsForDateReference(
+        layer,
+        columnId,
+        i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+          defaultMessage: 'Cumulative sum',
+        })
+      ),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]);
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {

@@ -14,7 +14,7 @@ import {
   EuiCheckboxGroup,
   EuiCheckboxGroupOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { PlatformIcon } from './platforms/platform_icon';

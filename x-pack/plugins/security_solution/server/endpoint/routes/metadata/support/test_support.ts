@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Agent } from '../../../../../../fleet/common';
 import { METADATA_UNITED_INDEX } from '../../../../../common/endpoint/constants';
 import { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
 
-export function legacyMetadataSearchResponse(
+export function legacyMetadataSearchResponseMock(
   hostMetadata?: HostMetadata
 ): estypes.SearchResponse<HostMetadata> {
   return {
@@ -44,8 +45,9 @@ export function legacyMetadataSearchResponse(
   } as unknown as estypes.SearchResponse<HostMetadata>;
 }
 
-export function unitedMetadataSearchResponse(
-  hostMetadata?: HostMetadata
+export function unitedMetadataSearchResponseMock(
+  hostMetadata: HostMetadata = {} as HostMetadata,
+  agent: Agent = {} as Agent
 ): estypes.SearchResponse<UnitedAgentMetadata> {
   return {
     took: 15,
@@ -73,7 +75,9 @@ export function unitedMetadataSearchResponse(
                   id: 'test-agent-id',
                 },
                 united: {
-                  agent: {},
+                  agent: {
+                    ...agent,
+                  },
                   endpoint: {
                     ...hostMetadata,
                   },

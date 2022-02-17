@@ -15,7 +15,7 @@ import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
 import { KibanaPageTemplate } from '../../../../../kibana_react/public';
@@ -26,9 +26,8 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
 };
 
-const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
-  defaultMessage: 'Add data',
+const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
+  defaultMessage: 'Integrations',
 });
 
 class TutorialUi extends React.Component {
@@ -80,12 +79,8 @@ class TutorialUi extends React.Component {
 
     getServices().chrome.setBreadcrumbs([
       {
-        text: homeTitle,
-        href: '#/',
-      },
-      {
-        text: addDataTitle,
-        href: '#/tutorial_directory',
+        text: integrationsTitle,
+        href: this.props.addBasePath('/app/integrations/browse'),
       },
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
@@ -419,6 +414,7 @@ class TutorialUi extends React.Component {
       content = (
         <div>
           <Introduction
+            category={this.state.tutorial.category}
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
@@ -426,6 +422,7 @@ class TutorialUi extends React.Component {
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
+            basePath={getServices().http.basePath}
           />
 
           {this.renderInstructionSetsToggle()}

@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObject } from 'kibana/server';
 
 import type { AgentPolicy } from '../../types';
@@ -47,7 +48,10 @@ describe('reassignAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
     expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
-    expect(calledWith[0]?.body?.doc).toHaveProperty('policy_id', regularAgentPolicySO.id);
+    expect((calledWith[0] as estypes.UpdateRequest)?.body?.doc).toHaveProperty(
+      'policy_id',
+      regularAgentPolicySO.id
+    );
   });
 
   it('cannot reassign from regular agent policy to hosted', async () => {
@@ -85,7 +89,7 @@ describe('reassignAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
     // only 1 are regular and bulk write two line per update
-    expect(calledWith.body?.length).toBe(2);
+    expect((calledWith as estypes.BulkRequest).body?.length).toBe(2);
     // @ts-expect-error
     expect(calledWith.body[0].update._id).toEqual(agentInRegularDoc._id);
   });
@@ -125,7 +129,7 @@ function createClientsMock() {
 
   const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // @ts-expect-error
-  esClientMock.mget.mockImplementation(async () => {
+  esClientMock.mget.mockResponseImplementation(() => {
     return {
       body: {
         docs: [agentInHostedDoc, agentInRegularDoc, agentInHostedDoc2],
@@ -133,7 +137,7 @@ function createClientsMock() {
     };
   });
   // @ts-expect-error
-  esClientMock.get.mockImplementation(async ({ id }) => {
+  esClientMock.get.mockResponseImplementation(({ id }) => {
     switch (id) {
       case agentInHostedDoc._id:
         return { body: agentInHostedDoc };
@@ -143,10 +147,10 @@ function createClientsMock() {
         throw new Error(`${id} not found`);
     }
   });
-  esClientMock.bulk.mockResolvedValue({
+  esClientMock.bulk.mockResponse(
     // @ts-expect-error not full interface
-    body: { items: [] },
-  });
+    { items: [] }
+  );
 
   return { soClient: soClientMock, esClient: esClientMock };
 }

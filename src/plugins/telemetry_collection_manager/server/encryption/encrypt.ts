@@ -14,11 +14,11 @@ export function getKID(useProdKey = false): string {
 }
 
 export async function encryptTelemetry<Payload = unknown>(
-  payload: Payload | Payload[],
+  payload: Payload,
   { useProdKey = false } = {}
-): Promise<string[]> {
+): Promise<string> {
   const kid = getKID(useProdKey);
   const encryptor = await createRequestEncryptor(telemetryJWKS);
-  const clusters = ([] as Payload[]).concat(payload);
-  return Promise.all(clusters.map((cluster) => encryptor.encrypt(kid, cluster)));
+
+  return await encryptor.encrypt(kid, payload);
 }

@@ -19,9 +19,9 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     this.http = http;
   }
 
-  private _request(url: string, query?: any) {
+  private _request<T = unknown>(url: string, query?: any) {
     return this.http
-      .fetch(url, {
+      .fetch<T>(url, {
         query,
       })
       .catch((resp: any) => {
@@ -49,18 +49,28 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     }).then((resp: any) => resp.fields);
   }
 
-  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex, allowNoIndex }: GetFieldsOptions) {
+  getFieldsForWildcard({
+    pattern,
+    metaFields,
+    type,
+    rollupIndex,
+    allowNoIndex,
+    filter,
+  }: GetFieldsOptions) {
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
+      filter,
     }).then((resp: any) => resp.fields || []);
   }
 
   async hasUserIndexPattern(): Promise<boolean> {
-    const response = await this._request(this._getUrl(['has_user_index_pattern']));
+    const response = await this._request<{ result: boolean }>(
+      this._getUrl(['has_user_index_pattern'])
+    );
     return response.result;
   }
 }

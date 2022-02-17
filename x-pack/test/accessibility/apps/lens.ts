@@ -13,12 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     after(async () => {
@@ -28,7 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.clickDeleteSelected();
       await PageObjects.common.clickConfirmOnModal();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     it('lens', async () => {

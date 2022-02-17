@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import SwimlaneParamsFields from './swimlane_params';
 import { SwimlaneConnectorType } from './types';
 import { mappings } from './mocks';
@@ -124,14 +124,6 @@ describe('SwimlaneParamsFields renders', () => {
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
-    });
-
-    test('An empty comment does not trigger editAction', () => {
-      const wrapper = mountWithIntl(<SwimlaneParamsFields {...defaultProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls.length).toEqual(0);
     });
   });
 });

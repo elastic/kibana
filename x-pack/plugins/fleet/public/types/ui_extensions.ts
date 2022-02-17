@@ -50,6 +50,7 @@ export interface PackagePolicyEditExtensionComponentProps {
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
+  useLatestPackageVersion?: boolean;
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 

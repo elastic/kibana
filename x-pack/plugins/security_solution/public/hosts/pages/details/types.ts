@@ -6,7 +6,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTableType } from '../../store/model';
 import { HostsQueryProps } from '../types';
@@ -62,7 +62,7 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;
-    indexPattern: IIndexPattern;
+    indexPattern: DataViewBase;
     type: hostsModel.HostsType;
   };
 

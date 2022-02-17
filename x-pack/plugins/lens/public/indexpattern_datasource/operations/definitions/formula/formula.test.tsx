@@ -6,20 +6,30 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
+import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn } from './formula';
-import { regenerateLayerFromAst } from './parse';
+import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
+import { TermsIndexPatternColumn } from '../terms';
+import { MovingAverageIndexPatternColumn } from '../calculations';
+import { StaticValueIndexPatternColumn } from '../static_value';
+import { getFilter } from '../helpers';
 
 jest.mock('../../layer_helpers', () => {
   return {
-    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
+    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, GenericIndexPatternColumn> }) =>
       Object.keys(columns)
     ),
     getManagedColumnsFrom: jest.fn().mockReturnValue([]),
   };
 });
+
+interface PartialColumnParams {
+  kql?: string;
+  lucene?: string;
+  shift?: string;
+}
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   average: {
@@ -33,15 +43,31 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  terms: { input: 'field' } as GenericOperationDefinition,
-  sum: { input: 'field', filterable: true } as GenericOperationDefinition,
-  last_value: { input: 'field' } as GenericOperationDefinition,
-  max: { input: 'field' } as GenericOperationDefinition,
+  terms: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ordinal' }),
+  } as unknown as GenericOperationDefinition,
+  sum: {
+    input: 'field',
+    filterable: true,
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  last_value: {
+    input: 'field',
+    getPossibleOperationForField: ({ type }) => ({
+      scale: type === 'string' ? 'ordinal' : 'ratio',
+    }),
+  } as GenericOperationDefinition,
+  max: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
   count: {
     input: 'field',
     filterable: true,
-    buildColumn: ({ field }: { field: IndexPatternField }) => ({
+    buildColumn: ({ field }: { field: IndexPatternField }, columnsParams: PartialColumnParams) => ({
       label: 'avg',
       dataType: 'number',
       operationType: 'count',
@@ -49,13 +75,21 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       isBucketed: false,
       scale: 'ratio',
       timeScale: false,
+      filter: getFilter(undefined, columnsParams),
     }),
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  derivative: { input: 'fullReference' } as GenericOperationDefinition,
+  derivative: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
   moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
-    buildColumn: ({ references }: { references: string[] }) => ({
+    buildColumn: (
+      { references }: { references: string[] },
+      columnsParams: PartialColumnParams
+    ) => ({
       label: 'moving_average',
       dataType: 'number',
       operationType: 'moving_average',
@@ -64,10 +98,16 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       timeScale: false,
       params: { window: 5 },
       references,
+      filter: getFilter(undefined, columnsParams),
     }),
     getErrorMessage: () => ['mock error'],
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+    filterable: true,
   } as unknown as GenericOperationDefinition,
-  cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
+  cumulative_sum: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
 };
 
 describe('formula', () => {
@@ -89,7 +129,7 @@ describe('formula', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
       },
     };
   });
@@ -167,7 +207,7 @@ describe('formula', () => {
                 },
               },
             },
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -201,7 +241,7 @@ describe('formula', () => {
               // Need to test with multiple replaces due to string replace
               query: `category.keyword: "Men's Clothing" or category.keyword: "Men's Shoes"`,
             },
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -219,18 +259,18 @@ describe('formula', () => {
       });
     });
 
-    it('it should move over lucene arguments without', () => {
+    it('it should move over lucene arguments if set', () => {
       expect(
         formulaOperation.buildColumn({
           previousColumn: {
             ...layer.columns.col1,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             filter: {
               language: 'lucene',
               query: `*`,
             },
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -261,7 +301,7 @@ describe('formula', () => {
               references: ['col2'],
               timeScale: 'd',
               params: { window: 3 },
-            },
+            } as MovingAverageIndexPatternColumn,
             layer: {
               indexPatternId: '1',
               columnOrder: [],
@@ -275,7 +315,7 @@ describe('formula', () => {
                   references: ['col2'],
                   timeScale: 'd',
                   params: { window: 3 },
-                },
+                } as MovingAverageIndexPatternColumn,
                 col2: {
                   dataType: 'number',
                   isBucketed: false,
@@ -321,7 +361,7 @@ describe('formula', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
             layer: {
               indexPatternId: '1',
               columnOrder: [],
@@ -337,7 +377,7 @@ describe('formula', () => {
                     orderDirection: 'asc',
                   },
                   sourceField: 'category',
-                },
+                } as TermsIndexPatternColumn,
               },
             },
             indexPattern,
@@ -368,7 +408,7 @@ describe('formula', () => {
             params: {
               value: '0',
             },
-          },
+          } as StaticValueIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -384,29 +424,45 @@ describe('formula', () => {
     });
   });
 
-  describe('regenerateLayerFromAst()', () => {
+  describe('insertOrReplaceFormulaColumn()', () => {
     let indexPattern: IndexPattern;
     let currentColumn: FormulaIndexPatternColumn;
 
-    function testIsBrokenFormula(formula: string) {
+    function testIsBrokenFormula(
+      formula: string,
+      partialColumn: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
+    ) {
+      const mergedColumn = {
+        ...currentColumn,
+        ...partialColumn,
+      };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+
       expect(
-        regenerateLayerFromAst(
-          formula,
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          {
+            ...mergedColumn,
+            params: {
+              ...mergedColumn.params,
+              formula,
+            },
+          },
+          mergedLayer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
-        ...layer,
+        ...mergedLayer,
         columns: {
-          ...layer.columns,
+          ...mergedLayer.columns,
           col1: {
-            ...currentColumn,
+            ...mergedColumn,
             label: formula,
             params: {
-              ...currentColumn.params,
+              ...mergedColumn.params,
               formula,
               isFormulaBroken: true,
             },
@@ -430,14 +486,21 @@ describe('formula', () => {
 
     it('should mutate the layer with new columns for valid formula expressions', () => {
       expect(
-        regenerateLayerFromAst(
-          'average(bytes)',
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: 'average(bytes)',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -469,14 +532,21 @@ describe('formula', () => {
 
     it('should create a valid formula expression for numeric literals', () => {
       expect(
-        regenerateLayerFromAst(
-          '0',
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: '0',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -612,28 +682,151 @@ describe('formula', () => {
       testIsBrokenFormula(formula);
     });
 
+    it('returns a filter type error if query types mismatch between column filter and inner formula one', () => {
+      const formulas = [
+        `count(kql='bytes > 4000')`,
+        `count(lucene='bytes:[400 TO *]') + count(kql='bytes > 4000')`,
+        `moving_average(average(bytes), kql='bytes: *', window=7)`,
+        `moving_average(sum(bytes, kql='bytes: *'), window=7)`,
+      ];
+
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula, { filter: { language: 'lucene', query: 'bytes:[400 TO *]' } });
+      }
+    });
+
     it('returns the locations of each function', () => {
       expect(
-        regenerateLayerFromAst(
-          'moving_average(average(bytes), window=7) + count()',
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).locations
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: 'moving_average(average(bytes), window=7) + count()',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).meta.locations
       ).toEqual({
         col1X0: { min: 15, max: 29 },
         col1X1: { min: 0, max: 41 },
         col1X2: { min: 42, max: 50 },
       });
     });
+
+    it('add the formula filter to supported operations', () => {
+      const filter = { language: 'kuery', query: 'bytes > 4000' };
+      const mergedColumn = { ...currentColumn, filter };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = 'moving_average(average(bytes), window=7) + count()';
+
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
+        'col1',
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
+      );
+
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            filter,
+          }),
+          col1X1: expect.objectContaining({
+            operationType: 'moving_average',
+            filter,
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            filter,
+          }),
+        })
+      );
+
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1X0: expect.not.objectContaining({
+            filter,
+          }),
+          col1X3: expect.not.objectContaining({
+            filter,
+          }),
+        })
+      );
+    });
+    it('prepend formula filter to supported operations', () => {
+      const filter = { language: 'kuery', query: 'bytes > 4000' };
+      const innerFilter = 'bytes > 5000';
+      const mergedColumn = { ...currentColumn, filter };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = `moving_average(average(bytes), window=7, kql='${innerFilter}') + count(kql='${innerFilter}')`;
+
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
+        'col1',
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
+      );
+
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            filter,
+          }),
+          col1X1: expect.objectContaining({
+            operationType: 'moving_average',
+            filter: {
+              ...filter,
+              query: `(${filter.query}) AND (${innerFilter})`,
+            },
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            filter: {
+              ...filter,
+              query: `(${filter.query}) AND (${innerFilter})`,
+            },
+          }),
+        })
+      );
+    });
   });
 
   describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
 
-    function getNewLayerWithFormula(formula: string, isBroken = true): IndexPatternLayer {
+    function getNewLayerWithFormula(
+      formula: string,
+      isBroken = true,
+      columnParams: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
+    ): IndexPatternLayer {
       return {
         columns: {
           col1: {
@@ -644,9 +837,10 @@ describe('formula', () => {
             scale: 'ratio',
             params: { formula, isFormulaBroken: isBroken },
             references: [],
-          },
+            ...columnParams,
+          } as FormulaIndexPatternColumn,
         },
-        columnOrder: [],
+        columnOrder: ['col1'],
         indexPatternId: '',
       };
     }
@@ -1194,6 +1388,45 @@ invalid: "
       }
     });
 
+    it('returns an error if the formula is fully static and there is at least one bucket dimension', () => {
+      const formulaLayer = getNewLayerWithFormula('5 + 3 * 7');
+      expect(
+        formulaOperation.getErrorMessage!(
+          {
+            ...formulaLayer,
+            columns: {
+              ...formulaLayer.columns,
+              col0: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '',
+                operationType: 'date_histogram',
+                references: [],
+                sourceField: 'ts',
+              },
+            },
+            columnOrder: ['col0', 'col1'],
+          },
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        'A layer with only static values will not show results, use at least one dynamic metric',
+      ]);
+    });
+
+    it('returns no error if the formula is fully static and there is no bucket dimension', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('5 + 3 * 7'),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
+    });
+
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',
@@ -1227,6 +1460,30 @@ invalid: "
             operationDefinitionMap
           )
         ).toEqual(undefined);
+      }
+    });
+
+    it('returns errors if the returned type of an operation is not supported by Formula', () => {
+      // check only "valid" operations which are strictly not supported by Formula
+      // as for last_value with ordinal data
+      const formulas = [
+        { formula: 'last_value(dest)' },
+        { formula: 'terms(dest)' },
+        { formula: 'moving_average(last_value(dest), window=7)', errorFormula: 'last_value(dest)' },
+      ];
+      for (const { formula, errorFormula } of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([
+          `The return value type of the operation ${
+            errorFormula ?? formula
+          } is not supported in Formula.`,
+        ]);
       }
     });
 
@@ -1280,5 +1537,77 @@ invalid: "
         });
       });
     }
+
+    it('returns error if formula filter has not same type of inner operations filter', () => {
+      const formulas = [
+        { formula: `count(kql='bytes > 4000')`, operation: 'count' },
+        {
+          formula: `count(lucene='bytes:[400 TO *]') + sum(bytes, kql='bytes > 4000')`,
+          operation: 'sum',
+        },
+        {
+          formula: `moving_average(average(bytes), kql='bytes: *', window=7)`,
+          operation: 'moving_average',
+        },
+        { formula: `moving_average(sum(bytes, kql='bytes: *'), window=7)`, operation: 'sum' },
+      ];
+
+      for (const { formula, operation } of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula, true, {
+              filter: { language: 'lucene', query: 'bytes:[400 TO *]' },
+            }),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([
+          `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the ${operation} operation.`,
+        ]);
+      }
+    });
+
+    it('return multiple errors if formula filter has not same type of multiple inner operations filter', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(
+            `count(kql='bytes > 4000') + sum(bytes, kql='bytes > 4000')`,
+            true,
+            {
+              filter: { language: 'lucene', query: 'bytes:[400 TO *]' },
+            }
+          ),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the count operation.`,
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the sum operation.`,
+      ]);
+    });
+
+    it('returns no error if formula filter and operation inner filters are compatible', () => {
+      const formulas = [
+        `count(kql='bytes > 4000')`,
+        `count(kql='bytes > 4000') + sum(bytes, kql='bytes > 4000')`,
+        `moving_average(average(bytes), kql='bytes: *', window=7)`,
+        `moving_average(sum(bytes, kql='bytes: *'), window=7)`,
+      ];
+
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula, true, {
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+            }),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
   });
 });

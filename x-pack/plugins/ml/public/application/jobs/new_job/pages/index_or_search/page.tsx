@@ -6,18 +6,12 @@
  */
 
 import React, { FC } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiTitle,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
@@ -37,27 +31,21 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
   };
 
   return (
-    <EuiPage data-test-subj="mlPageSourceSelection">
+    <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.selectIndexPatternOrSavedSearch"
-                  defaultMessage="Select index pattern or saved search"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+            defaultMessage="Select data view or saved search"
+          />
+        </MlPageHeader>
+        <EuiPageContent hasShadow={false} hasBorder={true}>
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter
             noItemsMessage={i18n.translate('xpack.ml.newJob.wizard.searchSelection.notFoundLabel', {
-              defaultMessage: 'No matching indices or saved searches found.',
+              defaultMessage: 'No matching data views or saved searches found.',
             })}
             savedObjectMetaData={[
               {
@@ -74,9 +62,9 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
                   {
-                    defaultMessage: 'Index pattern',
+                    defaultMessage: 'Data view',
                   }
                 ),
               },
@@ -87,6 +75,6 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
           />
         </EuiPageContent>
       </EuiPageBody>
-    </EuiPage>
+    </div>
   );
 };

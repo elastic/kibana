@@ -11,11 +11,12 @@ Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error AP
 ```typescript
 export interface ErrorToastOptions extends ToastOptions 
 ```
+<b>Extends:</b> ToastOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [title](./kibana-plugin-core-public.errortoastoptions.title.md) | <code>string</code> | The title of the toast and the dialog when expanding the message. |
-|  [toastMessage](./kibana-plugin-core-public.errortoastoptions.toastmessage.md) | <code>string</code> | The message to be shown in the toast. If this is not specified the error's message will be shown in the toast instead. Overwriting that message can be used to provide more user-friendly toasts. If you specify this, the error message will still be shown in the detailed error modal. |
+|  [title](./kibana-plugin-core-public.errortoastoptions.title.md) | string | The title of the toast and the dialog when expanding the message. |
+|  [toastMessage?](./kibana-plugin-core-public.errortoastoptions.toastmessage.md) | string | <i>(Optional)</i> The message to be shown in the toast. If this is not specified the error's message will be shown in the toast instead. Overwriting that message can be used to provide more user-friendly toasts. If you specify this, the error message will still be shown in the detailed error modal. |
 

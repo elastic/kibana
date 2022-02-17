@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+export type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+export { SpacesService } from './spaces_service';

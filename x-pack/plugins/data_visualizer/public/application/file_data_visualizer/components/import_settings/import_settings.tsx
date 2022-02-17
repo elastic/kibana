@@ -14,6 +14,7 @@ import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 import { CombinedField } from '../../../common/components/combined_fields';
 import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   index: string;
@@ -56,6 +57,15 @@ export const ImportSettings: FC<Props> = ({
   onCombinedFieldsChange,
   results,
 }) => {
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useDataVisualizerKibana();
+
+  const canCreateDataView =
+    capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true;
+
   const tabs = [
     {
       id: 'simple-settings',
@@ -74,6 +84,7 @@ export const ImportSettings: FC<Props> = ({
             onCreateIndexPatternChange={onCreateIndexPatternChange}
             indexNameError={indexNameError}
             combinedFields={combinedFields}
+            canCreateDataView={canCreateDataView}
           />
         </React.Fragment>
       ),
@@ -106,6 +117,7 @@ export const ImportSettings: FC<Props> = ({
             combinedFields={combinedFields}
             onCombinedFieldsChange={onCombinedFieldsChange}
             results={results}
+            canCreateDataView={canCreateDataView}
           />
         </React.Fragment>
       ),

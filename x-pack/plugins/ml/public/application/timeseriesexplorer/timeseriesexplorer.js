@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCallOut,
@@ -85,6 +85,7 @@ import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
+import { ExplorerNoJobsSelected } from '../explorer/components';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -104,7 +105,6 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
-    focusAggregations: {},
     focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
@@ -721,9 +721,7 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId]).catch((err) => {
-      console.log('Error populating field formats:', err);
-    });
+    mlFieldFormatService.populateFormats([jobId]);
   }
 
   componentDidMount() {
@@ -935,7 +933,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       focusAnnotationError,
       focusAnnotationData,
-      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -978,7 +975,11 @@ export class TimeSeriesExplorer extends React.Component {
     const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
-      return <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef} />;
+      return (
+        <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+          <ExplorerNoJobsSelected />
+        </TimeSeriesExplorerPage>
+      );
     }
 
     const selectedJob = mlJobService.getJob(selectedJobId);
@@ -1172,9 +1173,13 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />
@@ -1257,7 +1262,6 @@ export class TimeSeriesExplorer extends React.Component {
                       detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
-                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />

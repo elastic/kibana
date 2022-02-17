@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useValuesList } from '../../../../hooks/use_values_list';
 import { FilterProps } from './columns/filter_expanded';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -25,13 +25,13 @@ export function useFilterValues(
       queryFilters.push(qFilter.query);
     }
     if (isExistsFilter(qFilter)) {
-      queryFilters.push({ exists: qFilter.query.exists } as QueryDslQueryContainer);
+      queryFilters.push({ exists: qFilter.query.exists } as estypes.QueryDslQueryContainer);
     }
   });
 
   return useValuesList({
     query,
-    label,
+    label: label ?? field,
     sourceField: field,
     time: series.time,
     keepHistory: true,

@@ -7,4 +7,5 @@
  */
 
 export { ListContainer, LIST_CONTAINER } from './list_container';
-export { ListContainerFactoryDefinition, ListContainerFactory } from './list_container_factory';
+export type { ListContainerFactory } from './list_container_factory';
+export { ListContainerFactoryDefinition } from './list_container_factory';

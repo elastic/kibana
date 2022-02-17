@@ -10,4 +10,4 @@ import { ReportingExamplePlugin } from './plugin';
 export function plugin() {
   return new ReportingExamplePlugin();
 }
-export { PluginSetup, PluginStart } from './types';
+export type { PluginSetup, PluginStart } from './types';

@@ -7,7 +7,7 @@
 
 import { EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormValidationError } from './validation_errors';
 
@@ -58,14 +58,14 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
     return (
       <FormattedMessage
         id="xpack.infra.logSourceConfiguration.missingTimestampFieldErrorMessage"
-        defaultMessage="The index pattern must be time-based."
+        defaultMessage="The data view must be time-based."
       />
     );
   } else if (error.type === 'missing_message_field') {
     return (
       <FormattedMessage
         id="xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage"
-        defaultMessage="The index pattern must contain a {messageField} field."
+        defaultMessage="The data view must contain a {messageField} field."
         values={{
           messageField: <EuiCode>message</EuiCode>,
         }}
@@ -85,16 +85,16 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
     return (
       <FormattedMessage
         id="xpack.infra.logSourceConfiguration.rollupIndexPatternErrorMessage"
-        defaultMessage="The index pattern must not be a rollup index pattern."
+        defaultMessage="The data view must not be a rollup index pattern."
       />
     );
   } else if (error.type === 'missing_index_pattern') {
     return (
       <FormattedMessage
-        id="xpack.infra.logSourceConfiguration.missingIndexPatternErrorMessage"
-        defaultMessage="The index pattern {indexPatternId} must exist."
+        id="xpack.infra.logSourceConfiguration.missingDataViewErrorMessage"
+        defaultMessage="The data view {dataViewId} must exist."
         values={{
-          indexPatternId: <EuiCode>{error.indexPatternId}</EuiCode>,
+          dataViewId: <EuiCode>{error.indexPatternId}</EuiCode>,
         }}
       />
     );

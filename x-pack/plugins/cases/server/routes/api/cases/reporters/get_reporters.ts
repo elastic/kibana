@@ -7,7 +7,8 @@
 
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
-import { CASE_REPORTERS_URL, AllReportersFindRequest } from '../../../../../common';
+import { AllReportersFindRequest } from '../../../../../common/api';
+import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 
 export function initGetReportersApi({ router, logger }: RouteDeps) {
   router.get(

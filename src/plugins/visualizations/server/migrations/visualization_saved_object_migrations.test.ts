@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
-import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
+import { getAllMigrations } from './visualization_saved_object_migrations';
+import {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
+} from 'kibana/server';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
@@ -56,6 +60,8 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
 };
 
 describe('migration visualization', () => {
+  const visualizationSavedObjectTypeMigrations = getAllMigrations({});
+
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['6.7.2'](
@@ -1674,7 +1680,8 @@ describe('migration visualization', () => {
       type = 'area',
       categoryAxes?: object[],
       valueAxes?: object[],
-      hasPalette = false
+      hasPalette = false,
+      hasCirclesRadius = false
     ) => ({
       attributes: {
         title: 'My Vis',
@@ -1692,6 +1699,21 @@ describe('migration visualization', () => {
             valueAxes: valueAxes ?? [
               {
                 labels: {},
+              },
+            ],
+            seriesParams: [
+              {
+                show: true,
+                type,
+                mode: 'stacked',
+                drawLinesBetweenPoints: true,
+                lineWidth: 2,
+                showCircles: true,
+                interpolate: 'linear',
+                valueAxis: 'ValueAxis-1',
+                ...(hasCirclesRadius && {
+                  circlesRadius: 3,
+                }),
               },
             ],
             ...(hasPalette && {
@@ -1730,6 +1752,20 @@ describe('migration visualization', () => {
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('default');
+    });
+
+    it("should decorate existing docs with the circlesRadius attribute if it doesn't exist", () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+
+      expect(result.circlesRadius).toEqual(1);
+    });
+
+    it('should not decorate existing docs with the circlesRadius attribute if it exists', () => {
+      const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true, true));
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+
+      expect(result.circlesRadius).toEqual(3);
     });
 
     describe('labels.filter', () => {
@@ -2342,6 +2378,165 @@ describe('migration visualization', () => {
 
       expect(params.mardwon_less).toBeUndefined();
       expect(params.markdown_css).toEqual('test { color: red }');
+    });
+  });
+
+  describe('7.17.0 tsvb - add drop last bucket into TSVB model', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const migrateAgain = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.17.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    it('should add "drop_last_bucket" into model if it not exist and run twice', () => {
+      const params = {};
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+
+      const migratedTestDocNew = migrateAgain(migratedTestDoc);
+      const { params: migratedNewParams } = JSON.parse(migratedTestDocNew.attributes.visState);
+
+      expect(migratedNewParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+    });
+
+    it('should not set "drop_last_bucket" to 1 into model if it exists', () => {
+      const params = { drop_last_bucket: 0 };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 0,
+        }
+      `);
+    });
+  });
+
+  it('should apply search source migrations within visualization', () => {
+    const visualizationDoc = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            some: 'prop',
+            migrated: false,
+          }),
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '1.2.3';
+    const visMigrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(
+      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+    ).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            some: 'prop',
+            migrated: true,
+          }),
+        },
+      },
+    });
+  });
+
+  describe('8.1.0 pie - labels and addLegend migration', () => {
+    const getDoc = (addLegend: boolean, lastLevel: boolean = false) => ({
+      attributes: {
+        title: 'Pie Vis',
+        description: 'Pie vis',
+        visState: JSON.stringify({
+          type: 'pie',
+          title: 'Pie vis',
+          params: {
+            addLegend,
+            addTooltip: true,
+            isDonut: true,
+            labels: {
+              position: 'default',
+              show: true,
+              truncate: 100,
+              values: true,
+              valuesFormat: 'percent',
+              percentDecimals: 2,
+              last_level: lastLevel,
+            },
+            legendPosition: 'right',
+            nestedLegend: false,
+            maxLegendLines: 1,
+            truncateLegend: true,
+            distinctColors: false,
+            palette: {
+              name: 'default',
+              type: 'palette',
+            },
+            dimensions: {
+              metric: {
+                type: 'vis_dimension',
+                accessor: 1,
+                format: {
+                  id: 'number',
+                  params: {
+                    id: 'number',
+                  },
+                },
+              },
+              buckets: [],
+            },
+          },
+        }),
+      },
+    });
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.1.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    it('should migrate addLegend to legendDisplay', () => {
+      const pie = getDoc(true);
+      const migrated = migrate(pie);
+      const params = JSON.parse(migrated.attributes.visState).params;
+
+      expect(params.legendDisplay).toBe('show');
+      expect(params.addLegend).toBeUndefined();
+
+      const otherPie = getDoc(false);
+      const otherMigrated = migrate(otherPie);
+      const otherParams = JSON.parse(otherMigrated.attributes.visState).params;
+
+      expect(otherParams.legendDisplay).toBe('hide');
+      expect(otherParams.addLegend).toBeUndefined();
     });
   });
 });

@@ -8,7 +8,7 @@
 import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -46,6 +46,7 @@ jest.mock('../../lib/kibana', () => {
 describe('Custom Links', () => {
   const hostName = 'Host Name';
   const ipv4 = '192.0.2.255';
+  const ipv4a = '192.0.2.266';
   const ipv6 = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff';
   const ipv6Encoded = encodeIpv6(ipv6);
 
@@ -64,6 +65,16 @@ describe('Custom Links', () => {
   });
 
   describe('NetworkDetailsLink', () => {
+    test('can handle array of ips', () => {
+      const wrapper = mount(<NetworkDetailsLink ip={[ipv4, ipv4a]} />);
+      expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4)}/source`
+      );
+      expect(wrapper.text()).toEqual(`${ipv4}${ipv4a}`);
+      expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4a)}/source`
+      );
+    });
     test('should render valid link to IP Details with ipv4 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(

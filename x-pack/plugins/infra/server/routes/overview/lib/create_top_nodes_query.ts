@@ -7,6 +7,7 @@
 
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { TopNodesRequest } from '../../../../common/http_api/overview_api';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const createTopNodesQuery = (
   options: TopNodesRequest,
@@ -22,9 +23,10 @@ export const createTopNodesQuery = (
         filter: [
           {
             range: {
-              [source.configuration.fields.timestamp]: {
+              [TIMESTAMP_FIELD]: {
                 gte: options.timerange.from,
                 lte: options.timerange.to,
+                format: 'epoch_millis',
               },
             },
           },
@@ -49,7 +51,7 @@ export const createTopNodesQuery = (
                 { field: 'host.name' },
                 { field: 'cloud.provider' },
               ],
-              sort: { '@timestamp': 'desc' },
+              sort: { [TIMESTAMP_FIELD]: 'desc' },
               size: 1,
             },
           },

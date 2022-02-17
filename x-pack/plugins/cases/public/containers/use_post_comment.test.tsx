@@ -7,9 +7,10 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
+import { CommentType } from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { usePostComment, UsePostComment } from './use_post_comment';
-import { basicCaseId, basicSubCaseId } from './mock';
+import { basicCaseId } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -57,32 +58,7 @@ describe('usePostComment', () => {
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal, undefined);
-    });
-  });
-
-  it('calls postComment with correct arguments - sub case', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'postComment');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
-      );
-      await waitForNextUpdate();
-
-      result.current.postComment({
-        caseId: basicCaseId,
-        data: samplePost,
-        updateCase: updateCaseCallback,
-        subCaseId: basicSubCaseId,
-      });
-      await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(
-        samplePost,
-        basicCaseId,
-        abortCtrl.signal,
-        basicSubCaseId
-      );
+      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
     });
   });
 

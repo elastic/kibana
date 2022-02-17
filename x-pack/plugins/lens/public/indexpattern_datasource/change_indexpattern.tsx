@@ -19,6 +19,7 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
 
 export function ChangeIndexPattern({
   indexPatternRefs,
+  isMissingCurrent,
   indexPatternId,
   onChangeIndexPattern,
   trigger,
@@ -26,13 +27,12 @@ export function ChangeIndexPattern({
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
+  isMissingCurrent?: boolean;
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-
-  const isMissingCurrent = !indexPatternRefs.some(({ id }) => id === indexPatternId);
 
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
@@ -61,6 +61,9 @@ export function ChangeIndexPattern({
       <EuiPopover
         panelClassName="lnsChangeIndexPatternPopover"
         button={createTrigger()}
+        panelProps={{
+          ['data-test-subj']: 'lnsChangeIndexPatternPopover',
+        }}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
         display="block"
@@ -69,8 +72,8 @@ export function ChangeIndexPattern({
       >
         <div>
           <EuiPopoverTitle>
-            {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
-              defaultMessage: 'Index pattern',
+            {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
+              defaultMessage: 'Data view',
             })}
           </EuiPopoverTitle>
           <EuiSelectable<{

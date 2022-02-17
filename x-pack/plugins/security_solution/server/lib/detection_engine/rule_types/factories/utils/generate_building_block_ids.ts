@@ -7,8 +7,8 @@
 
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { createHash } from 'crypto';
+import { ALERT_ANCESTORS } from '../../../../../../common/field_maps/field_names';
 import { Ancestor } from '../../../signals/types';
-import { ALERT_ANCESTORS } from '../../field_maps/field_names';
 import { RACAlert } from '../../types';
 
 /**

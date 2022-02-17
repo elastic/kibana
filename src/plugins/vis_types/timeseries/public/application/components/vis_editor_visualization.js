@@ -9,7 +9,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { pluck } from 'rxjs/operators';
 
 const MIN_CHART_HEIGHT = 300;

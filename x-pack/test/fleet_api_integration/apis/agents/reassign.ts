@@ -8,11 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('reassign agent(s)', () => {
     before(async () => {
@@ -190,7 +192,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
         expect(body.total).to.eql(4);
-        body.list.forEach((agent: any) => {
+        body.items.forEach((agent: any) => {
           expect(agent.policy_id).to.eql('policy2');
         });
       });
@@ -204,6 +206,18 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'INVALID_ID',
           })
           .expect(404);
+      });
+
+      it('should return a 403 if user lacks fleet all permissions', async () => {
+        await supertestWithoutAuth
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent2', 'agent3'],
+            policy_id: 'policy2',
+          })
+          .expect(403);
       });
     });
   });

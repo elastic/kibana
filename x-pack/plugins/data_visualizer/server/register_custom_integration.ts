@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { applicationPath, featureDescription, featureId, featureTitle } from '../common';
+import { applicationPath, featureId, featureTitle } from '../common/constants';
 
 export function registerWithCustomIntegrations(customIntegrations: CustomIntegrationsPluginSetup) {
   customIntegrations.registerCustomIntegration({
     id: featureId,
     title: featureTitle,
-    description: featureDescription,
+    description: i18n.translate('xpack.dataVisualizer.customIntegrationsDescription', {
+      defaultMessage:
+        'Upload data from a CSV, TSV, JSON or other log file to Elasticsearch for analysis.',
+    }),
     uiInternalPath: applicationPath,
     isBeta: false,
     icons: [

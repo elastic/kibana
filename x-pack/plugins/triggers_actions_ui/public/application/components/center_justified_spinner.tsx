@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const CenterJustifiedSpinner: React.FunctionComponent<Props> = ({ size }) => (
-  <EuiFlexGroup justifyContent="center">
+  <EuiFlexGroup data-test-subj="centerJustifiedSpinner" justifyContent="center">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size={size || 'xl'} />
     </EuiFlexItem>

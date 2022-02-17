@@ -87,7 +87,7 @@ const EnrichmentAccordion: React.FC<{
   const {
     id = `threat-details-item`,
     field,
-    provider,
+    feedName,
     type,
     value,
   } = getEnrichmentIdentifiers(enrichment);
@@ -98,7 +98,7 @@ const EnrichmentAccordion: React.FC<{
       key={accordionId}
       initialIsOpen={true}
       arrowDisplay="right"
-      buttonContent={<EnrichmentButtonContent field={field} provider={provider} value={value} />}
+      buttonContent={<EnrichmentButtonContent field={field} feedName={feedName} value={value} />}
       extraAction={
         isInvestigationTimeEnrichment(type) && (
           <EuiFlexItem grow={false}>

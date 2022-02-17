@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiPageTemplate } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetLinkTo } from './use_policy_trusted_apps_empty_hooks';
 
 interface CommonProps {
@@ -16,7 +16,7 @@ interface CommonProps {
 }
 
 export const PolicyTrustedAppsEmptyUnexisting = memo<CommonProps>(({ policyId, policyName }) => {
-  const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
+  const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName, { show: 'create' });
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt

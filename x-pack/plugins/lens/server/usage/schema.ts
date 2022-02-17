@@ -212,6 +212,28 @@ const savedSchema: MakeSchemaFrom<LensUsage['saved_overall']> = {
   },
 };
 
+const savedMultitermsSchema: MakeSchemaFrom<LensUsage['saved_multiterms_overall']> = {
+  multiterms_docs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of saved lens visualizations which are using at least one multiterms operation',
+    },
+  },
+  multiterms_terms_count: {
+    type: 'long',
+    _meta: {
+      description: 'Sum of terms used for multiterms operations of saved lens visualizations',
+    },
+  },
+  multiterms_operations_count: {
+    type: 'long',
+    _meta: {
+      description: 'Sum of operations using multiterms of saved lens visualizations',
+    },
+  },
+};
+
 export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {
   // LensClickUsage
   events_30_days: eventsSchema,
@@ -227,4 +249,8 @@ export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {
   saved_overall: savedSchema,
   saved_30_days: savedSchema,
   saved_90_days: savedSchema,
+
+  saved_multiterms_overall: savedMultitermsSchema,
+  saved_multiterms_30_days: savedMultitermsSchema,
+  saved_multiterms_90_days: savedMultitermsSchema,
 };

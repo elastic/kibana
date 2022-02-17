@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ColorPickerPopover, Props } from './color_picker_popover';
+export type { Props } from './color_picker_popover';
+export { ColorPickerPopover } from './color_picker_popover';

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
-import { MonitoringStartPluginDependencies } from './types';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
 import { Legacy } from './legacy_shims';
 
 import {
@@ -26,10 +25,6 @@ import {
   syncState,
   withNotifyOnErrors,
 } from '../../../../src/plugins/kibana_utils/public';
-
-interface Route {
-  params: { _g: unknown };
-}
 
 interface RawObject {
   [key: string]: unknown;
@@ -57,7 +52,6 @@ export interface MonitoringAppStateTransitions {
 const GLOBAL_STATE_KEY = '_g';
 const objectEquals = (objA: any, objB: any) => JSON.stringify(objA) === JSON.stringify(objB);
 
-// TODO: clean all angular references after angular is removed
 export class GlobalState {
   private readonly stateSyncRef: ISyncStateRef;
   private readonly stateContainer: StateContainer<
@@ -70,13 +64,10 @@ export class GlobalState {
   private readonly timefilterRef: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
 
   private lastAssignedState: MonitoringAppState = {};
-  private lastKnownGlobalState?: string;
 
   constructor(
     queryService: MonitoringStartPluginDependencies['data']['query'],
-    toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'],
-    rootScope: Partial<ng.IRootScopeService>,
-    ngLocation: Partial<ng.ILocationService>,
+    toasts: MonitoringStartServices['notifications']['toasts'],
     externalState: RawObject
   ) {
     this.timefilterRef = queryService.timefilter.timefilter;
@@ -102,9 +93,6 @@ export class GlobalState {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.lastAssignedState = this.getState();
-      if (!this.stateContainer.get() && this.lastKnownGlobalState) {
-        ngLocation.search?.(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace();
-      }
 
       // TODO: check if this is not needed after https://github.com/elastic/kibana/pull/109132 is merged
       if (Legacy.isInitializated()) {
@@ -112,15 +100,11 @@ export class GlobalState {
       }
 
       this.syncExternalState(externalState);
-      rootScope.$applyAsync?.();
     });
 
     this.syncQueryStateWithUrlManager = syncQueryStateWithUrl(queryService, this.stateStorage);
     this.stateSyncRef.start();
-    this.startHashSync(rootScope, ngLocation);
     this.lastAssignedState = this.getState();
-
-    rootScope.$on?.('$destroy', () => this.destroy());
   }
 
   private syncExternalState(externalState: { [key: string]: unknown }) {
@@ -135,24 +119,6 @@ export class GlobalState {
         externalState[key] = currentState[key];
       }
     }
-  }
-
-  private startHashSync(
-    rootScope: Partial<ng.IRootScopeService>,
-    ngLocation: Partial<ng.ILocationService>
-  ) {
-    rootScope.$on?.(
-      '$routeChangeStart',
-      (_: { preventDefault: () => void }, newState: Route, oldState: Route) => {
-        const currentGlobalState = oldState?.params?._g;
-        const nextGlobalState = newState?.params?._g;
-        if (!nextGlobalState && currentGlobalState && typeof currentGlobalState === 'string') {
-          newState.params._g = currentGlobalState;
-          ngLocation.search?.(`${GLOBAL_STATE_KEY}=${currentGlobalState}`).replace();
-        }
-        this.lastKnownGlobalState = (nextGlobalState || currentGlobalState) as string;
-      }
-    );
   }
 
   public setState(state?: { [key: string]: unknown }) {

@@ -16,10 +16,10 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -33,7 +33,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -407,6 +407,14 @@ describe('create()', () => {
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
         },
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -441,6 +449,7 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
@@ -598,6 +607,14 @@ describe('create()', () => {
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
+        },
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+          },
         },
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -1013,6 +1030,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
@@ -1209,6 +1227,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
@@ -1374,6 +1393,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
@@ -1547,6 +1567,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1675,6 +1696,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1803,6 +1825,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1921,6 +1944,52 @@ describe('create()', () => {
       apiKeyId: '123',
       createdAt,
     });
+  });
+
+  test('fails if task scheduling fails due to conflict', async () => {
+    const data = getMockData();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockRejectedValueOnce(
+      Object.assign(new Error('Conflict!'), { statusCode: 409 })
+    );
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Conflict!"`
+    );
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
@@ -2108,6 +2177,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -2207,6 +2277,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',

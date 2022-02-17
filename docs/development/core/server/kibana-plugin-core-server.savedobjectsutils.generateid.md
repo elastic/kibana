@@ -13,5 +13,5 @@ static generateId(): string;
 ```
 <b>Returns:</b>
 
-`string`
+string
 

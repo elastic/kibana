@@ -36,13 +36,16 @@ export async function updateActionConnector({
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  const res = await http.put(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`, {
-    body: JSON.stringify({
-      name: connector.name,
-      config: connector.config,
-      secrets: connector.secrets,
-    }),
-  });
+  const res = await http.put<Parameters<typeof rewriteBodyRes>[0]>(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`,
+    {
+      body: JSON.stringify({
+        name: connector.name,
+        config: connector.config,
+        secrets: connector.secrets,
+      }),
+    }
+  );
 
   return rewriteBodyRes(res);
 }

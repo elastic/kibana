@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RowRenderer } from '../../../../../../common';
+import { RowRenderer } from '../../../../../../common/types';
 import { Ecs } from '../../../../../../common/ecs';
 
 export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer | null =>

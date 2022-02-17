@@ -12,6 +12,7 @@ import { ServiceNowActionConnector } from './types';
 
 const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
 const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
+const SERVICENOW_ITOM_ACTION_TYPE_ID = '.servicenow-itom';
 let actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 
 beforeAll(() => {
@@ -20,7 +21,11 @@ beforeAll(() => {
 });
 
 describe('actionTypeRegistry.get() works', () => {
-  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+  [
+    SERVICENOW_ITSM_ACTION_TYPE_ID,
+    SERVICENOW_SIR_ACTION_TYPE_ID,
+    SERVICENOW_ITOM_ACTION_TYPE_ID,
+  ].forEach((id) => {
     test(`${id}: action type static data is as expected`, () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       expect(actionTypeModel.id).toEqual(id);
@@ -29,7 +34,11 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('servicenow connector validation', () => {
-  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+  [
+    SERVICENOW_ITSM_ACTION_TYPE_ID,
+    SERVICENOW_SIR_ACTION_TYPE_ID,
+    SERVICENOW_ITOM_ACTION_TYPE_ID,
+  ].forEach((id) => {
     test(`${id}: connector validation succeeds when connector config is valid`, async () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       const actionConnector = {
@@ -43,7 +52,7 @@ describe('servicenow connector validation', () => {
         isPreconfigured: false,
         config: {
           apiUrl: 'https://dev94428.service-now.com/',
-          isLegacy: false,
+          usesTableApi: false,
         },
       } as ServiceNowActionConnector;
 
@@ -51,7 +60,7 @@ describe('servicenow connector validation', () => {
         config: {
           errors: {
             apiUrl: [],
-            isLegacy: [],
+            usesTableApi: [],
           },
         },
         secrets: {
@@ -79,7 +88,7 @@ describe('servicenow connector validation', () => {
         config: {
           errors: {
             apiUrl: ['URL is required.'],
-            isLegacy: [],
+            usesTableApi: [],
           },
         },
         secrets: {
@@ -106,7 +115,7 @@ describe('servicenow action params validation', () => {
       });
     });
 
-    test(`${id}: params validation fails when body is not valid`, async () => {
+    test(`${id}: params validation fails when short_description is not valid`, async () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       const actionParams = {
         subActionParams: { incident: { short_description: '' }, comments: [] },
@@ -117,6 +126,24 @@ describe('servicenow action params validation', () => {
           ['subActionParams.incident.short_description']: ['Short description is required.'],
         },
       });
+    });
+  });
+
+  test(`${SERVICENOW_ITOM_ACTION_TYPE_ID}: action params validation succeeds when action params is valid`, async () => {
+    const actionTypeModel = actionTypeRegistry.get(SERVICENOW_ITOM_ACTION_TYPE_ID);
+    const actionParams = { subActionParams: { severity: 'Critical' } };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { ['severity']: [] },
+    });
+  });
+
+  test(`${SERVICENOW_ITOM_ACTION_TYPE_ID}: params validation fails when severity is not valid`, async () => {
+    const actionTypeModel = actionTypeRegistry.get(SERVICENOW_ITOM_ACTION_TYPE_ID);
+    const actionParams = { subActionParams: { severity: null } };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { ['severity']: ['Severity is required.'] },
     });
   });
 });

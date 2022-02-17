@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiFlyoutBody } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
 
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
@@ -62,14 +62,15 @@ export const EndpointDetailsFlyoutTabs = memo(
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
-      <EndpointDetailsTab tab={tab} isSelected={tab.id === selectedTab?.id} />
+      <EndpointDetailsTab key={tab.id} tab={tab} isSelected={tab.id === selectedTab?.id} />
     ));
 
     return (
       <>
         <EndpointDetailsFlyoutHeader hostname={hostname} hasBorder>
-          <EuiSpacer size="s" />
-          <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
+          <EuiTabs bottomBorder={false} style={{ marginBottom: '-25px' }}>
+            {renderTabs}
+          </EuiTabs>
         </EndpointDetailsFlyoutHeader>
         <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
           {selectedTab?.content}

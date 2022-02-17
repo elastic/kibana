@@ -106,6 +106,14 @@ export class GisPageObject extends FtrService {
     });
   }
 
+  async waitForLayersToLoadMinimizedLayerControl() {
+    this.log.debug('Wait for layers to load (minimized layer control)');
+    await this.retry.try(async () => {
+      const tableOfContents = await this.testSubjects.find('mapExpandLayerControlButton');
+      await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
+    });
+  }
+
   async waitForLayerDeleted(layerName: string) {
     this.log.debug('Wait for layer deleted');
     await this.retry.waitFor('Layer to be deleted', async () => {
@@ -148,13 +156,13 @@ export class GisPageObject extends FtrService {
     await this.renderable.waitForRender();
   }
 
-  async saveMap(name: string, redirectToOrigin = true, tags?: string[]) {
+  async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
     await this.testSubjects.click('mapSaveButton');
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
       redirectToOrigin,
-      saveAsNew: true,
+      saveAsNew,
     });
     if (tags) {
       await this.testSubjects.click('savedObjectTagSelector');
@@ -164,6 +172,7 @@ export class GisPageObject extends FtrService {
       await this.testSubjects.click('savedObjectTitle');
     }
     await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveAndReturnButton() {
@@ -285,12 +294,26 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('layerVisibilityToggleButton');
   }
 
+  async openLegend() {
+    const isOpen = await this.testSubjects.exists('mapLayerTOC');
+    if (isOpen === false) {
+      await this.testSubjects.click('mapExpandLayerControlButton');
+      await this.testSubjects.existOrFail('mapLayerTOC');
+    }
+  }
+
   async closeLegend() {
     const isOpen = await this.testSubjects.exists('mapLayerTOC');
     if (isOpen) {
       await this.testSubjects.click('mapToggleLegendButton');
       await this.testSubjects.waitForDeleted('mapLayerTOC');
     }
+  }
+
+  async clickFitToData() {
+    this.log.debug('Fit to data');
+    await this.testSubjects.click('fitToData');
+    await this.waitForMapPanAndZoom();
   }
 
   async clickFitToBounds(layerName: string) {
@@ -307,6 +330,18 @@ export class GisPageObject extends FtrService {
     if (!isOpen) {
       await this.testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
     }
+  }
+
+  async getLayerTocTooltipMsg(layerName: string) {
+    const escapedDisplayName = escapeLayerName(layerName);
+    await this.retry.try(async () => {
+      await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
+      const isOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      if (!isOpen) {
+        throw new Error('layer TOC tooltip not open');
+      }
+    });
+    return await this.testSubjects.getVisibleText('layerTocTooltip');
   }
 
   async openLayerPanel(layerName: string) {
@@ -356,14 +391,6 @@ export class GisPageObject extends FtrService {
     return await this.testSubjects.exists(
       `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
     );
-  }
-
-  async hasFilePickerLoadedFile(fileName: string) {
-    this.log.debug(`Has file picker loaded file ${fileName}`);
-    const filePickerText = await this.find.byCssSelector('.euiFilePicker__promptText');
-    const filePickerTextContent = await filePickerText.getVisibleText();
-
-    return fileName === filePickerTextContent;
   }
 
   /*
@@ -426,62 +453,6 @@ export class GisPageObject extends FtrService {
     }
   }
 
-  async importFileButtonEnabled() {
-    this.log.debug(`Check "Import file" button enabled`);
-    const importFileButton = await this.testSubjects.find('importFileButton');
-    const isDisabled = await importFileButton.getAttribute('disabled');
-    return !isDisabled;
-  }
-
-  async importLayerReadyForAdd() {
-    this.log.debug(`Wait until import complete`);
-    await this.testSubjects.find('indexRespCopyButton', 5000);
-    let layerAddReady = false;
-    await this.retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
-      layerAddReady = await this.importFileButtonEnabled();
-      return layerAddReady;
-    });
-    return layerAddReady;
-  }
-
-  async clickImportFileButton() {
-    this.log.debug(`Click "Import file" button`);
-    await this.testSubjects.click('importFileButton');
-  }
-
-  async setIndexName(indexName: string) {
-    this.log.debug(`Set index name to: ${indexName}`);
-    await this.testSubjects.setValue('fileUploadIndexNameInput', indexName);
-  }
-
-  async setIndexType(indexType: string) {
-    this.log.debug(`Set index type to: ${indexType}`);
-    await this.testSubjects.selectValue('fileImportIndexSelect', indexType);
-  }
-
-  async indexTypeOptionExists(indexType: string) {
-    this.log.debug(`Check index type "${indexType}" available`);
-    return await this.find.existsByCssSelector(
-      `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
-    );
-  }
-
-  async clickCopyButton(dataTestSubj: string): Promise<string> {
-    this.log.debug(`Click ${dataTestSubj} copy button`);
-
-    await this.testSubjects.click(dataTestSubj);
-
-    return await this.browser.getClipboardValue();
-  }
-
-  async getIndexResults() {
-    return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
-  }
-
-  async getIndexPatternResults() {
-    return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
-  }
-
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
@@ -520,25 +491,27 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
-  async selectEMSBoundariesSource() {
-    this.log.debug(`Select EMS boundaries source`);
-    await this.testSubjects.click('emsBoundaries');
+  async selectDocumentsSource() {
+    this.log.debug(`Select Documents source`);
+    await this.testSubjects.click('documents');
   }
 
-  async selectGeoJsonUploadSource() {
-    this.log.debug(`Select upload geojson source`);
-    await this.testSubjects.click('uploadGeoJson');
-  }
-
-  async uploadJsonFileForIndexing(path: string) {
-    await this.common.setFileInputPath(path);
-    this.log.debug(`File selected`);
-
-    await this.header.waitUntilLoadingHasFinished();
+  async selectGeoIndexPatternLayer(name: string) {
+    this.log.debug(`Select index pattern ${name}`);
+    await this.comboBox.set('mapGeoIndexPatternSelect', name);
     await this.waitForLayersToLoad();
   }
 
-  // Returns first layer by default
+  async selectEMSBoundariesSource() {
+    this.log.debug(`Select Elastic Maps Service boundaries source`);
+    await this.testSubjects.click('emsBoundaries');
+  }
+
+  async selectFileUploadCard() {
+    this.log.debug(`Select upload file card`);
+    await this.testSubjects.click('uploadFile');
+  }
+
   async selectVectorLayer(vectorLayerName: string) {
     this.log.debug(`Select EMS vector layer ${vectorLayerName}`);
     if (!vectorLayerName) {

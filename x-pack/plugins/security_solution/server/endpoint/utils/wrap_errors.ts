@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointError } from '../errors';
+import { EndpointError } from '../../../common/endpoint/errors';
 
 /**
  * Will wrap the given Error with `EndpointError`, which will help getting a good picture of where in

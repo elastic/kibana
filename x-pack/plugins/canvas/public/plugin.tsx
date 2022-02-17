@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { ReportingStart } from '../../reporting/public';
 import {
   CoreSetup,
@@ -35,9 +36,8 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
-import { pluginServiceRegistry } from './services/kibana';
 
-export { CoreStart, CoreSetup };
+export type { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -63,6 +63,7 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -121,8 +122,20 @@ export class CanvasPlugin
         srcPlugin.start(coreStart, startPlugins);
 
         const { pluginServices } = await import('./services');
+        const { pluginServiceRegistry } = await import('./services/kibana');
+
         pluginServices.setRegistry(
-          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
+          pluginServiceRegistry.start({
+            coreStart,
+            startPlugins,
+            appUpdater: this.appUpdater,
+            initContext: this.initContext,
+          })
+        );
+
+        const { expressions, presentationUtil } = startPlugins;
+        await presentationUtil.registerExpressionsLanguage(
+          Object.values(expressions.getFunctions())
         );
 
         // Load application bundle

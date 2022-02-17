@@ -27,22 +27,6 @@ describe('TutorialService', () => {
       }).toThrow();
     });
 
-    test('allows multiple register directory notice calls', () => {
-      const setup = new TutorialService().setup();
-      expect(() => {
-        setup.registerDirectoryNotice('abc', () => <div />);
-        setup.registerDirectoryNotice('def', () => <span />);
-      }).not.toThrow();
-    });
-
-    test('throws when same directory notice is registered twice', () => {
-      const setup = new TutorialService().setup();
-      expect(() => {
-        setup.registerDirectoryNotice('abc', () => <div />);
-        setup.registerDirectoryNotice('abc', () => <span />);
-      }).toThrow();
-    });
-
     test('allows multiple register directory header link calls', () => {
       const setup = new TutorialService().setup();
       expect(() => {
@@ -88,22 +72,6 @@ describe('TutorialService', () => {
       setup.setVariable('abc', 123);
       setup.setVariable('def', { subKey: 456 });
       expect(service.getVariables()).toEqual({ abc: 123, def: { subKey: 456 } });
-    });
-  });
-
-  describe('getDirectoryNotices', () => {
-    test('returns empty array', () => {
-      const service = new TutorialService();
-      expect(service.getDirectoryNotices()).toEqual([]);
-    });
-
-    test('returns last state of register calls', () => {
-      const service = new TutorialService();
-      const setup = service.setup();
-      const notices = [() => <div />, () => <span />];
-      setup.registerDirectoryNotice('abc', notices[0]);
-      setup.registerDirectoryNotice('def', notices[1]);
-      expect(service.getDirectoryNotices()).toEqual(notices);
     });
   });
 

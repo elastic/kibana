@@ -14,7 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { LogEntryCategoriesSetupView } from './log_entry_categories_setup_view';
 import { LogEntryRateSetupView } from './log_entry_rate_setup_view';

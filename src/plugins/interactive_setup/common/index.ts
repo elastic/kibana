@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { InteractiveSetupViewState, EnrollmentToken, Certificate, PingResult } from './types';
+export type { EnrollmentToken, Certificate, PingResult, StatusResult } from './types';
 export { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
 export {
   ERROR_CONFIGURE_FAILURE,
@@ -16,5 +16,6 @@ export {
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
   ERROR_PING_FAILURE,
+  ERROR_COMPATIBILITY_FAILURE,
   VERIFICATION_CODE_LENGTH,
 } from './constants';

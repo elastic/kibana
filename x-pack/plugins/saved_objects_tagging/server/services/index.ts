@@ -6,4 +6,5 @@
  */
 
 export { TagsClient, savedObjectToTag, TagValidationError } from './tags';
-export { IAssignmentService, AssignmentService, AssignmentError } from './assignments';
+export type { IAssignmentService } from './assignments';
+export { AssignmentService, AssignmentError } from './assignments';

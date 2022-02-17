@@ -7,13 +7,18 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject, TestBed, TestBedConfig } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  findTestSubject,
+  TestBed,
+  AsyncTestBedConfig,
+} from '@kbn/test-jest-helpers';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
 import { withAppContext } from './app_context.mock';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/status`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/status`,

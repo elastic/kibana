@@ -8,7 +8,7 @@
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -70,9 +70,9 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
-          ({ name: varName }) => inputStreamValidationResults.vars?.[varName]?.length
+          ({ name: varName }) => inputStreamValidationResults?.vars?.[varName]?.length
         ).length,
-      [advancedVars, inputStreamValidationResults.vars]
+      [advancedVars, inputStreamValidationResults?.vars]
     );
 
     return (
@@ -106,8 +106,12 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
         <FlexItemWithMaxWidth>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
+              if (!packagePolicyInputStream?.vars) return null;
               const { name: varName, type: varType } = varDef;
-              const { value, frozen } = packagePolicyInputStream.vars![varName];
+              const varConfigEntry = packagePolicyInputStream.vars?.[varName];
+              const value = varConfigEntry?.value;
+              const frozen = varConfigEntry?.frozen ?? false;
+
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField
@@ -125,7 +129,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                         },
                       });
                     }}
-                    errors={inputStreamValidationResults.vars![varName]}
+                    errors={inputStreamValidationResults?.vars![varName]}
                     forceShowErrors={forceShowErrors}
                   />
                 </EuiFlexItem>
@@ -163,8 +167,10 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
+                      if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
-                      const value = packagePolicyInputStream.vars![varName].value;
+                      const value = packagePolicyInputStream.vars?.[varName]?.value;
+
                       return (
                         <EuiFlexItem key={varName}>
                           <PackagePolicyInputVarField
@@ -181,7 +187,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                                 },
                               });
                             }}
-                            errors={inputStreamValidationResults.vars![varName]}
+                            errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
                           />
                         </EuiFlexItem>

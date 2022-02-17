@@ -5,55 +5,54 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
-import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import type { FleetConfigType } from '../../../common';
 
-import type { FleetRequestHandlerContext } from '../../types/request_context';
+import type { FleetAuthzRouter } from '../security';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
-export const registerFleetSetupRoute = (router: IRouter<FleetRequestHandlerContext>) => {
+export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: SETUP_API_ROUTE,
       validate: false,
-      // if this route is set to `-all`, a read-only user get a 404 for this route
-      // and will see `Unable to initialize Ingest Manager` in the UI
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { setup: true },
+      },
     },
     fleetSetupHandler
   );
 };
 
 // That route is used by agent to setup Fleet
-export const registerCreateFleetSetupRoute = (router: IRouter<FleetRequestHandlerContext>) => {
+export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { setup: true },
+      },
     },
     fleetSetupHandler
   );
 };
 
-export const registerGetFleetStatusRoute = (router: IRouter<FleetRequestHandlerContext>) => {
+export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { setup: true },
+      },
     },
     getFleetStatusHandler
   );
 };
 
-export const registerRoutes = (
-  router: IRouter<FleetRequestHandlerContext>,
-  config: FleetConfigType
-) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Ingest manager setup
   registerFleetSetupRoute(router);
 

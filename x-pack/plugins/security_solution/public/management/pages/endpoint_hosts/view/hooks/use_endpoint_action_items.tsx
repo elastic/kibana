@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { APP_ID } from '../../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
@@ -65,9 +65,9 @@ export const useEndpointActionItems = (
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
-          icon: 'logoSecurity',
+          icon: 'lockOpen',
           key: 'unIsolateHost',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: {
             path: endpointUnIsolatePath,
           },
@@ -83,9 +83,9 @@ export const useEndpointActionItems = (
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
-          icon: 'logoSecurity',
+          icon: 'lock',
           key: 'isolateHost',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: {
             path: endpointIsolatePath,
           },
@@ -105,7 +105,7 @@ export const useEndpointActionItems = (
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
           key: 'hostDetailsLink',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: { path: `/hosts/${endpointHostName}` },
           href: getAppUrl({ path: `/hosts/${endpointHostName}` }),
           children: (

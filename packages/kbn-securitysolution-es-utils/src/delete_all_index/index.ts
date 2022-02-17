@@ -25,7 +25,7 @@ export const deleteAllIndex = async (
       {
         index: pattern,
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
 
     // @ts-expect-error status doesn't exist on response

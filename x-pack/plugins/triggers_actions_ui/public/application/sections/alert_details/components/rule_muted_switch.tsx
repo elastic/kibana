@@ -8,20 +8,20 @@
 import React, { useState } from 'react';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
-import { AlertInstanceListItem } from './alert_instances';
+import { AlertListItem } from './alerts';
 
 interface ComponentOpts {
-  alertInstance: AlertInstanceListItem;
-  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>;
+  alert: AlertListItem;
+  onMuteAction: (instance: AlertListItem) => Promise<void>;
   disabled: boolean;
 }
 
 export const RuleMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
-  alertInstance,
+  alert,
   onMuteAction,
   disabled,
 }: ComponentOpts) => {
-  const [isMuted, setIsMuted] = useState<boolean>(alertInstance?.isMuted);
+  const [isMuted, setIsMuted] = useState<boolean>(alert?.isMuted);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   return isUpdating ? (
@@ -34,11 +34,11 @@ export const RuleMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
       checked={isMuted}
       onChange={async () => {
         setIsUpdating(true);
-        await onMuteAction(alertInstance);
+        await onMuteAction(alert);
         setIsMuted(!isMuted);
         setIsUpdating(false);
       }}
-      data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
+      data-test-subj={`muteAlertButton_${alert.alert}`}
       showLabel={false}
       label="mute"
     />

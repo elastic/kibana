@@ -9,9 +9,7 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { KibanaUtilsPublicPlugin } from './plugin';
 
-// TODO: https://github.com/elastic/kibana/issues/109893
-/* eslint-disable @kbn/eslint/no_export_all */
-
+export type { Get, Set, UiComponent, UiComponentInstance } from '../common';
 export {
   AbortError,
   abortSignalToPromise,
@@ -20,20 +18,58 @@ export {
   Defer,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  Get,
   of,
-  Set,
-  UiComponent,
-  UiComponentInstance,
   url,
   createGetterSetter,
 } from '../common';
-export * from './core';
-export * from '../common/errors';
-export * from './render_complete';
-export * from './resize_checker';
-export * from '../common/state_containers';
-export * from './storage';
+export type { StartServicesGetter } from './core';
+export { createStartServicesGetter } from './core';
+export type { KibanaServerError } from '../common/errors';
+export {
+  KbnError,
+  CharacterNotAllowedInField,
+  SavedFieldNotFound,
+  SavedObjectNotFound,
+  SavedFieldTypeInvalidForAgg,
+  InvalidJSONProperty,
+  DuplicateField,
+} from '../common/errors';
+export {
+  RenderCompleteListener,
+  RenderCompleteDispatcher,
+  dispatchRenderComplete,
+  dispatchRenderStart,
+} from './render_complete';
+export { ResizeChecker } from './resize_checker';
+export type {
+  BaseState,
+  BaseStateContainer,
+  StateContainer,
+  ReduxLikeStateContainer,
+  Dispatch,
+  Middleware,
+  Selector,
+  Comparator,
+  MapStateToProps,
+  Connect,
+  Reducer,
+  UnboxState,
+  PureSelectorToSelector,
+  PureSelectorsToSelectors,
+  EnsurePureSelector,
+  EnsurePureTransition,
+  PureSelector,
+  PureTransition,
+  CreateStateContainerOptions,
+} from '../common/state_containers';
+export {
+  createStateContainerReactHelpers,
+  useContainerSelector,
+  useContainerState,
+  createStateContainer,
+} from '../common/state_containers';
+export type { IStorageWrapper, IStorage } from './storage';
+export { Storage } from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export {
   createStateHash,
@@ -56,11 +92,7 @@ export {
   replaceUrlQuery,
   replaceUrlHashQuery,
 } from './state_management/url';
-export {
-  syncState,
-  syncStates,
-  createKbnUrlStateStorage,
-  createSessionStorageStateStorage,
+export type {
   IStateSyncConfig,
   ISyncStateRef,
   IKbnUrlStateStorage,
@@ -69,7 +101,13 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
-export { Configurable, CollectConfigProps } from './ui';
+export {
+  syncState,
+  syncStates,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
+} from './state_sync';
+export type { Configurable, CollectConfigProps } from './ui';
 export {
   removeQueryParam,
   redirectWhenMissing,
@@ -79,9 +117,8 @@ export {
   createQueryParamObservable,
 } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
-export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
 
-export { KibanaUtilsSetup } from './plugin';
+export type { KibanaUtilsSetup } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new KibanaUtilsPublicPlugin(initializerContext);

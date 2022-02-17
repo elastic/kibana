@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import { EuiFormControlLayout } from '@elastic/eui';
 import { CodeEditor, Props } from './code_editor';
 

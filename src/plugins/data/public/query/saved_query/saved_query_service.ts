@@ -6,163 +6,64 @@
  * Side Public License, v 1.
  */
 
-import { isObject } from 'lodash';
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
-import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
+import { HttpStart } from 'src/core/public';
+import { SavedQuery } from './types';
+import type { SavedQueryAttributes } from '../../../common';
 
-type SerializedSavedQueryAttributes = SavedObjectAttributes &
-  SavedQueryAttributes & {
-    query: {
-      query: string;
-      language: string;
-    };
+export const createSavedQueryService = (http: HttpStart) => {
+  const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
+    const savedQuery = await http.post<SavedQuery>('/api/saved_query/_create', {
+      body: JSON.stringify(attributes),
+    });
+    return savedQuery;
   };
 
-export const createSavedQueryService = (
-  savedObjectsClient: SavedObjectsClientContract
-): SavedQueryService => {
-  const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
-    if (!attributes.title.length) {
-      // title is required extra check against circumventing the front end
-      throw new Error('Cannot create saved query without a title');
-    }
-
-    const query = {
-      query:
-        typeof attributes.query.query === 'string'
-          ? attributes.query.query
-          : JSON.stringify(attributes.query.query),
-      language: attributes.query.language,
-    };
-
-    const queryObject: SerializedSavedQueryAttributes = {
-      title: attributes.title.trim(), // trim whitespace before save as an extra precaution against circumventing the front end
-      description: attributes.description,
-      query,
-    };
-
-    if (attributes.filters) {
-      queryObject.filters = attributes.filters;
-    }
-
-    if (attributes.timefilter) {
-      queryObject.timefilter = attributes.timefilter;
-    }
-
-    let rawQueryResponse;
-    if (!overwrite) {
-      rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
-        id: attributes.title,
-      });
-    } else {
-      rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
-        id: attributes.title,
-        overwrite: true,
-      });
-    }
-
-    if (rawQueryResponse.error) {
-      throw new Error(rawQueryResponse.error.message);
-    }
-
-    return parseSavedQueryObject(rawQueryResponse);
+  const updateQuery = async (id: string, attributes: SavedQueryAttributes) => {
+    const savedQuery = await http.put<SavedQuery>(`/api/saved_query/${id}`, {
+      body: JSON.stringify(attributes),
+    });
+    return savedQuery;
   };
+
   // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
-    const count = await getSavedQueryCount();
-    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
-      type: 'query',
-      perPage: count,
-      page: 1,
-    });
-    return response.savedObjects.map(
-      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-        parseSavedQueryObject(savedObject)
+    const { savedQueries } = await http.post<{ savedQueries: SavedQuery[] }>(
+      '/api/saved_query/_all'
     );
+    return savedQueries;
   };
+
   // findSavedQueries will do a 'match_all' if no search string is passed in
   const findSavedQueries = async (
-    searchText: string = '',
+    search: string = '',
     perPage: number = 50,
-    activePage: number = 1
+    page: number = 1
   ): Promise<{ total: number; queries: SavedQuery[] }> => {
-    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
-      type: 'query',
-      search: searchText,
-      searchFields: ['title^5', 'description'],
-      sortField: '_score',
-      perPage,
-      page: activePage,
+    const { total, savedQueries: queries } = await http.post<{
+      savedQueries: SavedQuery[];
+      total: number;
+    }>('/api/saved_query/_find', {
+      body: JSON.stringify({ page, perPage, search }),
     });
 
-    return {
-      total: response.total,
-      queries: response.savedObjects.map(
-        (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-          parseSavedQueryObject(savedObject)
-      ),
-    };
+    return { total, queries };
   };
 
-  const getSavedQuery = async (id: string): Promise<SavedQuery> => {
-    const { saved_object: savedObject, outcome } =
-      await savedObjectsClient.resolve<SerializedSavedQueryAttributes>('query', id);
-    if (outcome === 'conflict') {
-      throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
-    } else if (savedObject.error) {
-      throw new Error(savedObject.error.message);
-    }
-    return parseSavedQueryObject(savedObject);
+  const getSavedQuery = (id: string): Promise<SavedQuery> => {
+    return http.get<SavedQuery>(`/api/saved_query/${id}`);
   };
 
-  const deleteSavedQuery = async (id: string) => {
-    return await savedObjectsClient.delete('query', id);
-  };
-
-  const parseSavedQueryObject = (savedQuery: {
-    id: string;
-    attributes: SerializedSavedQueryAttributes;
-  }) => {
-    let queryString: string | object = savedQuery.attributes.query.query;
-
-    try {
-      const parsedQueryString: object = JSON.parse(savedQuery.attributes.query.query);
-      if (isObject(parsedQueryString)) {
-        queryString = parsedQueryString;
-      }
-    } catch (e) {} // eslint-disable-line no-empty
-
-    const savedQueryItems: SavedQueryAttributes = {
-      title: savedQuery.attributes.title || '',
-      description: savedQuery.attributes.description || '',
-      query: {
-        query: queryString,
-        language: savedQuery.attributes.query.language,
-      },
-    };
-    if (savedQuery.attributes.filters) {
-      savedQueryItems.filters = savedQuery.attributes.filters;
-    }
-    if (savedQuery.attributes.timefilter) {
-      savedQueryItems.timefilter = savedQuery.attributes.timefilter;
-    }
-    return {
-      id: savedQuery.id,
-      attributes: savedQueryItems,
-    };
+  const deleteSavedQuery = (id: string) => {
+    return http.delete<{}>(`/api/saved_query/${id}`);
   };
 
   const getSavedQueryCount = async (): Promise<number> => {
-    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
-      type: 'query',
-      perPage: 0,
-      page: 1,
-    });
-    return response.total;
+    return http.get<number>('/api/saved_query/_count');
   };
 
   return {
-    saveQuery,
+    createQuery,
+    updateQuery,
     getAllSavedQueries,
     findSavedQueries,
     getSavedQuery,

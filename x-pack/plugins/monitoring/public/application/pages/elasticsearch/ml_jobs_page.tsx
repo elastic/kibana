@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchMLJobs } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import type { MLJobs } from '../../../types';
@@ -56,7 +56,7 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/ml_jobs`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<{ rows: MLJobs; clusterStatus: unknown }>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -67,8 +67,8 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
       }),
     });
     setData({
-      clusterStatus: response.clusterStatus,
-      jobs: (response.rows as MLJobs).map((job) => {
+      clusterStatus: response?.clusterStatus,
+      jobs: response?.rows?.map((job) => {
         if ('ml' in job && job.ml?.job) {
           return {
             ...job.ml.job,

@@ -34,47 +34,43 @@ export class ComponentRegistry {
 
   registry: { [key in Id]?: RegistryComponent } = {};
 
-  /**
-   * Attempts to register the provided component, with the ability to optionally allow
-   * the component to override an existing one.
-   *
-   * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.
-   *
-   * @param {*} id the id of the component to register
-   * @param {*} component the component
-   * @param {*} allowOverride (default: false) - optional flag to allow this component to override a previously registered component
-   */
-  private register(id: Id, component: RegistryComponent, allowOverride = false) {
-    if (!allowOverride && id in this.registry) {
-      throw new Error(`Component with id ${id} is already registered.`);
-    }
-
-    // Setting a display name if one does not already exist.
-    // This enhances the snapshots, as well as the debugging experience.
-    if (!component.displayName) {
-      component.displayName = id;
-    }
-
-    this.registry[id] = component;
-  }
-
-  /**
-   * Retrieve a registered component by its ID.
-   * If the component does not exist, then an exception is thrown.
-   *
-   * @param {*} id the ID of the component to retrieve
-   */
-  private get(id: Id): RegistryComponent {
-    return this.registry[id] || ComponentRegistry.defaultRegistry[id];
-  }
-
   setup = {
     componentType: ComponentRegistry.componentType,
-    register: this.register.bind(this),
+    /**
+     * Attempts to register the provided component, with the ability to optionally allow
+     * the component to override an existing one.
+     *
+     * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.
+     *
+     * @param id the id of the component to register
+     * @param component the component
+     * @param allowOverride (default: false) - optional flag to allow this component to override a previously registered component
+     */
+    register: (id: Id, component: RegistryComponent, allowOverride = false) => {
+      if (!allowOverride && id in this.registry) {
+        throw new Error(`Component with id ${id} is already registered.`);
+      }
+
+      // Setting a display name if one does not already exist.
+      // This enhances the snapshots, as well as the debugging experience.
+      if (!component.displayName) {
+        component.displayName = id;
+      }
+
+      this.registry[id] = component;
+    },
   };
 
   start = {
     componentType: ComponentRegistry.componentType,
-    get: this.get.bind(this),
+    /**
+     * Retrieve a registered component by its ID.
+     * If the component does not exist, then an exception is thrown.
+     *
+     * @param id the ID of the component to retrieve
+     */
+    get: (id: Id): RegistryComponent => {
+      return this.registry[id] || ComponentRegistry.defaultRegistry[id];
+    },
   };
 }

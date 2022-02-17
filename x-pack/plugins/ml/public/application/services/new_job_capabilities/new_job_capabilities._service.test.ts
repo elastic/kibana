@@ -20,7 +20,7 @@ jest.mock('../ml_api_service', () => ({
   },
 }));
 
-const indexPattern = {
+const dataView = {
   id: 'cloudwatch-*',
   title: 'cloudwatch-*',
 } as unknown as DataView;
@@ -28,7 +28,7 @@ const indexPattern = {
 describe('new_job_capabilities_service', () => {
   describe('cloudwatch newJobCaps()', () => {
     it('can construct job caps objects from endpoint json', async () => {
-      await newJobCapsService.initializeFromIndexPattern(indexPattern);
+      await newJobCapsService.initializeFromDataVIew(dataView);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
       const networkOutField = fields.find((f) => f.id === 'NetworkOut') || { aggs: [] };
@@ -47,7 +47,7 @@ describe('new_job_capabilities_service', () => {
     });
 
     it('job caps including text fields', async () => {
-      await newJobCapsService.initializeFromIndexPattern(indexPattern, true, false);
+      await newJobCapsService.initializeFromDataVIew(dataView, true, false);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
       expect(fields).toHaveLength(13); // one more field
@@ -55,7 +55,7 @@ describe('new_job_capabilities_service', () => {
     });
 
     it('job caps excluding event rate', async () => {
-      await newJobCapsService.initializeFromIndexPattern(indexPattern, false, true);
+      await newJobCapsService.initializeFromDataVIew(dataView, false, true);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
       expect(fields).toHaveLength(11); // one less field

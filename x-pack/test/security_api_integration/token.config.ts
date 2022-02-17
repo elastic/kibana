@@ -6,10 +6,16 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
 
   return {
     testFiles: [require.resolve('./tests/token')],
@@ -33,6 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         '--xpack.security.authc.providers=["token"]',
       ],
     },

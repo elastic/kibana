@@ -52,19 +52,22 @@ export const HiddenDocuments: React.FC = () => {
       isLoading={hiddenDocumentsLoading}
     >
       {hasDocuments ? (
-        documents.map((document, index) => (
-          <CurationResult
-            key={document.id}
-            result={convertToResultFormat(document)}
-            index={index}
-            actions={[
-              {
-                ...SHOW_DOCUMENT_ACTION,
-                onClick: () => removeHiddenId(document.id),
-              },
-            ]}
-          />
-        ))
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {documents.map((document, index) => (
+            <EuiFlexItem key={index}>
+              <CurationResult
+                result={convertToResultFormat(document)}
+                index={index}
+                actions={[
+                  {
+                    ...SHOW_DOCUMENT_ACTION,
+                    onClick: () => removeHiddenId(document.id),
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       ) : (
         <EuiEmptyPrompt
           titleSize="s"

@@ -67,13 +67,18 @@ describe('updateFailureIssue()', () => {
     await updateFailureIssue(
       'https://build-url',
       {
-        html_url: 'https://github.com/issues/1234',
-        number: 1234,
-        body: dedent`
-          # existing issue body
+        classname: 'foo',
+        name: 'test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: dedent`
+            # existing issue body
 
-          <!-- kibanaCiData = {"failed-test":{"test.failCount":10}} -->"
-        `,
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":10}} -->"
+          `,
+        },
       },
       api,
       'main'

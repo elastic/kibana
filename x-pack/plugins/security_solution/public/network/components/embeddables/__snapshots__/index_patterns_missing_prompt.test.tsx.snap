@@ -6,7 +6,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
     <EuiButton
       color="primary"
       fill={true}
-      href="/test/base/path/app/management/kibana/indexPatterns"
+      href="/test/base/path/app/management/kibana/dataViews"
       target="_blank"
     >
       Configure index patterns

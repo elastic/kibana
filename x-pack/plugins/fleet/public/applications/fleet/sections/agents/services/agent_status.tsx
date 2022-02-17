@@ -7,20 +7,20 @@
 
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-theme';
 
 import type { SimplifiedAgentStatus } from '../../../types';
 
 const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {
   // using variables as mentioned here https://elastic.github.io/eui/#/guidelines/getting-started
-  default: euiVars.default.euiColorLightShade,
+  default: euiLightVars.euiColorLightShade,
   primary: visColors[1],
-  secondary: visColors[0],
+  success: visColors[0],
   accent: visColors[2],
   warning: visColors[5],
   danger: visColors[9],
-  inactive: euiVars.default.euiColorDarkShade,
+  inactive: euiLightVars.euiColorDarkShade,
 };
 
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
@@ -34,7 +34,7 @@ export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
 export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): string {
   switch (agentStatus) {
     case 'healthy':
-      return colorToHexMap.secondary;
+      return colorToHexMap.success;
     case 'offline':
       return colorToHexMap.default;
     case 'inactive':

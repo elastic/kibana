@@ -16,11 +16,11 @@ import { dashboardsServiceFactory } from '../stub/dashboards';
 import { labsServiceFactory } from './labs';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
-import { overlaysServiceFactory } from './overlays';
-import { controlsServiceFactory } from './controls';
+import { dataViewsServiceFactory } from './data_views';
 
-export { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
-export { PresentationUtilServices } from '..';
+export type { PluginServiceProviders } from '../create';
+export { PluginServiceProvider, PluginServiceRegistry } from '../create';
+export type { PresentationUtilServices } from '..';
 
 export interface StorybookParams {
   canAccessDashboards?: boolean;
@@ -32,8 +32,7 @@ export interface StorybookParams {
 export const providers: PluginServiceProviders<PresentationUtilServices, StorybookParams> = {
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
-  overlays: new PluginServiceProvider(overlaysServiceFactory),
-  controls: new PluginServiceProvider(controlsServiceFactory),
+  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
 };
 

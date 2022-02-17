@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -331,7 +331,7 @@ export async function fetchHighLevelStats<
     },
   };
 
-  const { body: response } = await callCluster.search<T>(params, {
+  const response = await callCluster.search<T>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },

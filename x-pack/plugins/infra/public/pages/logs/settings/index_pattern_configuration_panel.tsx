@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexPatternReference } from '../../../../common/log_sources';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../observability/public';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
@@ -44,30 +44,21 @@ export const IndexPatternConfigurationPanel: React.FC<{
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.indexPatternSectionTitle"
-            defaultMessage="Index pattern"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <IndexPatternInlineHelpMessage />
+      <DataViewsInlineHelpMessage />
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
           <h4>
             <FormattedMessage
-              id="xpack.infra.logSourceConfiguration.logIndexPatternTitle"
-              defaultMessage="Log index pattern"
+              id="xpack.infra.logSourceConfiguration.dataViewTitle"
+              defaultMessage="Log data view"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.logIndexPatternDescription"
-            defaultMessage="Index pattern that contains log data"
+            id="xpack.infra.logSourceConfiguration.dataViewDescription"
+            defaultMessage="Data view that contains log data"
           />
         }
       >
@@ -75,8 +66,8 @@ export const IndexPatternConfigurationPanel: React.FC<{
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.infra.logSourceConfiguration.logIndexPatternLabel"
-              defaultMessage="Log index pattern"
+              id="xpack.infra.logSourceConfiguration.dataViewLabel"
+              defaultMessage="Log data view"
             />
           }
           {...useMemo(
@@ -96,22 +87,22 @@ export const IndexPatternConfigurationPanel: React.FC<{
   );
 };
 
-const IndexPatternInlineHelpMessage = React.memo(() => {
-  const indexPatternManagementLinkProps = useLinkProps({
+const DataViewsInlineHelpMessage = React.memo(() => {
+  const dataViewsManagementLinkProps = useLinkProps({
     app: 'management',
-    pathname: '/kibana/indexPatterns',
+    pathname: '/kibana/dataViews',
   });
 
   return (
     <FormattedMessage
-      id="xpack.infra.logSourceConfiguration.logIndexPatternHelpText"
-      defaultMessage="Kibana index patterns are shared among apps in the Kibana space and can be managed via the {indexPatternsManagementLink}."
+      id="xpack.infra.logSourceConfiguration.logDataViewHelpText"
+      defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}. A single data view can target multiple indices."
       values={{
-        indexPatternsManagementLink: (
-          <EuiLink {...indexPatternManagementLinkProps}>
+        dataViewsManagementLink: (
+          <EuiLink {...dataViewsManagementLinkProps}>
             <FormattedMessage
-              id="xpack.infra.logSourceConfiguration.indexPatternManagementLinkText"
-              defaultMessage="index patterns management screen"
+              id="xpack.infra.logSourceConfiguration.dataViewsManagementLinkText"
+              defaultMessage="data views management screen"
             />
           </EuiLink>
         ),

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { RewriteResponseCase } from '../../../../../actions/common';
-import { Alert, AlertUpdates } from '../../../types';
+import { AsApiContract, RewriteResponseCase } from '../../../../../actions/common';
+import { Rule, AlertUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformAlert } from './common_transformations';
 
@@ -36,8 +36,8 @@ export async function createAlert({
 }: {
   http: HttpSetup;
   alert: AlertCreateBody;
-}): Promise<Alert> {
-  const res = await http.post(`${BASE_ALERTING_API_PATH}/rule`, {
+}): Promise<Rule> {
+  const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
     body: JSON.stringify(rewriteBodyRequest(alert)),
   });
   return transformAlert(res);

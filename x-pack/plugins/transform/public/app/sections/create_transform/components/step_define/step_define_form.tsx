@@ -207,8 +207,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
         {searchItems.savedSearch === undefined && (
           <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
+            label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
+              defaultMessage: 'Data view',
             })}
           >
             <span>{indexPattern.title}</span>

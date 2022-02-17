@@ -23,17 +23,17 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'etcdMetrics',
     name: i18n.translate('home.tutorials.etcdMetrics.nameTitle', {
-      defaultMessage: 'Etcd metrics',
+      defaultMessage: 'Etcd Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Etcd server.',
+      defaultMessage: 'Collect metrics from Etcd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.etcdMetrics.longDescription', {
       defaultMessage:
-        'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
+        'The `etcd` Metricbeat module fetches metrics from Etcd. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-etcd.html',
@@ -54,8 +54,8 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }

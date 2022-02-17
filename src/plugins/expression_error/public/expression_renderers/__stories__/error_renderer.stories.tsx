@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { errorRenderer } from '../error_renderer';
+import { getErrorRenderer } from '../error_renderer';
 import { Render } from '../../../../presentation_util/public/__stories__';
 
 storiesOf('renderers/error', module).add('default', () => {
@@ -16,5 +16,5 @@ storiesOf('renderers/error', module).add('default', () => {
   const config = {
     error: thrownError,
   };
-  return <Render renderer={errorRenderer} config={config} />;
+  return <Render renderer={getErrorRenderer()} config={config} />;
 });

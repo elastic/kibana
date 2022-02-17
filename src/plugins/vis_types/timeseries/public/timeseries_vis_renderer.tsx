@@ -10,19 +10,18 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient } from 'kibana/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 
-import { fetchIndexPattern } from '../common/index_patterns_utils';
 import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
 
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
-import { getCharts, getDataStart } from './services';
 
 import type { TimeseriesVisParams } from './types';
 import type { ExpressionRenderDefinition } from '../../../expressions/common';
 import type { TimeseriesRenderValue } from './metrics_fn';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -39,49 +38,47 @@ const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVis
 
 export const getTimeseriesVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
-}) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({ uiSettings }) => ({
+  theme: ThemeServiceStart;
+}) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({ uiSettings, theme }) => ({
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     // Build optimization. Move app styles from main bundle
     // @ts-expect-error TS error, cannot find type declaration for scss
-    await import('./application/index.scss');
+    import('./application/index.scss');
 
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
     const { visParams: model, visData, syncColors } = config;
-    const { palettes } = getCharts();
-    const { indexPatterns } = getDataStart();
 
     const showNoResult = !checkIfDataExists(visData, model);
-    const [palettesService, { indexPattern }] = await Promise.all([
-      palettes.getPalettes(),
-      fetchIndexPattern(model.index_pattern, indexPatterns),
-    ]);
 
     render(
       <I18nProvider>
-        <VisualizationContainer
-          data-test-subj="timeseriesVis"
-          handlers={handlers}
-          showNoResult={showNoResult}
-          error={get(visData, [model.id, 'error'])}
-        >
-          <TimeseriesVisualization
-            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-            getConfig={uiSettings.get.bind(uiSettings)}
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <VisualizationContainer
+            data-test-subj="timeseriesVis"
             handlers={handlers}
-            indexPattern={indexPattern}
-            model={model}
-            visData={visData as TimeseriesVisData}
-            syncColors={syncColors}
-            uiState={handlers.uiState! as PersistedState}
-            palettesService={palettesService}
-          />
-        </VisualizationContainer>
+            showNoResult={showNoResult}
+            error={get(visData, [model.id, 'error'])}
+          >
+            <TimeseriesVisualization
+              // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+              getConfig={uiSettings.get.bind(uiSettings)}
+              handlers={handlers}
+              model={model}
+              visData={visData as TimeseriesVisData}
+              syncColors={syncColors}
+              uiState={handlers.uiState! as PersistedState}
+            />
+          </VisualizationContainer>
+        </KibanaThemeProvider>
       </I18nProvider>,
-      domNode
+      domNode,
+      () => {
+        handlers.done();
+      }
     );
   },
 });

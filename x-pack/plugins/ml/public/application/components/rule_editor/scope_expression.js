@@ -24,7 +24,7 @@ import {
 
 import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 import { filterTypeToText } from './utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 // Raise the popovers above GuidePageSideNav
 const POPOVER_STYLE = { zIndex: '200' };

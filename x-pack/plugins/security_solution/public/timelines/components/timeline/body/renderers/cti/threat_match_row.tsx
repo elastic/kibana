@@ -14,8 +14,8 @@ import {
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_TYPE,
-  PROVIDER,
   REFERENCE,
+  FEED_NAME,
 } from '../../../../../../../common/cti/constants';
 import { MatchDetails } from './match_details';
 import { IndicatorDetails } from './indicator_details';
@@ -23,7 +23,7 @@ import { IndicatorDetails } from './indicator_details';
 export interface ThreatMatchRowProps {
   contextId: string;
   eventId: string;
-  indicatorProvider: string | undefined;
+  feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
   isDraggable?: boolean;
@@ -46,7 +46,7 @@ export const ThreatMatchRow = ({
     contextId,
     eventId,
     indicatorReference: get(data, REFERENCE)[0] as string | undefined,
-    indicatorProvider: get(data, PROVIDER)[0] as string | undefined,
+    feedName: get(data, FEED_NAME)[0] as string | undefined,
     indicatorType: get(data, MATCHED_TYPE)[0] as string | undefined,
     isDraggable,
     sourceField: get(data, MATCHED_FIELD)[0] as string,
@@ -59,7 +59,7 @@ export const ThreatMatchRow = ({
 export const ThreatMatchRowView = ({
   contextId,
   eventId,
-  indicatorProvider,
+  feedName,
   indicatorReference,
   indicatorType,
   isDraggable,
@@ -86,7 +86,7 @@ export const ThreatMatchRowView = ({
         <IndicatorDetails
           contextId={contextId}
           eventId={eventId}
-          indicatorProvider={indicatorProvider}
+          feedName={feedName}
           indicatorReference={indicatorReference}
           indicatorType={indicatorType}
           isDraggable={isDraggable}

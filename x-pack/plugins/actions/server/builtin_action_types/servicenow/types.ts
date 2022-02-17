@@ -20,13 +20,21 @@ import {
   ExecutorParamsSchemaSIR,
   ExecutorSubActionPushParamsSchemaSIR,
   ExecutorSubActionGetChoicesParamsSchema,
+  ExecutorParamsSchemaITOM,
+  ExecutorSubActionAddEventParamsSchema,
+  ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
+export type ServiceNowPublicConfigurationBaseType = TypeOf<
+  typeof ExternalIncidentServiceConfigurationBaseSchema
+>;
+
 export type ServiceNowPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
+
 export type ServiceNowSecretConfigurationType = TypeOf<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;
@@ -108,8 +116,9 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export type PushToServiceApiParamsITSM = ExecutorSubActionPushParamsITSM;
 export type PushToServiceApiParamsSIR = ExecutorSubActionPushParamsSIR;
 
-export interface ExternalServiceApiHandlerArgs {
-  externalService: ExternalService;
+export interface ExternalServiceApiHandlerArgs<T = ExternalService> {
+  externalService: T;
+  logger: Logger;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<
@@ -134,7 +143,6 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   params: PushToServiceApiParams;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
-  logger: Logger;
   commentFieldKey: string;
 }
 
@@ -162,13 +170,13 @@ export interface ExternalServiceChoices {
 export type GetCommonFieldsResponse = ExternalServiceFields[];
 export type GetChoicesResponse = ExternalServiceChoices[];
 
-export interface GetCommonFieldsHandlerArgs {
-  externalService: ExternalService;
+export interface GetCommonFieldsHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetChoicesHandlerArgs {
-  externalService: ExternalService;
+  externalService: Partial<ExternalService> & { getChoices: ExternalService['getChoices'] };
+  logger: Logger;
   params: ExecutorSubActionGetChoicesParams;
 }
 
@@ -245,6 +253,7 @@ export interface SNProductsConfigValue {
   useImportAPI: boolean;
   importSetTable: string;
   commentFieldKey: string;
+  appId?: string;
 }
 
 export type SNProductsConfig = Record<string, SNProductsConfigValue>;
@@ -276,9 +285,36 @@ export interface ExternalServiceSIR extends ExternalService {
   ) => Promise<ObservableResponse[]>;
 }
 
-export type ServiceFactory = (
+export type ServiceFactory<T = ExternalService> = (
   credentials: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
   serviceConfig: SNProductsConfigValue
-) => ExternalServiceSIR | ExternalService;
+) => T;
+
+/**
+ * ITOM
+ */
+
+export type ExecutorSubActionAddEventParams = TypeOf<typeof ExecutorSubActionAddEventParamsSchema>;
+
+export interface ExternalServiceITOM {
+  getChoices: ExternalService['getChoices'];
+  addEvent: (params: ExecutorSubActionAddEventParams) => Promise<void>;
+}
+
+export interface AddEventApiHandlerArgs extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
+  params: ExecutorSubActionAddEventParams;
+}
+
+export interface GetCommonFieldsHandlerArgsITOM
+  extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
+  params: ExecutorSubActionGetChoicesParams;
+}
+
+export interface ExternalServiceApiITOM {
+  getChoices: ExternalServiceAPI['getChoices'];
+  addEvent: (args: AddEventApiHandlerArgs) => Promise<void>;
+}
+
+export type ExecutorParamsITOM = TypeOf<typeof ExecutorParamsSchemaITOM>;

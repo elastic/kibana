@@ -51,8 +51,11 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       return pageId !== null;
     }
 
-    clickRowByResolver(nodeResolver) {
-      return testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver);
+    async clickRowByResolver(nodeResolver) {
+      await retry.waitForWithTimeout('redirection to node detail', 30000, async () => {
+        await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
+        return testSubjects.exists('elasticsearchNodeDetailStatus', { timeout: 5000 });
+      });
     }
 
     async waitForTableToFinishLoading() {
@@ -63,7 +66,6 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
     async clickNameCol() {
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_NAME_COL}"] > button`);
-      await find.byCssSelector('.euiBasicTable-loading');
       await this.waitForTableToFinishLoading();
     }
 
@@ -114,10 +116,22 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
     }
 
+    async getNodeNames() {
+      return await testSubjects.getVisibleTextAll(SUBJ_NODES_NAMES);
+    }
+
+    async getNodeStatuses() {
+      return await testSubjects.getAttributeAll(SUBJ_NODES_STATUSES, 'alt');
+    }
+
+    async getNodeCpus() {
+      return trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_CPUS));
+    }
+
     async getNodesAll() {
-      const names = await testSubjects.getVisibleTextAll(SUBJ_NODES_NAMES);
-      const statuses = await testSubjects.getAttributeAll(SUBJ_NODES_STATUSES, 'alt');
-      const cpus = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_CPUS));
+      const names = await this.getNodeNames();
+      const statuses = await this.getNodeStatuses();
+      const cpus = await this.getNodeCpus();
       const loads = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_LOADS));
       const memories = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_MEMS));
       const disks = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_DISKS));

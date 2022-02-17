@@ -22,11 +22,11 @@ export class GrokDebuggerUIPlugin {
       }),
       id: PLUGIN.ID,
       enableRouting: false,
-      async mount({ element }) {
+      async mount({ element, theme$ }) {
         const [coreStart] = await coreSetup.getStartServices();
         const license = await plugins.licensing.license$.pipe(first()).toPromise();
         const { renderApp } = await import('./render_app');
-        return renderApp(license, element, coreStart);
+        return renderApp(license, element, coreStart, theme$);
       },
     });
 

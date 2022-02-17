@@ -16,10 +16,10 @@ requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpIn
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  httpErrorRequest | <code>HttpInterceptorRequestError</code> |  |
-|  controller | <code>IHttpInterceptController</code> |  |
+|  httpErrorRequest | HttpInterceptorRequestError | [HttpInterceptorRequestError](./kibana-plugin-core-public.httpinterceptorrequesterror.md) |
+|  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
 <b>Returns:</b>
 
-`MaybePromise<Partial<HttpFetchOptionsWithPath>> | void`
+MaybePromise&lt;Partial&lt;HttpFetchOptionsWithPath&gt;&gt; \| void
 

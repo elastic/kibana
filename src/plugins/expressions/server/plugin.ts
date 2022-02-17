@@ -22,10 +22,6 @@ export class ExpressionsServerPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ExpressionsServerSetup {
-    this.expressions.executor.extendContext({
-      environment: 'server',
-    });
-
     const setup = this.expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);

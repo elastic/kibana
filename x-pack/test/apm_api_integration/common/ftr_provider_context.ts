@@ -16,5 +16,5 @@ export type InheritedServices = InheritedFtrProviderContext extends GenericFtrPr
   ? TServices
   : {};
 
-export { InheritedFtrProviderContext };
+export type { InheritedFtrProviderContext };
 export type FtrProviderContext = GenericFtrProviderContext<ApmServices, {}>;

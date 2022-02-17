@@ -8,7 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
-import { createWriteStream, WriteStream } from 'fs';
+import { createWriteStream, WriteStream, mkdirSync } from 'fs';
+import { dirname } from 'path';
 
 import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
@@ -47,6 +48,7 @@ export class FileAppender implements DisposableAppender {
    */
   public append(record: LogRecord) {
     if (this.outputStream === undefined) {
+      this.ensureDirectory(this.path);
       this.outputStream = createWriteStream(this.path, {
         encoding: 'utf8',
         flags: 'a',
@@ -72,5 +74,9 @@ export class FileAppender implements DisposableAppender {
         resolve();
       });
     });
+  }
+
+  private ensureDirectory(path: string) {
+    mkdirSync(dirname(path), { recursive: true });
   }
 }

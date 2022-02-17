@@ -15,7 +15,7 @@ import type {
 } from '../../../../../alerting/common';
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
-import { AlertType } from '../../../../../alerting/server';
+import { RuleType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
 import type { PluginSetupContract as AlertingSetup } from '../../../../../alerting/server';
 
@@ -57,7 +57,7 @@ export function registerTransformHealthRuleType(params: RegisterParams) {
   alerting.registerType(getTransformHealthRuleType());
 }
 
-export function getTransformHealthRuleType(): AlertType<
+export function getTransformHealthRuleType(): RuleType<
   TransformHealthRuleParams,
   never,
   AlertTypeState,
@@ -100,7 +100,7 @@ export function getTransformHealthRuleType(): AlertType<
     isExportable: true,
     async executor(options) {
       const {
-        services: { scopedClusterClient, alertInstanceFactory },
+        services: { scopedClusterClient, alertFactory },
         params,
       } = options;
 
@@ -112,7 +112,7 @@ export function getTransformHealthRuleType(): AlertType<
 
       if (executionResult.length > 0) {
         executionResult.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = alertInstanceFactory(alertInstanceName);
+          const alertInstance = alertFactory.create(alertInstanceName);
           alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
         });
       }

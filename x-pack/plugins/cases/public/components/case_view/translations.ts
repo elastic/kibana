@@ -17,6 +17,14 @@ export const CHANGED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.ch
   defaultMessage: 'changed',
 });
 
+export const ENABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.enabledSetting', {
+  defaultMessage: 'enabled',
+});
+
+export const DISABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.disableSetting', {
+  defaultMessage: 'disabled',
+});
+
 export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.selectedThirdParty', {
     values: {
@@ -95,6 +103,10 @@ export const CASE_REFRESH = i18n.translate('xpack.cases.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
 });
 
+export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
+  defaultMessage: 'Activity',
+});
+
 export const EMAIL_SUBJECT = (caseTitle: string) =>
   i18n.translate('xpack.cases.caseView.emailSubject', {
     values: { caseTitle },
@@ -113,6 +125,10 @@ export const CHANGED_CONNECTOR_FIELD = i18n.translate('xpack.cases.caseView.fiel
 
 export const SYNC_ALERTS = i18n.translate('xpack.cases.caseView.syncAlertsLabel', {
   defaultMessage: `Sync alerts`,
+});
+
+export const SYNC_ALERTS_LC = i18n.translate('xpack.cases.caseView.syncAlertsLowercaseLabel', {
+  defaultMessage: `sync alerts`,
 });
 
 export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {

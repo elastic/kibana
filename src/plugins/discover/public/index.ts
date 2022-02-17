@@ -9,22 +9,23 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { DiscoverPlugin } from './plugin';
 
+export type { SavedSearch } from './services/saved_searches';
 export {
   getSavedSearch,
   getSavedSearchFullPathUrl,
   getSavedSearchUrl,
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
-  SavedSearch,
-} from './saved_searches';
+} from './services/saved_searches';
 
-export { DiscoverSetup, DiscoverStart } from './plugin';
+export type { DiscoverSetup, DiscoverStart } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './application/embeddable';
-export { loadSharingDataHelpers } from './shared';
+export type { ISearchEmbeddable, SearchInput } from './embeddable';
+export { SEARCH_EMBEDDABLE_TYPE } from './embeddable';
+export { loadSharingDataHelpers } from './utils';
 
-export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
-export { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
+export { DISCOVER_APP_LOCATOR } from './locator';
+export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';

@@ -9,3 +9,5 @@ Kibana can be started from the command line as follows:
 
 By default, Kibana runs in the foreground, prints its logs to the
 standard output (`stdout`), and can be stopped by pressing *Ctrl-C*.
+
+include::auto-enroll.asciidoc[]

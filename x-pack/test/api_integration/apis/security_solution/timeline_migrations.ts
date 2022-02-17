@@ -199,7 +199,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
         });
       });
-
       describe('pinned events timelineId', () => {
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(

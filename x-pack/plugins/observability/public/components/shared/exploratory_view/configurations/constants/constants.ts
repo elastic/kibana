@@ -21,6 +21,7 @@ import {
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
   CORE_WEB_VITALS_LABEL,
+  DCL_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
@@ -49,11 +50,24 @@ import {
   MONITORS_DURATION_LABEL,
   PAGE_LOAD_TIME_LABEL,
   LABELS_FIELD,
+  STEP_NAME_LABEL,
+  STEP_DURATION_LABEL,
 } from './labels';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_STEP_NAME,
+} from './field_names/synthetics';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../../lens/common/constants';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
-export const RECORDS_FIELD = 'Records';
+export const RECORDS_FIELD = DOCUMENT_FIELD_NAME;
 export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
 
 export const FieldLabels: Record<string, string> = {
@@ -71,12 +85,20 @@ export const FieldLabels: Record<string, string> = {
   [TBT_FIELD]: TBT_LABEL,
   [FID_FIELD]: FID_LABEL,
   [CLS_FIELD]: CLS_LABEL,
+
+  [SYNTHETICS_CLS]: CLS_LABEL,
+  [SYNTHETICS_DCL]: DCL_LABEL,
+  [SYNTHETICS_STEP_DURATION]: STEP_DURATION_LABEL,
+  [SYNTHETICS_LCP]: LCP_LABEL,
+  [SYNTHETICS_FCP]: FCP_LABEL,
+  [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
   [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
   [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
-  'monitor.duration.us': MONITORS_DURATION_LABEL,
+  [MONITOR_DURATION_US]: MONITORS_DURATION_LABEL,
+  [SYNTHETICS_STEP_NAME]: STEP_NAME_LABEL,
 
   'agent.hostname': AGENT_HOST_LABEL,
   'host.hostname': HOST_NAME_LABEL,
@@ -114,6 +136,7 @@ export enum DataTypes {
   SYNTHETICS = 'synthetics',
   UX = 'ux',
   MOBILE = 'mobile',
+  METRICS = 'infra_metrics',
 }
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';

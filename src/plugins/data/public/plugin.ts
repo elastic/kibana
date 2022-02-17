@@ -11,7 +11,7 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
@@ -27,6 +27,7 @@ import {
   setOverlays,
   setSearchService,
   setUiSettings,
+  setTheme,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import {
@@ -82,6 +83,7 @@ export class DataPublicPlugin
     const startServices = createStartServicesGetter(core.getStartServices);
 
     this.usageCollection = usageCollection;
+    setTheme(core.theme);
 
     const searchService = this.searchService.setup(core, {
       bfetch,
@@ -98,7 +100,7 @@ export class DataPublicPlugin
 
     uiActions.registerTrigger(applyFilterTrigger);
     uiActions.registerAction(
-      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
+      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter, core.theme)
     );
 
     inspector.registerView(
@@ -130,7 +132,7 @@ export class DataPublicPlugin
     core: CoreStart,
     { uiActions, fieldFormats, dataViews }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, notifications, savedObjects, overlays } = core;
+    const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
@@ -138,7 +140,7 @@ export class DataPublicPlugin
 
     const query = this.queryService.start({
       storage: this.storage,
-      savedObjectsClient: savedObjects.client,
+      http: core.http,
       uiSettings,
     });
 

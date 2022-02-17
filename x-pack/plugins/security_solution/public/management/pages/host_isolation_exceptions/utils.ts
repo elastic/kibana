@@ -7,7 +7,6 @@
 
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import ipaddr from 'ipaddr.js';
 
 export function createEmptyHostIsolationException(): CreateExceptionListItemSchema {
   return {
@@ -29,13 +28,4 @@ export function createEmptyHostIsolationException(): CreateExceptionListItemSche
     tags: ['policy:all'],
     type: 'simple',
   };
-}
-
-export function isValidIPv4OrCIDR(maybeIp: string): boolean {
-  try {
-    ipaddr.IPv4.parseCIDR(maybeIp);
-    return true;
-  } catch (e) {
-    return ipaddr.IPv4.isValid(maybeIp);
-  }
 }

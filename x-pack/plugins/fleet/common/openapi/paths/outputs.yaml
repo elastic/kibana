@@ -20,3 +20,46 @@ get:
               perPage:
                 type: integer
   operationId: get-outputs
+post:
+  summary: Outputs
+  description: 'Create a new output'
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/output.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            type:
+              type: string
+              enum: ["elasticsearch"]
+            is_default:
+              type: boolean
+            is_default_monitoring:
+              type: boolean
+            hosts:
+              type: array
+              items:
+                type: string
+            ca_sha256:
+              type: string
+            config_yaml:
+              type: string
+          required:
+            - name
+            - type
+  operationId: post-outputs

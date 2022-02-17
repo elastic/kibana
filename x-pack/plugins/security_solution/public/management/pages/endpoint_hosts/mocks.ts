@@ -14,8 +14,8 @@ import {
   ActivityLog,
   HostInfo,
   HostPolicyResponse,
-  HostResultList,
   HostStatus,
+  MetadataListResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -24,12 +24,13 @@ import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import {
   pendingActionsHttpMock,
   PendingActionsHttpMockInterface,
 } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { METADATA_TRANSFORM_STATS_URL, TRANSFORM_STATES } from '../../../../common/constants';
+import { TRANSFORM_STATES } from '../../../../common/constants';
 import { TransformStatsResponse } from './types';
 import {
   fleetGetAgentPolicyListHttpMock,
@@ -43,7 +44,7 @@ import {
 } from '../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
-  metadataList: () => HostResultList;
+  metadataList: () => MetadataListResponse;
   metadataDetails: () => HostInfo;
 }>;
 export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadataHttpMocksInterface>(
@@ -51,12 +52,12 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
     {
       id: 'metadataList',
       path: HOST_METADATA_LIST_ROUTE,
-      method: 'post',
+      method: 'get',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');
 
         return {
-          hosts: Array.from({ length: 10 }, () => {
+          data: Array.from({ length: 10 }, () => {
             const endpoint = {
               metadata: generator.generateHostMetadata(),
               host_status: HostStatus.UNHEALTHY,
@@ -67,8 +68,8 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
             return endpoint;
           }),
           total: 10,
-          request_page_size: 10,
-          request_page_index: 0,
+          page: 0,
+          pageSize: 10,
         };
       },
     },
@@ -122,30 +123,27 @@ export const endpointActivityLogHttpMock =
         const responseData = fleetActionGenerator.generateResponse({
           agent_id: endpointMetadata.agent.id,
         });
-
         return {
-          body: {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [
-              {
-                type: 'response',
-                item: {
-                  id: '',
-                  data: responseData,
-                },
+          page: 1,
+          pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
+          data: [
+            {
+              type: 'response',
+              item: {
+                id: '',
+                data: responseData,
               },
-              {
-                type: 'action',
-                item: {
-                  id: '',
-                  data: actionData,
-                },
+            },
+            {
+              type: 'action',
+              item: {
+                id: '',
+                data: actionData,
               },
-            ],
-          },
+            },
+          ],
         };
       },
     },
@@ -165,7 +163,7 @@ export const failedTransformStateMock = {
 export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInterface>([
   {
     id: 'metadataTransformStats',
-    path: METADATA_TRANSFORM_STATS_URL,
+    path: METADATA_TRANSFORMS_STATUS_ROUTE,
     method: 'get',
     handler: () => failedTransformStateMock,
   },

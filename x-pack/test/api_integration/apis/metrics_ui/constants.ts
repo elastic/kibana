@@ -19,6 +19,14 @@ export const DATES = {
     },
   },
   '8.0.0': {
+    pods_only: {
+      min: new Date('2022-01-20T17:09:55.124Z').getTime(),
+      max: new Date('2022-01-20T17:14:57.378Z').getTime(),
+    },
+    hosts_only: {
+      min: new Date('2022-01-18T19:57:47.534Z').getTime(),
+      max: new Date('2022-01-18T20:02:50.043Z').getTime(),
+    },
     logs_and_metrics: {
       min: 1562786660845,
       max: 1562786716965,
@@ -38,5 +46,9 @@ export const DATES = {
       min: 1609545600000, // '2021-01-02T00:00:00Z'
       max: 1609545900000, // '2021-01-02T00:05:00Z'
     },
+  },
+  ten_thousand_plus: {
+    min: 1634604480001, // 2021-10-19T00:48:00.001Z
+    max: 1634604839997, // 2021-10-19T00:53:59.997Z
   },
 };

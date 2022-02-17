@@ -11,7 +11,7 @@ import {
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
@@ -20,6 +20,7 @@ jest.mock('../../app_logic', () => ({
     selectors: { myRole: jest.fn(() => ({})) },
   },
 }));
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { EngineTypes } from '../engine/types';
@@ -31,7 +32,7 @@ import { CredentialsLogic } from './credentials_logic';
 describe('CredentialsLogic', () => {
   const { mount } = new LogicMounter(CredentialsLogic);
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     activeApiToken: {
@@ -1059,14 +1060,9 @@ describe('CredentialsLogic', () => {
         expect(CredentialsLogic.actions.setCredentialsData).toHaveBeenCalledWith(meta, results);
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValue(Promise.reject('An error occured'));
-
         CredentialsLogic.actions.fetchCredentials();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1086,14 +1082,9 @@ describe('CredentialsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValue(Promise.reject('An error occured'));
-
         CredentialsLogic.actions.fetchDetails();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1113,14 +1104,9 @@ describe('CredentialsLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount();
-        http.delete.mockReturnValue(Promise.reject('An error occured'));
-
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1172,14 +1158,9 @@ describe('CredentialsLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         mount();
-        http.post.mockReturnValue(Promise.reject('An error occured'));
-
         CredentialsLogic.actions.onApiTokenChange();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
 
       describe('token type data', () => {

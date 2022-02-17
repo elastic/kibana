@@ -11,7 +11,6 @@ jest.mock('../../export', () => ({
 }));
 
 import supertest from 'supertest';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import { createListStream } from '@kbn/utils';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
@@ -21,7 +20,7 @@ import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
   maxImportPayloadBytes: 26214400,

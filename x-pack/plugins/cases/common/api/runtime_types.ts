@@ -60,7 +60,7 @@ export const decodeOrThrow =
 const getExcessProps = (props: rt.Props, r: Record<string, unknown>): string[] => {
   const ex: string[] = [];
   for (const k of Object.keys(r)) {
-    if (!props.hasOwnProperty(k)) {
+    if (!Object.prototype.hasOwnProperty.call(props, k)) {
       ex.push(k);
     }
   }
@@ -89,5 +89,5 @@ export function excess<C extends rt.InterfaceType<rt.Props> | rt.PartialType<rt.
     codec.encode,
     codec.props
   );
-  return r as any;
+  return r as C;
 }

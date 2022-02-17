@@ -10,14 +10,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-
-import {
-  Filter,
-  IIndexPattern,
-  Query,
-  FilterManager,
-  SavedQuery,
-} from '../../../../../../../../src/plugins/data/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { FilterManager, SavedQuery } from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../../common/containers/source';
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
@@ -43,7 +37,7 @@ interface QueryBarDefineRuleProps {
   field: FieldHook;
   idAria: string;
   isLoading: boolean;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
@@ -61,6 +55,10 @@ const StyledEuiFormRow = styled(EuiFormRow)`
     .kbnQueryBar {
       & > div:first-child {
         margin: 0px 0px 0px 4px;
+      }
+      &__wrap,
+      &__textarea {
+        z-index: 0;
       }
     }
   }

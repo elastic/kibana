@@ -66,12 +66,13 @@ Saved objects that are unable to persist are replaced with an error object.
 ==== Response code
 
 `200`::
-  Indicates a successful call.
+  Indicates a successful call. Note, this HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual
+  objects will be returned in the response body. See the example below for details.
 
 [[saved-objects-api-bulk-create-example]]
 ==== Example
 
-Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
+Create {a-data-source} with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
 
 [source,sh]
 --------------------------------------------------
@@ -121,4 +122,20 @@ The API returns the following:
 }
 --------------------------------------------------
 
-There is already a saved object with the `my-dashboard` ID, so only the index pattern is created.
+There is already a saved object with the `my-dashboard` ID, so only the {data-source} is created.
+
+[[saved-objects-api-bulk-create-conflict-errors]]
+==== Conflict errors
+
+Starting in {kib} 8.0, saved objects can exist in multiple spaces. As a result, you may encounter different types of conflict errors when
+attempting to create an object:
+
+* *Regular conflict*: This is a 409 error without any metadata. It means an object of that type/ID already exists. This can be
+  overridden by using the `overwrite: true` option.
+* *Unresolvable conflict*: This is a 409 error with `isNotOverwritable: true` in its metadata. It means an object of that type/ID already
+  exists in a different space, and it cannot be overridden with the given parameters. To successfully overwrite this object, you must do so
+  in at least one space where it exists. You can specify that using the `space_id` path parameter _or_ the `initialNamespaces` parameter.
+* *Alias conflict*: This is a 409 error with a `spacesWithConflictingAliases` string array in its metadata. It means a conflicting
+  <<legacy-url-aliases,legacy URL alias>> for this type/ID exists in the space(s) where you attempted to create this object. A conflicting
+  legacy URL alias is one that points to a different type/ID. To successfully create this object, you need to first use the
+  <<spaces-api-disable-legacy-url-aliases,`_disable_legacy_url_aliases`>> API to disable the problematic legacy URL alias(es).

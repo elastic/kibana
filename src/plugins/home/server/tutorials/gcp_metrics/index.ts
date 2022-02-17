@@ -23,17 +23,16 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'gcpMetrics',
     name: i18n.translate('home.tutorials.gcpMetrics.nameTitle', {
-      defaultMessage: 'Google Cloud metrics',
+      defaultMessage: 'Google Cloud Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.gcpMetrics.shortDescription', {
-      defaultMessage:
-        'Fetch monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API.',
+      defaultMessage: 'Collect metrics from Google Cloud Platform with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.gcpMetrics.longDescription', {
       defaultMessage:
-        'The `gcp` Metricbeat module fetches monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API. \
+        'The `gcp` Metricbeat module fetches metrics from Google Cloud Platform using Stackdriver Monitoring API. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-gcp.html',
@@ -58,8 +57,8 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/gcp_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
   };
 }

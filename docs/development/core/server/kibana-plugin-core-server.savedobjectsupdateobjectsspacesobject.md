@@ -16,6 +16,6 @@ export interface SavedObjectsUpdateObjectsSpacesObject
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.id.md) | <code>string</code> | The type of the object to update |
-|  [type](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.type.md) | <code>string</code> | The ID of the object to update |
+|  [id](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.id.md) | string | The type of the object to update |
+|  [type](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.type.md) | string | The ID of the object to update |
 

@@ -49,12 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Job Listing APIs', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
+      await reportingAPI.initLogs();
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
+      await reportingAPI.teardownLogs();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 

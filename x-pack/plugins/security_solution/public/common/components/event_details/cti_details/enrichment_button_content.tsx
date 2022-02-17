@@ -22,10 +22,10 @@ const OverflowContainer = styled.div`
 
 export const EnrichmentButtonContent: React.FC<{
   field?: string;
-  provider?: string;
+  feedName?: string;
   value?: string;
-}> = ({ field = '', provider = '', value = '' }) => {
-  const title = `${field} ${value}${provider ? ` ${i18n.PROVIDER_PREPOSITION} ${provider}` : ''}`;
+}> = ({ field = '', feedName = '', value = '' }) => {
+  const title = `${field} ${value}${feedName ? ` ${i18n.FEED_NAME_PREPOSITION} ${feedName}` : ''}`;
   return (
     <EuiToolTip content={value}>
       <OverflowParent data-test-subj={'enrichment-button-content'}>

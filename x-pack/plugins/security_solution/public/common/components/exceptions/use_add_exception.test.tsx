@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -46,14 +46,12 @@ describe('useAddOrUpdateException', () => {
   let buildAlertStatusesFilter: jest.SpyInstance<
     ReturnType<typeof buildFilterHelpers.buildAlertStatusesFilter>
   >;
-  let buildAlertsRuleIdFilter: jest.SpyInstance<
-    ReturnType<typeof buildFilterHelpers.buildAlertsRuleIdFilter>
-  >;
+  let buildAlertsFilter: jest.SpyInstance<ReturnType<typeof buildFilterHelpers.buildAlertsFilter>>;
   let addOrUpdateItemsArgs: Parameters<AddOrUpdateExceptionItemsFunc>;
   let render: () => RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>;
   const onError = jest.fn();
   const onSuccess = jest.fn();
-  const ruleId = 'rule-id';
+  const ruleStaticId = 'rule-id';
   const alertIdToClose = 'idToClose';
   const bulkCloseIndex = ['.custom'];
   const itemsToAdd: CreateExceptionListItemSchema[] = [
@@ -130,9 +128,9 @@ describe('useAddOrUpdateException', () => {
 
     buildAlertStatusesFilter = jest.spyOn(buildFilterHelpers, 'buildAlertStatusesFilter');
 
-    buildAlertsRuleIdFilter = jest.spyOn(buildFilterHelpers, 'buildAlertsRuleIdFilter');
+    buildAlertsFilter = jest.spyOn(buildFilterHelpers, 'buildAlertsFilter');
 
-    addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate];
+    addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate];
     render = () =>
       renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
         () =>
@@ -259,7 +257,7 @@ describe('useAddOrUpdateException', () => {
 
   describe('when alertIdToClose is passed in', () => {
     beforeEach(() => {
-      addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate, alertIdToClose];
+      addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate, alertIdToClose];
     });
     it('should update the alert status', async () => {
       await act(async () => {
@@ -314,7 +312,7 @@ describe('useAddOrUpdateException', () => {
 
   describe('when bulkCloseIndex is passed in', () => {
     beforeEach(() => {
-      addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate, undefined, bulkCloseIndex];
+      addOrUpdateItemsArgs = [ruleStaticId, itemsToAddOrUpdate, undefined, bulkCloseIndex];
     });
     it('should update the status of only alerts that are open', async () => {
       await act(async () => {
@@ -348,8 +346,8 @@ describe('useAddOrUpdateException', () => {
           addOrUpdateItems(...addOrUpdateItemsArgs);
         }
         await waitForNextUpdate();
-        expect(buildAlertsRuleIdFilter).toHaveBeenCalledTimes(1);
-        expect(buildAlertsRuleIdFilter.mock.calls[0][0]).toEqual(ruleId);
+        expect(buildAlertsFilter).toHaveBeenCalledTimes(1);
+        expect(buildAlertsFilter.mock.calls[0][0]).toEqual(ruleStaticId);
       });
     });
     it('should generate the query filter using exceptions', async () => {

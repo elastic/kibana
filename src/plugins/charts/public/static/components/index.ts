@@ -9,4 +9,6 @@
 export { LegendToggle } from './legend_toggle';
 export { ColorPicker } from './color_picker';
 export { CurrentTime } from './current_time';
+export { EmptyPlaceholder } from './empty_placeholder';
+import './common_chart_styles.scss';
 export * from './endzones';
