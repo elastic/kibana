@@ -39,10 +39,6 @@ const bothAreZeroQueryResult: FindingsEvaluationsQueryResult = {
   },
 };
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('roundScore', () => {
   it('should return decimal values with one fraction digit', async () => {
     const rounded = roundScore(0.85245);

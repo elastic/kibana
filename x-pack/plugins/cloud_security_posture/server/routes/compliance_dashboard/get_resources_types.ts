@@ -10,7 +10,7 @@ import {
   AggregationsMultiBucketAggregateBase as Aggregation,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { CloudPostureStats, Evaluation } from '../../../common/types';
+import { CloudPostureStats } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 
@@ -18,7 +18,7 @@ export interface ResourceTypeQueryResult {
   aggs_by_resource_type: Aggregation<ResourceTypeBucket>;
 }
 
-interface ResourceTypeBucket extends KeyDocCount<Evaluation> {
+export interface ResourceTypeBucket extends KeyDocCount {
   failed_findings: {
     doc_count: number;
   };
@@ -59,7 +59,7 @@ export const getResourceTypeFromAggs = (
   queryResult: ResourceTypeBucket[]
 ): CloudPostureStats['resourcesTypes'] =>
   queryResult.map((bucket) => ({
-    resourceType: bucket.key,
+    name: bucket.key,
     totalFindings: bucket.doc_count,
     totalFailed: bucket.failed_findings.doc_count || 0,
     totalPassed: bucket.passed_findings.doc_count || 0,

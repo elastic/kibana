@@ -20,7 +20,7 @@ export interface Stats extends FindingsEvaluations {
 }
 
 export interface ResourceType extends FindingsEvaluations {
-  resourceType: string;
+  name: string;
 }
 
 export interface CloudPostureStats {
@@ -32,6 +32,6 @@ export interface CloudPostureStats {
       benchmarkName: string;
     };
     stats: Stats;
-    resourceTypeAggs: ResourceType[];
+    resourcesTypes: ResourceType[];
   }>;
 }

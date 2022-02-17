@@ -20,7 +20,7 @@ import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
-interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
+export interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
   failed_findings: {
     doc_count: number;
   };
@@ -61,17 +61,8 @@ export const getClustersQuery = (cycleId: string): SearchRequest => ({
   },
 });
 
-export const getClusters = async (
-  esClient: ElasticsearchClient,
-  cycleId: string
-): Promise<CloudPostureStats['clusters']> => {
-  const queryResult = await esClient.search<unknown, ClustersQueryResult>(
-    getClustersQuery(cycleId)
-  );
-  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
-  if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
-
-  return clusters.map((cluster) => {
+export const getClustersFromAggs = (clusters: ClusterBucket[]): CloudPostureStats['clusters'] =>
+  clusters.map((cluster) => {
     // get cluster's meta data
     const benchmarks = cluster.benchmarks.buckets;
     if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmarks per cluster');
@@ -87,15 +78,27 @@ export const getClusters = async (
     const stats = getStatsFromFindingsEvaluationsAggs(cluster);
 
     // get cluster's resource types aggs
-    const resourceTypesAggs = cluster.aggs_by_resource_type.buckets;
-    if (!Array.isArray(resourceTypesAggs))
+    const resourcesTypesAggs = cluster.aggs_by_resource_type.buckets;
+    if (!Array.isArray(resourcesTypesAggs))
       throw new Error('missing aggs by resource type per cluster');
-    const resourceTypeAggs = getResourceTypeFromAggs(resourceTypesAggs);
+    const resourcesTypes = getResourceTypeFromAggs(resourcesTypesAggs);
 
     return {
       meta,
       stats,
-      resourceTypeAggs,
+      resourcesTypes,
     };
   });
+
+export const getClusters = async (
+  esClient: ElasticsearchClient,
+  cycleId: string
+): Promise<CloudPostureStats['clusters']> => {
+  const queryResult = await esClient.search<unknown, ClustersQueryResult>(
+    getClustersQuery(cycleId)
+  );
+  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
+  if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
+
+  return getClustersFromAggs(clusters);
 };
