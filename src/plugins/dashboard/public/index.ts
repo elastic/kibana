@@ -25,7 +25,11 @@ export type {
 
 export type { DashboardUrlGeneratorState } from './url_generator';
 export { DASHBOARD_APP_URL_GENERATOR, createDashboardUrlGenerator } from './url_generator';
-export type { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
+export {
+  type DashboardAppLocator,
+  type DashboardAppLocatorParams,
+  cleanEmptyKeys,
+} from './locator';
 
 export type { DashboardSavedObject } from './saved_dashboards';
 export type { SavedDashboardPanel, DashboardContainerInput } from './types';
