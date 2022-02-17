@@ -19,7 +19,6 @@ import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import {
   cleanPreconfiguredOutputs,
-  ensureManagedPackagePoliciesUpgraded,
   ensurePreconfiguredOutputs,
   ensurePreconfiguredPackagesAndPolicies,
 } from './preconfiguration';
@@ -34,6 +33,7 @@ import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -110,12 +110,11 @@ async function createSetupSideEffects(
     );
 
   logger.debug('Ensure managed package policies are upgraded');
-  const packagePolicyUpgradeResults = await ensureManagedPackagePoliciesUpgraded(
-    soClient,
-    esClient
-  );
+  const packagePolicyUpgradeErrors = (
+    await upgradeManagedPackagePolicies(soClient, esClient)
+  ).filter((result) => (result.errors ?? []).length > 0);
 
-  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeResults];
+  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
 
   logger.debug('Cleaning up Fleet outputs');
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);

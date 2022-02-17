@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import semverGte from 'semver/functions/gte';
+import semverLt from 'semver/functions/lt';
 
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../common';
 
@@ -47,14 +47,12 @@ export const upgradeManagedPackagePolicies = async (
       );
 
       for (const packagePolicy of packagePolicies) {
-        if (isPolicyVersionGteInstalledVersion(packagePolicy, installedPackage)) {
-          continue;
+        if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
+          await upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
         }
-        await upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
       }
     }
   }
-
   return results;
 };
 
@@ -72,14 +70,13 @@ async function getPackagePoliciesNotMatchingVersion(
   ).items;
 }
 
-function isPolicyVersionGteInstalledVersion(
+function isPolicyVersionLtInstalledVersion(
   packagePolicy: PackagePolicy,
   installedPackage: Installation
 ): boolean {
   return (
-    !!packagePolicy.package &&
-    !!installedPackage.version &&
-    semverGte(packagePolicy.package.version, installedPackage.version)
+    packagePolicy.package !== undefined &&
+    semverLt(packagePolicy.package.version, installedPackage.version)
   );
 }
 

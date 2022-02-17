@@ -35,7 +35,6 @@ import type { InputsOverride } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
 interface PreconfigurationResult {
@@ -375,15 +374,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
-}
-
-export async function ensureManagedPackagePoliciesUpgraded(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-): Promise<UpgradeManagedPackagePoliciesResult[]> {
-  // Handle automatic package policy upgrades for managed packages and package with
-  // the `keep_policies_up_to_date` setting enabled
-  return upgradeManagedPackagePolicies(soClient, esClient);
 }
 
 export function comparePreconfiguredPolicyToCurrent(
