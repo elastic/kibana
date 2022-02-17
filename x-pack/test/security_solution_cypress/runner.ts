@@ -58,7 +58,7 @@ export async function SecuritySolutionCypressCliFirefoxTestRunner(context: FtrPr
 }
 
 export async function SecuritySolutionCypressVisualTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:open');
+  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:open');
 }
 
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
