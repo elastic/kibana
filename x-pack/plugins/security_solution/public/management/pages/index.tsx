@@ -23,14 +23,15 @@ import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
 import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
+import { useClearQueryString } from '../../common/components/url_state/use_url_state';
 
 const NoPermissions = memo(() => {
+  useClearQueryString();
   return (
     <>
       <EuiEmptyPrompt
@@ -53,7 +54,6 @@ const NoPermissions = memo(() => {
           </EuiText>
         }
       />
-      <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );
 });
@@ -83,12 +83,14 @@ const EventFilterTelemetry = () => (
   </TrackApplicationView>
 );
 
-const HostIsolationExceptionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
-    <SpyRoute pageName={SecurityPageName.administration} />
-    <HostIsolationExceptionsContainer />
-  </TrackApplicationView>
-);
+const HostIsolationExceptionsTelemetry = () => {
+  useClearQueryString();
+  return (
+    <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
+      <HostIsolationExceptionsContainer />
+    </TrackApplicationView>
+  );
+};
 
 export const ManagementContainer = memo(() => {
   const { loading, canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
@@ -120,5 +122,4 @@ export const ManagementContainer = memo(() => {
     </Switch>
   );
 });
-
 ManagementContainer.displayName = 'ManagementContainer';

@@ -32,7 +32,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
@@ -52,6 +51,10 @@ import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../common/components/url_state/use_url_state';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -65,6 +68,9 @@ const ID = 'NetworkQueryId';
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
+    useSyncQueryStringWithReduxStore();
+    usePageTitle(SecurityPageName.network);
+
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -236,8 +242,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             <OverviewEmpty />
           </SecuritySolutionPageWrapper>
         )}
-
-        <SpyRoute pageName={SecurityPageName.network} />
       </>
     );
   }

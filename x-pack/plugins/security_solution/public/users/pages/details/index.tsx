@@ -23,7 +23,7 @@ import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
+
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
@@ -42,12 +42,19 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../../common/components/url_state/use_url_state';
 const ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
   usersDetailsPagePath,
 }) => {
+  useSyncQueryStringWithReduxStore();
+  usePageTitle(SecurityPageName.users);
+
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
@@ -138,8 +145,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-
-      <SpyRoute pageName={SecurityPageName.users} />
     </>
   );
 };

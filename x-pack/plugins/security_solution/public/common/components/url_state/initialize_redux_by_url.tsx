@@ -21,7 +21,7 @@ import {
 } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-import { decodeRisonUrlState, isDetectionsPages } from './helpers';
+import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { SetInitialStateFromUrl } from './types';
 import {
@@ -30,6 +30,7 @@ import {
 } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 import { timelineActions } from '../../../timelines/store/timeline';
+import { isDetectionsPath } from '../../../helpers';
 
 export const useSetInitialStateFromUrl = () => {
   const dispatch = useDispatch();
@@ -46,7 +47,7 @@ export const useSetInitialStateFromUrl = () => {
     ({
       filterManager,
       indexPattern,
-      pageName,
+      pathname,
       savedQueries,
       urlStateToUpdate,
     }: SetInitialStateFromUrl) => {
@@ -58,7 +59,7 @@ export const useSetInitialStateFromUrl = () => {
           const sourcererState = decodeRisonUrlState<SourcererUrlState>(newUrlStateString);
           if (sourcererState != null) {
             const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
-              (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
+              (key) => !(key === SourcererScopeName.default && isDetectionsPath(pathname)) // TODO isDetectionsPath change
             ) as SourcererScopeName[];
             activeScopes.forEach((scope) =>
               dispatch(

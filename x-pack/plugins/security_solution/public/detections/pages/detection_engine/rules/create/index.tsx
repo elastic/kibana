@@ -27,7 +27,6 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
-import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
 import { AccordionTitle } from '../../../../components/rules/accordion_title';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -49,6 +48,7 @@ import { ruleStepsOrder } from '../utils';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useSyncQueryStringWithReduxStore } from '../../../../../common/components/url_state/use_url_state';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -75,6 +75,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC = () => {
+  useSyncQueryStringWithReduxStore();
   const [
     {
       loading: userInfoLoading,
@@ -435,8 +436,6 @@ const CreateRulePageComponent: React.FC = () => {
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
-
-      <SpyRoute pageName={SecurityPageName.rules} />
     </>
   );
 };

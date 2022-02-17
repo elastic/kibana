@@ -20,11 +20,11 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
+import { useSyncQueryStringWithReduxStore } from '../../common/components/url_state/use_url_state';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
@@ -43,6 +43,7 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
+  useSyncQueryStringWithReduxStore();
   const { cases: casesUi } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
@@ -157,7 +158,6 @@ const CaseContainerComponent: React.FC = () => {
           userCanCrud: userPermissions?.crud ?? false,
         })}
       </CaseDetailsRefreshContext.Provider>
-      <SpyRoute pageName={SecurityPageName.case} />
     </SecuritySolutionPageWrapper>
   );
 };

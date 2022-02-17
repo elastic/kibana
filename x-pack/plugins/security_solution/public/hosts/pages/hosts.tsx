@@ -31,8 +31,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
-
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
@@ -56,6 +54,10 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../common/components/url_state/use_url_state';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -67,6 +69,9 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const HostsComponent = () => {
+  useSyncQueryStringWithReduxStore();
+  usePageTitle(SecurityPageName.hosts);
+
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -237,8 +242,6 @@ const HostsComponent = () => {
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-
-      <SpyRoute pageName={SecurityPageName.hosts} />
     </>
   );
 };

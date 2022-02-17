@@ -33,7 +33,6 @@ import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
@@ -54,10 +53,17 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../../common/components/url_state/use_url_state';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
+  useSyncQueryStringWithReduxStore();
+  usePageTitle(SecurityPageName.hosts);
+
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
@@ -231,8 +237,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-
-      <SpyRoute pageName={SecurityPageName.hosts} />
     </>
   );
 };

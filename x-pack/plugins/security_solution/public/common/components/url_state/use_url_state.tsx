@@ -5,41 +5,165 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
+import { useSelector } from 'react-redux';
 import { useSetInitialStateFromUrl } from './initialize_redux_by_url';
-
 import { useKibana } from '../../lib/kibana';
-import { CONSTANTS, UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
 import {
   getQueryStringFromLocation,
   getParamFromQueryString,
-  getUrlType,
   getTitle,
   replaceStatesInLocation,
   decodeRisonUrlState,
-  isDetectionsPages,
   encodeRisonUrlState,
   isQueryStateEmpty,
   updateTimerangeUrl,
+  makeMapStateToProps,
 } from './helpers';
 import {
-  UrlStateContainerPropTypes,
   ReplaceStateInLocation,
   PreviousLocationUrlState,
   KeyUrlState,
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
   UrlState,
-  isAdministration,
   ValueUrlState,
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
+import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
+import { navTabs as NAV_TABS } from '../../../app/home/home_navigations';
+import { SecurityPageName } from '../../../app/types';
+
+// This hook should be called from a page.
+// It will sync any redux store update with the URL
+// Things missing: Update timerange and removing empty query strings
+export const useSyncQueryStringWithReduxStore = () => {
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+  const stateToProps = makeMapStateToProps();
+  const { urlState } = useSelector(stateToProps);
+  const prevProps = usePrevious({ urlState });
+
+  useEffect(() => {
+    /**
+     * Update query string with data from the redux store.
+     */
+    if (!deepEqual(urlState, prevProps.urlState)) {
+      const urlStateUpdatesToLocation: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
+        (urlKey: KeyUrlState) => ({
+          urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
+          urlStateKey: urlKey,
+        })
+      );
+      replaceStatesInLocation(urlStateUpdatesToLocation, pathname, search, history);
+    }
+  }, [history, pathname, search, urlState, prevProps.urlState]);
+};
+
+// has to be called from App level
+export const useInitializeReduxStoreFromQueryString = () => {
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+  const stateToProps = makeMapStateToProps();
+  const { urlState } = useSelector(stateToProps);
+  const { filterManager, savedQueries } = useKibana().services.data.query;
+  const { indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
+  const { setInitialStateFromUrl } = useSetInitialStateFromUrl();
+
+  useEffect(() => {
+    const urlStateUpdatesToStore: UrlStateToRedux[] = [];
+    const urlStateUpdatesToLocation: ReplaceStateInLocation[] = [];
+
+    ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
+      const newUrlStateString = getQueryStringKeyValue({ urlKey, search });
+
+      // If query string value is empty get set the value from store
+      if (!newUrlStateString) {
+        urlStateUpdatesToLocation.push({
+          urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
+          urlStateKey: urlKey,
+        });
+      } else {
+        // Updates the new URL query string.
+        const stateToUpdate = getUpdateToFormatUrlStateString({
+          isFirstPageLoad: true,
+          newUrlStateString,
+          updateTimerange: true,
+          urlKey,
+        });
+
+        if (stateToUpdate) {
+          urlStateUpdatesToLocation.push(stateToUpdate);
+        }
+
+        const updatedUrlStateString = stateToUpdate
+          ? encodeRisonUrlState(stateToUpdate.urlStateToReplace)
+          : newUrlStateString;
+
+        if (
+          urlKey !== CONSTANTS.timeline ||
+          !isTimelinePresentInUrlStateString(newUrlStateString, urlState.timeline)
+        ) {
+          urlStateUpdatesToStore.push({
+            urlKey,
+            newUrlStateString: updatedUrlStateString,
+          });
+        }
+      }
+    });
+
+    replaceStatesInLocation(urlStateUpdatesToLocation, pathname, search, history);
+
+    setInitialStateFromUrl({
+      filterManager,
+      indexPattern,
+      pathname,
+      savedQueries,
+      urlStateToUpdate: urlStateUpdatesToStore,
+    });
+    // It should only be called when the APP initializes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // TODO Move it somewhere else
+  // useEffect(() => {
+  //   queryTimelineByIdOnUrlChange({
+  //     oldSearch: prevProps.search,
+  //     search,
+  //     timelineIdFromReduxStore: urlState.timeline.id,
+  //     updateTimeline,
+  //     updateTimelineIsLoading,
+  //   });
+  // }, [search, prevProps.search, urlState.timeline.id, updateTimeline, updateTimelineIsLoading]);
+};
+
+export const usePageTitle = (pageName: SecurityPageName) => {
+  useEffect(() => {
+    document.title = `${getTitle(pageName, NAV_TABS)} - Kibana`;
+  }, [pageName]);
+};
+
+export const useClearQueryString = () => {
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+
+  useEffect(() => {
+    const urlStateUpdatesToLocation: ReplaceStateInLocation[] = [];
+    ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
+      urlStateUpdatesToLocation.push({
+        urlStateToReplace: '',
+        urlStateKey: urlKey,
+      });
+    });
+    replaceStatesInLocation(urlStateUpdatesToLocation, pathname, search, history);
+  }, [pathname, search, history]);
+};
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -48,162 +172,6 @@ function usePrevious(value: PreviousLocationUrlState) {
   });
   return ref.current;
 }
-
-export const useUrlStateHooks = ({
-  indexPattern,
-  navTabs,
-  pageName,
-  urlState,
-  search,
-  pathName,
-  history,
-}: UrlStateContainerPropTypes) => {
-  const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
-  const { filterManager, savedQueries } = useKibana().services.data.query;
-  const { pathname: browserPathName } = useLocation();
-  const prevProps = usePrevious({ pathName, pageName, urlState, search });
-
-  const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
-    useSetInitialStateFromUrl();
-
-  const handleInitialize = useCallback(
-    (type: UrlStateType) => {
-      const urlStateUpdatesToStore: UrlStateToRedux[] = [];
-      const urlStateUpdatesToLocation: ReplaceStateInLocation[] = [];
-
-      // Delete all query strings from URL when the page is security/administration (Manage menu group)
-      if (isAdministration(type)) {
-        ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-          urlStateUpdatesToLocation.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        });
-      } else {
-        ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-          const newUrlStateString = getQueryStringKeyValue({ urlKey, search });
-
-          if (!newUrlStateString) {
-            urlStateUpdatesToLocation.push({
-              urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
-              urlStateKey: urlKey,
-            });
-          } else {
-            // Updates the new URL query string.
-            const stateToUpdate = getUpdateToFormatUrlStateString({
-              isFirstPageLoad,
-              newUrlStateString,
-              updateTimerange: isDetectionsPages(pageName) || isFirstPageLoad,
-              urlKey,
-            });
-
-            if (stateToUpdate) {
-              urlStateUpdatesToLocation.push(stateToUpdate);
-            }
-
-            const updatedUrlStateString = stateToUpdate
-              ? encodeRisonUrlState(stateToUpdate.urlStateToReplace)
-              : newUrlStateString;
-
-            if (
-              // Update redux store with query string data on the first page load
-              isFirstPageLoad ||
-              // Update Redux store with data from the URL query string when navigating from a page to a detection page
-              (isDetectionsPages(pageName) && updatedUrlStateString !== newUrlStateString)
-            ) {
-              if (
-                urlKey !== CONSTANTS.timeline ||
-                !isTimelinePresentInUrlStateString(newUrlStateString, urlState.timeline)
-              ) {
-                urlStateUpdatesToStore.push({
-                  urlKey,
-                  newUrlStateString: updatedUrlStateString,
-                });
-              }
-            }
-          }
-        });
-      }
-
-      replaceStatesInLocation(urlStateUpdatesToLocation, pathName, search, history);
-
-      setInitialStateFromUrl({
-        filterManager,
-        indexPattern,
-        pageName,
-        savedQueries,
-        urlStateToUpdate: urlStateUpdatesToStore,
-      });
-    },
-    [
-      filterManager,
-      history,
-      indexPattern,
-      pageName,
-      pathName,
-      savedQueries,
-      search,
-      setInitialStateFromUrl,
-      urlState,
-      isFirstPageLoad,
-    ]
-  );
-
-  useEffect(() => {
-    // When browser location and store location are out of sync, skip the execution.
-    //  It happens in three scenarios:
-    //  * When changing urlState and quickly moving to a new location.
-    //  * Redirects as "security/hosts" -> "security/hosts/allHosts"
-    //  * It also happens once on every location change because browserPathName gets updated before pathName
-    // *Warning*: Removing this return would cause redirect loops that crashes the APP.
-    if (browserPathName !== pathName) return;
-
-    const type: UrlStateType = getUrlType(pageName);
-
-    if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !isAdministration(type)) {
-      const urlStateUpdatesToLocation: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
-        (urlKey: KeyUrlState) => ({
-          urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
-          urlStateKey: urlKey,
-        })
-      );
-
-      replaceStatesInLocation(urlStateUpdatesToLocation, pathName, search, history);
-    } else if (
-      (isFirstPageLoad && pageName != null && pageName !== '') ||
-      pathName !== prevProps.pathName
-    ) {
-      handleInitialize(type);
-      setIsFirstPageLoad(false);
-    }
-  }, [
-    isFirstPageLoad,
-    history,
-    pathName,
-    pageName,
-    prevProps,
-    urlState,
-    browserPathName,
-    handleInitialize,
-    search,
-  ]);
-
-  useEffect(() => {
-    document.title = `${getTitle(pageName, navTabs)} - Kibana`;
-  }, [pageName, navTabs]);
-
-  useEffect(() => {
-    queryTimelineByIdOnUrlChange({
-      oldSearch: prevProps.search,
-      search,
-      timelineIdFromReduxStore: urlState.timeline.id,
-      updateTimeline,
-      updateTimelineIsLoading,
-    });
-  }, [search, prevProps.search, urlState.timeline.id, updateTimeline, updateTimelineIsLoading]);
-
-  return null;
-};
 
 const getUrlStateKeyValue = (urlState: UrlState, urlKey: KeyUrlState) =>
   isQueryStateEmpty(urlState[urlKey], urlKey) ? '' : urlState[urlKey];

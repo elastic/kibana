@@ -68,12 +68,6 @@ jest.mock('./all', () => {
   };
 });
 
-jest.mock('../../../../common/utils/route/spy_routes', () => {
-  return {
-    SpyRoute: jest.fn().mockReturnValue(<div />),
-  };
-});
-
 jest.mock('../../../components/rules/pre_packaged_rules/update_callout', () => {
   return {
     UpdatePrePackagedRulesCallOut: jest.fn().mockReturnValue(<div />),

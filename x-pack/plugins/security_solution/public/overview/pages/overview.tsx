@@ -21,7 +21,6 @@ import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors } from '../../common/store';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
@@ -35,8 +34,15 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../common/components/url_state/use_url_state';
 
 const OverviewComponent = () => {
+  useSyncQueryStringWithReduxStore();
+  usePageTitle(SecurityPageName.overview);
+
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -180,8 +186,6 @@ const OverviewComponent = () => {
       ) : (
         <OverviewEmpty />
       )}
-
-      <SpyRoute pageName={SecurityPageName.overview} />
     </>
   );
 };

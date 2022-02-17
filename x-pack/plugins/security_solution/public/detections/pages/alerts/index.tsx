@@ -14,15 +14,19 @@ import * as i18n from './translations';
 import { TrackApplicationView } from '../../../../../../../src/plugins/usage_collection/public';
 import { DetectionEnginePage } from '../../pages/detection_engine/detection_engine';
 import { useKibana } from '../../../common/lib/kibana';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
-const AlertsRoute = () => (
-  <TrackApplicationView viewId={SecurityPageName.alerts}>
-    <DetectionEnginePage />
-    <SpyRoute pageName={SecurityPageName.alerts} />
-  </TrackApplicationView>
-);
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+import { useSyncQueryStringWithReduxStore } from '../../../common/components/url_state/use_url_state';
+
+const AlertsRoute = () => {
+  useSyncQueryStringWithReduxStore();
+
+  return (
+    <TrackApplicationView viewId={SecurityPageName.alerts}>
+      <DetectionEnginePage />
+    </TrackApplicationView>
+  );
+};
 
 const AlertsContainerComponent: React.FC = () => {
   const { chrome } = useKibana().services;

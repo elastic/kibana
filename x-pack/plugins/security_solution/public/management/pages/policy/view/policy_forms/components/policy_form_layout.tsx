@@ -31,8 +31,6 @@ import {
 import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
 import { AppAction } from '../../../../../../common/store/actions';
-import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
-import { SecurityPageName } from '../../../../../../app/types';
 import { getEndpointListPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -40,6 +38,7 @@ import { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/ty
 import { SecuritySolutionPageWrapper } from '../../../../../../common/components/page_wrapper';
 import { PolicyDetailsForm } from '../../policy_details_form';
 import { ConfirmUpdate } from './policy_form_confirm_update';
+import { useClearQueryString } from '../../../../../../common/components/url_state/use_url_state';
 
 export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -130,6 +129,8 @@ export const PolicyFormLayout = React.memo(() => {
     }
   }, [locationRouteState, routeState]);
 
+  useClearQueryString();
+
   // Before proceeding - check if we have a policy data.
   // If not, and we are still loading, show spinner.
   // Else, if we have an error, then show error on the page.
@@ -137,7 +138,6 @@ export const PolicyFormLayout = React.memo(() => {
     return (
       <SecuritySolutionPageWrapper noTimeline>
         {isPolicyLoading ? <EuiLoadingSpinner size="xl" /> : null}
-        <SpyRoute pageName={SecurityPageName.administration} />
       </SecuritySolutionPageWrapper>
     );
   }

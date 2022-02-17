@@ -70,10 +70,10 @@ export interface UpdateTimelineIsLoading {
 }
 
 export interface PreviousLocationUrlState {
-  pathName: string | undefined;
-  pageName: string | undefined;
+  pathName?: string;
+  pageName?: string;
   urlState: UrlState;
-  search: string | undefined;
+  search?: string;
 }
 
 export interface UrlStateToRedux {
@@ -84,7 +84,7 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl {
   filterManager: FilterManager;
   indexPattern: DataViewBase | undefined;
-  pageName: string;
+  pathname: string;
   savedQueries: SavedQueryService;
   urlStateToUpdate: UrlStateToRedux[];
 }

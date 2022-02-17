@@ -14,7 +14,6 @@ import { TimelineId, TimelineType } from '../../../common/types/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
@@ -23,6 +22,10 @@ import { NewTimeline } from '../components/timeline/properties/helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../common/components/url_state/use_url_state';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -31,6 +34,9 @@ const TimelinesContainer = styled.div`
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPageComponent: React.FC = () => {
+  useSyncQueryStringWithReduxStore();
+  usePageTitle(SecurityPageName.timelines);
+
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
@@ -96,8 +102,6 @@ export const TimelinesPageComponent: React.FC = () => {
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-
-      <SpyRoute pageName={SecurityPageName.timelines} />
     </>
   );
 };

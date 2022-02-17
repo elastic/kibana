@@ -52,7 +52,6 @@ import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
-import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
@@ -121,6 +120,7 @@ import {
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useSyncQueryStringWithReduxStore } from '../../../../../common/components/url_state/use_url_state';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -165,6 +165,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearSelected,
 }) => {
+  useSyncQueryStringWithReduxStore(); // TODO ruleName <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
+
   const { navigateToApp } = useKibana().services.application;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -807,8 +809,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory ruleId={ruleId} />}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
-
-      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );
 };

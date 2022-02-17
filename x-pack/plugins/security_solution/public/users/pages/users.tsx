@@ -27,7 +27,6 @@ import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { UsersTabs } from './users_tabs';
@@ -44,6 +43,10 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { UsersKpiComponent } from '../components/kpi_users';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { LastEventIndexKey } from '../../../common/search_strategy';
+import {
+  usePageTitle,
+  useSyncQueryStringWithReduxStore,
+} from '../../common/components/url_state/use_url_state';
 
 const ID = 'UsersQueryId';
 
@@ -57,6 +60,9 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UsersComponent = () => {
+  useSyncQueryStringWithReduxStore();
+  usePageTitle(SecurityPageName.users);
+
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
 
@@ -197,8 +203,6 @@ const UsersComponent = () => {
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
-
-      <SpyRoute pageName={SecurityPageName.users} />
     </>
   );
 };

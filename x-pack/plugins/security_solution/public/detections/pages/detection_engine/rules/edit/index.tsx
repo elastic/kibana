@@ -27,7 +27,6 @@ import {
   getDetectionEngineUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
-import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
@@ -57,10 +56,13 @@ import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useSyncQueryStringWithReduxStore } from '../../../../../common/components/url_state/use_url_state';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
 const EditRulePageComponent: FC = () => {
+  useSyncQueryStringWithReduxStore(); //  <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />;
+
   const [, dispatchToaster] = useStateToaster();
   const [
     {
@@ -424,8 +426,6 @@ const EditRulePageComponent: FC = () => {
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
-
-      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );
 };

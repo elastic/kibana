@@ -15,7 +15,6 @@ import {
   getCreateRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
@@ -42,8 +41,10 @@ import { RulesTableContextProvider } from './all/rules_table/rules_table_context
 import { RulesFeatureTourContextProvider } from './all/rules_feature_tour_context';
 import { useInvalidateRules } from '../../../containers/detection_engine/rules/use_find_rules_query';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useSyncQueryStringWithReduxStore } from '../../../../common/components/url_state/use_url_state';
 
 const RulesPageComponent: React.FC = () => {
+  useSyncQueryStringWithReduxStore();
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListModalVisible, showValueListModal, hideValueListModal] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
@@ -250,7 +251,6 @@ const RulesPageComponent: React.FC = () => {
           </SecuritySolutionPageWrapper>
         </RulesTableContextProvider>
       </RulesFeatureTourContextProvider>
-      <SpyRoute pageName={SecurityPageName.rules} />
     </>
   );
 };
