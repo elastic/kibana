@@ -40,19 +40,11 @@ export class PdfMaker {
   /**
    * The maximum heap size for old memory region of the worker thread.
    *
-   * @note We need to provide a sane number given that we need to load a
-   * node environment for TS compilation (dev-builds only), some library code
-   * and buffers that result from generating a PDF.
-   *
-   * Local testing indicates that to trigger an OOM event for the worker we need
-   * to exhaust not only heap but also any compression optimization and fallback
-   * swap space.
-   *
-   * With this value we are able to generate PDFs in excess of 5000x5000 pixels
-   * at which point issues other than memory start to show like glitches in the
-   * image.
+   * @note we leave this 'undefined' to use the Node.js default value.
+   * @note we set this to a low value to trigger an OOM event sooner for the worker
+   * in test scenarios.
    */
-  protected workerMaxOldHeapSizeMb = 128;
+  protected workerMaxOldHeapSizeMb: number | undefined = undefined;
 
   /**
    * The maximum heap size for young memory region of the worker thread.
