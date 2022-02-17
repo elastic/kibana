@@ -28,11 +28,11 @@ export async function getMetrics(
   checkParam(moduleType, 'moduleType in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
-  const config = req.server.config();
+  const config = req.server.config;
   // TODO: Pass in req parameters as explicit function parameters
   let min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const minIntervalSeconds = Number(config.get('monitoring.ui.min_interval_seconds'));
+  const minIntervalSeconds = config.ui.min_interval_seconds;
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
   const timezone = await getTimezone(req);
 

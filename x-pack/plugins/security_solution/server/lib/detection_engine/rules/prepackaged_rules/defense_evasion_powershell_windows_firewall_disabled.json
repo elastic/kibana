@@ -4,7 +4,7 @@
   ],
   "description": "Identifies when the Windows Firewall is disabled using PowerShell cmdlets, which attackers do to evade network constraints, like internet and network lateral communication restrictions.",
   "false_positives": [
-    "Windows Firewall can be disabled may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Windows Profile being disabled from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Windows Firewall can be disabled by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Windows Profile being disabled by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-9m",
   "index": [
@@ -58,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }
