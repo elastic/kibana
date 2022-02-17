@@ -23,11 +23,12 @@ import * as i18n from '../translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { dnsTopDomainsAttrs } from '../../configs/dns_top_domains';
 import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
+import { inputsSelectors } from '../../../common/store/inputs';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -63,6 +64,9 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   type,
 }) => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
+
+
+
   const isPtrIncluded = useShallowEqualSelector(
     (state) => getNetworkDnsSelector(state).isPtrIncluded
   );
@@ -79,15 +83,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       );
     },
     []
-  );
-  const { patternList, dataViewId } = useSourcererDataView();
-
-  const customLensAttrs = useMemo(
-    () => ({
-      ...dnsTopDomainsAttrs,
-      references: dnsTopDomainsAttrs.references.map((ref) => ({ ...ref, id: dataViewId })),
-    }),
-    [dataViewId]
   );
 
   useEffect(() => {
@@ -140,7 +135,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     ),
     [selectedStackByOption?.value, setSelectedChartOptionCallback]
   );
-
   return (
     <>
       <MatrixHistogram
@@ -159,8 +153,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         <EmbeddableHistogram
           appendTitle={appendTitle}
           title={title}
-          dataTypesIndexPatterns={patternList?.join(',')}
-          customLensAttrs={customLensAttrs}
+          customLensAttrs={dnsTopDomainsAttrs}
           customTimeRange={{ from: startDate, to: endDate }}
           isSingleMetric={false}
         />

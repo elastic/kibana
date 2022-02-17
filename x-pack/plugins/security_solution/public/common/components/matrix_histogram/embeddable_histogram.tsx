@@ -4,9 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { IconType } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { inputsSelectors } from '../../store';
+import { NetworkRouteType } from '../../../network/pages/navigation/types';
+import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
 
 export interface SingleMetricOptions {
   alignLnsMetric?: string;
@@ -40,7 +47,6 @@ interface EmbeddableHistogramProps {
   appendTitle?: JSX.Element;
   customLensAttrs: {};
   customTimeRange: { from: string; to: string };
-  dataTypesIndexPatterns: string;
   isSingleMetric: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
   title?: string | JSX.Element;
@@ -50,8 +56,36 @@ interface EmbeddableHistogramProps {
 export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   const { observability } = useKibana<StartServices>().services;
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
+  const { patternList, dataViewId } = useSourcererDataView();
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const { tabName } = useParams<{ tabName: string }>();
 
-  const mergedProps = { ...configs, ...props };
+  const tabsFilters = useMemo(() => {
+    if (tabName === NetworkRouteType.alerts) {
+      return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
+    }
+    return filters;
+  }, [tabName, filters]);
+  const customLensAttrs = useMemo(
+    () => {
+      const configs = props.customLensAttrs;
+      return({
+      ...configs,
+      state: {...configs.state, query, filters: [...configs.state.filters, ...tabsFilters]},
+      references: configs.references.map((ref) => ({ ...ref, id: dataViewId })),
+    })},
+    [dataViewId, query, filters]
+  );
+
+  const indexPatterns=patternList?.join(',');
+
+  const mergedProps = { ...configs, ...props, indexPatterns, customLensAttrs };
   return <ExploratoryViewEmbeddable {...mergedProps} />;
 };
 

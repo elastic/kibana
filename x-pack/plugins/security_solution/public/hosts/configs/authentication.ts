@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const authentication = {
-  title: 'my authentication',
+  title: 'Authentication',
   description: '',
   visualizationType: 'lnsXY',
   state: {

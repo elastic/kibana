@@ -46,18 +46,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 const panelHeight = '280px';
 const metricHeight = '70px';
-const attrsMapping = {
-  kpiHostArea,
-  kpiHostMetric,
-  kpiUniqueIpsArea,
-  kpiUniqueIpsBar,
-  kpiUniqueIpsDestinationMetric,
-  kpiUniqueIpsSourceMetric,
-  kpiUserAuthenticationsMetricFailure,
-  kpiUserAuthenticationsArea,
-  kpiUserAuthenticationsBar,
-  kpiUserAuthenticationsMetricSuccess,
-};
+
 
 interface Props {
   from: string;
@@ -76,22 +65,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
   );
   const dispatch = useDispatch();
 
-  const { patternList, dataViewId } = useSourcererDataView();
 
-  const customLensAttrs = useMemo(
-    () =>
-      Object.keys(attrsMapping).reduce(
-        (acc, id) => ({
-          ...acc,
-          [id]: {
-            ...attrsMapping[id],
-            references: attrsMapping[id].references.map((ref) => ({ ...ref, id: dataViewId })),
-          },
-        }),
-        {}
-      ),
-    [dataViewId]
-  );
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
@@ -106,7 +80,6 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
     [dispatch, inputsModelId]
   );
 
-  const dataTypesIndexPatterns = useMemo(() => patternList?.join(','), [patternList]);
 
   return (
     <EuiFlexGroup style={{ flexWrap: 'wrap' }}>
@@ -125,8 +98,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiHostMetric}
+                    customLensAttrs={kpiHostMetric}
                     customTimeRange={timerange}
                     isSingleMetric={true}
                     singleMetricOptions={{
@@ -140,8 +112,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiHostArea}
+                    customLensAttrs={kpiHostArea}
                     customTimeRange={timerange}
                     isSingleMetric={false}
                   />
@@ -166,8 +137,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricSuccess}
+                    customLensAttrs={kpiUserAuthenticationsMetricSuccess}
                     customTimeRange={timerange}
                     isSingleMetric={true}
                     singleMetricOptions={{
@@ -182,8 +152,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUserAuthenticationsBar}
+                    customLensAttrs={kpiUserAuthenticationsBar}
                     customTimeRange={timerange}
                     isSingleMetric={false}
                   />
@@ -194,8 +163,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricFailure}
+                    customLensAttrs={kpiUserAuthenticationsMetricFailure}
                     customTimeRange={timerange}
                     isSingleMetric={true}
                     singleMetricOptions={{
@@ -210,8 +178,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUserAuthenticationsArea}
+                    customLensAttrs={kpiUserAuthenticationsArea}
                     customTimeRange={timerange}
                     onBrushEnd={onBrushEnd}
                     isSingleMetric={false}
@@ -237,8 +204,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUniqueIpsSourceMetric}
+                    customLensAttrs={kpiUniqueIpsSourceMetric}
                     customTimeRange={timerange}
                     isSingleMetric={true}
                     singleMetricOptions={{
@@ -253,8 +219,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUniqueIpsBar}
+                    customLensAttrs={kpiUniqueIpsBar}
                     customTimeRange={timerange}
                     isSingleMetric={false}
                   />
@@ -265,8 +230,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUniqueIpsDestinationMetric}
+                    customLensAttrs={kpiUniqueIpsDestinationMetric}
                     customTimeRange={timerange}
                     isSingleMetric={true}
                     singleMetricOptions={{
@@ -281,8 +245,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EmbeddableHistogram
-                    dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    customLensAttrs={customLensAttrs.kpiUniqueIpsArea}
+                    customLensAttrs={kpiUniqueIpsArea}
                     customTimeRange={timerange}
                     onBrushEnd={onBrushEnd}
                     isSingleMetric={false}

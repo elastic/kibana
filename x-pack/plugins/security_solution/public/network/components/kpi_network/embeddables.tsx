@@ -46,16 +46,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 const panelHeight = '125px';
 const metricHeight = '75px';
-const attrsMapping = {
-  kpiNetworkEvents,
-  kpiUniqueFlowIds,
-  kpiTlsHandshakes,
-  kpiDnsQueries,
-  kpiUniquePrivateIpsBar,
-  kpiUniquePrivateIpsArea,
-  kpiUniquePrivateIpsSourceMetric,
-  kpiUniquePrivateIpsDestinationMetric,
-};
+
 
 export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesProps>(
   ({ filterQuery, from, to, inputsModelId = 'global' }) => {
@@ -69,22 +60,8 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
     );
     const dispatch = useDispatch();
 
-    const { patternList, dataViewId } = useSourcererDataView();
 
-    const customLensAttrs = useMemo(
-      () =>
-        Object.keys(attrsMapping).reduce(
-          (acc, id) => ({
-            ...acc,
-            [id]: {
-              ...attrsMapping[id],
-              references: attrsMapping[id].references.map((ref) => ({ ...ref, id: dataViewId })),
-            },
-          }),
-          {}
-        ),
-      [dataViewId]
-    );
+
 
     const onBrushEnd = useCallback(
       ({ range }: { range: number[] }) => {
@@ -99,7 +76,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
       [dispatch, inputsModelId]
     );
 
-    const dataTypesIndexPatterns = useMemo(() => patternList?.join(','), [patternList]);
 
     return (
       <EuiFlexGroup wrap>
@@ -114,8 +90,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       defaultMessage="Network events"
                     />
                   }
-                  dataTypesIndexPatterns={dataTypesIndexPatterns}
-                  customLensAttrs={customLensAttrs.kpiNetworkEvents}
+                  customLensAttrs={kpiNetworkEvents}
                   customTimeRange={timerange}
                   isSingleMetric={true}
                   onBrushEnd={onBrushEnd}
@@ -126,8 +101,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
                   title={DNS_QUERIES}
-                  dataTypesIndexPatterns={dataTypesIndexPatterns}
-                  customLensAttrs={customLensAttrs.kpiDnsQueries}
+                  customLensAttrs={kpiDnsQueries}
                   customTimeRange={timerange}
                   isSingleMetric={true}
                   onBrushEnd={onBrushEnd}
@@ -141,8 +115,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
                   title={UNIQUE_FLOW_IDS}
-                  dataTypesIndexPatterns={dataTypesIndexPatterns}
-                  customLensAttrs={customLensAttrs.kpiUniqueFlowIds}
+                  customLensAttrs={kpiUniqueFlowIds}
                   customTimeRange={timerange}
                   isSingleMetric={true}
                   onBrushEnd={onBrushEnd}
@@ -153,8 +126,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
                   title={TLS_HANDSHAKES}
-                  dataTypesIndexPatterns={dataTypesIndexPatterns}
-                  customLensAttrs={customLensAttrs.kpiTlsHandshakes}
+                  customLensAttrs={kpiTlsHandshakes}
                   customTimeRange={timerange}
                   isSingleMetric={true}
                   onBrushEnd={onBrushEnd}
@@ -178,8 +150,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                 <StyledEuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                     <EmbeddableHistogram
-                      dataTypesIndexPatterns={dataTypesIndexPatterns}
-                      customLensAttrs={customLensAttrs.kpiUniquePrivateIpsSourceMetric}
+                      customLensAttrs={kpiUniquePrivateIpsSourceMetric}
                       customTimeRange={timerange}
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={true}
@@ -195,8 +166,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EmbeddableHistogram
-                      dataTypesIndexPatterns={dataTypesIndexPatterns}
-                      customLensAttrs={customLensAttrs.kpiUniquePrivateIpsBar}
+                      customLensAttrs={kpiUniquePrivateIpsBar}
                       customTimeRange={timerange}
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={false}
@@ -208,9 +178,8 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                 <StyledEuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                     <EmbeddableHistogram
-                      customLensAttrs={customLensAttrs.kpiUniquePrivateIpsDestinationMetric}
+                      customLensAttrs={kpiUniquePrivateIpsDestinationMetric}
                       customTimeRange={timerange}
-                      dataTypesIndexPatterns={dataTypesIndexPatterns}
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={true}
                       singleMetricOptions={{
@@ -225,8 +194,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EmbeddableHistogram
-                      dataTypesIndexPatterns={dataTypesIndexPatterns}
-                      customLensAttrs={customLensAttrs.kpiUniquePrivateIpsArea}
+                      customLensAttrs={kpiUniquePrivateIpsArea}
                       customTimeRange={timerange}
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={false}

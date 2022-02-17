@@ -14,7 +14,7 @@ import { InputsModel, InputsRange, GlobalQuery } from './model';
 
 const selectInputs = (state: State): InputsModel => state.inputs;
 
-const selectGlobal = (state: State): InputsRange => state.inputs.global;
+export const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
