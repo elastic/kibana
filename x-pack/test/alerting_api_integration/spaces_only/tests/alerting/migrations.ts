@@ -375,7 +375,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('8.0.1 migrates and adds tags to disabled rules in 8.0', async () => {
-      const responseEnabledBeforeMigration = await es.get<{ alert: RawRule }>(
+      const responseEnabledBeforeMigration = await es.get<{ alert: RawAlert }>(
         {
           index: '.kibana',
           id: 'alert:1efdfa40-8ec7-11ec-a700-5524407a7653',
@@ -383,7 +383,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         { meta: true }
       );
       expect(responseEnabledBeforeMigration.statusCode).to.eql(200);
-      const responseDisabledBeforeMigration = await es.get<{ alert: RawRule }>(
+      const responseDisabledBeforeMigration = await es.get<{ alert: RawAlert }>(
         {
           index: '.kibana',
           id: 'alert:13fdfa40-8ec7-11ec-a700-5524407a7667',

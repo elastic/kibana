@@ -58,7 +58,7 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
-export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
+export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
 
 /**
@@ -141,7 +141,7 @@ export function getMigrations(
 
   const migrationRules801 = createEsoMigration(
     encryptedSavedObjects,
-    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
     pipeMigrations(addSecuritySolutionAADRuleTypeTags)
   );
 
@@ -685,8 +685,8 @@ function addSecuritySolutionAADRuleTypes(
 }
 
 function addSecuritySolutionAADRuleTypeTags(
-  doc: SavedObjectUnsanitizedDoc<RawRule>
-): SavedObjectUnsanitizedDoc<RawRule> {
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
   const ruleType = doc.attributes.params.type;
   return isDetectionEngineAADRuleType(doc) && isRuleType(ruleType)
     ? {
