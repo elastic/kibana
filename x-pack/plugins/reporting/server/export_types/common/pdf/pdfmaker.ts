@@ -24,7 +24,7 @@ import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 import type { GeneratePdfRequest, GeneratePdfResponse, WorkerData } from './worker';
 
 // Ensure that the worker and all dependencies are included in the release bundle.
-// import './worker';
+import './worker';
 
 export class PdfMaker {
   _layout: Layout;
@@ -141,88 +141,87 @@ export class PdfMaker {
     this._title = title;
   }
 
-  // private getGeneratePdfRequestData(): GeneratePdfRequest['data'] {
-  //   return {
-  //     layout: {
-  //       hasFooter: this._layout.hasFooter,
-  //       hasHeader: this._layout.hasHeader,
-  //       orientation: this._layout.getPdfPageOrientation(),
-  //       useReportingBranding: this._layout.useReportingBranding,
-  //       pageSize: this._layout.getPdfPageSize({
-  //         pageMarginTop,
-  //         pageMarginBottom,
-  //         pageMarginWidth,
-  //         tableBorderWidth,
-  //         headingHeight,
-  //         subheadingHeight,
-  //       }),
-  //     },
-  //     title: this._title,
-  //     logo: this._logo,
-  //     content: this._content as unknown as SerializableRecord[],
-  //   };
-  // }
+  private getGeneratePdfRequestData(): GeneratePdfRequest['data'] {
+    return {
+      layout: {
+        hasFooter: this._layout.hasFooter,
+        hasHeader: this._layout.hasHeader,
+        orientation: this._layout.getPdfPageOrientation(),
+        useReportingBranding: this._layout.useReportingBranding,
+        pageSize: this._layout.getPdfPageSize({
+          pageMarginTop,
+          pageMarginBottom,
+          pageMarginWidth,
+          tableBorderWidth,
+          headingHeight,
+          subheadingHeight,
+        }),
+      },
+      title: this._title,
+      logo: this._logo,
+      content: this._content as unknown as SerializableRecord[],
+    };
+  }
 
-  // private createWorker(port: MessagePort): Worker {
-  //   const workerData: WorkerData = {
-  //     port,
-  //   };
-  //   return new Worker(this.workerModulePath, {
-  //     workerData,
-  //     resourceLimits: {
-  //       maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
-  //       maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
-  //     },
-  //     transferList: [port],
-  //   });
-  // }
+  private createWorker(port: MessagePort): Worker {
+    const workerData: WorkerData = {
+      port,
+    };
+    return new Worker(this.workerModulePath, {
+      workerData,
+      resourceLimits: {
+        maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
+        maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
+      },
+      transferList: [port],
+    });
+  }
 
-  // private async cleanupWorker(): Promise<void> {
-  //   if (this.worker) {
-  //     await this.worker.terminate();
-  //     this.worker = undefined;
-  //   }
-  // }
+  private async cleanupWorker(): Promise<void> {
+    if (this.worker) {
+      await this.worker.terminate();
+      this.worker = undefined;
+    }
+  }
 
   public async generate(): Promise<Uint8Array> {
-    return new Uint8Array();
-    // if (this.worker) throw new Error('PDF generation already in progress!');
+    if (this.worker) throw new Error('PDF generation already in progress!');
 
-    // try {
-    //   return await new Promise<Uint8Array>((resolve, reject) => {
-    //     const { port1: myPort, port2: theirPort } = new MessageChannel();
-    //     this.worker = this.createWorker(theirPort);
-    //     this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
-    //       if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
-    //         reject(new PdfWorkerOutOfMemoryError(workerError.message));
-    //       } else {
-    //         reject(workerError);
-    //       }
-    //     });
+    try {
+      return await new Promise<Uint8Array>((resolve, reject) => {
+        const { port1: myPort, port2: theirPort } = new MessageChannel();
+        this.worker = this.createWorker(theirPort);
+        this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+          if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
+            reject(new PdfWorkerOutOfMemoryError(workerError.message));
+          } else {
+            reject(workerError);
+          }
+        });
 
-    //     // Send the initial request
-    //     const generatePdfRequest: GeneratePdfRequest = {
-    //       data: this.getGeneratePdfRequestData(),
-    //     };
-    //     myPort.postMessage(generatePdfRequest);
+        // Send the initial request
+        const generatePdfRequest: GeneratePdfRequest = {
+          data: this.getGeneratePdfRequestData(),
+        };
+        myPort.postMessage(generatePdfRequest);
 
-    //     // We expect one message from the worker generating the PDF buffer.
-    //     myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
-    //       if (error) {
-    //         reject(new Error(`PDF worker returned the following error: ${error}`));
-    //         return;
-    //       }
-    //       if (!data) {
-    //         reject(new Error(`Worker did not generate a PDF!`));
-    //         return;
-    //       }
-    //       this.pageCount = data.metrics.pages;
-    //       resolve(data.buffer);
-    //     });
-    //   });
-    // } finally {
-    //   await this.cleanupWorker();
-    // }
+        // We expect one message from the worker generating the PDF buffer.
+        myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
+          if (error) {
+            reject(new Error(`PDF worker returned the following error: ${error}`));
+            return;
+          }
+          if (!data) {
+            reject(new Error(`Worker did not generate a PDF!`));
+            return;
+          }
+          this.pageCount = data.metrics.pages;
+          resolve(data.buffer);
+        });
+      });
+    } finally {
+      await this.cleanupWorker();
+    }
   }
 
   getPageCount(): number {
