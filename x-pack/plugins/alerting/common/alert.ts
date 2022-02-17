@@ -10,7 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from 'kibana/server';
-import { RuleExecutionSearchStats } from '.';
+import { RuleExecutionMetrics } from '.';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
@@ -38,7 +38,7 @@ export enum AlertExecutionStatusErrorReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   numberOfTriggeredActions?: number;
-  searchStats?: RuleExecutionSearchStats;
+  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {

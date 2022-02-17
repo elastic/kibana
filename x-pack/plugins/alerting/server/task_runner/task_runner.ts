@@ -424,7 +424,7 @@ export class TaskRunner<
       name: rule.name,
     };
 
-    const searchStats = wrappedScopedClusterClient.getStats();
+    const searchMetrics = wrappedScopedClusterClient.getStats();
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
@@ -537,7 +537,7 @@ export class TaskRunner<
     }
 
     return {
-      searchStats,
+      metrics: searchMetrics,
       triggeredActions,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
@@ -766,21 +766,21 @@ export class TaskRunner<
     }
 
     // Copy search stats into event log
-    if (executionStatus.searchStats) {
+    if (executionStatus.metrics) {
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_queries',
-        executionStatus.searchStats.numQueries ?? 0
+        executionStatus.metrics.numQueries ?? 0
       );
       set(
         event,
         'kibana.alert.rule.execution.metrics.total_query_duration_ms',
-        executionStatus.searchStats.totalQueryDurationMs ?? 0
+        executionStatus.metrics.totalQueryDurationMs ?? 0
       );
       set(
         event,
         'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-        executionStatus.searchStats.totalSearchDurationMs ?? 0
+        executionStatus.metrics.totalSearchDurationMs ?? 0
       );
     }
 
@@ -808,7 +808,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['triggeredActions', 'searchStats']),
+        ...omit(executionState, ['triggeredActions', 'metrics']),
         previousStartedAt: startedAt,
       };
     };

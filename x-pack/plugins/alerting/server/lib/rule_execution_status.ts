@@ -14,7 +14,7 @@ import { AlertExecutionStatuses } from '../../common';
 export function executionStatusFromState(state: RuleExecutionState): AlertExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
   return {
-    searchStats: state.searchStats,
+    metrics: state.metrics,
     numberOfTriggeredActions: state.triggeredActions?.length ?? 0,
     lastExecutionDate: new Date(),
     status: alertIds.length === 0 ? 'ok' : 'active',

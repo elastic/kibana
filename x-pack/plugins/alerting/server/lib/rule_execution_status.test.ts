@@ -16,7 +16,7 @@ import {
 import { ErrorWithReason } from './error_with_reason';
 
 const MockLogger = loggingSystemMock.create().get();
-const searchStats = { numQueries: 1, totalQueryDurationMs: 10, totalSearchDurationMs: 20 };
+const metrics = { numQueries: 1, totalQueryDurationMs: 10, totalSearchDurationMs: 20 };
 
 describe('RuleExecutionStatus', () => {
   beforeEach(() => {
@@ -36,39 +36,39 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertInstances: {},
         triggeredActions: [],
-        searchStats,
+        metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
-      expect(status.searchStats).toBe(searchStats);
+      expect(status.metrics).toBe(metrics);
     });
 
     test('task state with one instance', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
         triggeredActions: [],
-        searchStats,
+        metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
-      expect(status.searchStats).toBe(searchStats);
+      expect(status.metrics).toBe(metrics);
     });
 
     test('task state with numberOfTriggeredActions', () => {
       const status = executionStatusFromState({
         triggeredActions: [{ group: '1' } as AlertAction],
         alertInstances: { a: {} },
-        searchStats,
+        metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(1);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
-      expect(status.searchStats).toBe(searchStats);
+      expect(status.metrics).toBe(metrics);
     });
   });
 

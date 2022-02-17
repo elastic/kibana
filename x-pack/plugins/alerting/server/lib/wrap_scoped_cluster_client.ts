@@ -21,7 +21,7 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
-import { ElasticsearchClientWithChild, RuleExecutionSearchStats } from '../types';
+import { ElasticsearchClientWithChild, RuleExecutionMetrics } from '../types';
 import { Alert as Rule } from '../types';
 
 type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'>;
@@ -58,7 +58,7 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
 
   return {
     client: () => wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics }),
-    getStats: (): RuleExecutionSearchStats => {
+    getStats: (): RuleExecutionMetrics => {
       return {
         totalQueryDurationMs,
         totalSearchDurationMs,

@@ -22,16 +22,16 @@ export const ruleStateSchema = t.partial({
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 
-const ruleExecutionSearchStatsSchema = t.partial({
+const ruleExecutionMetricsSchema = t.partial({
   numQueries: t.number,
   totalSearchDurationMs: t.number,
   totalQueryDurationMs: t.number,
 });
 
-export type RuleExecutionSearchStats = t.TypeOf<typeof ruleExecutionSearchStatsSchema>;
+export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
 export type RuleExecutionState = RuleTaskState & {
-  searchStats: RuleExecutionSearchStats;
+  metrics: RuleExecutionMetrics;
   triggeredActions: Array<t.TypeOf<typeof actionSchema>>;
 };
 
