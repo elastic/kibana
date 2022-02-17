@@ -275,7 +275,7 @@ exports.Cluster = class Cluster {
       []
     );
 
-    this._log.debug('%s %s', ES_BIN, args.join(' '));
+    this._log.info('%s %s', ES_BIN, args.join(' '));
 
     let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
 
@@ -288,7 +288,7 @@ exports.Cluster = class Cluster {
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
 
-    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
+    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts.trim());
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
