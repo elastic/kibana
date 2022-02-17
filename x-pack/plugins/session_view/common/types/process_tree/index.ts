@@ -68,8 +68,8 @@ export interface ProcessFields {
   interactive: boolean;
   working_directory: string;
   pid: number;
-  start: Date;
-  end?: Date;
+  start: string;
+  end?: string;
   user: User;
   exit_code?: number;
   entry_meta?: EntryMeta;
@@ -79,6 +79,9 @@ export interface ProcessFields {
 export interface ProcessSelf extends Omit<ProcessFields, 'user'> {
   parent: ProcessFields;
   session_leader: ProcessFields;
+  // replacing session_leader with session as a Temporary implementation for the endpoint integration
+  // TODO: revert to session_leader once it's ready
+  session: ProcessFields;
   entry_leader: ProcessFields;
   group_leader: ProcessFields;
 }
@@ -125,7 +128,7 @@ export interface ProcessEventAlert {
 }
 
 export interface ProcessEvent {
-  '@timestamp': Date;
+  '@timestamp': string;
   event: {
     kind: EventKind;
     category: string;

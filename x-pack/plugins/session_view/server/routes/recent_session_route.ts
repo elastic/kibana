@@ -31,6 +31,13 @@ export const registerRecentSessionRoute = (router: IRouter) => {
               'process.entry_leader.interactive': true,
             },
           },
+          // This runtime_mappings is a temporary fix, so we are able to Query these ECS fields while they are not available
+          // TODO: Remove the runtime_mappings once process.entry_leader.interactive is implemented to ECS
+          runtime_mappings: {
+            'process.entry_leader.interactive': {
+              type: 'boolean',
+            },
+          },
           size: 1,
           sort: [{ '@timestamp': 'desc' }],
         },

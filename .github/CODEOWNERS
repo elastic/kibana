@@ -418,6 +418,9 @@ x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-e
 x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
+## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/session_view @elastic/adaptive-workload-protection
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 

@@ -57,7 +57,7 @@ export const doSearch = async (
     siemSignalsExists = false;
   }
 
-  const indices = ['cmd'];
+  const indices = ['logs-endpoint.events.process-default'];
 
   if (siemSignalsExists) {
     indices.push('.siem-signals-default');
@@ -69,6 +69,13 @@ export const doSearch = async (
       query: {
         match: {
           'process.entry_leader.entity_id': sessionEntityId,
+        },
+      },
+      // This runtime_mappings is a temporary fix, so we are able to Query these ECS fields while they are not available
+      // TODO: Remove the runtime_mappings once process.entry_leader.entity_id is implemented to ECS
+      runtime_mappings: {
+        'process.entry_leader.entity_id': {
+          type: 'keyword',
         },
       },
       size: PROCESS_EVENTS_PER_PAGE,
