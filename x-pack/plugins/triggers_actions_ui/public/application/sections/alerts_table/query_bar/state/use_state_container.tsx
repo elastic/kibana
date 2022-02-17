@@ -7,14 +7,14 @@
 
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '../../../../common/lib/kibana';
-import { TimefilterContract } from '../../../../../../../../src/plugins/data/public';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { TimefilterContract } from '../../../../../../../../../src/plugins/data/public';
 import {
   createKbnUrlStateStorage,
   syncState,
   IKbnUrlStateStorage,
   useContainerSelector,
-} from '../../../../../../../../src/plugins/kibana_utils/public';
+} from '../../../../../../../../../src/plugins/kibana_utils/public';
 import { useContainer, defaultState, StateContainer, ContainerState } from './state_container';
 
 export function useStateContainer() {

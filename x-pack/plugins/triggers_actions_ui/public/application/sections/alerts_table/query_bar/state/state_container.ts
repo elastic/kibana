@@ -8,7 +8,7 @@
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-} from '../../../../../../../../src/plugins/kibana_utils/public';
+} from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 interface ContainerState {
   rangeFrom: string;

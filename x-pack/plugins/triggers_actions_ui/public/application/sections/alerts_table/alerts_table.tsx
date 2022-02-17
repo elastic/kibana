@@ -16,11 +16,6 @@ import {
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import {
-  // RuleRegistrySearchRequest,
-  // RuleRegistrySearchResponse,
-  ParsedTechnicalFields,
-} from '../../../../../rule_registry/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { QueryBar, useQueryBar, Provider, alertsPageStateContainer } from './query_bar';
 import { getVisibleAlertConsumers } from './get_visible_alert_consumers';
@@ -63,7 +58,9 @@ interface AlertsTableProps {
 
 const useFetchAlertData = () => {
   return {
-    fetchData: () => {},
+    fetchAlertData: () => {},
+    alerts: [],
+    alertsTotal: 0,
   };
 };
 
@@ -90,12 +87,12 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
     kibanaFeatures,
   } = useKibana().services;
 
-  const [alerts, setAlerts] = useState<ParsedTechnicalFields[]>([]);
-  const [alertsTotal, setAlertsTotal] = useState<number>(0);
+  // const [alerts, setAlerts] = useState<ParsedTechnicalFields[]>([]);
+  // const [alertsTotal, setAlertsTotal] = useState<number>(0);
   const { sortingColumns, onSort } = useSorting();
   const { pagination, onChangeItemsPerPage, onChangePage } = usePagination();
-  const { fetchData } = useFetchAlertData();
-  const { onQueryBarQueryChange, rangeFrom, rangeTo, kuery } = useQueryBar(data, fetchData);
+  const { fetchAlertData, alerts, alertsTotal } = useFetchAlertData();
+  const { onQueryBarQueryChange, rangeFrom, rangeTo, kuery } = useQueryBar(data, fetchAlertData);
   const visibleConsumers = getVisibleAlertConsumers(capabilities, kibanaFeatures, props.consumers);
   const { dataViews } = useFetchDataViews(visibleConsumers, http, data);
 
