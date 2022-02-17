@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { openSync, writeSync, unlinkSync, closeSync } from 'fs';
+import { openSync, writeSync, unlinkSync, closeSync, statSync } from 'fs';
 import { dirname } from 'path';
 import { setTimeout } from 'timers/promises';
 
@@ -39,6 +39,7 @@ interface DownloadToDiskOptions {
   shaAlgorithm: string;
   maxAttempts?: number;
   retryDelaySecMultiplier?: number;
+  skipChecksumCheck?: boolean;
 }
 export async function downloadToDisk({
   log,
@@ -48,8 +49,9 @@ export async function downloadToDisk({
   shaAlgorithm,
   maxAttempts = 1,
   retryDelaySecMultiplier = 5,
+  skipChecksumCheck = false,
 }: DownloadToDiskOptions) {
-  if (!shaChecksum) {
+  if (!shaChecksum && !skipChecksumCheck) {
     throw new Error(`${shaAlgorithm} checksum of ${url} not provided, refusing to download.`);
   }
 
@@ -69,7 +71,7 @@ export async function downloadToDisk({
     try {
       log.debug(
         `[${attempt}/${maxAttempts}] Attempting download of ${url}`,
-        chalk.dim(shaAlgorithm)
+        skipChecksumCheck ? '' : chalk.dim(shaAlgorithm)
       );
 
       const response = await Axios.request({
@@ -83,9 +85,13 @@ export async function downloadToDisk({
       }
 
       const hash = createHash(shaAlgorithm);
+
       await new Promise((resolve, reject) => {
         response.data.on('data', (chunk: Buffer) => {
-          hash.update(chunk);
+          if (!skipChecksumCheck) {
+            hash.update(chunk);
+          }
+
           writeSync(fileHandle, chunk);
         });
 
@@ -93,20 +99,25 @@ export async function downloadToDisk({
         response.data.on('end', resolve);
       });
 
-      const downloadedSha = hash.digest('hex');
-      if (downloadedSha !== shaChecksum) {
-        throw new Error(
-          `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
-        );
+      if (!skipChecksumCheck) {
+        const downloadedSha = hash.digest('hex');
+        if (downloadedSha !== shaChecksum) {
+          throw new Error(
+            `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
+          );
+        }
       }
     } catch (_error) {
       error = _error;
     } finally {
       closeSync(fileHandle);
+
+      const fileStats = statSync(destination);
+      log.debug(`Downloaded ${fileStats.size} bytes to ${destination}`);
     }
 
     if (!error) {
-      log.debug(`Downloaded ${url} and verified checksum`);
+      log.debug(`Downloaded ${url} ${skipChecksumCheck ? '' : 'and verified checksum'}`);
       return;
     }
 
