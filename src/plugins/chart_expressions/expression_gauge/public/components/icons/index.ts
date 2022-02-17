@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionGaugePlugin } from './plugin';
-
-export function plugin() {
-  return new ExpressionGaugePlugin();
-}
-
-export { getGoalValue, getMaxValue, getMinValue, getValueFromAccessor } from './components/utils';
-export { VerticalBulletIcon, HorizontalBulletIcon } from './components/icons';
+export { HorizontalBulletIcon } from './horizontal_bullet_icon';
+export { VerticalBulletIcon } from './vertical_bullet_icon';
