@@ -7,10 +7,11 @@
  */
 
 import { CollectorSet } from '../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../core/server/logging/logger.mock';
+import { executionContextServiceMock, loggingSystemMock } from '../../core/server/mocks';
 
 const { makeUsageCollector } = new CollectorSet({
-  logger: loggerMock.create(),
+  logger: loggingSystemMock.createLogger(),
+  executionContext: executionContextServiceMock.createSetupContract(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 
