@@ -6,11 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import {
-  ALERT_RULE_NAMESPACE,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_DESCRIPTION,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAMESPACE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -41,6 +37,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
+  { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
 ];
 
 /**
@@ -69,7 +66,7 @@ function getFieldsByCategory({
         { id: 'process.name' },
       ];
     case EventCategory.DNS:
-      return [{ id: 'dns.query.name' }, { id: 'process.name' }];
+      return [{ id: 'dns.question.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     case EventCategory.MALWARE:
@@ -107,7 +104,7 @@ function getFieldsByEventCode(
   switch (eventCode) {
     case EventCode.BEHAVIOR:
       return [
-        { id: ALERT_RULE_DESCRIPTION, label: ALERTS_HEADERS_RULE_DESCRIPTION },
+        { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
         // Resolve more fields based on the source event
         ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
       ];

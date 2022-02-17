@@ -39,7 +39,16 @@ function ofName(name: string, timeShift: string | undefined) {
   );
 }
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'ip',
+  'date',
+  'ip_range',
+  'number_range',
+  'date_range',
+]);
 
 export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
   if (!indexPattern) {
@@ -157,6 +166,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
+    const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];
     const sortField = isTimeFieldNameDateField(indexPattern)
       ? indexPattern.timeFieldName
       : indexPattern.fields.find((f) => f.type === 'date')?.name;
@@ -179,7 +189,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
-        sortField,
+        sortField: lastValueParams?.sortField || sortField,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };

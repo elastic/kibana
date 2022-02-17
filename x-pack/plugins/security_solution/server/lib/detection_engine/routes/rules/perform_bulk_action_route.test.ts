@@ -57,14 +57,36 @@ describe('perform_bulk_action', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({ success: true, rules_count: 1 });
+      expect(response.body).toEqual({
+        success: true,
+        rules_count: 1,
+        attributes: {
+          results: someBulkActionResults(),
+          summary: {
+            failed: 0,
+            succeeded: 1,
+            total: 1,
+          },
+        },
+      });
     });
 
     it("returns 200 when provided filter query doesn't match any rules", async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({ success: true, rules_count: 0 });
+      expect(response.body).toEqual({
+        success: true,
+        rules_count: 0,
+        attributes: {
+          results: someBulkActionResults(),
+          summary: {
+            failed: 0,
+            succeeded: 0,
+            total: 0,
+          },
+        },
+      });
     });
 
     it('returns 400 when provided filter query matches too many rules', async () => {
@@ -99,7 +121,7 @@ describe('perform_bulk_action', () => {
           errors: [
             {
               message: 'Elastic rule can`t be edited',
-              status_code: 403,
+              status_code: 400,
               rules: [
                 {
                   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -108,7 +130,8 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
-          rules: {
+          results: someBulkActionResults(),
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -139,7 +162,8 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
-          rules: {
+          results: someBulkActionResults(),
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -213,7 +237,8 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
-          rules: {
+          results: someBulkActionResults(),
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -250,7 +275,7 @@ describe('perform_bulk_action', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         attributes: {
-          rules: {
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -268,6 +293,7 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
+          results: someBulkActionResults(),
         },
         message: 'Bulk edit failed',
         status_code: 500,
@@ -300,7 +326,7 @@ describe('perform_bulk_action', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         attributes: {
-          rules: {
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -317,6 +343,7 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
+          results: someBulkActionResults(),
         },
         message: 'Bulk edit failed',
         status_code: 500,
@@ -351,7 +378,7 @@ describe('perform_bulk_action', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         attributes: {
-          rules: {
+          summary: {
             failed: 3,
             succeeded: 2,
             total: 5,
@@ -382,6 +409,7 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
+          results: someBulkActionResults(),
         },
         message: 'Bulk edit partially failed',
         status_code: 500,
@@ -417,14 +445,14 @@ describe('perform_bulk_action', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         attributes: {
-          rules: {
+          summary: {
             failed: 1,
             succeeded: 1,
             total: 2,
           },
           errors: [
             {
-              message: 'Can`t fetch a rule',
+              message: 'Rule not found',
               status_code: 500,
               rules: [
                 {
@@ -433,6 +461,7 @@ describe('perform_bulk_action', () => {
               ],
             },
           ],
+          results: someBulkActionResults(),
         },
         message: 'Bulk edit partially failed',
         status_code: 500,
@@ -546,6 +575,23 @@ describe('perform_bulk_action', () => {
     const response = await server.inject(getBulkActionEditRequest(), context);
 
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({ success: true, rules_count: rulesNumber });
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        success: true,
+        rules_count: rulesNumber,
+        attributes: {
+          summary: { failed: 0, succeeded: rulesNumber, total: rulesNumber },
+          results: someBulkActionResults(),
+        },
+      })
+    );
   });
 });
+
+function someBulkActionResults() {
+  return {
+    created: expect.any(Array),
+    deleted: expect.any(Array),
+    updated: expect.any(Array),
+  };
+}
