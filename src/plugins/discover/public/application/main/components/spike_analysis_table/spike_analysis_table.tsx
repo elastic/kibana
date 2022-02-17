@@ -265,23 +265,26 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   }, []);
 
   const barSeries = useMemo(
-    () => orderBy(response?.overallTimeSeries?.data ?? [], 'normalizedScore', 'desc'),
-    [response?.overallTimeSeries?.data]
+    () => orderBy(response?.overallTimeSeries ?? [], 'normalizedScore', 'desc'),
+    [response?.overallTimeSeries]
   );
 
-  const cpBarSeries =
-    response.changePoints?.map((cp) => {
-      return {
-        ...cp,
-        data:
-          cp?.histogram?.map((h, i) => {
-            return {
-              ...h,
-              other: Math.max(0, barSeries[i].doc_count - h.doc_count),
-            };
-          }) ?? [],
-      };
-    }) ?? [];
+  const cpBarSeries = useMemo(
+    () =>
+      pageOfItems.map((cp) => {
+        return {
+          ...cp,
+          data:
+            cp?.histogram?.map((h, i) => {
+              return {
+                ...h,
+                other: Math.max(0, barSeries[i].doc_count - h.doc_count),
+              };
+            }) ?? [],
+        };
+      }) ?? [],
+    [barSeries, pageOfItems]
+  );
 
   return (
     <EuiFlexItem grow={false} style={{ height: '100%', overflow: 'hidden' }}>
@@ -289,7 +292,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         <EuiFlexGroup wrap gutterSize="xs">
           {cpBarSeries.map((cp) => {
             return (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiSplitPanel.Outer grow>
                   <EuiSplitPanel.Inner grow={false} paddingSize="s">
                     <div
@@ -307,7 +310,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
                           yScaleType={ScaleType.Linear}
                           xAccessor={'key'}
                           yAccessors={['other']}
-                          data={cp.data as any[]}
+                          data={cp.data}
                           stackAccessors={[0]}
                           // color={['lightblue']}
                         />
@@ -317,7 +320,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
                           yScaleType={ScaleType.Linear}
                           xAccessor={'key'}
                           yAccessors={['doc_count']}
-                          data={cp.data as any[]}
+                          data={cp.data}
                           stackAccessors={[0]}
                           color={['orange']}
                         />
@@ -329,7 +332,9 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
                     paddingSize="s"
                     style={{ width: '200px', overflow: 'hidden' }}
                   >
-                    <EuiStat title={cp.fieldValue} description={cp.fieldName} titleSize="xxxs" />
+                    <small>
+                      <EuiStat title={cp.fieldValue} description={cp.fieldName} titleSize="xxxs" />
+                    </small>
                   </EuiSplitPanel.Inner>
                 </EuiSplitPanel.Outer>
               </EuiFlexItem>

@@ -38,12 +38,19 @@ export interface FieldValuePair {
   fieldValue: string | number;
 }
 
+interface HistogramItem {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
+
 export interface ChangePoint extends FieldValuePair {
   doc_count: number;
   bg_count: number;
   score: number;
   pValue: number | null;
   normalizedScore: number;
+  histogram: HistogramItem[];
 }
 
 export interface TopValueBucket {
@@ -81,8 +88,10 @@ export interface ChangePointsResponse {
   ccsWarning: boolean;
   changePoints?: ChangePoint[];
   fieldStats?: FieldStats[];
-  overallTimeSeries?: { data: any[] };
+  overallTimeSeries?: HistogramItem[];
 }
+
+type HistogramResponse = Array<{ data: HistogramItem[] }>;
 
 export const DEBOUNCE_INTERVAL = 100;
 
@@ -100,7 +109,8 @@ export function useChangePointDetection(
     data,
     core: { http },
   } = useDiscoverServices();
-  const discoverQuery = data.query.getEsQuery(dataView);
+
+  const discoverQuery = useMemo(() => data.query.getEsQuery(dataView), [data.query, dataView]);
 
   // const fetchParams = useFetchParams();
 
@@ -248,7 +258,7 @@ export function useChangePointDetection(
         samplerShardSize: -1,
       });
 
-      const overallTimeSeries = await http.post<unknown[]>({
+      const overallTimeSeries = await http.post<HistogramResponse>({
         path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
         body,
       });
@@ -256,34 +266,36 @@ export function useChangePointDetection(
       // time series filtered by fields
       if (responseUpdate.changePoints) {
         await asyncForEach(responseUpdate.changePoints, async (cp, index) => {
-          const histogramQuery = {
-            bool: {
-              filter: [
-                ...discoverQuery.bool.filter,
-                {
-                  term: { [cp.fieldName]: cp.fieldValue },
-                },
-              ],
-            },
-          };
+          if (responseUpdate.changePoints) {
+            const histogramQuery = {
+              bool: {
+                filter: [
+                  ...discoverQuery.bool.filter,
+                  {
+                    term: { [cp.fieldName]: cp.fieldValue },
+                  },
+                ],
+              },
+            };
 
-          const hBody = JSON.stringify({
-            query: histogramQuery,
-            fields: [{ fieldName: '@timestamp', type: 'date' }],
-            samplerShardSize: -1,
-          });
+            const hBody = JSON.stringify({
+              query: histogramQuery,
+              fields: [{ fieldName: '@timestamp', type: 'date' }],
+              samplerShardSize: -1,
+            });
 
-          const cpTimeSeries = await http.post<unknown[]>({
-            path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
-            body: hBody,
-          });
+            const cpTimeSeries = await http.post<HistogramResponse>({
+              path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
+              body: hBody,
+            });
 
-          responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
+            responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
+          }
         });
       }
 
       responseUpdate.fieldStats = stats;
-      responseUpdate.overallTimeSeries = overallTimeSeries[0];
+      responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,
