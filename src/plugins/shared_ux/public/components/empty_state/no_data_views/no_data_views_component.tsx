@@ -45,7 +45,7 @@ export const NoDataViewsComponent = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { size } = euiTheme;
-  const maxWidth = Number.parseInt(size.xxl.slice(0, -2), 10) * 19 + 'px';
+  const maxWidth = `calc(${size.xxl} * 19)`;
 
   const button = (
     <EuiButton
