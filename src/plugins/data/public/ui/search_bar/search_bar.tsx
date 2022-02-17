@@ -260,13 +260,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
-  public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
-    if (!this.state.query) return;
+  public onSave = async (
+    savedQueryMeta: SavedQueryMeta,
+    saveAsNew = false,
+    query = this.state.query
+  ) => {
+    if (!query) return;
 
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
-      query: this.state.query,
+      query,
     };
 
     if (savedQueryMeta.filters !== undefined) {
@@ -650,7 +654,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           toggleAddFilterModal={this.toggleAddFilterModal}
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
-          onNewFiltersSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+          onNewFiltersSave={(savedQueryMeta) =>
+            this.onSave(savedQueryMeta, true, {
+              language: this.state.query!.language,
+              query: '',
+            })
+          }
           savedQueryService={this.savedQueryService}
         />
       );
@@ -720,7 +729,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             isEditFilterModalOpen={this.state.isEditFilterModalOpen}
             editFilterMode={this.state.editFilterMode}
             savedQueryService={this.savedQueryService}
-            onFilterSave={this.onSave}
+            onFilterSave={(savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
+              console.log(this.state.query);
+              return this.onSave(savedQueryMeta, saveAsNew, {
+                language: this.state.query!.language,
+                query: '',
+              });
+            }}
             onFilterBadgeSave={this.onFilterBadgeSave}
           />
         </div>
