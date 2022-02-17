@@ -32,12 +32,16 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
   return (await getEMSClient()).getTMSServices();
 }
 
-let emsClient: EMSClient | null = null;
+let emsClientPromise: Promise<EMSClient> | null = null;
 let latestLicenseId: string | undefined;
 async function getEMSClient(): Promise<EMSClient> {
-  if (!emsClient) {
-    emsClient = await getMapsEmsStart().createEMSClient();
+  if (!emsClientPromise) {
+    emsClientPromise = new Promise(async (resolve) => {
+      const emsClient = await getMapsEmsStart().createEMSClient();
+      resolve(emsClient);
+    });
   }
+  const emsClient = await emsClientPromise;
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
