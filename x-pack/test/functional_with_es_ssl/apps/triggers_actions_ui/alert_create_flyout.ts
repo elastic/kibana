@@ -258,12 +258,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.click('cancelsaveRuleButton');
+      await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('intervalInput', '10');
-      await testSubjects.click('cancelsaveRuleButton');
+      await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
@@ -281,7 +281,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelsaveRuleButton');
+      await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
     });
@@ -306,14 +306,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await ruleTypeSearchBox.type('notexisting rule type');
       await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
 
-      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__alertTypeNodeHeading');
+      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__ruleTypeNodeHeading');
       expect(ruleTypes).to.have.length(0);
 
       const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
       await searchClearButton.click();
 
       const ruleTypesClearFilter = await find.allByCssSelector(
-        '.triggersActionsUI__alertTypeNodeHeading'
+        '.triggersActionsUI__ruleTypeNodeHeading'
       );
       expect(ruleTypesClearFilter.length).to.above(0);
     });

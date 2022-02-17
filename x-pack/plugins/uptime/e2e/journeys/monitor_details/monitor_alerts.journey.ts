@@ -66,7 +66,7 @@ journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) =
   });
 
   step('close anomaly detection flyout', async () => {
-    await page.click(byTestId('cancelsaveRuleButton'));
+    await page.click(byTestId('cancelSaveRuleButton'));
   });
 
   step('open anomaly detection alert', async () => {

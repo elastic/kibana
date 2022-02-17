@@ -21,17 +21,17 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
-      name: $(row).findTestSubject('alertsTableCell-name').find('.euiTableCellContent').text(),
+      name: $(row).findTestSubject('rulesTableCell-name').find('.euiTableCellContent').text(),
       duration: $(row)
-        .findTestSubject('alertsTableCell-duration')
+        .findTestSubject('rulesTableCell-duration')
         .find('.euiTableCellContent')
         .text(),
       interval: $(row)
-        .findTestSubject('alertsTableCell-interval')
+        .findTestSubject('rulesTableCell-interval')
         .find('.euiTableCellContent')
         .text(),
       tags: $(row)
-        .findTestSubject('alertsTableCell-tagsPopover')
+        .findTestSubject('rulesTableCell-tagsPopover')
         .find('.euiTableCellContent')
         .text(),
     };
@@ -74,7 +74,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await searchBox.type(searchText);
       await searchBox.pressKeys(ENTER_KEY);
       await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
     },
     async getConnectorsList() {
@@ -96,42 +96,42 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         });
     },
     async getAlertsList() {
-      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('alert-row')
+      return $.findTestSubjects('rule-row')
         .toArray()
         .map((row) => {
           return getRowItemData(row, $);
         });
     },
     async getAlertsListWithStatus() {
-      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('alert-row')
+      return $.findTestSubjects('rule-row')
         .toArray()
         .map((row) => {
           const rowItem = getRowItemData(row, $);
           return {
             ...rowItem,
             status: $(row)
-              .findTestSubject('alertsTableCell-status')
+              .findTestSubject('rulesTableCell-status')
               .find('.euiTableCellContent')
               .text(),
           };
         });
     },
     async isAlertsListDisplayed() {
-      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
       return table.isDisplayed();
     },
     async isAnEmptyAlertsListDisplayed() {
       await retry.try(async () => {
-        const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+        const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
         const $ = await table.parseDomContent();
-        const rows = $.findTestSubjects('alert-row').toArray();
+        const rows = $.findTestSubjects('rule-row').toArray();
         expect(rows.length).to.eql(0);
         const emptyRow = await find.byCssSelector(
-          '[data-test-subj="alertsList"] table .euiTableRow'
+          '[data-test-subj="rulesList"] table .euiTableRow'
         );
         expect(await emptyRow.getVisibleText()).to.eql('No items found');
       });
@@ -139,7 +139,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
-      await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
+      await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
     },
     async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
@@ -150,7 +150,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickCreateAlertButton() {
       const createBtn = await find.byCssSelector(
-        '[data-test-subj="createAlertButton"],[data-test-subj="createFirstRuleButton"]'
+        '[data-test-subj="createRuleButton"],[data-test-subj="createFirstRuleButton"]'
       );
       await createBtn.click();
     },
