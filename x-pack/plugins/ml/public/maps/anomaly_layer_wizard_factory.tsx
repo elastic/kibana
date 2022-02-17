@@ -8,6 +8,8 @@
 import React from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import type { StartServicesAccessor } from 'kibana/public';
+import { LocatorPublic } from 'src/plugins/share/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../maps/common';
 import { SEVERITY_COLOR_RAMP } from '../../common';
@@ -41,12 +43,17 @@ export class AnomalyLayerWizardFactory {
 
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
-    private canGetJobs: boolean
+    private canGetJobs: boolean,
+    private canCreateJobs: boolean
   ) {
     this.canGetJobs = canGetJobs;
+    this.canCreateJobs = canCreateJobs;
   }
 
-  private async getServices(): Promise<{ mlJobsService: MlApiServices['jobs']; mlLocator: any }> {
+  private async getServices(): Promise<{
+    mlJobsService: MlApiServices['jobs'];
+    mlLocator?: LocatorPublic<SerializableRecord>;
+  }> {
     const [coreStart, pluginStart] = await this.getStartServices();
     const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
 
@@ -59,9 +66,15 @@ export class AnomalyLayerWizardFactory {
 
   public async create(): Promise<LayerWizard> {
     const { mlJobsService, mlLocator } = await this.getServices();
-    const jobsManagementPath = await mlLocator.getUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    });
+    let jobsManagementPath: string | undefined;
+    if (mlLocator) {
+      jobsManagementPath = await mlLocator.getUrl({
+        page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+      });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error('Unable to get job management path.');
+    }
 
     const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
 
@@ -99,7 +112,7 @@ export class AnomalyLayerWizardFactory {
           onSourceConfigChange={onSourceConfigChange}
           mlJobsService={mlJobsService}
           jobsManagementPath={jobsManagementPath}
-          canGetJobs={this.canGetJobs}
+          canCreateJobs={this.canCreateJobs}
         />
       );
     };

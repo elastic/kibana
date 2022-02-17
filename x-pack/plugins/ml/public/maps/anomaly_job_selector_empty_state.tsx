@@ -11,10 +11,10 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
   jobsManagementPath: string;
-  canGetJobs: boolean;
+  canCreateJobs: boolean;
 }
 
-export const AnomalyJobSelectorEmptyState: FC<Props> = ({ jobsManagementPath, canGetJobs }) => (
+export const AnomalyJobSelectorEmptyState: FC<Props> = ({ jobsManagementPath, canCreateJobs }) => (
   <EuiEmptyPrompt
     layout="vertical"
     hasBorder={false}
@@ -44,7 +44,7 @@ export const AnomalyJobSelectorEmptyState: FC<Props> = ({ jobsManagementPath, ca
         href={jobsManagementPath}
         fill
         iconType="plusInCircle"
-        isDisabled={!canGetJobs}
+        isDisabled={!canCreateJobs}
         data-test-subj="mlMapsCreateNewJobButton"
       >
         <FormattedMessage

@@ -16,8 +16,8 @@ import { AnomalyJobSelectorEmptyState } from './anomaly_job_selector_empty_state
 interface Props {
   onJobChange: (jobId: string) => void;
   mlJobsService: MlApiServices['jobs'];
-  jobsManagementPath: string;
-  canGetJobs: boolean;
+  jobsManagementPath?: string;
+  canCreateJobs: boolean;
 }
 
 interface State {
@@ -65,7 +65,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
 
   render() {
     const supportedJobsExist = this.state.jobIdList?.length && this.state.jobIdList?.length > 0;
-    return supportedJobsExist ? (
+    return supportedJobsExist || !this.props.jobsManagementPath ? (
       <EuiFormRow
         label={i18n.translate('xpack.ml.maps.jobIdLabel', {
           defaultMessage: 'Job ID',
@@ -84,7 +84,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
     ) : (
       <AnomalyJobSelectorEmptyState
         jobsManagementPath={this.props.jobsManagementPath}
-        canGetJobs={this.props.canGetJobs}
+        canCreateJobs={this.props.canCreateJobs}
       />
     );
   }

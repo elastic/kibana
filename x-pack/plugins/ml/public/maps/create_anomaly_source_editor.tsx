@@ -17,8 +17,8 @@ import type { MlApiServices } from '../application/services/ml_api_service';
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
   mlJobsService: MlApiServices['jobs'];
-  jobsManagementPath: string;
-  canGetJobs: boolean;
+  jobsManagementPath?: string;
+  canCreateJobs: boolean;
 }
 
 interface State {
@@ -84,7 +84,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
           onJobChange={this.previewLayer}
           mlJobsService={this.props.mlJobsService}
           jobsManagementPath={this.props.jobsManagementPath}
-          canGetJobs={this.props.canGetJobs}
+          canCreateJobs={this.props.canCreateJobs}
         />
         {selector}
       </EuiPanel>
