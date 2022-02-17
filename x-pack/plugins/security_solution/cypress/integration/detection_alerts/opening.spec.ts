@@ -45,7 +45,7 @@ describe('Opening alerts', () => {
     refreshPage();
   });
 
-  it('Open one alert when more than one closed alerts are selected', () => {
+  it('Open one alert when more than one closed alerts are selected ', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT)
