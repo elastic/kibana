@@ -9,7 +9,13 @@
 import { topNElasticSearchQuery } from './search_topn';
 import { DataRequestHandlerContext } from '../../../data/server';
 import { kibanaResponseFactory } from '../../../../core/server';
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsAggregationContainer,
+  AggregationsHistogramAggregate,
+  AggregationsHistogramBucket,
+  AggregationsMultiBucketAggregateBase,
+  AggregationsStringTermsBucket,
+} from '@elastic/elasticsearch/lib/api/types';
 
 const anyQuery = 'any::query';
 const index = 'test';
@@ -36,23 +42,23 @@ function mockTopNData() {
                   histogram: {
                     buckets: [
                       {
-                        key_as_string: '1644506880',
-                        key: 1644506880000,
-                        doc_count: 700,
+                        key_as_string: '123',
+                        key: 123000,
+                        doc_count: 10,
                         group_by: {
                           buckets: [
                             {
-                              key: 'vyHke_Kdp2c05tXV7a_Rkg==',
+                              key: '::any::key::',
                               doc_count: 10,
                               Count: {
                                 value: 100.0,
                               },
-                            },
+                            } as AggregationsStringTermsBucket,
                           ],
-                        },
-                      },
+                        } as AggregationsMultiBucketAggregateBase<AggregationsStringTermsBucket>,
+                      } as AggregationsHistogramBucket,
                     ],
-                  },
+                  } as AggregationsHistogramAggregate,
                 },
               },
             }),

@@ -8,12 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory } from 'kibana/server';
 import {
+  AggregationsHistogramAggregate,
   AggregationsHistogramBucket,
-  AggregationsMultiBucketAggregateBase,
+  AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
-import { newProjectTimeQuery, autoHistogramSumCountOnGroupByField } from './mappings';
+import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './mappings';
 
 export async function topNElasticSearchQuery(
   context: DataRequestHandlerContext,
@@ -21,6 +22,7 @@ export async function topNElasticSearchQuery(
   projectID: string,
   timeFrom: string,
   timeTo: string,
+  topNItems: number,
   searchField: string,
   response: KibanaResponseFactory
 ) {
@@ -30,23 +32,22 @@ export async function topNElasticSearchQuery(
     body: {
       query: newProjectTimeQuery(projectID, timeFrom, timeTo),
       aggs: {
-        histogram: autoHistogramSumCountOnGroupByField(searchField),
+        histogram: autoHistogramSumCountOnGroupByField(searchField, topNItems),
       },
     },
   });
 
   if (searchField === 'StackTraceID') {
-    const autoDateHistogram = resTopNStackTraces.body.aggregations
-      ?.histogram as AggregationsMultiBucketAggregateBase<AggregationsHistogramBucket>;
-
     const docIDs: string[] = [];
-    autoDateHistogram.buckets?.forEach((timeInterval: any) => {
-      timeInterval.group_by.buckets.forEach((stackTraceItem: any) => {
+    (
+      resTopNStackTraces.body.aggregations?.histogram as AggregationsHistogramAggregate
+    ).buckets.forEach((timeInterval: AggregationsHistogramBucket) => {
+      timeInterval.group_by.buckets.forEach((stackTraceItem: AggregationsStringTermsBucket) => {
         docIDs.push(stackTraceItem.key);
       });
     });
 
-    const resTraceMetadata = await esClient.mget<any>({
+    const resTraceMetadata = await esClient.mget({
       index: 'profiling-stacktraces',
       body: { ids: docIDs },
     });
@@ -76,23 +77,25 @@ export function queryTopNCommon(
       path: pathName,
       validate: {
         query: schema.object({
-          index: schema.maybe(schema.string()),
-          projectID: schema.maybe(schema.string()),
-          timeFrom: schema.maybe(schema.string()),
-          timeTo: schema.maybe(schema.string()),
+          index: schema.string(),
+          projectID: schema.string(),
+          timeFrom: schema.string(),
+          timeTo: schema.string(),
+          n: schema.number(),
         }),
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo } = request.query;
+      const { index, projectID, timeFrom, timeTo, n } = request.query;
 
       try {
         return await topNElasticSearchQuery(
           context,
-          index!,
-          projectID!,
-          timeFrom!,
-          timeTo!,
+          index,
+          projectID,
+          timeFrom,
+          timeTo,
+          n,
           searchField,
           response
         );
