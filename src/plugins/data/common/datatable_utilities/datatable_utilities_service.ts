@@ -23,6 +23,10 @@ export class DatatableUtilitiesService {
     this.isFilterable = this.isFilterable.bind(this);
   }
 
+  clearField(column: DatatableColumn): void {
+    delete column.meta.field;
+  }
+
   clearFieldFormat(column: DatatableColumn): void {
     delete column.meta.params;
   }

@@ -31,6 +31,16 @@ describe('DatatableUtilitiesService', () => {
     datatableUtilitiesService = new DatatableUtilitiesService(aggs, dataViews, fieldFormatsMock);
   });
 
+  describe('clearField', () => {
+    it('should delete the field reference', () => {
+      const column = { meta: { field: 'foo' } } as DatatableColumn;
+
+      datatableUtilitiesService.clearField(column);
+
+      expect(column).not.toHaveProperty('meta.field');
+    });
+  });
+
   describe('clearFieldFormat', () => {
     it('should remove field format', () => {
       const column = { meta: { params: { id: 'number' } } } as DatatableColumn;
