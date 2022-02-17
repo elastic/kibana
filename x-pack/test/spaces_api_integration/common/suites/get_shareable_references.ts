@@ -65,7 +65,6 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       id: CASES.DEFAULT_ONLY.id,
       spaces: [DEFAULT_SPACE_ID],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
-      spacesWithMatchingAliases: [SPACE_1_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
     },
     {
       type: 'sharedtype',
@@ -113,6 +112,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       id: CASES.SPACE_1_ONLY.id,
       spaces: [SPACE_1_ID],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
+      spacesWithMatchingAliases: [DEFAULT_SPACE_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
     },
     {
       type: 'sharedtype',

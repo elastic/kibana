@@ -399,6 +399,24 @@
 {
   "type": "doc",
   "value": {
+    "id": "legacy-url-alias:default:sharedtype:space_1_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "space_1_only",
+        "targetNamespace": "default",
+        "targetType": "sharedtype",
+        "targetId": "default_only"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "sharedtype:space_1_only",
     "index": ".kibana",
     "source": {
@@ -413,24 +431,6 @@
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "legacy-url-alias:space_1:sharedtype:default_only",
-    "index": ".kibana",
-    "source": {
-      "type": "legacy-url-alias",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "legacy-url-alias": {
-        "sourceId": "default_only",
-        "targetNamespace": "space_1",
-        "targetType": "sharedtype",
-        "targetId": "space_1_only"
-      }
-    }
   }
 }
 
@@ -457,13 +457,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:space_2:sharedtype:default_only",
+    "id": "legacy-url-alias:space_2:sharedtype:space_1_only",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
-        "sourceId": "default_only",
+        "sourceId": "space_1_only",
         "targetNamespace": "space_2",
         "targetType": "sharedtype",
         "targetId": "space_2_only"
@@ -602,14 +602,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:space_1:sharedtype:doesnt-matter",
+    "id": "legacy-url-alias:default:sharedtype:doesnt-matter",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
         "sourceId": "doesnt-matter",
-        "targetNamespace": "space_1",
+        "targetNamespace": "default",
         "targetType": "sharedtype",
         "targetId": "alias_delete_inclusive"
       }

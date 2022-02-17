@@ -102,11 +102,14 @@ export async function internalBulkResolve<T>(
   const validObjects = allObjects.filter(isRight);
 
   const namespace = normalizeNamespace(options.namespace);
-  const requiresAliasCheck = namespace !== undefined;
 
-  const aliasDocs = requiresAliasCheck
-    ? await fetchAndUpdateAliases(validObjects, client, serializer, getIndexForType, namespace)
-    : [];
+  const aliasDocs = await fetchAndUpdateAliases(
+    validObjects,
+    client,
+    serializer,
+    getIndexForType,
+    namespace
+  );
 
   const docsToBulkGet: Array<{ _id: string; _index: string }> = [];
   const aliasTargetIds: Array<string | undefined> = [];
@@ -117,19 +120,17 @@ export async function internalBulkResolve<T>(
       _id: serializer.generateRawId(namespace, type, id),
       _index: objectIndex,
     });
-    if (requiresAliasCheck) {
-      const aliasDoc = aliasDocs[i];
-      if (aliasDoc?.found) {
-        const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source[LEGACY_URL_ALIAS_TYPE];
-        if (!legacyUrlAlias.disabled) {
-          docsToBulkGet.push({
-            // also attempt to find a match for the legacy URL alias target ID
-            _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
-            _index: objectIndex,
-          });
-          aliasTargetIds.push(legacyUrlAlias.targetId);
-          return;
-        }
+    const aliasDoc = aliasDocs[i];
+    if (aliasDoc?.found) {
+      const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source[LEGACY_URL_ALIAS_TYPE];
+      if (!legacyUrlAlias.disabled) {
+        docsToBulkGet.push({
+          // also attempt to find a match for the legacy URL alias target ID
+          _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
+          _index: objectIndex,
+        });
+        aliasTargetIds.push(legacyUrlAlias.targetId);
+        return;
       }
     }
     aliasTargetIds.push(undefined);
@@ -259,7 +260,7 @@ async function fetchAndUpdateAliases(
     .map(({ value: { type, id } }) => [
       {
         update: {
-          _id: serializer.generateRawLegacyUrlAliasId(namespace!, type, id),
+          _id: serializer.generateRawLegacyUrlAliasId(namespace, type, id),
           _index: getIndexForType(LEGACY_URL_ALIAS_TYPE),
           _source: true,
         },

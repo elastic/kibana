@@ -549,19 +549,17 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
 
   const { id: originId, type } = otherAttrs;
   const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
-  if (namespace !== undefined) {
-    const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
-      id: `${namespace}:${type}:${originId}`,
-      type: LEGACY_URL_ALIAS_TYPE,
-      attributes: {
-        sourceId: originId,
-        targetNamespace: namespace,
-        targetType: type,
-        targetId: id,
-      },
-    };
-    additionalDocs.push(legacyUrlAlias);
-  }
+  const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
+    id: `${namespace}:${type}:${originId}`,
+    type: LEGACY_URL_ALIAS_TYPE,
+    attributes: {
+      sourceId: originId,
+      targetNamespace: namespace,
+      targetType: type,
+      targetId: id,
+    },
+  };
+  additionalDocs.push(legacyUrlAlias);
   return {
     transformedDoc: { ...otherAttrs, id, originId, namespaces: [namespace] },
     additionalDocs,

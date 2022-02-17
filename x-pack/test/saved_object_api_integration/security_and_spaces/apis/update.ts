@@ -43,7 +43,7 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.ALIAS_CONFLICT_OBJ, upsert: false, ...fail404() },
-    { ...CASES.ALIAS_CONFLICT_OBJ, upsert: true, ...fail409(spaceId === SPACE_1_ID) },
+    { ...CASES.ALIAS_CONFLICT_OBJ, upsert: true, ...fail409(spaceId !== SPACE_2_ID) }, // upsert fails if this is the default space or space_1, because an alias exists in those spaces
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail404() }];

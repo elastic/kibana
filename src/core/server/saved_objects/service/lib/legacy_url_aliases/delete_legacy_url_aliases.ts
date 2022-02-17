@@ -14,7 +14,7 @@ import type { IndexMapping } from '../../../mappings';
 import { LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import type { RepositoryEsClient } from '../repository_es_client';
 import { getSearchDsl } from '../search_dsl';
-import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { ALL_NAMESPACES_STRING } from '../utils';
 
 /** @internal */
 export interface DeleteLegacyUrlAliasesParams {
@@ -57,11 +57,7 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
     throwError(type, id, '"namespaces" cannot include the * string');
   }
 
-  // Legacy URL aliases cannot exist in the default space; filter that out
-  const filteredNamespaces = namespaces.filter(
-    (namespace) => namespace !== DEFAULT_NAMESPACE_STRING
-  );
-  if (!filteredNamespaces.length && deleteBehavior === 'inclusive') {
+  if (!namespaces.length && deleteBehavior === 'inclusive') {
     // nothing to do, return early
     return;
   }
@@ -91,7 +87,7 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
               }
             `,
             params: {
-              namespaces: filteredNamespaces,
+              namespaces,
               matchTargetNamespaceOp: deleteBehavior === 'inclusive' ? 'delete' : 'noop',
               notMatchTargetNamespaceOp: deleteBehavior === 'inclusive' ? 'noop' : 'delete',
             },

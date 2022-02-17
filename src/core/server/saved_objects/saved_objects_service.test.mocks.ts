@@ -30,3 +30,7 @@ export const registerRoutesMock = jest.fn();
 jest.doMock('./routes', () => ({
   registerRoutes: registerRoutesMock,
 }));
+
+// The SavedObjectsSerializer imports SavedObjectUtils from the '../service' module, and that somehow breaks unit tests for the
+// SavedObjectsService. To avoid this, we mock the entire './serialization' module, since we don't need it for these tests.
+jest.mock('./serialization');

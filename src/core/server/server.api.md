@@ -2757,7 +2757,7 @@ export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id: string): string;
-    generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
+    generateRawLegacyUrlAliasId(namespace: string | undefined, type: string, id: string): string;
     isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
     rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc<T>;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
