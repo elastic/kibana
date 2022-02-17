@@ -400,9 +400,6 @@ export interface CoreContext {
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     application: ApplicationSetup;
-    // Warning: (ae-forgotten-export) The symbol "ExecutionContextSetup" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextSetup"
-    //
     // (undocumented)
     executionContext: ExecutionContextSetup;
     // (undocumented)
@@ -433,9 +430,6 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
-    // Warning: (ae-forgotten-export) The symbol "ExecutionContextStart" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextStart"
-    //
     // (undocumented)
     executionContext: ExecutionContextStart;
     // (undocumented)
@@ -521,6 +515,23 @@ export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
+
+// @public (undocumented)
+export interface ExecutionContextSetup {
+    // (undocumented)
+    clear(): void;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContext" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    context$: Observable<ExecutionContext>;
+    // (undocumented)
+    getAll(): ExecutionContext;
+    // (undocumented)
+    set(c$: ExecutionContext): void;
+}
+
+// @public
+export type ExecutionContextStart = ExecutionContextSetup;
 
 // @public
 export interface FatalErrorInfo {

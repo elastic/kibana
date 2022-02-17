@@ -12,7 +12,7 @@ import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
-  CoreStart,
+  ExecutionContextStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -115,7 +115,7 @@ export interface HistoryLocationState {
 
 export interface LensAppServices {
   http: HttpStart;
-  executionContext: CoreStart['executionContext'];
+  executionContext: ExecutionContextStart;
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;

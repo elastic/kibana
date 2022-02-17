@@ -20,8 +20,7 @@ export type KibanaExecutionContext = {
   /** public name of an application or a user-facing feature */
   readonly name?: string; // 'TSVB' | 'Lens' |  'action_execution' | ..;
   /** a stand alone, logical unit such as an application page or tab */
-  readonly page?: string; //
-  /** space identifier */
+  readonly page?: string;
   /** unique value to identify the source */
   readonly id?: string;
   /** human readable description. For example, a vis title, action name */

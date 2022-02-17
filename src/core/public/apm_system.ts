@@ -8,7 +8,6 @@
 
 import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
-import { distinctUntilChanged } from 'rxjs/operators';
 import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
 import { ExecutionContextStart } from './execution_context';
@@ -86,7 +85,7 @@ export class ApmSystem {
      * Register listeners for navigation changes and capture them as
      * route-change transactions after Kibana app is bootstrapped
      */
-    start.application.currentAppId$.pipe(distinctUntilChanged()).subscribe((appId) => {
+    start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
         this.apm.startTransaction(appId, 'app-change', {

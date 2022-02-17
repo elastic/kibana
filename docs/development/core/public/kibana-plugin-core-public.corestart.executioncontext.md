@@ -4,6 +4,7 @@
 
 ## CoreStart.executionContext property
 
+[ExecutionContextStart](./kibana-plugin-core-public.executioncontextstart.md)
 
 <b>Signature:</b>
 

@@ -15,7 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import {
+import type {
   ApplicationStart,
   ChromeStart,
   ScopedHistory,

@@ -8,7 +8,6 @@
 
 import { isEqual } from 'lodash';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
 import { CoreService } from '../../types';
 
 export type ExecutionContext = Record<string, any>;
@@ -42,7 +41,7 @@ export class ExecutionContextService
 
   public setup() {
     this.contract = {
-      context$: this.context$,
+      context$: this.context$.asObservable(),
       clear: () => {
         this.context$.next({
           url: window.location.pathname,
@@ -73,7 +72,7 @@ export class ExecutionContextService
 
     // Track app id changes and clear context on app change
     this.subscription.add(
-      curApp$.pipe(distinctUntilChanged()).subscribe((appId) => {
+      curApp$.subscribe((appId) => {
         this.appId = appId;
         start.clear();
       })
