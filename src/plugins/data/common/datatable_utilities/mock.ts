@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from '../../data_views/common/fields/fields.mocks';
-export * from './datatable_utilities/mock';
+import type { DatatableUtilitiesService } from './datatable_utilities_service';
+
+export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesService> {
+  return {
+    getAggConfig: jest.fn(),
+    getDataView: jest.fn(),
+    isFilterable: jest.fn(),
+  } as unknown as jest.Mocked<DatatableUtilitiesService>;
+}

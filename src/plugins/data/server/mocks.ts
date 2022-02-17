@@ -16,6 +16,7 @@ import {
   createFieldFormatsStartMock,
 } from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './data_views/mocks';
+import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 import { DataRequestHandlerContext } from './search';
 import { AutocompleteSetup } from './autocomplete';
 
@@ -42,6 +43,7 @@ function createStartContract() {
      */
     fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
+    datatableUtilities: createDatatableUtilitiesMock(),
   };
 }
 
