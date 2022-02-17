@@ -53,7 +53,7 @@ export const NoDataViewsPage = ({ onDataViewCreated, dataViewsDocLink }: Props) 
 
   return (
     <NoDataViewsComponent
-      onClick={createNewDataView}
+      onClickCreate={createNewDataView}
       canCreateNewDataView={canCreateNewDataView}
       dataViewsDocLink={dataViewsDocLink}
     />

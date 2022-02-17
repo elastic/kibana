@@ -16,7 +16,7 @@ describe('<NoDataViewsComponent />', () => {
   test('is rendered correctly', () => {
     const component = mountWithIntl(
       <NoDataViewsComponent
-        onClick={jest.fn()}
+        onClickCreate={jest.fn()}
         canCreateNewDataView={true}
         dataViewsDocLink={'dummy'}
       />
@@ -34,20 +34,20 @@ describe('<NoDataViewsComponent />', () => {
 
   test('does not documentation link if linkToDocumentation is not provided', () => {
     const component = mountWithIntl(
-      <NoDataViewsComponent onClick={jest.fn()} canCreateNewDataView={true} />
+      <NoDataViewsComponent onClickCreate={jest.fn()} canCreateNewDataView={true} />
     );
 
     expect(component.find(DocumentationLink).length).toBe(0);
   });
 
-  test('onClick', () => {
-    const onClick = jest.fn();
+  test('onClickCreate', () => {
+    const onClickCreate = jest.fn();
     const component = mountWithIntl(
-      <NoDataViewsComponent canCreateNewDataView={true} onClick={onClick} />
+      <NoDataViewsComponent canCreateNewDataView={true} onClickCreate={onClickCreate} />
     );
 
     component.find('button').simulate('click');
 
-    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClickCreate).toHaveBeenCalledTimes(1);
   });
 });

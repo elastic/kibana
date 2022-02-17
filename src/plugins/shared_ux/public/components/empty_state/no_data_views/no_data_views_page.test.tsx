@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { mount as enzymeMount, ReactWrapper } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
 
 import { ServicesProvider, SharedUXServices } from '../../../services';
 import { servicesFactory } from '../../../services/mocks';
@@ -21,7 +22,7 @@ describe('<NoDataViewsPageTest />', () => {
   beforeEach(() => {
     services = servicesFactory();
     mount = (element: JSX.Element) =>
-      enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
+      mountWithIntl(<ServicesProvider {...services}>{element}</ServicesProvider>);
   });
 
   afterEach(() => {

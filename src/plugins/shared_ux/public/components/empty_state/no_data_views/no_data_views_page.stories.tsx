@@ -45,7 +45,7 @@ export const PureComponent = ({
   return (
     <NoDataViewsComponent
       canCreateNewDataView={canCreateNewDataView}
-      onClick={action('onClick')}
+      onClickCreate={action('onClick')}
       dataViewsDocLink={dataViewDocLinks}
     />
   );

@@ -30,7 +30,7 @@ const Illustration = lazy(() => import('../assets/data_view_illustration'));
 
 interface Props {
   canCreateNewDataView: boolean;
-  onClick?: () => void;
+  onClickCreate?: () => void;
   dataViewsDocLink?: string;
 }
 
@@ -39,7 +39,7 @@ const createDataViewText = i18n.translate('sharedUX.noDataViewsPage.addDataViewT
 });
 
 export const NoDataViewsComponent = ({
-  onClick,
+  onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
 }: Props) => {
@@ -47,9 +47,9 @@ export const NoDataViewsComponent = ({
   const { size } = euiTheme;
   const maxWidth = `calc(${size.xxl} * 19)`;
 
-  const button = (
+  const createNewButton = (
     <EuiButton
-      onClick={onClick}
+      onClick={onClickCreate}
       iconType="plusInCircle"
       fill={true}
       data-test-subj="createDataViewButtonFlyout"
@@ -95,7 +95,7 @@ export const NoDataViewsComponent = ({
                 yesterday, or all indices that contain your log data."
               />
             </p>
-            {canCreateNewDataView && button}
+            {canCreateNewDataView && createNewButton}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
