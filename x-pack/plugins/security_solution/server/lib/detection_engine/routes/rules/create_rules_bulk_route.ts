@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
@@ -92,7 +92,7 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+              throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
               const finalIndex = internalRule.params.outputIndex;
               const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
               if (!isRuleRegistryEnabled && !indexExists) {
