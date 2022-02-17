@@ -23,6 +23,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
+import { extract, inject } from '../common/embeddable';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
@@ -225,6 +226,8 @@ export class MapsPlugin implements Plugin {
     plugins.embeddable.registerEmbeddableFactory({
       id: MAP_SAVED_OBJECT_TYPE,
       migrations: embeddableMigrations,
+      inject,
+      extract,
     });
 
     return {
