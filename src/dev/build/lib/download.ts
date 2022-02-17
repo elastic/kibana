@@ -100,7 +100,7 @@ export async function downloadToDisk({
         response.data.on('error', reject);
         response.data.on('end', () => {
           if (bytesWritten === 0) {
-            throw new Error(`No bytes written when downloading ${url}`);
+            reject(new Error(`No bytes written when downloading ${url}`));
           }
 
           resolve();
