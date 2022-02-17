@@ -35,7 +35,7 @@ For the Elastic Security 8.0.1 release information, refer to {security-guide}/re
 
 [float]
 [[fixes-v8.0.1]]
-=== Bug Fixes
+=== Bug fixes
 Alerting::
 Fixes an issue where the *Cases* rule link was displayed as `Unknown rule`, even when the correct rule name was retrieved {kibana-pull}123883[#123883]
 
