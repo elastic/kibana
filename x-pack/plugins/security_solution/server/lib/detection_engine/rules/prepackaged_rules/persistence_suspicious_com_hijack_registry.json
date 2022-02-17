@@ -5,9 +5,7 @@
   "description": "Identifies Component Object Model (COM) hijacking via registry modification. Adversaries may establish persistence by executing malicious content triggered by hijacked references to COM objects.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -52,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

@@ -56,8 +56,6 @@
 /examples/state_containers_examples/ @elastic/kibana-app-services
 /examples/ui_action_examples/ @elastic/kibana-app-services
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
-/examples/url_generators_examples/ @elastic/kibana-app-services
-/examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
@@ -344,8 +342,8 @@
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
-/docs/user/alerting/ @elastic/response-ops
-/docs/management/connectors/ @elastic/response-ops
+/docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
+/docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
 #CC# /x-pack/plugins/stack_alerts @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
