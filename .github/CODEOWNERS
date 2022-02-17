@@ -56,8 +56,6 @@
 /examples/state_containers_examples/ @elastic/kibana-app-services
 /examples/ui_action_examples/ @elastic/kibana-app-services
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
-/examples/url_generators_examples/ @elastic/kibana-app-services
-/examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
