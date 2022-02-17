@@ -29,7 +29,7 @@ export interface ReduxStateProps {
 }
 
 export interface ReduxDispatchProps {
-  addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
+  addNewFeatureToIndex: (geometry: Geometry | Position[], drawShape: DRAW_SHAPE) => void;
   deleteFeatureFromIndex: (featureId: string) => void;
 }
 
@@ -57,7 +57,10 @@ export class DrawFeatureControl extends Component<Props, {}> {
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
-          this.props.addNewFeatureToIndex(featureGeom);
+          this.props.addNewFeatureToIndex(
+            featureGeom,
+            this.props.drawShape || DRAW_SHAPE.SIMPLE_SELECT
+          );
         }
       });
     } catch (error) {

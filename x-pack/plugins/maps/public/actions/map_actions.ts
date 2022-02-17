@@ -353,7 +353,7 @@ export function updateEditLayer(layerId: string | null) {
   };
 }
 
-export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
+export function addNewFeatureToIndex(geometry: Geometry | Position[], drawShape: DRAW_SHAPE) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -373,7 +373,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       await (layer as IVectorLayer).addFeature(geometry);
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
         setTimeout(() => {
-          dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
+          dispatch(updateEditShape(drawShape));
         }, 500);
       });
     } catch (e) {

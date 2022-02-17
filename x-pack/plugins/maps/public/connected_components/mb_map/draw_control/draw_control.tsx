@@ -60,7 +60,6 @@ export class DrawControl extends Component<Props> {
 
   _onDraw = (event: { features: Feature[] }) => {
     this.props.onDraw(event, this._mbDrawControl);
-    this.props.updateEditShape(DRAW_SHAPE.WAIT);
   };
 
   _onClick = (event: MapMouseEvent) => {

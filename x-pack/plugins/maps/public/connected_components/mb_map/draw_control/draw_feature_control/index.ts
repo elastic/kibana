@@ -19,6 +19,7 @@ import { addNewFeatureToIndex, deleteFeatureFromIndex } from '../../../../action
 import { MapStoreState } from '../../../../reducers/store';
 import { getEditState, getLayerById } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
+import { DRAW_SHAPE } from '../../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   const editState = getEditState(state);
@@ -34,8 +35,8 @@ function mapDispatchToProps(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
 ): ReduxDispatchProps {
   return {
-    addNewFeatureToIndex(geometry: Geometry | Position[]) {
-      dispatch(addNewFeatureToIndex(geometry));
+    addNewFeatureToIndex(geometry: Geometry | Position[], drawShape: DRAW_SHAPE) {
+      dispatch(addNewFeatureToIndex(geometry, drawShape));
     },
     deleteFeatureFromIndex(featureId: string) {
       dispatch(deleteFeatureFromIndex(featureId));
