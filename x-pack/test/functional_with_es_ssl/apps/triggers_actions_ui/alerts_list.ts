@@ -427,7 +427,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
-      await testSubjects.click('alertStatusFilterButton');
+      await testSubjects.click('ruleStatusFilterButton');
       await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =

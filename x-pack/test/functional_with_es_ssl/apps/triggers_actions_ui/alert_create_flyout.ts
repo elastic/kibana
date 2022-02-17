@@ -41,7 +41,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -57,13 +57,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     await testSubjects.click('closePopover');
     // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('alertNameInput');
+    const nameInput = await testSubjects.find('ruleNameInput');
     await nameInput.click();
   }
 
   async function defineIndexThresholdAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.index-threshold-SelectOption`);
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     await testSubjects.click('closePopover');
     // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('alertNameInput');
+    const nameInput = await testSubjects.find('ruleNameInput');
     await nameInput.click();
 
     await testSubjects.click('whenExpression');
@@ -101,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
@@ -157,7 +157,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -207,7 +207,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorActionGroup-1');
       await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
 
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -228,13 +228,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineAlwaysFiringAlert(alertName);
 
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       await testSubjects.existOrFail('confirmRuleSaveModal');
       await testSubjects.click('confirmRuleSaveModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
-      await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
+      await find.existsByCssSelector('[data-test-subj="saveRuleButton"]:not(disabled)');
 
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       await testSubjects.existOrFail('confirmRuleSaveModal');
       await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
@@ -258,12 +258,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.click('cancelsaveRuleButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('intervalInput', '10');
-      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.click('cancelsaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
@@ -281,7 +281,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.click('cancelsaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
     });
@@ -301,8 +301,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('alertNameInput', 'alertName');
-      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="alertSearchField"]');
+      await testSubjects.setValue('ruleNameInput', 'alertName');
+      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="ruleSearchField"]');
       await ruleTypeSearchBox.type('notexisting rule type');
       await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
 

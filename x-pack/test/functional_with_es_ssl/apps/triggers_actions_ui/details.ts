@@ -269,11 +269,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
-        await testSubjects.setValue('alertNameInput', updatedRuleName, {
+        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
@@ -299,18 +299,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('alertNameInput', uuid.v4(), {
+        await testSubjects.setValue('ruleNameInput', uuid.v4(), {
           clearWithKeyboard: true,
         });
 
-        await testSubjects.click('cancelSaveEditedAlertButton');
+        await testSubjects.click('cancelSaveEditedRuleButton');
         await testSubjects.existOrFail('confirmRuleCloseModal');
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
+        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedRuleButton"]');
 
         await editButton.click();
 
-        const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+        const nameInputAfterCancel = await testSubjects.find('ruleNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
         expect(textAfterCancel).to.eql(updatedRuleName);
       });

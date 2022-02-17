@@ -68,7 +68,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       );
     },
     async searchAlerts(searchText: string) {
-      const searchBox = await testSubjects.find('alertSearchField');
+      const searchBox = await testSubjects.find('ruleSearchField');
       await searchBox.click();
       await searchBox.clearValue();
       await searchBox.type(searchText);
@@ -155,11 +155,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await createBtn.click();
     },
     async setAlertName(value: string) {
-      await testSubjects.setValue('alertNameInput', value);
+      await testSubjects.setValue('ruleNameInput', value);
       await this.assertAlertName(value);
     },
     async assertAlertName(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute('alertNameInput', 'value');
+      const actualValue = await testSubjects.getAttribute('ruleNameInput', 'value');
       expect(actualValue).to.eql(expectedValue);
     },
     async setAlertInterval(value: number, unit?: 's' | 'm' | 'h' | 'd') {
@@ -178,7 +178,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       }
     },
     async saveAlert() {
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmRuleSaveModal');
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');

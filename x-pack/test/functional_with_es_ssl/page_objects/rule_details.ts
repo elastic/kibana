@@ -16,10 +16,10 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async getHeadingText() {
-      return await testSubjects.getVisibleText('alertDetailsTitle');
+      return await testSubjects.getVisibleText('ruleDetailsTitle');
     },
     async getRuleType() {
-      return await testSubjects.getVisibleText('alertTypeLabel');
+      return await testSubjects.getVisibleText('ruleTypeLabel');
     },
     async getActionsLabels() {
       return {
