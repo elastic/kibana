@@ -318,7 +318,7 @@ export function DiscoverLayout({
                       savedSearchDataChart$={charts$}
                       savedSearchDataTotalHits$={totalHits$}
                       stateContainer={stateContainer}
-                      isTimeBased={isTimeBased}
+                      indexPattern={indexPattern}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                       hideChart={state.hideChart}
