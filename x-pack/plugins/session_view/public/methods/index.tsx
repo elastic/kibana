@@ -7,14 +7,28 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+// Initializing react-query
+const queryClient = new QueryClient();
 
 const SessionViewTableProcessTreeLazy = lazy(
   () => import('../components/SessionViewTableProcessTree')
 );
+const SessionViewLazy = lazy(() => import('../components/SessionView'));
 export const getSessionViewTableProcessTreeLazy = () => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <SessionViewTableProcessTreeLazy />
     </Suspense>
+  );
+};
+export const getSessionViewLazy = (sessionEntityId: string) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <SessionViewLazy sessionEntityId={sessionEntityId} />
+      </Suspense>
+    </QueryClientProvider>
   );
 };

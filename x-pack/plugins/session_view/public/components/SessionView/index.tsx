@@ -191,3 +191,6 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { SessionView as default };
