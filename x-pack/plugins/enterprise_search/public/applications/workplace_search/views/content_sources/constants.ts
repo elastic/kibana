@@ -543,19 +543,29 @@ export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
+export const SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsDescription',
   {
     defaultMessage:
-      'Customize the indexing rules that determine which objects and assets are synchronized from this content source to Workplace Search.',
+      'Flexibly manage the documents to be synchronized and made available for search using granular controls below.',
   }
 );
 
-export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsLabel',
+export const SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsLearnMoreLink',
   {
-    defaultMessage: 'Object and details to include in search results',
+    defaultMessage: 'Learn more about sync objects types.',
   }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_ASSETS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsAssetsLabel',
+  { defaultMessage: 'Assets' }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsLabel',
+  { defaultMessage: 'Objects' }
 );
 
 export const SOURCE_SYNCHRONIZATION_TOGGLE_LABEL = i18n.translate(

@@ -105,7 +105,9 @@ There are also command line flags for `--bail` and `--grep`, which behave just l
 
 Logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
 
-Use the `--help` flag for more options.
+There are also options like `--include` to run only the tests defined in a single file or set of files.
+
+Run `node scripts/functional_test_runner --help` to see all available options.
 
 
 [discrete]

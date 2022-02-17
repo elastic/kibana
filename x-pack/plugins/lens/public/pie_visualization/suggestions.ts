@@ -81,7 +81,15 @@ export function suggestions({
     return [];
   }
 
-  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+  const [groups, metrics] = partition(
+    // filter out all metrics which are not number based
+    table.columns.filter((col) => col.operation.isBucketed || col.operation.dataType === 'number'),
+    (col) => col.operation.isBucketed
+  );
+
+  if (groups.length === 0 && metrics.length === 0) {
+    return [];
+  }
 
   if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
