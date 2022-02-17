@@ -54,6 +54,7 @@ import {
   insertNewColumn,
   TermsIndexPatternColumn,
 } from './operations';
+import { getTopColumnFromReference } from './operations/layer_helpers';
 import {
   IndexPatternField,
   IndexPatternPrivateState,
@@ -461,18 +462,25 @@ export function getIndexPatternDatasource({
         datasourceId: 'indexpattern',
         getTableSpec: () => {
           // consider also referenced columns in this case
-          const fieldsPerColumn = layer.columnOrder.map((colId) => {
+          // but map fields to the top referencing column
+          const fieldsPerColumn: Record<string, string[]> = {};
+          Object.keys(layer.columns).map((colId) => {
+            const visibleColumnId = getTopColumnFromReference(layer, colId);
+            fieldsPerColumn[visibleColumnId] = fieldsPerColumn[visibleColumnId] || [];
+
             const column = layer.columns[colId];
             if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
-              return [column.sourceField].concat(column.params.secondaryFields ?? []);
+              fieldsPerColumn[visibleColumnId].push(
+                ...[column.sourceField].concat(column.params.secondaryFields ?? [])
+              );
             }
-            if ('sourceField' in column) {
-              return [column.sourceField].filter((field) => field !== DOCUMENT_FIELD_NAME);
+            if ('sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
+              fieldsPerColumn[visibleColumnId].push(column.sourceField);
             }
           });
           return visibleColumnIds.map((colId, i) => ({
             columnId: colId,
-            fields: fieldsPerColumn[i] || [],
+            fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
         getOperationForColumnId: (columnId: string) => {

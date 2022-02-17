@@ -1204,7 +1204,11 @@ describe('IndexPattern Data Source', () => {
 
     describe('getTableSpec', () => {
       it('should include col1', () => {
-        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1', fields: ['op'] }]);
+        expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ columnId: 'col1' })]);
+      });
+
+      it('should include fields prop for each column', () => {
+        expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ fields: ['op'] })]);
       });
 
       it('should skip columns that are being referenced', () => {
@@ -1241,7 +1245,97 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
 
+        expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ columnId: 'col2' })]);
+      });
+
+      it('should collect all fields (also from referenced columns)', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
+                    references: ['col1'],
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+
         expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2', fields: ['test'] }]);
+      });
+
+      it('should collect and organize fields per visible column', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
+                    references: ['col1'],
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                  col3: {
+                    label: 'My Op',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'op',
+                    params: {
+                      size: 5,
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+
+        // col1 is skipped as referenced but its field gets inherited by col2
+        expect(publicAPI.getTableSpec()).toEqual([
+          { columnId: 'col2', fields: ['test'] },
+          { columnId: 'col3', fields: ['op'] },
+        ]);
       });
     });
 
@@ -1296,6 +1390,20 @@ describe('IndexPattern Data Source', () => {
         });
         expect(publicAPI.getOperationForColumnId('col1')).toEqual(null);
       });
+    });
+
+    describe('getSourceId', () => {
+      it('should basically return the datasource internal id', () => {
+        expect(publicAPI.getSourceId()).toEqual('1');
+      });
+    });
+
+    describe('getFilters', () => {
+      it.todo('should return all filters in metrics, grouped by language');
+      it.todo('shuold collect top values fields as kuery existence filters');
+      it.todo('should collect custom ranges as kuery filters');
+      it.todo('should collect filters within filters operation grouped by language');
+      it.todo('should support complex scenarios');
     });
   });
 

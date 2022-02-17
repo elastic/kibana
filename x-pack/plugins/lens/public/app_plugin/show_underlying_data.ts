@@ -49,7 +49,7 @@ interface LayerMetaInfo {
 }
 
 export function getLayerMetaInfo(
-  currentDatasource: Datasource,
+  currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
   discover: DiscoverStart | undefined
@@ -71,7 +71,8 @@ export function getLayerMetaInfo(
     return {
       meta: undefined,
       error: i18n.translate('xpack.lens.app.showUnderlyingDataMultipleLayers', {
-        defaultMessage: 'Underlying data cannot be shown for visualizations with multiple layers',
+        defaultMessage:
+          'Cannot show underlying data cannot be shown for visualizations with multiple layers',
       }),
       isVisible,
     };
@@ -120,42 +121,49 @@ export function getLayerMetaInfo(
 }
 
 export function combineQueryAndFilters(
-  query: Query,
+  query: Query | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined
 ) {
+  // Unless a lucene query is already defined, kuery is assigned to it
   const { queryLanguage, filtersLanguage }: Record<string, 'kuery' | 'lucene'> =
     query?.language === 'lucene'
       ? { queryLanguage: 'lucene', filtersLanguage: 'kuery' }
       : { queryLanguage: 'kuery', filtersLanguage: 'lucene' };
 
-  // build here a query extension based on kql filters
-  const filtersQuery = joinQueries(meta.filters[queryLanguage]);
-  const newQuery = {
-    language: filtersQuery,
-    query: query ? `( ${query.query} ) ${filtersQuery ? `AND ${filtersQuery}` : ''}` : filtersQuery,
-  };
+  let newQuery = query;
+  if (meta.filters[queryLanguage]?.length) {
+    const filtersQuery = joinQueries(meta.filters[queryLanguage]);
+    newQuery = {
+      language: queryLanguage,
+      query: query
+        ? `( ${query.query} ) ${filtersQuery ? `AND ${filtersQuery}` : ''}`
+        : filtersQuery,
+    };
+  }
 
-  // extends the filters here with the lucene filters
-  const queryExpression = joinQueries(meta.filters[filtersLanguage]);
-  const newFilters = [
-    ...filters,
-    buildCustomFilter(
-      meta.id!,
-      buildEsQuery(
-        dataViews?.find(({ id }) => id === meta.id),
-        { language: filtersLanguage, query: queryExpression },
-        []
-      ),
-      false,
-      false,
-      i18n.translate('xpack.lens.app.lensContext', {
-        defaultMessage: 'Lens context ({language})',
-        values: { language: filtersLanguage },
-      }),
-      FilterStateStore.APP_STATE
-    ),
-  ];
+  const newFilters = [...filters];
+  if (meta.filters[filtersLanguage]?.length) {
+    const queryExpression = joinQueries(meta.filters[filtersLanguage]);
+    // Append the new filter based on the queryExpression to the existing ones
+    newFilters.push(
+      buildCustomFilter(
+        meta.id!,
+        buildEsQuery(
+          dataViews?.find(({ id }) => id === meta.id),
+          { language: filtersLanguage, query: queryExpression },
+          []
+        ),
+        false,
+        false,
+        i18n.translate('xpack.lens.app.lensContext', {
+          defaultMessage: 'Lens context ({language})',
+          values: { language: filtersLanguage },
+        }),
+        FilterStateStore.APP_STATE
+      )
+    );
+  }
   return { filters: newFilters, query: newQuery };
 }
