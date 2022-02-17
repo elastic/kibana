@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uptimeOverviewLocatorID } from '../../../../observability/public';
+import { uptimeOverviewLocatorID } from '../../../../observability/common';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 
 const formatSearchKey = (key: string, value: string) => `${key}: "${value}"`;
