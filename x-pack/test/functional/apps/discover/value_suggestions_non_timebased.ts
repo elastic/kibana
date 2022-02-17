@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
       );
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
     });
 
     after(async () => {
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     it('shows all autosuggest options for a filter in discover context app', async () => {
