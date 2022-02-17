@@ -24,6 +24,8 @@ Run all tests from the `x-pack` root directory
 
 Lens state is kept in the Redux Store. To enable redux logger, open Chrome Developer Tools and type in the console: `window.ELASTIC_LENS_LOGGER=true`.
 
+To simulate long running searches, set `data.search.aggs.shardDelay.enabled` in your `kibana.dev.yml` to true and set the dealy via console in the browser (e.g. for a 20 seconds delay): `window.ELASTIC_LENS_DELAY_SECONDS=20`.
+
 ## UI Terminology
 
 Lens has a lot of UI elements – to make it easier to refer to them in issues or bugs, this is a hopefully complete list:

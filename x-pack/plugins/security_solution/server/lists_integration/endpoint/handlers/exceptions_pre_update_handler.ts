@@ -10,6 +10,7 @@ import {
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import { ExceptionItemLikeOptions } from '../types';
 import {
   EventFilterValidator,
   TrustedAppValidator,
@@ -44,26 +45,45 @@ export const getExceptionsPreUpdateItemHandler = (
 
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
-      return new TrustedAppValidator(endpointAppContextService, request).validatePreUpdateItem(
-        data,
-        currentSavedItem
+      const trustedAppValidator = new TrustedAppValidator(endpointAppContextService, request);
+      const validatedItem = await trustedAppValidator.validatePreUpdateItem(data, currentSavedItem);
+      trustedAppValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'TRUSTED_APP_BY_POLICY'
       );
+      return validatedItem;
     }
 
     // Validate Event Filters
     if (EventFilterValidator.isEventFilter({ listId })) {
-      return new EventFilterValidator(endpointAppContextService, request).validatePreUpdateItem(
+      const eventFilterValidator = new EventFilterValidator(endpointAppContextService, request);
+      const validatedItem = await eventFilterValidator.validatePreUpdateItem(
         data,
         currentSavedItem
       );
+      eventFilterValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'EVENT_FILTERS_BY_POLICY'
+      );
+      return validatedItem;
     }
 
     // Validate host isolation
     if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
-      return new HostIsolationExceptionsValidator(
+      const hostIsolationExceptionValidator = new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreUpdateItem(data);
+      );
+      const validatedItem = await hostIsolationExceptionValidator.validatePreUpdateItem(data);
+      hostIsolationExceptionValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'HOST_ISOLATION_EXCEPTION_BY_POLICY'
+      );
+      hostIsolationExceptionValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'HOST_ISOLATION_EXCEPTION'
+      );
+      return validatedItem;
     }
 
     return data;

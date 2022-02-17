@@ -13,7 +13,7 @@ import { UrlForwardingStart } from '../../../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../services/navigation';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { IndexPatternsContract, SavedQueryService } from '../../services/data';
+import { DataViewsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
@@ -83,7 +83,7 @@ export function makeDefaultServices(): DashboardAppServices {
     savedObjectsClient: core.savedObjects.client,
     dashboardCapabilities: defaultCapabilities,
     data: dataPluginMock.createStartContract(),
-    indexPatterns: {} as IndexPatternsContract,
+    dataViews: {} as DataViewsContract,
     savedQueryService: {} as SavedQueryService,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},

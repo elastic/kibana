@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiSwitch } from '@elastic/eui';
 import { LineCurveOption } from './line_curve_option';
 

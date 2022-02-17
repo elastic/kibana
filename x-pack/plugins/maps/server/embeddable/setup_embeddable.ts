@@ -11,6 +11,7 @@ import {
   MigrateFunctionsObject,
 } from '../../../../../src/plugins/kibana_utils/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { extract, inject } from '../../common/embeddable';
 import { embeddableMigrations } from './embeddable_migrations';
 import { getPersistedStateMigrations } from '../saved_objects';
 
@@ -26,5 +27,7 @@ export function setupEmbeddable(
         getPersistedStateMigrations(getFilterMigrations())
       );
     },
+    inject,
+    extract,
   });
 }

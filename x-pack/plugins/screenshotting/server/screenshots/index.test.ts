@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { of, throwError, NEVER } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import type { Logger } from 'src/core/server';
+import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
-import { getScreenshots, ScreenshotOptions } from '.';
+import { Screenshots, ScreenshotOptions } from '.';
 
 /*
  * Tests
@@ -23,6 +24,7 @@ describe('Screenshot Observable Pipeline', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
   let options: ScreenshotOptions;
+  let screenshots: Screenshots;
 
   beforeEach(async () => {
     driver = createMockBrowserDriver();
@@ -35,7 +37,7 @@ describe('Screenshot Observable Pipeline', () => {
     } as unknown as jest.Mocked<Logger>;
     options = {
       browserTimezone: 'UTC',
-      conditionalHeaders: {},
+      headers: {},
       layout: {},
       timeouts: {
         loadDelay: 2000,
@@ -45,6 +47,7 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
+    screenshots = new Screenshots(driverFactory, logger, { poolSize: 1 } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
@@ -56,7 +59,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await getScreenshots(driverFactory, logger, options).toPromise();
+    const result = await screenshots.getScreenshots(options).toPromise();
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -112,10 +115,12 @@ describe('Screenshot Observable Pipeline', () => {
 
   it('pipelines multiple urls into', async () => {
     driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
-    const result = await getScreenshots(driverFactory, logger, {
-      ...options,
-      urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
-    }).toPromise();
+    const result = await screenshots
+      .getScreenshots({
+        ...options,
+        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      })
+      .toPromise();
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -245,10 +250,15 @@ describe('Screenshot Observable Pipeline', () => {
       driver.waitForSelector.mockImplementation((selectorArg: string) => {
         throw new Error('Mock error!');
       });
-      const result = await getScreenshots(driverFactory, logger, {
-        ...options,
-        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php3'],
-      }).toPromise();
+      const result = await screenshots
+        .getScreenshots({
+          ...options,
+          urls: [
+            '/welcome/home/start/index2.htm',
+            '/welcome/home/start/index.php3?page=./home.php3',
+          ],
+        })
+        .toPromise();
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
@@ -346,14 +356,13 @@ describe('Screenshot Observable Pipeline', () => {
         of({
           driver,
           unexpectedExit$: throwError('Instant timeout has fired!'),
-          metrics$: NEVER,
-          close: () => of(undefined),
+          close: () => of({}),
         })
       );
 
-      await expect(
-        getScreenshots(driverFactory, logger, options).toPromise()
-      ).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
+      await expect(screenshots.getScreenshots(options).toPromise()).rejects.toMatchInlineSnapshot(
+        `"Instant timeout has fired!"`
+      );
     });
 
     it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
@@ -362,7 +371,7 @@ describe('Screenshot Observable Pipeline', () => {
       );
 
       layout.getViewport = () => null;
-      const result = await getScreenshots(driverFactory, logger, options).toPromise();
+      const result = await screenshots.getScreenshots(options).toPromise();
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
@@ -376,7 +385,7 @@ describe('Screenshot Observable Pipeline', () => {
                     "height": 1200,
                     "left": 0,
                     "top": 0,
-                    "width": 1800,
+                    "width": 1950,
                   },
                   "scroll": Object {
                     "x": 0,

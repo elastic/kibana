@@ -11,7 +11,7 @@ import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from 'src/core/server';
 
 import { appContextService } from '../../../app_context';

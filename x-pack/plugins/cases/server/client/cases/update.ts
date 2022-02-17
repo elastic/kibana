@@ -97,17 +97,14 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
-  unsecuredSavedObjectsClient,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
   return caseService.getAllCaseComments({
-    unsecuredSavedObjectsClient,
     id: idsOfCasesToSync,
     options: {
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
@@ -166,7 +163,6 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
-    unsecuredSavedObjectsClient,
   });
 
   // create an array of requests that indicate the id, index, and status to update an alert
@@ -253,7 +249,6 @@ export const update = async (
 
   try {
     const myCases = await caseService.getCases({
-      unsecuredSavedObjectsClient,
       caseIds: query.cases.map((q) => q.id),
     });
 
@@ -320,7 +315,6 @@ export const update = async (
     const { username, full_name, email } = user;
     const updatedDt = new Date().toISOString();
     const updatedCases = await caseService.patchCases({
-      unsecuredSavedObjectsClient,
       cases: updateCases.map(({ updateReq, originalCase }) => {
         // intentionally removing owner from the case so that we don't accidentally allow it to be updated
         const { id: caseId, version, owner, ...updateCaseAttributes } = updateReq;

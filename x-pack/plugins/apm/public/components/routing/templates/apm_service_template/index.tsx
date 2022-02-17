@@ -302,14 +302,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
               label={i18n.translate(
                 'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
                 {
-                  defaultMessage: 'Experimental',
+                  defaultMessage: 'Technical preview',
                 }
               )}
               tooltipContent={i18n.translate(
                 'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
                 {
                   defaultMessage:
-                    'Profiling is highly experimental and for internal use only.',
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                 }
               )}
             />

@@ -646,6 +646,9 @@
                 "properties": {
                   "force": {
                     "type": "boolean"
+                  },
+                  "ignore_constraints": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -4221,9 +4224,6 @@
             "type": "string"
           },
           "ca_trusted_fingerprint": {
-            "type": "string"
-          },
-          "api_key": {
             "type": "string"
           },
           "config": {

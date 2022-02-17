@@ -49,7 +49,7 @@ export const registerCreateRoute = ({
       const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.ccr.follow({
+        const responseBody = await client.asCurrentUser.ccr.follow({
           index: name,
           body,
         });

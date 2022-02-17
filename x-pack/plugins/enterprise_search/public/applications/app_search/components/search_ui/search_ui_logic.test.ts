@@ -12,7 +12,7 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 

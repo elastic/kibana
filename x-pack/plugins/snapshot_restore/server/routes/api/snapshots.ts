@@ -65,7 +65,7 @@ export function registerSnapshotsRoutes({
       // Attempt to retrieve policies
       // This could fail if user doesn't have access to read SLM policies
       try {
-        const { body: policiesByName } = await clusterClient.asCurrentUser.slm.getLifecycle();
+        const policiesByName = await clusterClient.asCurrentUser.slm.getLifecycle();
         policies = Object.keys(policiesByName);
       } catch (e) {
         // Silently swallow error as policy names aren't required in UI
@@ -74,10 +74,9 @@ export function registerSnapshotsRoutes({
       let repositories: string[] = [];
 
       try {
-        const { body: repositoriesByName } =
-          await clusterClient.asCurrentUser.snapshot.getRepository({
-            name: '_all',
-          });
+        const repositoriesByName = await clusterClient.asCurrentUser.snapshot.getRepository({
+          name: '_all',
+        });
         repositories = Object.keys(repositoriesByName);
 
         if (repositories.length === 0) {
@@ -108,7 +107,7 @@ export function registerSnapshotsRoutes({
       }
       try {
         // If any of these repositories 504 they will cost the request significant time.
-        const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
+        const fetchedSnapshots = await clusterClient.asCurrentUser.snapshot.get({
           repository:
             searchField === 'repository'
               ? getSnapshotSearchWildcard({
@@ -189,7 +188,7 @@ export function registerSnapshotsRoutes({
           ignore_unavailable: true,
         });
 
-        const { snapshots: snapshotsList } = response.body;
+        const { snapshots: snapshotsList } = response;
 
         if (!snapshotsList || snapshotsList.length === 0) {
           return res.notFound({ body: 'Snapshot not found' });

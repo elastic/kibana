@@ -50,7 +50,6 @@ async function createCommentableCase({
   lensEmbeddableFactory,
 }: CombinedCaseParams) {
   const caseInfo = await caseService.getCase({
-    unsecuredSavedObjectsClient,
     id: caseID,
   });
 

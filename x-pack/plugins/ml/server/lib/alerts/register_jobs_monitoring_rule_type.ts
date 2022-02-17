@@ -159,7 +159,7 @@ export function registerJobsMonitoringRuleType({
         );
 
         executionResult.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = services.alertInstanceFactory(alertInstanceName);
+          const alertInstance = services.alertFactory.create(alertInstanceName);
           alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
         });
       }

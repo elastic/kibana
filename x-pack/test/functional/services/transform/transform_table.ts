@@ -234,6 +234,34 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await this.switchToExpandedRowTab('transformPreviewTab', '~transformPivotPreview');
     }
 
+    public async assertTransformExpandedRowJson(expectedText: string, expectedToContain = true) {
+      await this.ensureDetailsOpen();
+
+      // The expanded row should show the details tab content by default
+      await testSubjects.existOrFail('transformDetailsTab');
+      await testSubjects.existOrFail('~transformDetailsTabContent');
+
+      // Click on the JSON tab and assert the messages
+      await this.switchToExpandedRowTab('transformJsonTab', '~transformJsonTabContent');
+      await retry.tryForTime(30 * 1000, async () => {
+        const actualText = await testSubjects.getVisibleText('~transformJsonTabContent');
+        if (expectedToContain) {
+          expect(actualText.toLowerCase()).to.contain(
+            expectedText.toLowerCase(),
+            `Expected transform messages text to include '${expectedText}'`
+          );
+        } else {
+          expect(actualText.toLowerCase()).to.not.contain(
+            expectedText.toLowerCase(),
+            `Expected transform messages text to not include '${expectedText}'`
+          );
+        }
+      });
+
+      // Switch back to details tab
+      await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
+    }
+
     public async assertTransformExpandedRowMessages(expectedText: string) {
       await this.ensureDetailsOpen();
 
@@ -250,6 +278,9 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           `Expected transform messages text to include '${expectedText}'`
         );
       });
+
+      // Switch back to details tab
+      await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
     }
 
     public rowSelector(transformId: string, subSelector?: string) {
