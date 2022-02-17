@@ -155,7 +155,7 @@ export class PlaywrightService extends FtrService {
     }
     return await this.withSpan('browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
-      this.browser = await playwright.chromium.launch({ headless });
+      this.browser = await playwright.chromium.launch({ headless, timeout: 60000 });
       return this.browser;
     });
   }
