@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'settings', 'context', 'header']);
-  const kibanaServer = getService('kibanaServer');
 
   describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
