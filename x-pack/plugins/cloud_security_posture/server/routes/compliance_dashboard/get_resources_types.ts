@@ -47,10 +47,9 @@ export const getRisksEsQuery = (cycleId: string): SearchRequest => ({
   index: CSP_KUBEBEAT_INDEX_PATTERN,
   size: 0,
   query: {
-    match_all: {},
-    // bool: {
-    //   filter: [{ term: { 'cycle_id.keyword': cycleId } }],
-    // },
+    bool: {
+      filter: [{ term: { 'cycle_id.keyword': cycleId } }],
+    },
   },
   aggs: resourceTypeAggQuery,
 });

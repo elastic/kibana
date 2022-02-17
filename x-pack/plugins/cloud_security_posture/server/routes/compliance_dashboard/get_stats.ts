@@ -39,10 +39,9 @@ export const findingsEvaluationAggsQuery = {
 export const getEvaluationsQuery = (cycleId: string): SearchRequest => ({
   index: CSP_KUBEBEAT_INDEX_PATTERN,
   query: {
-    // bool: {
-    //   filter: [{ term: { 'cycle_id.keyword': cycleId } }],
-    // },
-    match_all: {},
+    bool: {
+      filter: [{ term: { 'cycle_id.keyword': cycleId } }],
+    },
   },
   aggs: findingsEvaluationAggsQuery,
 });

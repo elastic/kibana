@@ -78,31 +78,32 @@ export const BenchmarksSection = () => {
         return (
           <>
             <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-              <EuiFlexGroup style={{ height: 300 }}>
+              <EuiFlexGroup gutterSize="none" style={{ height: 300 }}>
                 <EuiFlexItem grow={2} style={getIntegrationBoxStyle(euiTheme)}>
-                  <EuiText>
-                    <h4>{cluster.meta.benchmarkName}</h4>
-                  </EuiText>
-                  <EuiText>
-                    <h4>{`Cluster ID ${shortId}`}</h4>
-                  </EuiText>
-                  {INTERNAL_FEATURE_FLAGS.clusterMetaMock && (
-                    <>
-                      <EuiSpacer size="xs" />
-                      <EuiText size="xs" color="subdue">
-                        <EuiIcon type="clock" />
-                        {'Updated 7 second ago'}
+                  <EuiFlexGroup direction="column" alignItems="center" justifyContent="spaceAround">
+                    <EuiFlexItem grow={false}>
+                      <EuiText style={{ textAlign: 'center' }}>
+                        <h4>{cluster.meta.benchmarkName}</h4>
                       </EuiText>
-                    </>
-                  )}
-                  <EuiSpacer />
-                  <EuiIcon type={getBenchmarkLogo(cluster.meta.benchmarkName)} size="xxl" />
-                  {INTERNAL_FEATURE_FLAGS.manageRulesMock && (
-                    <>
-                      <EuiSpacer />
-                      <EuiButtonEmpty>{'Manage Rules'}</EuiButtonEmpty>
-                    </>
-                  )}
+                      <EuiText style={{ textAlign: 'center' }}>
+                        <h4>{`Cluster ID ${shortId || mockClusterId}`}</h4>
+                      </EuiText>
+                      {INTERNAL_FEATURE_FLAGS.clusterMetaMock && (
+                        <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
+                          <EuiIcon type="clock" />
+                          {' Updated 7 second ago'}
+                        </EuiText>
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={getBenchmarkLogo(cluster.meta.benchmarkName)} size="xxl" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {INTERNAL_FEATURE_FLAGS.manageRulesMock && (
+                        <EuiButtonEmpty>{'Manage Rules'}</EuiButtonEmpty>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={4} style={{ borderRight: '1px solid #D3DAE6' }}>
                   <ChartPanel
@@ -143,8 +144,5 @@ export const BenchmarksSection = () => {
 const getIntegrationBoxStyle = (euiTheme: EuiThemeComputed) => ({
   border: `1px solid ${euiTheme.colors.lightShade}`,
   borderRadius: `${euiTheme.border.radius.medium} 0 0 ${euiTheme.border.radius.medium}`,
-  justifyContent: 'center',
-  alignItems: 'center',
   background: euiTheme.colors.lightestShade,
-  padding: 0,
 });
