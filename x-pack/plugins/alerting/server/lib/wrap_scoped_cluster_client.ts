@@ -60,7 +60,7 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
 
   return {
     client: () => wrappedClient,
-    getStats: (): RuleExecutionMetrics => {
+    getMetrics: (): RuleExecutionMetrics => {
       return {
         totalQueryDurationMs,
         totalSearchDurationMs,

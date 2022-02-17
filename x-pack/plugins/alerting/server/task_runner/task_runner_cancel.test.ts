@@ -174,7 +174,11 @@ describe('Task Runner Cancel', () => {
       .requireMock('../lib/wrap_scoped_cluster_client')
       .createWrappedScopedClusterClientFactory.mockReturnValue({
         client: () => services.scopedClusterClient,
-        getStats: () => ({ numQueries: 3, totalQueryDurationMs: 23423, totalSearchDurationMs: 33 }),
+        getMetrics: () => ({
+          numQueries: 3,
+          totalQueryDurationMs: 23423,
+          totalSearchDurationMs: 33,
+        }),
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);

@@ -167,7 +167,7 @@ export class TaskRunner<
     return { apiKey, enabled };
   }
 
-  private generateKibanaRequestFromApiKey(spaceId: string, apiKey: RawRule['apiKey']) {
+  private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -424,7 +424,7 @@ export class TaskRunner<
       name: rule.name,
     };
 
-    const searchMetrics = wrappedScopedClusterClient.getStats();
+    const searchMetrics = wrappedScopedClusterClient.getMetrics();
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
@@ -594,7 +594,7 @@ export class TaskRunner<
       );
     }
 
-    const fakeRequest = this.generateKibanaRequestFromApiKey(spaceId, apiKey);
+    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
 
     // Get rules client with space level permissions
     const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);

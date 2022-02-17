@@ -143,7 +143,7 @@ describe('wrapScopedClusterClient', () => {
     expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
-    const stats = wrappedSearchClientFactory.getStats();
+    const stats = wrappedSearchClientFactory.getMetrics();
     expect(stats.numQueries).toEqual(3);
     expect(stats.totalQueryDurationMs).toEqual(999);
 
