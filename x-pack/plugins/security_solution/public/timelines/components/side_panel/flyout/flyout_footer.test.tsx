@@ -12,11 +12,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { EventDetailsFlyoutFooter, IFlyoutFooterProps } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { ACTIVE_PANEL } from '../event_details';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
-
+const showAlertDetails = jest.fn();
 describe('Flyout Footer', () => {
   let wrapper: ReactWrapper;
 
@@ -41,7 +42,7 @@ describe('Flyout Footer', () => {
     handleOnEventClosed: jest.fn(),
     activePanel: null,
     loading: false,
-    showAlertDetails: jest.fn(),
+    showAlertDetails,
     timelineId: 'testTimelineId',
   };
 
@@ -60,7 +61,7 @@ describe('Flyout Footer', () => {
     });
   });
 
-  test('should render osquery', () => {
+  test('should render osquery', async () => {
     wrapper = mount(
       <TestProviders>
         <EventDetailsFlyoutFooter {...defaultProps} activePanel={ACTIVE_PANEL.OSQUERY} />
@@ -68,6 +69,11 @@ describe('Flyout Footer', () => {
     );
     expect(wrapper.find('[data-test-subj="flyout-footer-osquery"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="flyout-footer-default"]').exists()).toBeFalsy();
+    await act(async () => {
+      const button = wrapper.find('[data-test-subj="osquery-empty-button"]').at(0);
+      await button.simulate('click');
+    });
+    expect(showAlertDetails).toHaveBeenCalled();
   });
 
   test('should render default body', () => {

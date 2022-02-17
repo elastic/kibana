@@ -19,7 +19,10 @@ export const OsqueryEventDetailsFooterComponent = ({
 }: EventDetailsFooterProps) => {
   const renderFooterBody = useMemo(() => {
     return (
-      <EuiButtonEmpty onClick={() => handlePanelChange(null)}>
+      <EuiButtonEmpty
+        onClick={() => handlePanelChange(null)}
+        data-test-subj={'osquery-empty-button'}
+      >
         <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
       </EuiButtonEmpty>
     );
