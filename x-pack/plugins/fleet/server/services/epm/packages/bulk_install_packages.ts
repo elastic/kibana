@@ -14,7 +14,6 @@ import type { InstallResult } from '../../../types';
 
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
-import { getBundledPackages } from './get_bundled_packages';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -31,23 +30,23 @@ export async function bulkInstallPackages({
   esClient,
   spaceId,
   force,
-  preferredSource = 'registry',
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
-  const bundledPackages = await getBundledPackages();
-
   const packagesResults = await Promise.allSettled(
-    packagesToInstall.map((pkg) => {
-      if (typeof pkg === 'string') return Registry.fetchFindLatestPackage(pkg);
-      return Promise.resolve(pkg);
+    packagesToInstall.map(async (pkg) => {
+      if (typeof pkg !== 'string') {
+        return Promise.resolve(pkg);
+      }
+
+      return Registry.fetchFindLatestPackageOrThrow(pkg);
     })
   );
 
   logger.debug(
-    `kicking off bulk install of ${packagesToInstall.join(
-      ', '
-    )} with preferred source of "${preferredSource}"`
+    `kicking off bulk install of ${packagesToInstall
+      .map((pkg) => (typeof pkg === 'string' ? pkg : pkg.name))
+      .join(', ')}`
   );
 
   const bulkInstallResults = await Promise.allSettled(
@@ -83,61 +82,16 @@ export async function bulkInstallPackages({
         };
       }
 
-      let installResult: InstallResult;
       const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
 
-      const bundledPackage = bundledPackages.find((pkg) => pkg.name === pkgkey);
-
-      // If preferred source is bundled packages on disk, attempt to install from disk first, then fall back to registry
-      if (preferredSource === 'bundled') {
-        if (bundledPackage) {
-          logger.debug(
-            `kicking off install of ${pkgKeyProps.name}-${pkgKeyProps.version} from bundled package on disk`
-          );
-          installResult = await installPackage({
-            savedObjectsClient,
-            esClient,
-            installSource: 'upload',
-            archiveBuffer: bundledPackage.buffer,
-            contentType: 'application/zip',
-            spaceId,
-          });
-        } else {
-          installResult = await installPackage({
-            savedObjectsClient,
-            esClient,
-            pkgkey,
-            installSource: 'registry',
-            spaceId,
-            force,
-          });
-        }
-      } else {
-        // If preferred source is registry, attempt to install from registry first, then fall back to bundled packages on disk
-        installResult = await installPackage({
-          savedObjectsClient,
-          esClient,
-          pkgkey,
-          installSource: 'registry',
-          spaceId,
-          force,
-        });
-
-        // If we initially errored, try to install from bundled package on disk
-        if (installResult.error && bundledPackage) {
-          logger.debug(
-            `kicking off install of ${pkgKeyProps.name}-${pkgKeyProps.version} from bundled package on disk`
-          );
-          installResult = await installPackage({
-            savedObjectsClient,
-            esClient,
-            installSource: 'upload',
-            archiveBuffer: bundledPackage.buffer,
-            contentType: 'application/zip',
-            spaceId,
-          });
-        }
-      }
+      const installResult = await installPackage({
+        savedObjectsClient,
+        esClient,
+        pkgkey,
+        installSource: 'registry',
+        spaceId,
+        force,
+      });
 
       if (installResult.error) {
         return {
