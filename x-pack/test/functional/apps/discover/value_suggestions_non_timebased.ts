@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'settings', 'context', 'header']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
@@ -23,6 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+      });
     });
 
     after(async () => {
@@ -31,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 
     it('shows all autosuggest options for a filter in discover context app', async () => {
