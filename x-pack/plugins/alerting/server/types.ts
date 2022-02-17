@@ -242,6 +242,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: string | number;
 }
 
 export type AlertInfoParams = Pick<
