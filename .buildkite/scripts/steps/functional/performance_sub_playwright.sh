@@ -30,6 +30,7 @@ for i in "${journeys[@]}"; do
 
     export TEST_PERFORMANCE_PHASE=WARMUP
     export ELASTIC_APM_ACTIVE=false
+    export JOURNEY_NAME="${i}"
     
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
       node scripts/functional_tests \
