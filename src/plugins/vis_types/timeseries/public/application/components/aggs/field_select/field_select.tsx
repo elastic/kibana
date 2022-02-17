@@ -1,0 +1,181 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import React, { useCallback, useMemo, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiComboBoxProps, EuiFormRow, htmlIdGenerator, DragDropContextProps } from '@elastic/eui';
+
+import { FieldSelectItem } from './field_select_item';
+import { IndexPatternValue, SanitizedFieldType } from '../../../../../common/types';
+import { TimeseriesUIRestrictions } from '../../../../../common/ui_restrictions';
+import { getIndexPatternKey } from '../../../../../common/index_patterns_utils';
+import { MultiFieldSelect } from './multi_field_select';
+import {
+  getGroupedOptions,
+  findInGroupedOptions,
+  INVALID_FIELD_ID,
+  MAX_MULTI_FIELDS_ITEMS,
+} from './field_select_utils';
+
+interface FieldSelectProps {
+  label: string | ReactNode;
+  type: string;
+  uiRestrictions?: TimeseriesUIRestrictions;
+  restrict?: string[];
+  value?: string | string[] | null;
+  fields: Record<string, SanitizedFieldType[]>;
+  indexPattern: IndexPatternValue;
+  onChange: (selectedValues: Array<string | null | undefined>) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  'data-test-subj'?: string;
+  allowMultiSelect?: boolean;
+}
+
+export function FieldSelect({
+  label,
+  type,
+  value,
+  fields,
+  indexPattern,
+  uiRestrictions,
+  restrict,
+  onChange,
+  disabled,
+  placeholder,
+  allowMultiSelect = false,
+  'data-test-subj': dataTestSubj,
+}: FieldSelectProps) {
+  const htmlId = htmlIdGenerator();
+  const fieldsSelector = getIndexPatternKey(indexPattern);
+
+  const selectedIds = useMemo(
+    () => (value ? (Array.isArray(value) ? value : [value]) : []),
+    [value]
+  );
+
+  const groupedOptions = useMemo(
+    () => getGroupedOptions(type, selectedIds, fields[fieldsSelector], uiRestrictions, restrict),
+    [fields, fieldsSelector, restrict, selectedIds, type, uiRestrictions]
+  );
+
+  const selectedOptionsMap = useMemo(() => {
+    const map = new Map<string, EuiComboBoxProps<string>['selectedOptions']>();
+    if (selectedIds) {
+      const addIntoSet = (item: string) => {
+        const option = findInGroupedOptions(groupedOptions, item);
+        if (option) {
+          map.set(item, [option]);
+        } else {
+          map.set(item, [{ label: item, id: INVALID_FIELD_ID }]);
+        }
+      };
+
+      selectedIds.forEach((v) => addIntoSet(v));
+    }
+    return map;
+  }, [groupedOptions, selectedIds]);
+
+  const invalidSelectedOptions = useMemo(
+    () =>
+      [...selectedOptionsMap.values()]
+        .flat()
+        .filter((item) => item?.label && item?.id === INVALID_FIELD_ID)
+        .map((item) => item!.label),
+    [selectedOptionsMap]
+  );
+
+  const preselectedField = useMemo(
+    () => placeholder && findInGroupedOptions(groupedOptions, placeholder)?.label,
+    [groupedOptions, placeholder]
+  );
+
+  const onFieldSelectItemChange = useCallback(
+    (index: number | undefined, [selectedItem]) => {
+      const arr = [...selectedIds];
+      arr[index ?? 0] = selectedItem?.value ?? null;
+      onChange(arr);
+    },
+    [selectedIds, onChange]
+  );
+
+  const onNewItemAdd = useCallback(() => {
+    onChange([...selectedIds, null]);
+  }, [selectedIds, onChange]);
+
+  const onDeleteItem = useCallback(
+    (index?: number) => {
+      onChange(selectedIds.filter((item, i) => i !== index));
+    },
+    [onChange, selectedIds]
+  );
+
+  const onDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
+    ({ source, destination }) => {
+      if (destination && source.index !== destination?.index) {
+        const arr = [...selectedIds];
+        arr.splice(destination.index, 0, arr.splice(source.index, 1)[0]);
+        onChange(arr);
+      }
+    },
+    [onChange, selectedIds]
+  );
+
+  const FieldSelectItemFactory = useMemo(
+    () => (props: { value?: string | null; index?: number }) =>
+      (
+        <FieldSelectItem
+          options={groupedOptions}
+          selectedOptions={(props.value ? selectedOptionsMap.get(props.value) : undefined) ?? []}
+          disabled={disabled}
+          onNewItemAdd={onNewItemAdd}
+          onDeleteItem={onDeleteItem.bind(undefined, props.index)}
+          onChange={onFieldSelectItemChange.bind(undefined, props.index)}
+          placeholder={preselectedField}
+          disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
+          disableDelete={!allowMultiSelect || selectedIds?.length === 1}
+        />
+      ),
+    [
+      groupedOptions,
+      selectedOptionsMap,
+      disabled,
+      onNewItemAdd,
+      onDeleteItem,
+      onFieldSelectItemChange,
+      preselectedField,
+      allowMultiSelect,
+      selectedIds?.length,
+    ]
+  );
+
+  return (
+    <EuiFormRow
+      id={htmlId('timeField')}
+      label={label}
+      error={i18n.translate('visTypeTimeseries.fieldSelect.fieldIsNotValid', {
+        defaultMessage:
+          'The "{fieldParameter}" field is not valid for use with the current index. Please select a new field.',
+        values: {
+          fieldParameter: invalidSelectedOptions.join(', '),
+        },
+      })}
+      isInvalid={Boolean(invalidSelectedOptions.length)}
+      data-test-subj={dataTestSubj ?? 'metricsIndexPatternFieldsSelect'}
+    >
+      {selectedIds?.length > 1 ? (
+        <MultiFieldSelect
+          values={selectedIds}
+          onDragEnd={onDragEnd}
+          WrappedComponent={FieldSelectItemFactory}
+        />
+      ) : (
+        <FieldSelectItemFactory value={selectedIds?.[0]} />
+      )}
+    </EuiFormRow>
+  );
+}

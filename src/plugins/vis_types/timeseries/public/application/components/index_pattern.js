@@ -259,7 +259,11 @@ export const IndexPattern = ({
             restrict={RESTRICT_FIELDS}
             value={model[timeFieldName]}
             disabled={disabled}
-            onChange={handleSelectChange(timeFieldName)}
+            onChange={(value) =>
+              onChange({
+                [timeFieldName]: value?.[0],
+              })
+            }
             indexPattern={model[indexPatternName]}
             fields={fields}
             placeholder={

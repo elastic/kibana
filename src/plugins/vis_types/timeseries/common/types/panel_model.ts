@@ -109,7 +109,7 @@ export interface Series {
   steps: number;
   terms_direction?: string;
   terms_exclude?: string;
-  terms_field?: string;
+  terms_field?: string | string[];
   terms_include?: string;
   terms_order_by?: string;
   terms_size?: string;

@@ -23,7 +23,6 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -65,9 +64,9 @@ export class TablePanelConfig extends Component<
     this.setState({ selectedTab });
   }
 
-  handlePivotChange = (selectedOption: Array<EuiComboBoxOptionOption<string>>) => {
+  handlePivotChange = (selectedOptions: string[] | null) => {
     const { fields, model } = this.props;
-    const pivotId = get(selectedOption, '[0].value', null);
+    const pivotId = selectedOptions?.[0];
     const field = fields[getIndexPatternKey(model.index_pattern)].find((f) => f.name === pivotId);
     const pivotType = get(field, 'type', model.pivot_type);
 

@@ -142,11 +142,16 @@ export const SplitByTermsUI = ({
             ]}
             data-test-subj="groupByField"
             indexPattern={indexPattern}
-            onChange={handleSelectChange('terms_field')}
+            onChange={(value) =>
+              onChange({
+                terms_field: value,
+              })
+            }
             value={model.terms_field}
             fields={fields}
             uiRestrictions={uiRestrictions}
             type={'terms'}
+            allowMultiSelect={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
