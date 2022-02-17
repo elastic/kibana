@@ -15,9 +15,10 @@ import {
   LensTopNavMenuProps,
   LensTopNavTooltips,
 } from './types';
+import type { StateSetter } from '../types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas } from '../../../../../src/plugins/data/common';
+import { tableHasFormulas, DataViewListItem } from '../../../../../src/plugins/data/common';
 import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -26,8 +27,14 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  updateDatasourceState,
 } from '../state_management';
-import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
+import {
+  getIndexPatternsObjects,
+  getIndexPatternsIds,
+  getResolvedDateRange,
+  handleIndexPatternChange,
+} from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -193,6 +200,7 @@ export const LensTopNavMenu = ({
   );
 
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
@@ -252,6 +260,14 @@ export const LensTopNavMenu = ({
     indexPatterns,
     data.indexPatterns,
   ]);
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViews = await data.dataViews.getIdsWithTitle();
+      setDataViewsList(dataViews);
+    };
+    fetchDataViews();
+  }, [data.dataViews]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -470,6 +486,44 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
+  const currentIndexPattern = indexPatterns[0];
+
+  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
+    return (updater) => {
+      dispatch(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasourceId!,
+          clearStagedPreview: true,
+        })
+      );
+    };
+  }, [activeDatasourceId, dispatch]);
+
+  const dataViewsPickerProps = {
+    'data-test-subj': 'indexPattern-switcher',
+    trigger: {
+      label: currentIndexPattern?.title || '',
+      'data-test-subj': 'indexPattern-switch-link',
+      title: currentIndexPattern?.title || '',
+    },
+    indexPatternRefs: dataViewsList,
+    indexPatternId: currentIndexPattern?.id,
+    onChangeIndexPattern: (newIndexPatternId: string) =>
+      handleIndexPatternChange({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates,
+        indexPatternId: newIndexPatternId,
+        setDatasourceState,
+      }),
+  };
+
   return (
     <TopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -481,6 +535,8 @@ export const LensTopNavMenu = ({
       onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
       onClearSavedQuery={onClearSavedQueryWrapped}
       indexPatterns={indexPatterns}
+      showDataViewsPicker={true}
+      dataViewsPickerProps={dataViewsPickerProps}
       query={query}
       dateRangeFrom={from}
       dateRangeTo={to}

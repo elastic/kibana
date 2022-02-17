@@ -16,7 +16,7 @@ import type {
 import type { IUiSettingsClient } from 'kibana/public';
 import type { SavedObjectReference } from 'kibana/public';
 import type { Document } from './persistence/saved_object_store';
-import type { Datasource, DatasourceMap, Visualization } from './types';
+import type { Datasource, DatasourceMap, Visualization, StateSetter } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -59,6 +59,26 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
 export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
+
+export function handleIndexPatternChange({
+  activeDatasources,
+  datasourceStates,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: DatasourceStates;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.updateCurrentIndexPatternId?.({
+      state: datasourceStates[id].state,
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
 
 export function getIndexPatternsIds({
   activeDatasources,

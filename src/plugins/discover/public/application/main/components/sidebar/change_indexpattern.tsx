@@ -45,7 +45,7 @@ export function ChangeIndexPattern({
     return (
       <EuiButton
         fullWidth
-        color="text"
+        color="primary"
         iconSide="right"
         iconType="arrowDown"
         title={title}

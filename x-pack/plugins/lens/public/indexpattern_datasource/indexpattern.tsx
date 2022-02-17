@@ -429,6 +429,10 @@ export function getIndexPatternDatasource({
         : undefined;
     },
 
+    updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
+      handleChangeIndexPattern(indexPatternId, state, setState);
+    },
+
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId }) => {
