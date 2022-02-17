@@ -371,10 +371,7 @@ export class CsvGenerator {
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
       }
-      if (
-        err instanceof esErrors.ResponseError &&
-        [401, 403].includes(err.statusCode)
-      ) {
+      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
         throw new AuthenticationExpiredError();
       }
     } finally {
