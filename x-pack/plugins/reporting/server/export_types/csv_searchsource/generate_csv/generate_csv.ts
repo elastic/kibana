@@ -373,7 +373,7 @@ export class CsvGenerator {
       }
       if (
         err instanceof esErrors.ResponseError &&
-        (err.statusCode === 403 || err.statusCode === 401)
+        [401, 403].includes(err.statusCode)
       ) {
         throw new AuthenticationExpiredError();
       }
