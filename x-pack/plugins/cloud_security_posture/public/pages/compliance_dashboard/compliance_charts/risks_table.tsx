@@ -129,16 +129,14 @@ export const RisksTable = ({ data: resourcesTypes }: RisksTableProps) => {
     [handleCellClick]
   );
 
-  if (!resourcesTypes) return null;
+  const items = useMemo(() => getTop5Risks(resourcesTypes), [resourcesTypes]);
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
       <EuiFlexItem>
         <EuiBasicTable<ResourceType>
           rowHeader="name"
-          items={
-            INTERNAL_FEATURE_FLAGS.showRisksMock ? getTop5Risks(mockData) : getTop5Risks(resourcesTypes)
-          }
+          items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTop5Risks(mockData) : items}
           columns={columns}
         />
       </EuiFlexItem>
