@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { EventDetailsFlyoutBody, IProps as IFlyoutBodyProps } from './flyout_body';
-export { EventDetailsFlyoutFooter, IProps as IFlyoutFooterProps } from './flyout_footer';
+export { EventDetailsFlyoutBody } from './flyout_body';
+export { EventDetailsFlyoutFooter } from './flyout_footer';
 export { EventDetailsFlyoutHeader } from './flyout_header';
+export type { IProps as IFlyoutBodyProps } from './flyout_body';
+export type { IProps as IFlyoutFooterProps } from './flyout_footer';
