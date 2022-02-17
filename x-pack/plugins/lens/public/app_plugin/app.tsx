@@ -24,6 +24,7 @@ import { Document } from '../persistence/saved_object_store';
 
 import {
   setState,
+  applyChanges,
   useLensSelector,
   useLensDispatch,
   LensAppState,
@@ -289,6 +290,7 @@ export function App({
         (newState) => {
           if (newState) {
             dispatchSetState(newState);
+            dispatch(applyChanges());
             setIsSaveModalVisible(false);
           }
         },
@@ -310,6 +312,7 @@ export function App({
       redirectTo,
       lensAppServices,
       dispatchSetState,
+      dispatch,
       setIsSaveModalVisible,
     ]
   );
