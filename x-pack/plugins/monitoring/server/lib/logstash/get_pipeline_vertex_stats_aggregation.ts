@@ -271,7 +271,7 @@ export function getPipelineVertexStatsAggregation({
     filters,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
 
   return fetchPipelineVertexTimeSeriesStats({
     query,
@@ -279,9 +279,7 @@ export function getPipelineVertexStatsAggregation({
     version,
     vertexId,
     timeSeriesIntervalInSeconds,
-    // @ts-ignore not undefined, need to get correct config
-    // https://github.com/elastic/kibana/issues/112146
-    maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
+    maxBucketSize: config.ui.max_bucket_size,
     callWithRequest,
     req,
   });

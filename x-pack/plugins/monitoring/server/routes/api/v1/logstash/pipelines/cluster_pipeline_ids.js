@@ -7,8 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { handleError } from '../../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
 
 /**
@@ -33,15 +31,12 @@ export function logstashClusterPipelineIdsRoute(server) {
       },
     },
     handler: async (req) => {
-      const config = server.config();
-      const { ccs } = req.payload;
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
-      const size = config.get('monitoring.ui.max_bucket_size');
+      const size = config.ui.max_bucket_size;
 
       try {
-        const pipelines = await getLogstashPipelineIds({ req, lsIndexPattern, clusterUuid, size });
-        return pipelines;
+        return await getLogstashPipelineIds({ req, clusterUuid, size });
       } catch (err) {
         throw handleError(err, req);
       }
