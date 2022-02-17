@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import axios from 'axios';
 import JSON5 from 'json5';
-
-// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
 
 import { readCliArgs } from '../args';
 import { Task, read, downloadToDisk } from '../lib';
