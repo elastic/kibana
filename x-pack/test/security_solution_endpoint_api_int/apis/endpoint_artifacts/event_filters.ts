@@ -29,8 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Endpoint artifacts (via lists plugin): Event Filters', () => {
+  describe('Endpoint artifacts (via lists plugin): Event Filters', () => {
     const USER = ROLES.detections_admin;
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
