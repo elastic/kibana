@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { hasSimpleExecutableName, isPathValid } from '@kbn/securitysolution-utils';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
   ConditionEntry,
@@ -30,8 +31,6 @@ import {
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
-  isPathValid,
-  hasSimpleExecutableName,
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 

@@ -28,7 +28,6 @@ import { paramIsValid } from '../param_is_valid';
 
 const SINGLE_SELECTION = { asPlainText: true };
 
-type OS = 'linux' | 'macos' | 'windows';
 interface AutocompleteFieldWildcardProps {
   placeholder: string;
   selectedField: DataViewFieldBase | undefined;
@@ -42,56 +41,13 @@ interface AutocompleteFieldWildcardProps {
   rowLabel?: string;
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
-  onError?: (arg: boolean) => void;
-  onWarning?: (arg: boolean) => void;
-  os: OS;
+  onError: (arg: boolean) => void;
+  onWarning: (arg: boolean) => void;
+  warning?: string;
 }
 
-/*
- * regex to match executable names
- * starts matching from the eol of the path
- * file names with a single or multiple spaces (for spaced names)
- * and hyphens and combinations of these that produce complex names
- * such as:
- * c:\home\lib\dmp.dmp
- * c:\home\lib\my-binary-app-+/ some/  x/ dmp.dmp
- * /home/lib/dmp.dmp
- * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
- */
-const WIN_EXEC_PATH = /\\(\w+|\w*[\w+|-]+\/ +)+\w+[\w+|-]+\.*\w+$/i;
-const UNIX_EXEC_PATH = /(\/|\w*[\w+|-]+\\ +)+\w+[\w+|-]+\.*\w*$/i;
-
-export const warnOnWildcardInExecutableName = ({
-  os,
-  value = '',
-}: {
-  os: OS;
-  value?: string;
-}): string | undefined => {
-  const textInput = value.trim();
-  const isUnixValidPath = UNIX_EXEC_PATH.test(textInput);
-  const isWindowsValidPath = WIN_EXEC_PATH.test(textInput);
-
-  if (os === 'windows') {
-    return textInput.length
-      ? !isWindowsValidPath
-        ? isUnixValidPath
-          ? i18n.FILEPATH_WARNING
-          : i18n.FILENAME_WILDCARD_WARNING
-        : ''
-      : undefined;
-  }
-
-  return textInput.length
-    ? !isUnixValidPath
-      ? isWindowsValidPath
-        ? i18n.FILEPATH_WARNING
-        : i18n.FILENAME_WILDCARD_WARNING
-      : ''
-    : undefined;
-};
-
 export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildcardProps> = ({
+  autocompleteService,
   placeholder,
   rowLabel,
   selectedField,
@@ -105,13 +61,11 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
   onChange,
   onError,
   onWarning,
-  os,
-  autocompleteService,
+  warning,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [warning, setWarning] = useState<string | undefined>(undefined);
   const [isLoadingSuggestions, , suggestions] = useFieldValueAutocomplete({
     autocompleteService,
     fieldValue: selectedValue,
@@ -149,17 +103,9 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
   const handleWarning = useCallback(
     (warn: string | undefined): void => {
-      setWarning((existingWarning): string | undefined => {
-        const oldWarning = existingWarning != null;
-        const newWarning = warn != null;
-        if (oldWarning !== newWarning && onWarning != null) {
-          onWarning(newWarning);
-        }
-
-        return warn;
-      });
+      onWarning(warn !== undefined);
     },
-    [setWarning, onWarning]
+    [onWarning]
   );
 
   const { comboOptions, labels, selectedComboOptions } = useMemo(
@@ -187,22 +133,18 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       if (searchVal !== '' && selectedField != null) {
         const err = paramIsValid(searchVal, selectedField, isRequired, touched);
         handleError(err);
-
-        const warn = warnOnWildcardInExecutableName({ value: searchVal, os });
-        handleWarning(warn);
-
+        handleWarning(warning);
         setSearchQuery(searchVal);
       }
     },
-    [handleError, isRequired, selectedField, touched, os, handleWarning]
+    [handleError, isRequired, selectedField, touched, warning, handleWarning]
   );
 
   const handleCreateOption = useCallback(
     (option: string): boolean | undefined => {
       const err = paramIsValid(option, selectedField, isRequired, touched);
       handleError(err);
-      const warn = warnOnWildcardInExecutableName({ value: option, os });
-      handleWarning(warn);
+      handleWarning(warning);
 
       if (err != null) {
         // Explicitly reject the user's input
@@ -212,7 +154,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
         return undefined;
       }
     },
-    [isRequired, onChange, selectedField, touched, handleError, handleWarning, os]
+    [isRequired, onChange, selectedField, touched, handleError, handleWarning, warning]
   );
 
   const setIsTouchedValue = useCallback((): void => {
@@ -220,10 +162,8 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     const err = paramIsValid(selectedValue, selectedField, isRequired, true);
     handleError(err);
-
-    const warn = warnOnWildcardInExecutableName({ value: selectedValue, os });
-    handleWarning(warn);
-  }, [setIsTouched, handleError, selectedValue, selectedField, isRequired, handleWarning, os]);
+    handleWarning(warning);
+  }, [setIsTouched, handleError, selectedValue, selectedField, isRequired, handleWarning, warning]);
 
   const inputPlaceholder = useMemo((): string => {
     if (isLoading || isLoadingSuggestions) {
@@ -242,7 +182,6 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
   useEffect((): void => {
     setError(undefined);
-    setWarning(undefined);
     if (onError != null) {
       onError(false);
     }

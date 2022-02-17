@@ -137,6 +137,6 @@ The `onChange` handler is passed selected `string[]`.
   isClearable={false}
   indexPattern={indexPattern}
   onChange={handleFieldMatchAnyValueChange}
-  os='linux'
+  warning='input warning'
 />
 ```

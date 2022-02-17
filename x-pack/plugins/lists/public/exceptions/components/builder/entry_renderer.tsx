@@ -37,6 +37,7 @@ import {
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
+import { OperatingSystem, validateFilePathInput } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
@@ -310,10 +311,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
-        let os: 'linux' | 'macos' | 'windows' = 'windows';
+        let os: OperatingSystem = OperatingSystem.WINDOWS;
         if (osTypes) {
-          [os] = osTypes;
+          [os] = osTypes as OperatingSystem[];
         }
+        const warning = validateFilePathInput({ os, value: wildcardValue });
         return (
           <AutocompleteFieldWildcardComponent
             autocompleteService={autocompleteService}
@@ -326,7 +328,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             onError={handleError}
             onChange={handleFieldWildcardValueChange}
             onWarning={handleWarning}
-            os={os}
+            warning={warning}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             rowLabel={isFirst ? i18n.VALUE : undefined}
             selectedField={entry.correspondingKeywordField ?? entry.field}

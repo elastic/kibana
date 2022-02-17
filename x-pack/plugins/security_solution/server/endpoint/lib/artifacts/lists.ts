@@ -13,6 +13,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { hasSimpleExecutableName } from '@kbn/securitysolution-utils';
 
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -40,7 +41,6 @@ import {
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
-import { hasSimpleExecutableName } from '../../../../common/endpoint/service/trusted_apps/validations';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
