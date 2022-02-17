@@ -9,14 +9,7 @@ import {
   ElasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'src/core/server/elasticsearch/client/mocks';
-
-import {
-  getBenchmarks,
-  getAllFindingsStats,
-  roundScore,
-  getBenchmarksStats,
-  getResourceTypesAggs,
-} from './stats';
+import { roundScore } from './get_stats';
 
 export const mockCountResultOnce = async (mockEsClient: ElasticsearchClientMock, count: number) => {
   mockEsClient.count.mockReturnValueOnce(

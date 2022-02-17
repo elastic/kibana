@@ -15,12 +15,8 @@ import { CloudPostureStats, Score } from '../../../common/types';
  */
 export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
 
-export const calculatePostureScore = (
-  total: number,
-  passed: number,
-  failed: number
-): Score | undefined =>
-  passed + failed === 0 || total === undefined ? undefined : roundScore(passed / (passed + failed));
+export const calculatePostureScore = (passed: number, failed: number): Score =>
+  roundScore(passed / (passed + failed));
 
 export interface FindingsEvaluationsQueryResult {
   failed_findings: {
@@ -57,8 +53,8 @@ export const getStatsFromFindingsEvaluationsAggs = (
   const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count;
   const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count;
   const totalFindings = failedFindings + passedFindings;
-  const postureScore = calculatePostureScore(totalFindings, passedFindings, failedFindings);
-  if (postureScore === undefined) throw new Error("couldn't calculate posture score");
+  if (!totalFindings) throw new Error("couldn't calculate posture score");
+  const postureScore = calculatePostureScore(passedFindings, failedFindings);
 
   return {
     totalFailed: failedFindings,
