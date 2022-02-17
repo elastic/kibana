@@ -14,11 +14,14 @@ import { useGetAgentPolicies } from './use_request';
 interface AgentEnrollmentFlyoutData {
   agentPolicies: AgentPolicy[];
   refreshAgentPolicies: () => void;
+  isLoadingInitialAgentPolicies: boolean;
+  isLoadingAgentPolicies: boolean;
 }
 
 export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
   const {
     data: agentPoliciesData,
+    isInitialRequest,
     isLoading: isLoadingAgentPolicies,
     resendRequest: refreshAgentPolicies,
   } = useGetAgentPolicies({
@@ -34,5 +37,10 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
     return [];
   }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
 
-  return { agentPolicies, refreshAgentPolicies };
+  return {
+    agentPolicies,
+    refreshAgentPolicies,
+    isLoadingInitialAgentPolicies: isInitialRequest && isLoadingAgentPolicies,
+    isLoadingAgentPolicies,
+  };
 }
