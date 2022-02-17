@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import fs from 'fs';
 import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-utils';
@@ -13,9 +14,21 @@ import { withProcRunner } from '@kbn/dev-utils';
 import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
+const retrieveIntegrations = () => {
+  const directoryPath = resolve(__dirname, '../../plugins/security_solution/cypress/integration');
+  const folderNames = fs.readdirSync(directoryPath);
+  const integrationsPaths = folderNames.map((f) =>
+    resolve(__dirname, `../../plugins/security_solution/cypress/integration/${f}/*.spec.ts`)
+  );
+  const halfLength = Math.ceil(integrationsPaths.length / 2);
+
+  return [integrationsPaths.slice(0, halfLength), integrationsPaths.slice(-halfLength)];
+};
+
 export async function SecuritySolutionConfigurableCypressCliTestRunner(
   { getService }: FtrProviderContext,
-  command: string
+  command: string,
+  envVars?: Record<string, string>
 ) {
   const log = getService('log');
   const config = getService('config');
@@ -35,6 +48,7 @@ export async function SecuritySolutionConfigurableCypressCliTestRunner(
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
         ...process.env,
+        ...envVars,
       },
       wait: true,
     });
@@ -42,11 +56,17 @@ export async function SecuritySolutionConfigurableCypressCliTestRunner(
 }
 
 export async function SecuritySolutionCypressCliTestRunnerCISet1(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:ci-set:1');
+  const integrations = retrieveIntegrations();
+  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:spec', {
+    SPEC_LIST: integrations[0].join(','),
+  });
 }
 
 export async function SecuritySolutionCypressCliTestRunnerCISet2(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:ci-set:2');
+  const integrations = retrieveIntegrations();
+  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:spec', {
+    SPEC_LIST: integrations[1].join(','),
+  });
 }
 
 export async function SecuritySolutionCypressCliTestRunner(context: FtrProviderContext) {
