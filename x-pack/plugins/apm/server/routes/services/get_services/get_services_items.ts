@@ -58,10 +58,12 @@ export async function getServicesItems({
       }),
     ]);
 
-    return mergeServiceStats({
+    const services = mergeServiceStats({
       transactionStats,
       servicesFromErrorAndMetricDocuments,
       healthStatuses,
     });
+
+    return services.slice(0, size);
   });
 }
