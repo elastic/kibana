@@ -428,6 +428,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:maxNumServices': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:enableComparisonByDefault': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

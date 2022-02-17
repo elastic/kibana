@@ -12,6 +12,7 @@ export { formatDurationFromTimeUnitChar } from './utils/formatters';
 export {
   enableInspectEsQueries,
   maxSuggestions,
+  maxNumServices,
   enableComparisonByDefault,
   enableInfrastructureView,
 } from './ui_settings_keys';

@@ -19,6 +19,7 @@ export async function getServices({
   logger,
   start,
   end,
+  size,
 }: {
   environment: string;
   kuery: string;
@@ -27,6 +28,7 @@ export async function getServices({
   logger: Logger;
   start: number;
   end: number;
+  size: number;
 }) {
   return withApmSpan('get_services', async () => {
     const [items, hasLegacyData] = await Promise.all([
@@ -38,6 +40,7 @@ export async function getServices({
         logger,
         start,
         end,
+        size,
       }),
       getLegacyDataStatus(setup, start, end),
     ]);

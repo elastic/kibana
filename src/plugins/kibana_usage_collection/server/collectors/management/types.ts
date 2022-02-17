@@ -39,6 +39,7 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
   'observability:maxSuggestions': number;
+  'observability:maxNumServices': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableInfrastructureView': boolean;
   'visualize:enableLabs': boolean;

@@ -15,8 +15,6 @@ import { mergeServiceStats } from './merge_service_stats';
 
 export type ServicesItemsSetup = Setup;
 
-const MAX_NUMBER_OF_SERVICES = 50;
-
 export async function getServicesItems({
   environment,
   kuery,
@@ -25,6 +23,7 @@ export async function getServicesItems({
   logger,
   start,
   end,
+  size,
 }: {
   environment: string;
   kuery: string;
@@ -33,6 +32,7 @@ export async function getServicesItems({
   logger: Logger;
   start: number;
   end: number;
+  size: number;
 }) {
   return withApmSpan('get_services_items', async () => {
     const params = {
@@ -40,7 +40,7 @@ export async function getServicesItems({
       kuery,
       setup,
       searchAggregatedTransactions,
-      maxNumServices: MAX_NUMBER_OF_SERVICES,
+      maxNumServices: size,
       start,
       end,
     };

@@ -10,6 +10,7 @@ import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
+import { maxNumServices } from '../../../../observability/common';
 import { ProfilingValueType } from '../../../common/profiling';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -99,7 +100,7 @@ const servicesRoute = createApmServerRoute({
     hasLegacyData: boolean;
   }> {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, context } = resources;
     const { environment, kuery, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
@@ -107,6 +108,10 @@ const servicesRoute = createApmServerRoute({
       start,
       end,
     });
+
+    const size = await context.core.uiSettings.client.get<number>(
+      maxNumServices
+    );
 
     return getServices({
       environment,
@@ -116,6 +121,7 @@ const servicesRoute = createApmServerRoute({
       logger,
       start,
       end,
+      size,
     });
   },
 });

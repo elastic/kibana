@@ -7,5 +7,6 @@
 
 export const enableInspectEsQueries = 'observability:enableInspectEsQueries';
 export const maxSuggestions = 'observability:maxSuggestions';
+export const maxNumServices = 'observability:maxNumServices';
 export const enableComparisonByDefault = 'observability:enableComparisonByDefault';
 export const enableInfrastructureView = 'observability:enableInfrastructureView';

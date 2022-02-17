@@ -13,6 +13,7 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
+  maxNumServices,
   enableInfrastructureView,
 } from '../common/ui_settings_keys';
 
@@ -39,6 +40,17 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     value: 100,
     description: i18n.translate('xpack.observability.maxSuggestionsUiSettingDescription', {
       defaultMessage: 'Maximum number of suggestions fetched in autocomplete selection boxes.',
+    }),
+    schema: schema.number(),
+  },
+  [maxNumServices]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.maxNumServicesUiSettingName', {
+      defaultMessage: 'Maximum services',
+    }),
+    value: 50,
+    description: i18n.translate('xpack.observability.maxNumServicesUiSettingDescription', {
+      defaultMessage: 'Maximum number of services displayed in APM app',
     }),
     schema: schema.number(),
   },
