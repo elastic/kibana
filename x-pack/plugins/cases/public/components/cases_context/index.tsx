@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, Dispatch } from 'react';
 import { merge } from 'lodash';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
@@ -18,6 +18,8 @@ import {
 import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 
+export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
+
 export interface CasesContextValue {
   owner: string[];
   appId: string;
@@ -25,7 +27,7 @@ export interface CasesContextValue {
   userCanCrud: boolean;
   basePath: string;
   features: CasesContextFeatures;
-  dispatch: (action: CasesContextStoreAction) => void;
+  dispatch: CasesContextValueDispatch;
 }
 
 export interface CasesContextProps extends Pick<CasesContextValue, 'owner' | 'userCanCrud'> {

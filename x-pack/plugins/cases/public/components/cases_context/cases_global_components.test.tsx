@@ -35,7 +35,7 @@ describe('Cases context UI', () => {
       appMock.render(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).toHaveBeenCalledWith({ attachments: [] });
     });
-    it('should not render the create case flyout when isFlyoutOpen is true', async () => {
+    it('should not render the create case flyout when isFlyoutOpen is false', async () => {
       const state = {
         createCaseFlyout: {
           isFlyoutOpen: false,
