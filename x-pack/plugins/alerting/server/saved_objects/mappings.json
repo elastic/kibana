@@ -158,7 +158,7 @@
       },
       "snoozeEndTime": {
         "type": "date",
-        "format": "strict_date_time_no_millis"
+        "format": "strict_date_time"
       }
     }
   }
