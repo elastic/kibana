@@ -95,7 +95,7 @@ export const NoDataViewsComponent = ({
                 yesterday, or all indices that contain your log data."
               />
             </p>
-            <div>{canCreateNewDataView && button}</div>
+            {canCreateNewDataView && button}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
