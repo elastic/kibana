@@ -18,27 +18,24 @@ import {
   httpServerMock,
   executionContextServiceMock,
 } from '../../../../core/server/mocks';
+import type { ExecutionContextSetup, Logger } from 'src/core/server';
 
 describe('CollectorSet', () => {
-  const logger = loggingSystemMock.createLogger();
-  const executionContext = executionContextServiceMock.createSetupContract();
+  let logger: jest.Mocked<Logger>;
+  let executionContext: jest.Mocked<ExecutionContextSetup>;
 
-  const collectorSetConfig: CollectorSetConfig = {
-    logger,
-    executionContext,
-  };
+  let collectorSetConfig: CollectorSetConfig;
 
-  const loggerSpies = {
-    debug: jest.spyOn(logger, 'debug'),
-    warn: jest.spyOn(logger, 'warn'),
-  };
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    executionContext = executionContextServiceMock.createSetupContract();
+    collectorSetConfig = { logger, executionContext };
+  });
 
   describe('registers a collector set and runs lifecycle events', () => {
     let fetch: Function;
     beforeEach(() => {
       fetch = noop;
-      loggerSpies.debug.mockRestore();
-      loggerSpies.warn.mockRestore();
     });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const mockSoClient = savedObjectsClientMock.create();
@@ -92,11 +89,9 @@ describe('CollectorSet', () => {
       );
 
       const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
-      expect(loggerSpies.debug).toHaveBeenCalledTimes(2);
-      expect(loggerSpies.debug).toHaveBeenCalledWith('Getting ready collectors');
-      expect(loggerSpies.debug).toHaveBeenCalledWith(
-        'Fetching data from MY_TEST_COLLECTOR collector'
-      );
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledWith('Getting ready collectors');
+      expect(logger.debug).toHaveBeenCalledWith('Fetching data from MY_TEST_COLLECTOR collector');
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -268,7 +263,12 @@ describe('CollectorSet', () => {
   });
 
   describe('makeStatsCollector', () => {
-    const collectorSet = new CollectorSet(collectorSetConfig);
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      collectorSet = new CollectorSet(collectorSetConfig);
+    });
+
     test('TS should hide kibanaRequest when not opted-in', () => {
       collectorSet.makeStatsCollector({
         type: 'MY_TEST_COLLECTOR',
@@ -333,7 +333,12 @@ describe('CollectorSet', () => {
   });
 
   describe('makeUsageCollector', () => {
-    const collectorSet = new CollectorSet(collectorSetConfig);
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      collectorSet = new CollectorSet(collectorSetConfig);
+    });
+
     describe('TS validations', () => {
       describe('when types are inferred', () => {
         test('TS should hide kibanaRequest when not opted-in', () => {
@@ -536,13 +541,13 @@ describe('CollectorSet', () => {
   });
 
   describe('bulkFetch', () => {
-    const collectorSetConfigWithMaxTime: CollectorSetConfig = {
-      logger,
-      executionContext,
-      maximumWaitTimeForAllCollectorsInS: 1,
-    };
-    let collectorSet = new CollectorSet(collectorSetConfigWithMaxTime);
-    afterEach(() => {
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      const collectorSetConfigWithMaxTime: CollectorSetConfig = {
+        ...collectorSetConfig,
+        maximumWaitTimeForAllCollectorsInS: 1,
+      };
       collectorSet = new CollectorSet(collectorSetConfigWithMaxTime);
     });
 
