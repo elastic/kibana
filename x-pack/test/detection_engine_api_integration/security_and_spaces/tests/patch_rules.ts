@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
           tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
         });
 
-        // patch a simple rule's enabled property to true
+        // patch a simple rule's enabled property to false
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')

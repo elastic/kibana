@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { FullResponseSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -350,7 +351,125 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      // TODO: auto_disabled_8.0 tests
+      it('should remove the auto_disabled_8.0 tag if present after enabling rule', async () => {
+        const createdRule1 = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          enabled: false,
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+        });
+
+        const createdRule2 = await createRule(supertest, log, {
+          ...getSimpleRule('rule-2'),
+          enabled: false,
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+        });
+
+        // patch two simple rules' enabled properties to true
+        const { body } = await supertest
+          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([
+            { id: createdRule1.id, enabled: true },
+            { id: createdRule2.id, enabled: true },
+          ])
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          tags: ['tag1', 'tag2'],
+          version: 2,
+        };
+
+        const bodyToCompare = body.map((created: FullResponseSchema) =>
+          removeServerGeneratedProperties(created)
+        );
+        expect(bodyToCompare[0]).to.eql(outputRule);
+        expect(bodyToCompare[1]).to.eql({ ...outputRule, rule_id: 'rule-2' });
+      });
+
+      it('should preserve tags and version if auto_disabled_8.0 tag is not present after enabling rule', async () => {
+        const createdRule1 = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          enabled: false,
+          tags: ['tag1', 'tag2'],
+        });
+        const createdRule2 = await createRule(supertest, log, {
+          ...getSimpleRule('rule-2'),
+          enabled: false,
+          tags: ['tag1', 'tag2'],
+        });
+
+        // patch two simple rules' enabled properties to true
+        const { body } = await supertest
+          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([
+            { id: createdRule1.id, enabled: true },
+            { id: createdRule2.id, enabled: true },
+          ])
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          tags: ['tag1', 'tag2'],
+          version: 1,
+        };
+
+        const bodyToCompare = body.map((created: FullResponseSchema) =>
+          removeServerGeneratedProperties(created)
+        );
+        expect(bodyToCompare[0]).to.eql(outputRule);
+        expect(bodyToCompare[1]).to.eql({ ...outputRule, rule_id: 'rule-2' });
+      });
+
+      it('should not modify tags or version when disabling rule', async () => {
+        const createdRule1 = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+        });
+        const createdRule2 = await createRule(supertest, log, {
+          ...getSimpleRule('rule-2'),
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+        });
+
+        // patch two simple rules' enabled properties to false
+        const { body } = await supertest
+          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([
+            { id: createdRule1.id, enabled: false },
+            { id: createdRule2.id, enabled: false },
+          ])
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: false,
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+          version: 1,
+        };
+
+        const bodyToCompare = body.map((created: FullResponseSchema) =>
+          removeServerGeneratedProperties(created)
+        );
+        expect(bodyToCompare[0]).to.eql(outputRule);
+        expect(bodyToCompare[1]).to.eql({ ...outputRule, rule_id: 'rule-2' });
+      });
+
+      it('should give a 404 if it is given a fake id', async () => {
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' })
+          .expect(404);
+
+        expect(body).to.eql({
+          status_code: 404,
+          message: 'id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" not found',
+        });
+      });
     });
   });
 };

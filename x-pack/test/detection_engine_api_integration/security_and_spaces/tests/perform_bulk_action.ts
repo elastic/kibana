@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(deletedTagsRule.tags).to.eql(['tag2']);
       });
 
-      it('should set, add and delete index patterns in rules', async () => {
+      it('should set, add, and delete index patterns in rules', async () => {
         const ruleId = 'ruleId';
         const indices = ['index1-*', 'index2-*'];
         await createRule(supertest, log, getSimpleRule(ruleId));
@@ -397,6 +397,100 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rule.timeline_title).to.eql(timelineTitle);
     });
 
-    // TODO: auto_disabled_8.0 tests
+    it('should remove the auto_disabled_8.0 tag if present after enabling rule', async () => {
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-1'),
+        enabled: false,
+        tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+      });
+
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-2'),
+        enabled: false,
+        tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+      });
+
+      const { body } = await postBulkAction()
+        .send({ query: '*', action: BulkAction.enable })
+        .expect(200);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 2, total: 1 });
+
+      // Check that the updated rule is returned with the response
+      expect(body.attributes.results.updated[0].enabled).to.eql(true);
+
+      // Check that the updates have been persisted
+      const { body: ruleBody1 } = await fetchRule('rule-1').expect(200);
+      expect(ruleBody1.enabled).to.eql(true);
+      expect(ruleBody1.tags).to.eql(['tag1', 'tag2']);
+
+      const { body: ruleBody2 } = await fetchRule('rule-2').expect(200);
+      expect(ruleBody2.enabled).to.eql(true);
+      expect(ruleBody2.tags).to.eql(['tag1', 'tag2']);
+    });
+
+    it('should preserve tags and version if auto_disabled_8.0 tag is not present after enabling rule', async () => {
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-1'),
+        enabled: false,
+        tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+      });
+
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-2'),
+        enabled: false,
+        tags: ['tag1', 'tag2'],
+      });
+
+      const { body } = await postBulkAction()
+        .send({ query: '', action: BulkAction.enable })
+        .expect(200);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 2, total: 2 });
+
+      // Check that the updated rule is returned with the response
+      expect(body.attributes.results.updated[0].enabled).to.eql(true);
+
+      // Check that the updates have been persisted
+      const { body: ruleBody1 } = await fetchRule('rule-1').expect(200);
+      expect(ruleBody1.enabled).to.eql(true);
+      expect(ruleBody1.tags).to.eql(['tag1', 'tag2']);
+
+      const { body: ruleBody2 } = await fetchRule('rule-2').expect(200);
+      expect(ruleBody2.enabled).to.eql(true);
+      expect(ruleBody2.tags).to.eql(['tag1', 'tag2']);
+    });
+
+    it('should not modify tags or version when disabling rule', async () => {
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-1'),
+        enabled: true,
+        tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
+      });
+
+      await createRule(supertest, log, {
+        ...getSimpleRule('rule-2'),
+        enabled: false,
+        tags: ['tag1', 'tag2'],
+      });
+
+      const { body } = await postBulkAction()
+        .send({ query: '', action: BulkAction.disable })
+        .expect(200);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 2, total: 2 });
+
+      // Check that the updated rule is returned with the response
+      expect(body.attributes.results.updated[0].enabled).to.eql(false);
+
+      // Check that the updates have been persisted
+      const { body: ruleBody1 } = await fetchRule('rule-1').expect(200);
+      expect(ruleBody1.enabled).to.eql(false);
+      expect(ruleBody1.tags).to.eql(['tag1', 'tag2', 'auto_disabled_8.0']);
+
+      const { body: ruleBody2 } = await fetchRule('rule-2').expect(200);
+      expect(ruleBody2.enabled).to.eql(false);
+      expect(ruleBody2.tags).to.eql(['tag1', 'tag2']);
+    });
   });
 };
