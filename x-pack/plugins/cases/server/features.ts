@@ -12,6 +12,14 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 import { APP_ID } from '../common/constants';
 
+/**
+ * The order of appearance in the feature privilege page
+ * under the management section. Cases should be under
+ * the Actions and Connectors feature
+ */
+
+const FEATURE_ORDER = 3100;
+
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
   id: APP_ID,
   name: i18n.translate('xpack.cases.features.casesFeatureName', {
@@ -19,7 +27,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
-  order: 3100,
+  order: FEATURE_ORDER,
   management: {
     insightsAndAlerting: [APP_ID],
   },
