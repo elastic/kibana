@@ -55,7 +55,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   }, [agentPolicies, isFleetServerPolicy]);
 
   const onAgentPolicyCreated = useCallback(
-    async (policy: AgentPolicy | null, errorMessage?: string) => {
+    async (policy: AgentPolicy | null, errorMessage?: JSX.Element) => {
       if (!policy) {
         setCreateState({ status: CREATE_STATUS.FAILED, errorMessage });
         return;

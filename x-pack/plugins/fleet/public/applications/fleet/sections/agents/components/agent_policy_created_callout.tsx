@@ -17,7 +17,7 @@ export enum CREATE_STATUS {
 
 export interface AgentPolicyCreateState {
   status: CREATE_STATUS;
-  errorMessage?: string;
+  errorMessage?: JSX.Element;
 }
 
 interface Props {
@@ -52,12 +52,7 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
           color="danger"
           iconType="cross"
         >
-          {createState.errorMessage ? (
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyCreation.errorMessage"
-              defaultMessage={createState.errorMessage}
-            />
-          ) : null}
+          {createState.errorMessage ?? null}
         </EuiCallOut>
       )}
     </>
