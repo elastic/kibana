@@ -10,6 +10,10 @@ import * as t from 'io-ts';
 export const FetchMonitorManagementListQueryArgsType = t.partial({
   page: t.number,
   perPage: t.number,
+  sortField: t.string,
+  sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
+  search: t.string,
+  searchFields: t.array(t.string),
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<

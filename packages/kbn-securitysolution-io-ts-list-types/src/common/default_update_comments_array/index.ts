@@ -11,17 +11,17 @@ import { Either } from 'fp-ts/lib/Either';
 import { updateCommentsArray, UpdateCommentsArray } from '../update_comment';
 
 /**
- * Types the DefaultCommentsUpdate as:
- *   - If null or undefined, then a default array of type entry will be set
+ * Types the DefaultUpdateComments as:
+ *   - If null or undefined, then a default array of type UpdateCommentsArray will be set
  */
 export const DefaultUpdateCommentsArray = new t.Type<
   UpdateCommentsArray,
   UpdateCommentsArray,
   unknown
 >(
-  'DefaultCreateComments',
+  'DefaultUpdateComments',
   updateCommentsArray.is,
-  (input): Either<t.Errors, UpdateCommentsArray> =>
-    input == null ? t.success([]) : updateCommentsArray.decode(input),
+  (input, context): Either<t.Errors, UpdateCommentsArray> =>
+    input == null ? t.success([]) : updateCommentsArray.validate(input, context),
   t.identity
 );

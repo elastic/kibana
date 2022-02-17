@@ -41,10 +41,15 @@ import {
   DeleteActionName,
   DeleteActionModal,
 } from '../action_delete';
+import {
+  isResetActionDisabled,
+  useResetAction,
+  ResetActionName,
+  ResetActionModal,
+} from '../action_reset';
 import { useStartAction, StartActionName, StartActionModal } from '../action_start';
 import { StopActionName, useStopAction } from '../action_stop';
 
-import { ItemIdToExpandedRowMap } from './common';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { transformFilters, filterTransforms } from './transform_search_bar_filters';
@@ -52,6 +57,8 @@ import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
+
+type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
@@ -84,17 +91,15 @@ export const TransformList: FC<TransformListProps> = ({
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
   const { setEditAlertRule } = useAlertRuleFlyout();
 
-  const [filterActive, setFilterActive] = useState(false);
+  const [query, setQuery] = useState<Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]>();
 
-  const [filteredTransforms, setFilteredTransforms] = useState<TransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
+  const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
-
-  const [searchError, setSearchError] = useState<any>(undefined);
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -114,27 +119,10 @@ export const TransformList: FC<TransformListProps> = ({
     transformSelection
   );
 
-  const onQueryChange = ({
-    query,
-    error,
-  }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => {
-    if (error) {
-      setSearchError(error.message);
-    } else {
-      let clauses: any = [];
-      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-        clauses = query.ast.clauses;
-      }
-      if (clauses.length > 0) {
-        setFilterActive(true);
-        const filtered = filterTransforms(transforms, clauses);
-        setFilteredTransforms(filtered);
-      } else {
-        setFilterActive(false);
-      }
-      setSearchError(undefined);
-    }
-  };
+  const searchError = query?.error ? query?.error.message : undefined;
+  const clauses = query?.query?.ast?.clauses ?? [];
+  const filteredTransforms =
+    clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
 
   if (transforms.length === 0 && transformNodes === 0) {
     return null;
@@ -194,6 +182,19 @@ export const TransformList: FC<TransformListProps> = ({
         }}
       >
         <StopActionName items={transformSelection} />
+      </EuiButtonEmpty>
+    </div>,
+    <div key="resetAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty
+        onClick={() => {
+          bulkResetAction.openModal(transformSelection);
+        }}
+      >
+        <ResetActionName
+          canResetTransform={capabilities.canResetTransform}
+          disabled={isResetActionDisabled(transformSelection, false)}
+          isBulkAction={true}
+        />
       </EuiButtonEmpty>
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
@@ -267,7 +268,7 @@ export const TransformList: FC<TransformListProps> = ({
   const search = {
     toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     toolsRight,
-    onChange: onQueryChange,
+    onChange: setQuery,
     box: {
       incremental: true,
     },
@@ -283,6 +284,7 @@ export const TransformList: FC<TransformListProps> = ({
       {/* Bulk Action Modals */}
       {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
       {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
+      {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
       {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
 
       {/* Single Action Modals */}
@@ -296,7 +298,7 @@ export const TransformList: FC<TransformListProps> = ({
         hasActions={false}
         isExpandable={true}
         isSelectable={false}
-        items={filterActive ? filteredTransforms : transforms}
+        items={filteredTransforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         loading={isLoading || transformsLoading}

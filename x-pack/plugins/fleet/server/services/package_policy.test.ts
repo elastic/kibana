@@ -10,7 +10,7 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-
+import { produce } from 'immer';
 import type {
   SavedObjectsClient,
   SavedObjectsClientContract,
@@ -25,6 +25,7 @@ import type {
   PostPackagePolicyDeleteCallback,
   RegistryDataStream,
   PackagePolicyInputStream,
+  PackagePolicy,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -948,6 +949,55 @@ describe('Package policy service', () => {
       );
 
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+    });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        // this mimics the way that OSQuery plugin create immutable objects
+        produce<PackagePolicy>(
+          { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+          (draft) => draft
+        )
+      );
+
+      expect(result.name).toEqual('test');
     });
   });
 
@@ -2891,6 +2941,7 @@ describe('Package policy service', () => {
         name: 'apache-1',
         inputs: [{ type: 'logfile', enabled: false }],
         package: { name: 'apache', version: '0.3.3' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -2967,6 +3018,7 @@ describe('Package policy service', () => {
         name: 'aws-1',
         inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
         package: { name: 'aws', version: '1.0.0' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),

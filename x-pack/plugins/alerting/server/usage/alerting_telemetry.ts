@@ -43,7 +43,7 @@ const ruleTypeExecutionsWithDurationMetric = {
     init_script: 'state.ruleTypes = [:]; state.ruleTypesDuration = [:];',
     map_script: `
       String ruleType = doc['rule.category'].value;
-      long duration = doc['event.duration'].value / (1000 * 1000); 
+      long duration = doc['event.duration'].value / (1000 * 1000);
       state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
       state.ruleTypesDuration.put(ruleType, state.ruleTypesDuration.containsKey(ruleType) ? state.ruleTypesDuration.get(ruleType) + duration : duration);
     `,
@@ -92,16 +92,45 @@ const ruleTypeExecutionsMetric = {
   },
 };
 
+const taskTypeExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.statuses = [:]',
+    map_script: `
+      String status = doc['task.status'].value;
+      String taskType = doc['task.taskType'].value.replace('alerting:', '');
+      Map taskTypes = state.statuses.containsKey(status) ? state.statuses.get(status) : [:];
+      taskTypes.put(taskType, taskTypes.containsKey(taskType) ? taskTypes.get(taskType) + 1 : 1);
+      state.statuses.put(status, taskTypes);
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
 const ruleTypeFailureExecutionsMetric = {
   scripted_metric: {
     init_script: 'state.reasons = [:]',
     map_script: `
-      if (doc['event.outcome'].value == 'failure') { 
-        String reason = doc['event.reason'].value; 
-        String ruleType = doc['rule.category'].value; 
-        Map ruleTypes = state.reasons.containsKey(reason) ? state.reasons.get(reason) : [:]; 
-        ruleTypes.put(ruleType, ruleTypes.containsKey(ruleType) ? ruleTypes.get(ruleType) + 1 : 1); 
-        state.reasons.put(reason, ruleTypes); 
+      if (doc['event.outcome'].value == 'failure') {
+        String reason = doc['event.reason'].value;
+        String ruleType = doc['rule.category'].value;
+        Map ruleTypes = state.reasons.containsKey(reason) ? state.reasons.get(reason) : [:];
+        ruleTypes.put(ruleType, ruleTypes.containsKey(ruleType) ? ruleTypes.get(ruleType) + 1 : 1);
+        state.reasons.put(reason, ruleTypes);
       }
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
@@ -139,7 +168,7 @@ export async function getTotalCountAggregations(
     | 'count_rules_namespaces'
   >
 > {
-  const { body: results } = await esClient.search({
+  const results = await esClient.search({
     index: kibanaIndex,
     body: {
       size: 0,
@@ -153,13 +182,13 @@ export async function getTotalCountAggregations(
           type: 'long',
           script: {
             source: `
-              def alert = params._source['alert']; 
-              if (alert != null) { 
-                def actions = alert.actions; 
-                if (actions != null) { 
-                  emit(actions.length); 
-                } else { 
-                  emit(0); 
+              def alert = params._source['alert'];
+              if (alert != null) {
+                def actions = alert.actions;
+                if (actions != null) {
+                  emit(actions.length);
+                } else {
+                  emit(0);
                 }
               }`,
           },
@@ -302,7 +331,7 @@ export async function getTotalCountAggregations(
 }
 
 export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIndex: string) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: kibanaIndex,
     size: 0,
     body: {
@@ -338,7 +367,7 @@ export async function getExecutionsPerDayCount(
   esClient: ElasticsearchClient,
   eventLogIndex: string
 ) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: eventLogIndex,
     size: 0,
     body: {
@@ -460,7 +489,7 @@ export async function getExecutionTimeoutsPerDayCount(
   esClient: ElasticsearchClient,
   eventLogIndex: string
 ) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: eventLogIndex,
     size: 0,
     body: {
@@ -507,6 +536,102 @@ export async function getExecutionTimeoutsPerDayCount(
     ),
     countByType: replaceDotSymbolsInRuleTypeIds(
       executionsAggregations.byRuleTypeId.value.ruleTypes
+    ),
+  };
+}
+
+export async function getFailedAndUnrecognizedTasksPerDay(
+  esClient: ElasticsearchClient,
+  taskManagerIndex: string
+) {
+  const searchResult = await esClient.search({
+    index: taskManagerIndex,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'task.status': 'unrecognized',
+                    },
+                  },
+                  {
+                    term: {
+                      'task.status': 'failed',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              wildcard: {
+                'task.taskType': {
+                  value: 'alerting:*',
+                },
+              },
+            },
+            {
+              range: {
+                'task.runAt': {
+                  gte: 'now-1d',
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        byTaskTypeId: taskTypeExecutionsMetric,
+      },
+    },
+  });
+
+  const executionsAggregations = searchResult.aggregations as {
+    byTaskTypeId: { value: { statuses: Record<string, Record<string, string>> } };
+  };
+
+  return {
+    countTotal: Object.keys(executionsAggregations.byTaskTypeId.value.statuses).reduce(
+      (total: number, status: string) => {
+        const byRuleTypesRefs = executionsAggregations.byTaskTypeId.value.statuses[status];
+        const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+          (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+          0
+        );
+        return countByRuleTypes + total;
+      },
+      0
+    ),
+    countByStatus: Object.keys(executionsAggregations.byTaskTypeId.value.statuses).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, status: string) => {
+        const byRuleTypesRefs = executionsAggregations.byTaskTypeId.value.statuses[status];
+        const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+          (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+          0
+        );
+        return {
+          ...obj,
+          [status]: countByRuleTypes,
+        };
+      },
+      {}
+    ),
+    countByStatusByRuleType: Object.keys(executionsAggregations.byTaskTypeId.value.statuses).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [key]: replaceDotSymbolsInRuleTypeIds(
+          executionsAggregations.byTaskTypeId.value.statuses[key]
+        ),
+      }),
+      {}
     ),
   };
 }

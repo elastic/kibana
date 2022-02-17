@@ -7,7 +7,7 @@
  */
 
 import { Container, isErrorEmbeddable } from '../../../..';
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,

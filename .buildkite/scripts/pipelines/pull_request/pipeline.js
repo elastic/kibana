@@ -103,6 +103,10 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime.yml'));
     }
 
+    if (process.env.GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     uploadPipeline(pipeline.join('\n'));

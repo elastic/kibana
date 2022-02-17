@@ -34,6 +34,8 @@ interface Props {
   indexName: string;
 }
 
+const STATUS_CALLOUT_DATA_TEST_SUBJ = 'fileUploadStatusCallout';
+
 export class ImportCompleteView extends Component<Props, {}> {
   _renderCodeEditor(json: object | undefined, title: string, copyButtonDataTestSubj: string) {
     if (!json) {
@@ -103,6 +105,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           })}
           color="danger"
           iconType="alert"
+          data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>
             {i18n.translate('xpack.fileUpload.importComplete.permissionFailureMsg', {
@@ -139,6 +142,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           })}
           color="danger"
           iconType="alert"
+          data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>{errorMsg}</p>
         </EuiCallOut>
@@ -166,6 +170,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessTitle', {
           defaultMessage: 'File upload complete',
         })}
+        data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
       >
         <p>{`${successMsg} ${failedFeaturesMsg}`}</p>
       </EuiCallOut>

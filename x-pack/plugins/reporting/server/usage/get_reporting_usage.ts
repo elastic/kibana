@@ -204,7 +204,7 @@ export async function getReportingUsage(
   const featureAvailability = await getLicense();
   return esClient
     .search(params)
-    .then(({ body: response }) => handleResponse(response))
+    .then((response) => handleResponse(response))
     .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(

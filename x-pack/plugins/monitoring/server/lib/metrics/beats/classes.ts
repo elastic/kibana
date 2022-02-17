@@ -8,8 +8,8 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { ClusterMetric, Metric } from '../classes';
+
+import { ClusterMetric, ClusterMetricOptions, Metric, MetricOptions } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
@@ -17,9 +17,13 @@ const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.beats.perSec
   defaultMessage: '/s',
 });
 
+type BeatsClusterMetricOptions = Pick<
+  ClusterMetricOptions,
+  'derivative' | 'format' | 'metricAgg' | 'units' | 'field' | 'label' | 'description'
+>;
+
 export class BeatsClusterMetric extends ClusterMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsClusterMetricOptions) {
     super({
       ...opts,
       app: 'beats',
@@ -35,9 +39,14 @@ export class BeatsClusterMetric extends ClusterMetric {
   }
 }
 
+type BeatsEventsRateClusterMetricOptions = Pick<
+  ClusterMetricOptions,
+  'field' | 'title' | 'label' | 'description'
+> &
+  Partial<Pick<ClusterMetricOptions, 'format'>>;
+
 export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsEventsRateClusterMetricOptions) {
     super({
       ...opts,
       derivative: true,
@@ -45,7 +54,6 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
       metricAgg: 'max',
       units: perSecondUnitLabel,
     });
-    // @ts-ignore
 
     this.aggs = {
       beats_uuids: {
@@ -56,7 +64,6 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
         aggs: {
           event_rate_per_beat: {
             max: {
-              // @ts-ignore
               field: this.field,
             },
           },
@@ -79,9 +86,13 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
   }
 }
 
+type BeatsMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'title' | 'label' | 'description' | 'format' | 'metricAgg' | 'units' | 'derivative'
+>;
+
 export class BeatsMetric extends Metric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsMetricOptions) {
     super({
       ...opts,
       app: 'beats',
@@ -99,9 +110,12 @@ export class BeatsMetric extends Metric {
 
 export type BeatsMetricFields = ReturnType<typeof BeatsMetric.getMetricFields>;
 
+type BeatsByteRateClusterMetricOptions = Pick<
+  ClusterMetricOptions,
+  'field' | 'title' | 'label' | 'description'
+>;
 export class BeatsByteRateClusterMetric extends BeatsEventsRateClusterMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsByteRateClusterMetricOptions) {
     super({
       ...opts,
       format: LARGE_BYTES,
@@ -109,9 +123,12 @@ export class BeatsByteRateClusterMetric extends BeatsEventsRateClusterMetric {
   }
 }
 
+type BeatsEventsRateMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'title' | 'label' | 'description'
+>;
 export class BeatsEventsRateMetric extends BeatsMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsEventsRateMetricOptions) {
     super({
       ...opts,
       format: LARGE_FLOAT,
@@ -122,9 +139,10 @@ export class BeatsEventsRateMetric extends BeatsMetric {
   }
 }
 
+type BeatsByteRateMetricOptions = Pick<MetricOptions, 'field' | 'title' | 'label' | 'description'>;
+
 export class BeatsByteRateMetric extends BeatsMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsByteRateMetricOptions) {
     super({
       ...opts,
       format: LARGE_BYTES,
@@ -135,9 +153,13 @@ export class BeatsByteRateMetric extends BeatsMetric {
   }
 }
 
+type BeatsCpuUtilizationMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'title' | 'label' | 'description'
+>;
+
 export class BeatsCpuUtilizationMetric extends BeatsMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: BeatsCpuUtilizationMetricOptions) {
     super({
       ...opts,
       format: SMALL_FLOAT,
@@ -149,9 +171,14 @@ export class BeatsCpuUtilizationMetric extends BeatsMetric {
     /*
      * Convert a counter of milliseconds of utilization time into a percentage of the bucket size
      */
-    // @ts-ignore
-    this.calculation = ({ metric_deriv: metricDeriv } = {}, _key, _metric, bucketSizeInSeconds) => {
-      if (metricDeriv) {
+
+    this.calculation = (
+      { metric_deriv: metricDeriv } = { metric_deriv: undefined },
+      _key,
+      _metric,
+      bucketSizeInSeconds
+    ) => {
+      if (metricDeriv && bucketSizeInSeconds) {
         const { value } = metricDeriv;
         const bucketSizeInMillis = bucketSizeInSeconds * 1000;
 

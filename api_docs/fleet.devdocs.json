@@ -2455,15 +2455,13 @@
             "Authorization for the current user"
           ],
           "signature": [
-            "Promise<",
             {
               "pluginId": "fleet",
               "scope": "common",
               "docId": "kibFleetPluginApi",
               "section": "def-common.FleetAuthz",
               "text": "FleetAuthz"
-            },
-            ">"
+            }
           ],
           "path": "x-pack/plugins/fleet/public/plugin.ts",
           "deprecated": false
@@ -3636,367 +3634,6 @@
                 "description": [],
                 "signature": [
                   "Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }"
-                ],
-                "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-server.AgentPolicyServiceInterface.getDefaultAgentPolicyId",
-            "type": "Function",
-            "tags": [],
-            "label": "getDefaultAgentPolicyId",
-            "description": [],
-            "signature": [
-              "(soClient: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
-              ") => Promise<string>"
-            ],
-            "path": "x-pack/plugins/fleet/server/services/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.AgentPolicyServiceInterface.getDefaultAgentPolicyId.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "soClient",
-                "description": [],
-                "signature": [
-                  "{ create: <T = unknown>(type: string, attributes: T, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreateOptions",
-                    "text": "SavedObjectsCreateOptions"
-                  },
-                  " | undefined) => Promise<",
-                  "SavedObject",
-                  "<T>>; bulkCreate: <T = unknown>(objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkCreateObject",
-                    "text": "SavedObjectsBulkCreateObject"
-                  },
-                  "<T>[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreateOptions",
-                    "text": "SavedObjectsCreateOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkResponse",
-                    "text": "SavedObjectsBulkResponse"
-                  },
-                  "<T>>; checkConflicts: (objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCheckConflictsObject",
-                    "text": "SavedObjectsCheckConflictsObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCheckConflictsResponse",
-                    "text": "SavedObjectsCheckConflictsResponse"
-                  },
-                  ">; delete: (type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteOptions",
-                    "text": "SavedObjectsDeleteOptions"
-                  },
-                  ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindResponse",
-                    "text": "SavedObjectsFindResponse"
-                  },
-                  "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkGetObject",
-                    "text": "SavedObjectsBulkGetObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkResponse",
-                    "text": "SavedObjectsBulkResponse"
-                  },
-                  "<T>>; bulkResolve: <T = unknown>(objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkResolveObject",
-                    "text": "SavedObjectsBulkResolveObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkResolveResponse",
-                    "text": "SavedObjectsBulkResolveResponse"
-                  },
-                  "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  "SavedObject",
-                  "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsResolveResponse",
-                    "text": "SavedObjectsResolveResponse"
-                  },
-                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateOptions",
-                    "text": "SavedObjectsUpdateOptions"
-                  },
-                  "<T>) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateResponse",
-                    "text": "SavedObjectsUpdateResponse"
-                  },
-                  "<T>>; collectMultiNamespaceReferences: (objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-                  },
-                  ">; updateObjectsSpaces: (objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                    "text": "SavedObjectsUpdateObjectsSpacesObject"
-                  },
-                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
-                  },
-                  ">; bulkUpdate: <T = unknown>(objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateObject",
-                    "text": "SavedObjectsBulkUpdateObject"
-                  },
-                  "<T>[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateOptions",
-                    "text": "SavedObjectsBulkUpdateOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateResponse",
-                    "text": "SavedObjectsBulkUpdateResponse"
-                  },
-                  "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                    "text": "SavedObjectsRemoveReferencesToOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                    "text": "SavedObjectsRemoveReferencesToResponse"
-                  },
-                  ">; openPointInTimeForType: (type: string | string[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                    "text": "SavedObjectsOpenPointInTimeOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                    "text": "SavedObjectsOpenPointInTimeResponse"
-                  },
-                  ">; closePointInTime: (id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                    "text": "SavedObjectsClosePointInTimeResponse"
-                  },
-                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
-                  },
-                  ", dependencies?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                    "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.ISavedObjectsPointInTimeFinder",
-                    "text": "ISavedObjectsPointInTimeFinder"
-                  },
-                  "<T, A>; errors: typeof ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsErrorHelpers",
-                    "text": "SavedObjectsErrorHelpers"
-                  },
-                  "; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false
@@ -6917,6 +6554,51 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.getMaxPackageName",
+        "type": "Function",
+        "tags": [],
+        "label": "getMaxPackageName",
+        "description": [],
+        "signature": [
+          "(packageName: string, packagePolicies: { name: string; }[] | undefined) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/max_package_name.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getMaxPackageName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "packageName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/max_package_name.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getMaxPackageName.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "packagePolicies",
+            "description": [],
+            "signature": [
+              "{ name: string; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/max_package_name.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.getStreamsForInputType",
         "type": "Function",
         "tags": [],
@@ -8008,14 +7690,15 @@
             "section": "def-common.AgentPolicy",
             "text": "AgentPolicy"
           },
-          " extends ",
+          " extends Omit<",
           {
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
             "section": "def-common.NewAgentPolicy",
             "text": "NewAgentPolicy"
-          }
+          },
+          ", \"id\">"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,
@@ -8617,7 +8300,7 @@
             "label": "error",
             "description": [],
             "signature": [
-              "\"MISSING_SECURITY\" | \"MISSING_SUPERUSER_ROLE\" | undefined"
+              "\"MISSING_SECURITY\" | \"MISSING_PRIVILEGES\" | \"MISSING_FLEET_SERVER_SETUP_PRIVILEGES\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/app.ts",
             "deprecated": false
@@ -12302,7 +11985,7 @@
             "label": "install_status",
             "description": [],
             "signature": [
-              "\"installed\" | \"installing\" | \"install_failed\""
+              "\"installed\" | \"installing\" | \"install_failed\" | \"installed_bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -12906,6 +12589,19 @@
         "children": [
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.name",
             "type": "string",
             "tags": [],
@@ -12956,6 +12652,19 @@
             "type": "CompoundType",
             "tags": [],
             "label": "is_default_fleet_server",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.has_fleet_server",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "has_fleet_server",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -14754,7 +14463,7 @@
             "section": "def-common.NewAgentPolicy",
             "text": "NewAgentPolicy"
           },
-          ", \"namespace\">"
+          ", \"id\" | \"namespace\">"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/preconfiguration.ts",
         "deprecated": false,
@@ -16764,7 +16473,7 @@
             "section": "def-common.ValueOf",
             "text": "ValueOf"
           },
-          "<{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }>; description?: string | undefined; name: string; updated_at: string; updated_by: string; namespace: string; is_default?: boolean | undefined; package_policies: string[] | ",
+          "<{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }>; description?: string | undefined; name: string; updated_at: string; updated_by: string; namespace: string; is_default?: boolean | undefined; is_default_fleet_server?: boolean | undefined; has_fleet_server?: boolean | undefined; is_managed: boolean; monitoring_enabled?: (\"metrics\" | \"logs\")[] | undefined; unenroll_timeout?: number | undefined; is_preconfigured?: boolean | undefined; data_output_id?: string | undefined; monitoring_output_id?: string | undefined; package_policies: string[] | ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -16772,7 +16481,7 @@
             "section": "def-common.PackagePolicy",
             "text": "PackagePolicy"
           },
-          "[]; is_default_fleet_server?: boolean | undefined; is_managed: boolean; monitoring_enabled?: (\"metrics\" | \"logs\")[] | undefined; unenroll_timeout?: number | undefined; is_preconfigured?: boolean | undefined; data_output_id?: string | undefined; monitoring_output_id?: string | undefined; revision: number; }"
+          "[]; revision: number; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,
@@ -17174,48 +16883,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_AGENT_POLICY_ID_SEED",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_AGENT_POLICY_ID_SEED",
-        "description": [],
-        "signature": [
-          "\"default-agent-policy\""
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY_ID_SEED",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_FLEET_SERVER_AGENT_POLICY_ID_SEED",
-        "description": [],
-        "signature": [
-          "\"default-fleet-server\""
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_FLEET_SERVER_POLICY_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_FLEET_SERVER_POLICY_ID",
-        "description": [],
-        "signature": [
-          "\"default-fleet-server-agent-policy\""
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.DEFAULT_OUTPUT_ID",
         "type": "string",
         "tags": [],
@@ -17225,48 +16892,6 @@
           "\"fleet-default-output\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/output.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_PACKAGES",
-        "type": "Array",
-        "tags": [],
-        "label": "DEFAULT_PACKAGES",
-        "description": [],
-        "signature": [
-          "{ name: string; version: string; }[]"
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_SYSTEM_PACKAGE_POLICY_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_SYSTEM_PACKAGE_POLICY_ID",
-        "description": [],
-        "signature": [
-          "\"default-system-policy\""
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.defaultPackages",
-        "type": "Array",
-        "tags": [],
-        "label": "defaultPackages",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17487,7 +17112,7 @@
         "label": "EpmPackageInstallStatus",
         "description": [],
         "signature": [
-          "\"installed\" | \"installing\" | \"install_failed\""
+          "\"installed\" | \"installing\" | \"install_failed\" | \"installed_bundled\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -17919,8 +17544,8 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
-            "section": "def-common.Installed",
-            "text": "Installed"
+            "section": "def-common.InstalledRegistry",
+            "text": "InstalledRegistry"
           },
           "<T> | ",
           {
@@ -17945,6 +17570,14 @@
             "docId": "kibFleetPluginApi",
             "section": "def-common.InstallFailed",
             "text": "InstallFailed"
+          },
+          "<T> | ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.InstalledBundled",
+            "text": "InstalledBundled"
           },
           "<T>"
         ],
@@ -17988,7 +17621,7 @@
         "label": "InstallationStatus",
         "description": [],
         "signature": [
-          "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; }"
+          "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; readonly InstalledBundled: \"installed_bundled\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -17996,10 +17629,24 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-common.Installed",
+        "id": "def-common.InstalledBundled",
         "type": "Type",
         "tags": [],
-        "label": "Installed",
+        "label": "InstalledBundled",
+        "description": [],
+        "signature": [
+          "T & { status: \"installed_bundled\"; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.InstalledRegistry",
+        "type": "Type",
+        "tags": [],
+        "label": "InstalledRegistry",
         "description": [],
         "signature": [
           "T & { status: \"installed\"; savedObject: ",
@@ -18757,6 +18404,14 @@
             "section": "def-common.PackageList",
             "text": "PackageList"
           },
+          "; installed_bundled: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackageList",
+            "text": "PackageList"
+          },
           "; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -19180,20 +18835,6 @@
         "description": [],
         "signature": [
           "\".\\\\elastic-agent.exe install\""
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.unremovablePackages",
-        "type": "Array",
-        "tags": [],
-        "label": "unremovablePackages",
-        "description": [],
-        "signature": [
-          "string[]"
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,
@@ -20209,11 +19850,26 @@
             "label": "getCheckPermissionsPath",
             "description": [],
             "signature": [
-              "() => string"
+              "(fleetServerSetup?: boolean | undefined) => string"
             ],
             "path": "x-pack/plugins/fleet/common/services/routes.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.appRoutesService.getCheckPermissionsPath.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "fleetServerSetup",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -20297,229 +19953,6 @@
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_AGENT_POLICY",
-        "type": "Object",
-        "tags": [],
-        "label": "DEFAULT_AGENT_POLICY",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.namespace",
-            "type": "string",
-            "tags": [],
-            "label": "namespace",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.package_policies",
-            "type": "Array",
-            "tags": [],
-            "label": "package_policies",
-            "description": [],
-            "signature": [
-              "{ id: string; name: string; package: { name: string; }; }[]"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.is_default",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_default",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.is_managed",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_managed",
-            "description": [],
-            "signature": [
-              "false"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_AGENT_POLICY.monitoring_enabled",
-            "type": "Array",
-            "tags": [],
-            "label": "monitoring_enabled",
-            "description": [],
-            "signature": [
-              "(\"metrics\" | \"logs\")[]"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY",
-        "type": "Object",
-        "tags": [],
-        "label": "DEFAULT_FLEET_SERVER_AGENT_POLICY",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.namespace",
-            "type": "string",
-            "tags": [],
-            "label": "namespace",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.package_policies",
-            "type": "Array",
-            "tags": [],
-            "label": "package_policies",
-            "description": [],
-            "signature": [
-              "{ id: string; name: string; package: { name: string; }; }[]"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.is_default",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_default",
-            "description": [],
-            "signature": [
-              "false"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.is_default_fleet_server",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_default_fleet_server",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.is_managed",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_managed",
-            "description": [],
-            "signature": [
-              "false"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.DEFAULT_FLEET_SERVER_AGENT_POLICY.monitoring_enabled",
-            "type": "Array",
-            "tags": [],
-            "label": "monitoring_enabled",
-            "description": [],
-            "signature": [
-              "(\"metrics\" | \"logs\")[]"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/preconfiguration.ts",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -21298,7 +20731,7 @@
         "label": "installationStatuses",
         "description": [],
         "signature": [
-          "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; }"
+          "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; readonly InstalledBundled: \"installed_bundled\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,

@@ -17,7 +17,6 @@ import './palette_configuration.scss';
 
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import { toColorRanges, getFallbackDataBounds } from './utils';
-import { defaultPaletteParams } from './constants';
 import { ColorRanges, ColorRangesContext } from './color_ranges';
 import { isAllColorRangesValid } from './color_ranges/color_ranges_validation';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
@@ -52,12 +51,10 @@ export function CustomizablePalette({
 
   useDebounce(
     () => {
-      const rangeType =
-        localState.activePalette?.params?.rangeType ?? defaultPaletteParams.rangeType;
       if (
         (localState.activePalette !== activePalette ||
           colorRangesToShow !== localState.colorRanges) &&
-        isAllColorRangesValid(localState.colorRanges, dataBounds, rangeType)
+        isAllColorRangesValid(localState.colorRanges)
       ) {
         setPalette(localState.activePalette);
       }

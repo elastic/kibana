@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [typedoc_interfaces](../modules/typedoc_interfaces.md) / ICaseUserActionsResponse
+[Cases Client API Interface](../README.md) / [typedoc\_interfaces](../modules/typedoc_interfaces.md) / ICaseUserActionsResponse
 
 # Interface: ICaseUserActionsResponse
 
@@ -6,6 +6,6 @@
 
 ## Hierarchy
 
-- *CaseUserActionsResponse*
+- [`CaseUserActionsResponse`](../modules/typedoc_interfaces._internal_namespace.md#caseuseractionsresponse)
 
-  ↳ **ICaseUserActionsResponse**
+  ↳ **`ICaseUserActionsResponse`**

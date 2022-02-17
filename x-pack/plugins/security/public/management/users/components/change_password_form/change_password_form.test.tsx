@@ -9,7 +9,7 @@ import { EuiFieldPassword } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import type { User } from '../../../../../common/model';

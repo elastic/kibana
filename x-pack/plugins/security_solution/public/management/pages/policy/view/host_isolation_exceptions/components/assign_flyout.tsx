@@ -277,7 +277,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
           data-test-subj="hostIsolationExceptions-assignable-list"
           artifacts={exceptionsRequest.data}
           selectedArtifactIds={selectedArtifactIds}
-          isListLoading={exceptionsRequest.isLoading}
+          isListLoading={exceptionsRequest.isLoading || exceptionsRequest.isRefetching}
           selectedArtifactsUpdated={handleSelectArtifact}
         />
 

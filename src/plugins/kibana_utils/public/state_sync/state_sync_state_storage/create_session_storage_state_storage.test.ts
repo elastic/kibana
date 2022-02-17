@@ -10,7 +10,7 @@ import {
   createSessionStorageStateStorage,
   ISessionStorageStateStorage,
 } from './create_session_storage_state_storage';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 
 describe('SessionStorageStateStorage', () => {
   let browserStorage: StubBrowserStorage;

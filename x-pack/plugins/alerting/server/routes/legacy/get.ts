@@ -38,7 +38,7 @@ export const getAlertRoute = (
       const rulesClient = context.alerting.getRulesClient();
       const { id } = req.params;
       return res.ok({
-        body: await rulesClient.get({ id }),
+        body: await rulesClient.get({ id, excludeFromPublicApi: true }),
       });
     })
   );

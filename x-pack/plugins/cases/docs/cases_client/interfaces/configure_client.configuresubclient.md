@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [configure/client](../modules/configure_client.md) / ConfigureSubClient
+[Cases Client API Interface](../README.md) / [configure/client](../modules/configure_client.md) / ConfigureSubClient
 
 # Interface: ConfigureSubClient
 
@@ -10,16 +10,16 @@ This is the public API for interacting with the connector configuration for case
 
 ### Methods
 
-- [create](configure_client.configuresubclient.md#create)
-- [get](configure_client.configuresubclient.md#get)
-- [getConnectors](configure_client.configuresubclient.md#getconnectors)
-- [update](configure_client.configuresubclient.md#update)
+- [create](configure_client.ConfigureSubClient.md#create)
+- [get](configure_client.ConfigureSubClient.md#get)
+- [getConnectors](configure_client.ConfigureSubClient.md#getconnectors)
+- [update](configure_client.ConfigureSubClient.md#update)
 
 ## Methods
 
 ### create
 
-▸ **create**(`configuration`: [*ICasesConfigureRequest*](typedoc_interfaces.icasesconfigurerequest.md)): *Promise*<[*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
+▸ **create**(`configuration`): `Promise`<[`ICasesConfigureResponse`](typedoc_interfaces.ICasesConfigureResponse.md)\>
 
 Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
 
@@ -27,17 +27,21 @@ Creates a configuration if one does not already exist. If one exists it is delet
 
 | Name | Type |
 | :------ | :------ |
-| `configuration` | [*ICasesConfigureRequest*](typedoc_interfaces.icasesconfigurerequest.md) |
+| `configuration` | [`ICasesConfigureRequest`](typedoc_interfaces.ICasesConfigureRequest.md) |
 
-**Returns:** *Promise*<[*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
+#### Returns
 
-Defined in: [configure/client.ts:98](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/configure/client.ts#L98)
+`Promise`<[`ICasesConfigureResponse`](typedoc_interfaces.ICasesConfigureResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/configure/client.ts:93](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L93)
 
 ___
 
 ### get
 
-▸ **get**(`params`: { `owner`: *undefined* \| *string* \| *string*[]  }): *Promise*<{} \| [*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
+▸ **get**(`params`): `Promise`<{} \| [`ICasesConfigureResponse`](typedoc_interfaces.ICasesConfigureResponse.md)\>
 
 Retrieves the external connector configuration for a particular case owner.
 
@@ -45,30 +49,38 @@ Retrieves the external connector configuration for a particular case owner.
 
 | Name | Type |
 | :------ | :------ |
-| `params` | *object* |
-| `params.owner` | *undefined* \| *string* \| *string*[] |
+| `params` | `Object` |
+| `params.owner` | `undefined` \| `string` \| `string`[] |
 
-**Returns:** *Promise*<{} \| [*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
+#### Returns
 
-Defined in: [configure/client.ts:80](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/configure/client.ts#L80)
+`Promise`<{} \| [`ICasesConfigureResponse`](typedoc_interfaces.ICasesConfigureResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/configure/client.ts:75](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L75)
 
 ___
 
 ### getConnectors
 
-▸ **getConnectors**(): *Promise*<FindActionResult[]\>
+▸ **getConnectors**(): `Promise`<[`FindActionResult`](client._internal_namespace.FindActionResult.md)[]\>
 
 Retrieves the valid external connectors supported by the cases plugin.
 
-**Returns:** *Promise*<FindActionResult[]\>
+#### Returns
 
-Defined in: [configure/client.ts:84](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/configure/client.ts#L84)
+`Promise`<[`FindActionResult`](client._internal_namespace.FindActionResult.md)[]\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/configure/client.ts:79](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L79)
 
 ___
 
 ### update
 
-▸ **update**(`configurationId`: *string*, `configurations`: [*ICasesConfigurePatch*](typedoc_interfaces.icasesconfigurepatch.md)): *Promise*<[*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
+▸ **update**(`configurationId`, `configurations`): `Promise`<[`ICasesConfigureResponse`](typedoc_interfaces.ICasesConfigureResponse.md)\>
 
 Updates a particular configuration with new values.
 
@@ -76,9 +88,13 @@ Updates a particular configuration with new values.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `configurationId` | *string* | the ID of the configuration to update |
-| `configurations` | [*ICasesConfigurePatch*](typedoc_interfaces.icasesconfigurepatch.md) | the new configuration parameters |
+| `configurationId` | `string` | the ID of the configuration to update |
+| `configurations` | [`ICasesConfigurePatch`](typedoc_interfaces.ICasesConfigurePatch.md) | the new configuration parameters |
 
-**Returns:** *Promise*<[*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
+#### Returns
 
-Defined in: [configure/client.ts:91](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/configure/client.ts#L91)
+`Promise`<[`ICasesConfigureResponse`](typedoc_interfaces.ICasesConfigureResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/configure/client.ts:86](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L86)

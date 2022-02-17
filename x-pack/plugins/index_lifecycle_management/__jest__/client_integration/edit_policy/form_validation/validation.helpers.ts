@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBedConfig } from '@kbn/test/jest';
+import { TestBedConfig } from '@kbn/test-jest-helpers';
 import {
   createColdPhaseActions,
   createDeletePhaseActions,

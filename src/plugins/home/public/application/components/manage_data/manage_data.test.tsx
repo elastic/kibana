@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ManageData } from './manage_data';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ApplicationStart } from 'kibana/public';
 import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
 

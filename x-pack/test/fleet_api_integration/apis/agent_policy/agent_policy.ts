@@ -101,6 +101,17 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should return a 400 with an empty name', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: '  ',
+            namespace: 'default',
+          })
+          .expect(400);
+      });
+
       it('should return a 400 with an invalid namespace', async () => {
         await supertest
           .post(`/api/fleet/agent_policies`)
@@ -130,6 +141,33 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send(sharedBody)
+          .expect(409);
+      });
+
+      it('should create policy with provided id and return 409 the second time', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-id',
+            name: 'TEST ID',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        expect(createdPolicy.id).to.equal('test-id');
+
+        // second one fails because id exists
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-id',
+            name: 'TEST 2 ID',
+            namespace: 'default',
+          })
           .expect(409);
       });
 
@@ -226,6 +264,7 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       });
+      setupFleetAndAgents(providerContext);
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       });
@@ -257,6 +296,83 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
         });
+      });
+
+      it('should increment package policy copy names', async () => {
+        async function getSystemPackagePolicyCopyVersion(policyId: string) {
+          const {
+            body: {
+              item: { package_policies: packagePolicies },
+            },
+          } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
+
+          const matches = packagePolicies[0].name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
+          if (matches) {
+            return parseInt(matches[2], 10) || 1;
+          }
+
+          return 0;
+        }
+        const {
+          body: {
+            item: { id: originalPolicyId },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({
+            sys_monitoring: true,
+          })
+          .send({
+            name: 'original policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        expect(await getSystemPackagePolicyCopyVersion(originalPolicyId)).to.be(0);
+
+        const {
+          body: {
+            item: { id: copy1Id },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${originalPolicyId}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'copy 1',
+            description: 'Test',
+          })
+          .expect(200);
+        expect(await getSystemPackagePolicyCopyVersion(copy1Id)).to.be(1);
+
+        const {
+          body: {
+            item: { id: copy2Id },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${originalPolicyId}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'copy 2',
+            description: 'Test',
+          })
+          .expect(200);
+        expect(await getSystemPackagePolicyCopyVersion(copy2Id)).to.be(2);
+
+        // Copy a copy
+        const {
+          body: {
+            item: { id: copy3Id },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${copy2Id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'copy 3',
+            description: 'Test',
+          })
+          .expect(200);
+        expect(await getSystemPackagePolicyCopyVersion(copy3Id)).to.be(3);
       });
 
       it('should return a 404 with invalid source policy', async () => {
