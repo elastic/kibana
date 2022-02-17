@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.0.0 releases.
 
+* <<release-notes-8.0.1>>
 * <<release-notes-8.0.0>>
 * <<release-notes-8.0.0-rc2>>
 * <<release-notes-8.0.0-rc1>>
@@ -18,6 +19,61 @@ Review important information about the {kib} 8.0.0 releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.0.1]]
+== {kib} 8.0.1
+
+coming::[8.0.1]
+
+The 8.0.1 release includes the following enhancement and bug fixes.
+
+[float]
+[[enhancement-v8.0.1]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 8.0.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.0.1]]
+=== Bug Fixes
+Alerting::
+Fixes an issue where the *Cases* rule link was displayed as `Unknown rule`, even when the correct rule name was retrieved {kibana-pull}123883[#123883]
+
+Dashboard::
+Transfer state when drilldown is opened in a new tab {kibana-pull}124770[#124770]
+
+Elastic Security::
+For the Elastic Security 8.0.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Avoid breaking setup when compatible package is unavailable in registry {kibana-pull}125525[#125525]
+* Tell users when assets are installed in a different space {kibana-pull}125278[#125278]
+
+Machine Learning::
+Only fetch field statistics for available fields {kibana-pull}123003[#123003]
+
+Management::
+Registering a snapshot repository is now possible in Snapshot and Restore {kibana-pull}125656[#125656]
+
+Maps::
+* Fixes an issue where dashboards with by-value maps are broken when copied to new space {kibana-pull}125599[#125599]
+* Fixes an issue where styles were unable to be applied to vector tiles {kibana-pull}124289[#124289]
+
+Metrics::
+Allow single values for ip and mac node metadata {kibana-pull}124384[#124384]
+
+Monitoring::
+Update rules queries to support Metricbeat 8.0.0 {kibana-pull}125748[#125748]
+
+Platform::
+Adds origin conflict checks when resolving import errors {kibana-pull}125241[#125241]
+
+Security::
+Adds 8.0.1 rules updates {kibana-pull}125316[#125316]
+
+Uptime::
+Update mobile data view to account for metrics events {kibana-pull}125916[#125916]
+
 [[release-notes-8.0.0]]
 == {kib} 8.0.0
 
