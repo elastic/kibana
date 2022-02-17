@@ -10,7 +10,7 @@
  */
 
 import React, { Fragment, lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';

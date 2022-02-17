@@ -22,23 +22,15 @@ export function defineCheckPrivilegesRoutes({
       try {
         const [
           {
-            body: {
-              cluster: {
-                manage_security: manageSecurity,
-                manage_api_key: manageApiKey,
-                manage_own_api_key: manageOwnApiKey,
-              },
+            cluster: {
+              manage_security: manageSecurity,
+              manage_api_key: manageApiKey,
+              manage_own_api_key: manageOwnApiKey,
             },
           },
           areApiKeysEnabled,
         ] = await Promise.all([
-          context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<{
-            cluster: {
-              manage_security: boolean;
-              manage_api_key: boolean;
-              manage_own_api_key: boolean;
-            };
-          }>({
+          context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
             body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
           }),
           getAuthenticationService().apiKeys.areAPIKeysEnabled(),

@@ -14,7 +14,7 @@ import '../../../../../__mocks__/engine_logic.mock';
 
 import { ReactWrapper } from 'enzyme';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 export const runActionColumnTests = (wrapper: ReactWrapper) => {
   const { http } = mockHttpValues;

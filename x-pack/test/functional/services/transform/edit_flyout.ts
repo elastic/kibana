@@ -41,6 +41,19 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail(`transformEditFlyoutDestinationIngestPipelineFieldSelect`);
     },
 
+    async assertTransformEditFlyoutRetentionPolicySwitchEnabled(expectedValue: boolean) {
+      await testSubjects.existOrFail(`transformEditRetentionPolicySwitch`, {
+        timeout: 1000,
+      });
+      const isEnabled = await testSubjects.isEnabled(`transformEditRetentionPolicySwitch`);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'transformEditRetentionPolicySwitch' input to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
     async assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(expectedValue: boolean) {
       await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,
@@ -95,14 +108,18 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail('transformEditAccordionDestinationContent');
     },
 
-    async openTransformEditAccordionRetentionPolicySettings() {
-      await testSubjects.click('transformEditAccordionRetentionPolicy');
-      await testSubjects.existOrFail('transformEditAccordionRetentionPolicyContent');
-    },
-
     async openTransformEditAccordionAdvancedSettings() {
       await testSubjects.click('transformEditAccordionAdvancedSettings');
       await testSubjects.existOrFail('transformEditAccordionAdvancedSettingsContent');
+    },
+
+    async clickTransformEditRetentionPolicySettings(expectExists: boolean) {
+      await testSubjects.click('transformEditRetentionPolicySwitch');
+      if (expectExists) {
+        await testSubjects.existOrFail('transformEditRetentionPolicyContent');
+      } else {
+        await testSubjects.missingOrFail('transformEditRetentionPolicyContent');
+      }
     },
 
     async setTransformEditFlyoutInputValue(input: string, value: string) {

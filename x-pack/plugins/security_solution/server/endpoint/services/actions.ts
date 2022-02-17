@@ -212,7 +212,7 @@ export const getPendingActionCounts = async (
       { ignore: [404] }
     )
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || [])
+    .then((result) => result?.hits?.hits?.map((a) => a._source!) || [])
     .catch(catchAndWrapError);
 
   // retrieve any responses to those action IDs from these agents
@@ -305,9 +305,7 @@ const hasEndpointResponseDoc = async ({
       },
       { ignore: [404] }
     )
-    .then(
-      (result) => result.body?.hits?.hits?.map((a) => a._source?.EndpointActions.action_id) || []
-    )
+    .then((result) => result?.hits?.hits?.map((a) => a._source?.EndpointActions.action_id) || [])
     .catch(catchAndWrapError);
   return response.filter((action): action is string => action !== undefined);
 };
@@ -354,7 +352,7 @@ const fetchActionResponses = async (
       { ignore: [404] }
     )
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || [])
+    .then((result) => result?.hits?.hits?.map((a) => a._source!) || [])
     .catch(catchAndWrapError);
 
   if (actionResponses.length === 0) {

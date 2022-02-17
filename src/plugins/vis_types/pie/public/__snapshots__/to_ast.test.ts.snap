@@ -34,9 +34,6 @@ Object {
     },
     Object {
       "arguments": Object {
-        "addLegend": Array [
-          true,
-        ],
         "addTooltip": Array [
           true,
         ],
@@ -70,7 +67,7 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "lastLevel": Array [
+                  "last_level": Array [
                     true,
                   ],
                   "show": Array [
@@ -83,12 +80,15 @@ Object {
                     true,
                   ],
                 },
-                "function": "pie_labels",
+                "function": "partitionLabels",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
+        ],
+        "legendDisplay": Array [
+          "show",
         ],
         "legendPosition": Array [
           "right",
@@ -112,6 +112,9 @@ Object {
             "type": "expression",
           },
         ],
+        "nestedLegend": Array [
+          false,
+        ],
         "palette": Array [
           Object {
             "chain": Array [
@@ -124,8 +127,11 @@ Object {
             "type": "expression",
           },
         ],
+        "startFromSecondLargestSlice": Array [
+          false,
+        ],
       },
-      "function": "pie_vis",
+      "function": "pieVis",
       "type": "function",
     },
   ],

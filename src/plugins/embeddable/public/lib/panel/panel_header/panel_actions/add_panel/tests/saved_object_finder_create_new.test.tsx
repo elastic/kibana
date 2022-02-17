@@ -10,7 +10,7 @@ import React from 'react';
 import { SavedObjectFinderCreateNew } from '../saved_object_finder_create_new';
 import { shallow } from 'enzyme';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 describe('SavedObjectFinderCreateNew', () => {
   test('renders correctly with no items', () => {

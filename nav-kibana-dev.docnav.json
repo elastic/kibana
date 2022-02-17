@@ -47,7 +47,8 @@
           "label": "Building a Kibana distributable"
         },
         { "id": "kibDevTutorialCI" },
-        { "id": "kibDevTutorialServerEndpoint" }
+        { "id": "kibDevTutorialServerEndpoint" },
+        { "id": "kibDevTutorialAdvancedSettings"}
       ]
     },
     {

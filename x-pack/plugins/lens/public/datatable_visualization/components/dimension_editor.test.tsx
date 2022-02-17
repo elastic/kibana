@@ -10,7 +10,7 @@ import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
 import { FramePublicAPI, Operation, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteRegistry } from 'src/plugins/charts/public';

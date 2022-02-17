@@ -16,7 +16,7 @@ import { HomeTestBed, setup } from './home.helpers';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { stubWebWorker } from '@kbn/test/jest';
+import { stubWebWorker } from '@kbn/test-jest-helpers';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {

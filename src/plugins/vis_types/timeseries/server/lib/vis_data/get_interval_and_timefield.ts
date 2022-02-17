@@ -9,6 +9,7 @@ import moment from 'moment';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { validateField } from '../../../common/fields_utils';
 import { validateInterval } from '../../../common/validate_interval';
+import { TimeFieldNotSpecifiedError } from '../../../common/errors';
 
 import type { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 
@@ -34,7 +35,11 @@ export function getIntervalAndTimefield(
   }
 
   if (panel.use_kibana_indexes) {
-    validateField(timeField!, index);
+    if (timeField) {
+      validateField(timeField, index);
+    } else {
+      throw new TimeFieldNotSpecifiedError();
+    }
   }
 
   let interval = panel.interval;

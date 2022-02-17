@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ml } from '../../../services/ml_api_service';
 
 import { CalendarsList } from './calendars_list';

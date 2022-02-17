@@ -15,11 +15,23 @@ import {
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeLabelMajorModes,
+  GaugeColorModes,
+  GaugeShapes,
 } from '../../common';
-import { GaugeShapes, GaugeTicksPositions } from '../../common';
-import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import { GaugeTicksPositions } from '../../common';
+import {
+  getAccessorsFromArgs,
+  getIcons,
+  getMaxValue,
+  getMinValue,
+  getValueFromAccessor,
+  getSubtypeByGaugeType,
+  getGoalConfig,
+} from './utils';
 import './index.scss';
+import { GaugeCentralMajorMode } from '../../common/types';
+import { isBulletShape, isRoundShape } from '../../common/utils';
+
 declare global {
   interface Window {
     /**
@@ -99,16 +111,18 @@ function normalizeBands(
 }
 
 function getTitle(
-  labelMajorMode: GaugeLabelMajorMode,
-  labelMajor?: string,
+  majorMode?: GaugeLabelMajorMode | GaugeCentralMajorMode,
+  major?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === GaugeLabelMajorModes.none) {
+  if (majorMode === GaugeLabelMajorModes.NONE) {
     return '';
-  } else if (labelMajorMode === GaugeLabelMajorModes.auto) {
-    return `${fallbackTitle || ''}   `; // added extra space for nice rendering
   }
-  return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
+
+  if (majorMode === GaugeLabelMajorModes.AUTO) {
+    return fallbackTitle || '';
+  }
+  return major || fallbackTitle || '';
 }
 
 // TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
@@ -131,9 +145,14 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
-  if (ticksPosition === GaugeTicksPositions.bands && colorBands) {
+  if (ticksPosition === GaugeTicksPositions.HIDDEN) {
+    return [];
+  }
+
+  if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
+
   const TICKS_NO = 3;
   const min = Math.min(...(colorBands || []), ...range);
   const max = Math.max(...(colorBands || []), ...range);
@@ -149,41 +168,44 @@ function getTicks(
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
-      shape: subtype,
-      metricAccessor,
+      shape: gaugeType,
       palette,
       colorMode,
       labelMinor,
       labelMajor,
       labelMajorMode,
+      centralMajor,
+      centralMajorMode,
       ticksPosition,
     } = args;
-    if (!metricAccessor) {
+    const table = data;
+    const accessors = getAccessorsFromArgs(args, table.columns);
+
+    if (!accessors || !accessors.metric) {
       // Chart is not ready
       return null;
     }
 
     const chartTheme = chartsThemeService.useChartsTheme();
 
-    const table = data;
-    const metricColumn = table.columns.find((col) => col.id === metricAccessor);
+    const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
     const chartData = table.rows.filter(
-      (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
+      (v) => typeof v[accessors.metric!] === 'number' || Array.isArray(v[accessors.metric!])
     );
     const row = chartData?.[0];
 
-    const metricValue = getValueFromAccessor('metricAccessor', row, args);
+    const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
-    const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
+    const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
       return <EmptyPlaceholder icon={icon} />;
     }
 
-    const goal = getValueFromAccessor('goalAccessor', row, args);
-    const min = getMinValue(row, args);
-    const max = getMaxValue(row, args);
+    const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
+    const min = getMinValue(row, accessors);
+    const max = getMaxValue(row, accessors);
 
     if (min === max) {
       return (
@@ -197,7 +219,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           }
         />
       );
-    } else if (min > max) {
+    }
+
+    if (min > max) {
       return (
         <EmptyPlaceholder
           icon={icon}
@@ -228,21 +252,43 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     // TODO: format in charts
     const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
+    const goalConfig = getGoalConfig(gaugeType);
+    const totalTicks = getTicks(ticksPosition, [min, max], bands);
+    const ticks =
+      gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
+
+    const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
+
+    // added extra space for nice rendering
+    const majorExtraSpaces = isBulletShape(gaugeType) ? '   ' : '';
+    const minorExtraSpaces = isBulletShape(gaugeType) ? '  ' : '';
+
+    const extraTitles = isRoundShape(gaugeType)
+      ? {
+          centralMinor: tickFormatter.convert(metricValue),
+          centralMajor: getTitle(centralMajorMode, centralMajor, metricColumn?.name),
+        }
+      : {};
 
     return (
       <Chart>
-        <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
+        <Settings
+          debugState={window._echDebugStateFlag ?? false}
+          theme={chartTheme}
+          ariaLabel={args.ariaLabel}
+          ariaUseDefaultSummary={!args.ariaLabel}
+        />
         <Goal
           id="goal"
-          subtype={subtype}
+          subtype={getSubtypeByGaugeType(gaugeType)}
           base={bands[0]}
           target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
           actual={formattedActual}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
           bands={bands}
-          ticks={getTicks(ticksPosition, [min, max], bands)}
+          ticks={ticks}
           bandFillColor={
-            colorMode === 'palette' && colors
+            colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {
                   const index = bands && bands.indexOf(val.value) - 1;
                   return colors && index >= 0 && colors[index]
@@ -253,8 +299,10 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                 }
               : () => `rgba(255,255,255,0)`
           }
-          labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
-          labelMinor={labelMinor ? labelMinor + '  ' : ''} // added extra space for nice rendering
+          labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
+          labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
+          {...extraTitles}
+          {...goalConfig}
         />
       </Chart>
     );
