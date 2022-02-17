@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of an AWS CloudWatch log stream, which permanently deletes all associated archived log events with the stream.",
   "false_positives": [
-    "A log stream may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log stream deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "A log stream may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log stream deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -73,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }
