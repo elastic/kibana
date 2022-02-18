@@ -26,10 +26,10 @@ interface FieldSelectProps {
   type: string;
   uiRestrictions?: TimeseriesUIRestrictions;
   restrict?: string[];
-  value?: string | string[] | null;
+  value?: string | Array<string | null> | null;
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: IndexPatternValue;
-  onChange: (selectedValues: Array<string | null | undefined>) => void;
+  onChange: (selectedValues: Array<string | null>) => void;
   disabled?: boolean;
   placeholder?: string;
   'data-test-subj'?: string;
@@ -75,7 +75,7 @@ export function FieldSelect({
         }
       };
 
-      selectedIds.forEach((v) => addIntoSet(v));
+      selectedIds.forEach((v) => v && addIntoSet(v));
     }
     return map;
   }, [groupedOptions, selectedIds]);

@@ -62,12 +62,15 @@ export async function getTableData(
   });
 
   const calculatePivotLabel = async () => {
+    // @todo:
+    const a = Array.isArray(panel.pivot_id) ? panel.pivot_id.join('|') : panel.pivot_id;
+
     if (panel.pivot_id && panelIndex.indexPattern?.id) {
       const fields = await extractFields({ id: panelIndex.indexPattern.id });
 
-      return extractFieldLabel(fields, panel.pivot_id);
+      return extractFieldLabel(fields, a!);
     }
-    return panel.pivot_id;
+    return a;
   };
 
   const meta: DataResponseMeta = {

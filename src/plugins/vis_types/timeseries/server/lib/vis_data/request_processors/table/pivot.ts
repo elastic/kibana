@@ -18,15 +18,34 @@ export const pivot: TableRequestProcessorsFunction =
   (next) =>
   (doc) => {
     const { sort } = req.body.state;
+    const normalizedPivotIds = panel.pivot_id
+      ? Array.isArray(panel.pivot_id)
+        ? (panel.pivot_id.filter(Boolean) as string[])
+        : [panel.pivot_id!]
+      : [];
 
-    if (panel.pivot_id) {
-      overwrite(doc, 'aggs.pivot.terms.field', panel.pivot_id);
-      overwrite(doc, 'aggs.pivot.terms.size', panel.pivot_rows);
+    const termsType = normalizedPivotIds.length > 1 ? 'multi_terms' : 'terms';
+
+    if (normalizedPivotIds.length) {
+      if (termsType === 'multi_terms') {
+        overwrite(
+          doc,
+          `aggs.pivot.${termsType}.terms`,
+          normalizedPivotIds.map((item: string) => ({
+            field: item,
+          }))
+        );
+      } else {
+        overwrite(doc, `aggs.pivot.${termsType}.field`, normalizedPivotIds[0]);
+      }
+
+      overwrite(doc, `aggs.pivot.${termsType}.size`, panel.pivot_rows);
+
       if (sort) {
         const series = panel.series.find((item) => item.id === sort.column);
         const metric = series && last(series.metrics);
         if (metric && metric.type === 'count') {
-          overwrite(doc, 'aggs.pivot.terms.order', { _count: sort.order });
+          overwrite(doc, `aggs.pivot.${termsType}.order`, { _count: sort.order });
         } else if (metric && series && basicAggs.includes(metric.type)) {
           const sortAggKey = `${metric.id}-SORT`;
           const fn = bucketTransform[metric.type];
@@ -34,10 +53,10 @@ export const pivot: TableRequestProcessorsFunction =
             metric.id,
             sortAggKey
           );
-          overwrite(doc, `aggs.pivot.terms.order`, { [bucketPath]: sort.order });
+          overwrite(doc, `aggs.pivot.${termsType}.order`, { [bucketPath]: sort.order });
           overwrite(doc, `aggs.pivot.aggs`, { [sortAggKey]: fn(metric) });
         } else {
-          overwrite(doc, 'aggs.pivot.terms.order', {
+          overwrite(doc, `aggs.pivot.${termsType}.order`, {
             _key: get(sort, 'order', 'asc'),
           });
         }

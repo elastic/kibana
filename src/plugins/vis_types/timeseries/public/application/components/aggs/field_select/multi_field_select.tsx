@@ -21,9 +21,9 @@ import React, { FunctionComponent } from 'react';
 const DROPPABLE_ID = 'onDragEnd';
 
 export function MultiFieldSelect(props: {
-  values: string[];
+  values: Array<string | null>;
   onDragEnd: DragDropContextProps['onDragEnd'];
-  WrappedComponent: FunctionComponent<{ value: string; index?: number }>;
+  WrappedComponent: FunctionComponent<{ value?: string | null; index?: number }>;
 }) {
   return (
     <EuiDragDropContext onDragEnd={props.onDragEnd}>

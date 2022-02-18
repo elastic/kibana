@@ -17,7 +17,7 @@ export const MAX_MULTI_FIELDS_ITEMS = 4;
 
 export const getGroupedOptions = (
   type: string,
-  selectedIds: string[],
+  selectedIds: Array<string | null>,
   fields: SanitizedFieldType[] = [],
   uiRestrictions: TimeseriesUIRestrictions | undefined,
   restrict: string[] = []
