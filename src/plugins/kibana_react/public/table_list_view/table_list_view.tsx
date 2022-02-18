@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTableActionsColumnType,
   SearchFilterConfig,
+  Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +26,8 @@ import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
+
+const STORAGE_KEY = 'table_list_view.page_size';
 
 export interface TableListViewProps<V> {
   createItem?(): void;
@@ -71,6 +74,9 @@ export interface TableListViewState<V> {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  pageIndex: number;
+  pageSize: number;
+  pageSizeOptions: number[];
 }
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -82,17 +88,14 @@ class TableListView<V extends {}> extends React.Component<
   TableListViewProps<V>,
   TableListViewState<V>
 > {
-  private pagination = {};
   private _isMounted = false;
 
   constructor(props: TableListViewProps<V>) {
     super(props);
 
-    this.pagination = {
-      initialPageIndex: 0,
-      initialPageSize: props.initialPageSize,
-      pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
-    };
+    const storedPageSize = sessionStorage.getItem(STORAGE_KEY);
+    const pageSize = storedPageSize ? parseInt(storedPageSize, 10) : props.initialPageSize;
+
     this.state = {
       items: [],
       totalItems: 0,
@@ -103,6 +106,9 @@ class TableListView<V extends {}> extends React.Component<
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
+      pageIndex: 0,
+      pageSize,
+      pageSizeOptions: uniq([10, 20, 50, pageSize]).sort(),
     };
   }
 
@@ -462,12 +468,28 @@ class TableListView<V extends {}> extends React.Component<
         values={{ entityNamePlural: this.props.entityNamePlural }}
       />
     );
+
+    const onChange = ({ page }: Criteria<V>) => {
+      if (!page) {
+        return;
+      }
+
+      const pageSize = page.size;
+      window.sessionStorage.setItem(STORAGE_KEY, pageSize + '');
+      this.setState({ pageSize, pageIndex: page.index });
+    };
+
     return (
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
         columns={columns}
-        pagination={this.pagination}
+        pagination={{
+          pageSize: this.state.pageSize,
+          pageIndex: this.state.pageIndex,
+          pageSizeOptions: this.state.pageSizeOptions,
+        }}
+        onChange={onChange}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
         selection={selection}
