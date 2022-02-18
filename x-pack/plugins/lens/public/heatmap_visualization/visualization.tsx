@@ -340,6 +340,7 @@ export const getHeatmapVisualization = ({
                     arguments: {
                       isVisible: [state.legend.isVisible],
                       position: [state.legend.position],
+                      legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
                     },
                   },
                 ],

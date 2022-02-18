@@ -102,6 +102,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
+  legendSize?: number;
   truncateLegend?: boolean;
 }
 

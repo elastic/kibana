@@ -58,6 +58,10 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: strings.getLegendPositionArgHelp(),
     },
+    legendSize: {
+      types: ['number'],
+      help: strings.getLegendSizeArgHelp(),
+    },
     nestedLegend: {
       types: ['boolean'],
       help: strings.getNestedLegendArgHelp(),

@@ -52,6 +52,7 @@ interface VisCommonParams {
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
   ariaLabel?: string;
 }
 

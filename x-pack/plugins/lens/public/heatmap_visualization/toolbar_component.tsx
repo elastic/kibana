@@ -110,6 +110,16 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
+              legendSize={state?.legend.legendSize}
+              onLegendSizeChange={(legendSize) => {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    legendSize,
+                  },
+                });
+              }}
             />
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -45,6 +45,11 @@ export interface LegendConfig {
    * Flag whether the legend items are truncated or not
    */
   shouldTruncate?: boolean;
+  /**
+   * Exact legend width (vertical) or height (horizontal)
+   * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
+   */
+  legendSize?: number;
 }
 
 export type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
@@ -119,6 +124,12 @@ export const legendConfig: ExpressionFunctionDefinition<
       default: true,
       help: i18n.translate('xpack.lens.xyChart.shouldTruncate.help', {
         defaultMessage: 'Specifies whether the legend items will be truncated or not',
+      }),
+    },
+    legendSize: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.legendSize.help', {
+        defaultMessage: 'Specifies the legend size in pixels.',
       }),
     },
   },

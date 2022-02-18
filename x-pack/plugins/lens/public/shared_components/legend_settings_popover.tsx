@@ -17,6 +17,7 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
 import { LegendLocationSettings } from './legend_location_settings';
+import { LegendSizeSettings } from './legend_size_settings';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { useDebouncedValue } from './debounced_value';
@@ -118,6 +119,14 @@ export interface LegendSettingsPopoverProps {
    * Button group position
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
+  /**
+   * Legend size in pixels
+   */
+  legendSize?: number;
+  /**
+   * Callback on legend size change
+   */
+  onLegendSizeChange: (size?: number) => void;
 }
 
 const DEFAULT_TRUNCATE_LINES = 1;
@@ -177,6 +186,8 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onMaxLinesChange = () => {},
   shouldTruncate,
   onTruncateLegendChange = () => {},
+  legendSize,
+  onLegendSizeChange,
 }) => {
   return (
     <ToolbarPopover
@@ -335,6 +346,11 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           </TooltipWrapper>
         </EuiFormRow>
       )}
+      <LegendSizeSettings
+        legendSize={legendSize}
+        onLegendSizeChange={onLegendSizeChange}
+        isDisabled={mode === 'hide'}
+      />
     </ToolbarPopover>
   );
 };

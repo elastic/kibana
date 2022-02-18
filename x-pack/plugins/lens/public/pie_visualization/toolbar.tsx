@@ -123,6 +123,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     [onStateChange]
   );
 
+  const onLegendSizeChange = useCallback(
+    (val) => onStateChange({ legendSize: val }),
+    [onStateChange]
+  );
+
   const onValueInLegendChange = useCallback(() => {
     onStateChange({
       showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
@@ -251,6 +256,8 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
         onMaxLinesChange={onLegendMaxLinesChange}
+        legendSize={layer.legendSize}
+        onLegendSizeChange={onLegendSizeChange}
       />
     </EuiFlexGroup>
   );
