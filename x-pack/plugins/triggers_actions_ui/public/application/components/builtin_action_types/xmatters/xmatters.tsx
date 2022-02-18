@@ -57,13 +57,10 @@ export function getActionType(): ActionTypeModel<
         secrets: { errors: secretsErrors },
       };
       // basic auth validation
-      if (
-        !action.config.urlConfig &&
-        !action.config.usesBasic &&
-        !action.secrets.user &&
-        !action.secrets.password
-      ) {
+      if (!action.config.urlConfig && action.config.usesBasic) {
         configErrors.urlConfig.push(translations.URL_REQUIRED);
+      }
+      if (action.config.usesBasic && !action.secrets.user && !action.secrets.password) {
         secretsErrors.user.push(translations.USERNAME_REQUIRED);
         secretsErrors.password.push(translations.PASSWORD_REQUIRED);
       }

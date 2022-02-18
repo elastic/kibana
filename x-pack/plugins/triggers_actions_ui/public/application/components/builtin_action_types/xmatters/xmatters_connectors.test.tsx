@@ -62,11 +62,11 @@ describe('XmattersActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="userCredsLabel"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="urlReenterDescription"]').length).toEqual(0);
   });
 
-  test('should display a message on edit to re-enter credentials', () => {
+  test('should display a message on edit to re-enter credentials, Basic Auth', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -92,8 +92,8 @@ describe('XmattersActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="userCredsLabel"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="urlReenterDescription"]').length).toEqual(0);
   });
 
   test('should display a message for missing secrets after import', () => {
@@ -124,5 +124,35 @@ describe('XmattersActionConnectorFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
+
+  test('should display a message on edit to re-enter credentials, URL Auth', () => {
+    const actionConnector = {
+      secrets: {
+        user: '',
+        password: '',
+        urlSecrets: 'http:\\test?apiKey=someKey',
+      },
+      id: 'test',
+      actionTypeId: '.xmatters',
+      isPreconfigured: false,
+      name: 'xmatters',
+      config: {
+        usesBasic: false,
+      },
+    } as XmattersActionConnector;
+    const wrapper = mountWithIntl(
+      <XmattersActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="urlReenterDescription"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="userCredsLabel"]').length).toEqual(0);
   });
 });

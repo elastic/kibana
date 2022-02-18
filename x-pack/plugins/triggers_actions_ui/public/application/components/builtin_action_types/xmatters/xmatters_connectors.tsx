@@ -97,6 +97,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<
           <EuiFormRow fullWidth>
             <p>
               <FormattedMessage
+                data-test-subj="urlReenterDescription"
                 id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.urlReenterDescription"
                 defaultMessage="You must reenter this value each time you edit the connector."
               />
@@ -157,6 +158,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<
           <EuiTitle size="xxs">
             <h4>
               <FormattedMessage
+                data-test-subj="userCredsLabel"
                 id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.userCredsLabel"
                 defaultMessage="User credentials"
               />

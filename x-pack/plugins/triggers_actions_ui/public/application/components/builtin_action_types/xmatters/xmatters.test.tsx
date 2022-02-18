@@ -56,6 +56,7 @@ describe('xmatters connector validation', () => {
         errors: {
           user: [],
           password: [],
+          urlSecrets: [],
         },
       },
     });
@@ -66,13 +67,13 @@ describe('xmatters connector validation', () => {
       secrets: {
         user: '',
         password: '',
+        urlSecrets: 'https://test.com?apiKey=someKey',
       },
       id: 'test',
       actionTypeId: '.xmatters',
       name: 'xmatters',
       isPreconfigured: false,
       config: {
-        urlConfig: 'http://test.com',
         usesBasic: false,
       },
     } as XmattersActionConnector;
@@ -87,6 +88,7 @@ describe('xmatters connector validation', () => {
         errors: {
           user: [],
           password: [],
+          urlSecrets: [],
         },
       },
     });
@@ -115,6 +117,7 @@ describe('xmatters connector validation', () => {
         errors: {
           user: [],
           password: ['Password is required when username is used.'],
+          urlSecrets: [],
         },
       },
     });
@@ -145,6 +148,7 @@ describe('xmatters connector validation', () => {
         errors: {
           user: [],
           password: [],
+          urlSecrets: [],
         },
       },
     });
