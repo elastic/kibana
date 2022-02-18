@@ -73,7 +73,7 @@ export async function runDockerGenerator(
       ? [resolve(beatsDir, metricbeatTarball), resolve(beatsDir, filebeatTarball)]
       : []),
   ];
-
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -95,6 +95,7 @@ export async function runDockerGenerator(
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
