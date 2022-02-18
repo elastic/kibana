@@ -8987,13 +8987,6 @@ const BootstrapCommand = {
     }, {
       prefix: '[vscode]',
       debug: false
-    });
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures'], {
-      cwd: kbn.getAbsolute(),
-      env: process.env
-    }, {
-      prefix: '[ts refs]',
-      debug: false
     }); // send timings
 
     await reporter.timings({
