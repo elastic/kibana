@@ -19,6 +19,7 @@ import {
 
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
+import { ViewMode } from '../../../../embeddable/public';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
@@ -36,7 +37,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     useEmbeddableSelector,
     containerActions: { untilEmbeddableLoaded, removeEmbeddable },
   } = useReduxContainerContext<ControlGroupInput>();
-  const { controlStyle } = useEmbeddableSelector((state) => state);
+  const { controlStyle, viewMode } = useEmbeddableSelector((state) => state);
 
   // Controls Services Context
   const { overlays } = pluginServices.getHooks();
@@ -47,6 +48,8 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
   const [title, setTitle] = useState<string>();
 
   const usingTwoLineLayout = controlStyle === 'twoLine';
+
+  const isEditable = viewMode === ViewMode.EDIT;
 
   useEffect(() => {
     if (embeddableRoot.current && embeddable) {
@@ -98,7 +101,9 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
 
   const form = (
     <EuiFormControlLayout
-      className={'controlFrame__formControlLayout'}
+      className={classNames('controlFrame__formControlLayout', {
+        'controlFrameFormControlLayout--twoLine': controlStyle === 'twoLine',
+      })}
       fullWidth
       prepend={
         <>

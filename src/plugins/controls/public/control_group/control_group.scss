@@ -90,6 +90,18 @@ $controlMinWidth: $euiSize * 14;
   flex-basis: auto;
   position: relative;
 
+  &.controlFrameWrapper-isEditable {
+    .controlFrame__formControlLayoutLabel {
+      padding-left: 0;
+    }
+  }
+
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    }
+  }
+
   .controlFrame__formControlLayout {
     width: 100%;
     min-width: $controlMinWidth;
@@ -97,7 +109,6 @@ $controlMinWidth: $euiSize * 14;
 
     &Label {
       @include euiTextTruncate;
-      padding-left: 0;
       border-radius: $euiBorderRadius;
     }
 
