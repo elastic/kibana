@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { Filter, isFilterPinned } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
@@ -127,6 +127,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       hideAggregatedPreview?: boolean;
     } = {};
     const queryState: QueryState = {};
+    const { isFilterPinned } = await import('@kbn/es-query');
 
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
