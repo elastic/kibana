@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ToolbarPopover, TooltipWrapper } from '../../shared_components';
 import { TitlePositionOptions } from './title_position_option';
 import { FramePublicAPI } from '../../types';
-import { MetricState } from '../../../common/expressions';
+import type { MetricState } from '../../../common/types';
 import { TextFormattingOptions } from './text_formatting_options';
 
 export interface VisualOptionsPopoverProps {

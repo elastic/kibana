@@ -27,7 +27,6 @@ import { renameColumns } from '../common/expressions/rename_columns/rename_colum
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
-import { metricChart } from '../common/expressions/metric_chart/metric_chart';
 import { lensMultitable } from '../common/expressions';
 
 export const setupExpressions = (
@@ -41,7 +40,6 @@ export const setupExpressions = (
     xyChart,
     mergeTables,
     counterRate,
-    metricChart,
     yAxisConfig,
     layerConfig,
     formatColumn,

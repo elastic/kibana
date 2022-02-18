@@ -9,7 +9,6 @@ import type { CoreSetup } from 'kibana/server';
 import {
   xyChart,
   counterRate,
-  metricChart,
   yAxisConfig,
   layerConfig,
   formatColumn,
@@ -37,7 +36,6 @@ export const setupExpressions = (
   [
     xyChart,
     counterRate,
-    metricChart,
     yAxisConfig,
     layerConfig,
     formatColumn,
