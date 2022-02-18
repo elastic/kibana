@@ -85,10 +85,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertIndexNameValue(expectedValue: string) {
-      const actualIndexName = await testSubjects.getAttribute(
-        'dataVisualizerFileIndexNameInput',
-        'value'
-      );
+      const actualIndexName = await testSubjects.getAttribute('fileUploadIndexNameInput', 'value');
       expect(actualIndexName).to.eql(
         expectedValue,
         `Expected index name to be '${expectedValue}' (got '${actualIndexName}')`
@@ -96,7 +93,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setIndexName(indexName: string) {
-      await mlCommonUI.setValueWithChecks('dataVisualizerFileIndexNameInput', indexName, {
+      await mlCommonUI.setValueWithChecks('fileUploadIndexNameInput', indexName, {
         clearWithKeyboard: true,
       });
       await this.assertIndexNameValue(indexName);

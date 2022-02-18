@@ -273,6 +273,8 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
       indexNameError: error,
     });
 
+    error = error === undefined ? error : undefined;
+
     const isReadyToImport = !!name && error === undefined;
     if (isReadyToImport) {
       this.props.enableImportBtn();
