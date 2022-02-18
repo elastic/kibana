@@ -77,7 +77,7 @@ describe('secrets validation', () => {
       password: '',
       urlSecrets: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
     };
-    expect(validateSecrests(actionType, secrets)).toEqual(secrets);
+    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 });
 
@@ -166,12 +166,10 @@ describe('config validation', () => {
 describe('params validation', () => {
   test('param validation passes when only required fields are provided', () => {
     const params: Record<string, string> = {
-      alertActionGroupName: 'A groupy group',
-      signalId: 'abcde-12345:abcd-1234',
+      severity: 'high',
     };
     expect(validateParams(actionType, params)).toEqual({
-      alertActionGroupName: 'A groupy group',
-      signalId: 'abcde-12345:abcd-1234',
+      severity: 'high',
     });
   });
 
