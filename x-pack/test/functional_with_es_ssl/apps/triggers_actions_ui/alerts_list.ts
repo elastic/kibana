@@ -472,12 +472,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await refreshAlertsList();
-      expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be('Showing: 2 of 2 rules.');
-      expect(await testSubjects.getVisibleText('totalActiveAlertsCount')).to.be('Active: 0');
-      expect(await testSubjects.getVisibleText('totalOkAlertsCount')).to.be('Ok: 1');
-      expect(await testSubjects.getVisibleText('totalErrorAlertsCount')).to.be('Error: 1');
-      expect(await testSubjects.getVisibleText('totalPendingAlertsCount')).to.be('Pending: 0');
-      expect(await testSubjects.getVisibleText('totalUnknownAlertsCount')).to.be('Unknown: 0');
+      expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('Showing: 2 of 2 rules.');
+      expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
+      expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
+      expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
+      expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
+      expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
     });
 
     it('should filter alerts by the alert type', async () => {

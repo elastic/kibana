@@ -64,7 +64,7 @@ export const alertsTableColumns = (
   readOnly: boolean
 ) => [
   {
-    field: 'rule',
+    field: 'alert',
     name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.Alert', {
       defaultMessage: 'Alert',
     }),
