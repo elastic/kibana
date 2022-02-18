@@ -72,6 +72,7 @@ describe('TSVB Filter Ratio', () => {
             label: 'number',
             options: [
               {
+                disabled: false,
                 label: 'system.cpu.user.pct',
                 value: 'system.cpu.user.pct',
               },
@@ -95,6 +96,7 @@ describe('TSVB Filter Ratio', () => {
             "label": "date",
             "options": Array [
               Object {
+                "disabled": false,
                 "label": "@timestamp",
                 "value": "@timestamp",
               },
@@ -104,6 +106,7 @@ describe('TSVB Filter Ratio', () => {
             "label": "number",
             "options": Array [
               Object {
+                "disabled": false,
                 "label": "system.cpu.user.pct",
                 "value": "system.cpu.user.pct",
               },
