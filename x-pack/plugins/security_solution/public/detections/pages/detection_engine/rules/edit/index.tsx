@@ -28,7 +28,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-import { useUserData } from '../../../../components/user_info';
+import { useUserInfo } from '../../../../components/user_info';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -62,15 +62,13 @@ const formHookNoop = async (): Promise<undefined> => undefined;
 
 const EditRulePageComponent: FC = () => {
   const [, dispatchToaster] = useStateToaster();
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const {
+    loading: userInfoLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    hasEncryptionKey,
+    canUserCRUD,
+  } = useUserInfo();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { navigateToApp } = useKibana().services.application;

@@ -33,8 +33,7 @@ export interface AlertsUtilityBarProps {
   areEventsLoading: boolean;
   clearSelection: () => void;
   currentFilter: Status;
-  hasIndexMaintenance: boolean;
-  hasIndexWrite: boolean;
+  hasAlertsCrud: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   selectAll: () => void;
@@ -62,8 +61,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   areEventsLoading,
   clearSelection,
   currentFilter,
-  hasIndexMaintenance,
-  hasIndexWrite,
+  hasAlertsCrud,
   onShowBuildingBlockAlertsChanged,
   onShowOnlyThreatIndicatorAlertsChanged,
   selectAll,
@@ -163,7 +161,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup grow={true}>
-            {hasIndexWrite && hasIndexMaintenance && (
+            {hasAlertsCrud && (
               <>
                 <UtilityBarText dataTestSubj="selectedAlerts">
                   {i18n.SELECTED_ALERTS(

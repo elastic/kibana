@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { Privilege } from '../../../containers/detection_engine/alerts/types';
-import { useUserData } from '../../user_info';
+import { useUserInfo } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const REQUIRED_INDEX_PRIVILIGES = ['read', 'write', 'view_index_metadata', 'maintenance'] as const;
@@ -41,7 +41,7 @@ export interface MissingPrivileges {
 
 export const useMissingPrivileges = (): MissingPrivileges => {
   const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
-  const [{ canUserCRUD }] = useUserData();
+  const { canUserCRUD } = useUserInfo();
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];

@@ -28,7 +28,7 @@ import {
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-import { useUserData } from '../../../../components/user_info';
+import { useUserInfo } from '../../../../components/user_info';
 import { AccordionTitle } from '../../../../components/rules/accordion_title';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
@@ -75,15 +75,13 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC = () => {
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const {
+    loading: userInfoLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    hasEncryptionKey,
+    canUserCRUD,
+  } = useUserInfo();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { navigateToApp } = useKibana().services.application;

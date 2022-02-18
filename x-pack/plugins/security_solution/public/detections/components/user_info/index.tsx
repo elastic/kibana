@@ -12,7 +12,7 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 import { useCreateTransforms } from '../../../transforms/containers/use_create_transforms';
 
-export interface State {
+interface State {
   canUserCRUD: boolean | null;
   canUserREAD: boolean | null;
   hasIndexManage: boolean | null;
@@ -26,6 +26,15 @@ export interface State {
   loading: boolean;
   signalIndexName: string | null;
   signalIndexMappingOutdated: boolean | null;
+}
+
+interface UseUserInfo extends State {
+  hasAlertsCrud: boolean;
+  shouldShowCallout: boolean;
+  hasIndexAndKibanaRead: boolean;
+  hasIndexAndKibanaWrite: boolean;
+  disabledAddException: boolean;
+  canSetLoadingCreatePrePackagedRules: boolean;
 }
 
 export const initialState: State = {
@@ -194,7 +203,7 @@ export const ManageUserInfo = ({ children }: ManageUserInfoProps) => (
   </StateUserInfoContext.Provider>
 );
 
-export const useUserInfo = (): State => {
+export const useUserInfo = (): UseUserInfo => {
   const [
     {
       canUserCRUD,
@@ -362,6 +371,11 @@ export const useUserInfo = (): State => {
     signalIndexMappingOutdated,
   ]);
 
+  const disabledAddException = !canUserCRUD || !hasIndexWrite || true;
+  const userDoesntHaveIndexManage = hasIndexManage != null && !hasIndexManage;
+  const signalIndexMappingIsOutdated =
+    signalIndexMappingOutdated != null && signalIndexMappingOutdated;
+
   return {
     loading,
     isSignalIndexExists,
@@ -376,5 +390,17 @@ export const useUserInfo = (): State => {
     hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,
+    canSetLoadingCreatePrePackagedRules:
+      (canUserCRUD &&
+        hasIndexWrite &&
+        isAuthenticated &&
+        hasEncryptionKey &&
+        isSignalIndexExists) ||
+      false,
+    hasAlertsCrud: (canUserCRUD && hasIndexWrite && hasIndexMaintenance) || false,
+    shouldShowCallout: signalIndexMappingIsOutdated && userDoesntHaveIndexManage,
+    hasIndexAndKibanaRead: (hasKibanaREAD && hasIndexRead) || false,
+    hasIndexAndKibanaWrite: (canUserCRUD && hasIndexWrite) || false,
+    disabledAddException,
   };
 };

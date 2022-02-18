@@ -17,7 +17,7 @@ import {
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
-import { useUserData } from '../../../components/user_info';
+import { useUserInfo } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
@@ -49,16 +49,13 @@ const RulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
   const invalidateRules = useInvalidateRules();
 
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-      hasIndexWrite,
-    },
-  ] = useUserData();
+  const {
+    loading: userInfoLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    hasEncryptionKey,
+    canUserCRUD,
+  } = useUserInfo();
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
@@ -79,13 +76,7 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotUpdated,
     getLoadPrebuiltRulesAndTemplatesButton,
     getReloadPrebuiltRulesAndTemplatesButton,
-  } = usePrePackagedRules({
-    canUserCRUD,
-    hasIndexWrite,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-  });
+  } = usePrePackagedRules();
   const prePackagedRuleStatus = getPrePackagedRuleStatus(
     rulesInstalled,
     rulesNotInstalled,
