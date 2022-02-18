@@ -6,9 +6,9 @@
  */
 
 import type { AppDataType } from '../../components/shared/exploratory_view/types';
-import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../../../src/plugins/data_views/public';
 
-const getAppDataView = (data: DataPublicPluginStart) => {
+const getAppDataView = (data: DataViewsPublicPluginStart) => {
   return async (appId: AppDataType, indexPattern?: string) => {
     try {
       const { ObservabilityDataViews } = await import('./observability_data_views');

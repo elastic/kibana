@@ -49,7 +49,7 @@ interface Props {
   monitorList: MonitorManagementListState;
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
-  errorSummaries: Ping[];
+  errorSummaries?: Ping[];
 }
 
 export const MonitorManagementList = ({

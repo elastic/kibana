@@ -270,7 +270,7 @@ export class Plugin
         PageTemplate,
       },
       createExploratoryViewUrl,
-      getAppDataView: getAppDataView(pluginsStart.data),
+      getAppDataView: getAppDataView(pluginsStart.dataViews),
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
     };
   }
