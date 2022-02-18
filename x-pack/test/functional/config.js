@@ -554,7 +554,7 @@ export default async function ({ readConfigFile }) {
 
         snapshot_restore_user: {
           elasticsearch: {
-            cluster: ['monitor', 'create_snapshot', 'manage'],
+            cluster: ['create_snapshot', 'manage', 'monitor'],
             indices: [
               {
                 names: ['*'],
