@@ -27,6 +27,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     </EuiFlexItem>
     <EuiFlexItem>
       <FieldSelect
+        allowMultiSelect={true}
         data-test-subj="groupByField"
         fields={
           Object {
