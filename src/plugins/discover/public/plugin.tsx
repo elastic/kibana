@@ -41,10 +41,6 @@ import {
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from './url_generator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
