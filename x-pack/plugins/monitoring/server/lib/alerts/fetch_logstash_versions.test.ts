@@ -107,6 +107,7 @@ describe('fetchLogstashVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'logstash_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'logstash.node_stats' } },
                   ],
                   minimum_should_match: 1,

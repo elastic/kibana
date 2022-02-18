@@ -19,10 +19,11 @@ import {
 import { PartialAlert } from '../../../../../../alerting/server';
 import { isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
-import { transform, transformAlertToRule } from './utils';
+import { transform } from './utils';
 import { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (
   rule: PartialAlert<RuleParams>,
@@ -69,7 +70,7 @@ export const transformValidateBulkError = (
   isRuleRegistryEnabled?: boolean
 ): RulesSchema | BulkError => {
   if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
-    const transformed = transformAlertToRule(rule, ruleExecutionSummary);
+    const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
     const [validated, errors] = validateNonExact(transformed, rulesSchema);
     if (errors != null || validated == null) {
       return createBulkErrorObject({

@@ -21,7 +21,7 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from 'src/plugins/share/public';
+import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -29,7 +29,6 @@ import { EuiLoadingContent } from '@elastic/eui';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
@@ -44,7 +43,6 @@ import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
   DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGenerator,
   DiscoverUrlGeneratorState,
 } from './url_generator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
@@ -60,12 +58,6 @@ import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { useDiscoverServices } from './utils/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-
-declare module '../../share/public' {
-  export interface UrlGeneratorStateMapping {
-    [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
-  }
-}
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -119,11 +111,6 @@ export interface DiscoverSetup {
 }
 
 export interface DiscoverStart {
-  /**
-   * @deprecated Use URL locator instead. URL generator will be removed.
-   */
-  readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
-
   /**
    * `share` plugin URL locator for Discover app. Use it to generate links into
    * Discover application, for example, navigate:
@@ -201,24 +188,10 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
-
-  /**
-   * @deprecated
-   */
-  private urlGenerator?: DiscoverStart['urlGenerator'];
   private locator?: DiscoverAppLocator;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-
-    if (plugins.share) {
-      this.urlGenerator = plugins.share.urlGenerators.registerUrlGenerator(
-        new DiscoverUrlGenerator({
-          appBasePath: baseUrl,
-          useHash: core.uiSettings.get('state:storeInSessionStorage'),
-        })
-      );
-    }
 
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(
@@ -374,7 +347,6 @@ export class DiscoverPlugin
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {
-      urlGenerator: this.urlGenerator,
       locator: this.locator,
     };
   }

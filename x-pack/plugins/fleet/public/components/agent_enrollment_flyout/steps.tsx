@@ -83,7 +83,7 @@ export const AgentPolicySelectionStep = ({
   excludeFleetServer,
   refreshAgentPolicies,
 }: {
-  agentPolicies?: AgentPolicy[];
+  agentPolicies: AgentPolicy[];
   setSelectedPolicyId?: (policyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
@@ -93,7 +93,7 @@ export const AgentPolicySelectionStep = ({
   // storing the created agent policy id as the child component is being recreated
   const [policyId, setPolicyId] = useState<string | undefined>(undefined);
   const regularAgentPolicies = useMemo(() => {
-    return (agentPolicies ?? []).filter(
+    return agentPolicies.filter(
       (policy) =>
         policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
     );
