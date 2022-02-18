@@ -1054,8 +1054,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param count - expected count of metric
      */
     async assertMetric(title: string, count: string) {
-      await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
-      await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+      await this.assertExactText('[data-test-subj="metric_label"]', title);
+      await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
     async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {

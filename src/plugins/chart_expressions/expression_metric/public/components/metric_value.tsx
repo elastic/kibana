@@ -28,6 +28,7 @@ export const MetricVisValue = ({ style, metric, onFilter, labelConfig }: MetricV
   const metricComponent = (
     <div className={containerClassName} style={{ backgroundColor: metric.bgColor }}>
       <div
+        data-test-subj="metric_value"
         className="mtrVis__value"
         style={{
           ...(style.spec as CSSProperties),
@@ -45,6 +46,7 @@ export const MetricVisValue = ({ style, metric, onFilter, labelConfig }: MetricV
       />
       {labelConfig.show && (
         <div
+          data-test-subj="metric_label"
           style={{
             ...(labelConfig.style.spec as CSSProperties),
             order: labelConfig.position === 'top' ? -1 : 2,
