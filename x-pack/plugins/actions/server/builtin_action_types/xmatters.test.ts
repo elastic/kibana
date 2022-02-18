@@ -70,6 +70,15 @@ describe('secrets validation', () => {
   test('succeeds when basic authentication credentials are omitted', () => {
     expect(validateSecrets(actionType, {})).toEqual({ password: null, user: null });
   });
+
+  test('succeeds when URL auth used', () => {
+    const secrets: Record<string, string> = {
+      user: '',
+      password: '',
+      urlSecrets: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
+    };
+    expect(validateSecrests(actionType, secrets)).toEqual(secrets);
+  });
 });
 
 describe('config validation', () => {
@@ -141,6 +150,16 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: Error configuring xMatters action: target url is not present in allowedHosts"`
     );
+  });
+
+  test('config validations returns successful when URL auth used', () => {
+    const config: Record<string, boolean> = {
+      usesBasic: false,
+    };
+
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+    });
   });
 });
 

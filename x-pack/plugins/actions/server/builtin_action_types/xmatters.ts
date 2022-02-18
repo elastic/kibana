@@ -57,7 +57,7 @@ const ParamsSchema = schema.object({
   signalId: schema.maybe(schema.string()),
   ruleName: schema.maybe(schema.string()),
   date: schema.maybe(schema.string()),
-  severity: schema.maybe(schema.string()),
+  severity: schema.string(),
   spaceId: schema.maybe(schema.string()),
   tags: schema.maybe(schema.string()),
 });
@@ -224,7 +224,7 @@ interface XmattersPayload {
   signalId?: string;
   ruleName?: string;
   date?: string;
-  severity?: string;
+  severity: string;
   spaceId?: string;
   tags?: string;
 }

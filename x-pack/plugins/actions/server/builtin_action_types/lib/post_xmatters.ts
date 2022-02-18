@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { request } from './axios_utils';
-import { promiseResult, Result } from '../lib/result_type';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface PostXmattersOptions {
@@ -18,7 +17,7 @@ interface PostXmattersOptions {
     signalId?: string;
     ruleName?: string;
     date?: string;
-    severity?: string;
+    severity: string;
     spaceId?: string;
     tags?: string;
   };
