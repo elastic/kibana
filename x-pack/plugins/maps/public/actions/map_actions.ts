@@ -353,7 +353,7 @@ export function updateEditLayer(layerId: string | null) {
   };
 }
 
-export function addNewFeatureToIndex(geometry: Geometry | Position[], drawShape: DRAW_SHAPE) {
+export function addNewFeatureToIndex(geometry: Array<Geometry | Position[]>) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -370,10 +370,16 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[], drawShape:
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
-      await (layer as IVectorLayer).addFeature(geometry);
+
+      const promisesToAwait = [];
+      for (let i = 0; i < geometry.length; i++) {
+        promisesToAwait.push((layer as IVectorLayer).addFeature(geometry[i]));
+      }
+      await Promise.all(promisesToAwait);
+
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
         setTimeout(() => {
-          dispatch(updateEditShape(drawShape));
+          dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
         }, 500);
       });
     } catch (e) {
