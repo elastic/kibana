@@ -64,9 +64,9 @@ export class TablePanelConfig extends Component<
     this.setState({ selectedTab });
   }
 
-  handlePivotChange = (selectedOptions: string[] | null) => {
+  handlePivotChange = (selectedOptions: Array<string | null>) => {
     const { fields, model } = this.props;
-    const pivotId = selectedOptions?.[0];
+    const pivotId = selectedOptions;
     const field = fields[getIndexPatternKey(model.index_pattern)].find((f) => f.name === pivotId);
     const pivotType = get(field, 'type', model.pivot_type);
 
@@ -128,6 +128,7 @@ export class TablePanelConfig extends Component<
                     onChange={this.handlePivotChange}
                     uiRestrictions={this.context.uiRestrictions}
                     type={BUCKET_TYPES.TERMS}
+                    allowMultiSelect={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>

@@ -109,7 +109,7 @@ export interface Series {
   steps: number;
   terms_direction?: string;
   terms_exclude?: string;
-  terms_field?: string | string[];
+  terms_field?: string | Array<string | null>;
   terms_include?: string;
   terms_order_by?: string;
   terms_size?: string;
@@ -155,7 +155,7 @@ export interface Panel {
   markdown_scrollbars: number;
   markdown_vertical_align?: string;
   max_bars: number;
-  pivot_id?: string;
+  pivot_id?: string | Array<string | null>;
   pivot_label?: string;
   pivot_rows?: string;
   pivot_type?: string;
