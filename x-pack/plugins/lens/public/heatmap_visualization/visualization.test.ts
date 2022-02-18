@@ -418,6 +418,7 @@ describe('heatmap', () => {
                       arguments: {
                         isVisible: [true],
                         position: [Position.Right],
+                        legendSize: [],
                       },
                     },
                   ],

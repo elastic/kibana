@@ -145,6 +145,7 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
                     "bottom",
