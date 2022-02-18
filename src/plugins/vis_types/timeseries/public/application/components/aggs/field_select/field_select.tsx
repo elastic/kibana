@@ -53,10 +53,7 @@ export function FieldSelect({
   const htmlId = htmlIdGenerator();
   const fieldsSelector = getIndexPatternKey(indexPattern);
 
-  const selectedIds = useMemo(
-    () => (value ? (Array.isArray(value) ? value : [value]) : []),
-    [value]
-  );
+  const selectedIds = useMemo(() => (Array.isArray(value) ? value : [value || null]), [value]);
 
   const groupedOptions = useMemo(
     () => getGroupedOptions(type, selectedIds, fields[fieldsSelector], uiRestrictions, restrict),
@@ -95,20 +92,25 @@ export function FieldSelect({
   );
 
   const onFieldSelectItemChange = useCallback(
-    (index: number | undefined, [selectedItem]) => {
+    (index: number = 0, [selectedItem]) => {
       const arr = [...selectedIds];
-      arr[index ?? 0] = selectedItem?.value ?? null;
+      arr[index] = selectedItem?.value ?? null;
       onChange(arr);
     },
     [selectedIds, onChange]
   );
 
-  const onNewItemAdd = useCallback(() => {
-    onChange([...selectedIds, null]);
-  }, [selectedIds, onChange]);
+  const onNewItemAdd = useCallback(
+    (index: number = 0) => {
+      const arr = [...selectedIds];
+      arr.splice(index + 1, 0, null);
+      onChange(arr);
+    },
+    [selectedIds, onChange]
+  );
 
   const onDeleteItem = useCallback(
-    (index?: number) => {
+    (index: number = 0) => {
       onChange(selectedIds.filter((item, i) => i !== index));
     },
     [onChange, selectedIds]
@@ -132,12 +134,12 @@ export function FieldSelect({
           options={groupedOptions}
           selectedOptions={(props.value ? selectedOptionsMap.get(props.value) : undefined) ?? []}
           disabled={disabled}
-          onNewItemAdd={onNewItemAdd}
+          onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
           onDeleteItem={onDeleteItem.bind(undefined, props.index)}
           onChange={onFieldSelectItemChange.bind(undefined, props.index)}
           placeholder={preselectedField}
           disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
-          disableDelete={!allowMultiSelect || selectedIds?.length === 1}
+          disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
         />
       ),
     [

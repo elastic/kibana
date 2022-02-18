@@ -8,7 +8,7 @@
 
 import { get, last } from 'lodash';
 import { overwrite, getBucketsPath, bucketTransform } from '../../helpers';
-
+import { getFieldsForTerms } from '../../../../../common/fields_utils';
 import { basicAggs } from '../../../../../common/basic_aggs';
 
 import type { TableRequestProcessorsFunction } from './types';
@@ -18,25 +18,20 @@ export const pivot: TableRequestProcessorsFunction =
   (next) =>
   (doc) => {
     const { sort } = req.body.state;
-    const normalizedPivotIds = panel.pivot_id
-      ? Array.isArray(panel.pivot_id)
-        ? (panel.pivot_id.filter(Boolean) as string[])
-        : [panel.pivot_id!]
-      : [];
+    const pivotIds = getFieldsForTerms(panel.pivot_id);
+    const termsType = pivotIds.length > 1 ? 'multi_terms' : 'terms';
 
-    const termsType = normalizedPivotIds.length > 1 ? 'multi_terms' : 'terms';
-
-    if (normalizedPivotIds.length) {
+    if (pivotIds.length) {
       if (termsType === 'multi_terms') {
         overwrite(
           doc,
           `aggs.pivot.${termsType}.terms`,
-          normalizedPivotIds.map((item: string) => ({
+          pivotIds.map((item: string) => ({
             field: item,
           }))
         );
       } else {
-        overwrite(doc, `aggs.pivot.${termsType}.field`, normalizedPivotIds[0]);
+        overwrite(doc, `aggs.pivot.${termsType}.field`, pivotIds[0]);
       }
 
       overwrite(doc, `aggs.pivot.${termsType}.size`, panel.pivot_rows);

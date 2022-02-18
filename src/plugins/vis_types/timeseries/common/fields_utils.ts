@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
 
-import { FieldSpec } from '../../../data/common';
-import { isNestedField } from '../../../data/common';
-import { FetchedIndexPattern, SanitizedFieldType } from './types';
+import { isNestedField, FieldSpec } from '../../../data/common';
 import { FieldNotFoundError } from './errors';
+import type { FetchedIndexPattern, SanitizedFieldType } from './types';
 
 export const extractFieldLabel = (
   fields: SanitizedFieldType[],
@@ -49,3 +49,22 @@ export const toSanitizedFieldType = (fields: FieldSpec[]) =>
           type: field.type,
         } as SanitizedFieldType)
     );
+
+export const getFieldsForTerms = (fields: string | Array<string | null> | undefined): string[] => {
+  return fields ? (Array.isArray(fields) ? (fields.filter(Boolean) as string[]) : [fields]) : [];
+};
+
+export const getMultiFieldLabel = (fields: SanitizedFieldType[], fieldForTerms: string[]) => {
+  const firstFieldLabel = extractFieldLabel(fields, fieldForTerms[0]);
+
+  if (fieldForTerms.length > 1) {
+    return i18n.translate('visTypeTimeseries.fieldUtils.multiFieldLabel', {
+      defaultMessage: '{firstFieldLabel} + {length} other',
+      values: {
+        firstFieldLabel,
+        length: fieldForTerms.length - 1,
+      },
+    });
+  }
+  return firstFieldLabel;
+};

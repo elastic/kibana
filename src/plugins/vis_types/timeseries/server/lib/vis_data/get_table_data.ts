@@ -14,7 +14,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { extractFieldLabel } from '../../../common/fields_utils';
+import { getFieldsForTerms, getMultiFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
 import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
 import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
@@ -62,15 +62,15 @@ export async function getTableData(
   });
 
   const calculatePivotLabel = async () => {
-    // @todo:
-    const a = Array.isArray(panel.pivot_id) ? panel.pivot_id.join('|') : panel.pivot_id;
+    const pivotIds = getFieldsForTerms(panel.pivot_id);
 
-    if (panel.pivot_id && panelIndex.indexPattern?.id) {
-      const fields = await extractFields({ id: panelIndex.indexPattern.id });
+    if (pivotIds.length) {
+      const fields = panelIndex.indexPattern?.id
+        ? await extractFields({ id: panelIndex.indexPattern.id })
+        : [];
 
-      return extractFieldLabel(fields, a!);
+      return getMultiFieldLabel(fields, pivotIds);
     }
-    return a;
   };
 
   const meta: DataResponseMeta = {
