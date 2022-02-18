@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from '../../../visualizations/public';
-import { goalVisType } from '../../gauge/public';
+import { VisTypeGaugePlugin } from './plugin';
 
-import { toExpressionAst } from './to_ast';
-import { GaugeVisParams } from './gauge';
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new VisTypeGaugePlugin();
+}
 
-export const goalVisTypeDefinition = {
-  ...goalVisType(),
-  toExpressionAst,
-} as VisTypeDefinition<GaugeVisParams>;
+export { VisTypeGaugePluginSetup, VisTypeGaugePluginStart } from './types';
+
+export { gaugeVisType, goalVisType } from './vis_type';

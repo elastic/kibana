@@ -6,13 +6,33 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
+import { Range } from '../../../expressions/public';
 import { ColorSchemaParams, Labels, Style } from '../../../charts/public';
-import { RangeValues } from '../../../vis_default_editor/public';
-import { gaugeVisType } from '../../gauge/public';
-import { VisTypeDefinition } from '../../../visualizations/public';
 
-import { Alignment, GaugeType } from './types';
-import { toExpressionAst } from './to_ast';
+/**
+ * Gauge title alignment
+ */
+export const Alignment = {
+  Automatic: 'automatic',
+  Horizontal: 'horizontal',
+  Vertical: 'vertical',
+} as const;
+
+export type Alignment = $Values<typeof Alignment>;
+
+export const GaugeType = {
+  Arc: 'Arc',
+  Circle: 'Circle',
+} as const;
+
+export type GaugeType = $Values<typeof GaugeType>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeGaugePluginSetup {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeGaugePluginStart {}
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
@@ -20,7 +40,7 @@ export interface Gauge extends ColorSchemaParams {
   orientation: 'vertical';
   type: 'meter';
   alignment: Alignment;
-  colorsRange: RangeValues[];
+  colorsRange: Range[];
   extendRange: boolean;
   gaugeType: GaugeType;
   labels: Labels;
@@ -42,8 +62,3 @@ export interface GaugeVisParams {
   isDisplayWarning: boolean;
   gauge: Gauge;
 }
-
-export const gaugeVisTypeDefinition = {
-  ...gaugeVisType(),
-  toExpressionAst,
-} as VisTypeDefinition<GaugeVisParams>;

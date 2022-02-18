@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
+import { gaugeVisTypeDefinition } from './gauge';
+import { goalVisTypeDefinition } from './goal';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { GaugeVisParams } from '../../gauge';
+export const gaugeVisType = () => {
+  return gaugeVisTypeDefinition;
+};
 
-const GaugeOptionsLazy = lazy(() => import('./gauge'));
-
-export const GaugeOptions = (props: VisEditorOptionsProps<GaugeVisParams>) => (
-  <GaugeOptionsLazy {...props} />
-);
+export const goalVisType = () => {
+  return goalVisTypeDefinition;
+};

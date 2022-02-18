@@ -7,10 +7,10 @@
  */
 export const sampleAreaVis = {
   type: {
-    name: 'heatmap',
-    title: 'Heatmap',
-    description: 'Creates a heatmap viz',
-    icon: 'visHeatmap',
+    name: 'gauge',
+    title: 'Gauge',
+    description: 'Creates a gauge viz',
+    icon: 'visGauge',
     stage: 'production',
     options: {
       showTimePicker: true,
@@ -21,7 +21,7 @@ export const sampleAreaVis = {
     },
     visConfig: {
       defaults: {
-        type: 'heatmap',
+        type: 'gauge',
         valueAxes: [
           {
             id: 'ValueAxis-1',
@@ -144,7 +144,7 @@ export const sampleAreaVis = {
   title: '[eCommerce] Sales by Category',
   description: '',
   params: {
-    type: 'heatmap',
+    type: 'gauge',
     valueAxes: [
       {
         id: 'ValueAxis-1',

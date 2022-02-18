@@ -37,7 +37,7 @@ export const getAccessorByDimension = (
   dimension: string | ExpressionValueVisDimension,
   columns: DatatableColumn[]
 ) => {
-  if (typeof dimension === 'string') {
+  if (!isVisDimension(dimension)) {
     return dimension;
   }
 
@@ -48,3 +48,13 @@ export const getAccessorByDimension = (
 
   return accessor.id;
 };
+
+export function isVisDimension(
+  accessor: string | ExpressionValueVisDimension | undefined
+): accessor is ExpressionValueVisDimension {
+  if (typeof accessor === 'string' || accessor === undefined) {
+    return false;
+  }
+
+  return true;
+}

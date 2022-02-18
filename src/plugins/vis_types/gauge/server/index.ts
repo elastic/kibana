@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from '../../../visualizations/public';
-import { goalVisType } from '../../gauge/public';
+import { PluginConfigDescriptor } from 'src/core/server';
+import { configSchema, ConfigSchema } from '../config';
+import { VisTypeGaugeServerPlugin } from './plugin';
 
-import { toExpressionAst } from './to_ast';
-import { GaugeVisParams } from './gauge';
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+};
 
-export const goalVisTypeDefinition = {
-  ...goalVisType(),
-  toExpressionAst,
-} as VisTypeDefinition<GaugeVisParams>;
+export const plugin = () => new VisTypeGaugeServerPlugin();

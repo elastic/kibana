@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { GaugeVisParams } from '../../../gauge';
+import { GaugeVisParams } from '../../../types';
 import { RangesPanel } from './ranges_panel';
 import { StylePanel } from './style_panel';
 import { LabelsPanel } from './labels_panel';
@@ -37,13 +37,9 @@ function GaugeOptions(props: VisEditorOptionsProps<GaugeVisParams>) {
   return (
     <>
       <StylePanel {...props} setGaugeValue={setGaugeValue} />
-
       <EuiSpacer size="s" />
-
       <RangesPanel {...props} setGaugeValue={setGaugeValue} />
-
       <EuiSpacer size="s" />
-
       <LabelsPanel {...props} setGaugeValue={setGaugeValue} />
     </>
   );

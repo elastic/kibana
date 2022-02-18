@@ -7,10 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import { colorSchemas } from '../../../../charts/public';
-import { getPositions, getScaleTypes } from '../../../xy/public';
-
 import { Alignment, GaugeType } from '../types';
 
 export const getGaugeTypes = () => [
@@ -52,11 +49,5 @@ export const getAlignments = () => [
 export const getGaugeCollections = () => ({
   gaugeTypes: getGaugeTypes(),
   alignments: getAlignments(),
-  colorSchemas,
-});
-
-export const getHeatmapCollections = () => ({
-  legendPositions: getPositions(),
-  scales: getScaleTypes(),
   colorSchemas,
 });

@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from '../../../visualizations/public';
-import { goalVisType } from '../../gauge/public';
-
-import { toExpressionAst } from './to_ast';
-import { GaugeVisParams } from './gauge';
-
-export const goalVisTypeDefinition = {
-  ...goalVisType(),
-  toExpressionAst,
-} as VisTypeDefinition<GaugeVisParams>;
+export const LEGACY_GAUGE_CHARTS_LIBRARY = 'visualization:visualize:legacyGaugeChartsLibrary';

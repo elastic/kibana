@@ -19,7 +19,7 @@ import {
 } from '../../../../../../vis_default_editor/public';
 import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../../charts/public';
 import { GaugeOptionsInternalProps } from '../gauge';
-import { Gauge } from '../../../gauge';
+import { Gauge } from '../../../types';
 
 function RangesPanel({
   setGaugeValue,
