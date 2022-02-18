@@ -48,7 +48,7 @@ const defaultParams: Params = {
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
-  return renderToString(<span>{content}</span>);
+  return renderToString(<>{content}</>);
 };
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
