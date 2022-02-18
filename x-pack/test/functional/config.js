@@ -552,6 +552,26 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: ['monitor', 'create_snapshot', 'manage'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         ingest_pipelines_user: {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
