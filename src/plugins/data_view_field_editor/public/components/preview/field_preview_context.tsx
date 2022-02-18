@@ -46,8 +46,10 @@ const defaultParams: Params = {
   format: null,
 };
 
-export const defaultValueFormatter = (value: unknown) =>
-  renderToString(<span>${typeof value === 'object' ? JSON.stringify(value) : value ?? '-'}</span>);
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  return renderToString(<span>{content}</span>);
+};
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
