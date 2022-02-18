@@ -74,7 +74,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View sample document')).not.toBeNull();
+    expect(queryByText('View transaction in Discover')).not.toBeNull();
   });
 
   it('always renders the trace logs link', async () => {

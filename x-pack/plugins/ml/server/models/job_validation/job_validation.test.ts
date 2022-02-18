@@ -6,19 +6,20 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../common/types/es_client';
 import type { MlClient } from '../../lib/ml_client';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 
-const callAs = {
-  fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  search: () =>
-    Promise.resolve({
-      body: { hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } } },
-    }),
-};
+const callAs = elasticsearchServiceMock.createElasticsearchClient();
+// @ts-expect-error incorrect types
+callAs.fieldCaps.mockResponse({ fields: [] });
+callAs.search.mockResponse({
+  // @ts-expect-error incorrect types
+  hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } },
+});
 
 const authHeader: AuthorizationHeader = {};
 
@@ -30,14 +31,12 @@ const mlClusterClient = {
 const mlClient = {
   info: () =>
     Promise.resolve({
-      body: {
-        limits: {
-          effective_max_model_memory_limit: '100MB',
-          max_model_memory_limit: '1GB',
-        },
+      limits: {
+        effective_max_model_memory_limit: '100MB',
+        max_model_memory_limit: '1GB',
       },
     }),
-  previewDatafeed: () => Promise.resolve({ body: [{}] }),
+  previewDatafeed: () => Promise.resolve([{}]),
 } as unknown as MlClient;
 
 // Note: The tests cast `payload` as any

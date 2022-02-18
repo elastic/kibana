@@ -27,13 +27,13 @@ const mlClusterClientFactory = (
   fail = false
 ): IScopedClusterClient => {
   const callAs = {
-    search: () => Promise.resolve({ body: responses.search }),
-    fieldCaps: () => Promise.resolve({ body: responses.fieldCaps }),
+    search: () => Promise.resolve(responses.search),
+    fieldCaps: () => Promise.resolve(responses.fieldCaps),
   };
 
   const callAsFail = {
-    search: () => Promise.reject({ body: {} }),
-    fieldCaps: () => Promise.reject({ body: {} }),
+    search: () => Promise.reject({}),
+    fieldCaps: () => Promise.reject({}),
   };
 
   return {

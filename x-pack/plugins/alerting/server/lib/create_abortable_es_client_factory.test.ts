@@ -32,6 +32,7 @@ describe('createAbortableEsClientFactory', () => {
     await abortableSearchClient.asInternalUser.search(esQuery);
     expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith(esQuery, {
       signal: abortController.signal,
+      meta: true,
     });
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
@@ -47,6 +48,7 @@ describe('createAbortableEsClientFactory', () => {
     await abortableSearchClient.asCurrentUser.search(esQuery);
     expect(scopedClusterClient.asCurrentUser.search).toHaveBeenCalledWith(esQuery, {
       signal: abortController.signal,
+      meta: true,
     });
     expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
   });
@@ -63,6 +65,7 @@ describe('createAbortableEsClientFactory', () => {
     expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith(esQuery, {
       ignore: [404],
       signal: abortController.signal,
+      meta: true,
     });
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
