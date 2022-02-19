@@ -51,7 +51,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
-  const [groupIds, setGroupIds] = useState<[] | undefined>(undefined);
+  const [groupIds, setGroupIds] = useState<number[]>([]);
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -110,45 +110,39 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         id: selectedFilters[idx].id,
         relationship: selectedFilters[idx].relationship,
         subGroupId: selectedFilters[idx].subGroupId,
-        groupCount
+        groupCount,
       };
     });
 
     const multipleFilters = [...props.multipleFilters];
 
-    const newMultipleFilters = multipleFilters.filter(
-      (filter) => !groupIds.includes(filter.groupId)
+    const indexOfCurFilter = multipleFilters.findIndex(
+      (f) => Number(f.groupId) === Number(groupIds[0])
     );
 
-    const filtersNew = newMultipleFilters.concat(mergedFilters);
-
-    // const indexOfCurFilter = multipleFilters.findIndex(
-    //   (f) => Number(f.groupId) === Number(groupId)
-    // );
-
-    // multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
+    multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
 
     // when user adds new filters in edit modal they should appear near of editing filter
-    // let gId: number = 0;
-    // let reserveGroupId: number;
-    // const updatedMultipleFilters = multipleFilters.map((filter, idx) => {
-    //   if (filter.groupId !== reserveGroupId) {
-    //     reserveGroupId = filter.groupId;
-    //     gId++;
-    //   }
-    //   return {
-    //     ...filter,
-    //     groupId: gId,
-    //     id: idx,
-    //   };
-    // });
+    let gId: number = 0;
+    let reserveGroupId: number;
+    const updatedMultipleFilters = multipleFilters.map((filter, idx) => {
+      if (filter.groupId !== reserveGroupId) {
+        reserveGroupId = filter.groupId;
+        gId++;
+      }
+      return {
+        ...filter,
+        groupId: gId,
+        id: idx,
+      };
+    });
 
-    props?.onMultipleFiltersUpdated?.(filtersNew);
+    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
 
     const filters = [...props.filters, ...buildFilters];
     const updatedFilters: Filter[] = [];
 
-    filtersNew.forEach((filter) => {
+    updatedMultipleFilters.forEach((filter) => {
       filters.forEach((f) => {
         if (isEqual(f.query, filter.query)) {
           updatedFilters.push(f);
@@ -250,7 +244,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   function renderEditFilter() {
     let currentEditFilters = [];
     groupIds?.forEach((groupId) => {
-      const filteredFilters = props.multipleFilters.filter(filter => filter.groupId === groupId);
+      const filteredFilters = props.multipleFilters.filter((filter) => filter.groupId === groupId);
       currentEditFilters.push(...filteredFilters);
     });
 
