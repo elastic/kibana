@@ -116,6 +116,28 @@ export function getAlertType(
     }
   );
 
+  const actionVariableSearchTypeLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextSearchTypeLabel',
+    {
+      defaultMessage: 'The type of search is used.',
+    }
+  );
+
+  const actionVariableSearchConfigurationLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextSearchConfigurationLabel',
+    {
+      defaultMessage:
+        'Serialized search source fields used to fetch the documents from Elasticsearch.',
+    }
+  );
+
+  const actionVariableContextLinkLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
+    {
+      defaultMessage: 'A link to see records that triggered this alert.',
+    }
+  );
+
   return {
     id: ES_QUERY_ID,
     name: alertTypeName,
@@ -132,13 +154,16 @@ export function getAlertType(
         { name: 'value', description: actionVariableContextValueLabel },
         { name: 'hits', description: actionVariableContextHitsLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
+        { name: 'link', description: actionVariableContextLinkLabel },
       ],
       params: [
-        { name: 'index', description: actionVariableContextIndexLabel },
-        { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'size', description: actionVariableContextSizeLabel },
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
+        { name: 'searchType', description: actionVariableSearchTypeLabel },
+        { name: 'searchConfiguration', description: actionVariableSearchConfigurationLabel },
+        { name: 'esQuery', description: actionVariableContextQueryLabel },
+        { name: 'index', description: actionVariableContextIndexLabel },
       ],
     },
     minimumLicenseRequired: 'basic',
