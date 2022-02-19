@@ -16,6 +16,7 @@ import {
   cleanFilter,
   getFilterParams,
   FieldFilter,
+  buildQueryFromFilters,
 } from '@kbn/es-query';
 import {
   EuiFormRow,
@@ -97,6 +98,7 @@ export function EditFilterModal({
   onRemoveFilterGroup,
   saveFilters,
   savedQueryService,
+  filters
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (
@@ -114,13 +116,24 @@ export function EditFilterModal({
   onRemoveFilterGroup: () => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   savedQueryService: SavedQueryService;
+  filters: Filterp[];
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
-  const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(currentEditFilters?.map(filter => cleanFilter(filter)), null, 2));
+  const [queryDsl, setQueryDsl] = useState<string>(
+    JSON.stringify(
+      {
+        query: {
+          bool: buildQueryFromFilters(filters, selectedIndexPattern)
+        },
+      },
+      null,
+      2
+    )
+  );
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );

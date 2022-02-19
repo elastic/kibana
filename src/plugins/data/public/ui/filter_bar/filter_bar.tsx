@@ -208,7 +208,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={gId}
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
@@ -230,7 +230,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedByAlias[label]}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           onEditFilterClick={onEditFilterClick}
@@ -254,6 +254,16 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       currentEditFilters.push(...filteredFilters);
     });
 
+    const saerchedFilters: Filter[] = [];
+
+    currentEditFilters.forEach((filter) => {
+      props.filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          saerchedFilters.push(f);
+        }
+      });
+    });
+
     return (
       <EuiFlexItem grow={false}>
         {props.isEditFilterModalOpen && (
@@ -263,6 +273,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={currentEditFilters[0]}
             currentEditFilters={currentEditFilters}
+            filters={saerchedFilters}
             multipleFilters={props.multipleFilters}
             indexPatterns={props.indexPatterns!}
             onRemoveFilterGroup={onDeleteFilterGroup}
