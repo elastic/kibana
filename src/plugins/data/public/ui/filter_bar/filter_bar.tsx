@@ -260,7 +260,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           <EditFilterModal
             onSubmit={onAddMultipleFilters}
             onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
-            applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={currentEditFilters[0]}
             currentEditFilters={currentEditFilters}

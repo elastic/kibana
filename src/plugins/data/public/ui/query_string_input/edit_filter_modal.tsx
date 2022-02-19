@@ -88,7 +88,6 @@ export function EditFilterModal({
   onSubmit,
   onMultipleFiltersSubmit,
   onCancel,
-  applySavedQueries,
   filter,
   multipleFilters,
   currentEditFilters,
@@ -105,7 +104,6 @@ export function EditFilterModal({
     buildFilters: Filter[],
     groupCount: number
   ) => void;
-  applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
   multipleFilters?: Filter[];
@@ -186,15 +184,15 @@ export function EditFilterModal({
         value: undefined,
         groupId: multipleFilters?.length
           ? Math.max.apply(
-              Math,
-              multipleFilters.map((f) => f.groupId)
-            ) + 1
+            Math,
+            multipleFilters.map((f) => f.groupId)
+          ) + 1
           : 1,
         id: multipleFilters?.length
           ? Math.max.apply(
-              Math,
-              multipleFilters.map((f) => f.id)
-            ) + 1
+            Math,
+            multipleFilters.map((f) => f.id)
+          ) + 1
           : 0,
         subGroupId: 1,
       },
@@ -312,11 +310,11 @@ export function EditFilterModal({
           placeholder={
             selectedField
               ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                  defaultMessage: 'Operator',
-                })
+                defaultMessage: 'Operator',
+              })
               : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                  defaultMessage: 'Waiting',
-                })
+                defaultMessage: 'Waiting',
+              })
           }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -489,8 +487,6 @@ export function EditFilterModal({
           onSubmitWithLabel(finalFilters);
         }
       }
-    } else if (addFilterMode === 'saved_filters') {
-      applySavedQueries();
     }
   };
 
@@ -526,8 +522,8 @@ export function EditFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                ? 'kbnQueryBar__filterModalGroups'
-                : '';
+                  ? 'kbnQueryBar__filterModalGroups'
+                  : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -781,29 +777,6 @@ export function EditFilterModal({
       <EuiHorizontalRule margin="none" />
       <EuiModalFooter>
         <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-          {addFilterMode !== 'saved_filters' && (
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('data.filter.filterEditor.createCustomLabelInputLabel', {
-                  defaultMessage: 'Label (optional)',
-                })}
-                display="columnCompressed"
-                error={i18n.translate('data.search.searchBar.savedQueryForm.titleConflictText', {
-                  defaultMessage: 'Name conflicts with an existing saved query.',
-                })}
-                isInvalid={submitDisabled}
-              >
-                <EuiFieldText
-                  value={`${customLabel}`}
-                  onChange={(e) => {
-                    setSubmitDisabled(false);
-                    setCustomLabel(e.target.value);
-                  }}
-                  compressed
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>

@@ -730,7 +730,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             editFilterMode={this.state.editFilterMode}
             savedQueryService={this.savedQueryService}
             onFilterSave={(savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
-              console.log(this.state.query);
               return this.onSave(savedQueryMeta, saveAsNew, {
                 language: this.state.query!.language,
                 query: '',
