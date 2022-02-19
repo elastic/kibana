@@ -777,6 +777,29 @@ export function EditFilterModal({
       <EuiHorizontalRule margin="none" />
       <EuiModalFooter>
         <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+          {addFilterMode !== 'saved_filters' && (
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('data.filter.filterEditor.createCustomLabelInputLabel', {
+                  defaultMessage: 'Label (optional)',
+                })}
+                display="columnCompressed"
+                error={i18n.translate('data.search.searchBar.savedQueryForm.titleConflictText', {
+                  defaultMessage: 'Name conflicts with an existing saved query.',
+                })}
+                isInvalid={submitDisabled}
+              >
+                <EuiFieldText
+                  value={`${customLabel}`}
+                  onChange={(e) => {
+                    setSubmitDisabled(false);
+                    setCustomLabel(e.target.value);
+                  }}
+                  compressed
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
