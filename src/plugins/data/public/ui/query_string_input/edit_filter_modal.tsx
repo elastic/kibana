@@ -116,7 +116,7 @@ export function EditFilterModal({
   onRemoveFilterGroup: () => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   savedQueryService: SavedQueryService;
-  filters: Filterp[];
+  filters: Filter[];
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -127,7 +127,7 @@ export function EditFilterModal({
     JSON.stringify(
       {
         query: {
-          bool: buildQueryFromFilters(filters, selectedIndexPattern)
+          bool: buildQueryFromFilters(filters, selectedIndexPattern),
         },
       },
       null,
