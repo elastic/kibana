@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useCallback, useMemo, useEffect } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
@@ -33,6 +33,23 @@ import {
   CreateFieldEditorActions,
   useCreateFieldButton,
 } from '../../../timelines/components/create_field_button';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { SummaryViewSelector, ViewSelection } from './selector';
+
+export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
+  graphEventId != null && graphEventId !== '';
+
+export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
+  ${({ $view, theme }) =>
+    $view === 'gridView' ? `margin-right: ${theme.eui.paddingSizes.xl};` : ''}
+  position: absolute;
+  z-index: ${({ theme }) => theme.eui.euiZLevel1};
+  right: 0px;
+`;
+
+export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
+  ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
+`;
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -178,13 +195,35 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
   const createFieldComponent = useCreateFieldButton(scopeId, id, editorActionsRef);
+  const [tableView, setTableView] = useState<ViewSelection>('gridView');
+  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
 
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
+        <UpdatedFlexGroup
+                alignItems={alignItems}
+                data-test-subj="updated-flex-group"
+                gutterSize="m"
+                justifyContent="flexEnd"
+                $view={tableView}
+              >
+                <UpdatedFlexItem grow={false} $show={true}>
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
+                </UpdatedFlexItem>
+                {tGridEventRenderedViewEnabled &&
+                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                    <UpdatedFlexItem grow={false} $show={true}>
+                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                    </UpdatedFlexItem>
+                  )}
+                <UpdatedFlexItem grow={false} $show={true}>
+                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                </UpdatedFlexItem>
+          </UpdatedFlexGroup>
           {timelinesUi.getTGrid<'embedded'>({
-            additionalFilters,
+            tableView,
             appId: APP_UI_ID,
             browserFields,
             bulkActions,
@@ -220,7 +259,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             setQuery,
             sort,
             start,
-            tGridEventRenderedViewEnabled,
             trailingControlColumns,
             type: 'embedded',
             unit,

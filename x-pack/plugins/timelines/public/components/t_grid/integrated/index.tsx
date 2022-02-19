@@ -40,14 +40,14 @@ import type { DataPublicPluginStart } from '../../../../../../../src/plugins/dat
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import { buildCombinedQuery, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
-import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
+import { ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 const TitleText = styled.span`
@@ -93,7 +93,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
-  additionalFilters: React.ReactNode;
+  tableView: ViewSelection;
   appId: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
@@ -133,13 +133,12 @@ export interface TGridIntegratedProps {
   setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
   sort: Sort[];
   start: string;
-  tGridEventRenderedViewEnabled: boolean;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (n: number) => string;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
-  additionalFilters,
+  tableView,
   appId,
   browserFields,
   bulkActions = true,
@@ -176,7 +175,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   setQuery,
   sort,
   start,
-  tGridEventRenderedViewEnabled,
   trailingControlColumns,
   unit,
 }) => {
@@ -185,7 +183,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const { uiSettings } = useKibana<CoreStart>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(true);
 
-  const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
@@ -340,15 +337,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  {!resolverIsShowing(graphEventId) && additionalFilters}
-                </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled &&
-                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                    <UpdatedFlexItem grow={false} $show={!loading}>
-                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                    </UpdatedFlexItem>
-                  )}
               </UpdatedFlexGroup>
               {!graphEventId && graphOverlay == null && (
                 <>
