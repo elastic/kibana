@@ -5,26 +5,35 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import { pick } from 'lodash';
 import { RouteRegistrar } from 'kibana/server';
 import { CasesRequestHandlerContext } from '../../types';
-import { deleteCaseRoute } from './cases/delete_cases';
-import { RegisterRoutesDeps } from './types';
-import { wrapError } from './utils';
+import { CaseRoute, RegisterRoutesDeps } from './types';
+import { escapeHatch, wrapError } from './utils';
 
-const getRoutes = () => [deleteCaseRoute];
+export function pickKeys<T, K extends keyof T>(obj: T, ...keys: K[]) {
+  return pick(obj, keys) as Pick<T, K>;
+}
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
-  const { router, logger, kibanaVersion } = deps;
-  const routes = getRoutes();
+  const { router, routes, logger, kibanaVersion } = deps;
 
   routes.forEach((route) => {
-    const { method, options, handler } = route;
+    const { method, path, params, handler } = route as CaseRoute;
 
     (router[method] as RouteRegistrar<typeof method, CasesRequestHandlerContext>)(
-      options,
+      {
+        path,
+        validate: {
+          params: params.params ?? escapeHatch,
+          query: params.query ?? escapeHatch,
+          body: params.body ?? schema.nullable(escapeHatch),
+        },
+      },
       async (context, request, response) => {
         try {
-          const res = await handler({ logger, context, request, response });
+          const res = await handler({ logger, context, request, response, kibanaVersion });
           return res;
         } catch (error) {
           logger.error(error.message);

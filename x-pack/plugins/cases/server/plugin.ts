@@ -31,6 +31,7 @@ import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { LensServerPluginSetup } from '../../lens/server';
 import { registerRoutes } from './routes/api/register_routes';
+import { getExternalRoutes } from './routes/api/get_external_routes';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -107,7 +108,12 @@ export class CasePlugin {
       kibanaVersion: this.kibanaVersion,
     });
 
-    registerRoutes({ router, logger: this.log, kibanaVersion: this.kibanaVersion });
+    registerRoutes({
+      router,
+      routes: getExternalRoutes(),
+      logger: this.log,
+      kibanaVersion: this.kibanaVersion,
+    });
   }
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {

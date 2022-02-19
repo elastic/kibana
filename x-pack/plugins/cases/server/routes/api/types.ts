@@ -8,11 +8,10 @@
 import type {
   Logger,
   PluginInitializerContext,
-  RouteConfig,
-  RouteMethod,
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
+  RouteValidatorConfig,
 } from 'kibana/server';
 
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
@@ -25,6 +24,7 @@ export interface RouteDeps {
 
 export interface RegisterRoutesDeps {
   router: CasesRouter;
+  routes: CaseRoute[];
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
@@ -39,11 +39,13 @@ interface CaseRouteHandlerArguments<P, Q, B> {
   context: CasesRequestHandlerContext;
   response: KibanaResponseFactory;
   logger: Logger;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
 export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
-  method: 'get' | 'post' | 'put' | 'delete';
-  options: RouteConfig<P, Q, B, RouteMethod>;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch';
+  path: string;
+  params: RouteValidatorConfig<P, Q, B>;
   handler: ({
     request,
     context,

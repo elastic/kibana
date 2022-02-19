@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { CaseRoute } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
+import { createRouter } from '../create_cases_route';
 
-const validate = {
-  query: schema.object({
-    ids: schema.arrayOf(schema.string()),
-  }),
-};
-
-export const deleteCaseRoute: CaseRoute<unknown, TypeOf<typeof validate['query']>> = {
+export const deleteCaseRoute = createRouter({
   method: 'delete',
-  options: {
-    path: CASES_URL,
-    validate,
+  path: CASES_URL,
+  params: {
+    query: schema.object({
+      ids: schema.arrayOf(schema.string()),
+    }),
   },
   handler: async ({ context, request, response }) => {
     try {
@@ -38,4 +34,4 @@ export const deleteCaseRoute: CaseRoute<unknown, TypeOf<typeof validate['query']
       });
     }
   },
-};
+});
