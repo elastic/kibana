@@ -7,4 +7,4 @@
 
 import { CaseRoute } from './types';
 
-export const createRouter = <P, Q, B>(route: CaseRoute<P, Q, B>) => route;
+export const createCasesRoute = <P, Q, B>(route: CaseRoute<P, Q, B>) => route;

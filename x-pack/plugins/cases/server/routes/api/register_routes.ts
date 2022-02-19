@@ -26,9 +26,9 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
       {
         path,
         validate: {
-          params: params.params ?? escapeHatch,
-          query: params.query ?? escapeHatch,
-          body: params.body ?? schema.nullable(escapeHatch),
+          params: params?.params ?? escapeHatch,
+          query: params?.query ?? escapeHatch,
+          body: params?.body ?? schema.nullable(escapeHatch),
         },
       },
       async (context, request, response) => {

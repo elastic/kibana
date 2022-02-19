@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
-import { createRouter } from '../create_cases_route';
+import { createCasesRoute } from '../create_cases_route';
 
-export const deleteCaseRoute = createRouter({
+export const deleteCaseRoute = createCasesRoute({
   method: 'delete',
   path: CASES_URL,
   params: {

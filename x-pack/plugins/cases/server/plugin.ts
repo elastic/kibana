@@ -15,7 +15,6 @@ import {
 } from '../../actions/server';
 import { APP_ID } from '../common/constants';
 
-import { initCaseApi } from './routes/api';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -102,12 +101,6 @@ export class CasePlugin {
     );
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
-    initCaseApi({
-      logger: this.log,
-      router,
-      kibanaVersion: this.kibanaVersion,
-    });
-
     registerRoutes({
       router,
       routes: getExternalRoutes(),
