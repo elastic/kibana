@@ -17,6 +17,7 @@ import type {
   FieldBrowserProps,
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
+  InspectButtonProps,
 } from './components';
 export type { SortDirection } from '../common/types';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
@@ -36,6 +37,7 @@ export interface TimelinesUIStart {
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
+  getInspectButton: (props: InspectButtonProps) => ReactElement<InspectButtonProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
   getUseDraggableKeyboardWrapper: () => (

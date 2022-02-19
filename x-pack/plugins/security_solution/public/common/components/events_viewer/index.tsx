@@ -35,6 +35,7 @@ import {
 } from '../../../timelines/components/create_field_button';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { SummaryViewSelector, ViewSelection } from './selector';
+import { InspectResponse } from '../../../types';
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
@@ -49,6 +50,10 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
 
 export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
   ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
+`;
+
+const TitleText = styled.span`
+  margin-right: 12px;
 `;
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
@@ -75,7 +80,6 @@ export interface OwnProps {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
@@ -118,7 +122,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   showCheckboxes,
   sort,
   timelineQuery,
-  utilityBar,
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
@@ -143,6 +146,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     'tGridEventRenderedViewEnabled'
   );
   const editorActionsRef = useRef<CreateFieldEditorActions>(null);
+  const [inspectResponse, setInspectResponse] = useState<InspectResponse>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>('');
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -176,8 +182,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [graphEventId, id]
   );
   const setQuery = useCallback(
-    (inspect, loading, refetch) => {
+    (inspect, loading, refetch, title) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
+      setInspectResponse(inspect);
+      setLoading(loading);
+      setTitle(title);
     },
     [dispatch, id]
   );
@@ -197,6 +206,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const createFieldComponent = useCreateFieldButton(scopeId, id, editorActionsRef);
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
+  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+
 
   return (
     <>
@@ -209,16 +220,21 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                 justifyContent="flexEnd"
                 $view={tableView}
               >
-                <UpdatedFlexItem grow={false} $show={true}>
+                {!!inspectResponse ? (
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  {timelinesUi.getInspectButton({inspect: inspectResponse, loading, title: justTitle})}
+                </UpdatedFlexItem>
+                ) : null}
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
                 {tGridEventRenderedViewEnabled &&
                   ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                    <UpdatedFlexItem grow={false} $show={true}>
+                    <UpdatedFlexItem grow={false} $show={!loading}>
                       <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                     </UpdatedFlexItem>
                   )}
-                <UpdatedFlexItem grow={false} $show={true}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                 </UpdatedFlexItem>
           </UpdatedFlexGroup>
@@ -363,7 +379,6 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
-      prevProps.utilityBar === nextProps.utilityBar &&
       prevProps.additionalFilters === nextProps.additionalFilters &&
       prevProps.graphEventId === nextProps.graphEventId
   )

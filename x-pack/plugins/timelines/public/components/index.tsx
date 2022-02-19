@@ -60,3 +60,4 @@ export * from './draggables';
 export * from './last_updated';
 export * from './loading';
 export * from './fields_browser';
+export * from './inspect';

@@ -13,7 +13,7 @@ import { Provider } from 'react-redux';
 import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps, InspectButtonProps } from '../components';
 import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 import { initialTGridState } from '../store/t_grid/reducer';
 import { createStore } from '../store/t_grid';
@@ -81,6 +81,15 @@ export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { stor
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <FieldsBrowserLazy {...props} store={store} />
+    </Suspense>
+  );
+};
+
+const InspectButtonLazy = lazy(() => import('../components/inspect'));
+export const getInspectButtonLazy = (props: InspectButtonProps) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <InspectButtonLazy {...props} />
     </Suspense>
   );
 };

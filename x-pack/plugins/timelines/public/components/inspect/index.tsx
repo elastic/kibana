@@ -112,3 +112,6 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 };
 
 export const InspectButton = React.memo(InspectButtonComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { InspectButton as default };

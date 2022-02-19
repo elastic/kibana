@@ -44,15 +44,11 @@ import { buildCombinedQuery, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
 import { Sort } from '../body/sort';
-import { InspectButton, InspectButtonContainer } from '../../inspect';
+import { InspectButtonContainer } from '../../inspect';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-
-const TitleText = styled.span`
-  margin-right: 12px;
-`;
 
 const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   display: flex;
@@ -130,7 +126,7 @@ export interface TGridIntegratedProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
-  setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
+  setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch, inspectTitle: string) => void; // TODO: remove inspectTitle
   sort: Sort[];
   start: string;
   trailingControlColumns?: ControlColumnProps[];
@@ -191,8 +187,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
   }, [dispatch, id, isQueryLoading]);
-
-  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
   const combinedQueries = buildCombinedQuery({
     config: getEsQueryConfig(uiSettings),
@@ -283,8 +277,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
-  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-
   const isFirstUpdate = useRef(true);
   useEffect(() => {
     if (isFirstUpdate.current && !loading) {
@@ -293,8 +285,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [loading]);
 
   useEffect(() => {
-    setQuery(inspect, loading, refetch);
-  }, [inspect, loading, refetch, setQuery]);
+    setQuery(inspect, loading, refetch, title);
+  }, [inspect, loading, refetch, setQuery, title]);
   const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
 
   // Clear checkbox selection when new events are fetched
@@ -327,17 +319,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup
-                alignItems={alignItems}
-                data-test-subj="updated-flex-group"
-                gutterSize="m"
-                justifyContent="flexEnd"
-                $view={tableView}
-              >
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-                </UpdatedFlexItem>
-              </UpdatedFlexGroup>
               {!graphEventId && graphOverlay == null && (
                 <>
                   {!hasAlerts && !loading && <TGridEmpty height="short" />}
