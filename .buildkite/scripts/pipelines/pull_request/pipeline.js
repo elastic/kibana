@@ -85,6 +85,10 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
     }
 
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_synthetics.yml'));
+    }
+
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')

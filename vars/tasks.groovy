@@ -154,6 +154,7 @@ def functionalXpack(Map params = [:]) {
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
+        task(kibanaPipeline.functionalTestProcess('xpack-APMSynthetics', './test/scripts/jenkins_apm_synthetics.sh'))
       }
     }
 
@@ -164,7 +165,7 @@ def functionalXpack(Map params = [:]) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
       }
     }
-    
+
     whenChanged([
       'x-pack/plugins/fleet/',
     ]) {
@@ -176,6 +177,7 @@ def functionalXpack(Map params = [:]) {
     whenChanged([
       'x-pack/plugins/osquery/',
     ]) {
+
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-osqueryCypress', './test/scripts/jenkins_osquery_cypress.sh'))
       }

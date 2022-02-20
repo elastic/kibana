@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "exclude": ["tmp", "target/**/*"],
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [ "node"],
+  },
+  "references": [
+    { "path": "../../../test/tsconfig.json" },
+    { "path": "../../../../test/tsconfig.json" },
+  ]
+}

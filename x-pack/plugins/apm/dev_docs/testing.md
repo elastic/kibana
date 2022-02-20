@@ -74,6 +74,16 @@ The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
 
 ---
 
+## E2E Tests (Synthetics)
+
+```
+node scripts/test/synthetics [--trial] [--help]
+```
+
+The synethetics E2E tests are located in [`x-pack/plugins/apm/e2e`](../e2e)
+
+---
+
 ## Functional tests (Security and Correlations tests)
 
 TODO: We could try moving this tests to the new e2e tests located at `x-pack/plugins/apm/ftr_e2e`.
