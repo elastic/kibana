@@ -335,7 +335,9 @@ describe('cherrypick', () => {
     jest
       .spyOn(childProcess, 'exec')
 
-      // mock cherry pick command
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
+      // mock cherrypick(...)
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
 
     expect(await cherrypick(options, 'abcd')).toEqual({
@@ -348,6 +350,9 @@ describe('cherrypick', () => {
   it('should use mainline option when specified', async () => {
     const execSpy = jest
       .spyOn(childProcess, 'exec')
+
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
@@ -362,6 +367,9 @@ describe('cherrypick', () => {
   it('should return `needsResolving: true` upon cherrypick error', async () => {
     jest
       .spyOn(childProcess, 'exec')
+
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(
@@ -405,6 +413,9 @@ describe('cherrypick', () => {
     jest
       .spyOn(childProcess, 'exec')
 
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
+
       // mock cherry pick command
       .mockRejectedValueOnce(
         new ExecError({
@@ -434,6 +445,9 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
     jest
       .spyOn(childProcess, 'exec')
 
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
+
       // mock cherry pick command
       .mockRejectedValueOnce(
         new ExecError({
@@ -456,6 +470,9 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
   it('gracefully handles missing git info', async () => {
     jest
       .spyOn(childProcess, 'exec')
+
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(
@@ -492,6 +509,9 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
   it('should re-throw non-cherrypick errors', async () => {
     jest
       .spyOn(childProcess, 'exec')
+
+      // mock getIsMergeCommit(...)
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(new Error('non-cherrypick error'))

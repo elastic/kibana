@@ -7,16 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run file",
-      "program": "${file}",
-      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "console": "integratedTerminal"
-    },
-
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Start backport (CLI)",
+      "name": "Run backport (ts-node)",
       "program": "${workspaceRoot}/src/entrypoint.cli.ts",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "args": [

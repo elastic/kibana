@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../options/options';
 import {
-  parseRemoteConfig,
   RemoteConfigHistory,
   RemoteConfigHistoryFragment,
 } from '../remoteConfig';
@@ -38,6 +37,7 @@ export interface SourcePullRequestNode {
     }[];
   };
   mergeCommit: {
+    remoteConfigHistory: RemoteConfigHistory['remoteConfigHistory'];
     sha: string;
     message: string;
   };
@@ -84,7 +84,6 @@ interface TimelineIssueEdge {
 }
 
 export type SourceCommitWithTargetPullRequest = {
-  remoteConfigHistory: RemoteConfigHistory['remoteConfigHistory'];
   repository: {
     name: string;
     owner: { login: string };
@@ -110,22 +109,6 @@ export function parseSourceCommit({
   const sourcePullRequest =
     sourceCommit.associatedPullRequests.edges?.[0]?.node;
 
-  // use info from associated pull request if available. Fall back to commit info
-
-  const sourceBranch = sourcePullRequest?.baseRefName ?? options.sourceBranch;
-  const remoteConfig =
-    sourceCommit.remoteConfigHistory.edges?.[0]?.remoteConfig;
-
-  const branchLabelMapping = remoteConfig
-    ? parseRemoteConfig(remoteConfig)?.branchLabelMapping ??
-      options.branchLabelMapping
-    : options.branchLabelMapping;
-
-  const expectedTargetPullRequests = getExpectedTargetPullRequests(
-    sourceCommit,
-    branchLabelMapping
-  );
-
   return {
     sourceCommit: {
       committedDate: sourceCommit.committedDate,
@@ -142,15 +125,16 @@ export function parseSourceCommit({
           },
         }
       : undefined,
-    sourceBranch,
-    expectedTargetPullRequests,
+    sourceBranch: sourcePullRequest?.baseRefName ?? options.sourceBranch,
+    expectedTargetPullRequests: getExpectedTargetPullRequests({
+      sourceCommit,
+      latestBranchLabelMapping: options.branchLabelMapping,
+    }),
   };
 }
 
-export const sourceCommitWithTargetPullRequestFragment = gql`
-  fragment SourceCommitWithTargetPullRequest on Commit {
-    ...RemoteConfigHistory
-
+export const SourceCommitWithTargetPullRequestFragment = gql`
+  fragment SourceCommitWithTargetPullRequestFragment on Commit {
     # Source Commit
     repository {
       name
@@ -177,6 +161,7 @@ export const sourceCommitWithTargetPullRequestFragment = gql`
 
           # source merge commit (the commit that actually went into the source branch)
           mergeCommit {
+            ...RemoteConfigHistoryFragment
             sha: oid
             message
           }

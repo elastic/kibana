@@ -99,6 +99,11 @@ export function getOptionsFromCliArgs(
       type: 'boolean',
     })
 
+    .option('dryRun', {
+      description: 'Run backport locally without pushing to Github',
+      type: 'boolean',
+    })
+
     .option('editor', {
       description: 'Editor to be opened during conflict resolution',
       type: 'string',

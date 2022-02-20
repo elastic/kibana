@@ -7,45 +7,16 @@ import * as childProcess from './child-process-promisified';
 import {
   cherrypick,
   cloneRepo,
+  getCommitsInMergeCommit,
   getIsCommitInBranch,
   getSourceRepoPath,
+  getIsMergeCommit,
 } from './git';
 import { getShortSha } from './github/commitFormatters';
 import { RepoOwnerAndNameResponse } from './github/v4/getRepoOwnerAndNameFromGitRemotes';
 
 jest.unmock('del');
 jest.unmock('make-dir');
-
-async function createAndCommitFile({
-  filename,
-  content,
-  execOpts,
-}: {
-  filename: string;
-  content: string;
-  execOpts: { cwd: string };
-}) {
-  await childProcess.exec(`echo "${content}" > "${filename}"`, execOpts);
-  await childProcess.exec(
-    `git add -A && git commit -m 'Update ${filename}'`,
-    execOpts
-  );
-
-  return getCurrentSha(execOpts);
-}
-
-async function getCurrentSha(execOpts: { cwd: string }) {
-  const { stdout } = await childProcess.exec('git rev-parse HEAD', execOpts);
-  return stdout.trim();
-}
-
-async function getCurrentMessage(execOpts: { cwd: string }) {
-  const { stdout } = await childProcess.exec(
-    'git --no-pager log -1 --pretty=%B',
-    execOpts
-  );
-  return stdout.trim();
-}
 
 describe('git.integration', () => {
   describe('getIsCommitInBranch', () => {
@@ -324,7 +295,128 @@ describe('git.integration', () => {
       );
     });
   });
+
+  describe('when cloning "backport-org/different-merge-strategies"', () => {
+    const MERGE_COMMIT_HASH_1 = 'bdc5a17f81e5f32129e27b05c742e055c650bc54';
+    const MERGE_COMMIT_HASH_2 = '0db7f1ac1233461563d8708511d1c14adbab46da';
+    const SQUASH_COMMIT_HASH = '74a76fa64b34e3ffe8f2a3f73840e1b42fd07299';
+    const REBASE_COMMIT_HASH = '9059ae0ca31caa2eebc035f2542842d6c2fde83b';
+
+    let sandboxPath: string;
+    beforeAll(async () => {
+      sandboxPath = getSandboxPath({
+        filename: __filename,
+        specname: 'different-merge-strategies',
+      });
+      await resetSandbox(sandboxPath);
+
+      await childProcess.exec(
+        'git clone https://github.com/backport-org/different-merge-strategies.git ./',
+        { cwd: sandboxPath }
+      );
+    });
+
+    describe('getIsMergeCommit', () => {
+      it('returns true for first merge commit', async () => {
+        const res = await getIsMergeCommit(
+          { dir: sandboxPath } as ValidConfigOptions,
+          MERGE_COMMIT_HASH_1
+        );
+
+        expect(res).toBe(true);
+      });
+
+      it('returns true for second merge commit', async () => {
+        const res = await getIsMergeCommit(
+          { dir: sandboxPath } as ValidConfigOptions,
+          MERGE_COMMIT_HASH_2
+        );
+
+        expect(res).toBe(true);
+      });
+
+      it('returns false for rebased commits', async () => {
+        const res = await getIsMergeCommit(
+          { dir: sandboxPath } as ValidConfigOptions,
+          REBASE_COMMIT_HASH
+        );
+
+        expect(res).toBe(false);
+      });
+
+      it('returns false for squashed commits', async () => {
+        const res = await getIsMergeCommit(
+          { dir: sandboxPath } as ValidConfigOptions,
+          SQUASH_COMMIT_HASH
+        );
+
+        expect(res).toBe(false);
+      });
+    });
+
+    describe('getCommitsInMergeCommit', () => {
+      it('returns a list of commit hashes - excluding the merge hash itself', async () => {
+        const res = await getCommitsInMergeCommit(
+          { dir: sandboxPath } as ValidConfigOptions,
+          MERGE_COMMIT_HASH_1
+        );
+
+        expect(res).not.toContain(MERGE_COMMIT_HASH_1);
+
+        expect(res).toEqual([
+          'f9a760e0d9eb3ebcc64f8cb75ce885714b836496',
+          '7b92e29e88266004485ce0fae0260605b01df887',
+          'a1facf8c006fb815d6a6ecd1b2907e6e64f29576',
+          'b8d4bcfb0fd875be4ab0230f6db40ddf72f45378',
+          '6f224054db5f7772b04f23f17659070216bae84c',
+          '7fed54cbd1ba9cb973462670ff82ac80bf8a79f8',
+          '78c24d0058859e7d511d10ce91ebf279c7b58ac2',
+          '709ccf707d443dd8c001b3c3ae40fdf037bb43f5',
+        ]);
+      });
+
+      it('returns empty for squash commits', async () => {
+        const res = await getCommitsInMergeCommit(
+          { dir: sandboxPath } as ValidConfigOptions,
+          SQUASH_COMMIT_HASH
+        );
+
+        expect(res).toEqual([]);
+      });
+    });
+  });
 });
+
+async function createAndCommitFile({
+  filename,
+  content,
+  execOpts,
+}: {
+  filename: string;
+  content: string;
+  execOpts: { cwd: string };
+}) {
+  await childProcess.exec(`echo "${content}" > "${filename}"`, execOpts);
+  await childProcess.exec(
+    `git add -A && git commit -m 'Update ${filename}'`,
+    execOpts
+  );
+
+  return getCurrentSha(execOpts);
+}
+
+async function getCurrentSha(execOpts: { cwd: string }) {
+  const { stdout } = await childProcess.exec('git rev-parse HEAD', execOpts);
+  return stdout.trim();
+}
+
+async function getCurrentMessage(execOpts: { cwd: string }) {
+  const { stdout } = await childProcess.exec(
+    'git --no-pager log -1 --pretty=%B',
+    execOpts
+  );
+  return stdout.trim();
+}
 
 function mockRepoOwnerAndName({
   repoName,

@@ -53,7 +53,7 @@ type Options = Partial<{
   repoOwner: string;
   resetAuthor: boolean;
   reviewers: string[];
-  sha: string;
+  sha: string | string[];
   skipRemoteConfig: boolean;
   sourceBranch: string;
   sourcePRLabels: string[];

@@ -4,7 +4,7 @@ describe('throwOnInvalidAccessToken', () => {
   describe('when status code is', () => {
     it('should handle invalid access token', () => {
       const error = {
-        axiosResponse: {
+        githubResponse: {
           status: 401,
           headers: {},
         },
@@ -23,7 +23,7 @@ describe('throwOnInvalidAccessToken', () => {
 
     it('should handle SSO error', () => {
       const error = {
-        axiosResponse: {
+        githubResponse: {
           status: 200,
           headers: { 'x-github-sso': 'required; url=https://ssourl.com' },
           data: {
@@ -43,7 +43,7 @@ describe('throwOnInvalidAccessToken', () => {
 
     it('should handle non-existing repo', () => {
       const error = {
-        axiosResponse: {
+        githubResponse: {
           status: 200,
           headers: {
             'x-oauth-scopes': 'a,b,c',
@@ -66,7 +66,7 @@ describe('throwOnInvalidAccessToken', () => {
 
     it('should handle insufficient permissions (oauth scopes)', () => {
       const error = {
-        axiosResponse: {
+        githubResponse: {
           status: 200,
           headers: {
             'x-oauth-scopes': 'a,b',
@@ -89,7 +89,7 @@ describe('throwOnInvalidAccessToken', () => {
 
     it('should not handle unknown cases', () => {
       const error = {
-        axiosResponse: {
+        githubResponse: {
           status: 500,
           headers: {},
         },

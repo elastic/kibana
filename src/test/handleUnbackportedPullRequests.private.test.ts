@@ -1,5 +1,4 @@
 import { getCommits, backportRun, Commit } from '../entrypoint.module';
-import { exec } from '../services/child-process-promisified';
 import { getDevAccessToken } from './private/getDevAccessToken';
 import { getSandboxPath, resetSandbox } from './sandbox';
 
@@ -41,7 +40,6 @@ describe('Handle unbackported pull requests', () => {
     const accessToken = getDevAccessToken();
     const sandboxPath = getSandboxPath({ filename: __filename });
     await resetSandbox(sandboxPath);
-    await exec('git init', { cwd: sandboxPath });
 
     const result = await backportRun({
       accessToken: accessToken,

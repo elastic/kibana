@@ -15,6 +15,12 @@ Array [
     },
   ],
   Array [
+    "git rev-list -1 --merges mySha~1..mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
     "git cherry-pick -x mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
@@ -116,6 +122,12 @@ Array [
     },
   ],
   Array [
+    "git rev-list -1 --merges mySha~1..mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
     "git cherry-pick -x mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
@@ -123,6 +135,12 @@ Array [
   ],
   Array [
     "git fetch elastic 7.x:7.x --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git rev-list -1 --merges mySha2~1..mySha2",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

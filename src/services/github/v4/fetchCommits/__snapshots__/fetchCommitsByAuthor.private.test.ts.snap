@@ -23,7 +23,7 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
           ) {
             edges {
               node {
-                ...SourceCommitWithTargetPullRequest
+                ...SourceCommitWithTargetPullRequestFragment
               }
             }
           }
@@ -33,8 +33,7 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
   }
 }
 
-fragment SourceCommitWithTargetPullRequest on Commit {
-  ...RemoteConfigHistory
+fragment SourceCommitWithTargetPullRequestFragment on Commit {
   repository {
     name
     owner {
@@ -56,6 +55,7 @@ fragment SourceCommitWithTargetPullRequest on Commit {
         }
         baseRefName
         mergeCommit {
+          ...RemoteConfigHistoryFragment
           sha: oid
           message
         }
@@ -102,7 +102,7 @@ fragment SourceCommitWithTargetPullRequest on Commit {
   }
 }
 
-fragment RemoteConfigHistory on Commit {
+fragment RemoteConfigHistoryFragment on Commit {
   remoteConfigHistory: history(first: 1, path: \\".backportrc.json\\") {
     edges {
       remoteConfig: node {

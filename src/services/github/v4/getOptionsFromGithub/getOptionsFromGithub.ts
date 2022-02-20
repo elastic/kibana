@@ -6,7 +6,10 @@ import {
   isLocalConfigFileModified,
 } from '../../../git';
 import { logger } from '../../../logger';
-import { parseRemoteConfig } from '../../../remoteConfig';
+import {
+  parseRemoteConfig,
+  swallowMissingConfigFileException,
+} from '../../../remoteConfig';
 import { apiRequestV4, GithubV4Exception } from '../apiRequestV4';
 import { throwOnInvalidAccessToken } from '../throwOnInvalidAccessToken';
 import { GithubConfigOptionsResponse, query } from './query';
@@ -44,9 +47,8 @@ export async function getOptionsFromGithub(options: {
       throw e;
     }
 
-    const error = e as GithubV4Exception<GithubConfigOptionsResponse>;
-    throwOnInvalidAccessToken({ error, repoName, repoOwner });
-    res = swallowErrorIfConfigFileIsMissing(error);
+    throwOnInvalidAccessToken({ error: e, repoName, repoOwner });
+    res = swallowMissingConfigFileException<GithubConfigOptionsResponse>(e);
   }
 
   // it is not possible to have a branch named "backport"
@@ -122,20 +124,4 @@ async function getRemoteConfigFileOptions(
   }
 
   return parseRemoteConfig(remoteConfig);
-}
-
-function swallowErrorIfConfigFileIsMissing<T>(error: GithubV4Exception<T>) {
-  const { data, errors } = error.axiosResponse.data;
-
-  const missingConfigError = errors?.some((error) => {
-    return error.path.includes('remoteConfig') && error.type === 'NOT_FOUND';
-  });
-
-  // swallow error if it's just the config file that's missing
-  if (missingConfigError && data != null) {
-    return data;
-  }
-
-  // Throw unexpected error
-  throw error;
 }

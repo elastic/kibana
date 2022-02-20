@@ -22,7 +22,7 @@ export async function createStatusComment({
     publishStatusComment,
   } = options;
 
-  if (!publishStatusComment) {
+  if (!publishStatusComment || options.dryRun) {
     return;
   }
 

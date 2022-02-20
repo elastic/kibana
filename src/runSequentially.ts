@@ -52,6 +52,7 @@ export async function runSequentially({
         pullRequestNumber: number,
       });
     } catch (e) {
+      process.exitCode = 1;
       results.push({
         targetBranch,
         status: 'failure',

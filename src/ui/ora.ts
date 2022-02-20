@@ -11,9 +11,6 @@ const oraMock = {
   set text(value: string) {},
 };
 
-export function ora(
-  ci: boolean | undefined,
-  options?: string | oraOriginal.Options | undefined
-) {
-  return ci ? oraMock : oraOriginal(options);
+export function ora(ci: boolean | undefined, text?: string | undefined) {
+  return ci ? oraMock : oraOriginal({ text });
 }

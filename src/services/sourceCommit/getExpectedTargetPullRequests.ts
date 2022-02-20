@@ -2,6 +2,7 @@ import { uniq } from 'lodash';
 import { ValidConfigOptions } from '../../options/options';
 import { filterNil } from '../../utils/filterEmpty';
 import { getFirstLine } from '../github/commitFormatters';
+import { parseRemoteConfig } from '../remoteConfig';
 import {
   SourcePullRequestNode,
   SourceCommitWithTargetPullRequest,
@@ -20,12 +21,22 @@ export type ExpectedTargetPullRequest = {
   };
 };
 
-export function getExpectedTargetPullRequests(
-  sourceCommit: SourceCommitWithTargetPullRequest,
-  branchLabelMapping: ValidConfigOptions['branchLabelMapping']
-): ExpectedTargetPullRequest[] {
+export function getExpectedTargetPullRequests({
+  sourceCommit,
+  latestBranchLabelMapping,
+}: {
+  sourceCommit: SourceCommitWithTargetPullRequest;
+  latestBranchLabelMapping: ValidConfigOptions['branchLabelMapping'];
+}): ExpectedTargetPullRequest[] {
   const sourcePullRequest =
     sourceCommit.associatedPullRequests.edges?.[0]?.node;
+
+  const remoteConfig =
+    sourcePullRequest?.mergeCommit.remoteConfigHistory.edges?.[0]?.remoteConfig;
+
+  const branchLabelMapping =
+    (remoteConfig && parseRemoteConfig(remoteConfig)?.branchLabelMapping) ??
+    latestBranchLabelMapping;
 
   // if there is no source pull request the commit was pushed directly to the source branch
   // in that case there will be no labels, and thus not possible to deduce the expected target branches

@@ -4,13 +4,12 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
 "query CommitsBySha($repoOwner: String!, $repoName: String!, $sha: String!) {
   repository(owner: $repoOwner, name: $repoName) {
     object(expression: $sha) {
-      ...SourceCommitWithTargetPullRequest
+      ...SourceCommitWithTargetPullRequestFragment
     }
   }
 }
 
-fragment SourceCommitWithTargetPullRequest on Commit {
-  ...RemoteConfigHistory
+fragment SourceCommitWithTargetPullRequestFragment on Commit {
   repository {
     name
     owner {
@@ -32,6 +31,7 @@ fragment SourceCommitWithTargetPullRequest on Commit {
         }
         baseRefName
         mergeCommit {
+          ...RemoteConfigHistoryFragment
           sha: oid
           message
         }
@@ -78,7 +78,7 @@ fragment SourceCommitWithTargetPullRequest on Commit {
   }
 }
 
-fragment RemoteConfigHistory on Commit {
+fragment RemoteConfigHistoryFragment on Commit {
   remoteConfigHistory: history(first: 1, path: \\".backportrc.json\\") {
     edges {
       remoteConfig: node {

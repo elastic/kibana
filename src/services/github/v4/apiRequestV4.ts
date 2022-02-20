@@ -45,18 +45,14 @@ export async function apiRequestV4<DataResponse>({
     );
 
     if (response.data.errors) {
-      const message = `${response.data.errors
-        .map((error) => error.message)
-        .join(',')} (Github API v4)`;
-
-      throw new GithubV4Exception(message, response);
+      throw new GithubV4Exception(response);
     }
 
     addDebugLogs({
       githubApiBaseUrlV4,
       query,
       variables,
-      axiosResponse: response,
+      githubResponse: response,
       didSucceed: false,
     });
 
@@ -67,13 +63,10 @@ export async function apiRequestV4<DataResponse>({
         githubApiBaseUrlV4,
         query,
         variables,
-        axiosResponse: e.response,
+        githubResponse: e.response,
         didSucceed: false,
       });
-      throw new GithubV4Exception(
-        `${e.message} (Unhandled Github API v4)`,
-        e.response
-      );
+      throw new GithubV4Exception(e.response, e.message);
     }
 
     throw e;
@@ -84,26 +77,26 @@ function addDebugLogs({
   githubApiBaseUrlV4,
   query,
   variables,
-  axiosResponse,
+  githubResponse,
   didSucceed,
 }: {
   githubApiBaseUrlV4: string;
   query: DocumentNode;
   variables?: Variables;
-  axiosResponse: AxiosResponse;
+  githubResponse: AxiosResponse;
   didSucceed: boolean;
 }) {
   const gqlQueryName = getQueryName(query);
   logger.info(
-    `POST ${githubApiBaseUrlV4} (name:${gqlQueryName}, status: ${axiosResponse.status})`
+    `POST ${githubApiBaseUrlV4} (name:${gqlQueryName}, status: ${githubResponse.status})`
   );
   const logMethod = didSucceed ? logger.verbose : logger.info;
 
   logMethod(`Query name ${gqlQueryName}`);
   logMethod(`Query: ${query}`);
   logMethod('Variables:', variables);
-  logMethod('Response headers:', axiosResponse.headers);
-  logMethod('Response data:', axiosResponse.data);
+  logMethod('Response headers:', githubResponse.headers);
+  logMethod('Response data:', githubResponse.data);
 }
 
 type AxiosGithubResponse<DataResponse> = AxiosResponse<
@@ -111,13 +104,25 @@ type AxiosGithubResponse<DataResponse> = AxiosResponse<
   any
 >;
 export class GithubV4Exception<DataResponse> extends Error {
+  githubResponse: AxiosGithubResponse<DataResponse> & { request: undefined };
+
   constructor(
-    public message: string,
-    public axiosResponse: AxiosGithubResponse<DataResponse>
+    githubResponse: AxiosGithubResponse<DataResponse>,
+    errorMessage?: string
   ) {
+    const githubMessage = githubResponse.data.errors
+      ?.map((error) => error.message)
+      .join(',');
+
+    const message = `${
+      errorMessage ?? githubMessage ?? 'Unknown error'
+    } (Github API v4)`;
+
     super(message);
     Error.captureStackTrace(this, HandledError);
     this.name = 'GithubV4Exception';
+    this.message = message;
+    this.githubResponse = { ...githubResponse, request: undefined };
   }
 }
 

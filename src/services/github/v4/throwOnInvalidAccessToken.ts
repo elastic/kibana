@@ -20,19 +20,20 @@ export function throwOnInvalidAccessToken({
     }
   }
 
-  const statusCode = error.axiosResponse.status;
+  const statusCode = error.githubResponse.status;
 
   switch (statusCode) {
     case 200: {
-      const repoNotFound = error.axiosResponse.data.errors?.some(
+      const repoNotFound = error.githubResponse.data.errors?.some(
         (error) =>
           error.type === 'NOT_FOUND' && error.path.join('.') === 'repository'
       );
 
-      const grantedScopes = error.axiosResponse.headers['x-oauth-scopes'] || '';
+      const grantedScopes =
+        error.githubResponse.headers['x-oauth-scopes'] || '';
       const requiredScopes =
-        error.axiosResponse.headers['x-accepted-oauth-scopes'] || '';
-      const ssoHeader = maybe(error.axiosResponse.headers['x-github-sso']);
+        error.githubResponse.headers['x-accepted-oauth-scopes'] || '';
+      const ssoHeader = maybe(error.githubResponse.headers['x-github-sso']);
 
       if (repoNotFound) {
         const hasRequiredScopes = isEmpty(
@@ -52,7 +53,7 @@ export function throwOnInvalidAccessToken({
         );
       }
 
-      const repoAccessForbidden = error.axiosResponse.data.errors?.some(
+      const repoAccessForbidden = error.githubResponse.data.errors?.some(
         (error) => error.type === 'FORBIDDEN'
       );
 

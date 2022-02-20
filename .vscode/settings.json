@@ -5,6 +5,7 @@
     "coverage": true
   },
   "search.exclude": {
+    "dist/*": true,
     "**/node_modules": true,
     "**/bower_components": true,
     "**/*.code-search": true,
@@ -14,7 +15,7 @@
   },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll": true
   },
   "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -92,7 +92,7 @@ describe('runSequentially', () => {
 
     rpcExecMock = jest
       .spyOn(childProcess, 'exec')
-      .mockResolvedValue({ stdout: 'success', stderr: '' });
+      .mockResolvedValue({ stdout: '', stderr: '' });
     rpcExecOriginalMock = jest.spyOn(childProcess, 'execAsCallback');
 
     const scope = nock('https://api.github.com')
@@ -162,36 +162,63 @@ describe('runSequentially', () => {
     `);
   });
 
-  it('should run all exec commands in the either source or backport directory', () => {
+  it('should run commands in correct folders', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    expect(rpcExecMock.mock.calls.map(([cmd, opts]) => opts.cwd)).toEqual([
-      '/path/to/source/repo',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-      '/myHomeDir/.backport/repositories/elastic/kibana',
-    ]);
-  });
-
-  it('exec commands should be called with correct args', () => {
-    expect(rpcExecMock.mock.calls.map(([cmd]) => cmd)).toEqual([
-      'git remote --verbose',
-      'git remote rm origin',
-      'git remote rm sqren_authenticated',
-      'git remote add sqren_authenticated https://x-access-token:myAccessToken@github.com/sqren_authenticated/kibana.git',
-      'git remote rm elastic',
-      'git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git',
-      'git reset --hard && git clean -d --force && git fetch elastic 7.x && git checkout -B backport/7.x/pr-55 elastic/7.x --no-track',
-      'git fetch elastic master:master --force',
-      'git cherry-pick -x abcd',
-      'git push sqren_authenticated backport/7.x/pr-55:backport/7.x/pr-55 --force',
-      'git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/7.x/pr-55',
+    expect(
+      rpcExecMock.mock.calls.map(([cmd, { cwd }]) => ({ cmd, cwd }))
+    ).toEqual([
+      {
+        cmd: 'git rev-parse --show-toplevel',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git remote --verbose',
+        cwd: '/path/to/source/repo',
+      },
+      {
+        cmd: 'git remote rm origin',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git remote rm sqren_authenticated',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git remote add sqren_authenticated https://x-access-token:myAccessToken@github.com/sqren_authenticated/kibana.git',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git remote rm elastic',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git reset --hard && git clean -d --force && git fetch elastic 7.x && git checkout -B backport/7.x/pr-55 elastic/7.x --no-track',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git fetch elastic master:master --force',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git rev-list -1 --merges abcd~1..abcd',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git cherry-pick -x abcd',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git push sqren_authenticated backport/7.x/pr-55:backport/7.x/pr-55 --force',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
+      {
+        cmd: 'git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/7.x/pr-55',
+        cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
+      },
     ]);
   });
 

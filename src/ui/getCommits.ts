@@ -21,12 +21,23 @@ export async function getCommits(options: ValidConfigOptions) {
 
   try {
     if (options.sha) {
-      spinner.text = `Loading commit "${getShortSha(options.sha)}"`;
-      const commit = await fetchCommitBySha({ ...options, sha: options.sha });
-      spinner.stopAndPersist(
-        getOraPersistsOption('Select commit', commit.sourceCommit.message)
+      const shas = Array.isArray(options.sha) ? options.sha : [options.sha];
+
+      // TODO: use Intl.ListFormat to format the sha's
+      spinner.text = `Loading commit "${shas.map(getShortSha)}"`;
+
+      const commits = await Promise.all(
+        shas.map((sha) => fetchCommitBySha({ ...options, sha }))
       );
-      return [commit];
+
+      spinner.stopAndPersist(
+        getOraPersistsOption(
+          'Select commit',
+          commits.map((commit) => commit.sourceCommit.message).join(', ')
+        )
+      );
+
+      return commits;
     }
 
     if (options.pullNumber) {

@@ -30,7 +30,7 @@ export const query = gql`
       defaultBranchRef {
         name
         target {
-          ...RemoteConfigHistory
+          ...RemoteConfigHistoryFragment
         }
       }
     }

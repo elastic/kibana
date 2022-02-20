@@ -1,10 +1,11 @@
 import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
+import { swallowMissingConfigFileException } from '../../../remoteConfig';
 import {
   Commit,
   SourceCommitWithTargetPullRequest,
-  sourceCommitWithTargetPullRequestFragment,
+  SourceCommitWithTargetPullRequestFragment,
   parseSourceCommit,
 } from '../../../sourceCommit/parseSourceCommit';
 import { apiRequestV4 } from '../apiRequestV4';
@@ -31,24 +32,29 @@ export async function fetchCommitBySha(options: {
     query CommitsBySha($repoOwner: String!, $repoName: String!, $sha: String!) {
       repository(owner: $repoOwner, name: $repoName) {
         object(expression: $sha) {
-          ...SourceCommitWithTargetPullRequest
+          ...SourceCommitWithTargetPullRequestFragment
         }
       }
     }
 
-    ${sourceCommitWithTargetPullRequestFragment}
+    ${SourceCommitWithTargetPullRequestFragment}
   `;
 
-  const res = await apiRequestV4<CommitsByShaResponse>({
-    githubApiBaseUrlV4,
-    accessToken,
-    query,
-    variables: {
-      repoOwner,
-      repoName,
-      sha,
-    },
-  });
+  let res: CommitsByShaResponse;
+  try {
+    res = await apiRequestV4<CommitsByShaResponse>({
+      githubApiBaseUrlV4,
+      accessToken,
+      query,
+      variables: {
+        repoOwner,
+        repoName,
+        sha,
+      },
+    });
+  } catch (e) {
+    res = swallowMissingConfigFileException<CommitsByShaResponse>(e);
+  }
 
   const sourceCommit = res.repository.object;
   if (!sourceCommit) {

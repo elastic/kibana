@@ -1,5 +1,5 @@
 import { resolve as pathResolve } from 'path';
-import { uniq, isEmpty } from 'lodash';
+import { uniq, isEmpty, first, last } from 'lodash';
 import { ValidConfigOptions } from '../options/options';
 import { ora } from '../ui/ora';
 import { filterNil } from '../utils/filterEmpty';
@@ -130,9 +130,11 @@ export async function getRepoInfoFromGitRemotes({ cwd }: { cwd: string }) {
   }
 }
 
-export async function getGitProjectRoot({ cwd }: { cwd: string }) {
+export async function getGitProjectRoot(dir: string) {
   try {
-    const { stdout } = await exec('git rev-parse --show-toplevel', { cwd });
+    const { stdout } = await exec('git rev-parse --show-toplevel', {
+      cwd: dir,
+    });
     return stdout.trim();
   } catch (e) {
     logger.error('An error occurred while retrieving git project root', e);
@@ -195,6 +197,40 @@ export async function fetchBranch(options: ValidConfigOptions, branch: string) {
   });
 }
 
+export async function getIsMergeCommit(
+  options: ValidConfigOptions,
+  sha: string
+) {
+  const res = await exec(`git rev-list -1 --merges ${sha}~1..${sha}`, {
+    cwd: getRepoPath(options),
+  });
+
+  return res.stdout !== '';
+}
+
+export async function getCommitsInMergeCommit(
+  options: ValidConfigOptions,
+  sha: string
+) {
+  try {
+    const res = await exec(
+      `git --no-pager log ${sha}^1..${sha}^2  --pretty=format:"%H"`,
+      {
+        cwd: getRepoPath(options),
+      }
+    );
+
+    return res.stdout.split('\n');
+  } catch (e) {
+    // swallow error
+    if (e.code === 128) {
+      return [];
+    }
+
+    throw e;
+  }
+}
+
 export async function cherrypick(
   options: ValidConfigOptions,
   sha: string,
@@ -209,9 +245,27 @@ export async function cherrypick(
 }> {
   const mainlinArg =
     options.mainline != undefined ? ` --mainline ${options.mainline}` : '';
-
   const cherrypickRefArg = options.cherrypickRef === false ? '' : ' -x';
-  const cmd = `git cherry-pick${cherrypickRefArg}${mainlinArg} ${sha}`;
+
+  let shaOrRange = sha;
+
+  if (!options.mainline) {
+    try {
+      const isMergeCommit = await getIsMergeCommit(options, sha);
+      if (isMergeCommit) {
+        const shas = await getCommitsInMergeCommit(options, sha);
+        shaOrRange = `${last(shas)}^..${first(shas)}`;
+      }
+    } catch (e) {
+      // swallow error if it's a known error
+      // exit 128 will happen for many things, among others when the cherrypicked commit is empty
+      if (e.code !== 128) {
+        throw e;
+      }
+    }
+  }
+  const cmd = `git cherry-pick${cherrypickRefArg}${mainlinArg} ${shaOrRange}`;
+
   try {
     await exec(cmd, { cwd: getRepoPath(options) });
     return { conflictingFiles: [], unstagedFiles: [], needsResolving: false };
@@ -471,7 +525,7 @@ export async function getSourceRepoPath(options: ValidConfigOptions) {
   const sourcePath =
     options.repoName === gitRemote.repoName &&
     options.repoOwner === gitRemote.repoOwner
-      ? (await getGitProjectRoot(options)) ?? remoteUrl
+      ? (await getGitProjectRoot(options.cwd)) ?? remoteUrl
       : remoteUrl;
 
   return sourcePath;

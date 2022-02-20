@@ -1,10 +1,11 @@
 import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
+import { swallowMissingConfigFileException } from '../../../remoteConfig';
 import {
   Commit,
   SourceCommitWithTargetPullRequest,
-  sourceCommitWithTargetPullRequestFragment,
+  SourceCommitWithTargetPullRequestFragment,
   parseSourceCommit,
 } from '../../../sourceCommit/parseSourceCommit';
 import { apiRequestV4 } from '../apiRequestV4';
@@ -35,25 +36,30 @@ export async function fetchCommitByPullNumber(options: {
       repository(owner: $repoOwner, name: $repoName) {
         pullRequest(number: $pullNumber) {
           mergeCommit {
-            ...SourceCommitWithTargetPullRequest
+            ...SourceCommitWithTargetPullRequestFragment
           }
         }
       }
     }
 
-    ${sourceCommitWithTargetPullRequestFragment}
+    ${SourceCommitWithTargetPullRequestFragment}
   `;
 
-  const res = await apiRequestV4<CommitByPullNumberResponse>({
-    githubApiBaseUrlV4,
-    accessToken,
-    query,
-    variables: {
-      repoOwner,
-      repoName,
-      pullNumber,
-    },
-  });
+  let res: CommitByPullNumberResponse;
+  try {
+    res = await apiRequestV4<CommitByPullNumberResponse>({
+      githubApiBaseUrlV4,
+      accessToken,
+      query,
+      variables: {
+        repoOwner,
+        repoName,
+        pullNumber,
+      },
+    });
+  } catch (e) {
+    res = swallowMissingConfigFileException<CommitByPullNumberResponse>(e);
+  }
 
   const pullRequestNode = res.repository.pullRequest;
   if (!pullRequestNode) {

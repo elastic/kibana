@@ -43,14 +43,28 @@ export async function cherrypickAndCreateTargetPullRequest({
   options: ValidConfigOptions;
   commits: Commit[];
   targetBranch: string;
-}): Promise<{
-  url: string;
-  number: number;
-  didUpdate: boolean;
-}> {
+}): Promise<{ url: string; number: number; didUpdate: boolean }> {
   const backportBranch = getBackportBranchName(targetBranch, commits);
   const repoForkOwner = getRepoForkOwner(options);
   consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
+
+  await createBackportBranch({ options, targetBranch, backportBranch });
+
+  await sequentially(commits, (commit) =>
+    waitForCherrypick(options, commit, targetBranch)
+  );
+
+  if (options.resetAuthor) {
+    await setCommitAuthor(options, options.authenticatedUsername);
+  }
+
+  if (options.dryRun) {
+    ora(options.ci).succeed('Dry run');
+    return { url: 'https://localhost/dry-run', didUpdate: false, number: 1337 };
+  }
+
+  await pushBackportBranch({ options, backportBranch });
+  await deleteBackportBranch({ options, backportBranch });
 
   const prPayload: PullRequestPayload = {
     owner: options.repoOwner,
@@ -61,13 +75,7 @@ export async function cherrypickAndCreateTargetPullRequest({
     base: targetBranch, // eg. 7.x
   };
 
-  const targetPullRequest = await backportViaFilesystem({
-    options,
-    prPayload,
-    targetBranch,
-    backportBranch,
-    commits,
-  });
+  const targetPullRequest = await createPullRequest({ options, prPayload });
 
   // add assignees to target pull request
   const assignees = options.autoAssign
@@ -116,42 +124,13 @@ export async function cherrypickAndCreateTargetPullRequest({
         );
       }
     });
+
     await Promise.all(promises);
   }
 
   consoleLog(`View pull request: ${targetPullRequest.url}`);
 
   return targetPullRequest;
-}
-
-async function backportViaFilesystem({
-  options,
-  prPayload,
-  commits,
-  targetBranch,
-  backportBranch,
-}: {
-  options: ValidConfigOptions;
-  prPayload: PullRequestPayload;
-  commits: Commit[];
-  targetBranch: string;
-  backportBranch: string;
-}) {
-  logger.info('Backporting via filesystem');
-
-  await createBackportBranch({ options, targetBranch, backportBranch });
-
-  await sequentially(commits, (commit) =>
-    waitForCherrypick(options, commit, targetBranch)
-  );
-
-  if (options.resetAuthor) {
-    await setCommitAuthor(options, options.authenticatedUsername);
-  }
-
-  await pushBackportBranch({ options, backportBranch });
-  await deleteBackportBranch({ options, backportBranch });
-  return createPullRequest({ options, prPayload });
 }
 
 /*

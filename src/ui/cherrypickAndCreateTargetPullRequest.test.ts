@@ -157,7 +157,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('should start the spinner with the correct text', () => {
-      expect((ora as any).mock.calls.map((call: any) => call[0]))
+      expect((ora as any).mock.calls.map((call: any) => call[0].text))
         .toMatchInlineSnapshot(`
         Array [
           "Pulling latest changes",
@@ -382,7 +382,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('calls ora correctly', () => {
-      expect((ora as any).mock.calls.map((call: any) => call[0]))
+      expect((ora as any).mock.calls.map((call: any) => call[0].text))
         .toMatchInlineSnapshot(`
         Array [
           "Pulling latest changes",
@@ -487,6 +487,11 @@ function setupExecSpyForCherryPick() {
 
       // deleteFeatureBranch
       if (cmd.includes('git branch -D ')) {
+        return { stdout: ``, stderr: '' };
+      }
+
+      // getIsMergeCommit
+      if (cmd.startsWith('git rev-list -1 --merges')) {
         return { stdout: ``, stderr: '' };
       }
 

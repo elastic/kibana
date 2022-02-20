@@ -26,7 +26,7 @@ export async function fetchRemoteProjectConfig(options: {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
-            ...RemoteConfigHistory
+            ...RemoteConfigHistoryFragment
           }
         }
       }

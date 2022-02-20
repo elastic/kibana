@@ -6,12 +6,13 @@ import { fetchCommitBySha } from './services/github/v4/fetchCommits/fetchCommitB
 import { fetchCommitsByAuthor } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
 import { getOptionsFromGithub } from './services/github/v4/getOptionsFromGithub/getOptionsFromGithub';
 import { initLogger } from './services/logger';
+import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { excludeUndefined } from './utils/excludeUndefined';
 
 // public API
 export { BackportResponse } from './backportRun';
 export { ConfigFileOptions } from './options/ConfigOptions';
-export { Commit } from './services/sourceCommit/parseSourceCommit';
+export { Commit };
 export { fetchRemoteProjectConfig as getRemoteProjectConfig } from './services/github/v4/fetchRemoteProjectConfig';
 export { getGlobalConfig as getLocalGlobalConfig } from './options/config/globalConfig';
 
@@ -41,12 +42,12 @@ export async function getCommits(options: {
   branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
   githubApiBaseUrlV4?: string;
   pullNumber?: number;
-  sha?: string;
+  sha?: string | string[];
   skipRemoteConfig?: boolean;
   sourceBranch?: string;
   dateUntil?: string;
   dateSince?: string;
-}) {
+}): Promise<Commit[]> {
   initLogger({ ci: true, accessToken: options.accessToken });
 
   const optionsFromGithub = await getOptionsFromGithub(options);
@@ -62,13 +63,13 @@ export async function getCommits(options: {
   }
 
   if (options.sha) {
-    return [
-      await fetchCommitBySha({
-        ...optionsFromGithub,
-        ...options,
-        sha: options.sha,
-      }),
-    ];
+    const shas = Array.isArray(options.sha) ? options.sha : [options.sha];
+
+    return Promise.all(
+      shas.map((sha) =>
+        fetchCommitBySha({ ...optionsFromGithub, ...options, sha })
+      )
+    );
   }
 
   return fetchCommitsByAuthor({

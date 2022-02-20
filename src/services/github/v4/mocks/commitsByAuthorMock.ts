@@ -8,7 +8,6 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
           edges: [
             {
               node: {
-                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -23,7 +22,6 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
-                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -42,6 +40,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
                         },
                         number: 85,
                         mergeCommit: {
+                          remoteConfigHistory: { edges: [] },
                           sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
                           message: 'Add witch (#85)',
                         },
@@ -56,7 +55,6 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
-                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -76,6 +74,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
                         baseRefName: 'master',
                         number: 80,
                         mergeCommit: {
+                          remoteConfigHistory: { edges: [] },
                           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
                           message:
                             'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
@@ -126,7 +125,6 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
-                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -141,7 +139,6 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
-                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },

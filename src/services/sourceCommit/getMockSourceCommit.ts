@@ -34,25 +34,6 @@ export function getMockSourceCommit({
   const defaultSourceCommitSha = 'DO NOT USE: default-source-commit-sha';
 
   const baseMockCommit: SourceCommitWithTargetPullRequest = {
-    remoteConfigHistory: sourceCommit.remoteConfig
-      ? {
-          edges: [
-            {
-              remoteConfig: {
-                committedDate: sourceCommit.remoteConfig.committedDate,
-                file: {
-                  object: {
-                    text: JSON.stringify({
-                      branchLabelMapping:
-                        sourceCommit.remoteConfig.branchLabelMapping,
-                    }),
-                  },
-                },
-              },
-            },
-          ],
-        }
-      : { edges: [] },
     repository: {
       name: 'kibana',
       owner: { login: 'elastic' },
@@ -67,6 +48,26 @@ export function getMockSourceCommit({
     return baseMockCommit;
   }
 
+  const remoteConfigHistory = sourceCommit.remoteConfig
+    ? {
+        edges: [
+          {
+            remoteConfig: {
+              committedDate: sourceCommit.remoteConfig.committedDate,
+              file: {
+                object: {
+                  text: JSON.stringify({
+                    branchLabelMapping:
+                      sourceCommit.remoteConfig.branchLabelMapping,
+                  }),
+                },
+              },
+            },
+          },
+        ],
+      }
+    : { edges: [] };
+
   return {
     ...baseMockCommit,
     associatedPullRequests: {
@@ -74,6 +75,7 @@ export function getMockSourceCommit({
         {
           node: {
             mergeCommit: {
+              remoteConfigHistory,
               sha: sourceCommit.sha ?? defaultSourceCommitSha,
               message: sourceCommit.message,
             },
