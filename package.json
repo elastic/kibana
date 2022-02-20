@@ -23,14 +23,13 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "test -f ./dist/scripts/runPostinstall.js && node ./dist/scripts/runPostinstall.js || echo 'Dist folder missing'",
-    "version": "echo \"Bumping version\" && yarn extractPackageVersion && git add src/utils/packageVersion.ts && yarn build",
+    "version": "echo \"Bumping version\" && yarn extractPackageVersion && git add src/utils/packageVersion.ts && yarn tsc",
     "prepare": "husky install",
-    "prepublishOnly": "yarn lint",
-    "build": "tsc --project ./tsconfig.prod.json",
+    "prepublishOnly": "yarn lint && yarn tsc",
     "extractPackageVersion": "node -p \"'export const PACKAGE_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" | prettier > src/utils/packageVersion.ts",
-    "lint": "echo \"Running lint\" && tsc --project ./tsconfig.test.json && eslint './**/*.{ts,js}'",
+    "lint": "echo \"Running lint\" && eslint './**/*.{ts,js}'",
     "start": "ts-node --transpile-only ./src/entrypoint.cli.ts",
-    "test-all": "yarn lint && jest --config ./jest.config.all.js",
+    "test-all": "jest --config ./jest.config.all.js",
     "test-mutation": "jest --config ./jest.config.mutation.js",
     "test-private": "jest --config ./jest.config.private.js",
     "test": "jest"
