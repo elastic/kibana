@@ -16,6 +16,7 @@ import {
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
 import { GlobeIllustration } from '../../../assets/globe_illustration';
+import { APP_ID } from '../../../../common/constants';
 import './geo_field_workspace_panel.scss';
 
 interface Props {
@@ -41,6 +42,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
       indexPatternId: props.indexPatternId,
       fieldName: props.fieldName,
+      originatingApp: APP_ID,
     });
   }
 
