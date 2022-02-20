@@ -90,7 +90,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props.toggleEditFilterModal?.(false);
   };
 
-  function onAddMultipleFilters(selectedFilters: Filter[]) {
+  function onEditMultipleFilters(selectedFilters: Filter[]) {
     props.toggleEditFilterModal?.(false);
 
     const filters = [...props.filters, ...selectedFilters];
@@ -100,7 +100,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   function onEditMultipleFiltersANDOR(
     selectedFilters: FilterGroup[],
     buildFilters: Filter[],
-    groupCount: number
+    groupCount: number = 0
   ) {
     const mappedFilters = mapAndFlattenFilters(buildFilters);
     const mergedFilters = mappedFilters.map((filter, idx) => {
@@ -268,7 +268,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       <EuiFlexItem grow={false}>
         {props.isEditFilterModalOpen && (
           <EditFilterModal
-            onSubmit={onAddMultipleFilters}
+            onSubmit={onEditMultipleFilters}
             onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={saerchedFilters[0]}

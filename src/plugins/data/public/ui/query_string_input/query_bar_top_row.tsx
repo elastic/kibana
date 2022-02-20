@@ -396,6 +396,9 @@ export const QueryBarTopRow = React.memo(
 
       const filters = [...props.filters, ...selectedFilters];
       props?.onFiltersUpdated?.(filters);
+
+      const multipleFilters = [...props.multipleFilters, ...selectedFilters];
+      props?.onMultipleFiltersUpdated?.(multipleFilters);
     }
 
     function onAddMultipleFiltersANDOR(
