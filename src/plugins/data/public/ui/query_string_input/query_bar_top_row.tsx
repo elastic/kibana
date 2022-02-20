@@ -397,7 +397,27 @@ export const QueryBarTopRow = React.memo(
       const filters = [...props.filters, ...selectedFilters];
       props?.onFiltersUpdated?.(filters);
 
-      const multipleFilters = [...props.multipleFilters, ...selectedFilters];
+      const multipleFilters = [
+        ...props.multipleFilters,
+        ...selectedFilters.map((filter) => ({
+          ...filter,
+          groupId: props.multipleFilters?.length
+            ? Math.max.apply(
+              Math,
+              props.multipleFilters.map((f) => f.groupId)
+            ) + 1
+            : 1,
+          id: props.multipleFilters?.length
+            ? Math.max.apply(
+              Math,
+              props.multipleFilters.map((f) => f.id)
+            ) + 1
+            : 0,
+          subGroupId: 1,
+          relationship: undefined,
+          groupsCount: 0,
+        }))
+      ];
       props?.onMultipleFiltersUpdated?.(multipleFilters);
     }
 
