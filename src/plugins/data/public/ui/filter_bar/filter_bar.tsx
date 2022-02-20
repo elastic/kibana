@@ -94,7 +94,66 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props.toggleEditFilterModal?.(false);
 
     const filters = [...props.filters, ...selectedFilters];
-    props?.onFiltersUpdated?.(filters);
+
+    const updatedFilters: Filter[] = [];
+
+    selectedFilters.forEach((filter) => {
+      filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+
+    props?.onFiltersUpdated?.(updatedFilters);
+
+    const multipleFilters = [
+      ...props.multipleFilters,
+      ...selectedFilters.map((filter, indx) => ({
+        ...filter,
+        groupId: props.multipleFilters?.length
+          ? Math.max.apply(
+            Math,
+            props.multipleFilters.map((f) => f.groupId)
+          ) + indx + 1
+          : 1,
+        id: props.multipleFilters?.length
+          ? Math.max.apply(
+            Math,
+            props.multipleFilters.map((f) => f.id)
+          ) + indx + 1
+          : 0,
+        subGroupId: 1,
+        relationship: undefined,
+        groupsCount: 1,
+      }))
+    ];
+
+    const updatedFiltersGroup: Filter[] = [];
+
+    updatedFilters.forEach((filter) => {
+      multipleFilters.forEach((f) => {
+        if (!isEqual(f.query, filter.query)) {
+          updatedFiltersGroup.push({
+            ...f,
+            meta: {
+              ...filter.meta,
+            },
+            query: filter.query,
+          });
+        }
+      });
+    });
+
+    updatedFiltersGroup.forEach((filter) => {
+      multipleFilters.forEach((f, indx) => {
+        if (isEqual(f.id, filter.id)) {
+          multipleFilters[indx] = filter;
+        }
+      });
+    });
+
+    props?.onMultipleFiltersUpdated?.(multipleFilters);
   }
 
   function onEditMultipleFiltersANDOR(
@@ -110,7 +169,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         id: selectedFilters[idx].id,
         relationship: selectedFilters[idx].relationship,
         subGroupId: selectedFilters[idx].subGroupId,
-        groupCount
+        groupCount,
       };
     });
 
