@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-context$: Observable<ExecutionContext>;
+context$: Observable<KibanaExecutionContext>;
 ```

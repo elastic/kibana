@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-set(c$: ExecutionContext): void;
+set(c$: KibanaExecutionContext): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  c$ | ExecutionContext |  |
+|  c$ | KibanaExecutionContext |  |
 
 <b>Returns:</b>
 

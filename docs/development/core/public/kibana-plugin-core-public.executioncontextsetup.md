@@ -15,13 +15,15 @@ export interface ExecutionContextSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [context$](./kibana-plugin-core-public.executioncontextsetup.context_.md) | Observable&lt;ExecutionContext&gt; |  |
+|  [context$](./kibana-plugin-core-public.executioncontextsetup.context_.md) | Observable&lt;KibanaExecutionContext&gt; |  |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
 |  [clear()](./kibana-plugin-core-public.executioncontextsetup.clear.md) |  |
-|  [getAll()](./kibana-plugin-core-public.executioncontextsetup.getall.md) |  |
+|  [get()](./kibana-plugin-core-public.executioncontextsetup.get.md) |  |
+|  [getAsLabels()](./kibana-plugin-core-public.executioncontextsetup.getaslabels.md) | returns apm labels |
 |  [set(c$)](./kibana-plugin-core-public.executioncontextsetup.set.md) |  |
+|  [withGlobalContext(context)](./kibana-plugin-core-public.executioncontextsetup.withglobalcontext.md) | merges the current global context with the specific event context |
 

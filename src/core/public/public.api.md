@@ -520,14 +520,14 @@ export interface ErrorToastOptions extends ToastOptions {
 export interface ExecutionContextSetup {
     // (undocumented)
     clear(): void;
-    // Warning: (ae-forgotten-export) The symbol "ExecutionContext" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    context$: Observable<ExecutionContext>;
+    context$: Observable<KibanaExecutionContext>;
     // (undocumented)
-    getAll(): ExecutionContext;
+    get(): KibanaExecutionContext;
+    getAsLabels(): Labels;
     // (undocumented)
-    set(c$: ExecutionContext): void;
+    set(c$: KibanaExecutionContext): void;
+    withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
 }
 
 // @public
