@@ -10,7 +10,6 @@ import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
 jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
