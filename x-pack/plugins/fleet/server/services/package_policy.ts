@@ -41,7 +41,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
-  InstallablePackage,
+  PackagePolicyPackage,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -62,7 +62,6 @@ import type { ExternalCallback } from '..';
 
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
-import * as Registry from './epm/registry';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
@@ -71,7 +70,6 @@ import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
-import { getArchivePackage } from './epm/archive';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -164,21 +162,9 @@ class PackagePolicyService {
       }
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      let installablePackage: InstallablePackage | undefined =
-        getArchivePackage(pkgInfo)?.packageInfo;
+      inputs = await this._compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
 
-      if (!installablePackage) {
-        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
-      }
-
-      inputs = await this._compilePackagePolicyInputs(
-        installablePackage,
-        pkgInfo,
-        packagePolicy.vars || {},
-        inputs
-      );
-
-      elasticsearch = installablePackage.elasticsearch;
+      elasticsearch = pkgInfo.elasticsearch;
     }
 
     const isoDate = new Date().toISOString();
@@ -407,20 +393,8 @@ class PackagePolicyService {
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      let installablePackage: InstallablePackage | undefined =
-        getArchivePackage(pkgInfo)?.packageInfo;
-
-      if (!installablePackage) {
-        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
-      }
-
-      inputs = await this._compilePackagePolicyInputs(
-        installablePackage,
-        pkgInfo,
-        packagePolicy.vars || {},
-        inputs
-      );
-      elasticsearch = installablePackage.elasticsearch;
+      inputs = await this._compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      elasticsearch = pkgInfo.elasticsearch;
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -595,48 +569,26 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser },
+    packagePolicy?: PackagePolicy,
+    packageInfo?: PackageInfo,
+    pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
     const result: UpgradePackagePolicyResponse = [];
 
     for (const id of ids) {
       try {
-        const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
+        if (!packagePolicy) {
+          ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
+        } else if (!packageInfo) {
+          packageInfo = await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package!.name,
+            pkgVersion: pkgVersion ?? '',
+          });
+        }
 
-        const updatePackagePolicy = updatePackageInputs(
-          {
-            ...omit(packagePolicy, 'id'),
-            inputs: packagePolicy.inputs,
-            package: {
-              ...packagePolicy.package,
-              version: packageInfo.version,
-            },
-          },
-          packageInfo,
-          packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
-        );
-        const registryPkgInfo = await Registry.fetchInfo(packageInfo.name, packageInfo.version);
-        updatePackagePolicy.inputs = await this._compilePackagePolicyInputs(
-          registryPkgInfo,
-          packageInfo,
-          updatePackagePolicy.vars || {},
-          updatePackagePolicy.inputs as PackagePolicyInput[]
-        );
-        updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
-
-        await this.update(
-          soClient,
-          esClient,
-          id,
-          updatePackagePolicy,
-          options,
-          packagePolicy.package.version
-        );
-        result.push({
-          id,
-          name: packagePolicy.name,
-          success: true,
-        });
+        await this.doUpgrade(soClient, esClient, id, packagePolicy, result, packageInfo, options);
       } catch (error) {
         result.push({
           id,
@@ -649,72 +601,143 @@ class PackagePolicyService {
     return result;
   }
 
+  private async doUpgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    id: string,
+    packagePolicy: PackagePolicy,
+    result: UpgradePackagePolicyResponse,
+    packageInfo: PackageInfo,
+    options?: { user?: AuthenticatedUser }
+  ) {
+    const updatePackagePolicy = updatePackageInputs(
+      {
+        ...omit(packagePolicy, 'id'),
+        inputs: packagePolicy.inputs,
+        package: {
+          ...packagePolicy.package!,
+          version: packageInfo.version,
+        },
+      },
+      packageInfo,
+      packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
+    );
+    updatePackagePolicy.inputs = await this._compilePackagePolicyInputs(
+      packageInfo,
+      updatePackagePolicy.vars || {},
+      updatePackagePolicy.inputs as PackagePolicyInput[]
+    );
+    updatePackagePolicy.elasticsearch = packageInfo.elasticsearch;
+
+    await this.update(
+      soClient,
+      esClient,
+      id,
+      updatePackagePolicy,
+      options,
+      packagePolicy.package!.version
+    );
+    result.push({
+      id,
+      name: packagePolicy.name,
+      success: true,
+    });
+  }
+
   public async getUpgradeDryRunDiff(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    packagePolicy?: PackagePolicy,
+    packageInfo?: PackageInfo,
+    pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
-
-      const updatedPackagePolicy = updatePackageInputs(
-        {
-          ...omit(packagePolicy, 'id'),
-          inputs: packagePolicy.inputs,
-          package: {
-            ...packagePolicy.package,
-            version: packageInfo.version,
-          },
-        },
-        packageInfo,
-        packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
-        true
-      );
-      const registryPkgInfo = await Registry.fetchInfo(packageInfo.name, packageInfo.version);
-      updatedPackagePolicy.inputs = await this._compilePackagePolicyInputs(
-        registryPkgInfo,
-        packageInfo,
-        updatedPackagePolicy.vars || {},
-        updatedPackagePolicy.inputs as PackagePolicyInput[]
-      );
-      updatedPackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
-
-      const hasErrors = 'errors' in updatedPackagePolicy;
-
-      if (packagePolicy.package.version !== packageInfo.version) {
-        const upgradeTelemetry: PackageUpdateEvent = {
-          packageName: packageInfo.name,
-          currentVersion: packagePolicy.package.version,
-          newVersion: packageInfo.version,
-          status: hasErrors ? 'failure' : 'success',
-          error: hasErrors ? updatedPackagePolicy.errors : undefined,
-          dryRun: true,
-          eventType: 'package-policy-upgrade' as UpdateEventType,
-        };
-        sendTelemetryEvents(
-          appContextService.getLogger(),
-          appContextService.getTelemetryEventsSender(),
-          upgradeTelemetry
-        );
-        appContextService
-          .getLogger()
-          .info(
-            `Package policy upgrade dry run ${
-              hasErrors ? 'resulted in errors' : 'ran successfully'
-            }`
-          );
-        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      if (!packagePolicy) {
+        ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
+      } else if (!packageInfo) {
+        packageInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package!.name,
+          pkgVersion: pkgVersion ?? '',
+        });
       }
 
-      return {
-        name: updatedPackagePolicy.name,
-        diff: [packagePolicy, updatedPackagePolicy],
-        hasErrors,
-      };
+      return this.calculateDiff(packagePolicy, packageInfo);
     } catch (error) {
       return {
         hasErrors: true,
         ...ingestErrorToResponseOptions(error),
       };
+    }
+  }
+
+  private async calculateDiff(
+    packagePolicy: PackagePolicy,
+    packageInfo: PackageInfo
+  ): Promise<UpgradePackagePolicyDryRunResponseItem> {
+    const updatedPackagePolicy = updatePackageInputs(
+      {
+        ...omit(packagePolicy, 'id'),
+        inputs: packagePolicy.inputs,
+        package: {
+          ...packagePolicy.package!,
+          version: packageInfo.version,
+        },
+      },
+      packageInfo,
+      packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
+      true
+    );
+    updatedPackagePolicy.inputs = await this._compilePackagePolicyInputs(
+      packageInfo,
+      updatedPackagePolicy.vars || {},
+      updatedPackagePolicy.inputs as PackagePolicyInput[]
+    );
+    updatedPackagePolicy.elasticsearch = packageInfo.elasticsearch;
+
+    const hasErrors = 'errors' in updatedPackagePolicy;
+
+    this.sendUpgradeTelemetry(
+      packagePolicy.package!,
+      packageInfo.version,
+      hasErrors,
+      updatedPackagePolicy.errors
+    );
+
+    return {
+      name: updatedPackagePolicy.name,
+      diff: [packagePolicy, updatedPackagePolicy],
+      hasErrors,
+    };
+  }
+
+  private sendUpgradeTelemetry(
+    packagePolicyPackage: PackagePolicyPackage,
+    latestVersion: string,
+    hasErrors: boolean,
+    errors?: Array<{ key: string | undefined; message: string }>
+  ) {
+    if (packagePolicyPackage.version !== latestVersion) {
+      const upgradeTelemetry: PackageUpdateEvent = {
+        packageName: packagePolicyPackage.name,
+        currentVersion: packagePolicyPackage.version,
+        newVersion: latestVersion,
+        status: hasErrors ? 'failure' : 'success',
+        error: hasErrors ? errors : undefined,
+        dryRun: true,
+        eventType: 'package-policy-upgrade' as UpdateEventType,
+      };
+      sendTelemetryEvents(
+        appContextService.getLogger(),
+        appContextService.getTelemetryEventsSender(),
+        upgradeTelemetry
+      );
+      appContextService
+        .getLogger()
+        .info(
+          `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'}`
+        );
+      appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
     }
   }
 
@@ -812,19 +835,13 @@ class PackagePolicyService {
   }
 
   public async _compilePackagePolicyInputs(
-    installablePackage: InstallablePackage,
     pkgInfo: PackageInfo,
     vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const inputsPromises = inputs.map(async (input) => {
       const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input);
-      const compiledStreams = await _compilePackageStreams(
-        installablePackage,
-        pkgInfo,
-        vars,
-        input
-      );
+      const compiledStreams = await _compilePackageStreams(pkgInfo, vars, input);
       return {
         ...input,
         compiled_input: compiledInput,
@@ -975,7 +992,6 @@ async function _compilePackagePolicyInput(
 }
 
 async function _compilePackageStreams(
-  installablePackage: InstallablePackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
