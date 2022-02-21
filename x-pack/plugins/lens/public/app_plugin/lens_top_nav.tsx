@@ -34,6 +34,7 @@ import {
   getIndexPatternsIds,
   getResolvedDateRange,
   handleIndexPatternChange,
+  refreshIndexPatternsList,
 } from '../utils';
 
 function getLensTopNavConfig(options: {
@@ -191,6 +192,7 @@ export const LensTopNavMenu = ({
     application,
     attributeService,
     dashboardFeatureFlag,
+    DataViewPickerComponent,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -500,6 +502,30 @@ export const LensTopNavMenu = ({
     };
   }, [activeDatasourceId, dispatch]);
 
+  const refreshFieldList = useCallback(async () => {
+    if (currentIndexPattern && currentIndexPattern.id) {
+      refreshIndexPatternsList({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        indexPatternId: currentIndexPattern.id,
+        setDatasourceState,
+      });
+    }
+    // start a new session so all charts are refreshed
+    data.search.session.start();
+  }, [
+    currentIndexPattern,
+    data.search.session,
+    datasourceMap,
+    datasourceStates,
+    setDatasourceState,
+  ]);
+
   const dataViewsPickerProps = {
     'data-test-subj': 'indexPattern-switcher',
     trigger: {
@@ -509,7 +535,8 @@ export const LensTopNavMenu = ({
     },
     indexPatternRefs: dataViewsList,
     indexPatternId: currentIndexPattern?.id,
-    onChangeIndexPattern: (newIndexPatternId: string) =>
+    onAddField: refreshFieldList,
+    onChangeDataView: (newIndexPatternId: string) =>
       handleIndexPatternChange({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
@@ -535,8 +562,7 @@ export const LensTopNavMenu = ({
       onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
       onClearSavedQuery={onClearSavedQueryWrapped}
       indexPatterns={indexPatterns}
-      showDataViewsPicker={true}
-      dataViewsPickerProps={dataViewsPickerProps}
+      dataViewPickerComponent={<DataViewPickerComponent {...dataViewsPickerProps} />}
       query={query}
       dateRangeFrom={from}
       dateRangeTo={to}

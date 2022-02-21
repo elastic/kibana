@@ -21,6 +21,7 @@ import type {
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 import type { DashboardStart } from '../../../../../src/plugins/dashboard/public';
+import { DataViewPickerStart } from '../../../../../src/plugins/data_view_picker/public';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import type { LensAttributeService } from '../lens_attribute_service';
@@ -136,6 +137,7 @@ export interface LensAppServices {
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
+  DataViewPickerComponent: DataViewPickerStart['DataViewPickerComponent'];
 }
 
 export interface LensTopNavTooltips {

@@ -274,6 +274,8 @@ export interface Datasource<T = unknown, P = unknown> {
     setState: StateSetter<T>;
   }) => void;
 
+  refreshIndexPatternsList?: (props: { indexPatternId: string; setState: StateSetter<T> }) => void;
+
   toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (

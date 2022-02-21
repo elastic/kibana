@@ -1,0 +1,14 @@
+{
+  "id": "dataViewPicker",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["dataViews", "dataViewFieldEditor"],
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["kibanaReact"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Reusable data view picker Kibana"
+}

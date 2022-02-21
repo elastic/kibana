@@ -36,6 +36,7 @@ import type { PresentationUtilPluginStart } from '../../../../src/plugins/presen
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
+import { DataViewPickerStart } from '../../../../src/plugins/data_view_picker/public';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
@@ -119,6 +120,7 @@ export interface LensPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViewPicker: DataViewPickerStart;
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;

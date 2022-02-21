@@ -197,8 +197,7 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           isClearable={props.isClearable}
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
-          showDataViewsPicker={props.showDataViewsPicker}
-          dataViewsPickerProps={props.dataViewsPickerProps}
+          dataViewPickerComponent={props.dataViewPickerComponent}
         />
       </KibanaContextProvider>
     );
