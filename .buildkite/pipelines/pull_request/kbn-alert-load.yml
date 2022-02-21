@@ -1,0 +1,7 @@
+steps:
+  - command: .buildkite/scripts/steps/cloud/kbn-alert-load.sh
+    label: 'KBN-ALERT-LOAD'
+    agents:
+      queue: n2-2
+    depends_on: build
+    timeout_in_minutes: 60
