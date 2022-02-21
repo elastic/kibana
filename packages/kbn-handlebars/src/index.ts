@@ -95,8 +95,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   MustacheStatement(mustache: hbs.AST.MustacheStatement) {
-    // @ts-expect-error
-    this.SubExpression(mustache); // TODO: Calling SubExpression with a MustacheStatement doesn't seem right
+    // @ts-expect-error Calling SubExpression with a MustacheStatement doesn't seem right, but it's what handlebars does, so we do too
+    this.SubExpression(mustache);
   }
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
