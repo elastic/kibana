@@ -7,13 +7,18 @@
 
 import React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
-import { getCreateCaseFlyoutLazyNoProvider } from '../../methods/get_create_case_flyout';
+import {
+  getAllCasesSelectorModalNoProviderLazy,
+  getCreateCaseFlyoutLazyNoProvider,
+} from '../../methods';
 import { getInitialCasesContextState } from './cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
-jest.mock('../../methods/get_create_case_flyout');
+jest.mock('../../methods');
 
 const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as jest.Mock;
+const getAllCasesSelectorModalNoProviderLazyMock =
+  getAllCasesSelectorModalNoProviderLazy as jest.Mock;
 
 describe('Cases context UI', () => {
   let appMock: AppMockRenderer;
@@ -37,6 +42,7 @@ describe('Cases context UI', () => {
       appMock.render(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).toHaveBeenCalledWith({ attachments: [] });
     });
+
     it('should not render the create case flyout when isFlyoutOpen is false', async () => {
       const state = {
         ...getInitialCasesContextState(),
@@ -46,6 +52,38 @@ describe('Cases context UI', () => {
       };
       appMock.render(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('select case modal', () => {
+    it('should render the select case modal when isModalOpen is true', async () => {
+      const onRowClick = jest.fn();
+      const state = {
+        ...getInitialCasesContextState(),
+        selectCaseModal: {
+          isModalOpen: true,
+          props: {
+            attachments: [],
+            onRowClick,
+          },
+        },
+      };
+      appMock.render(<CasesGlobalComponents state={state} />);
+      expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalledWith({
+        attachments: [],
+        onRowClick,
+      });
+    });
+
+    it('should not render the select case modal when isModalOpen is false', async () => {
+      const state = {
+        ...getInitialCasesContextState(),
+        selectCaseModal: {
+          isModalOpen: false,
+        },
+      };
+      appMock.render(<CasesGlobalComponents state={state} />);
+      expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalled();
     });
   });
 });
