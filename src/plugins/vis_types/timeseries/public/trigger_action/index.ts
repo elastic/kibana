@@ -16,6 +16,7 @@ import { getDataSourceInfo } from './get_datasource_info';
 import { getFieldType } from './get_field_type';
 import { getSeries } from './get_series';
 import { getYExtents } from './get_extents';
+import { getFieldsForTerms } from '../../common/fields_utils';
 
 const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
 
@@ -114,7 +115,7 @@ export const triggerTSVBtoLensConfiguration = async (
       timeFieldName: timeField,
       chartType,
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
-      ...(layer.terms_field && { splitField: layer.terms_field }),
+      ...(layer.terms_field && { splitField: getFieldsForTerms(layer.terms_field) }),
       splitWithDateHistogram,
       ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
       ...(splitFilters.length > 0 && { splitFilters }),

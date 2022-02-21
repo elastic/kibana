@@ -22,8 +22,12 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { getValueOrEmpty } from '../../../../../common/empty_label';
-import { getFieldsForTerms, getMultiFieldLabel } from '../../../../../common/fields_utils';
+
+import {
+  getFieldsForTerms,
+  getMultiFieldLabel,
+  MULTI_FIELD_VALUES_SEPARATOR,
+} from '../../../../../common/fields_utils';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -77,16 +81,26 @@ class TableVis extends Component {
   renderRow = (row, pivotIds) => {
     const { model, fieldFormatMap, getConfig } = this.props;
 
-    let rowDisplay = getValueOrEmpty(
-      model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
-    );
+    let rowDisplay = row.key;
 
-    if (pivotIds.length === 1) {
-      const [pivotId] = pivotIds;
-      // we should skip url field formatting for key if tsvb have drilldown_url
-      if (fieldFormatMap?.[pivotId]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
-        const formatter = createFieldFormatter(pivotId, fieldFormatMap, 'html');
-        rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />; // eslint-disable-line react/no-danger
+    // we should skip url field formatting for key if tsvb have drilldown_url
+    if (pivotIds.length) {
+      const formatPart = (pivot, value) => {
+        // @todo use indexPattern.getFormatterForField instead
+        if (fieldFormatMap?.[pivot] && fieldFormatMap[pivot]?.id !== FIELD_FORMAT_IDS.URL) {
+          const formatter = createFieldFormatter(pivot, fieldFormatMap, 'html');
+          return <span dangerouslySetInnerHTML={{ __html: formatter(value) }} />; // eslint-disable-line react/no-danger
+        } else {
+          return model.pivot_type === 'date' ? this.dateFormatter.convert(value) : value;
+        }
+      };
+
+      if (pivotIds.length) {
+        rowDisplay = pivotIds
+          .map((item, index) =>
+            formatPart(item, (Array.isArray(row.key) ? row.key : [row.key])[index])
+          )
+          .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
       }
     }
 

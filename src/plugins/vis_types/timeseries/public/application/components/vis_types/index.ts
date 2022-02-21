@@ -15,6 +15,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
 import type { FieldFormatMap } from '../../../../../../data/common';
+import { FetchedIndexPattern } from '../../../../common/types';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
@@ -62,5 +63,7 @@ export interface TimeseriesVisProps {
   getConfig: IUiSettingsClient['get'];
   syncColors: boolean;
   palettesService: PaletteRegistry;
+  indexPattern?: FetchedIndexPattern['indexPattern'];
+  /** @deprecated please use indexPattern.fieldFormatMap instead **/
   fieldFormatMap?: FieldFormatMap;
 }
