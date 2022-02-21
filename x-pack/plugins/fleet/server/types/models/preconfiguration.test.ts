@@ -17,12 +17,14 @@ describe('Test preconfiguration schema', () => {
             name: 'Output 1',
             type: 'elasticsearch',
             is_default: true,
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'output-2',
             name: 'Output 2',
             type: 'elasticsearch',
             is_default: true,
+            hosts: ['http://test.fr:9200'],
           },
         ]);
       }).toThrowError('preconfigured outputs can only have one default output.');
@@ -35,12 +37,14 @@ describe('Test preconfiguration schema', () => {
             name: 'Output 1',
             type: 'elasticsearch',
             is_default_monitoring: true,
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'output-2',
             name: 'Output 2',
             type: 'elasticsearch',
             is_default_monitoring: true,
+            hosts: ['http://test.fr:9200'],
           },
         ]);
       }).toThrowError('preconfigured outputs can only have one default monitoring output.');
@@ -52,11 +56,13 @@ describe('Test preconfiguration schema', () => {
             id: 'nonuniqueid',
             name: 'Output 1',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'nonuniqueid',
             name: 'Output 2',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
         ]);
       }).toThrowError('preconfigured outputs need to have unique ids.');
@@ -68,11 +74,13 @@ describe('Test preconfiguration schema', () => {
             id: 'output-1',
             name: 'nonuniquename',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'output-2',
             name: 'nonuniquename',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
         ]);
       }).toThrowError('preconfigured outputs need to have unique names.');
