@@ -8,6 +8,7 @@
 import React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../methods/get_create_case_flyout';
+import { getInitialCasesContextState } from './cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
 jest.mock('../../methods/get_create_case_flyout');
@@ -25,6 +26,7 @@ describe('Cases context UI', () => {
   describe('create case flyout', () => {
     it('should render the create case flyout when isFlyoutOpen is true', async () => {
       const state = {
+        ...getInitialCasesContextState(),
         createCaseFlyout: {
           isFlyoutOpen: true,
           props: {
@@ -37,6 +39,7 @@ describe('Cases context UI', () => {
     });
     it('should not render the create case flyout when isFlyoutOpen is false', async () => {
       const state = {
+        ...getInitialCasesContextState(),
         createCaseFlyout: {
           isFlyoutOpen: false,
         },
