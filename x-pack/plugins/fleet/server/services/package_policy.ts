@@ -577,7 +577,7 @@ class PackagePolicyService {
 
     for (const id of ids) {
       try {
-        let packageInfo: PackageInfo | undefined = undefined;
+        let packageInfo: PackageInfo | undefined;
         if (!packagePolicy) {
           ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
         } else if (!packageInfo) {
@@ -651,7 +651,7 @@ class PackagePolicyService {
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      let packageInfo: PackageInfo | undefined = undefined;
+      let packageInfo: PackageInfo | undefined;
       if (!packagePolicy) {
         ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
       } else if (!packageInfo) {
