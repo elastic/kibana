@@ -14,19 +14,17 @@ import type {
   RouteValidatorConfig,
 } from 'kibana/server';
 
+import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
-export interface RouteDeps {
-  router: CasesRouter;
-  logger: Logger;
-  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
-}
+type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
 
 export interface RegisterRoutesDeps {
   router: CasesRouter;
   routes: CaseRoute[];
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }
 
 export interface TotalCommentByCase {

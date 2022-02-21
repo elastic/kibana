@@ -17,7 +17,7 @@ export function pickKeys<T, K extends keyof T>(obj: T, ...keys: K[]) {
 }
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
-  const { router, routes, logger, kibanaVersion } = deps;
+  const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
     const { method, path, params, handler } = route as CaseRoute;
