@@ -54,7 +54,7 @@ export const insertDataIntoIndex = ({
       bulk.push(updateTimestamps(doc));
     });
 
-    const { body: resp } = await esClient.asCurrentUser.bulk({
+    const resp = await esClient.asCurrentUser.bulk({
       body: bulk,
     });
 

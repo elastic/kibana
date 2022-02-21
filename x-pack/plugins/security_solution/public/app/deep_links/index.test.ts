@@ -140,16 +140,16 @@ describe('deepLinks', () => {
     ).toBeTruthy();
   });
 
-  it('should return NO ueba link when enableExperimental.uebaEnabled === false', () => {
+  it('should return NO users link when enableExperimental.usersEnabled === false', () => {
     const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
-    expect(findDeepLink(SecurityPageName.ueba, deepLinks)).toBeFalsy();
+    expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
   });
 
-  it('should return ueba link when enableExperimental.uebaEnabled === true', () => {
+  it('should return users link when enableExperimental.usersEnabled === true', () => {
     const deepLinks = getDeepLinks({
       ...mockGlobalState.app.enableExperimental,
-      uebaEnabled: true,
+      usersEnabled: true,
     });
-    expect(findDeepLink(SecurityPageName.ueba, deepLinks)).toBeTruthy();
+    expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeTruthy();
   });
 });

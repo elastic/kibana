@@ -23,9 +23,7 @@ const ccrDataEnricher = async (indicesList: Index[], client: IScopedClusterClien
   }
 
   try {
-    const {
-      body: { follower_indices: followerIndices },
-    } = await client.asCurrentUser.ccr.followInfo({
+    const { follower_indices: followerIndices } = await client.asCurrentUser.ccr.followInfo({
       index: '_all',
     });
 

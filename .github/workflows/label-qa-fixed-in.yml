@@ -37,7 +37,8 @@ jobs:
               }
             }
           prnumber: ${{ github.event.number }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
       - uses: sergeysova/jq-action@v2
         id: issues_to_label
         with:
@@ -75,4 +76,5 @@ jobs:
             }
           issueid: ${{ matrix.issueNodeId }}
           labelids: ${{ needs.fetch_issues_to_label.outputs.label_ids }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}

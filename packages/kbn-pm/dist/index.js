@@ -8987,13 +8987,6 @@ const BootstrapCommand = {
     }, {
       prefix: '[vscode]',
       debug: false
-    });
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures'], {
-      cwd: kbn.getAbsolute(),
-      env: process.env
-    }, {
-      prefix: '[ts refs]',
-      debug: false
     }); // send timings
 
     await reporter.timings({
@@ -9049,7 +9042,7 @@ var _ci_stats_config = __webpack_require__(218);
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
-/** Container for metadata that can be attached to different ci-stats objects */
+/** A ci-stats metric record */
 
 /** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
@@ -51510,7 +51503,7 @@ async function sortPackageJson(kbn) {
   await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.writeFile(packageJsonPath, JSON.stringify(sort_package_json__WEBPACK_IMPORTED_MODULE_1___default()(JSON.parse(packageJson), {
     // top level keys in the order they were written when this was implemented
     sortOrder: ['name', 'description', 'keywords', 'private', 'version', 'branch', 'types', 'tsdocMetadata', 'build', 'homepage', 'bugs', 'kibana', 'author', 'scripts', 'repository', 'engines', 'resolutions']
-  }), null, 2));
+  }), null, 2) + '\n');
 }
 
 /***/ }),

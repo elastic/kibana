@@ -8,8 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { ServiceLocations, LOCATIONS_LABEL } from './locations';
-import userEvent from '@testing-library/user-event';
+import { ServiceLocations } from './locations';
 
 describe('<ActionBar />', () => {
   const setLocations = jest.fn();
@@ -52,47 +51,7 @@ describe('<ActionBar />', () => {
       { state }
     );
 
-    expect(screen.getByText(LOCATIONS_LABEL)).toBeInTheDocument();
-    expect(screen.queryByText('US Central')).not.toBeInTheDocument();
-  });
-
-  it('shows location options when clicked', async () => {
-    render(
-      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
-      { state }
-    );
-
-    userEvent.click(screen.getByRole('button'));
-
-    expect(screen.getByText('US Central')).toBeInTheDocument();
-  });
-
-  it('prevents bad inputs', async () => {
-    render(
-      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
-      { state }
-    );
-
-    userEvent.click(screen.getByRole('button'));
-    userEvent.type(screen.getByRole('textbox'), 'fake location');
-
-    expect(screen.getByText("doesn't match any options")).toBeInTheDocument();
-
-    userEvent.keyboard(`{enter}`);
-
-    expect(screen.getByText('"fake location" is not a valid option')).toBeInTheDocument();
-  });
-
-  it('calls setLocations', async () => {
-    render(
-      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
-      { state }
-    );
-
-    userEvent.click(screen.getByRole('button'));
-    userEvent.click(screen.getByText('US Central'));
-
-    expect(setLocations).toBeCalledWith([location]);
+    expect(screen.queryByText('US Central')).toBeInTheDocument();
   });
 
   it('shows invalid error', async () => {

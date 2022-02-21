@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
+import type { Logger, PluginInitializerContext } from 'kibana/server';
 
 import type { CasesRouter } from '../../types';
 
 export interface RouteDeps {
   router: CasesRouter;
   logger: Logger;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
 export interface TotalCommentByCase {
