@@ -97,7 +97,10 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
+// TODO PackagePolicyServiceInterface should not include private methods
+export const createPackagePolicyServiceMock = (): jest.Mocked<
+  Partial<PackagePolicyServiceInterface>
+> => {
   return {
     _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
