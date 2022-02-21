@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       // wait for the the pending job to complete
-      await reportingAPI.waitForJobToFinish(downloadPath);
+      await reportingAPI.waitForJobToFinish(downloadPath, true);
 
       expect(await reportingAPI.getJobErrorCode(report.id)).to.be('unknown_error');
 
