@@ -10,10 +10,10 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToRules } from './constants';
+import { Section, routeToConnectors, routeToRules, routeToAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
-import { hasShowActionsCapability } from './lib/capabilities';
+import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
 
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
@@ -24,6 +24,7 @@ const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
 const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+const AlertsTable = lazy(() => import('./sections/alerts_table'));
 
 export interface MatchParams {
   section: Section;
@@ -43,6 +44,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
+  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
@@ -62,6 +64,18 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         <FormattedMessage
           id="xpack.triggersActionsUI.home.connectorsTabTitle"
           defaultMessage="Connectors"
+        />
+      ),
+    });
+  }
+
+  if (canShowAlerts) {
+    tabs.push({
+      id: 'alerts',
+      name: (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.home.alertsTabTitle"
+          defaultMessage="Alerts"
         />
       ),
     });
@@ -133,6 +147,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               exact
               path={routeToRules}
               component={suspendedComponentWithProps(AlertsList, 'xl')}
+            />
+            <Route
+              exact
+              path={routeToAlerts}
+              component={suspendedComponentWithProps(AlertsTable, 'xl')}
             />
           </Switch>
         </HealthCheck>
