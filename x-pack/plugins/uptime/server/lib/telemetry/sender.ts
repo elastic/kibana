@@ -134,7 +134,8 @@ export class TelemetryEventsSender {
         events,
         telemetryUrl,
         clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number
+        clusterInfo?.version?.number,
+        clusterInfo?.cluster_name
       );
     } catch (err) {
       this.logger.debug(`Error sending telemetry events data: ${err}`);
@@ -162,7 +163,8 @@ export class TelemetryEventsSender {
     events: unknown[],
     telemetryUrl: string,
     clusterUuid: string | undefined,
-    clusterVersionNumber: string | undefined
+    clusterVersionNumber: string | undefined,
+    clusterName: string | undefined
   ) {
     // using ndjson so that each line will be wrapped in json envelope on server side
     // see https://github.com/elastic/infra/blob/master/docs/telemetry/telemetry-next-dataflow.md#json-envelope
@@ -173,6 +175,7 @@ export class TelemetryEventsSender {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
+          'X-Elastic-Cluster-Name': clusterName,
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.2.0',
         },
       });
