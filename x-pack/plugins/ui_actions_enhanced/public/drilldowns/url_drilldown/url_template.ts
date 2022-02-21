@@ -11,7 +11,10 @@ export async function compile(
   doEncode: boolean = true
 ): Promise<string> {
   const handlebarsTemplate = (await import('./handlebars').then((m) => m.handlebars)).compileAST(
-    urlTemplate
+    urlTemplate,
+    {
+      noEscape: true,
+    }
   );
 
   let processedUrl: string = handlebarsTemplate(context);

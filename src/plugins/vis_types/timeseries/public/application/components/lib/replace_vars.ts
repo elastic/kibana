@@ -7,11 +7,9 @@
  */
 
 import { encode, RisonValue } from 'rison-node';
-import Handlebars from '@kbn/handlebars';
+import Handlebars, { ExtendedCompileOptions } from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
-
-type CompileOptions = Parameters<typeof Handlebars.compile>[1];
 
 const handlebars = Handlebars.create();
 
@@ -55,12 +53,14 @@ export function replaceVars(
   str: string,
   args: Record<string, unknown> = {},
   vars: Record<string, unknown> = {},
-  compileOptions: Partial<CompileOptions> = {}
+  compileOptions: Partial<ExtendedCompileOptions> = {}
 ) {
   try {
     /** we need add '[]' for emptyLabel because this value contains special characters.
      * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
-    const template = handlebars.compileAST(str.split(emptyLabel).join(`[${emptyLabel}]`));
+    const template = handlebars.compileAST(str.split(emptyLabel).join(`[${emptyLabel}]`), {
+      ...compileOptions,
+    });
     const string = template({
       ...vars,
       args,

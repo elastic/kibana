@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Handlebars, { HelperDelegate } from './';
+import Handlebars, { HelperDelegate, ExtendedCompileOptions } from './';
 
 test('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
@@ -22,6 +22,22 @@ describe('Handlebars.compileAST', () => {
       expectTemplate(template).withInput(context).toCompileTo(outputExpected);
     });
   }
+
+  describe('compiler options', () => {
+    test('noEscape', () => {
+      expectTemplate('{{value}}').withInput({ value: '<foo>' }).toCompileTo('&lt;foo&gt;');
+
+      expectTemplate('{{value}}')
+        .withCompileOptions({ noEscape: false })
+        .withInput({ value: '<foo>' })
+        .toCompileTo('&lt;foo&gt;');
+
+      expectTemplate('{{value}}')
+        .withCompileOptions({ noEscape: true })
+        .withInput({ value: '<foo>' })
+        .toCompileTo('<foo>');
+    });
+  });
 
   test('invalid template', () => {
     expectTemplate('{{value').withInput({ value: 42 }).toThrowErrorMatchingSnapshot();
@@ -60,11 +76,17 @@ test('Handlebars.registerHelpers', () => {
 
 class HandlebarsTestBench {
   private template: string;
+  private compileOptions?: ExtendedCompileOptions;
   private helpers: { [key: string]: HelperDelegate } = {};
   private input: object = {};
 
   constructor(template: string) {
     this.template = template;
+  }
+
+  withCompileOptions(compileOptions: ExtendedCompileOptions) {
+    this.compileOptions = compileOptions;
+    return this;
   }
 
   withInput(input: object) {
@@ -108,8 +130,8 @@ class HandlebarsTestBench {
     }
 
     return {
-      renderEval: hbar.compile(this.template),
-      renderAST: hbar.compileAST(this.template),
+      renderEval: hbar.compile(this.template, this.compileOptions),
+      renderAST: hbar.compileAST(this.template, this.compileOptions),
     };
   }
 }

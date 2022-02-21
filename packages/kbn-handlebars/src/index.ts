@@ -11,9 +11,14 @@ import OriginalHandlebars from 'handlebars';
 import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
 import get from 'lodash/get';
 
+export type ExtendedCompileOptions = Pick<CompileOptions, 'noEscape'>;
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
-  export function compileAST(template: string): (context: any) => string;
+  export function compileAST(
+    template: string,
+    options?: ExtendedCompileOptions
+  ): (context: any) => string;
   export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
 }
 
@@ -36,16 +41,17 @@ export function create(): typeof Handlebars {
 Handlebars.create = create;
 
 // Custom function to compile only the AST so we don't have to use `eval`
-Handlebars.compileAST = function (template: string) {
-  const visitor = new ElasticHandlebarsVisitor(template, this.helpers);
+Handlebars.compileAST = function (template: string, options?: ExtendedCompileOptions) {
+  const visitor = new ElasticHandlebarsVisitor(template, options, this.helpers);
   return (context: any) => visitor.render(context);
 };
 
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private scopes: any[] = [];
   private values: any[] = [];
-  private helpers: { [name: string]: Handlebars.HelperDelegate };
   private template: string;
+  private compileOptions: ExtendedCompileOptions;
+  private helpers: { [name: string]: Handlebars.HelperDelegate };
   private ast?: hbs.AST.Program;
   private defaultHelperOptions: Handlebars.HelperOptions = {
     // @ts-expect-error this function is lifted from the handlebars source and slightly modified (lib/handlebars/runtime.js)
@@ -65,9 +71,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     },
   };
 
-  constructor(template: string, helpers: { [name: string]: Handlebars.HelperDelegate }) {
+  constructor(
+    template: string,
+    options: ExtendedCompileOptions = {},
+    helpers: { [name: string]: Handlebars.HelperDelegate }
+  ) {
     super();
     this.template = template;
+    this.compileOptions = options;
     this.helpers = helpers;
   }
 
@@ -133,7 +144,11 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   PathExpression(path: hbs.AST.PathExpression) {
     const context = this.scopes[path.depth];
     const value = path.parts[0] === undefined ? context : get(context, path.parts);
-    this.values.push(value);
+    if (this.compileOptions.noEscape === true || typeof value !== 'string') {
+      this.values.push(value);
+    } else {
+      this.values.push(Handlebars.escapeExpression(value));
+    }
   }
 
   ContentStatement(content: hbs.AST.ContentStatement) {
