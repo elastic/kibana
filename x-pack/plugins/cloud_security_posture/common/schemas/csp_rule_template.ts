@@ -6,21 +6,21 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
-export const cspRuleTemplateSchema = rt.object({
-    name: rt.string(),
-    description: rt.string(),
-    rationale: rt.string(),
-    impact: rt.string(),
-    default_value: rt.string(),
-    remediation: rt.string(),
-    benchmark: rt.object({ name: rt.string(), version: rt.string() }),
-    severity: rt.string(),
-    benchmark_rule_id: rt.string(),
-    rego_rule_id: rt.string(),
-    tags: rt.arrayOf(rt.string()),
-    enabled: rt.boolean(),
-    muted: rt.boolean(),
-  });
+const cspRuleTemplateSchema = rt.object({
+  name: rt.string(),
+  description: rt.string(),
+  rationale: rt.string(),
+  impact: rt.string(),
+  default_value: rt.string(),
+  remediation: rt.string(),
+  benchmark: rt.object({ name: rt.string(), version: rt.string() }),
+  severity: rt.string(),
+  benchmark_rule_id: rt.string(),
+  rego_rule_id: rt.string(),
+  tags: rt.arrayOf(rt.string()),
+  enabled: rt.boolean(),
+  muted: rt.boolean(),
+});
 
-  export const cspRuleTemplateSavedObjectType = 'csp-rule-template';
-  export type CspRuleTemplateSchema = TypeOf<typeof cspRuleTemplateSchema>;
+export const cspRuleTemplateSavedObjectType = 'csp-rule-template';
+export type CspRuleTemplateSchema = TypeOf<typeof cspRuleTemplateSchema>;

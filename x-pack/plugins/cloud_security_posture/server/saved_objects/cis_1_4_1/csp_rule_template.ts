@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsType, SavedObjectsValidationMap } from '../../../../../../src/core/server';
-import { type CspRuleTemplateSchema, cspRuleTemplateSchema, cspRuleTemplateSavedObjectType } from '../../../common/schemas/csp_rule_template';
+import { SavedObjectsType } from '../../../../../../src/core/server';
+import {
+  type CspRuleTemplateSchema,
+  cspRuleTemplateSavedObjectType,
+} from '../../../common/schemas/csp_rule_template';
 
 const ruleTemplateAssetSavedObjectMappings: SavedObjectsType<CspRuleTemplateSchema>['mappings'] = {
   dynamic: false,
@@ -26,13 +29,8 @@ const ruleTemplateAssetSavedObjectMappings: SavedObjectsType<CspRuleTemplateSche
   },
 };
 
-const validationMap: SavedObjectsValidationMap = {
-  '1.0.0': cspRuleTemplateSchema,
-};
-
 export const cspRuleTemplateAssetType: SavedObjectsType<CspRuleTemplateSchema> = {
   name: cspRuleTemplateSavedObjectType,
-  schemas: validationMap,
   hidden: false,
   management: {
     importableAndExportable: true,
