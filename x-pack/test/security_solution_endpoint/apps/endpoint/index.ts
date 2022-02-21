@@ -15,8 +15,7 @@ import {
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('endpoint', function () {
+  describe('endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');

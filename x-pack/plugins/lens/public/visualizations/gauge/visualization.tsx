@@ -21,8 +21,8 @@ import {
   getMaxValue,
   getMinValue,
   getValueFromAccessor,
-  GaugeIconVertical,
-  GaugeIconHorizontal,
+  VerticalBulletIcon,
+  HorizontalBulletIcon,
 } from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
 import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
@@ -56,14 +56,14 @@ export const isNumericDynamicMetric = (op: OperationMetadata) =>
 
 export const CHART_NAMES = {
   horizontalBullet: {
-    icon: GaugeIconHorizontal,
+    icon: HorizontalBulletIcon,
     label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
       defaultMessage: 'Gauge horizontal',
     }),
     groupLabel: groupLabelForGauge,
   },
   verticalBullet: {
-    icon: GaugeIconVertical,
+    icon: VerticalBulletIcon,
     label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
       defaultMessage: 'Gauge vertical',
     }),
