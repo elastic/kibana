@@ -204,11 +204,11 @@ describe('workspace_panel', () => {
 
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
-    const eventData = {};
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
     onEvent({ name: 'brush', data: eventData });
 
     expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
-    expect(trigger.exec).toHaveBeenCalledWith({ data: eventData });
+    expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
   });
 
   it('should push add current data table to state on data$ emitting value', async () => {
