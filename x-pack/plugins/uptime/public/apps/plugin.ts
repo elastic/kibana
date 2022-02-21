@@ -105,7 +105,7 @@ export class UptimePlugin
       return UptimeDataHelper(coreStart);
     };
 
-    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
+    // plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
     plugins.observability.dashboard.register({
       appName: 'synthetics',
