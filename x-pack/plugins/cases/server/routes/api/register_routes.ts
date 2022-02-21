@@ -10,11 +10,37 @@ import { pick } from 'lodash';
 import { RouteRegistrar } from 'kibana/server';
 import { CasesRequestHandlerContext } from '../../types';
 import { CaseRoute, RegisterRoutesDeps } from './types';
-import { escapeHatch, wrapError } from './utils';
+import { escapeHatch, getIsKibanaRequest, wrapError } from './utils';
 
 export function pickKeys<T, K extends keyof T>(obj: T, ...keys: K[]) {
   return pick(obj, keys) as Pick<T, K>;
 }
+
+const increaseTelemetryCounters = ({
+  telemetryUsageCounter,
+  method,
+  path,
+  isKibanaRequest,
+  isError = false,
+}: {
+  telemetryUsageCounter: Exclude<RegisterRoutesDeps['telemetryUsageCounter'], undefined>;
+  method: string;
+  path: string;
+  isKibanaRequest: boolean;
+  isError?: boolean;
+}) => {
+  const counterName = `${method.toUpperCase()} ${path}`;
+
+  telemetryUsageCounter.incrementCounter({
+    counterName,
+    counterType: isError ? 'error' : 'success',
+  });
+
+  telemetryUsageCounter.incrementCounter({
+    counterName,
+    counterType: `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+  });
+};
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
@@ -32,11 +58,29 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         },
       },
       async (context, request, response) => {
+        const isKibanaRequest = getIsKibanaRequest(request.headers);
+
         try {
           const res = await handler({ logger, context, request, response, kibanaVersion });
+
+          if (telemetryUsageCounter) {
+            increaseTelemetryCounters({ telemetryUsageCounter, method, path, isKibanaRequest });
+          }
+
           return res;
         } catch (error) {
           logger.error(error.message);
+
+          if (telemetryUsageCounter) {
+            increaseTelemetryCounters({
+              telemetryUsageCounter,
+              method,
+              path,
+              isError: true,
+              isKibanaRequest,
+            });
+          }
+
           return response.customError(wrapError(error));
         }
       }
