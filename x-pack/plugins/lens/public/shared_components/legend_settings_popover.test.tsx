@@ -38,7 +38,7 @@ describe('Legend Settings', () => {
       mode: 'auto',
       onDisplayChange: jest.fn(),
       onPositionChange: jest.fn(),
-      onLegendSizeChange: jest.fn,
+      onLegendSizeChange: jest.fn(),
     };
   });
 
