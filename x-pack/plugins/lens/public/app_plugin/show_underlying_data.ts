@@ -71,8 +71,7 @@ export function getLayerMetaInfo(
     return {
       meta: undefined,
       error: i18n.translate('xpack.lens.app.showUnderlyingDataMultipleLayers', {
-        defaultMessage:
-          'Cannot show underlying data cannot be shown for visualizations with multiple layers',
+        defaultMessage: 'Cannot show underlying data for visualizations with multiple layers',
       }),
       isVisible,
     };
@@ -94,27 +93,36 @@ export function getLayerMetaInfo(
   //   }
   const tableSpec = datasourceAPI.getTableSpec();
 
-  const uniqueFields = [
-    ...new Set(
-      tableSpec
-        .filter(({ columnId }) => !datasourceAPI.getOperationForColumnId(columnId)?.hasTimeShift)
-        .map(({ fields }) => fields)
-        .flat()
-    ),
-  ];
-  // If no field, return?
+  const columnsWithNoTimeShifts = tableSpec.filter(
+    ({ columnId }) => !datasourceAPI.getOperationForColumnId(columnId)?.hasTimeShift
+  );
+  if (columnsWithNoTimeShifts.length < tableSpec.length) {
+    return {
+      meta: undefined,
+      error: i18n.translate('xpack.lens.app.showUnderlyingDataTimeShifts', {
+        defaultMessage: "Cannot show underlying data when there's a time shift configured",
+      }),
+      isVisible,
+    };
+  }
+
+  const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
+  // If no field, return? Or rather carry on and show the default columns?
   // if (!uniqueFields.length) {
   //   return {
   //     meta: undefined,
   //     error: i18n.translate('xpack.lens.app.showUnderlyingDataNoFields', {
-  //       defaultMessage: 'The current visualization has not available fields to show',
+  //       defaultMessage: 'The current visualization has no available fields to show',
   //     }),
   //     isVisible,
   //   };
   // }
-  const layerFilters = datasourceAPI.getFilters();
   return {
-    meta: { id: datasourceAPI.getSourceId()!, columns: uniqueFields, filters: layerFilters },
+    meta: {
+      id: datasourceAPI.getSourceId()!,
+      columns: uniqueFields,
+      filters: datasourceAPI.getFilters(),
+    },
     error: undefined,
     isVisible,
   };

@@ -23,6 +23,8 @@ import {
   MovingAverageIndexPatternColumn,
   MathIndexPatternColumn,
   FormulaIndexPatternColumn,
+  RangeIndexPatternColumn,
+  FiltersIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
@@ -1346,7 +1348,6 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: true,
           isStaticValue: false,
-          hasFilter: false,
           hasTimeShift: false,
         } as OperationDescriptor);
       });
@@ -1399,11 +1400,420 @@ describe('IndexPattern Data Source', () => {
     });
 
     describe('getFilters', () => {
-      it.todo('should return all filters in metrics, grouped by language');
-      it.todo('shuold collect top values fields as kuery existence filters');
-      it.todo('should collect custom ranges as kuery filters');
-      it.todo('should collect filters within filters operation grouped by language');
-      it.todo('should support complex scenarios');
+      it('should return all filters in metrics, grouped by language', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: 'bytes > 1000' },
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'lucene', query: 'memory' },
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [[{ language: 'kuery', query: 'bytes > 1000' }]],
+          lucene: [[{ language: 'lucene', query: 'memory' }]],
+        });
+      });
+      it('should ignore empty filtered metrics', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: '' },
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({ kuery: [], lucene: [] });
+      });
+      it('shuold collect top values fields as kuery existence filters', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.dest',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [
+            [{ language: 'kuery', query: 'geo.src: *' }],
+            [
+              { language: 'kuery', query: 'geo.dest: *' },
+              { language: 'kuery', query: 'myField: *' },
+            ],
+          ],
+          lucene: [],
+        });
+      });
+      it('should ignore top values fields if other/missing option is enabled', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      otherBucket: true,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      missingBucket: true,
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({ kuery: [], lucene: [] });
+      });
+      it('should collect custom ranges as kuery filters', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Single range',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ from: 100, to: 150, label: 'Range 1' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                  col2: {
+                    label: 'Multiple ranges',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [
+                        { from: 200, to: 300, label: 'Range 2' },
+                        { from: 300, to: 400, label: 'Range 3' },
+                      ],
+                    },
+                  } as RangeIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [
+            [{ language: 'kuery', query: 'bytes >= 100 AND bytes <= 150' }],
+            [
+              { language: 'kuery', query: 'bytes >= 200 AND bytes <= 300' },
+              { language: 'kuery', query: 'bytes >= 300 AND bytes <= 400' },
+            ],
+          ],
+          lucene: [],
+        });
+      });
+      it('should collect custom ranges as kuery filters as partial', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3'],
+                columns: {
+                  col1: {
+                    label: 'Empty range',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ label: 'Empty range' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                  col2: {
+                    label: 'From range',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ from: 100, label: 'Partial range 1' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                  col3: {
+                    label: 'To ranges',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ to: 300, label: 'Partial Range 2' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [
+            [{ language: 'kuery', query: 'bytes >= 100' }],
+            [{ language: 'kuery', query: 'bytes <= 300' }],
+          ],
+          lucene: [],
+        });
+      });
+      it('should collect filters within filters operation grouped by language', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3'],
+                columns: {
+                  col1: {
+                    label: 'kuery Filter',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [{ label: '', input: { language: 'kuery', query: 'bytes > 1000' } }],
+                    },
+                  } as FiltersIndexPatternColumn,
+                  col2: {
+                    label: 'Lucene Filter',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [{ label: '', input: { language: 'lucene', query: 'memory' } }],
+                    },
+                  } as FiltersIndexPatternColumn,
+                  col3: {
+                    label: 'Mixed filters',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [
+                        { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
+                        { label: '', input: { language: 'kuery', query: 'memory > 500000' } },
+                        { label: '', input: { language: 'lucene', query: 'phpmemory' } },
+                        { label: '', input: { language: 'lucene', query: 'memory: 5000000' } },
+                      ],
+                    },
+                  } as FiltersIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [
+            [{ language: 'kuery', query: 'bytes > 1000' }],
+            [
+              { language: 'kuery', query: 'bytes > 5000' },
+              { language: 'kuery', query: 'memory > 500000' },
+            ],
+          ],
+          lucene: [
+            [{ language: 'lucene', query: 'memory' }],
+            [
+              { language: 'lucene', query: 'phpmemory' },
+              { language: 'lucene', query: 'memory: 5000000' },
+            ],
+          ],
+        });
+      });
+      it('should support complete scenarios', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3', 'col4'],
+                columns: {
+                  col1: {
+                    label: 'Mixed filters',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [
+                        { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
+                        { label: '', input: { language: 'kuery', query: 'memory > 500000' } },
+                        { label: '', input: { language: 'lucene', query: 'phpmemory' } },
+                        { label: '', input: { language: 'lucene', query: 'memory: 5000000' } },
+                      ],
+                    },
+                  } as FiltersIndexPatternColumn,
+                  col2: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: 'bytes > 1000' },
+                  } as GenericIndexPatternColumn,
+                  col3: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'lucene', query: 'memory' },
+                  } as GenericIndexPatternColumn,
+                  col4: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [
+            [{ language: 'kuery', query: 'bytes > 1000' }],
+            [
+              { language: 'kuery', query: 'bytes > 5000' },
+              { language: 'kuery', query: 'memory > 500000' },
+            ],
+            [
+              { language: 'kuery', query: 'geo.src: *' },
+              { language: 'kuery', query: 'myField: *' },
+            ],
+          ],
+          lucene: [
+            [{ language: 'lucene', query: 'memory' }],
+            [
+              { language: 'lucene', query: 'phpmemory' },
+              { language: 'lucene', query: 'memory: 5000000' },
+            ],
+          ],
+        });
+      });
     });
   });
 

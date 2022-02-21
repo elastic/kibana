@@ -8,6 +8,8 @@
 import { createMockDatasource } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { DiscoverStart } from '../../../../../src/plugins/discover/public';
+import { Filter } from '@kbn/es-query';
+import { DatasourcePublicAPI } from '../types';
 
 describe('getLayerMetaInfo', () => {
   it('should return error in case of no data', () => {
@@ -16,6 +18,7 @@ describe('getLayerMetaInfo', () => {
         .error
     ).toBe('Visualization has no data available to show');
   });
+
   it('should return error in case of multiple layers', () => {
     expect(
       getLayerMetaInfo(
@@ -27,19 +30,46 @@ describe('getLayerMetaInfo', () => {
         },
         {} as DiscoverStart
       ).error
-    ).toBe('Cannot show underlying data cannot be shown for visualizations with multiple layers');
+    ).toBe('Cannot show underlying data for visualizations with multiple layers');
   });
+
   it('should return error in case of missing activeDatasource', () => {
     expect(getLayerMetaInfo(undefined, {}, undefined, {} as DiscoverStart).error).toBe(
       'Visualization has no data available to show'
     );
   });
+
   it('should return error in case of missing configuration/state', () => {
     expect(
       getLayerMetaInfo(createMockDatasource('testDatasource'), undefined, {}, {} as DiscoverStart)
         .error
     ).toBe('Visualization has no data available to show');
   });
+
+  it('should return error in case of a timeshift declared in a column', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'testDatasource',
+      getOperationForColumnId: jest.fn(() => ({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+        label: 'A field',
+        isStaticValue: false,
+        sortingHint: undefined,
+        hasTimeShift: true,
+      })),
+      getTableSpec: jest.fn(),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getFilters: jest.fn(),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    expect(
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {} as DiscoverStart).error
+    ).toBe('Visualization has no data available to show');
+  });
+
   it('should not be visible if discover is not available', () => {
     expect(
       getLayerMetaInfo(
@@ -52,7 +82,43 @@ describe('getLayerMetaInfo', () => {
       ).isVisible
     ).toBeFalsy();
   });
-  it.todo('should basically work collecting fields and filters in the visualization');
+
+  it('should basically work collecting fields and filters in the visualization', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'testDatasource',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getFilters: jest.fn(() => ({
+        kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
+        lucene: [],
+      })),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    const { error, meta } = getLayerMetaInfo(
+      mockDatasource,
+      {}, // the publicAPI has been mocked, so no need for a state here
+      {
+        datatable1: { type: 'datatable', columns: [], rows: [] },
+      },
+      {} as DiscoverStart
+    );
+    expect(error).toBeUndefined();
+    expect(meta?.columns).toEqual(['bytes']);
+    expect(meta?.filters).toEqual({
+      kuery: [
+        [
+          {
+            language: 'kuery',
+            query: 'memory > 40000',
+          },
+        ],
+      ],
+      lucene: [],
+    });
+  });
 });
 describe('combineQueryAndFilters', () => {
   it('should just return same query and filters if no fields or filters are in layer meta', () => {
@@ -189,9 +255,302 @@ describe('combineQueryAndFilters', () => {
       ],
     });
   });
-  it.todo(
-    'should append lucene meta filters to app filters even if existing filters are using kuery'
-  );
-  it.todo('should work for complex cases of nested meta filters');
-  it.todo('should append lucene meta filters to an existing lucene query');
+  it('should append lucene meta filters to app filters even if existing filters are using kuery', () => {
+    expect(
+      combineQueryAndFilters(
+        { language: 'kuery', query: 'myField: *' },
+        [
+          {
+            $state: {
+              store: 'appState',
+            },
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        exists: {
+                          field: 'myfield',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              must: [],
+              must_not: [],
+              should: [],
+            },
+            meta: {
+              alias: 'Existing kuery filters',
+              disabled: false,
+              index: 'testDatasource',
+              negate: false,
+              type: 'custom',
+            },
+          } as Filter,
+        ],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            kuery: [],
+            lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+          },
+        },
+        undefined
+      )
+    ).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      exists: {
+                        field: 'myfield',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'Existing kuery filters',
+            disabled: false,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [],
+            must: [
+              {
+                query_string: {
+                  query: '( anotherField )',
+                },
+              },
+            ],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'Lens context (lucene)',
+            disabled: false,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+      ],
+      query: {
+        language: 'kuery',
+        query: 'myField: *',
+      },
+    });
+  });
+  it('should append lucene meta filters to an existing lucene query', () => {
+    expect(
+      combineQueryAndFilters(
+        { language: 'lucene', query: 'myField' },
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
+            lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+          },
+        },
+        undefined
+      )
+    ).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      exists: {
+                        field: 'myfield',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'Lens context (kuery)',
+            disabled: false,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+      ],
+      query: {
+        language: 'lucene',
+        query: '( myField ) AND ( anotherField )',
+      },
+    });
+  });
+  it('should work for complex cases of nested meta filters', () => {
+    // scenario overview:
+    // A kuery query
+    // A kuery filter pill
+    // 4 kuery table filter groups (1 from filtered column, 2 from filters, 1 from top values, 1 from custom ranges)
+    // 2 lucene table filter groups (1 from filtered column + 2 from filters )
+    expect(
+      combineQueryAndFilters(
+        { language: 'kuery', query: 'myField: *' },
+        [
+          {
+            $state: {
+              store: 'appState',
+            },
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        exists: {
+                          field: 'myfield',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              must: [],
+              must_not: [],
+              should: [],
+            },
+            meta: {
+              alias: 'Existing kuery filters',
+              disabled: false,
+              index: 'testDatasource',
+              negate: false,
+              type: 'custom',
+            },
+          } as Filter,
+        ],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes > 4000' }],
+              [
+                { language: 'kuery', query: 'memory > 5000' },
+                { language: 'kuery', query: 'memory >= 15000' },
+              ],
+              [{ language: 'kuery', query: 'myField: *' }],
+              [{ language: 'kuery', query: 'otherField >= 15' }],
+            ],
+            lucene: [
+              [{ language: 'lucene', query: 'filteredField: 400' }],
+              [
+                { language: 'lucene', query: 'aNewField' },
+                { language: 'lucene', query: 'anotherNewField: 200' },
+              ],
+            ],
+          },
+        },
+        undefined
+      )
+    ).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      exists: {
+                        field: 'myfield',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'Existing kuery filters',
+            disabled: false,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [],
+            must: [
+              {
+                query_string: {
+                  query:
+                    '( ( filteredField: 400 ) AND ( ( aNewField ) OR ( anotherNewField: 200 ) ) )',
+                },
+              },
+            ],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'Lens context (lucene)',
+            disabled: false,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+      ],
+      query: {
+        language: 'kuery',
+        query:
+          '( myField: * ) AND ( ( bytes > 4000 ) AND ( ( memory > 5000 ) OR ( memory >= 15000 ) ) AND ( myField: * ) AND ( otherField >= 15 ) )',
+      },
+    });
+  });
 });

@@ -244,41 +244,63 @@ export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
 export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[]) {
   // extract filters from filtered metrics
   const filteredMetrics = columnIds
-    .map((colId) => layer.columns[colId].filter)
-    .filter(Boolean) as Query[];
+    .map((colId) => layer.columns[colId]?.filter)
+    // filter out empty filters as well
+    .filter((filter) => filter?.query) as Query[];
 
   const { kuery: kqlMetricQueries, lucene: luceneMetricQueries } = groupBy(
     filteredMetrics,
     'language'
   );
 
+  function extractUsefulQueries(
+    queries: FiltersIndexPatternColumn['params']['filters'] | undefined
+  ) {
+    return queries?.map(({ input }) => input).filter(({ query }) => query && query !== '*');
+  }
+
   const filterOperation = columnIds
     .map((colId) => {
       const column = layer.columns[colId];
+
       if (isColumnOfType<FiltersIndexPatternColumn>('filters', column)) {
         const groupsByLanguage = groupBy(
           column.params.filters,
           ({ input }) => input.language
         ) as Record<'lucene' | 'kuery', FiltersIndexPatternColumn['params']['filters']>;
         return {
-          kuery: groupsByLanguage.kuery?.map(({ input }) => input),
-          lucene: groupsByLanguage.lucene?.map(({ input }) => input),
+          kuery: extractUsefulQueries(groupsByLanguage.kuery),
+          lucene: extractUsefulQueries(groupsByLanguage.lucene),
         };
       }
       if (isColumnOfType<RangeIndexPatternColumn>('range', column) && column.sourceField) {
         return {
-          kuery: column.params.ranges.map(({ from, to }) => ({
-            query: `${column.sourceField} >= ${from} AND ${column.sourceField} <= ${to}`,
-            language: 'kuery',
-          })),
+          kuery: column.params.ranges
+            .map(({ from, to }) => {
+              let rangeQuery = '';
+              if (from != null && isFinite(from)) {
+                rangeQuery += `${column.sourceField} >= ${from}`;
+              }
+              if (to != null && isFinite(to)) {
+                if (rangeQuery.length) {
+                  rangeQuery += ' AND ';
+                }
+                rangeQuery += `${column.sourceField} <= ${to}`;
+              }
+              return {
+                query: rangeQuery,
+                language: 'kuery',
+              };
+            })
+            .filter(({ query }) => query),
         };
       }
       if (
         isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
-        // TODO: return field -> terms
-        // TODO: support multi-terms
+        // TODO: return field -> terms?
+        // TODO: support multi-terms?
         return {
           kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
             column.params.secondaryFields?.map((field) => ({
@@ -292,10 +314,10 @@ export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[])
     .filter(Boolean) as Array<{ kuery?: Query[]; lucene?: Query[] }>;
   return {
     kuery: [kqlMetricQueries, ...filterOperation.map(({ kuery }) => kuery)].filter(
-      Boolean
+      (filters) => filters?.length
     ) as Query[][],
     lucene: [luceneMetricQueries, ...filterOperation.map(({ lucene }) => lucene)].filter(
-      Boolean
+      (filters) => filters?.length
     ) as Query[][],
   };
 }
