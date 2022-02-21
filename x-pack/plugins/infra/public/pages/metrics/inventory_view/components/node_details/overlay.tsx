@@ -25,7 +25,6 @@ import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
-import { uptimeOverviewLocatorID } from '../../../../../../../observability/public';
 
 interface Props {
   isOpen: boolean;
@@ -166,7 +165,9 @@ export const NodeContextPopover = ({
               </EuiTab>
               <EuiTab
                 onClick={() =>
-                  share.url.locators.get(uptimeOverviewLocatorID).navigate({ [nodeType]: node.id })
+                  share.url.locators
+                    .get('UPTIME_OVERVIEW_LOCATOR')
+                    .navigate({ [nodeType]: node.id })
                 }
               >
                 <EuiIcon type="popout" />{' '}

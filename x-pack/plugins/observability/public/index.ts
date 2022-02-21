@@ -28,7 +28,6 @@ export {
   enableComparisonByDefault,
   enableInfrastructureView,
 } from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
 
 export interface ConfigSchema {
   unsafe: {
