@@ -32,7 +32,7 @@ export interface ReportDocumentHead {
 
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
-  error_code: undefined | string;
+  error_code?: string;
   size: number;
 }
 
@@ -72,7 +72,6 @@ export interface ReportSource {
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
-  error_code?: string;
   payload: BasePayload;
   meta: {
     // for telemetry
