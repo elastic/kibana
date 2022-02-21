@@ -26,6 +26,7 @@ import { useLinkProps } from '../../../../../../../observability/public';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import { uptimeOverviewLocatorID } from '../../../../../../../observability/public';
+import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export const NodeContextPopover = ({
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab, OsqueryTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-  const { application, share } = useKibana().services;
+  const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
   const uiCapabilities = application?.capabilities;
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
