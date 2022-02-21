@@ -17,7 +17,7 @@ export interface FilterLabelProps {
   filter: Filter;
   valueLabel?: string;
   filterLabelStatus?: FilterLabelStatus;
-  readonly?: boolean;
+  hideAlias?: boolean;
 }
 
 // Needed for React.lazy
@@ -26,7 +26,7 @@ export default function FilterLabel({
   filter,
   valueLabel,
   filterLabelStatus,
-  readonly,
+  hideAlias,
 }: FilterLabelProps) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
@@ -44,7 +44,7 @@ export default function FilterLabel({
     return <span className="globalFilterLabel__value">{text}</span>;
   };
 
-  if (!readonly && filter.meta.alias !== null) {
+  if (!hideAlias && filter.meta.alias !== null) {
     return (
       <Fragment>
         {prefix}

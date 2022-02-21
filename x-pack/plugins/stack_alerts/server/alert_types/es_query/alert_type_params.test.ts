@@ -22,6 +22,7 @@ const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   timeWindowUnit: 'm',
   thresholdComparator: '>',
   threshold: [0],
+  searchType: 'esQuery',
 };
 
 describe('alertType Params validate()', () => {

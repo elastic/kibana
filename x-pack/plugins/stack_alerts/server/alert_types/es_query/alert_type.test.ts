@@ -14,17 +14,20 @@ import {
   AlertInstanceMock,
 } from '../../../../alerting/server/mocks';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { getAlertType, ConditionMetAlertInstanceId, ActionGroupId } from './alert_type';
+import { getAlertType } from './alert_type';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionContext } from './action_context';
 import { ESSearchResponse, ESSearchRequest } from '../../../../../../src/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { coreMock } from '../../../../../../src/core/server/mocks';
+import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { OnlyEsQueryAlertParams } from './types';
 
 describe('alertType', () => {
   const logger = loggingSystemMock.create().get();
-
-  const alertType = getAlertType(logger);
+  const coreSetup = coreMock.createSetup();
+  const alertType = getAlertType(logger, coreSetup);
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.es-query');
@@ -58,16 +61,12 @@ describe('alertType', () => {
             "description": "A string that describes the threshold condition.",
             "name": "conditions",
           },
+          Object {
+            "description": "A link to see records that triggered this alert.",
+            "name": "link",
+          },
         ],
         "params": Array [
-          Object {
-            "description": "The index the query was run against.",
-            "name": "index",
-          },
-          Object {
-            "description": "The string representation of the Elasticsearch query.",
-            "name": "esQuery",
-          },
           Object {
             "description": "The number of hits to retrieve for each query.",
             "name": "size",
@@ -80,13 +79,29 @@ describe('alertType', () => {
             "description": "A function to determine if the threshold has been met.",
             "name": "thresholdComparator",
           },
+          Object {
+            "description": "The type of search is used.",
+            "name": "searchType",
+          },
+          Object {
+            "description": "Serialized search source fields used to fetch the documents from Elasticsearch.",
+            "name": "searchConfiguration",
+          },
+          Object {
+            "description": "The string representation of the Elasticsearch query.",
+            "name": "esQuery",
+          },
+          Object {
+            "description": "The index the query was run against.",
+            "name": "index",
+          },
         ],
       }
     `);
   });
 
   it('validator succeeds with valid params', async () => {
-    const params: Partial<Writable<EsQueryAlertParams>> = {
+    const params: Partial<Writable<OnlyEsQueryAlertParams>> = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -95,6 +110,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '<',
       threshold: [0],
+      searchType: 'esQuery',
     };
 
     expect(alertType.validate?.params?.validate(params)).toBeTruthy();
@@ -104,7 +120,7 @@ describe('alertType', () => {
     const paramsSchema = alertType.validate?.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
-    const params: Partial<Writable<EsQueryAlertParams>> = {
+    const params: Partial<Writable<OnlyEsQueryAlertParams>> = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -113,6 +129,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: 'between',
       threshold: [0],
+      searchType: 'esQuery',
     };
 
     expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -121,7 +138,7 @@ describe('alertType', () => {
   });
 
   it('alert executor handles no documentes returned by ES', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -130,6 +147,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: 'between',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -148,7 +166,7 @@ describe('alertType', () => {
         ActionContext,
         typeof ActionGroupId
       >,
-      params,
+      params: params as EsQueryAlertParams,
       state: {
         latestTimestamp: undefined,
       },
@@ -188,7 +206,7 @@ describe('alertType', () => {
   });
 
   it('alert executor returns the latestTimestamp of the newest detected document', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -197,6 +215,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -227,7 +246,7 @@ describe('alertType', () => {
         ActionContext,
         typeof ActionGroupId
       >,
-      params,
+      params: params as EsQueryAlertParams,
       state: {
         latestTimestamp: undefined,
       },
@@ -271,7 +290,7 @@ describe('alertType', () => {
   });
 
   it('alert executor correctly handles numeric time fields that were stored by legacy rules prior to v7.12.1', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -280,6 +299,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -342,7 +362,7 @@ describe('alertType', () => {
   });
 
   it('alert executor ignores previous invalid latestTimestamp values stored by legacy rules prior to v7.12.1', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -351,6 +371,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -379,7 +400,7 @@ describe('alertType', () => {
         ActionContext,
         typeof ActionGroupId
       >,
-      params,
+      params: params as EsQueryAlertParams,
       state: {
         // inaalid legacy `latestTimestamp`
         latestTimestamp: 'FaslK3QBySSL_rrj9zM5',
@@ -423,7 +444,7 @@ describe('alertType', () => {
   });
 
   it('alert executor carries over the queried latestTimestamp in the alert state', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -432,6 +453,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -457,7 +479,7 @@ describe('alertType', () => {
         ActionContext,
         typeof ActionGroupId
       >,
-      params,
+      params: params as EsQueryAlertParams,
       state: {
         latestTimestamp: undefined,
       },
@@ -531,7 +553,7 @@ describe('alertType', () => {
   });
 
   it('alert executor ignores tie breaker sort values', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -540,6 +562,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -571,7 +594,7 @@ describe('alertType', () => {
         ActionContext,
         typeof ActionGroupId
       >,
-      params,
+      params: params as EsQueryAlertParams,
       state: {
         latestTimestamp: undefined,
       },
@@ -614,7 +637,7 @@ describe('alertType', () => {
   });
 
   it('alert executor ignores results with no sort values', async () => {
-    const params: EsQueryAlertParams = {
+    const params: OnlyEsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -623,6 +646,7 @@ describe('alertType', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [0],
+      searchType: 'esQuery',
     };
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -655,7 +679,7 @@ describe('alertType', () => {
         ActionContext,
         typeof ActionGroupId
       >,
-      params,
+      params: params as EsQueryAlertParams,
       state: {
         latestTimestamp: undefined,
       },

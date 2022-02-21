@@ -7,6 +7,7 @@
 
 import { EsQueryAlertActionContext, addMessages } from './action_context';
 import { EsQueryAlertParamsSchema } from './alert_type_params';
+import { OnlyEsQueryAlertParams } from './types';
 
 describe('ActionContext', () => {
   it('generates expected properties', async () => {
@@ -19,7 +20,8 @@ describe('ActionContext', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [4],
-    });
+      searchType: 'esQuery',
+    }) as OnlyEsQueryAlertParams;
     const base: EsQueryAlertActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
@@ -47,7 +49,8 @@ describe('ActionContext', () => {
       timeWindowUnit: 'm',
       thresholdComparator: 'between',
       threshold: [4, 5],
-    });
+      searchType: 'esQuery',
+    }) as OnlyEsQueryAlertParams;
     const base: EsQueryAlertActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 4,

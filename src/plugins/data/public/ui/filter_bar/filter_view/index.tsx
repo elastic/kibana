@@ -90,7 +90,7 @@ export const FilterView: FC<Props> = ({
           filter={filter}
           valueLabel={valueLabel}
           filterLabelStatus={filterLabelStatus}
-          readonly={readonly}
+          hideAlias={readonly}
         />
       </span>
     </EuiBadge>
