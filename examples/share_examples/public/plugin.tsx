@@ -17,9 +17,7 @@ interface StartDeps {
   share: SharePluginStart;
 }
 
-export class ShareDemoPlugin
-  implements Plugin<void, void, SetupDeps, StartDeps>
-{
+export class ShareDemoPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { share }: SetupDeps) {
     share.register({
       id: 'demo',
@@ -33,14 +31,12 @@ export class ShareDemoPlugin
           shareMenuItem: {
             name: 'Demo list item (from share_example plugin)',
           },
-        }
+        },
       ],
     });
   }
 
-  public start(core: CoreStart, { share }: StartDeps) {
-    
-  }
+  public start(core: CoreStart, { share }: StartDeps) {}
 
   public stop() {}
 }
