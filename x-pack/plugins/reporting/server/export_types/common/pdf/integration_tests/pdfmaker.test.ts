@@ -18,7 +18,7 @@ const imageBase64 = Buffer.from(
   'base64'
 );
 
-describe('PdfMaker', () => {
+describe.skip('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
 
