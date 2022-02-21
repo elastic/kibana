@@ -68,7 +68,7 @@ function isDesiredPreset(preset: Preset) {
 
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
-export default function ({ config: storybookConfig }: { config: Configuration }) {
+export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config = {
     devServer: {
       stats,
@@ -195,4 +195,4 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     config
   );
-}
+};

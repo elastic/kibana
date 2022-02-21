@@ -64,8 +64,17 @@ export const validateCommon: Validation = {
     const parsedFloat = parseFloat(number);
     return !parsedFloat || !unit || parsedFloat < 1;
   },
-  [ConfigKey.TIMEOUT]: ({ [ConfigKey.TIMEOUT]: timeout, [ConfigKey.SCHEDULE]: schedule }) => {
+  [ConfigKey.TIMEOUT]: ({
+    [ConfigKey.MONITOR_TYPE]: monitorType,
+    [ConfigKey.TIMEOUT]: timeout,
+    [ConfigKey.SCHEDULE]: schedule,
+  }) => {
     const { number, unit } = schedule as MonitorFields[ConfigKey.SCHEDULE];
+
+    // Timeout is not currently supported by browser monitors
+    if (monitorType === DataStream.BROWSER) {
+      return false;
+    }
 
     return (
       !timeout ||

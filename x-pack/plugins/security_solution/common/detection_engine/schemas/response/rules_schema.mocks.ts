@@ -68,16 +68,6 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   rule_id: 'query-rule-id',
   interval: '5m',
   exceptions_list: getListArrayMock(),
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
-  // execution_summary: {
-  //   last_execution: {
-  //     date: '2020-02-22T16:47:50.047Z',
-  //     status: RuleExecutionStatus.succeeded,
-  //     status_order: 0,
-  //     message: 'succeeded',
-  //     metrics: {},
-  //   },
-  // },
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {

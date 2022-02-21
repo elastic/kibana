@@ -46,6 +46,8 @@ async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
 }
 
 export class VegaMapView extends VegaBaseView {
+  private mapBoxInstance?: Map;
+
   private get shouldShowZoomControl() {
     return Boolean(this._parser.mapConfig.zoomControl);
   }
@@ -139,6 +141,7 @@ export class VegaMapView extends VegaBaseView {
       };
 
       mapBoxInstance.once('load', initMapComponents);
+      this.mapBoxInstance = mapBoxInstance;
     });
   }
 
@@ -176,7 +179,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
-        vegaControls: this._$controls.get(0),
+        vegaControls: this._$controls?.get(0),
         updateVegaView,
       },
     });
@@ -192,5 +195,9 @@ export class VegaMapView extends VegaBaseView {
     this.setView(vegaView);
 
     await this.initMapContainer(vegaView);
+  }
+
+  protected async onViewContainerResize() {
+    this.mapBoxInstance?.resize();
   }
 }

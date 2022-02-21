@@ -7,7 +7,7 @@
 
 jest.mock('../../../services/job_service.js', () => 'mlJobService');
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { EditConditionLink } from './edit_condition_link';

@@ -43,6 +43,7 @@ describe('Policy details host isolation exceptions delete modal', () => {
       (renderResult = mockedContext.render(
         <PolicyHostIsolationExceptionsDeleteModal
           policyId={policyId}
+          policyName="fakeName"
           exception={exception}
           onCancel={onCancel}
         />

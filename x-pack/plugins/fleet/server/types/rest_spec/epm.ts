@@ -74,7 +74,8 @@ export const InstallPackageFromRegistryRequestSchema = {
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.boolean(),
+      force: schema.boolean({ defaultValue: false }),
+      ignore_constraints: schema.boolean({ defaultValue: false }),
     })
   ),
 };

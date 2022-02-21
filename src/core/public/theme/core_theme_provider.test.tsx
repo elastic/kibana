@@ -12,7 +12,7 @@ import type { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { CoreThemeProvider } from './core_theme_provider';
 import type { CoreTheme } from './types';
 

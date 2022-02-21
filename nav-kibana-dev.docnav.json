@@ -46,7 +46,9 @@
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },
-        { "id": "kibDevTutorialServerEndpoint" }
+        { "id": "kibDevTutorialCI" },
+        { "id": "kibDevTutorialServerEndpoint" },
+        { "id": "kibDevTutorialAdvancedSettings"}
       ]
     },
     {
@@ -82,6 +84,7 @@
       "items": [
         { "id": "kibDevDocsApiWelcome" },
         { "id": "kibDevDocsPluginDirectory" },
+        { "id": "kibDevDocsDeprecationsDueByTeam" },
         { "id": "kibDevDocsDeprecationsByPlugin" },
         { "id": "kibDevDocsDeprecationsByApi" },
         { "id": "kibCorePluginApi" },

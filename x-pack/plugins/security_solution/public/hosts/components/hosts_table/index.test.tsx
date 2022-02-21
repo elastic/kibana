@@ -27,6 +27,12 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 
 jest.mock('../../../common/lib/kibana');
 
+jest.mock('../../../common/lib/kibana/hooks', () => ({
+  useNavigateTo: () => ({
+    navigateTo: jest.fn(),
+  }),
+}));
+
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../common/components/search_bar', () => ({

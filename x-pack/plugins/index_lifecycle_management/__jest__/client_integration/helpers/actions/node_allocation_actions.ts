@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 import { DataTierAllocationType } from '../../../../public/application/sections/edit_policy/types';
 import { Phase } from '../../../../common/types';

@@ -7,10 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  DiscoverUrlGeneratorState,
-  DISCOVER_APP_URL_GENERATOR,
-} from '../../../../../../../../../src/plugins/discover/public';
+import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
 
@@ -29,9 +26,9 @@ const getIndexPatternTitleFromTargetIndex = (item: TransformListRow) =>
 export type DiscoverAction = ReturnType<typeof useDiscoverAction>;
 export const useDiscoverAction = (forceDisable: boolean) => {
   const appDeps = useAppDependencies();
+  const { share } = appDeps;
   const savedObjectsClient = appDeps.savedObjects.client;
   const indexPatterns = appDeps.data.indexPatterns;
-  const { getUrlGenerator } = appDeps.share.urlGenerators;
   const isDiscoverAvailable = !!appDeps.application.capabilities.discover?.show;
 
   const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
@@ -48,24 +45,16 @@ export const useDiscoverAction = (forceDisable: boolean) => {
   }, [indexPatterns, loadIndexPatterns, savedObjectsClient]);
 
   const clickHandler = useCallback(
-    async (item: TransformListRow) => {
-      let discoverUrlGenerator;
-      try {
-        discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-      } catch (error) {
-        // ignore error thrown when url generator is not available
-        return;
-      }
-
+    (item: TransformListRow) => {
+      const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+      if (!locator) return;
       const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
       const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
-      const state: DiscoverUrlGeneratorState = {
+      locator.navigateSync({
         indexPatternId,
-      };
-      const path = await discoverUrlGenerator.createUrl(state);
-      appDeps.application.navigateToApp('discover', { path });
+      });
     },
-    [appDeps.application, getIndexPatternIdByTitle, getUrlGenerator]
+    [getIndexPatternIdByTitle, share]
   );
 
   const indexPatternExists = useCallback(

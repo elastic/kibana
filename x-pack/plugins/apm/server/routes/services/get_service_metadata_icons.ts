@@ -9,6 +9,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
+  CLOUD_SERVICE_NAME,
   CONTAINER_ID,
   KUBERNETES,
   SERVICE_NAME,
@@ -29,6 +30,7 @@ type ServiceMetadataIconsRaw = Pick<
 export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
+  serverlessType?: string;
   cloudProvider?: string;
 }
 
@@ -70,7 +72,13 @@ export async function getServiceMetadataIcons({
     },
     body: {
       size: 1,
-      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
+      _source: [
+        KUBERNETES,
+        CLOUD_PROVIDER,
+        CONTAINER_ID,
+        AGENT_NAME,
+        CLOUD_SERVICE_NAME,
+      ],
       query: { bool: { filter, should } },
     },
   };
@@ -85,6 +93,7 @@ export async function getServiceMetadataIcons({
       agentName: undefined,
       containerType: undefined,
       cloudProvider: undefined,
+      serverlessType: undefined,
     };
   }
 
@@ -98,9 +107,15 @@ export async function getServiceMetadataIcons({
     containerType = 'Docker';
   }
 
+  let serverlessType: string | undefined;
+  if (cloud?.provider === 'aws' && cloud?.service?.name === 'lambda') {
+    serverlessType = 'lambda';
+  }
+
   return {
     agentName: agent?.name,
     containerType,
+    serverlessType,
     cloudProvider: cloud?.provider,
   };
 }

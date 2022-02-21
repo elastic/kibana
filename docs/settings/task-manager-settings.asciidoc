@@ -33,7 +33,7 @@ This flag will enable automatic warn and error logging if task manager self dete
 The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
 
 `xpack.task_manager.ephemeral_tasks.enabled`::
-Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
+Enables a technical preview feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
 These action tasks will reduce the latency of the time it takes an action to run after it's triggered, but are not persisted as SavedObjects.
 These non-persisted action tasks have a risk that they won't be run at all if the Kibana instance running them exits unexpectedly. Defaults to false.
 

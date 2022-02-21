@@ -6,7 +6,6 @@ Object {
   "type": "render",
   "value": Object {
     "visConfig": Object {
-      "addLegend": true,
       "addTooltip": true,
       "dimensions": Object {
         "metric": Object {
@@ -25,6 +24,7 @@ Object {
         "truncate": 100,
         "values": true,
       },
+      "legendDisplay": "show",
       "legendPosition": "right",
       "type": "pie",
     },

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Unit } from '@elastic/datemath';
 import * as rt from 'io-ts';
 import { SnapshotCustomMetricInput } from '../../http_api';
 import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
+import { TimeUnitChar } from '../../../../observability/common/utils/formatters/duration';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -69,7 +69,7 @@ export interface MetricAnomalyParams {
 export interface InventoryMetricConditions {
   metric: SnapshotMetricType;
   timeSize: number;
-  timeUnit: Unit;
+  timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
@@ -89,7 +89,7 @@ export interface InventoryMetricThresholdParams {
 
 interface BaseMetricExpressionParams {
   timeSize: number;
-  timeUnit: Unit;
+  timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;

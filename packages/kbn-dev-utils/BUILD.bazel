@@ -45,6 +45,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-utils",
+  "//packages/kbn-std",
   "@npm//@babel/core",
   "@npm//axios",
   "@npm//chalk",
@@ -67,6 +68,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
   "@npm//@babel/parser",
   "@npm//@babel/types",
   "@npm//@types/babel__core",

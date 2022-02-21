@@ -64,6 +64,7 @@ export const useDataVisualizerGridData = (
     currentQuery,
     currentFilters,
     visibleFieldNames,
+    fieldsToFetch,
   } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
@@ -71,6 +72,7 @@ export const useDataVisualizerGridData = (
       currentQuery: input?.query,
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
+      fieldsToFetch: input?.fieldsToFetch,
     }),
     [input]
   );
@@ -171,7 +173,12 @@ export const useDataVisualizerGridData = (
 
       const aggregatableFields: string[] = [];
       const nonAggregatableFields: string[] = [];
-      currentIndexPattern.fields.forEach((field) => {
+
+      const fields = currentIndexPattern.fields;
+      fields?.forEach((field) => {
+        if (fieldsToFetch && !fieldsToFetch.includes(field.name)) {
+          return;
+        }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
         if (!OMIT_FIELDS.includes(fieldName)) {
           if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
@@ -194,6 +201,7 @@ export const useDataVisualizerGridData = (
         runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
         aggregatableFields,
         nonAggregatableFields,
+        fieldsToFetch,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -206,6 +214,7 @@ export const useDataVisualizerGridData = (
       samplerShardSize,
       searchSessionId,
       lastRefresh,
+      fieldsToFetch,
     ]
   );
 

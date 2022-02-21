@@ -9,13 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124075
-  describe.skip('lens heatmap', () => {
+  describe('lens heatmap', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render heatmap chart with the temperature palette', async () => {
-      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
       await PageObjects.lens.waitForVisualization();
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -99,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not change when passing from percentage to number', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -125,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '0', {
         clearWithKeyboard: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -145,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reset stop numbers when changing palette', async () => {
       await PageObjects.lens.changePaletteTo('status');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -165,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not change when passing from number to percent', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 

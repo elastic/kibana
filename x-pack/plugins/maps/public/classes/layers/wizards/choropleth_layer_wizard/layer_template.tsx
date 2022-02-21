@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { DataViewField, DataView } from 'src/plugins/data/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
@@ -59,15 +59,15 @@ interface State {
   leftSource: BOUNDARIES_SOURCE;
   leftEmsFileId: string | null;
   leftEmsFields: Array<EuiComboBoxOptionOption<string>>;
-  leftIndexPattern: IndexPattern | null;
-  leftGeoFields: IndexPatternField[];
-  leftJoinFields: IndexPatternField[];
+  leftIndexPattern: DataView | null;
+  leftGeoFields: DataViewField[];
+  leftJoinFields: DataViewField[];
   leftGeoField: string | null;
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
   rightIndexPatternId: string;
   rightIndexPatternTitle: string | null;
-  rightTermsFields: IndexPatternField[];
+  rightTermsFields: DataViewField[];
   rightJoinField: string | null;
 }
 
@@ -157,7 +157,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     );
   };
 
-  _onLeftIndexPatternChange = (indexPattern: IndexPattern) => {
+  _onLeftIndexPatternChange = (indexPattern: DataView) => {
     this.setState(
       {
         leftIndexPattern: indexPattern,

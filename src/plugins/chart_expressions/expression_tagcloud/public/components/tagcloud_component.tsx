@@ -191,7 +191,12 @@ export const TagCloudChart = ({
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%">
-            <Settings onElementClick={handleWordClick} onRenderChange={onRenderChange} />
+            <Settings
+              onElementClick={handleWordClick}
+              onRenderChange={onRenderChange}
+              ariaLabel={visParams.ariaLabel}
+              ariaUseDefaultSummary={!visParams.ariaLabel}
+            />
             <Wordcloud
               id="tagCloud"
               startAngle={0}

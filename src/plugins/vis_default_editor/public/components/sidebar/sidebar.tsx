@@ -104,7 +104,7 @@ function DefaultEditorSideBarComponent({
       ...vis.serialize(),
       params: state.params,
       data: {
-        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
+        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.serialize()) as any) : [],
       },
     });
     embeddableHandler.reload();

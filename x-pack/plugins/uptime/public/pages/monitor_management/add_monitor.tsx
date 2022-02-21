@@ -19,13 +19,13 @@ export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
-  const { error, loading } = useLocations();
+  const { error, loading, locations } = useLocations();
 
   useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
   return (
     <Loader
-      error={Boolean(error)}
+      error={Boolean(error) || (locations && locations.length === 0)}
       loading={loading}
       loadingTitle={LOADING_LABEL}
       errorTitle={ERROR_HEADING_LABEL}
@@ -37,7 +37,7 @@ export const AddMonitorPage: React.FC = () => {
           allowedScheduleUnits: [ScheduleUnit.MINUTES],
         }}
       >
-        <MonitorConfig />
+        <MonitorConfig isEdit={false} />
       </SyntheticsProviders>
     </Loader>
   );

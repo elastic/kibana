@@ -16,10 +16,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
+import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -216,6 +213,21 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
   });
 
+const formatThreshold = (metric: SnapshotMetricType, value: number) => {
+  const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
+  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+
+  const threshold = Array.isArray(value)
+    ? value.map((v: number) => {
+        if (metricFormatter.formatter === 'percent') {
+          v = Number(v) / 100;
+        }
+        return formatter(v);
+      })
+    : value;
+  return threshold;
+};
+
 const buildReasonWithVerboseMetricName = (
   group: string,
   resultItem: any,
@@ -223,6 +235,10 @@ const buildReasonWithVerboseMetricName = (
   useWarningThreshold?: boolean
 ) => {
   if (!resultItem) return '';
+
+  const thresholdToFormat = useWarningThreshold
+    ? resultItem.warningThreshold!
+    : resultItem.threshold;
   const resultWithVerboseMetricName = {
     ...resultItem,
     group,
@@ -232,7 +248,7 @@ const buildReasonWithVerboseMetricName = (
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
-    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    threshold: formatThreshold(resultItem.metric, thresholdToFormat),
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);

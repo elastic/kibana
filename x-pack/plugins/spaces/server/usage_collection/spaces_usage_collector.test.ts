@@ -82,9 +82,18 @@ function setup({
   };
 }
 
-const defaultEsClientSearchMock = jest.fn().mockResolvedValue({
-  body: {
+const getMockFetchContext = (mockedEsClient: any) => {
+  return {
+    ...createCollectorFetchContextMock(),
+    esClient: mockedEsClient,
+  };
+};
+
+const getMockedEsClient = () => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.search.mockResponse({
     hits: {
+      // @ts-expect-error incomplete definition
       total: {
         value: 2,
       },
@@ -99,19 +108,7 @@ const defaultEsClientSearchMock = jest.fn().mockResolvedValue({
         ],
       },
     },
-  },
-});
-
-const getMockFetchContext = (mockedEsClient: any) => {
-  return {
-    ...createCollectorFetchContextMock(),
-    esClient: mockedEsClient,
-  };
-};
-
-const getMockedEsClient = (esClientMock: jest.Mock) => {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.search = esClientMock;
+  });
   return esClient;
 };
 
@@ -150,10 +147,10 @@ describe('with a basic license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    const esClient = getMockedEsClient();
     usageData = await collector.fetch(getMockFetchContext(esClient));
 
-    expect(defaultEsClientSearchMock).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       body: {
         aggs: {
           disabledFeatures: {
@@ -209,7 +206,7 @@ describe('with no license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    const esClient = getMockedEsClient();
 
     usageData = await collector.fetch(getMockFetchContext(esClient));
   });
@@ -250,7 +247,7 @@ describe('with platinum license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    const esClient = getMockedEsClient();
 
     usageData = await collector.fetch(getMockFetchContext(esClient));
   });
