@@ -29,7 +29,12 @@ export const ICMPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   );
 
   return (
-    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         label={
           <FormattedMessage

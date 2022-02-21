@@ -62,7 +62,12 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   );
 
   return (
-    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
