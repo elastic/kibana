@@ -114,7 +114,14 @@ async function upgradePackagePolicy(
   }
 
   try {
-    await packagePolicyService.upgrade(soClient, esClient, [packagePolicy.id]);
+    await packagePolicyService.upgrade(
+      soClient,
+      esClient,
+      [packagePolicy.id],
+      undefined,
+      packagePolicy,
+      installedPackage.version
+    );
     results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [] });
   } catch (error) {
     results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [error] });
