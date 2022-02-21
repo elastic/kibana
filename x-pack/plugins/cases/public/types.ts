@@ -16,6 +16,7 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
+import { CommentRequestAlertType, CommentRequestUserType } from '../common/api';
 import type {
   GetCasesProps,
   GetAllCasesSelectorModalProps,
@@ -97,3 +98,5 @@ export interface CasesUiStart {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
   };
 }
+export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
+export type CaseAttachments = SupportedCaseAttachment[];
