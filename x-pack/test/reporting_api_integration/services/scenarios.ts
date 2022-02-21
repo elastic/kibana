@@ -194,7 +194,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const getJobErrorCode = async (id: string): Promise<undefined | string> => {
     const {
       body: [job],
-    } = await supertest.get(`/api/reporting/jobs/?ids=${id}`);
+    } = await supertest.get(`/api/reporting/jobs/?page=0&ids=${id}`);
     return job?.output?.error_code;
   };
 

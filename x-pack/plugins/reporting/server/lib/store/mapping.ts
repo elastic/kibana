@@ -52,8 +52,8 @@ export const mapping = {
   parent_id: { type: 'keyword' },
   output: {
     type: 'object',
-    error_code: { type: 'keyword' },
     properties: {
+      error_code: { type: 'keyword' },
       chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },
