@@ -5,38 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  Criteria,
-  Direction,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiTableSelectionType,
-  EuiTableSortingType,
-  EuiText,
-} from '@elastic/eui';
-import { difference, noop, orderBy } from 'lodash';
+import { EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { EuiSpacer } from '@elastic/eui/src/components/spacer';
 import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
 import * as i18n from './translations';
-import {
-  FieldItem,
-  getColumnHeader,
-  getFieldColumns,
-  getFieldItems,
-  // getCategoriesSelectedFieldIds,
-} from './field_items';
-import { CATEGORY_TABLE_CLASS_NAME, getFieldCount, TABLE_HEIGHT } from './helpers';
-import {
-  DATA_COLINDEX_ATTRIBUTE,
-  DATA_ROWINDEX_ATTRIBUTE,
-  onKeyDownFocusHandler,
-} from '../../../../../common/utils/accessibility/helpers';
+import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
+import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
-import { FieldTableColumns } from './types';
+import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
 
 interface FieldTableProps {
   timelineId: string;
@@ -48,16 +26,16 @@ interface FieldTableProps {
    */
   filteredBrowserFields: BrowserFields;
   /**
+   * Optional function to customize field table columns
+   */
+  getFieldTableColumns?: GetFieldTableColumns;
+  /**
    * The category selected on the left-hand side of the field browser
    */
   selectedCategoryIds: string[];
   /** The text displayed in the search input */
   /** Invoked when a user chooses to view a new set of columns in the timeline */
   searchInput: string;
-  /**
-   * The field table columns to render
-   */
-  fieldTableColumns: FieldTableColumns;
 }
 
 const TableContainer = styled.div<{ height: number }>`
@@ -76,7 +54,7 @@ Counts.displayName = 'Counts';
 const FieldTableComponent: React.FC<FieldTableProps> = ({
   columnHeaders,
   filteredBrowserFields,
-  fieldTableColumns,
+  getFieldTableColumns,
   searchInput,
   selectedCategoryIds,
   timelineId,
@@ -117,9 +95,10 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   );
 
   const columns = useMemo(
-    () => getFieldColumns({ highlight: searchInput, onToggleColumn, fieldTableColumns }),
-    [onToggleColumn, searchInput, fieldTableColumns]
+    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns }),
+    [onToggleColumn, searchInput, getFieldTableColumns]
   );
+  const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
   return (
     <>
@@ -142,7 +121,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           columns={columns}
           pagination={true}
           sorting={true}
-          hasActions={true}
+          hasActions={hasActions}
         />
       </TableContainer>
     </>

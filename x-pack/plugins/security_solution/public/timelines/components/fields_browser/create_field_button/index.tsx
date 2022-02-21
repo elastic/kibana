@@ -10,23 +10,26 @@ import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { useDispatch } from 'react-redux';
-import type { DataViewField, DataView } from '../../../../../../../src/plugins/data_views/common';
-import { useKibana } from '../../../common/lib/kibana';
+import type {
+  DataViewField,
+  DataView,
+} from '../../../../../../../../src/plugins/data_views/common';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import * as i18n from './translations';
-import { CreateFieldComponentType, TimelineId } from '../../../../../timelines/common';
-import { upsertColumn } from '../../../../../timelines/public';
-import { useDataView } from '../../../common/containers/source/use_data_view';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { sourcererSelectors } from '../../../common/store';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
-import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
+import { FieldBrowserOptions, TimelineId } from '../../../../../../timelines/common';
+import { upsertColumn } from '../../../../../../timelines/public';
+import { useDataView } from '../../../../common/containers/source/use_data_view';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { sourcererSelectors } from '../../../../common/store';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../timeline/body/constants';
+import { defaultColumnHeaderType } from '../../timeline/body/column_headers/default_headers';
 
 export type CreateFieldEditorActions = { closeEditor: () => void } | null;
-type CreateFieldEditorActionsRef = MutableRefObject<CreateFieldEditorActions>;
+export type CreateFieldEditorActionsRef = MutableRefObject<CreateFieldEditorActions>;
 
-interface CreateFieldButtonProps {
+export interface CreateFieldButtonProps {
   selectedDataViewId: string;
   onClick: () => void;
   timelineId: TimelineId;
@@ -142,7 +145,7 @@ export const useCreateFieldButton = (
       return;
     }
     // It receives onClick props from field browser in order to close the modal.
-    const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
+    const CreateFieldButtonComponent: FieldBrowserOptions['createFieldButton'] = ({ onClick }) => (
       <CreateFieldButton
         selectedDataViewId={selectedDataViewId}
         onClick={onClick}

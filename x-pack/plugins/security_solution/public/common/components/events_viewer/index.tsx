@@ -30,9 +30,9 @@ import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
+  useFieldBrowserOptions,
   CreateFieldEditorActions,
-  useCreateFieldButton,
-} from '../../../timelines/components/create_field_button';
+} from '../../../timelines/components/fields_browser';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -177,7 +177,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
-  const createFieldComponent = useCreateFieldButton(scopeId, id, editorActionsRef);
+  const fieldBrowserOptions = useFieldBrowserOptions({
+    sourcererScope: scopeId,
+    timelineId: id,
+    editorActionsRef,
+  });
 
   return (
     <>
@@ -197,6 +201,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             docValueFields,
             end,
             entityType,
+            fieldBrowserOptions,
             filters: globalFilters,
             filterStatus: currentFilter,
             globalFullScreen,
@@ -224,7 +229,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             trailingControlColumns,
             type: 'embedded',
             unit,
-            createFieldComponent,
           })}
         </InspectButtonContainer>
       </FullScreenContainer>

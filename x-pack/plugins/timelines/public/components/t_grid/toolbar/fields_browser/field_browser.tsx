@@ -17,32 +17,18 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useCallback, useRef, useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, CreateFieldComponentType } from '../../../../../common/types';
-import {
-  isEscape,
-  isTab,
-  stopPropagationAndPreventDefault,
-} from '../../../../../common/utils/accessibility';
-// import { CategoriesPane } from './categories_pane';
-// import { FieldsPane } from './fields_pane';
+import type {
+  FieldBrowserProps,
+  ColumnHeaderOptions,
+  FieldBrowserOptions,
+} from '../../../../../common/types';
 import { Search } from './search';
 
-import {
-  CATEGORY_PANE_WIDTH,
-  CLOSE_BUTTON_CLASS_NAME,
-  FIELDS_PANE_WIDTH,
-  FIELD_BROWSER_WIDTH,
-  focusSearchInput,
-  onFieldsBrowserTabPressed,
-  PANES_FLEX_GROUP_WIDTH,
-  RESET_FIELDS_CLASS_NAME,
-} from './helpers';
-import type { FieldBrowserProps } from './types';
+import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
 import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
@@ -51,22 +37,11 @@ import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
 
-const PanesFlexGroup = styled(EuiFlexGroup)`
-  width: ${PANES_FLEX_GROUP_WIDTH}px;
-`;
-PanesFlexGroup.displayName = 'PanesFlexGroup';
-
-type Props = Pick<
-  FieldBrowserProps,
-  'timelineId' | 'browserFields' | 'fieldTableColumns' | 'width'
-> & {
+type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> & {
   /**
    * The current timeline column headers
    */
   columnHeaders: ColumnHeaderOptions[];
-
-  createFieldComponent?: CreateFieldComponentType;
-
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -94,6 +69,10 @@ type Props = Pick<
    */
   onHide: () => void;
   /**
+   * field browser customization options
+   */
+  options?: FieldBrowserOptions;
+  /**
    * Invoked when the user types in the search input
    */
   onSearchInputChange: (newSearchInput: string) => void;
@@ -113,13 +92,12 @@ type Props = Pick<
 const FieldsBrowserComponent: React.FC<Props> = ({
   columnHeaders,
   filteredBrowserFields,
-  createFieldComponent: CreateField,
   isSearching,
   setSelectedCategoryIds,
   onSearchInputChange,
   onHide,
+  options,
   restoreFocusTo,
-  fieldTableColumns = [],
   searchInput,
   selectedCategoryIds,
   timelineId,
@@ -159,6 +137,11 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     [onSearchInputChange]
   );
 
+  const [CreateFieldButton, getFieldTableColumns] = [
+    options?.createFieldButton,
+    options?.getFieldTableColumns,
+  ];
+
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
       <div data-test-subj="fields-browser-container">
@@ -189,8 +172,8 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateField && dataViewId != null && dataViewId.length > 0 && (
-                <CreateField onClick={onHide} />
+              {CreateFieldButton && dataViewId != null && dataViewId.length > 0 && (
+                <CreateFieldButton onClick={onHide} />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -209,36 +192,8 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             filteredBrowserFields={filteredBrowserFields}
             searchInput={searchInput}
             selectedCategoryIds={selectedCategoryIds}
-            fieldTableColumns={fieldTableColumns}
-            // onUpdateColumns={onUpdateColumns}
+            getFieldTableColumns={getFieldTableColumns}
           />
-
-          {/* <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <CategoriesPane
-                data-test-subj="left-categories-pane"
-                filteredBrowserFields={filteredBrowserFields}
-                width={CATEGORY_PANE_WIDTH}
-                onCategorySelected={onCategorySelected}
-                selectedCategoryId={selectedCategoryId}
-                timelineId={timelineId}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <FieldsPane
-                columnHeaders={columnHeaders}
-                data-test-subj="fields-pane"
-                filteredBrowserFields={filteredBrowserFields}
-                onCategorySelected={onCategorySelected}
-                onUpdateColumns={onUpdateColumns}
-                searchInput={searchInput}
-                selectedCategoryId={selectedCategoryId}
-                timelineId={timelineId}
-                width={FIELDS_PANE_WIDTH}
-              />
-            </EuiFlexItem>
-          </PanesFlexGroup> */}
         </EuiModalBody>
 
         <EuiModalFooter>

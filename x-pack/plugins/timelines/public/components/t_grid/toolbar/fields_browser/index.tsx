@@ -10,11 +10,10 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
+import type { FieldBrowserProps } from '../../../../../common/types/fields_browser';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
 import * as i18n from './translations';
-import type { FieldBrowserProps } from './types';
 
 const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 
@@ -34,8 +33,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   columnHeaders,
   browserFields,
-  createFieldComponent,
-  fieldTableColumns,
+  options,
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -93,25 +91,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
         });
         setFilteredBrowserFields(newFilteredBrowserFields);
         setIsSearching(false);
-
-        // const newSelectedCategoryIds =
-        //   newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
-        //     ? DEFAULT_CATEGORY_NAME
-        //     : Object.keys(newFilteredBrowserFields)
-        //         .sort()
-        //         .reduce<string>(
-        //           (selected, category) =>
-        //             newFilteredBrowserFields[category].fields != null &&
-        //             newFilteredBrowserFields[selected].fields != null &&
-        //             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        //             Object.keys(newFilteredBrowserFields[category].fields!).length >
-        //               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        //               Object.keys(newFilteredBrowserFields[selected].fields!).length
-        //               ? category
-        //               : selected,
-        //           Object.keys(newFilteredBrowserFields)[0]
-        //         );
-        // setSelectedCategoryIds(newSelectedCategoryIds);
       }, INPUT_TIMEOUT);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,8 +122,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       {show && (
         <FieldsBrowser
           browserFields={browserFieldsWithDefaultCategory}
-          createFieldComponent={createFieldComponent}
-          fieldTableColumns={fieldTableColumns}
           columnHeaders={columnHeaders}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
@@ -153,6 +130,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           setSelectedCategoryIds={setSelectedCategoryIds}
           onHide={onHide}
           onSearchInputChange={updateFilter}
+          options={options}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
           selectedCategoryIds={selectedCategoryIds}

@@ -13,19 +13,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiScreenReaderOnly,
-  EuiHealth,
   EuiBadge,
   EuiBasicTableColumn,
-  EuiLink,
+  EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { getEmptyValue } from '../../../empty_value';
 import { getExampleText, getIconFromType } from '../../../utils/helpers';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions } from '../../../../../common/types';
+import type {
+  ColumnHeaderOptions,
+  BrowserFieldItem,
+  FieldTableColumns,
+  GetFieldTableColumns,
+} from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 import { TruncatableText } from '../../../truncatable_text';
@@ -33,7 +36,6 @@ import { FieldName } from './field_name';
 import * as i18n from './translations';
 import { getAlertColumnHeader } from './helpers';
 import { arrayIndexToAriaIndex } from '../../../../../common/utils/accessibility';
-import { FieldTableColumns } from './types';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;
@@ -49,21 +51,6 @@ export const Description = styled.span`
 Description.displayName = 'Description';
 
 /**
- * An item rendered in the table
- */
-export interface FieldItem {
-  name: string;
-  type?: string;
-  description?: string;
-  example?: string;
-  category: string;
-  selected: boolean;
-  isRuntime: boolean;
-  highlight?: string;
-  ariaRowindex?: number;
-}
-
-/**
  * Returns the field items of all categories selected
  */
 export const getFieldItems = ({
@@ -74,14 +61,14 @@ export const getFieldItems = ({
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
   columnHeaders: ColumnHeaderOptions[];
-}): FieldItem[] => {
+}): BrowserFieldItem[] => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
   const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
 
   return uniqBy(
     'name',
-    categoryIds.reduce<FieldItem[]>((fieldItems, categoryId) => {
+    categoryIds.reduce<BrowserFieldItem[]>((fieldItems, categoryId) => {
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
         fieldItems.push(
@@ -108,7 +95,7 @@ const getCategoryFieldItems = ({
   browserFields: Array<Partial<BrowserField>>;
   category: string;
   selectedFieldIds: Set<string>;
-}): FieldItem[] => {
+}): BrowserFieldItem[] => {
   return browserFields.map(({ name = '', ...field }, index) => ({
     name,
     type: field.type,
@@ -130,36 +117,6 @@ export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHe
   initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   ...getAlertColumnHeader(timelineId, fieldName),
 });
-
-// export const getSelectedFieldItems = ({
-//   columnHeaders,
-//   browserFields,
-//   selectedCategoryIds = [],
-// }: {
-//   columnHeaders: ColumnHeaderOptions[];
-//   browserFields: BrowserFields;
-//   selectedCategoryIds: string[];
-// }): FieldItem[] => {
-//   const columnsSet = new Set(columnHeaders.map(({ id }) => id));
-//   const categoryIds =
-//     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
-
-//   return categoryIds.reduce<FieldItem[]>((fieldItems, categoryId) => {
-//     const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
-//     const selectedCategoryBrowserFields = categoryBrowserFields.filter((categoryBrowserField) =>
-//       columnsSet.has(categoryBrowserField.name ?? '')
-//     );
-//     if (selectedCategoryBrowserFields.length > 0) {
-//       fieldItems.push(
-//         ...getCategoryFieldItems({
-//           category: categoryId,
-//           browserFields: selectedCategoryBrowserFields,
-//         })
-//       );
-//     }
-//     return fieldItems;
-//   }, []);
-// };
 
 // /**
 //  * Returns the fields items, values, and descriptions shown when a user expands an event
@@ -234,73 +191,12 @@ export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHe
 //     fieldId: field.name ?? '',
 //   }));
 
-const onDeleteRuntimeField = (fieldItem: FieldItem) => {
-  console.log('delete', { fieldItem });
-};
-const onEditRuntimeField = (fieldItem: FieldItem) => {
-  console.log('edit', { fieldItem });
-};
-
-const actions: Array<Action<FieldItem>> = [
-  {
-    name: 'Delete',
-    description: 'Delete runtime field',
-    icon: 'trash',
-    color: 'danger',
-    type: 'icon',
-    onClick: onDeleteRuntimeField,
-    isPrimary: true,
-    available: ({ isRuntime }) => isRuntime,
-    'data-test-subj': 'action-delete-runtime-field',
-  },
-  {
-    name: 'Edit',
-    isPrimary: true,
-    description: 'Edit runtime field',
-    icon: 'pencil',
-    type: 'icon',
-    available: ({ isRuntime }) => isRuntime,
-    onClick: onEditRuntimeField,
-    'data-test-subj': 'action-edit-runtime-field',
-  },
-];
-
-/**
- * Returns a table column template provided to the `EuiInMemoryTable`'s
- * `columns` prop
- */
-export const getFieldColumns = ({
-  highlight = '',
-  onToggleColumn,
-  fieldTableColumns,
-}: {
-  highlight: string;
-  onToggleColumn: (id: string) => void;
-  fieldTableColumns: FieldTableColumns;
-}): FieldTableColumns => [
-  {
-    field: 'selected',
-    name: '',
-    render: (selected: boolean, { name }) => (
-      <EuiToolTip content={i18n.VIEW_COLUMN(name)}>
-        <EuiCheckbox
-          aria-label={i18n.VIEW_COLUMN(name)}
-          checked={selected}
-          data-test-subj={`field-${name}-checkbox`}
-          data-colindex={1}
-          id={name}
-          onChange={() => onToggleColumn(name)}
-        />
-      </EuiToolTip>
-    ),
-    sortable: false,
-    width: '25px',
-  },
+const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'name',
     name: i18n.NAME,
     dataType: 'string',
-    render: (name: string, item: FieldItem) => {
+    render: (name: string, item: BrowserFieldItem) => {
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
@@ -319,25 +215,7 @@ export const getFieldColumns = ({
       );
     },
     sortable: true,
-    width: '120px',
-  },
-  ...fieldTableColumns,
-  {
-    field: 'name',
-    name: 'Reference',
-    render: (name, item) => {
-      const field = name.replaceAll('.', '-').replace('@', '');
-      return !item.isRuntime && !name.startsWith('_') ? (
-        <EuiToolTip content="ECS Field Reference">
-          <EuiLink
-            href={`https://www.elastic.co/guide/en/ecs/current/ecs-${item.category}.html#field-${field}`}
-            target="_blank"
-          />
-        </EuiToolTip>
-      ) : null;
-    },
-    sortable: false,
-    width: '80px',
+    width: '225px',
   },
   {
     field: 'description',
@@ -357,16 +235,7 @@ export const getFieldColumns = ({
       </EuiToolTip>
     ),
     sortable: true,
-    width: '350px',
-  },
-  {
-    field: 'isRuntime',
-    name: i18n.RUNTIME,
-    dataType: 'boolean',
-    render: (isRuntime: boolean) =>
-      isRuntime ? <EuiHealth color="success" title={i18n.RUNTIME_FIELD} /> : null,
-    sortable: true,
-    width: '80px',
+    width: '400px',
   },
   {
     field: 'category',
@@ -376,9 +245,44 @@ export const getFieldColumns = ({
     sortable: true,
     width: '100px',
   },
+];
+
+export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
+  return (column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length > 0;
+};
+
+/**
+ * Returns a table column template provided to the `EuiInMemoryTable`'s
+ * `columns` prop
+ */
+export const getFieldColumns = ({
+  highlight = '',
+  onToggleColumn,
+  getFieldTableColumns,
+}: {
+  highlight: string;
+  onToggleColumn: (id: string) => void;
+  getFieldTableColumns?: GetFieldTableColumns;
+}): FieldTableColumns => [
   {
-    name: 'Actions',
-    actions,
-    width: '50px',
+    field: 'selected',
+    name: '',
+    render: (selected: boolean, { name }) => (
+      <EuiToolTip content={i18n.VIEW_COLUMN(name)}>
+        <EuiCheckbox
+          aria-label={i18n.VIEW_COLUMN(name)}
+          checked={selected}
+          data-test-subj={`field-${name}-checkbox`}
+          data-colindex={1}
+          id={name}
+          onChange={() => onToggleColumn(name)}
+        />
+      </EuiToolTip>
+    ),
+    sortable: false,
+    width: '25px',
   },
+  ...(getFieldTableColumns
+    ? getFieldTableColumns(highlight)
+    : getDefaultFieldTableColumns(highlight)),
 ];

@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { omit } from 'lodash';
-import styled from 'styled-components';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -20,8 +19,7 @@ import {
 } from '@elastic/eui';
 import { BrowserFields } from '../../../../../common';
 import * as i18n from './translations';
-import { CountBadge, getFieldCount } from './helpers';
-import { CategoryName } from './category_columns';
+import { CountBadge, getFieldCount, CategoryName, CategorySelectableContainer } from './helpers';
 import { isEscape } from '../../../../../common/utils/accessibility';
 
 interface CategoriesSelectorProps {
@@ -46,11 +44,6 @@ interface CategoryOption {
   count: number;
   checked?: FilterChecked;
 }
-
-export const CategorySelectableContainer = styled.div`
-  width: 300px;
-`;
-CategorySelectableContainer.displayName = 'CategorySelectableContainer';
 
 const renderOption = (option: CategoryOption, searchValue: string) => {
   const { categoryId, label, count, checked } = option;

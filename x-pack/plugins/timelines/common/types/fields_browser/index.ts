@@ -6,14 +6,36 @@
  */
 
 import { EuiBasicTableColumn } from '@elastic/eui';
-import { CreateFieldComponentType } from '../../../../../common/types';
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
-import { FieldItem } from './field_items';
+import { BrowserFields } from '../../search_strategy';
+import { ColumnHeaderOptions } from '../timeline/columns';
+
+/**
+ * An item rendered in the table
+ */
+export interface BrowserFieldItem {
+  name: string;
+  type?: string;
+  description?: string;
+  example?: string;
+  category: string;
+  selected: boolean;
+  isRuntime: boolean;
+  highlight?: string;
+  ariaRowindex?: number;
+}
 
 export type OnFieldSelected = (fieldId: string) => void;
 
-export type FieldTableColumns = Array<EuiBasicTableColumn<FieldItem>>;
+export type CreateFieldComponent = React.FC<{
+  onClick: () => void;
+}>;
+export type FieldTableColumns = Array<EuiBasicTableColumn<BrowserFieldItem>>;
+export type GetFieldTableColumns = (highlight: string) => FieldTableColumns;
+export interface FieldBrowserOptions {
+  createFieldButton?: CreateFieldComponent;
+  getFieldTableColumns?: GetFieldTableColumns;
+}
+
 export interface FieldBrowserProps {
   /** The timeline associated with this field browser */
   timelineId: string;
@@ -22,12 +44,9 @@ export interface FieldBrowserProps {
   /** A map of categoryId -> metadata about the fields in that category */
   browserFields: BrowserFields;
 
-  createFieldComponent?: CreateFieldComponentType;
+  // createFieldComponent?: CreateFieldComponentType;
 
-  // options?: {
-  //   createFieldButton?: CreateFieldComponentType;
-  //   tableColumns: FieldTableColumns;
-  // };
+  options?: FieldBrowserOptions;
 
   /** When true, this Fields Browser is being used as an "events viewer" */
   isEventViewer?: boolean;
