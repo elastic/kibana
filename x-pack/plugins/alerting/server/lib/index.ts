@@ -24,3 +24,4 @@ export {
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
+export { getRecoveredAlerts } from './get_recovered_alerts';
