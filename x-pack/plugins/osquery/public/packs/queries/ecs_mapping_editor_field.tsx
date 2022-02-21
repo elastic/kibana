@@ -638,7 +638,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
 
     const handleSubmit = useCallback(async () => {
       validate();
-      validateFields(['result.value']);
+      validateFields(['result.value', 'key']);
       const { data, isValid } = await submit();
 
       if (isValid) {
@@ -1036,6 +1036,9 @@ export const ECSMappingEditorField = React.memo(
 
     const handleUpdateRow = useCallback(
       (currentKey: string) => (updatedRow: FormData) => {
+        console.log('currentKey', currentKey);
+        console.log('updatedRow', updatedRow);
+
         if (updatedRow?.key && updatedRow?.value) {
           setValue(
             produce((draft) => {
