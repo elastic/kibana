@@ -69,7 +69,7 @@ export async function getTableData(
         ? await extractFields({ id: panelIndex.indexPattern.id })
         : [];
 
-      return getMultiFieldLabel(fields, pivotIds);
+      return getMultiFieldLabel(pivotIds, fields);
     }
   };
 
@@ -88,7 +88,7 @@ export async function getTableData(
       }
     });
 
-    if (!panel.pivot_id) {
+    if (!getFieldsForTerms(panel.pivot_id).length) {
       throw new PivotNotSelectedForTableError();
     }
 

@@ -54,8 +54,8 @@ export const getFieldsForTerms = (fields: string | Array<string | null> | undefi
   return fields ? (Array.isArray(fields) ? (fields.filter(Boolean) as string[]) : [fields]) : [];
 };
 
-export const getMultiFieldLabel = (fields: SanitizedFieldType[], fieldForTerms: string[]) => {
-  const firstFieldLabel = extractFieldLabel(fields, fieldForTerms[0]);
+export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFieldType[]) => {
+  const firstFieldLabel = fields ? extractFieldLabel(fields, fieldForTerms[0]) : fieldForTerms[0];
 
   if (fieldForTerms.length > 1) {
     return i18n.translate('visTypeTimeseries.fieldUtils.multiFieldLabel', {

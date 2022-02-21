@@ -66,12 +66,14 @@ export class TablePanelConfig extends Component<
 
   handlePivotChange = (selectedOptions: Array<string | null>) => {
     const { fields, model } = this.props;
+    const notEmptyOptions = selectedOptions.filter(Boolean);
+
     const getPivotType = () => {
-      if (selectedOptions.length > 1) {
+      if (notEmptyOptions.length > 1) {
         return 'multi';
       } else {
         const field = fields[getIndexPatternKey(model.index_pattern)].find(
-          (f) => f.name === selectedOptions?.[0]
+          (f) => f.name === notEmptyOptions?.[0]
         );
         return get(field, 'type');
       }
