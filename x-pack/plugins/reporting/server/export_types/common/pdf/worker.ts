@@ -137,5 +137,9 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
   } catch (error) {
     const errorResponse: ErrorResponse = { error: error.message, data: null };
     port.postMessage(errorResponse);
+  } finally {
+    process.nextTick(() => {
+      process.exit(0);
+    });
   }
 }
