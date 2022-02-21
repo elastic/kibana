@@ -14,6 +14,6 @@ export function plugin() {
   return new VisTypeGaugePlugin();
 }
 
-export { VisTypeGaugePluginSetup, VisTypeGaugePluginStart } from './types';
+export type { VisTypeGaugePluginSetup, VisTypeGaugePluginStart } from './types';
 
 export { gaugeVisType, goalVisType } from './vis_type';

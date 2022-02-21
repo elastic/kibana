@@ -47,7 +47,6 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     colorSchema,
     colorsRange,
     invertColors,
-    extendRange,
     scale,
   } = vis.params.gauge;
 
@@ -64,9 +63,9 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
   const gauge = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
     shape: gaugeTypeToShape(gaugeType),
     metric: schemas.metric.map(prepareDimension),
-    ticksPosition: scale ? 'auto' : 'hidden',
+    ticksPosition: scale.show ? 'auto' : 'hidden',
     labelMajorMode: 'auto',
-    colorMode: extendRange ? 'palette' : 'none',
+    colorMode: 'palette',
   });
 
   if (colorsRange && colorsRange.length) {
@@ -75,6 +74,7 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
       ...stopsWithColors,
       range: percentageMode ? 'percent' : 'number',
       continuity: 'none',
+      gradient: true,
       rangeMax: percentageMode ? 100 : Infinity,
       rangeMin: 0,
     });
