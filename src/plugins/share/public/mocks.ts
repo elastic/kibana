@@ -39,9 +39,6 @@ const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShor
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     register: jest.fn(),
-    urlGenerators: {
-      registerUrlGenerator: jest.fn(),
-    },
     url,
     navigate: jest.fn(),
     setAnonymousAccessServiceProvider: jest.fn(),
@@ -52,9 +49,6 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     url,
-    urlGenerators: {
-      getUrlGenerator: jest.fn(),
-    },
     toggleShareContextMenu: jest.fn(),
     navigate: jest.fn(),
   };

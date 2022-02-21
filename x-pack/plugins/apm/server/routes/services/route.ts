@@ -49,6 +49,9 @@ import {
 } from '../../../../ml/server';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
+import { ScopedAnnotationsClient } from '../../../../observability/server';
+import { Annotation } from './../../../../observability/common/annotations';
+import { ConnectionStatsItemWithImpact } from './../../../common/connections';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -373,8 +376,10 @@ const serviceAnnotationsRoute = createApmServerRoute({
     const [annotationsClient, searchAggregatedTransactions] = await Promise.all(
       [
         observability
-          ? withApmSpan('get_scoped_annotations_client', () =>
-              observability.setup.getScopedAnnotationsClient(context, request)
+          ? withApmSpan(
+              'get_scoped_annotations_client',
+              (): Promise<undefined | ScopedAnnotationsClient> =>
+                observability.setup.getScopedAnnotationsClient(context, request)
             )
           : undefined,
         getSearchAggregatedTransactions({
@@ -443,8 +448,10 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
     } = resources;
 
     const annotationsClient = observability
-      ? await withApmSpan('get_scoped_annotations_client', () =>
-          observability.setup.getScopedAnnotationsClient(context, request)
+      ? await withApmSpan(
+          'get_scoped_annotations_client',
+          (): Promise<undefined | ScopedAnnotationsClient> =>
+            observability.setup.getScopedAnnotationsClient(context, request)
         )
       : undefined;
 
@@ -454,20 +461,22 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
 
     const { body, path } = params;
 
-    return withApmSpan('create_annotation', () =>
-      annotationsClient.create({
-        message: body.service.version,
-        ...body,
-        '@timestamp': new Date(body['@timestamp']).toISOString(),
-        annotation: {
-          type: 'deployment',
-        },
-        service: {
-          ...body.service,
-          name: path.serviceName,
-        },
-        tags: uniq(['apm'].concat(body.tags ?? [])),
-      })
+    return withApmSpan(
+      'create_annotation',
+      (): Promise<{ _id: string; _index: string; _source: Annotation }> =>
+        annotationsClient.create({
+          message: body.service.version,
+          ...body,
+          '@timestamp': new Date(body['@timestamp']).toISOString(),
+          annotation: {
+            type: 'deployment',
+          },
+          service: {
+            ...body.service,
+            name: path.serviceName,
+          },
+          tags: uniq(['apm'].concat(body.tags ?? [])),
+        })
     );
   },
 });
@@ -925,18 +934,25 @@ export const serviceDependenciesRoute = createApmServerRoute({
     ]);
 
     return {
-      serviceDependencies: currentPeriod.map((item) => {
-        const { stats, ...rest } = item;
-        const previousPeriodItem = previousPeriod.find(
-          (prevItem) => item.location.id === prevItem.location.id
-        );
+      serviceDependencies: currentPeriod.map(
+        (
+          item
+        ): Omit<ConnectionStatsItemWithImpact, 'stats'> & {
+          currentStats: ConnectionStatsItemWithImpact['stats'];
+          previousStats: ConnectionStatsItemWithImpact['stats'] | null;
+        } => {
+          const { stats, ...rest } = item;
+          const previousPeriodItem = previousPeriod.find(
+            (prevItem): boolean => item.location.id === prevItem.location.id
+          );
 
-        return {
-          ...rest,
-          currentStats: stats,
-          previousStats: previousPeriodItem?.stats || null,
-        };
-      }),
+          return {
+            ...rest,
+            currentStats: stats,
+            previousStats: previousPeriodItem?.stats || null,
+          };
+        }
+      ),
     };
   },
 });

@@ -55,7 +55,7 @@ export type {
 } from './column_types';
 
 export type { TermsIndexPatternColumn } from './terms';
-export type { FiltersIndexPatternColumn } from './filters';
+export type { FiltersIndexPatternColumn, Filter } from './filters';
 export type { CardinalityIndexPatternColumn } from './cardinality';
 export type { PercentileIndexPatternColumn } from './percentile';
 export type {

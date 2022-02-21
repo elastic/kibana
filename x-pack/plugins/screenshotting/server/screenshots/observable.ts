@@ -8,8 +8,8 @@
 import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ConditionalHeaders, Context, HeadlessChromiumDriver } from '../browsers';
+import type { Headers, Logger } from 'src/core/server';
+import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
 import type { Layout } from '../layouts';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
@@ -60,7 +60,7 @@ export interface ScreenshotObservableOptions {
   /**
    * Custom headers to be sent with each request.
    */
-  conditionalHeaders: ConditionalHeaders;
+  headers?: Headers;
 
   /**
    * Timeouts for each phase of the screenshot.
@@ -177,7 +177,7 @@ export class ScreenshotObservableHandler {
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
-        this.options.conditionalHeaders
+        this.options.headers ?? {}
       );
     }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
   }

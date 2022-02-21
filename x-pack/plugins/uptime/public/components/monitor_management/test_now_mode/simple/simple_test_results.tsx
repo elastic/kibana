@@ -12,16 +12,18 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
+  onDone: () => void;
 }
-export function SimpleTestResults({ monitorId }: Props) {
+export function SimpleTestResults({ monitorId, onDone }: Props) {
   const [summaryDocs, setSummaryDocs] = useState<Ping[]>([]);
   const { summaryDoc, loading } = useSimpleRunOnceMonitors({ configId: monitorId });
 
   useEffect(() => {
     if (summaryDoc) {
       setSummaryDocs((prevState) => [summaryDoc, ...prevState]);
+      onDone();
     }
-  }, [summaryDoc]);
+  }, [summaryDoc, onDone]);
 
   return (
     <>

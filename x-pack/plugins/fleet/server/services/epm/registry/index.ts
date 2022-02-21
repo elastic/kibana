@@ -21,7 +21,6 @@ import type {
   InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
   GetCategoriesRequest,
 } from '../../../types';
 import {
@@ -34,6 +33,8 @@ import {
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -65,18 +66,72 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
+
+async function _fetchFindLatestPackage(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const { ignoreConstraints = false } = options ?? {};
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
-  setKibanaVersion(url);
+  if (!ignoreConstraints) {
+    setKibanaVersion(url);
+  }
 
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
+  const res = await fetchUrl(url.toString(), 1);
+  const searchResults: RegistryPackage[] = JSON.parse(res);
+
+  return searchResults;
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+    }
+
     return searchResults[0];
-  } else {
-    throw new PackageNotFoundError(`${packageName} not found`);
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      throw error;
+    }
+
+    return bundledPackage;
+  }
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      return undefined;
+    }
+
+    return searchResults[0];
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      return undefined;
+    }
+
+    return bundledPackage;
   }
 }
 
@@ -116,10 +171,8 @@ function setKibanaVersion(url: URL) {
   }
 
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on main, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'main') {
+  if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }
