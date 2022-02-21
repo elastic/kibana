@@ -6,45 +6,42 @@
  * Side Public License, v 1.
  */
 
+import { TimefilterContract } from 'src/plugins/data/public';
 import { Vis } from 'src/plugins/visualizations/public';
-// import { sampleAreaVis } from './sample_vis.test.mocks';
-import { buildExpression } from '../../../expressions/public';
-
 import { toExpressionAst } from './to_ast';
 import { GaugeVisParams } from './types';
 
-jest.mock('../../../expressions/public', () => ({
-  ...(jest.requireActual('../../../expressions/public') as any),
-  buildExpression: jest.fn().mockImplementation(() => ({
-    toAst: () => ({
-      type: 'expression',
-      chain: [],
-    }),
-  })),
-}));
-
-jest.mock('./to_ast_esaggs', () => ({
-  getEsaggsFn: jest.fn(),
-}));
-
-describe('heatmap vis toExpressionAst function', () => {
+describe('gauge vis toExpressionAst function', () => {
   let vis: Vis<GaugeVisParams>;
 
-  const params = {
-    timefilter: {},
-    timeRange: {},
-    abortSignal: {},
-  } as any;
-
   beforeEach(() => {
-    // vis = sampleAreaVis as any;
-    vis = {} as any;
+    vis = {
+      isHierarchical: () => false,
+      type: {},
+      params: {
+        gauge: {
+          gaugeType: 'Circle',
+          scale: {
+            show: false,
+            labels: false,
+            color: 'rgba(105,112,125,0.2)',
+          },
+        },
+      },
+      data: {
+        indexPattern: { id: '123' } as any,
+        aggs: {
+          getResponseAggs: () => [],
+          aggs: [],
+        } as any,
+      },
+    } as unknown as Vis<GaugeVisParams>;
   });
 
-  it('should match basic snapshot', () => {
-    toExpressionAst(vis, params);
-    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
-
-    expect(builtExpression).toMatchSnapshot();
+  it('with minimal params', () => {
+    const actual = toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
+    expect(actual).toMatchSnapshot();
   });
 });
