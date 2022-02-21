@@ -2,7 +2,7 @@
     "extends": "../../../../tsconfig.base.json",
     "include": [
       "**/*"
-    ],
+, "../../security_solution/cypress/screens/trusted_apps.ts", "../../security_solution/cypress/cloud_upgrade_integration/trusted_apps/trusted_apps_post.spec.ts"    ],
     "exclude": [
       "target/**/*"
     ],

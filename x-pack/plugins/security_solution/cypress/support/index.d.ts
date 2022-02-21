@@ -16,5 +16,6 @@ declare namespace Cypress {
         timeout: number;
       }
     ): Chainable<Subject>;
+    getBySel: typeof cy.get;
   }
 }

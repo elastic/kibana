@@ -83,3 +83,7 @@ const waitUntil = (subject, fn, options = {}) => {
 };
 
 Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
+
+Cypress.Commands.add('getBySel', (selector, ...args) =>
+  cy.get(`[data-test-subj=${selector}]`, ...args)
+);
