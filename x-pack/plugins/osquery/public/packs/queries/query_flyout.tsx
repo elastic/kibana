@@ -67,7 +67,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     },
   });
 
-  const { submit, setFieldValue, reset, isSubmitting } = form;
+  const { submit, setFieldValue, reset, isSubmitting, validate } = form;
 
   const [{ query }] = useFormData({
     form,
@@ -102,8 +102,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
         }
       }
+
+      validate();
     },
-    [setFieldValue, reset]
+    [reset, validate, setFieldValue]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
