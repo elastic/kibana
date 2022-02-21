@@ -2668,6 +2668,15 @@ components:
           type: object
         config_yaml:
           type: string
+        ssl:
+          type: object
+          properties:
+            certificate:
+              type: string
+            certificate_authorities:
+              type: string
+            key:
+              type: string
       required:
         - id
         - is_default
