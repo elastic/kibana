@@ -14,7 +14,8 @@ import {
   FilterStateStore,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { DiscoverStart } from '../../../../../src/plugins/discover/public';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { Capabilities } from 'kibana/public';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
 
@@ -52,9 +53,9 @@ export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
-  discover: DiscoverStart | undefined
+  capabilities: RecursiveReadonly<Capabilities>
 ): { meta: LayerMetaInfo | undefined; isVisible: boolean; error: string | undefined } {
-  const isVisible = Boolean(discover);
+  const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
   // If Multiple tables, return
   // If there are time shifts, return
   const [datatable, ...otherTables] = Object.values(activeData || {});

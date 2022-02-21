@@ -7,15 +7,19 @@
 
 import { createMockDatasource } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
-import { DiscoverStart } from '../../../../../src/plugins/discover/public';
 import { Filter } from '@kbn/es-query';
 import { DatasourcePublicAPI } from '../types';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { Capabilities } from 'kibana/public';
 
 describe('getLayerMetaInfo', () => {
+  const capabilities = {
+    navLinks: { discover: true },
+    discover: { show: true },
+  } as unknown as RecursiveReadonly<Capabilities>;
   it('should return error in case of no data', () => {
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, undefined, {} as DiscoverStart)
-        .error
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, undefined, capabilities).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -28,21 +32,20 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
-        {} as DiscoverStart
+        capabilities
       ).error
     ).toBe('Cannot show underlying data for visualizations with multiple layers');
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, {} as DiscoverStart).error).toBe(
+    expect(getLayerMetaInfo(undefined, {}, undefined, capabilities).error).toBe(
       'Visualization has no data available to show'
     );
   });
 
   it('should return error in case of missing configuration/state', () => {
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), undefined, {}, {} as DiscoverStart)
-        .error
+      getLayerMetaInfo(createMockDatasource('testDatasource'), undefined, {}, capabilities).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -66,11 +69,12 @@ describe('getLayerMetaInfo', () => {
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {} as DiscoverStart).error
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, capabilities).error
     ).toBe('Visualization has no data available to show');
   });
 
   it('should not be visible if discover is not available', () => {
+    // both capabilities should be enabled to enable discover
     expect(
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
@@ -78,7 +82,23 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
-        undefined
+        {
+          navLinks: { discover: false },
+          discover: { show: true },
+        } as unknown as RecursiveReadonly<Capabilities>
+      ).isVisible
+    ).toBeFalsy();
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+        },
+        {
+          navLinks: { discover: true },
+          discover: { show: false },
+        } as unknown as RecursiveReadonly<Capabilities>
       ).isVisible
     ).toBeFalsy();
   });
@@ -103,7 +123,7 @@ describe('getLayerMetaInfo', () => {
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
-      {} as DiscoverStart
+      capabilities
     );
     expect(error).toBeUndefined();
     expect(meta?.columns).toEqual(['bytes']);

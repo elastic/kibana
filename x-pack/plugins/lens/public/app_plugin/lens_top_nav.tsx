@@ -320,9 +320,16 @@ export const LensTopNavMenu = ({
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
       activeData,
-      discover
+      application.capabilities
     );
-  }, [activeData, activeDatasourceId, datasourceMap, datasourceStates, discover]);
+  }, [
+    activeData,
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    discover,
+    application.capabilities,
+  ]);
 
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
