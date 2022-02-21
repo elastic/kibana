@@ -39,7 +39,6 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-  RegistryPackage,
 } from '../../common';
 import { packageToPackagePolicy } from '../../common';
 
