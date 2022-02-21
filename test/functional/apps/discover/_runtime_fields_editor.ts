@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows adding custom label to existing fields', async function () {
-      const customLabel = 'megabytes';
+      const customLabel = '@megabytes';
       await PageObjects.discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
@@ -60,32 +60,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows creation of a new field', async function () {
-      await createRuntimeField('runtimefield');
+      await createRuntimeField('@runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return fieldNames.includes('runtimefield');
+        return fieldNames.includes('@runtimefield');
       });
     });
 
     it('allows editing of a newly created field', async function () {
-      await PageObjects.discover.editField('runtimefield');
-      await fieldEditor.setName('runtimefield edited', true);
+      await PageObjects.discover.editField('@runtimefield');
+      await fieldEditor.setName('@runtimefield edited', true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return fieldNames.includes('runtimefield edited');
+        return fieldNames.includes('@runtimefield edited');
       });
     });
 
     it('allows creation of a new field and use it in a saved search', async function () {
-      await createRuntimeField('discover runtimefield');
+      await createRuntimeField('@discover runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.clickFieldListItemAdd('discover runtimefield');
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
+      await PageObjects.discover.clickFieldListItemAdd('@discover runtimefield');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('@discover runtimefield');
       expect(await PageObjects.discover.saveSearch('Saved Search with runtimefield'));
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -94,11 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.loadSavedSearch('Saved Search with runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('@discover runtimefield');
     });
 
     it('deletes a runtime field', async function () {
-      await createRuntimeField('delete');
+      await createRuntimeField('@delete');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.discover.removeField('delete');
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return !fieldNames.includes('delete');
+        return !fieldNames.includes('@delete');
       });
     });
 
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             throw new Error('test subject doc-hit is not yet displayed');
           }
           const runtimeFieldsRow = await testSubjects.exists(
-            'tableDocViewRow-discover runtimefield'
+            'tableDocViewRow-discover @runtimefield'
           );
 
           return hasDocHit && runtimeFieldsRow;
