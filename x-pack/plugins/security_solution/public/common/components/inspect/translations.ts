@@ -36,6 +36,21 @@ export const INDEX_PATTERN_DESC = i18n.translate(
   }
 );
 
+export const INSPECT_PATTERN_DIFFERENT = i18n.translate(
+  'xpack.securitySolution.inspectPatternDifferent',
+  {
+    defaultMessage: 'This element has a unique index pattern separate from the data view setting.',
+  }
+);
+
+export const LOGS_EXCLUDE_MESSAGE = i18n.translate(
+  'xpack.securitySolution.inspectPatternExcludeLogs',
+  {
+    defaultMessage:
+      'When the logs-* index pattern is selected, Elastic cloud logs are excluded from the search.',
+  }
+);
+
 export const QUERY_TIME = i18n.translate('xpack.securitySolution.inspect.modal.queryTimeLabel', {
   defaultMessage: 'Query time',
 });

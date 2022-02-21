@@ -75,7 +75,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const button = (
     <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
-      onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
+      onClick={hasMLJob ? () => setIsPopOverOpen(!isPopOverOpen) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={showLoading}
       size="s"

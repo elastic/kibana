@@ -118,7 +118,10 @@ export class APMEventClient {
         const searchPromise = withApmSpan(operationName, () => {
           const controller = new AbortController();
           return cancelEsRequestOnAbort(
-            this.esClient.search(searchParams, { signal: controller.signal }),
+            this.esClient.search(searchParams, {
+              signal: controller.signal,
+              meta: true,
+            }),
             this.request,
             controller
           );
@@ -161,7 +164,7 @@ export class APMEventClient {
                 index: Array.isArray(index) ? index.join(',') : index,
                 ...rest,
               },
-              { signal: controller.signal }
+              { signal: controller.signal, meta: true }
             ),
             this.request,
             controller

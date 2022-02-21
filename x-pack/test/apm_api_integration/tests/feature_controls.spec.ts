@@ -44,7 +44,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     {
       // this doubles as a smoke test for the _inspect query parameter
       req: {
-        url: `/internal/apm/services/foo/errors/groups/main_statistics?start=${start}&end=${end}&_inspect=true&environment=ENVIRONMENT_ALL&transactionType=bar&kuery=`,
+        url: `/internal/apm/services/foo/errors/groups/main_statistics?start=${start}&end=${end}&_inspect=true&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

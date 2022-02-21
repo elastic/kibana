@@ -116,7 +116,7 @@ export class CasesClientFactory {
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
       userActionService: new CaseUserActionService(this.logger),
-      attachmentService: new AttachmentService(this.logger),
+      attachmentService,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,

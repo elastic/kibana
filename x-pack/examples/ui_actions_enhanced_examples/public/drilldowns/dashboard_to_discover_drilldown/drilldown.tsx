@@ -65,9 +65,9 @@ export class DashboardToDiscoverDrilldown
   };
 
   private readonly getPath = async (config: Config, context: ActionContext): Promise<string> => {
-    const { urlGenerator } = this.params.start().plugins.discover;
+    const { locator } = this.params.start().plugins.discover;
 
-    if (!urlGenerator) throw new Error('Discover URL generator not available.');
+    if (!locator) throw new Error('Discover locator not available.');
 
     let indexPatternId =
       !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
@@ -79,7 +79,7 @@ export class DashboardToDiscoverDrilldown
       }
     }
 
-    return await urlGenerator.createUrl({
+    return await locator.getUrl({
       indexPatternId,
     });
   };

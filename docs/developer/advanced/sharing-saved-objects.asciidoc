@@ -405,8 +405,8 @@ necessary. However, such handling of secondary objects is not considered critica
 ==== 4. What is a "legacy URL alias"?
 
 As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To
-preserve its old ID, we also create a special object called a _legacy URL alias_ ("alias" for short); this alias retains the target object's
-old ID (_sourceId_), and it contains a pointer to the target object's new ID (_targetId_).
+preserve its old ID, we also create a special object called a <<legacy-url-aliases,_legacy URL alias_>> ("alias" for short); this alias
+retains the target object's old ID (_sourceId_), and it contains a pointer to the target object's new ID (_targetId_).
 
 Aliases are meant to be mostly invisible to end-users by design. There is no UI to manage them directly. Our vision is that aliases will be
 used as a stop-gap to help us through the 8.0 upgrade process, but we will nudge users away from relying on aliases so we can eventually
@@ -473,3 +473,7 @@ change any other data flows to use `resolve()`.
 External plugins (those not shipped with {kib}) can use this guide to convert any isolated objects to become share-capable or fully
 shareable! If you are an external plugin developer, the steps are the same, but you don't need to worry about getting anything done before a
 specific release. The only thing you need to know is that your plugin cannot convert your objects until the 8.0 release.
+
+==== 8. How will users be impacted?
+
+Refer to <<saved-object-ids,Saved Object IDs>> documentation for more details how users should expect to be impacted.

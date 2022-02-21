@@ -41,6 +41,7 @@ import { omit } from 'lodash';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
+import moment from 'moment';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -309,7 +310,7 @@ describe('Task Runner', () => {
             },
           ]
         `);
-    expect(call.services.alertInstanceFactory).toBeTruthy();
+    expect(call.services.alertFactory.create).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
@@ -427,8 +428,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices
-            .alertInstanceFactory('1')
+          executorServices.alertFactory
+            .create('1')
             .scheduleActionsWithSubGroup('default', 'subDefault');
         }
       );
@@ -708,7 +709,7 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -934,8 +935,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-          executorServices.alertInstanceFactory('2').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
+          executorServices.alertFactory.create('2').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -978,7 +979,128 @@ describe('Task Runner', () => {
     }
   );
 
-  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert alert state does not change', async () => {
+  test.each(ephemeralTestParams)(
+    'skips firing actions for active alert if alert is throttled %s',
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+      (
+        customTaskRunnerFactoryInitializerParams as TaskRunnerFactoryInitializerParamsType
+      ).actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+        true
+      );
+      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
+      ruleType.executor.mockImplementation(
+        async ({
+          services: executorServices,
+        }: AlertExecutorOptions<
+          AlertTypeParams,
+          AlertTypeState,
+          AlertInstanceState,
+          AlertInstanceContext,
+          string
+        >) => {
+          executorServices.alertFactory.create('1').scheduleActions('default');
+          executorServices.alertFactory.create('2').scheduleActions('default');
+        }
+      );
+      const taskRunner = new TaskRunner(
+        ruleType,
+        {
+          ...mockedTaskInstance,
+          state: {
+            ...mockedTaskInstance.state,
+            alertInstances: {
+              '2': {
+                meta: {
+                  lastScheduledActions: { date: moment().toISOString(), group: 'default' },
+                },
+                state: {
+                  bar: false,
+                  start: '1969-12-31T00:00:00.000Z',
+                  duration: 86400000000000,
+                },
+              },
+            },
+          },
+        },
+        taskRunnerFactoryInitializerParams
+      );
+      rulesClient.get.mockResolvedValue({
+        ...mockedRuleTypeSavedObject,
+        throttle: '1d',
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          enabled: true,
+        },
+        references: [],
+      });
+      await taskRunner.run();
+      // expect(enqueueFunction).toHaveBeenCalledTimes(1);
+
+      const logger = customTaskRunnerFactoryInitializerParams.logger;
+      // expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).nthCalledWith(
+        3,
+        `skipping scheduling of actions for '2' in rule test:1: 'rule-name': rule is throttled`
+      );
+    }
+  );
+
+  test.each(ephemeralTestParams)(
+    'skips firing actions for active alert when alert is muted even if notifyWhen === onActionGroupChange %s',
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+        true
+      );
+      ruleType.executor.mockImplementation(
+        async ({
+          services: executorServices,
+        }: AlertExecutorOptions<
+          AlertTypeParams,
+          AlertTypeState,
+          AlertInstanceState,
+          AlertInstanceContext,
+          string
+        >) => {
+          executorServices.alertFactory.create('1').scheduleActions('default');
+          executorServices.alertFactory.create('2').scheduleActions('default');
+        }
+      );
+      const taskRunner = new TaskRunner(
+        ruleType,
+        mockedTaskInstance,
+        customTaskRunnerFactoryInitializerParams
+      );
+      rulesClient.get.mockResolvedValue({
+        ...mockedRuleTypeSavedObject,
+        mutedInstanceIds: ['2'],
+        notifyWhen: 'onActionGroupChange',
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          enabled: true,
+        },
+        references: [],
+      });
+      await taskRunner.run();
+      expect(enqueueFunction).toHaveBeenCalledTimes(1);
+      const logger = customTaskRunnerFactoryInitializerParams.logger;
+      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).nthCalledWith(
+        3,
+        `skipping scheduling of actions for '2' in rule test:1: 'rule-name': rule is muted`
+      );
+    }
+  );
+
+  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert state does not change', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -991,7 +1113,7 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -1192,7 +1314,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -1268,8 +1390,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices
-            .alertInstanceFactory('1')
+          executorServices.alertFactory
+            .create('1')
             .scheduleActionsWithSubGroup('default', 'subgroup1');
         }
       );
@@ -1350,7 +1472,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -1672,7 +1794,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -2080,10 +2202,10 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
 
           // create an instance, but don't schedule any actions, so it doesn't go active
-          executorServices.alertInstanceFactory('3');
+          executorServices.alertFactory.create('3');
         }
       );
       const taskRunner = new TaskRunner(
@@ -2186,7 +2308,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -2297,7 +2419,7 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const date = new Date().toISOString();
@@ -3692,8 +3814,8 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
-        executorServices.alertInstanceFactory('2').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -4006,8 +4128,8 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
-        executorServices.alertInstanceFactory('2').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -4251,8 +4373,8 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
-        executorServices.alertInstanceFactory('2').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -5035,7 +5157,7 @@ describe('Task Runner', () => {
             },
           ]
         `);
-    expect(call.services.alertInstanceFactory).toBeTruthy();
+    expect(call.services.alertFactory.create).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 

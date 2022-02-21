@@ -51,7 +51,6 @@ import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import { layerTypes } from '../../common';
 import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
@@ -76,6 +75,7 @@ import {
   ReferenceLineAnnotations,
 } from './expression_reference_lines';
 import { computeOverallDataDomain } from './reference_line_helpers';
+import { isDataLayer, isReferenceLayer } from './visualization_helpers';
 
 declare global {
   interface Window {
@@ -263,9 +263,6 @@ export function XYChart({
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
-  const referenceLineLayers = layers.filter(
-    (layer) => layer.layerType === layerTypes.REFERENCELINE
-  );
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
@@ -333,7 +330,6 @@ export function XYChart({
     left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
-  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -350,6 +346,9 @@ export function XYChart({
         .filter((name) => Boolean(name))[0]
     );
   };
+
+  const referenceLineLayers = layers.filter((layer) => isReferenceLayer(layer));
+  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -665,6 +664,8 @@ export function XYChart({
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
+        ariaLabel={args.ariaLabel}
+        ariaUseDefaultSummary={!args.ariaLabel}
       />
 
       <Axis
@@ -985,9 +986,10 @@ export function XYChart({
 }
 
 function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
-  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor, layerType }) => {
+  return layers.filter((layer) => {
+    const { layerId, xAccessor, accessors, splitAccessor } = layer;
     return (
-      layerType === layerTypes.DATA &&
+      isDataLayer(layer) &&
       !(
         !accessors.length ||
         !data.tables[layerId] ||

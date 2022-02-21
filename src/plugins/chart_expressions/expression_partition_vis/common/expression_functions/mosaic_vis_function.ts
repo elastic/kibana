@@ -7,7 +7,7 @@
  */
 
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable } from '../../../../visualizations/common/utils';
 import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -82,6 +82,11 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: strings.getAriaLabelHelp(),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     const maxSupportedBuckets = 2;
@@ -95,6 +100,10 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
 
     const visConfig: PartitionVisParams = {
       ...args,
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
         metric: args.metric,
