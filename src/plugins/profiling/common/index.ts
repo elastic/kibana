@@ -88,3 +88,18 @@ export function timeRangeFromRequest(request: any): [number, number] {
   const timeTo = parseInt(request.query.timeTo!, 10);
   return [timeFrom, timeTo];
 }
+
+export const now = (label?: string) => {
+  if (label) {
+    console.log('Started', label);
+  }
+  return new Date().getTime();
+};
+
+export const elapsed = (start: number, label?: string) => {
+  const duration = new Date().getTime() - start;
+  if (label) {
+    console.log(label, `${duration / 1000}s`);
+  }
+  return duration;
+};

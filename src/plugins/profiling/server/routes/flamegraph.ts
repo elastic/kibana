@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { StackTraceID, StackFrameID, FileID, StackTrace, StackFrame, Executable } from './types';
 
 function getExeFileName(exe: any, type: number) {
   if (exe?.FileName === undefined) {
-    console.log("MISSING EXE")
+    console.log('MISSING EXE');
     return '';
   }
   if (exe.FileName !== '') {
@@ -71,18 +72,18 @@ export class FlameGraph {
   // Do the same for single entries in the events array.
   totalCount: number;
 
-  events: any;
-  stacktraces: any;
-  stackframes: any;
-  executables: any;
+  events: Map<StackTraceID, number>;
+  stacktraces: Map<StackTraceID, StackTrace>;
+  stackframes: Map<StackFrameID, StackFrame>;
+  executables: Map<FileID, Executable>;
 
   constructor(
     sampleRate: number,
     totalCount: number,
-    events: any,
-    stackTraces: any,
-    stackFrames: any,
-    executables: any
+    events: Map<StackTraceID, number>,
+    stackTraces: Map<StackTraceID, StackTrace>,
+    stackFrames: Map<StackFrameID, StackFrame>,
+    executables: Map<FileID, Executable>
   ) {
     this.sampleRate = sampleRate;
     this.totalCount = totalCount;
@@ -93,58 +94,36 @@ export class FlameGraph {
   }
 
   toElastic() {
-    // Create a lookup table for stack frames with an appropriate default if
-    // the corresponding metadata is missing
-    const frameMap = new Map();
-    for (let i = 0; i < this.stackframes.length; i++) {
-      const frame = this.stackframes[i];
-      if (frame.found) {
-        frameMap.set(frame._id, frame._source);
-      } else {
-        frameMap.set(frame._id, {
-          FunctionName: '',
-          LineNumber: 0,
-        });
-      }
-    }
+    const leaves = [];
+    let n = 0;
 
-    // Create a lookup table for executables with an appropriate default if
-    // the corresponding metadata is missing
-    const exeMap = new Map();
-    for (let i = 0; i < this.executables.length; i++) {
-      const exe = this.executables[i];
-      if (exe.found) {
-        exeMap.set(exe._id, exe._source);
-      } else {
-        exeMap.set(exe._id, {
-          FileName: '',
-        });
-      }
-    }
+    for (const trace of this.stacktraces.values()) {
+      const path = ['root'];
+      for (let i = trace.FrameID.length - 1; i >= 0; i--) {
+        const label = getLabel(
+          this.stackframes.get(trace.FrameID[i]),
+          this.executables.get(trace.FileID[i]),
+          parseInt(trace.Type[i], 10)
+        );
 
-    let leaves = [];
-
-    for (const trace of this.stacktraces) {
-      if (trace.found) {
-        const path = ['root'];
-        for (let i = 0; i < trace._source.FrameID.length; i++) {
-          const label = getLabel(
-            frameMap.get(trace._source.FrameID[i]),
-            exeMap.get(trace._source.FileID[i]),
-            trace._source.Type[i]);
-          if (label.length === 0) {
-            path.push(trace._source.FrameID[i]);
-          } else {
-            path.push(label);
-          }
+        if (label.length === 0) {
+          path.push(trace.FrameID[i]);
+        } else {
+          path.push(label);
         }
-        const leaf = {
-          id: path[path.length - 1],
-          value: 1,
-          depth: trace._source.FrameID.length,
-          pathFromRoot: Object.fromEntries(path.map((item, i) => [i, item])),
-        };
-        leaves.push(leaf);
+      }
+      const leaf = {
+        id: path[path.length - 1],
+        value: 1,
+        depth: trace.FrameID.length,
+        pathFromRoot: Object.fromEntries(path.map((item, i) => [i, item])),
+      };
+      leaves.push(leaf);
+
+      n++;
+      if (n >= 1000) {
+        // just don't overload the Kibana flamechart
+        break;
       }
     }
 
