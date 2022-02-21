@@ -10,7 +10,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { createKbnUrlTracker, replaceUrlHashQuery } from '../../../kibana_utils/public';
 import { getScopedHistory } from '../kibana_services';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../url_generator';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
 import type { DiscoverSetupPlugins } from '../plugin';
 
 /**
