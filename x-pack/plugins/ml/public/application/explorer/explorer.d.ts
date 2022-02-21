@@ -13,7 +13,6 @@ declare interface ExplorerProps {
   explorerState: ExplorerState;
   severity: number;
   showCharts: boolean;
-  setSelectedCells: (swimlaneSelectedCells: AppStateSelectedCells) => void;
 }
 
 export const Explorer: FC<ExplorerProps>;

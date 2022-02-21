@@ -5,13 +5,69 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { AnomalyTimelineState } from './anomaly_timeline_state';
+import React, { useContext, useMemo } from 'react';
+import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
+import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
+import { useMlKibana, useTimefilter } from '../contexts/kibana';
+import { mlResultsServiceProvider } from '../services/results_service';
+import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 
 export type AnomalyExplorerContextValue =
   | {
-      anomalyTimelineState: AnomalyTimelineState;
+      anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
+      anomalyTimelineStateService: AnomalyTimelineStateService;
     }
   | undefined;
 
+/**
+ * Context of the Anomaly Explorer page.
+ */
 export const AnomalyExplorerContext = React.createContext<AnomalyExplorerContextValue>(undefined);
+
+/**
+ * Hook for consuming {@link AnomalyExplorerContext}.
+ */
+export function useAnomalyExplorerContext():
+  | Exclude<AnomalyExplorerContextValue, undefined>
+  | never {
+  const context = useContext(AnomalyExplorerContext);
+
+  if (context === undefined) {
+    throw new Error('AnomalyExplorerContext has not been initialized.');
+  }
+
+  return context;
+}
+
+/**
+ * Creates Anomaly Explorer context.
+ */
+export function useAnomalyExplorerContextValue(): Exclude<AnomalyExplorerContextValue, undefined> {
+  const timefilter = useTimefilter();
+
+  const {
+    services: {
+      mlServices: { mlApiServices },
+      uiSettings,
+    },
+  } = useMlKibana();
+
+  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
+
+  const anomalyTimelineService = useMemo(() => {
+    return new AnomalyTimelineService(timefilter, uiSettings, mlResultsService);
+  }, []);
+
+  return useMemo(() => {
+    const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService();
+
+    return {
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService: new AnomalyTimelineStateService(
+        anomalyExplorerCommonStateService,
+        anomalyTimelineService,
+        timefilter
+      ),
+    };
+  }, []);
+}

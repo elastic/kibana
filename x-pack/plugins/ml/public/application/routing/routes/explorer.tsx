@@ -21,7 +21,7 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
-import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
+// import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
@@ -44,9 +44,9 @@ import { AnomalyResultsViewSelector } from '../../components/anomaly_results_vie
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import {
   AnomalyExplorerContext,
-  AnomalyExplorerContextValue,
+  useAnomalyExplorerContextValue,
 } from '../../explorer/anomaly_explorer_context';
-import { useAnomalyTimelineState } from '../../explorer/anomaly_timeline_state';
+import { AnomalyExplorerSwimLaneUrlState } from '../../../../common/types/locator';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -99,9 +99,11 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
+  const anomalyExplorerContext = useAnomalyExplorerContextValue();
+
   const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
 
-  const [globalState] = useUrlState('_g');
+  // const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
@@ -123,13 +125,13 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   // with `moment` since it can contain custom strings such as `now-15m`.
   // So when globalState's `time` changes, we update the timefilter and use
   // `timefilter.getBounds()` to update `bounds` in this component's state.
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      if (globalState.time.mode === 'invalid') {
-        setInValidTimeRangeError(true);
-      }
-    }
-  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
+  // useEffect(() => {
+  //   if (globalState?.time !== undefined) {
+  //     if (globalState.time.mode === 'invalid') {
+  //       setInValidTimeRangeError(true);
+  //     }
+  //   }
+  // }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -152,14 +154,41 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, []);
 
-  useEffect(() => {
-    if (jobIds.length > 0) {
-      explorerService.updateJobSelection(jobIds);
-      getJobsWithStoppedPartitions(jobIds);
-    } else {
-      explorerService.clearJobs();
-    }
-  }, [JSON.stringify(jobIds)]);
+  const updateSwimLaneUrlState = useCallback(
+    (update: AnomalyExplorerSwimLaneUrlState | undefined, replaceState = false) => {
+      const ccc = explorerUrlState?.mlExplorerSwimlane;
+      const resultUpdate = replaceState ? update : { ...ccc, ...update };
+      return setExplorerUrlState({
+        ...explorerUrlState,
+        mlExplorerSwimlane: resultUpdate,
+      });
+    },
+    [explorerUrlState, setExplorerUrlState]
+  );
+
+  useEffect(
+    // TODO URL state service should provide observable with updates
+    // and immutable method for updates
+    function updateAnomalyTimelineStateFromUrl() {
+      const { anomalyTimelineStateService } = anomalyExplorerContext;
+
+      anomalyTimelineStateService.updateSetStateCallback(updateSwimLaneUrlState);
+      anomalyTimelineStateService.updateFromUrlState(explorerUrlState?.mlExplorerSwimlane);
+    },
+    [explorerUrlState?.mlExplorerSwimlane, updateSwimLaneUrlState]
+  );
+
+  useEffect(
+    function handleJobSelection() {
+      if (jobIds.length > 0) {
+        explorerService.updateJobSelection(jobIds);
+        getJobsWithStoppedPartitions(jobIds);
+      } else {
+        explorerService.clearJobs();
+      }
+    },
+    [JSON.stringify(jobIds)]
+  );
 
   useEffect(() => {
     return () => {
@@ -203,14 +232,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, []);
 
-  /** Sync URL state with {@link explorerService} state */
-  useEffect(() => {
-    const replaceState = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName === undefined;
-    if (explorerAppState?.mlExplorerSwimlane?.viewByFieldName !== undefined) {
-      setExplorerUrlState(explorerAppState, replaceState);
-    }
-  }, [explorerAppState]);
-
   const [explorerData, loadExplorerData] = useExplorerData();
 
   useEffect(() => {
@@ -222,14 +243,18 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  const [selectedCells, setSelectedCells] = useSelectedCells(
-    explorerUrlState,
-    setExplorerUrlState,
-    explorerState?.swimlaneBucketInterval?.asSeconds()
+  // const [, setSelectedCells] = useSelectedCells(
+  //   explorerUrlState,
+  //   setExplorerUrlState,
+  //   explorerState?.swimlaneBucketInterval?.asSeconds()
+  // );
+
+  const selectedCells = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
   );
 
   useEffect(() => {
-    explorerService.setSelectedCells(selectedCells);
+    // explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
 
   const loadExplorerDataConfig =
@@ -251,6 +276,15 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         }
       : undefined;
 
+  useEffect(
+    function updateAnomalyExplorerCommonState() {
+      anomalyExplorerContext.anomalyExplorerCommonStateService.setSelectedJobs(
+        loadExplorerDataConfig?.selectedJobs!
+      );
+    },
+    [loadExplorerDataConfig]
+  );
+
   useEffect(() => {
     /**
      * For the "View by" swim lane the limit is the cardinality of the influencer values,
@@ -271,14 +305,19 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
 
-  const anomalyTimelineState = useAnomalyTimelineState();
-
-  const anomalyExplorerContext: AnomalyExplorerContextValue =
-    useMemo((): AnomalyExplorerContextValue => {
-      return {
-        anomalyTimelineState,
+  /** Sync URL state with {@link explorerAppState} state */
+  useEffect(() => {
+    const replaceState = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName === undefined;
+    if (explorerAppState?.mlExplorerSwimlane?.viewByFieldName !== undefined) {
+      const r = {
+        ...explorerUrlState,
+        ...explorerAppState,
       };
-    }, [anomalyTimelineState]);
+      r.mlExplorerSwimlane = explorerUrlState.mlExplorerSwimlane;
+
+      setExplorerUrlState(r, replaceState);
+    }
+  }, [JSON.stringify(explorerAppState), JSON.stringify(explorerUrlState), selectedCells]);
 
   if (
     explorerState === undefined ||
@@ -307,7 +346,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           <Explorer
             {...{
               explorerState,
-              setSelectedCells,
               showCharts: explorerState.showCharts,
               severity: tableSeverity.val,
               stoppedPartitions,

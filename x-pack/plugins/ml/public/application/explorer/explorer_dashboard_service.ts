@@ -134,12 +134,12 @@ export const explorerService = {
       payload,
     });
   },
-  setSelectedCells: (payload: AppStateSelectedCells | undefined) => {
-    explorerAction$.next({
-      type: EXPLORER_ACTION.SET_SELECTED_CELLS,
-      payload,
-    });
-  },
+  // setSelectedCells: (payload: AppStateSelectedCells | undefined) => {
+  //   explorerAction$.next({
+  //     type: EXPLORER_ACTION. ,
+  //     payload,
+  //   });
+  // },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));
   },

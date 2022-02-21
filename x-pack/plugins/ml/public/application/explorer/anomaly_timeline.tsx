@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiButtonEmpty,
@@ -24,11 +24,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
-import { TimeBuckets } from '../util/time_buckets';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { explorerService } from './explorer_dashboard_service';
 import { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
@@ -41,6 +40,8 @@ import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -51,35 +52,33 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
 
 interface AnomalyTimelineProps {
   explorerState: ExplorerState;
-  setSelectedCells: (cells?: any) => void;
+  // setSelectedCells: (cells?: any) => void;
 }
 
 export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
-  ({ explorerState, setSelectedCells }) => {
+  ({ explorerState }) => {
     const {
       services: {
-        uiSettings,
         application: { capabilities },
       },
     } = useMlKibana();
+
+    const { anomalyTimelineStateService } = useAnomalyExplorerContext();
+
+    const setSelectedCells = anomalyTimelineStateService.setSelectedCells.bind(
+      anomalyTimelineStateService
+    );
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
     const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
-    const timeBuckets = useMemo(() => {
-      return new TimeBuckets({
-        'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-        'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-        dateFormat: uiSettings.get('dateFormat'),
-        'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-      });
-    }, [uiSettings]);
+    const timeBuckets = useTimeBuckets();
 
     const {
       filterActive,
-      selectedCells,
+      // selectedCells,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneDataLoading,
       viewBySwimlaneFieldName,
@@ -91,10 +90,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       loading,
       overallAnnotations,
       swimLaneSeverity,
-      overallSwimlaneData,
+      // overallSwimlaneData,
       viewBySwimlaneData,
       swimlaneContainerWidth,
     } = explorerState;
+
+    const overallSwimlaneData = useObservable(
+      anomalyTimelineStateService.getOverallSwimLaneData$()
+    );
+
+    const selectedCells = useObservable(anomalyTimelineStateService.getSelectedCells$());
+
+    console.log(selectedCells, '___selectedCells___');
 
     const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
 
@@ -102,6 +109,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       () => {
         if (severityUpdate === swimLaneSeverity) return;
 
+        anomalyTimelineStateService.setSeverity(severityUpdate!);
         explorerService.setSwimLaneSeverity(severityUpdate!);
       },
       500,
@@ -153,6 +161,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           : undefined,
       [overallSwimlaneData]
     );
+
+    const onResize = useCallback((value: number) => {
+      explorerService.setSwimlaneContainerWidth(value);
+      anomalyTimelineStateService.setContainerWidth(value);
+    }, []);
 
     return (
       <>
@@ -213,7 +226,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     id="selectViewBy"
                     options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
                     value={viewBySwimlaneFieldName}
-                    onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
+                    onChange={(e) => {
+                      explorerService.setViewBySwimlaneFieldName(e.target.value);
+                      anomalyTimelineStateService.setViewBySwimLaneFieldName(e.target.value);
+                    }}
                   />
                 </EuiFlexItem>
               </>
@@ -260,7 +276,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={setSelectedCells.bind(null, undefined)}
+                  onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}
                   data-test-subj="mlAnomalyTimelineClearSelection"
                 >
                   <FormattedMessage
@@ -298,7 +314,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             swimlaneType={SWIMLANE_TYPE.OVERALL}
             selection={overallCellSelection}
             onCellsSelection={setSelectedCells}
-            onResize={explorerService.setSwimlaneContainerWidth}
+            onResize={onResize}
             isLoading={loading}
             noDataWarning={
               <EuiEmptyPrompt
@@ -327,7 +343,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
               onCellsSelection={setSelectedCells}
-              onResize={explorerService.setSwimlaneContainerWidth}
+              onResize={onResize}
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
               swimlaneLimit={swimlaneLimit}
