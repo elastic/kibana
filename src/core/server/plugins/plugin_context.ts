@@ -161,6 +161,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
+      getAsLabels: deps.executionContext.getAsLabels,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,

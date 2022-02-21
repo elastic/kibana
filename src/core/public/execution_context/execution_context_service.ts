@@ -8,15 +8,13 @@
 
 import { isEqual, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { CoreService } from '../../types';
-
-export type ExecutionContext = Record<string, any>;
+import { CoreService, KibanaExecutionContext } from '../../types';
 
 /** @public */
 export interface ExecutionContextSetup {
-  context$: Observable<ExecutionContext>;
-  set(c$: ExecutionContext): void;
-  get(): ExecutionContext;
+  context$: Observable<KibanaExecutionContext>;
+  set(c$: KibanaExecutionContext): void;
+  get(): KibanaExecutionContext;
   clear(): void;
   /**
    * returns apm labels
@@ -25,7 +23,7 @@ export interface ExecutionContextSetup {
   /**
    * merges the current global context with the specific event context
    **/
-  withGlobalContext(context?: ExecutionContext): ExecutionContext;
+  withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
 }
 
 /**
@@ -42,7 +40,7 @@ export interface StartDeps {
 export class ExecutionContextService
   implements CoreService<ExecutionContextSetup, ExecutionContextStart>
 {
-  private context$: BehaviorSubject<ExecutionContext> = new BehaviorSubject({});
+  private context$: BehaviorSubject<KibanaExecutionContext> = new BehaviorSubject({});
   private appId?: string;
   private subscription: Subscription = new Subscription();
   private contract?: ExecutionContextSetup;
@@ -53,10 +51,8 @@ export class ExecutionContextService
       clear: () => {
         this.context$.next({});
       },
-      set: (c: ExecutionContext) => {
+      set: (c: KibanaExecutionContext) => {
         const newVal = {
-          url: window.location.pathname,
-          name: this.appId,
           ...this.context$.value,
           ...c,
         };
@@ -68,23 +64,18 @@ export class ExecutionContextService
         return this.context$.value;
       },
       getAsLabels: () => {
-        const executionContext = this.context$.value;
+        const executionContext = this.mergeContext();
         return omitBy(
           {
-            appId: executionContext?.name,
+            name: executionContext?.name,
             id: executionContext?.id,
             page: executionContext?.page,
           },
           isUndefined
         ) as Labels;
       },
-      withGlobalContext: (context: ExecutionContext) => {
-        return {
-          appId: this.appId,
-          url: window.location.pathname,
-          ...this.context$.value,
-          ...(context || {}),
-        };
+      withGlobalContext: (context: KibanaExecutionContext) => {
+        return this.mergeContext(context);
       },
     };
 
@@ -107,5 +98,14 @@ export class ExecutionContextService
 
   public stop() {
     this.subscription.unsubscribe();
+  }
+
+  private mergeContext(context: KibanaExecutionContext = {}): KibanaExecutionContext {
+    return {
+      name: this.appId,
+      url: window.location.pathname,
+      ...this.context$.value,
+      ...context,
+    };
   }
 }

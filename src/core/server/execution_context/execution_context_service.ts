@@ -177,7 +177,7 @@ export class ExecutionContextService
 
     return omitBy(
       {
-        appId: executionContext?.name,
+        name: executionContext?.name,
         id: executionContext?.id,
         page: executionContext?.page,
       },

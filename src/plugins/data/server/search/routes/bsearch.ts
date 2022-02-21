@@ -34,11 +34,10 @@ export function registerBsearchRoute(
        */
       onBatchItem: async ({ request: requestData, options }) => {
         const { executionContext, ...restOptions } = options || {};
+        return executionContextService.withContext(executionContext, () => {
+          apm.addLabels(executionContextService.getAsLabels());
 
-        apm.addLabels(executionContextService.getAsLabels());
-
-        return executionContextService.withContext(executionContext, () =>
-          search
+          return search
             .search(requestData, restOptions)
             .pipe(
               first(),
@@ -52,8 +51,8 @@ export function registerBsearchRoute(
                 };
               })
             )
-            .toPromise()
-        );
+            .toPromise();
+        });
       },
     };
   });

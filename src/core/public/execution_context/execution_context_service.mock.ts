@@ -15,7 +15,9 @@ const createContractMock = (): jest.Mocked<ExecutionContextSetup> => ({
   context$: new BehaviorSubject({}),
   clear: jest.fn(),
   set: jest.fn(),
-  getAll: jest.fn(),
+  get: jest.fn(),
+  getAsLabels: jest.fn(),
+  withGlobalContext: jest.fn(),
 });
 
 const createMock = (): jest.Mocked<PublicMethodsOf<ExecutionContextService>> => ({

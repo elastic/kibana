@@ -112,10 +112,7 @@ export class Fetch {
   };
 
   private createRequest(options: HttpFetchOptionsWithPath): Request {
-    const context = {
-      ...this.params.executionContext?.getAll(),
-      ...options.context,
-    } as KibanaExecutionContext;
+    const context = this.params.executionContext.withGlobalContext(options.context);
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
