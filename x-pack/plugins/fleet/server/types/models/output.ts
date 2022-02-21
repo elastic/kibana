@@ -60,12 +60,10 @@ export const UpdateOutputSchema = schema.object({
     schema.oneOf([schema.literal(outputType.Elasticsearch), schema.literal(outputType.Logstash)])
   ),
   hosts: schema.maybe(
-    schema.conditional(
-      schema.siblingRef('type'),
-      schema.literal(outputType.Elasticsearch),
+    schema.oneOf([
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] })),
-      schema.arrayOf(schema.string({ validate: validateLogstashHost }))
-    )
+      schema.arrayOf(schema.string({ validate: validateLogstashHost })),
+    ])
   ),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
