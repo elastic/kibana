@@ -60,7 +60,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
-  const { hasDataMap, hasAnyData, isAllRequestsComplete } = useHasData();
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
   const bucketSize = calculateBucketSize({
