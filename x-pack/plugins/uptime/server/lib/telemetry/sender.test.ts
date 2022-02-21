@@ -130,6 +130,7 @@ describe('TelemetryEventsSender', () => {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': '1',
+          'X-Elastic-Cluster-Name': 'name',
           'X-Elastic-Stack-Version': '8.0.0',
         },
       };
