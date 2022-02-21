@@ -30,28 +30,26 @@ describe('#getPrivilegeDeprecationsService', () => {
     });
 
     it('happy path to find siem roles with feature_siem privileges', async () => {
-      mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['feature_siem.all', 'feature_siem.cases_read'],
-                resources: ['space:securitySolutions'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
+      mockAsCurrentUser.asCurrentUser.security.getRole.mockResponse({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['feature_siem.all', 'feature_siem.cases_read'],
+              resources: ['space:securitySolutions'],
             },
-            transient_metadata: {
-              enabled: true,
-            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
           },
-        })
-      );
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      });
 
       const mockContext = {
         esClient: mockAsCurrentUser,
@@ -98,34 +96,32 @@ describe('#getPrivilegeDeprecationsService', () => {
     });
 
     it('happy path to find siem roles with feature_siem and feature_foo and feature_bar privileges', async () => {
-      mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: [
-                  'feature_foo.foo-privilege-1',
-                  'feature_foo.foo-privilege-2',
-                  'feature_bar.bar-privilege-1',
-                  'feature_siem.all',
-                  'feature_siem.cases_read',
-                ],
-                resources: ['space:securitySolutions'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
+      mockAsCurrentUser.asCurrentUser.security.getRole.mockResponse({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: [
+                'feature_foo.foo-privilege-1',
+                'feature_foo.foo-privilege-2',
+                'feature_bar.bar-privilege-1',
+                'feature_siem.all',
+                'feature_siem.cases_read',
+              ],
+              resources: ['space:securitySolutions'],
             },
-            transient_metadata: {
-              enabled: true,
-            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
           },
-        })
-      );
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      });
 
       const mockContext = {
         esClient: mockAsCurrentUser,
@@ -179,32 +175,30 @@ describe('#getPrivilegeDeprecationsService', () => {
     });
 
     it('happy path to NOT find siem roles with and feature_foo and feature_bar privileges', async () => {
-      mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: [
-                  'feature_foo.foo-privilege-1',
-                  'feature_foo.foo-privilege-2',
-                  'feature_bar.bar-privilege-1',
-                ],
-                resources: ['space:securitySolutions'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
+      mockAsCurrentUser.asCurrentUser.security.getRole.mockResponse({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: [
+                'feature_foo.foo-privilege-1',
+                'feature_foo.foo-privilege-2',
+                'feature_bar.bar-privilege-1',
+              ],
+              resources: ['space:securitySolutions'],
             },
-            transient_metadata: {
-              enabled: true,
-            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
           },
-        })
-      );
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      });
 
       const mockContext = {
         esClient: mockAsCurrentUser,
