@@ -6,7 +6,15 @@
  */
 
 import { parse, stringify } from 'query-string';
-import React, { createContext, useCallback, useContext, useMemo, FC } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  FC,
+  useRef,
+  useEffect,
+} from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -15,6 +23,7 @@ import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
 import { MlPages } from '../../../common/constants/locator';
+import { isPopulatedObject } from '../../../common';
 
 type Accessor = '_a' | '_g';
 export type SetUrlState = (
@@ -184,16 +193,41 @@ export const usePageUrlState = <PageUrlState extends {}>(
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
 
+  const setCallback = useRef();
+
+  useEffect(() => {
+    setCallback.current = setAppState;
+  }, [setAppState]);
+
+  const prevPageState = useRef<PageUrlState | undefined>();
+
   const resultPageState: PageUrlState = useMemo(() => {
-    return {
+    const result = {
       ...(defaultState ?? {}),
       ...(pageState ?? {}),
     };
+
+    if (isEqual(result, prevPageState.current)) {
+      return prevPageState.current;
+    }
+
+    // Compare prev and current states to only update changed values
+    if (isPopulatedObject(prevPageState.current)) {
+      for (const key in result) {
+        if (isEqual(result[key], prevPageState.current[key])) {
+          result[key] = prevPageState.current[key];
+        }
+      }
+    }
+
+    prevPageState.current = result;
+
+    return result;
   }, [pageState]);
 
   const onStateUpdate = useCallback(
     (update: Partial<PageUrlState>, replaceState?: boolean) => {
-      setAppState(
+      setCallback!.current(
         pageKey,
         {
           ...resultPageState,
@@ -202,7 +236,7 @@ export const usePageUrlState = <PageUrlState extends {}>(
         replaceState
       );
     },
-    [pageKey, resultPageState, setAppState]
+    [pageKey, resultPageState]
   );
 
   return useMemo(() => {
