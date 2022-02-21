@@ -117,12 +117,11 @@ export class ExceptionsListApiClient {
     [
       'created_at',
       'created_by',
-      'created_at',
-      'created_by',
       'list_id',
       'tie_breaker_id',
       'updated_at',
       'updated_by',
+      'meta',
     ].forEach((field) => {
       delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
     });
@@ -187,6 +186,7 @@ export class ExceptionsListApiClient {
   async create(exception: CreateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
     this.checkIfIsUsingTheRightInstance(exception.list_id);
+    delete exception.meta;
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
