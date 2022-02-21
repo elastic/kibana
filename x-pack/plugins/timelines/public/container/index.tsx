@@ -63,6 +63,7 @@ export interface TimelineArgs {
   refetch: Refetch;
   totalCount: number;
   updatedAt: number;
+  aggs?: Record<string, any>;
 }
 
 type LoadPage = (newActivePage: number) => void;
@@ -97,6 +98,11 @@ const createFilter = (filterQuery: ESQuery | string | undefined) =>
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
+
+const getAggsResponse = <T extends TimelineFactoryQueryTypes>(
+  response: TimelineStrategyResponseType<T>,
+  prevResponse?: Record<string, any>
+): Record<string, any> | undefined => (response != null ? [JSON.stringify(response.rawResponse.aggregations, null, 2)] : prevResponse);
 
 const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
   response: TimelineStrategyResponseType<T>,
@@ -232,6 +238,7 @@ export const useTimelineEvents = ({
                       pageInfo: response.pageInfo,
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
+                      aggs: getAggsResponse(response, prevResponse.aggs)
                     };
                     setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;

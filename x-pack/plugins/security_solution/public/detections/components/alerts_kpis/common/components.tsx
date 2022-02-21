@@ -25,15 +25,18 @@ export const KpiPanel = styled(EuiPanel)<{ height?: number }>`
   }
 `;
 interface StackedBySelectProps {
-  selected: string;
+  selected: string | null;
   onSelect: (selected: string) => void;
+  title?: string;
+  ariaLabel?: string;
+  placeholder?: string;
 }
 
 export const StackByComboBoxWrapper = styled.div`
   width: 400px;
 `;
 
-export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {
+export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect, title, placeholder, ariaLabel }) => {
   const onChange = useCallback(
     (options) => {
       if (options && options.length > 0) {
@@ -45,7 +48,7 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSe
     [onSelect]
   );
   const selectedOptions = useMemo(() => {
-    return [{ label: selected, value: selected }];
+    return selected !== null ? [{ label: selected, value: selected }] : [];
   }, [selected]);
   const stackOptions = useStackByFields();
   const singleSelection = useMemo(() => {
@@ -54,9 +57,9 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSe
   return (
     <StackByComboBoxWrapper>
       <EuiComboBox
-        aria-label={i18n.STACK_BY_ARIA_LABEL}
-        placeholder={i18n.STACK_BY_PLACEHOLDER}
-        prepend={i18n.STACK_BY_LABEL}
+        aria-label={ariaLabel ?? i18n.STACK_BY_ARIA_LABEL}
+        placeholder={placeholder ?? i18n.STACK_BY_PLACEHOLDER}
+        prepend={title ?? i18n.STACK_BY_LABEL}
         singleSelection={singleSelection}
         sortMatchesBy="startsWith"
         options={stackOptions}

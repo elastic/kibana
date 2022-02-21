@@ -36,6 +36,7 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   inspect?: Maybe<Inspect>;
+  aggs?: Maybe<Record<string, any>>;
 }
 
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {

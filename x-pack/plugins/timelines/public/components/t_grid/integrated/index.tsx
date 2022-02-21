@@ -126,7 +126,7 @@ export interface TGridIntegratedProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
-  setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch, inspectTitle: string) => void; // TODO: remove inspectTitle
+  setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch, inspectTitle: string, aggs?: Record<string, any>) => void; // TODO: remove inspectTitle
   sort: Sort[];
   start: string;
   trailingControlColumns?: ControlColumnProps[];
@@ -224,7 +224,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [sort]
   );
 
-  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect, aggs }] =
     useTimelineEvents({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
@@ -285,7 +285,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [loading]);
 
   useEffect(() => {
-    setQuery(inspect, loading, refetch, title);
+    setQuery(inspect, loading, refetch, title, aggs);
   }, [inspect, loading, refetch, setQuery, title]);
   const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
 

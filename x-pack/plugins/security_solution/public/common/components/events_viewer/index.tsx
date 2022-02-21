@@ -33,9 +33,11 @@ import {
   CreateFieldEditorActions,
   useCreateFieldButton,
 } from '../../../timelines/components/create_field_button';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiAccordion, EuiText, EuiPopover, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { SummaryViewSelector, ViewSelection } from './selector';
 import { InspectResponse } from '../../../types';
+import { StackByComboBox } from '../../../detections/components/alerts_kpis/common/components';
+import { DEFAULT_STACK_BY_FIELD } from '../../../detections/components/alerts_kpis/common/config';
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
@@ -149,6 +151,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const [inspectResponse, setInspectResponse] = useState<InspectResponse>();
   const [loading, setLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
+  const [aggs, setAggs] = useState<Record<string, any> | undefined>();
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -182,11 +185,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [graphEventId, id]
   );
   const setQuery = useCallback(
-    (inspect, loading, refetch, title) => {
+    (inspect, loading, refetch, title, aggs) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
       setInspectResponse(inspect);
       setLoading(loading);
       setTitle(title);
+      setAggs(aggs);
     },
     [dispatch, id]
   );
@@ -207,7 +211,87 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const [selectedGroupByOption, setSelectedGroupByOption] = useState<string | null>(null);
 
+  const grid = useMemo(() => timelinesUi.getTGrid<'embedded'>({
+    tableView,
+    appId: APP_UI_ID,
+    browserFields,
+    bulkActions,
+    columns,
+    dataProviders,
+    dataViewId,
+    defaultCellActions,
+    deletedEventIds,
+    disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+    docValueFields,
+    end,
+    entityType,
+    filters: globalFilters,
+    filterStatus: currentFilter,
+    globalFullScreen,
+    graphEventId,
+    graphOverlay,
+    hasAlertsCrud,
+    id,
+    indexNames: selectedPatterns,
+    indexPattern,
+    isLive,
+    isLoadingIndexPattern,
+    itemsPerPage,
+    itemsPerPageOptions,
+    kqlMode,
+    leadingControlColumns,
+    onRuleChange,
+    query,
+    renderCellValue,
+    rowRenderers,
+    runtimeMappings,
+    setQuery,
+    sort,
+    start,
+    trailingControlColumns,
+    type: 'embedded',
+    unit,
+    createFieldComponent,
+  }),
+  [tableView,
+    browserFields,
+    bulkActions,
+    columns,
+    dataProviders,
+    dataViewId,
+    defaultCellActions,
+    deletedEventIds,
+    docValueFields,
+    end,
+    entityType,
+    globalFilters,
+    currentFilter,
+    globalFullScreen,
+    graphEventId,
+    graphOverlay,
+    hasAlertsCrud,
+    id,
+    selectedPatterns,
+    indexPattern,
+    isLive,
+    isLoadingIndexPattern,
+    itemsPerPage,
+    itemsPerPageOptions,
+    kqlMode,
+    leadingControlColumns,
+    onRuleChange,
+    query,
+    renderCellValue,
+    rowRenderers,
+    runtimeMappings,
+    setQuery,
+    sort,
+    start,
+    trailingControlColumns,
+    unit,
+    createFieldComponent]);
 
   return (
     <>
@@ -235,51 +319,26 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                     </UpdatedFlexItem>
                   )}
                 <UpdatedFlexItem grow={false} $show={!loading}>
-                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  <StackByComboBox onSelect={setSelectedGroupByOption} selected={selectedGroupByOption} title='Group by' placeholder='Select a field to group by' ariaLabel='Group the alerts table by a field value' />
                 </UpdatedFlexItem>
           </UpdatedFlexGroup>
-          {timelinesUi.getTGrid<'embedded'>({
-            tableView,
-            appId: APP_UI_ID,
-            browserFields,
-            bulkActions,
-            columns,
-            dataProviders,
-            dataViewId,
-            defaultCellActions,
-            deletedEventIds,
-            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
-            end,
-            entityType,
-            filters: globalFilters,
-            filterStatus: currentFilter,
-            globalFullScreen,
-            graphEventId,
-            graphOverlay,
-            hasAlertsCrud,
-            id,
-            indexNames: selectedPatterns,
-            indexPattern,
-            isLive,
-            isLoadingIndexPattern,
-            itemsPerPage,
-            itemsPerPageOptions,
-            kqlMode,
-            leadingControlColumns,
-            onRuleChange,
-            query,
-            renderCellValue,
-            rowRenderers,
-            runtimeMappings,
-            setQuery,
-            sort,
-            start,
-            trailingControlColumns,
-            type: 'embedded',
-            unit,
-            createFieldComponent,
-          })}
+          {selectedGroupByOption !== null ? (
+              <EuiAccordion
+              id="alertGroups"
+              initialIsOpen={false}
+              paddingSize="s"
+              // ref={scheduleRuleRef}
+              // onToggle={(handleAccordionToggle.bind(null, RuleStep.scheduleRule))}
+              buttonContent={
+                <EuiText size="s">
+                  <p>{'test'}</p>
+                </EuiText>
+              }
+            >
+              
+                {grid}
+            </EuiAccordion>
+          ) : grid}
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
