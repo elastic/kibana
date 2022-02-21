@@ -28,17 +28,15 @@ export async function getServices({
   end: number;
 }) {
   return withApmSpan('get_services', async () => {
-    const [items] = await Promise.all([
-      getServicesItems({
-        environment,
-        kuery,
-        setup,
-        searchAggregatedTransactions,
-        logger,
-        start,
-        end,
-      }),
-    ]);
+    const [items] = await getServicesItems({
+      environment,
+      kuery,
+      setup,
+      searchAggregatedTransactions,
+      logger,
+      start,
+      end,
+    });
 
     return {
       items,
