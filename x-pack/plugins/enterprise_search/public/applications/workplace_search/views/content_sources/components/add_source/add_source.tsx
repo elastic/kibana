@@ -26,10 +26,12 @@ import { staticSourceData } from '../../source_data';
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
+import { ConfigurationExternalChoice } from './configuration_external_choice';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureCustom } from './configure_custom';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
+import { ExternalConnectorConfig } from './external_connector_config';
 import { Reauthenticate } from './reauthenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
@@ -69,6 +71,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   }, []);
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
+  const goToExternalChoice = () => setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
+  const goToExternalConfig = () => setAddSourceStep(AddSourceSteps.ConfigExternalConnectorStep);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
@@ -98,8 +102,25 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
+      {addSourceCurrentStep === AddSourceSteps.ConfigChoiceStep && (
+        <ConfigurationExternalChoice
+          name={name}
+          serviceType={serviceType}
+          advanceStepInternal={goToConfigurationIntro}
+          advanceStepExternal={goToExternalConfig}
+          header={header}
+        />
+      )}
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
+      )}
+      {addSourceCurrentStep === AddSourceSteps.ConfigExternalConnectorStep && (
+        <ExternalConnectorConfig
+          name={name}
+          advanceStep={goToSaveConfig}
+          goBackStep={goToExternalChoice}
+          header={header}
+        />
       )}
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig

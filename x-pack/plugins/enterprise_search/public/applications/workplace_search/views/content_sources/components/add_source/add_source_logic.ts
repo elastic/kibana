@@ -41,6 +41,8 @@ export interface AddSourceProps {
 }
 
 export enum AddSourceSteps {
+  ConfigChoiceStep = 'Config Choice',
+  ConfigExternalConnectorStep = 'Config External Connector',
   ConfigIntroStep = 'Config Intro',
   SaveConfigStep = 'Save Config',
   ConfigCompletedStep = 'Config Completed',
@@ -70,6 +72,8 @@ export interface AddSourceActions {
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
   setClientIdValue(clientIdValue: string): string;
   setClientSecretValue(clientSecretValue: string): string;
+  setExternalConnectorUrl(externalConnectorUrl: string): string;
+  setExternalConnectorApiKey(externalConnectorApiKey: string): string;
   setBaseUrlValue(baseUrlValue: string): string;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setSourceLoginValue(loginValue: string): string;
@@ -86,6 +90,8 @@ export interface AddSourceActions {
     successCallback: () => void,
     errorCallback?: () => void
   ): { serviceType: string; successCallback(): void; errorCallback?(): void };
+  saveExternalConnectorConfig(config: ExternalConnectorConfig): ExternalConnectorConfig;
+  saveExternalConnectorConfigSuccess(externalConnectorId: string): string;
   saveSourceConfig(
     isUpdating: boolean,
     successCallback?: () => void
@@ -128,6 +134,11 @@ export interface SourceConnectData {
   serviceType: string;
 }
 
+export interface ExternalConnectorConfig {
+  url: string;
+  apiKey: string;
+}
+
 export interface OrganizationsMap {
   [key: string]: string | boolean;
 }
@@ -141,6 +152,8 @@ interface AddSourceValues {
   customSourceNameValue: string;
   clientIdValue: string;
   clientSecretValue: string;
+  externalConnectorUrl: string;
+  externalConnectorApiKey: string;
   baseUrlValue: string;
   loginValue: string;
   passwordValue: string;
@@ -182,6 +195,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setAddSourceStep: (addSourceCurrentStep: AddSourceSteps) => addSourceCurrentStep,
     setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
+    setExternalConnectorUrl: (externalConnectorUrl: string) => externalConnectorUrl,
+    setExternalConnectorApiKey: (externalConnectorApiKey: string) => externalConnectorApiKey,
     setClientIdValue: (clientIdValue: string) => clientIdValue,
     setClientSecretValue: (clientSecretValue: string) => clientSecretValue,
     setBaseUrlValue: (baseUrlValue: string) => baseUrlValue,
@@ -201,6 +216,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     }),
     getSourceReConnectData: (sourceId: string) => ({ sourceId }),
     getPreContentSourceConfigData: () => true,
+    saveExternalConnectorConfig: (config: ExternalConnectorConfig) => config,
     saveSourceConfig: (isUpdating: boolean, successCallback?: () => void) => ({
       isUpdating,
       successCallback,
@@ -229,6 +245,10 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       AddSourceSteps.ConfigIntroStep,
       {
         setAddSourceStep: (_, addSourceCurrentStep) => addSourceCurrentStep,
+        setSourceConfigData: (state, source) =>
+          source.serviceType === 'share_point' && state === AddSourceSteps.ConfigIntroStep
+            ? AddSourceSteps.ConfigChoiceStep
+            : state,
       },
     ],
     sourceConfigData: [
@@ -283,6 +303,22 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       {
         setClientSecretValue: (_, clientSecretValue) => clientSecretValue,
         setSourceConfigData: (_, { configuredFields: { clientSecret } }) => clientSecret || '',
+        resetSourceState: () => '',
+      },
+    ],
+    externalConnectorUrl: [
+      '',
+      {
+        setExternalConnectorUrl: (_, url) => url,
+        // setSourceConfigData: (_, { configuredFields: { externalConnectorUrl } }) => externalConnectorUrl || '', TODO
+        resetSourceState: () => '',
+      },
+    ],
+    externalConnectorApiKey: [
+      '',
+      {
+        setExternalConnectorApiKey: (_, apiKey) => apiKey,
+        // setSourceConfigData: (_, { configuredFields: { externalConnectorUrl } }) => externalConnectorUrl || '', TODO
         resetSourceState: () => '',
       },
     ],
@@ -453,6 +489,37 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         actions.setPreContentSourceConfigData(response);
       } catch (e) {
         flashAPIErrors(e);
+      }
+    },
+    saveExternalConnectorConfig: async ({ url, apiKey }) => {
+      clearFlashMessages();
+      const route = '/internal/workplace_search/org/settings/connectors';
+      const http = HttpLogic.values.http.post;
+      const params = {
+        url,
+        api_key: apiKey,
+        service_type: 'external',
+      };
+      try {
+        const response = await http<SourceConfigData>(route, {
+          body: JSON.stringify(params),
+        });
+
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.externalConnectorCreated',
+            {
+              defaultMessage: 'Successfully updated configuration.',
+            }
+          )
+        );
+        // actions.setExternalConnectorId(response); TODO
+        actions.setAddSourceStep(AddSourceSteps.SaveConfigStep);
+      } catch (e) {
+        // flashAPIErrors(e);
+      } finally {
+        actions.setButtonNotLoading();
+        actions.setAddSourceStep(AddSourceSteps.SaveConfigStep);
       }
     },
     saveSourceConfig: async ({ isUpdating, successCallback }) => {

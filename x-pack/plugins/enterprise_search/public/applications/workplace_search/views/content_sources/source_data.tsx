@@ -45,7 +45,7 @@ import {
   EDIT_SALESFORCE_SANDBOX_PATH,
   EDIT_SERVICENOW_PATH,
   EDIT_SHAREPOINT_PATH,
-  EDIT_SHAREPOINT_EXTERNAL_PATH,
+  EDIT_EXTERNAL_PATH,
   EDIT_SLACK_PATH,
   EDIT_ZENDESK_PATH,
   EDIT_CUSTOM_PATH,
@@ -514,7 +514,6 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
-    externalServiceType: 'share_point_external',
     addPath: ADD_SHAREPOINT_PATH,
     editPath: EDIT_SHAREPOINT_PATH,
     configuration: {
@@ -543,9 +542,9 @@ export const staticSourceData = [
   },
   {
     name: SOURCE_NAMES.SHAREPOINT,
-    serviceType: 'share_point_external',
-    addPath: ADD_SHAREPOINT_EXTERNAL_PATH,
-    editPath: EDIT_SHAREPOINT_EXTERNAL_PATH,
+    serviceType: 'external',
+    addPath: ADD_EXTERNAL_PATH,
+    editPath: EDIT_EXTERNAL_PATH,
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
