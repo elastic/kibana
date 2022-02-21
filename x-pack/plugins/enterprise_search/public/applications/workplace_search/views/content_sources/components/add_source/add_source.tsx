@@ -20,8 +20,7 @@ import {
 } from '../../../../components/layout';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
-import { SourceDataItem } from '../../../../types';
-import { staticSourceData } from '../../source_data';
+import { externalSourceData, staticSourceData } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
@@ -41,6 +40,7 @@ import './add_source.scss';
 export const AddSource: React.FC<AddSourceProps> = (props) => {
   const {
     initializeAddSource,
+    goToFirstStep,
     setAddSourceStep,
     saveSourceConfig,
     createContentSource,
@@ -59,9 +59,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     newCustomSource,
   } = useValues(AddSourceLogic);
 
-  const { serviceType, configuration, features, objTypes, addPath } = staticSourceData[
-    props.sourceIndex
-  ] as SourceDataItem;
+  const { serviceType, configuration, features, objTypes, addPath } =
+    staticSourceData[props.sourceIndex];
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -72,7 +71,11 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToExternalChoice = () => setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
-  const goToExternalConfig = () => setAddSourceStep(AddSourceSteps.ConfigExternalConnectorStep);
+  // TODO: Fix this
+  const goToExternalConfig = () =>
+    KibanaLogic.values.navigateToUrl(
+      `${getSourcesPath(externalSourceData.addPath, isOrganization)}/`
+    );
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
@@ -106,7 +109,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
         <ConfigurationExternalChoice
           name={name}
           serviceType={serviceType}
-          advanceStepInternal={goToConfigurationIntro}
+          advanceStepInternal={goToFirstStep}
           advanceStepExternal={goToExternalConfig}
           header={header}
         />
@@ -154,7 +157,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       )}
       {addSourceCurrentStep === AddSourceSteps.ConfigureCustomStep && (
         <ConfigureCustom
-          helpText={configuration.helpText}
+          helpText={configuration.helpText ?? ''}
           advanceStep={goToSaveCustom}
           header={header}
         />

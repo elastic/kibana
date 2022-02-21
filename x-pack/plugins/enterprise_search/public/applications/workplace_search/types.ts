@@ -66,7 +66,7 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText: string;
+  helpText?: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
@@ -75,6 +75,7 @@ export interface Configuration {
 export interface SourceDataItem {
   name: string;
   serviceType: string;
+  externalServiceType?: string; // the service type of the external version of this connector
   configuration: Configuration;
   configured?: boolean;
   connected?: boolean;

@@ -21,7 +21,11 @@ import {
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
+import {
+  CUSTOM_SERVICE_TYPE,
+  EXTERNAL_SERVICE_TYPE,
+  WORKPLACE_SEARCH_URL_PREFIX,
+} from '../../../../constants';
 import {
   SOURCES_PATH,
   ADD_GITHUB_PATH,
@@ -64,6 +68,7 @@ export interface OauthParams {
 
 export interface AddSourceActions {
   initializeAddSource: (addSourceProps: AddSourceProps) => { addSourceProps: AddSourceProps };
+  goToFirstStep(): void;
   setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => {
     addSourceProps: AddSourceProps;
   };
@@ -245,10 +250,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       AddSourceSteps.ConfigIntroStep,
       {
         setAddSourceStep: (_, addSourceCurrentStep) => addSourceCurrentStep,
-        setSourceConfigData: (state, source) =>
-          source.serviceType === 'share_point' && state === AddSourceSteps.ConfigIntroStep
-            ? AddSourceSteps.ConfigChoiceStep
-            : state,
       },
     ],
     sourceConfigData: [
@@ -421,7 +422,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     initializeAddSource: ({ addSourceProps }) => {
       const { serviceType } = staticSourceData[addSourceProps.sourceIndex];
       actions.setAddSourceProps({ addSourceProps });
-      actions.setAddSourceStep(getFirstStep(addSourceProps));
+      if (serviceType === 'share_point') {
+        // TODO: Fix this for external content sources
+        actions.setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
+      } else {
+        actions.setAddSourceStep(getFirstStep(addSourceProps));
+      }
       actions.getSourceConfigData(serviceType);
     },
     getSourceConfigData: async ({ serviceType }) => {
@@ -491,6 +497,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         flashAPIErrors(e);
       }
     },
+    goToFirstStep: () => actions.setAddSourceStep(getFirstStep(values.addSourceProps)),
     saveExternalConnectorConfig: async ({ url, apiKey }) => {
       clearFlashMessages();
       const route = '/internal/workplace_search/org/settings/connectors';
@@ -501,9 +508,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         service_type: 'external',
       };
       try {
-        const response = await http<SourceConfigData>(route, {
-          body: JSON.stringify(params),
-        });
+        // const response = await http<SourceConfigData>(route, {
+        //   body: JSON.stringify(params),
+        // });
 
         flashSuccessToast(
           i18n.translate(
@@ -513,8 +520,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
             }
           )
         );
-        // actions.setExternalConnectorId(response); TODO
-        actions.setAddSourceStep(AddSourceSteps.SaveConfigStep);
+        // TODO: use response data to set connector ID
       } catch (e) {
         // flashAPIErrors(e);
       } finally {
@@ -666,10 +672,12 @@ const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   const { sourceIndex, connect, configure, reAuthenticate } = props;
   const { serviceType } = staticSourceData[sourceIndex];
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
+  const isExternal = serviceType === EXTERNAL_SERVICE_TYPE;
 
   if (isCustom) return AddSourceSteps.ConfigureCustomStep;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
+  if (isExternal) return AddSourceSteps.ConfigExternalConnectorStep;
   return AddSourceSteps.ConfigIntroStep;
 };

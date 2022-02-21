@@ -357,6 +357,7 @@ export const GITHUB_VIA_APP_SERVICE_TYPE = 'github_via_app';
 export const GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE = 'github_enterprise_server_via_app';
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
+export const EXTERNAL_SERVICE_TYPE = 'external';
 
 export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
 

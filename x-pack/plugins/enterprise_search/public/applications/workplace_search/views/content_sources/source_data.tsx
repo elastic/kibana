@@ -26,7 +26,7 @@ import {
   ADD_SALESFORCE_SANDBOX_PATH,
   ADD_SERVICENOW_PATH,
   ADD_SHAREPOINT_PATH,
-  ADD_SHAREPOINT_EXTERNAL_PATH,
+  ADD_EXTERNAL_PATH,
   ADD_SLACK_PATH,
   ADD_ZENDESK_PATH,
   ADD_CUSTOM_PATH,
@@ -52,7 +52,33 @@ import {
 } from '../../routes';
 import { FeatureIds, SourceDataItem } from '../../types';
 
-export const staticSourceData = [
+export const externalSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.SHAREPOINT,
+  serviceType: 'external',
+  addPath: ADD_EXTERNAL_PATH,
+  editPath: EDIT_EXTERNAL_PATH,
+  configuration: {
+    isPublicKey: false,
+    hasOauthRedirect: true,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchSharePoint,
+    applicationPortalUrl: 'https://portal.azure.com/',
+  },
+  objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+  features: {
+    basicOrgContext: [
+      FeatureIds.SyncFrequency,
+      FeatureIds.SyncedItems,
+      FeatureIds.GlobalAccessPermissions,
+    ],
+    basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+    platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+  },
+  accountContextOnly: false,
+};
+
+export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
     serviceType: 'box',
@@ -514,37 +540,9 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
+    externalServiceType: 'external',
     addPath: ADD_SHAREPOINT_PATH,
     editPath: EDIT_SHAREPOINT_PATH,
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: true,
-      needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchSharePoint,
-      applicationPortalUrl: 'https://portal.azure.com/',
-    },
-    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
-    features: {
-      basicOrgContext: [
-        FeatureIds.SyncFrequency,
-        FeatureIds.SyncedItems,
-        FeatureIds.GlobalAccessPermissions,
-      ],
-      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
-      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-      platinumPrivateContext: [
-        FeatureIds.Private,
-        FeatureIds.SyncFrequency,
-        FeatureIds.SyncedItems,
-      ],
-    },
-    accountContextOnly: false,
-  },
-  {
-    name: SOURCE_NAMES.SHAREPOINT,
-    serviceType: 'external',
-    addPath: ADD_EXTERNAL_PATH,
-    editPath: EDIT_EXTERNAL_PATH,
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -638,4 +636,5 @@ export const staticSourceData = [
     },
     accountContextOnly: false,
   },
-] as SourceDataItem[];
+  externalSourceData,
+];

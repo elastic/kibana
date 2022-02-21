@@ -29,6 +29,8 @@ export const images = {
   confluenceServer: confluence,
   custom,
   dropbox,
+  // TODO: fix this for external sources generally
+  external: sharePoint,
   github,
   githubEnterpriseServer: github,
   githubViaApp: github,
