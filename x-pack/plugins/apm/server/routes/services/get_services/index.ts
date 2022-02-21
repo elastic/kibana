@@ -28,7 +28,7 @@ export async function getServices({
   end: number;
 }) {
   return withApmSpan('get_services', async () => {
-    const [items] = await getServicesItems({
+    const items = await getServicesItems({
       environment,
       kuery,
       setup,
