@@ -23,7 +23,7 @@ import { getFont } from './get_font';
 import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 import type { GeneratePdfRequest, GeneratePdfResponse, WorkerData } from './worker';
 
-// Ensure that the worker and all dependencies are included in the release bundle.
+// Ensure that all dependencies are included in the release bundle.
 import './worker_dependencies';
 
 export class PdfMaker {
