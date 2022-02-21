@@ -9,6 +9,17 @@ import { HttpSetup } from 'kibana/public';
 
 const DATA_API_ROOT = '/api/triggers_actions_ui/data';
 
+const formatPattern = (pattern: string) => {
+  let formattedPattern = pattern;
+  if (!formattedPattern.startsWith('*')) {
+    formattedPattern = `*${formattedPattern}`;
+  }
+  if (!formattedPattern.endsWith('*')) {
+    formattedPattern = `${formattedPattern}*`;
+  }
+  return formattedPattern;
+};
+
 export async function getMatchingIndices({
   pattern,
   http,
@@ -16,15 +27,11 @@ export async function getMatchingIndices({
   pattern: string;
   http: HttpSetup;
 }): Promise<Record<string, any>> {
-  if (!pattern.startsWith('*')) {
-    pattern = `*${pattern}`;
-  }
-  if (!pattern.endsWith('*')) {
-    pattern = `${pattern}*`;
-  }
+  const formattedPattern = formatPattern(pattern);
+
   const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
     `${DATA_API_ROOT}/_indices`,
-    { body: JSON.stringify({ pattern }) }
+    { body: JSON.stringify({ pattern: formattedPattern }) }
   );
   return indices;
 }
@@ -61,11 +68,44 @@ export const getSavedObjectsClient = () => {
   return savedObjectsClient;
 };
 
-export const loadIndexPatterns = async () => {
-  const { savedObjects } = await getSavedObjectsClient().find({
+export const loadIndexPatterns = async (pattern: string) => {
+  let allSavedObjects = [];
+  const formattedPattern = formatPattern(pattern);
+  const perPage = 1000;
+
+  const { savedObjects, total } = await getSavedObjectsClient().find({
     type: 'index-pattern',
     fields: ['title'],
-    perPage: 10000,
+    page: 1,
+    search: formattedPattern,
+    perPage,
   });
-  return savedObjects;
+
+  allSavedObjects = savedObjects;
+
+  if (total > perPage) {
+    let currentPage = 2;
+    const numberOfPages = Math.ceil(total / perPage);
+    const promises = [];
+
+    while (currentPage <= numberOfPages) {
+      promises.push(
+        getSavedObjectsClient().find({
+          type: 'index-pattern',
+          page: currentPage,
+          fields: ['title'],
+          search: formattedPattern,
+          perPage,
+        })
+      );
+      currentPage++;
+    }
+
+    const paginatedResults = await Promise.all(promises);
+
+    allSavedObjects = paginatedResults.reduce((oldResult, result) => {
+      return oldResult.concat(result.savedObjects);
+    }, allSavedObjects);
+  }
+  return allSavedObjects.map((indexPattern: any) => indexPattern.attributes.title);
 };
