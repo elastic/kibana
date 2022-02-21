@@ -191,6 +191,13 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return response.text as unknown;
   };
 
+  const getJobErrorCode = async (id: string): Promise<undefined | string> => {
+    const {
+      body: [job],
+    } = await supertest.get(`/api/reporting/jobs/?ids=${id}`);
+    return job?.output?.error_code;
+  };
+
   const deleteAllReports = async () => {
     log.debug('ReportingAPI.deleteAllReports');
 
@@ -271,5 +278,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     checkIlmMigrationStatus,
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
+    getJobErrorCode,
   };
 }
