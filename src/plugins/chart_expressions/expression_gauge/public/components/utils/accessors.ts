@@ -7,8 +7,8 @@
  */
 
 import type { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { getAccessorByDimension } from '../../../../visualizations/common/utils';
-import { Accessors, GaugeArguments } from '../../common';
+import { getAccessorByDimension } from '../../../../../visualizations/common/utils';
+import { Accessors, GaugeArguments } from '../../../common';
 
 export const getValueFromAccessor = (
   accessor: string,
