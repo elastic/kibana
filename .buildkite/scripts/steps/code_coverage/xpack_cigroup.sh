@@ -22,11 +22,20 @@ echo " -> Running X-Pack functional tests with code coverage"
 
 cd "$XPACK_DIR"
 
-node scripts/functional_tests \
+NODE_OPTIONS=--max_old_space_size=14336 \
+  ./../node_modules/.bin/nyc \
+  --nycrc-path ./../src/dev/code_coverage/nyc_config/nyc.server.config.js \
+  node scripts/functional_tests \
   --include-tag "ciGroup$CI_GROUP" \
   --exclude-tag "skipCoverage" || true
 
 cd "$KIBANA_DIR"
+
+if [[ -d "$KIBANA_DIR/target/kibana-coverage/server" ]]; then
+  echo "--- Server side code coverage collected"
+  mkdir -p target/kibana-coverage/functional
+  mv target/kibana-coverage/server/coverage-final.json "target/kibana-coverage/functional/xpack-${CI_GROUP}-server-coverage.json"
+fi
 
 if [[ -d "$KIBANA_DIR/target/kibana-coverage/functional" ]]; then
   echo "--- Merging code coverage for CI Group $CI_GROUP"

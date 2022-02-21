@@ -59,6 +59,7 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
+      "ariaLabel": undefined,
       "bucket": Object {
         "accessor": 1,
         "format": Object {

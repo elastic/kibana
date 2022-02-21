@@ -32,6 +32,7 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
+      "ariaLabel": undefined,
       "buckets": Array [
         Object {
           "accessor": 1,
@@ -164,6 +165,7 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
+      "ariaLabel": undefined,
       "buckets": Array [
         Object {
           "accessor": 1,

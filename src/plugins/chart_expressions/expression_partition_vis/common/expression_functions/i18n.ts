@@ -93,6 +93,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.waffle.function.args.showValuesInLegendHelpText', {
       defaultMessage: 'Show values in legend',
     }),
+  getAriaLabelHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.functions.args.ariaLabelHelpText', {
+      defaultMessage: 'Specifies the aria label of the chart',
+    }),
 
   getSliceSizeHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.dimension.metric', {

@@ -24,8 +24,6 @@ include::user/index.asciidoc[]
 
 include::accessibility.asciidoc[]
 
-include::migration.asciidoc[]
-
 include::CHANGELOG.asciidoc[]
 
 include::developer/index.asciidoc[]

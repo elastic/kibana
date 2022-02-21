@@ -20,9 +20,9 @@ import {
 describe('alerting telemetry', () => {
   test('getTotalCountInUse should replace "." symbols with "__" in rule types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -40,7 +40,7 @@ describe('alerting telemetry', () => {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getTotalCountInUse(mockEsClient, 'test');
@@ -62,9 +62,9 @@ Object {
 
   test('getTotalCountAggregations should return min/max connectors in use', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -88,7 +88,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getTotalCountAggregations(mockEsClient, 'test');
@@ -135,9 +135,9 @@ Object {
 
   test('getExecutionsPerDayCount should return execution aggregations for total count, count by rule type and number of failed executions', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -169,7 +169,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
@@ -205,9 +205,9 @@ Object {
 
   test('getExecutionTimeoutsPerDayCount should return execution aggregations for total timeout count and count by rule type', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -222,7 +222,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test');
@@ -241,9 +241,9 @@ Object {
 
   test('getFailedAndUnrecognizedTasksPerDay should aggregations for total count, count by status and count by status and rule type for failed and unrecognized tasks', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byTaskTypeId: {
             value: {
@@ -263,7 +263,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getFailedAndUnrecognizedTasksPerDay(mockEsClient, 'test');
