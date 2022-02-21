@@ -65,7 +65,7 @@ export const LICENSE_ALLOWED = [
   'WTFPL OR ISC',
   'WTFPL',
   'Nuclide software',
-  'Python-2.0'
+  'Python-2.0',
 ];
 
 // The following list only applies to licenses that
