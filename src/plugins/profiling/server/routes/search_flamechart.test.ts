@@ -49,9 +49,9 @@ describe('Using down-sampled indexes', () => {
     ];
 
     for (const t of tests) {
-      expect(getSampledTraceEventsIndex(targetSampleSize, t.sampleCountFromPow6, initialExp)).toEqual(
-        t.expected
-      );
+      expect(
+        getSampledTraceEventsIndex(targetSampleSize, t.sampleCountFromPow6, initialExp)
+      ).toEqual(t.expected);
     }
   });
 });

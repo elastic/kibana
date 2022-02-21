@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from 'kibana/server';
 import type { DataRequestHandlerContext } from '../../../data/server';
-import { getRemoteRoutePaths } from '../../common';
+import { getRemoteRoutePaths, now, elapsed } from '../../common';
 import { FlameGraph } from './flamegraph';
 import { newProjectTimeQuery } from './mappings';
+import { StackTraceID, StackFrameID, FileID, StackTrace, StackFrame, Executable } from './types';
 
 export interface DownsampledEventsIndex {
   name: string;
@@ -51,7 +52,7 @@ export function getSampledTraceEventsIndex(
     return { name: downsampledIndex + 11, sampleRate: 1 / samplingFactor ** maxExp };
   } else if (sampleCountFromInitialExp < targetSampleSize) {
     // Search in less down-sampled indexes.
-    for (let i = initialExp -1; i >= 1; i--) {
+    for (let i = initialExp - 1; i >= 1; i--) {
       sampleCountFromInitialExp *= samplingFactor;
       if (sampleCountFromInitialExp >= targetSampleSize) {
         return { name: downsampledIndex + i, sampleRate: 1 / samplingFactor ** i };
@@ -82,12 +83,12 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
     async (context, request, response) => {
       const { projectID, timeFrom, timeTo } = request.query;
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
-      const topN = 200; // collect data for the top N unique stack traces
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
+        const startDS = now();
         // Start with counting the results in the index down-sampled by 5^6.
         // That is in the middle of our down-sampled indexes.
         const initialExp = 6;
@@ -108,100 +109,172 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           sampleCountFromInitialExp,
           initialExp
         );
+        elapsed(startDS, 'findDownsampledIndex');
 
         // eslint-disable-next-line no-console
         console.log('EventsIndex', eventsIndex);
 
+        // Using filter_path is less readable and scrollSearch seems to be buggy - it
+        // applies filter_path only to the first array of results, but not on the following arrays.
+        // The downside of `_source` is: it takes 2.5x more time on the ES side (see "took" field).
+        // The `composite` keyword skips sorting the buckets as and return results 'as is'.
+        // A max bucket size of 100000 needs a cluster level setting "search.max_buckets: 100000".
+        const start1 = now();
         const resEvents = await esClient.search({
           index: eventsIndex.name,
-          body: {
-            size: 0,
-            query: filter,
-            aggs: {
-              group_by: {
-                terms: {
-                  field: 'StackTraceID',
-                  size: topN,
-                },
-                aggs: {
-                  sum_count: {
-                    sum: {
-                      field: 'Count',
+          size: 0,
+          query: filter,
+          aggs: {
+            group_by: {
+              composite: {
+                size: 100000, // This is the upper limit of entries per event index.
+                sources: [
+                  {
+                    traceid: {
+                      terms: {
+                        field: 'StackTraceID',
+                      },
                     },
+                  },
+                ],
+              },
+              aggs: {
+                sum_count: {
+                  sum: {
+                    field: 'Count',
                   },
                 },
               },
-              total_count: {
-                sum: {
-                  field: 'Count',
-                },
+            },
+            total_count: {
+              sum: {
+                field: 'Count',
               },
             },
           },
         });
-        // console.log(JSON.stringify(resEvents, null, 2));
+        elapsed(start1, 'resEvents');
 
-        const tracesDocIDs: string[] = [];
-        let sumCount = 0;
-        let docCount = 0;
-        resEvents.body.aggregations.group_by.buckets.forEach((stackTraceItem: any) => {
-          tracesDocIDs.push(stackTraceItem.key);
-          sumCount += stackTraceItem.sum_count.value;
-          docCount += stackTraceItem.doc_count;
-        });
         const totalCount: number = resEvents.body.aggregations.total_count.value;
-        const otherDocCount: number = resEvents.body.aggregations.group_by.sum_other_doc_count;
+        const stackTraceEvents = new Map<StackTraceID, number>();
 
-        console.log('docCount', docCount, 'otherDocCount', otherDocCount);
-        console.log('sumCount', sumCount, 'totalCount', totalCount);
+        let docCount = 0;
+        let bucketCount = 0;
+        resEvents.body.aggregations.group_by.buckets.forEach((item: any) => {
+          const traceid: StackTraceID = item.key.traceid;
+          stackTraceEvents.set(traceid, item.sum_count.value);
+          docCount += item.doc_count;
+          bucketCount++;
+        });
+        console.log('took', resEvents.body.took);
+        console.log('docs', docCount);
+        console.log('total events', totalCount);
+        console.log('unique events', bucketCount);
 
-        const resStackTraces = await esClient.mget<any>({
+        const start2 = now();
+        const resStackTraces = await esClient.mget({
           index: 'profiling-stacktraces',
-          body: { ids: tracesDocIDs },
+          ids: [...stackTraceEvents.keys()],
+          _source_includes: ['FrameID', 'FileID', 'Type'],
         });
+        elapsed(start2, 'resStackTraces');
 
-        // sometimes we don't find the trace - needs investigation as we should always find
-        // profiling-events to profiling-stack-traces
+        // Sometimes we don't find the trace.
+        // This is due to ES delays writing (data is not immediately seen after write).
+        // Also, ES doesn't know about transactions.
+
+        // Create a lookup map StackTraceID -> StackTrace.
+        let stackTraces = new Map<StackTraceID, StackTrace>();
+        for (const trace of resStackTraces.body.docs) {
+          if (trace.found) {
+            stackTraces.set(trace._id, {
+              FileID: trace._source.FileID,
+              FrameID: trace._source.FrameID,
+              Type: trace._source.Type,
+            });
+          }
+        }
+        console.log('unique stacktraces', stackTraces.size);
+
+        // Create the set of unique FrameIDs.
         const stackFrameDocIDs = new Set<string>();
-        for (const trace of resStackTraces.body.docs) {
-          if (trace.found) {
-            for (const frameID of trace._source.FrameID) {
-              stackFrameDocIDs.add(frameID);
-            }
+        for (const trace of stackTraces.values()) {
+          for (const frameID of trace.FrameID) {
+            stackFrameDocIDs.add(frameID);
           }
         }
+        console.log('unique frames', stackFrameDocIDs.size);
 
-        const resStackFrames = await esClient.mget<any>({
+        const start3 = now();
+        const resStackFrames = await esClient.mget({
           index: 'profiling-stackframes',
-          body: { ids: [...stackFrameDocIDs] },
+          ids: [...stackFrameDocIDs],
         });
+        elapsed(start3, 'resStackFrames');
 
-        const executableDocIDs = new Set<string>();
-        for (const trace of resStackTraces.body.docs) {
-          if (trace.found) {
-            for (const fileID of trace._source.FileID) {
-              executableDocIDs.add(fileID);
-            }
+        // Create a lookup map StackFrameID -> StackFrame.
+        const stackFrames = new Map<StackFrameID, StackFrame>();
+        for (const frame of resStackFrames.body.docs) {
+          if (frame.found) {
+            stackFrames.set(frame._id, frame._source);
+          } else {
+            stackFrames.set(frame._id, {
+              FileName: '',
+              FunctionName: '',
+              FunctionOffset: 0,
+              LineNumber: 0,
+              SourceType: 0,
+            });
           }
         }
 
+        // Create the set of unique executable FileIDs.
+        const executableDocIDs = new Set<string>();
+        for (const trace of stackTraces.values()) {
+          for (const fileID of trace.FileID) {
+            executableDocIDs.add(fileID);
+          }
+        }
+        console.log('unique executable IDs', executableDocIDs.size);
+
+        const start4 = now();
         const resExecutables = await esClient.mget<any>({
           index: 'profiling-executables',
-          body: { ids: [...executableDocIDs] },
+          ids: [...executableDocIDs],
+          _source_includes: ['FileName'],
         });
+        elapsed(start4, 'resExecutables');
 
+        // Create a lookup map StackFrameID -> StackFrame.
+        const executables = new Map<FileID, Executable>();
+        for (const exe of resExecutables.body.docs) {
+          if (exe.found) {
+            executables.set(exe._id, exe._source);
+          } else {
+            executables.set(exe._id, {
+              FileName: '',
+            });
+          }
+        }
+
+        const start5 = now();
         const flamegraph = new FlameGraph(
           eventsIndex.sampleRate,
           totalCount,
-          resEvents.body,
-          resStackTraces.body.docs,
-          resStackFrames.body.docs,
-          resExecutables.body.docs
+          stackTraceEvents,
+          stackTraces,
+          stackFrames,
+          executables
         );
 
-        return response.ok({
+        const ret = response.ok({
           body: flamegraph.toElastic(),
         });
+        elapsed(start5, 'Flamegraph aggregation');
+
+        elapsed(startDS, 'totalDuration');
+
+        return ret;
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('Caught', e);
