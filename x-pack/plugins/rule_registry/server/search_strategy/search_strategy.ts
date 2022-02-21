@@ -25,7 +25,7 @@ import { AlertAuditAction, alertAuditEvent } from '../';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
 
 const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
-  rawResponse: {},
+  rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
 
 export const ruleRegistrySearchStrategyProvider = (
