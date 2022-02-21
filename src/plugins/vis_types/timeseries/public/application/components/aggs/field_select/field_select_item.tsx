@@ -26,7 +26,6 @@ export interface FieldSelectItemProps {
   disabled?: boolean;
   disableAdd?: boolean;
   disableDelete?: boolean;
-
   onNewItemAdd?: () => void;
   onDeleteItem?: () => void;
 }
@@ -50,7 +49,7 @@ export function FieldSelectItem({
   const isInvalid = Boolean(selectedOptions?.find((item) => item.id === INVALID_FIELD_ID));
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
         <EuiComboBox
           placeholder={placeholder}

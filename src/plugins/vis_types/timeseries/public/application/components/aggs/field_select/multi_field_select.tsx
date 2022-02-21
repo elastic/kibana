@@ -27,7 +27,7 @@ export function MultiFieldSelect(props: {
 }) {
   return (
     <EuiDragDropContext onDragEnd={props.onDragEnd}>
-      <EuiDroppable droppableId={DROPPABLE_ID} spacing="m">
+      <EuiDroppable droppableId={DROPPABLE_ID} spacing="none">
         {props.values.map((value, index) => (
           <EuiDraggable
             spacing="m"
@@ -37,7 +37,7 @@ export function MultiFieldSelect(props: {
             customDragHandle={true}
           >
             {(provided) => (
-              <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiPanel
                     color="transparent"

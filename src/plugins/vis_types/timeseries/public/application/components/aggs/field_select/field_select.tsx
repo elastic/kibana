@@ -7,7 +7,13 @@
  */
 import React, { useCallback, useMemo, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBoxProps, EuiFormRow, htmlIdGenerator, DragDropContextProps } from '@elastic/eui';
+import {
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+  EuiFormRow,
+  htmlIdGenerator,
+  DragDropContextProps,
+} from '@elastic/eui';
 
 import { FieldSelectItem } from './field_select_item';
 import { IndexPatternValue, SanitizedFieldType } from '../../../../../common/types';
@@ -36,6 +42,11 @@ interface FieldSelectProps {
   allowMultiSelect?: boolean;
 }
 
+const getPreselectedFields = (
+  placeholder?: string,
+  options?: Array<EuiComboBoxOptionOption<string>>
+) => placeholder && findInGroupedOptions(options, placeholder)?.label;
+
 export function FieldSelect({
   label,
   type,
@@ -52,7 +63,6 @@ export function FieldSelect({
 }: FieldSelectProps) {
   const htmlId = htmlIdGenerator();
   const fieldsSelector = getIndexPatternKey(indexPattern);
-
   const selectedIds = useMemo(() => (Array.isArray(value) ? value : [value || null]), [value]);
 
   const groupedOptions = useMemo(
@@ -84,11 +94,6 @@ export function FieldSelect({
         .filter((item) => item?.label && item?.id === INVALID_FIELD_ID)
         .map((item) => item!.label),
     [selectedOptionsMap]
-  );
-
-  const preselectedField = useMemo(
-    () => placeholder && findInGroupedOptions(groupedOptions, placeholder)?.label,
-    [groupedOptions, placeholder]
   );
 
   const onFieldSelectItemChange = useCallback(
@@ -137,7 +142,7 @@ export function FieldSelect({
           onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
           onDeleteItem={onDeleteItem.bind(undefined, props.index)}
           onChange={onFieldSelectItemChange.bind(undefined, props.index)}
-          placeholder={preselectedField}
+          placeholder={getPreselectedFields(placeholder, groupedOptions)}
           disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
           disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
         />
@@ -149,7 +154,7 @@ export function FieldSelect({
       onNewItemAdd,
       onDeleteItem,
       onFieldSelectItemChange,
-      preselectedField,
+      placeholder,
       allowMultiSelect,
       selectedIds?.length,
     ]
