@@ -319,6 +319,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(explorerAppState), JSON.stringify(explorerUrlState), selectedCells]);
 
+  const overallSwimlaneData = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getOverallSwimLaneData$()
+  );
+
   if (
     explorerState === undefined ||
     refresh === undefined ||
@@ -346,6 +350,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           <Explorer
             {...{
               explorerState,
+              overallSwimlaneData,
               showCharts: explorerState.showCharts,
               severity: tableSeverity.val,
               stoppedPartitions,

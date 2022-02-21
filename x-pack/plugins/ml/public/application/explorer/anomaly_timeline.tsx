@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiButtonEmpty,
@@ -78,32 +78,41 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const {
       filterActive,
-      // selectedCells,
       viewByLoadedForTimeFormatted,
-      viewBySwimlaneDataLoading,
-      viewBySwimlaneFieldName,
-      viewBySwimlaneOptions,
       selectedJobs,
       viewByFromPage,
       viewByPerPage,
       swimlaneLimit,
-      loading,
       overallAnnotations,
-      swimLaneSeverity,
-      // overallSwimlaneData,
-      viewBySwimlaneData,
-      swimlaneContainerWidth,
     } = explorerState;
+
+    const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
+
+    const swimlaneContainerWidth = useObservable(anomalyTimelineStateService.getContainerWidth$());
+    const viewBySwimlaneDataLoading = useObservable(
+      anomalyTimelineStateService.isViewBySwimLaneLoading$(),
+      true
+    );
 
     const overallSwimlaneData = useObservable(
       anomalyTimelineStateService.getOverallSwimLaneData$()
     );
 
+    const viewBySwimlaneData = useObservable(anomalyTimelineStateService.getViewBySwimLaneData$());
     const selectedCells = useObservable(anomalyTimelineStateService.getSelectedCells$());
+    const swimLaneSeverity = useObservable(anomalyTimelineStateService.getSwimLaneSeverity$());
+    const viewBySwimlaneFieldName = useObservable(
+      anomalyTimelineStateService.getViewBySwimlaneFieldName$()
+    );
 
-    console.log(selectedCells, '___selectedCells___');
+    const viewBySwimlaneOptions = useObservable(
+      anomalyTimelineStateService.getViewBySwimLaneOptions$(),
+      anomalyTimelineStateService.getViewBySwimLaneOptions()
+    );
 
-    const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
+    const [severityUpdate, setSeverityUpdate] = useState(
+      anomalyTimelineStateService.getSwimLaneSeverity()
+    );
 
     useDebounce(
       () => {
@@ -271,21 +280,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 )}
               </div>
             </EuiFlexItem>
-
-            {selectedCells ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}
-                  data-test-subj="mlAnomalyTimelineClearSelection"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.explorer.clearSelectionLabel"
-                    defaultMessage="Clear selection"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
+            <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}
+                data-test-subj="mlAnomalyTimelineClearSelection"
+              >
+                <FormattedMessage
+                  id="xpack.ml.explorer.clearSelectionLabel"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />

@@ -32,7 +32,6 @@ import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
@@ -102,14 +101,6 @@ const loadExplorerDataProvider = (
   anomalyExplorerChartsService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
 ) => {
-  const memoizedLoadOverallData = memoize(
-    anomalyTimelineService.loadOverallData,
-    anomalyTimelineService
-  );
-  const memoizedLoadViewBySwimlane = memoize(
-    anomalyTimelineService.loadViewBySwimlane,
-    anomalyTimelineService
-  );
   const memoizedAnomalyDataChange = memoize(
     anomalyExplorerChartsService.getAnomalyData,
     anomalyExplorerChartsService
@@ -134,7 +125,6 @@ const loadExplorerDataProvider = (
       swimlaneContainerWidth,
       viewByFromPage,
       viewByPerPage,
-      swimLaneSeverity,
     } = config;
 
     const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
@@ -192,13 +182,6 @@ const loadExplorerDataProvider = (
               influencersFilterQuery
             )
           : Promise.resolve({}),
-      overallState: memoizedLoadOverallData(
-        lastRefresh,
-        selectedJobs,
-        swimlaneContainerWidth,
-        undefined,
-        swimLaneSeverity
-      ),
       tableData: memoizedLoadAnomaliesTableData(
         lastRefresh,
         selectedCells,
@@ -251,7 +234,6 @@ const loadExplorerDataProvider = (
           overallAnnotations,
           anomalyChartRecords,
           influencers,
-          overallState,
           topFieldValues,
           annotationsData,
           tableData,
@@ -273,23 +255,23 @@ const loadExplorerDataProvider = (
                     influencersFilterQuery
                   )
                 : Promise.resolve(influencers),
-            viewBySwimlaneState: memoizedLoadViewBySwimlane(
-              lastRefresh,
-              topFieldValues,
-              {
-                earliest: overallState.earliest,
-                latest: overallState.latest,
-              },
-              selectedJobs,
-              viewBySwimlaneFieldName,
-              ANOMALY_SWIM_LANE_HARD_LIMIT,
-              viewByPerPage,
-              viewByFromPage,
-              swimlaneContainerWidth,
-              influencersFilterQuery,
-              undefined,
-              swimLaneSeverity
-            ),
+            // viewBySwimlaneState: memoizedLoadViewBySwimlane(
+            //   lastRefresh,
+            //   topFieldValues,
+            //   {
+            //     earliest: overallState.earliest,
+            //     latest: overallState.latest,
+            //   },
+            //   selectedJobs,
+            //   viewBySwimlaneFieldName,
+            //   ANOMALY_SWIM_LANE_HARD_LIMIT,
+            //   viewByPerPage,
+            //   viewByFromPage,
+            //   swimlaneContainerWidth,
+            //   influencersFilterQuery,
+            //   undefined,
+            //   swimLaneSeverity
+            // ),
           }).pipe(
             map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
               return {
@@ -299,8 +281,8 @@ const loadExplorerDataProvider = (
                 loading: false,
                 viewBySwimlaneDataLoading: false,
                 anomalyChartsDataLoading: false,
-                overallSwimlaneData: overallState,
-                viewBySwimlaneData: viewBySwimlaneState as any,
+                // overallSwimlaneData: overallState,
+                // viewBySwimlaneData: viewBySwimlaneState as any,
                 tableData,
                 swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
                   ? viewBySwimlaneState.cardinality

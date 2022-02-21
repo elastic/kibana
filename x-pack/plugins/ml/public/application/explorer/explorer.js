@@ -126,6 +126,7 @@ export class ExplorerUI extends React.Component {
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
     selectedJobsRunning: PropTypes.bool.isRequired,
+    overallSwimlaneData: PropTypes.object.isRequired,
   };
 
   state = { language: DEFAULT_QUERY_LANG };
@@ -227,13 +228,15 @@ export class ExplorerUI extends React.Component {
       influencers,
       loading,
       noInfluencersConfigured,
-      overallSwimlaneData,
       queryString,
       selectedCells,
       selectedJobs,
       tableData,
       swimLaneSeverity,
     } = this.props.explorerState;
+
+    const overallSwimlaneData = this.props.overallSwimlaneData || {};
+
     const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
 
     const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;

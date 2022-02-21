@@ -186,7 +186,7 @@ export class AnomalyTimelineService {
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
     swimLaneSeverity?: number
-  ): Promise<SwimlaneData | undefined> {
+  ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
     if (timefilterBounds === undefined) {
@@ -353,7 +353,7 @@ export class AnomalyTimelineService {
     bounds: any,
     viewBySwimlaneFieldName: string,
     interval: number
-  ): OverallSwimlaneData {
+  ): ViewBySwimLaneData {
     // Processes the scores for the 'view by' swim lane.
     // Sorts the lanes according to the supplied array of lane
     // values in the order in which they should be displayed,
