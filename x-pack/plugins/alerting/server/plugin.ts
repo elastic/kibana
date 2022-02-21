@@ -293,6 +293,7 @@ export class AlertingPlugin {
           ruleType.ruleTaskTimeout = ruleType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
           ruleType.cancelAlertsOnRuleTimeout =
             ruleType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
+          ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
           ruleTypeRegistry.register(ruleType);
         });
       },
