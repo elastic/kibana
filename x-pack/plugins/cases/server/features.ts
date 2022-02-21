@@ -48,7 +48,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
     },
     read: {
       cases: {
-        all: [APP_ID],
+        read: [APP_ID],
       },
       management: {
         insightsAndAlerting: [APP_ID],
