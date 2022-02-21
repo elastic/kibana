@@ -151,7 +151,7 @@ export function combineQueryAndFilters(
     };
   }
 
-  const newFilters = [...filters];
+  const newFilters = filters;
   if (meta.filters[filtersLanguage]?.length) {
     const queryExpression = joinQueries(meta.filters[filtersLanguage]);
     // Append the new filter based on the queryExpression to the existing ones

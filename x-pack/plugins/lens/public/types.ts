@@ -216,7 +216,6 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
-  // getLayerInfo(state: T, layerId: string): { datasourceId: string; fields: string[] };
   removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
   initializeDimension?: (
     state: T,

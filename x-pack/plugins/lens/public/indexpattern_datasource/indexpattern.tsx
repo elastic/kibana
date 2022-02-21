@@ -463,7 +463,7 @@ export function getIndexPatternDatasource({
           // consider also referenced columns in this case
           // but map fields to the top referencing column
           const fieldsPerColumn: Record<string, string[]> = {};
-          Object.keys(layer.columns).map((colId) => {
+          Object.keys(layer.columns).forEach((colId) => {
             const visibleColumnId = getTopColumnFromReference(layer, colId);
             fieldsPerColumn[visibleColumnId] = fieldsPerColumn[visibleColumnId] || [];
 
