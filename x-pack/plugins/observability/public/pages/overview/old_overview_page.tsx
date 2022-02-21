@@ -130,14 +130,12 @@ export function OverviewPage({ routeParams }: Props) {
                 })}
                 hasError={false}
               >
-                {hasDataMap?.alert?.hasData && (
-                  <AlertsTableTGrid
-                    setRefetch={setRefetch}
-                    rangeFrom={relativeTime.start}
-                    rangeTo={relativeTime.end}
-                    indexNames={indexNames}
-                  />
-                )}
+                <AlertsTableTGrid
+                  setRefetch={setRefetch}
+                  rangeFrom={relativeTime.start}
+                  rangeTo={relativeTime.end}
+                  indexNames={indexNames}
+                />
               </SectionContainer>
             </EuiFlexItem>
             <EuiFlexItem>
