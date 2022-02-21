@@ -11,6 +11,6 @@ import { ParsedTechnicalFields } from '../';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
-  dsl?: estypes.QueryDslQueryContainer;
+  query?: { bool: estypes.QueryDslBoolQuery };
 };
 export type RuleRegistrySearchResponse = IEsSearchResponse<ParsedTechnicalFields>;

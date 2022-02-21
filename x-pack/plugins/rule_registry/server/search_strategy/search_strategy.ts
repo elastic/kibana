@@ -7,7 +7,7 @@
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
-import { from } from 'rxjs';
+import { from, of } from 'rxjs';
 import { isValidFeatureId } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import { ISearchStrategy, PluginStart } from '../../../../../src/plugins/data/server';
@@ -23,6 +23,10 @@ import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '../';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
+
+const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
+  rawResponse: {},
+};
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
@@ -71,32 +75,33 @@ export const ruleRegistrySearchStrategyProvider = (
             ];
           }, []);
 
-          const filters = [];
+          if (indices.length === 0) {
+            return of(EMPTY_RESPONSE);
+          }
+
+          const filter = request.query?.bool?.filter
+            ? Array.isArray(request.query?.bool?.filter)
+              ? request.query?.bool?.filter
+              : [request.query?.bool?.filter]
+            : [];
           if (authzFilter) {
-            filters.push(authzFilter);
+            filter.push(authzFilter);
           }
           if (space?.id) {
-            filters.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
+            filter.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
           }
-          if (request.dsl?.bool?.filter) {
-            if (Array.isArray(request.dsl?.bool?.filter)) {
-              filters.push(...request.dsl?.bool?.filter);
-            } else {
-              filters.push(request.dsl?.bool?.filter);
-            }
-          }
-          const dsl: estypes.QueryDslQueryContainer = {
-            ...request.dsl,
+
+          const query = {
             bool: {
-              ...request.dsl?.bool,
-              filter: filters,
+              ...request.query?.bool,
+              filter,
             },
           };
           const params = {
             index: indices,
             body: {
               size: MAX_ALERT_SEARCH_SIZE,
-              query: dsl,
+              query,
             },
           };
           return es.search({ ...request, params }, options, deps);
