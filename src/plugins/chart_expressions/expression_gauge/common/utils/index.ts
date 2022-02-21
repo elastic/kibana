@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './url_generator_service';
-
-export * from './url_generator_definition';
-
-export * from './url_generator_contract';
+export { isBulletShape, isRoundShape } from './shapes';

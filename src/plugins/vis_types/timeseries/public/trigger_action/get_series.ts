@@ -57,6 +57,15 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
           continue;
         }
         const currentMetric = metrics[layerMetricIdx];
+        // We can only support top_hit with size 1
+        if (
+          (currentMetric.type === 'top_hit' &&
+            currentMetric?.size &&
+            Number(currentMetric?.size) !== 1) ||
+          currentMetric?.order === 'asc'
+        ) {
+          return null;
+        }
 
         // should treat percentiles differently
         if (currentMetric.type === 'percentile') {
@@ -125,6 +134,14 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       }
       break;
     }
+    case 'positive_only': {
+      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      if (!formula) {
+        return null;
+      }
+      metricsArray = getFormulaSeries(formula) as VisualizeEditorLayersContext['metrics'];
+      break;
+    }
     case 'avg_bucket':
     case 'max_bucket':
     case 'min_bucket':
@@ -142,6 +159,29 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
         return null;
       }
       metricsArray = getFormulaSeries(formula);
+      break;
+    }
+    case 'top_hit': {
+      const currentMetric = metrics[metricIdx];
+      // We can only support top_hit with size 1
+      if (
+        (currentMetric?.size && Number(currentMetric?.size) !== 1) ||
+        currentMetric?.order === 'asc'
+      ) {
+        return null;
+      }
+      const timeScale = getTimeScale(currentMetric);
+      metricsArray = [
+        {
+          agg: aggregationMap.name,
+          isFullReference: aggregationMap.isFullReference,
+          fieldName: fieldName ?? 'document',
+          params: {
+            ...(timeScale && { timeScale }),
+            ...(currentMetric?.order_by && { sortField: currentMetric?.order_by }),
+          },
+        },
+      ];
       break;
     }
     default: {
