@@ -71,7 +71,11 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   beforeEach(() => {
     ruleDataService.findIndicesByFeature.mockImplementation(() => {
-      return [];
+      return [
+        {
+          baseName: 'test',
+        } as IndexInfo,
+      ];
     });
 
     data.search.getSearchStrategy.mockImplementation(() => {
