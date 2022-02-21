@@ -29,7 +29,7 @@ export interface ReduxStateProps {
 }
 
 export interface ReduxDispatchProps {
-  addNewFeatureToIndex: (geometry: Array<Geometry | Position[]>) => void;
+  addNewFeatureToIndex: (geometries: Array<Geometry | Position[]>) => void;
   deleteFeatureFromIndex: (featureId: string) => void;
 }
 
@@ -42,7 +42,7 @@ type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
 export class DrawFeatureControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }, mbDrawControl: MapboxDraw) => {
     try {
-      const featureGeometry: Array<Geometry | Position[]> = [];
+      const geometries: Array<Geometry | Position[]> = [];
       e.features.forEach((feature: Feature) => {
         const { geometry } = geoJSONReader.read(feature);
         if (!geometry.isSimple() || !geometry.isValid()) {
@@ -58,12 +58,12 @@ export class DrawFeatureControl extends Component<Props, {}> {
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
-          featureGeometry.push(featureGeom);
+          geometries.push(featureGeom);
         }
       });
 
-      if (Array.isArray(featureGeometry) && featureGeometry.length) {
-        this.props.addNewFeatureToIndex(featureGeometry);
+      if (geometries.length) {
+        this.props.addNewFeatureToIndex(geometries);
       }
     } catch (error) {
       getToasts().addWarning(

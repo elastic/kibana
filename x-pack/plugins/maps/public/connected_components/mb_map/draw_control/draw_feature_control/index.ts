@@ -34,8 +34,8 @@ function mapDispatchToProps(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
 ): ReduxDispatchProps {
   return {
-    addNewFeatureToIndex(geometry: Array<Geometry | Position[]>) {
-      dispatch(addNewFeatureToIndex(geometry));
+    addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
+      dispatch(addNewFeatureToIndex(geometries));
     },
     deleteFeatureFromIndex(featureId: string) {
       dispatch(deleteFeatureFromIndex(featureId));

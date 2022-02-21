@@ -14,6 +14,7 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
 import { Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
+import { asyncForEach } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
@@ -353,7 +354,7 @@ export function updateEditLayer(layerId: string | null) {
   };
 }
 
-export function addNewFeatureToIndex(geometry: Array<Geometry | Position[]>) {
+export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -371,11 +372,9 @@ export function addNewFeatureToIndex(geometry: Array<Geometry | Position[]>) {
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
 
-      const promisesToAwait = [];
-      for (let i = 0; i < geometry.length; i++) {
-        promisesToAwait.push((layer as IVectorLayer).addFeature(geometry[i]));
-      }
-      await Promise.all(promisesToAwait);
+      await asyncForEach(geometries, async (geometry) => {
+        await (layer as IVectorLayer).addFeature(geometry);
+      });
 
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
         setTimeout(() => {
