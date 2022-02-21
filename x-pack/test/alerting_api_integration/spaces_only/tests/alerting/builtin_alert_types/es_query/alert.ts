@@ -71,6 +71,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         size: 100,
         thresholdComparator: '<',
         threshold: [0],
+        searchType: 'esQuery',
       });
 
       await createAlert({
@@ -79,6 +80,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         size: 100,
         thresholdComparator: '>',
         threshold: [-1],
+        searchType: 'esQuery',
       });
 
       const docs = await waitForDocs(2);
@@ -115,6 +117,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         thresholdComparator: '<',
         threshold: [0],
         timeField: 'date_epoch_millis',
+        searchType: 'esQuery',
       });
 
       await createAlert({
@@ -124,6 +127,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         thresholdComparator: '>',
         threshold: [-1],
         timeField: 'date_epoch_millis',
+        searchType: 'esQuery',
       });
 
       const docs = await waitForDocs(2);
@@ -177,6 +181,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         size: 100,
         thresholdComparator: '<',
         threshold: [-1],
+        searchType: 'esQuery',
       });
 
       await createAlert({
@@ -187,6 +192,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         size: 100,
         thresholdComparator: '>=',
         threshold: [0],
+        searchType: 'esQuery',
       });
 
       const docs = await waitForDocs(1);
@@ -211,6 +217,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         size: 100,
         thresholdComparator: '<',
         threshold: [1],
+        searchType: 'esQuery',
       });
 
       const docs = await waitForDocs(1);
@@ -263,6 +270,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       thresholdComparator: string;
       threshold: number[];
       timeWindowSize?: number;
+      searchType: 'esQuery' | 'searchSource';
     }
 
     async function createAlert(params: CreateAlertParams): Promise<string> {
@@ -308,6 +316,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
+            searchType: params.searchType,
           },
         })
         .expect(200);
