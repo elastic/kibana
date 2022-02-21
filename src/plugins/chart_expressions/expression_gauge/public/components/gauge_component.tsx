@@ -10,6 +10,7 @@ import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomPaletteState } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
+import { isVisDimension } from '../../../../visualizations/common/utils';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
@@ -234,17 +235,22 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         />
       );
     }
+    const customMetricFormatParams = isVisDimension(args.metric) ? args.metric.format : undefined;
+    const tableMetricFormatParams = metricColumn?.meta?.params?.params
+      ? metricColumn?.meta?.params
+      : undefined;
+
+    const defaultMetricFormatParams = {
+      id: 'number',
+      params: {
+        pattern: max - min > 5 ? `0,0` : `0,0.0`,
+      },
+    };
 
     const tickFormatter = formatFactory(
-      metricColumn?.meta?.params?.params
-        ? metricColumn?.meta?.params
-        : {
-            id: 'number',
-            params: {
-              pattern: max - min > 5 ? `0,0` : `0,0.0`,
-            },
-          }
+      customMetricFormatParams ?? tableMetricFormatParams ?? defaultMetricFormatParams
     );
+
     const colors = palette?.params?.colors ? normalizeColors(palette.params, min, max) : undefined;
     const bands: number[] = (palette?.params as CustomPaletteState)
       ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
