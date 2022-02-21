@@ -118,12 +118,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       await assertLogContains({
         description:
-          'usage_collector execution context propagates to Elasticsearch via "x-opaque-id" header',
+          'usage_collection execution context propagates to Elasticsearch via "x-opaque-id" header',
         predicate: (record) =>
           Boolean(
             // exclude part with collector types
             record.http?.request?.id?.includes(
-              `kibana:usage_collector:telemetry_usage_collector:application_usage`
+              `kibana:usage_collection:collector.fetch:application_usage`
             )
           ),
         retry,
@@ -133,8 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
           isExecutionContextLog(record?.message, {
-            type: 'usage_collector',
-            name: 'telemetry_usage_collector',
+            type: 'usage_collection',
+            name: 'collector.fetch',
             id: 'application_usage',
             description: 'Fetch method in the Collector "application_usage"',
           }),

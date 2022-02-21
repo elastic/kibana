@@ -215,8 +215,8 @@ export class CollectorSet {
             ...(collector.extendFetchContext.kibanaRequest && { kibanaRequest }),
           };
           const executionContext: KibanaExecutionContext = {
-            type: 'usage_collector',
-            name: 'telemetry_usage_collector', // public name of a user-facing feature
+            type: 'usage_collection',
+            name: 'collector.fetch',
             id: collector.type,
             description: `Fetch method in the Collector "${collector.type}"`,
           };
