@@ -109,7 +109,7 @@ const defaultParams: Params = {
 };
 
 export const defaultValueFormatter = (value: unknown) => {
-  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  const content = typeof value === 'object' ? JSON.stringify(value) : value ?? '-';
   return renderToString(<>{content}</>);
 };
 
