@@ -1,21 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<DocumentationLink /> is rendered correctly 1`] = `
-.emotion-0 {
-  background: #f0f4fb;
-  margin: 0 (-24px) (-24px);
-  padding: 24px;
-  border-radius: 0 0 6px 6px;
-  -webkit-align-items: baseline!important;
-  -webkit-box-align: baseline!important;
-  -ms-flex-align: baseline!important;
-  align-items: baseline!important;
-}
-
-.emotion-2 {
-  width: auto!important;
-}
-
 <DocumentationLink
   documentationUrl="dummy"
   intl={
@@ -121,80 +106,72 @@ exports[`<DocumentationLink /> is rendered correctly 1`] = `
     }
   }
 >
-  <EuiDescriptionList
-    className="emotion-0"
-    type="responsiveColumn"
-  >
-    <dl
-      className="euiDescriptionList euiDescriptionList--responsiveColumn emotion-0"
+  <dl>
+    <EuiTitle
+      size="xxs"
     >
-      <EuiDescriptionListTitle
-        className="emotion-2"
+      <dt
+        className="euiTitle euiTitle--xxsmall eui-displayInline"
       >
-        <dt
-          className="euiDescriptionList__title emotion-2"
+        <FormattedMessage
+          defaultMessage="Want to learn more?"
+          id="sharedUX.noDataViews.learnMore"
+          values={Object {}}
+        >
+          Want to learn more?
+        </FormattedMessage>
+      </dt>
+    </EuiTitle>
+     
+    <dd
+      className="eui-displayInline"
+    >
+      <EuiLink
+        external={true}
+        href="dummy"
+        target="_blank"
+      >
+        <a
+          className="euiLink euiLink--primary"
+          href="dummy"
+          rel="noopener noreferrer"
+          target="_blank"
         >
           <FormattedMessage
-            defaultMessage="Want to learn more?"
-            id="sharedUX.noDataViews.learnMore"
+            defaultMessage="Read documentation"
+            id="sharedUX.noDataViews.readDocumentation"
             values={Object {}}
           >
-            Want to learn more?
+            Read documentation
           </FormattedMessage>
-        </dt>
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        <dd
-          className="euiDescriptionList__description"
-        >
-          <EuiLink
-            external={true}
-            href="dummy"
-            target="_blank"
+          <EuiIcon
+            aria-label="External link"
+            className="euiLink__externalIcon"
+            size="s"
+            type="popout"
           >
-            <a
-              className="euiLink euiLink--primary"
-              href="dummy"
-              rel="noopener noreferrer"
-              target="_blank"
+            <span
+              aria-label="External link"
+              className="euiLink__externalIcon"
+              data-euiicon-type="popout"
+              size="s"
+            />
+          </EuiIcon>
+          <EuiScreenReaderOnly>
+            <span
+              className="euiScreenReaderOnly"
             >
-              <FormattedMessage
-                defaultMessage="Read documentation"
-                id="sharedUX.noDataViews.readDocumentation"
-                values={Object {}}
+              <EuiI18n
+                default="(opens in a new tab or window)"
+                token="euiLink.newTarget.screenReaderOnlyText"
               >
-                Read documentation
-              </FormattedMessage>
-              <EuiIcon
-                aria-label="External link"
-                className="euiLink__externalIcon"
-                size="s"
-                type="popout"
-              >
-                <span
-                  aria-label="External link"
-                  className="euiLink__externalIcon"
-                  data-euiicon-type="popout"
-                  size="s"
-                />
-              </EuiIcon>
-              <EuiScreenReaderOnly>
-                <span
-                  className="euiScreenReaderOnly"
-                >
-                  <EuiI18n
-                    default="(opens in a new tab or window)"
-                    token="euiLink.newTarget.screenReaderOnlyText"
-                  >
-                    (opens in a new tab or window)
-                  </EuiI18n>
-                </span>
-              </EuiScreenReaderOnly>
-            </a>
-          </EuiLink>
-        </dd>
-      </EuiDescriptionListDescription>
-    </dl>
-  </EuiDescriptionList>
+                (opens in a new tab or window)
+              </EuiI18n>
+            </span>
+          </EuiScreenReaderOnly>
+        </a>
+      </EuiLink>
+    </dd>
+  </dl>
 </DocumentationLink>
 `;

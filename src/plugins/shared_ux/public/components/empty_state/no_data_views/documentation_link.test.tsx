@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiLink, EuiTitle } from '@elastic/eui';
 import { DocumentationLink } from './documentation_link';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -21,9 +16,9 @@ describe('<DocumentationLink />', () => {
     const component = mountWithIntl(<DocumentationLink documentationUrl={'dummy'} />);
     expect(component).toMatchSnapshot();
 
-    expect(component.find(EuiDescriptionList).length).toBe(1);
-    expect(component.find(EuiDescriptionListTitle).length).toBe(1);
-    expect(component.find(EuiDescriptionListDescription).length).toBe(1);
+    expect(component.find('dl').length).toBe(1);
+    expect(component.find(EuiTitle).length).toBe(1);
+    expect(component.find(EuiLink).length).toBe(1);
 
     const link = component.find(EuiLink).at(0);
     expect(link.prop('href')).toBe('dummy');
