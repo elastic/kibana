@@ -48,6 +48,8 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     colorsRange,
     invertColors,
     scale,
+    style,
+    labels,
   } = vis.params.gauge;
 
   // fix formatter for percentage mode
@@ -60,12 +62,15 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     });
   }
 
+  const centralMajorMode = labels.show ? (style.subText ? 'custom' : 'auto') : 'none';
   const gauge = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
     shape: gaugeTypeToShape(gaugeType),
     metric: schemas.metric.map(prepareDimension),
     ticksPosition: scale.show ? 'auto' : 'hidden',
     labelMajorMode: 'auto',
     colorMode: 'palette',
+    centralMajorMode,
+    ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
   });
 
   if (colorsRange && colorsRange.length) {
