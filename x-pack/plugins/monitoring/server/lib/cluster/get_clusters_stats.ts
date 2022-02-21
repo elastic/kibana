@@ -53,14 +53,14 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string, ccs?: string
     ccs: ccs || req.payload.ccs,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
   // Get the params from the POST body for the request
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
     index: indexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._index',
