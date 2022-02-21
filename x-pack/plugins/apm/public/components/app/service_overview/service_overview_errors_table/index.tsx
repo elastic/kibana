@@ -58,9 +58,8 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
-  const {
-    urlParams: { comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
+  const { urlParams } = useLegacyUrlParams();
+  const { comparisonType, comparisonEnabled } = urlParams;
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -177,6 +176,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     serviceName,
     errorGroupDetailedStatistics,
     comparisonEnabled,
+    urlParams,
   });
 
   return (

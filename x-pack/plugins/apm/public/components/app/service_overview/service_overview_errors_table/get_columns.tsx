@@ -8,16 +8,25 @@
 import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ApmUrlParams } from '../../../../context/url_params_context/types';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { truncate } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { APMQueryParams } from '../../../shared/links/url_helpers';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+
+const ErrorLink = euiStyled(ErrorOverviewLink)`
+  ${truncate('100%')};
+`;
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -28,12 +37,37 @@ export function getColumns({
   serviceName,
   errorGroupDetailedStatistics,
   comparisonEnabled,
+  urlParams,
 }: {
   serviceName: string;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
+  urlParams: ApmUrlParams;
 }): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
   return [
+    {
+      name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
+        defaultMessage: 'Type',
+      }),
+      field: 'type',
+      sortable: false,
+      render: (_, { type }) => {
+        return (
+          <ErrorLink
+            title={type}
+            serviceName={serviceName}
+            query={
+              {
+                ...urlParams,
+                kuery: `error.exception.type:"${type}"`,
+              } as APMQueryParams
+            }
+          >
+            {type}
+          </ErrorLink>
+        );
+      },
+    },
     {
       field: 'name',
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
