@@ -21,8 +21,8 @@ import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
-import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
-import { getCoreChrome, getData } from '../../kibana_services';
+import { ExitFullScreenButton } from '../../../../../../src/plugins/shared_ux/public';
+import { getData } from '../../kibana_services';
 import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../reducers/map';
@@ -209,9 +209,7 @@ export class MapContainer extends Component<Props, State> {
 
     let exitFullScreenButton;
     if (isFullScreen) {
-      exitFullScreenButton = (
-        <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} chrome={getCoreChrome()} />
-      );
+      exitFullScreenButton = <ExitFullScreenButton onExit={exitFullScreen} />;
     }
     const shareAttributes = this.props.isSharable
       ? {
