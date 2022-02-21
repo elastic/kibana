@@ -27,3 +27,10 @@ export const txtUseCurrentDateRange = i18n.translate(
     defaultMessage: 'Use date range from origin dashboard',
   }
 );
+
+export const txtOpenInNewTab = i18n.translate(
+  'xpack.dashboard.components.DashboardDrilldownConfig.openInNewTab',
+  {
+    defaultMessage: 'Open dashboard in new tab',
+  }
+);
