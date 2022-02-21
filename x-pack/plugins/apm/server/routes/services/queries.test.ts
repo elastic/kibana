@@ -54,6 +54,7 @@ describe('services queries', () => {
     mock = await inspectSearchParams((setup) =>
       getServicesItems({
         setup,
+        size: 50,
         searchAggregatedTransactions: false,
         logger: {} as any,
         environment: ENVIRONMENT_ALL.value,
