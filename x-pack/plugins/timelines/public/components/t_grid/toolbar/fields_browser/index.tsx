@@ -80,18 +80,20 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       ? DEFAULT_CATEGORY_NAME
       : Object.keys(newFilteredBrowserFields)
           .sort()
-          .reduce<string>(
-            (selected, category) =>
-              newFilteredBrowserFields[category].fields != null &&
+          .reduce<string>((selected, category) => {
+            const filteredBrowserFieldsByCategory =
+              (newFilteredBrowserFields[category] && newFilteredBrowserFields[category].fields) ||
+              [];
+            const filteredBrowserFieldsBySelected =
+              (newFilteredBrowserFields[selected] && newFilteredBrowserFields[selected].fields) ||
+              [];
+            return newFilteredBrowserFields[category].fields != null &&
               newFilteredBrowserFields[selected].fields != null &&
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              Object.keys(newFilteredBrowserFields[category].fields!).length >
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                Object.keys(newFilteredBrowserFields[selected].fields!).length
-                ? category
-                : selected,
-            Object.keys(newFilteredBrowserFields)[0]
-          );
+              Object.keys(filteredBrowserFieldsByCategory).length >
+                Object.keys(filteredBrowserFieldsBySelected).length
+              ? category
+              : selected;
+          }, Object.keys(newFilteredBrowserFields)[0]);
   }, [appliedFilterInput, newFilteredBrowserFields]);
 
   /** Invoked when the user types in the filter input */
@@ -155,6 +157,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           onSearchInputChange={updateFilter}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
+          appliedFilterInput={appliedFilterInput}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
           width={width}
