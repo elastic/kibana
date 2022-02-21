@@ -10,6 +10,12 @@ import { $Values } from '@kbn/utility-types';
 import { Range } from '../../../expressions/public';
 import { ColorSchemaParams, Labels, Style } from '../../../charts/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeGaugePluginSetup {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeGaugePluginStart {}
+
 /**
  * Gauge title alignment
  */
@@ -27,12 +33,6 @@ export const GaugeType = {
 } as const;
 
 export type GaugeType = $Values<typeof GaugeType>;
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisTypeGaugePluginSetup {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisTypeGaugePluginStart {}
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
