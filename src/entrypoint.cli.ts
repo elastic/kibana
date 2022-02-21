@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import yargsParser from 'yargs-parser';
 import { backportRun } from './backportRun';
 import { ConfigFileOptions } from './entrypoint.module';

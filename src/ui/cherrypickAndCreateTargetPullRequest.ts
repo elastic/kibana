@@ -192,6 +192,8 @@ async function waitForCherrypick(
     throw e;
   }
 
+  const repoPath = getRepoPath(options);
+
   // resolve conflicts automatically
   if (options.autoFixConflicts) {
     const autoResolveSpinner = ora(
@@ -199,7 +201,6 @@ async function waitForCherrypick(
       'Attempting to resolve conflicts automatically'
     ).start();
 
-    const repoPath = getRepoPath(options);
     const didAutoFix = await options.autoFixConflicts({
       files: conflictingFiles.map((f) => f.absolute),
       directory: repoPath,
@@ -232,6 +233,7 @@ async function waitForCherrypick(
   consoleLog(
     chalk.bold('\nThe commit could not be backported due to conflicts\n')
   );
+  consoleLog(`Please fix the conflicts in ${repoPath}`);
 
   if (commitsWithoutBackports.length > 0) {
     consoleLog(
@@ -250,7 +252,6 @@ async function waitForCherrypick(
    */
 
   if (options.editor) {
-    const repoPath = getRepoPath(options);
     await exec(`${options.editor} ${repoPath}`, { cwd: options.cwd });
   }
 

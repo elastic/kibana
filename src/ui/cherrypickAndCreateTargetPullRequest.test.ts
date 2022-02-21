@@ -397,24 +397,18 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('logs correctly', async () => {
-      expect(consoleLogSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(consoleLogSpy.mock.calls.map((call) => call[0]).join(''))
+        .toMatchInlineSnapshot(`
         "
-        Backporting to 6.x:"
-      `);
-      expect(consoleLogSpy.mock.calls[1][0]).toMatchInlineSnapshot(`
-        "
+        Backporting to 6.x:
         The commit could not be backported due to conflicts
-        "
-      `);
-      expect(consoleLogSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
-        "
+        Please fix the conflicts in /myHomeDir/.backport/repositories/elastic/kibana
         ----------------------------------------
-        "
-      `);
-      expect(consoleLogSpy.mock.calls[3][0]).toMatchInlineSnapshot(`
-        "
+
         ----------------------------------------
-        "
+
+        ----------------------------------------
+        View pull request: myHtmlUrl"
       `);
     });
   });
