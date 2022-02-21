@@ -11,7 +11,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
+  EuiIcon,
+  EuiPanel,
+  EuiSelectable,
   EuiPagination,
   EuiText,
   EuiSpacer,
@@ -21,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
-import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;
 interface Props {
@@ -35,6 +36,13 @@ interface Props {
   onClose: () => void;
   saveFormComponent: JSX.Element;
   saveAsNewFormComponent: JSX.Element;
+}
+
+interface SelectableProps {
+  key?: string;
+  label: string;
+  value?: string;
+  checked?: 'on' | 'off' | undefined;
 }
 
 export function SavedQueryManagementList({
@@ -90,18 +98,18 @@ export function SavedQueryManagementList({
   );
 
   const handleDelete = useCallback(
-    (savedQueryToDelete: SavedQuery) => {
-      const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
+    (savedQueryToDelete: string) => {
+      const onDeleteSavedQuery = async (savedQueryId: string) => {
         cancelPendingListingRequest.current();
         setSavedQueries(
-          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
+          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQueryId)
         );
 
-        if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
+        if (loadedSavedQuery && loadedSavedQuery.id === savedQueryId) {
           onClearSavedQuery();
         }
 
-        await savedQueryService.deleteSavedQuery(savedQuery.id);
+        await savedQueryService.deleteSavedQuery(savedQueryId);
         setActivePage(0);
       };
 
@@ -128,7 +136,7 @@ export function SavedQueryManagementList({
     setActivePage(pageNumber);
   };
 
-  const savedQueryRows = () => {
+  const savedQueriesOptions = () => {
     const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;
@@ -137,16 +145,13 @@ export function SavedQueryManagementList({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    return savedQueriesReordered.map((savedQuery) => (
-      <SavedQueryListItem
-        key={savedQuery.id}
-        savedQuery={savedQuery}
-        isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
-        onSelect={handleSelect}
-        onDelete={handleDelete}
-        showWriteOperations={!!showSaveQuery}
-      />
-    ));
+    return savedQueriesReordered.map((savedQuery) => ({
+      key: savedQuery.id,
+      label: savedQuery.attributes.title,
+      value: savedQuery.id,
+      checked: !!loadedSavedQuery && savedQuery.id === loadedSavedQuery.id ? 'on' : undefined,
+      append: <EuiIcon type="trash" onClick={() => handleDelete(savedQuery.id)} />,
+    })) as unknown as SelectableProps[];
   };
 
   const listComponent = (
@@ -157,13 +162,33 @@ export function SavedQueryManagementList({
             <p>{savedQueryDescriptionText}</p>
           </EuiText>
           <div className="kbnSavedQueryManagement__listWrapper">
-            <EuiListGroup
-              flush={true}
-              className="kbnSavedQueryManagement__list"
-              aria-labelledby={'savedQueryManagementPopoverTitle'}
+            <EuiSelectable<SelectableProps>
+              aria-label="Basic example"
+              options={savedQueriesOptions()}
+              searchable
+              singleSelection="always"
+              onChange={(choices) => {
+                const choice = choices.find(({ checked }) => checked) as unknown as {
+                  value: string;
+                };
+                if (choice) {
+                  handleSelect(savedQueries.find((savedQuery) => savedQuery.id === choice.value));
+                }
+              }}
+              searchProps={{
+                compressed: true,
+                placeholder: i18n.translate('data.query.queryBar.indexPattern.findFilterSet', {
+                  defaultMessage: 'Find a filter set',
+                }),
+              }}
             >
-              {savedQueryRows()}
-            </EuiListGroup>
+              {(list, search) => (
+                <EuiPanel color="transparent" paddingSize="s">
+                  {search}
+                  {list}
+                </EuiPanel>
+              )}
+            </EuiSelectable>
           </div>
           <EuiPagination
             className="kbnSavedQueryManagement__pagination"
