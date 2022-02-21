@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123372
-  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
+  describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -71,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows editing of a newly created field', async function () {
       await PageObjects.discover.editField('runtimefield');
-      await fieldEditor.setName('runtimefield edited');
+      await fieldEditor.setName('runtimefield edited', true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
