@@ -6,6 +6,7 @@
  */
 import React, { ReactNode } from 'react';
 import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DetailPanelProcess } from '../../types';
 import { DetailPanelAccordion } from '../DetailPanelAccordion';
 import { DetailPanelCopy } from '../DetailPanelCopy';
@@ -23,26 +24,35 @@ type ListItems = Array<{
   description: NonNullable<ReactNode>;
 }>;
 
+// TODO: Update placeholder descriptions for these tootips once UX Writer Team Defines them
 const leaderDescriptionListInfo = [
   {
     id: 'processEntryLeader',
     title: 'Entry Leader',
-    tooltipContent: 'a entry leader placeholder description',
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+      defaultMessage: 'A entry leader placeholder description',
+    }),
   },
   {
     id: 'processSessionLeader',
     title: 'Session Leader',
-    tooltipContent: 'a session leader placeholder description',
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+      defaultMessage: 'A session leader placeholder description',
+    }),
   },
   {
     id: 'processGroupLeader',
     title: 'Group Leader',
-    tooltipContent: 'a group leader placeholder description',
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+      defaultMessage: 'a group leader placeholder description',
+    }),
   },
   {
     id: 'processParent',
     title: 'Parent',
-    tooltipContent: 'a parent placeholder description',
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+      defaultMessage: 'a parent placeholder description',
+    }),
   },
 ];
 

@@ -6,6 +6,7 @@
  */
 import React, { ReactNode } from 'react';
 import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DetailPanelListItem } from '../DetailPanelListItem';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from './styles';
@@ -41,7 +42,9 @@ export const DetailPanelCopy = ({
             display="base"
             iconType="copyClipboard"
             size="xs"
-            aria-label="copy"
+            aria-label={i18n.translate('xpack.sessionView.detailPanelCopy.copyButton', {
+              defaultMessage: 'Copy',
+            })}
           />
         )}
       </EuiCopy>

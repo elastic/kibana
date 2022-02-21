@@ -61,7 +61,14 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     return (
       <EuiEmptyPrompt
         data-test-subj="sessionViewProcessEventsEmpty"
-        title={<h2>No data to render</h2>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.sessionView.emptyDataMessage"
+              defaultMessage="No data to render"
+            />
+          </h2>
+        }
         body={<p>No process events found for this query.</p>}
       />
     );
@@ -85,8 +92,22 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
         <EuiEmptyPrompt
           iconType="alert"
           color="danger"
-          title={<h2>Error loading Session View</h2>}
-          body={<p>There was an error loading the Session View.</p>}
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.sessionView.errorHeading"
+                defaultMessage="Error loading Session View"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.sessionView.errorMessage"
+                defaultMessage="There was an error loading the Session View."
+              />
+            </p>
+          }
         />
       );
     }

@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
 import { SessionViewServices } from '../../types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -181,7 +182,9 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     return (
       <EuiToolTip position="top" content="Expand">
         <EuiButtonIcon
-          aria-label="row expand icon button"
+          aria-label={i18n.translate('xpack.sessionView.sessionLeaderTable.expand', {
+            defaultMessage: 'Expand',
+          })}
           color="primary"
           iconType="expand"
           onClick={() => onExpand(actionProps)}
@@ -194,7 +197,9 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     return (
       <EuiToolTip position="top" content="Inspect">
         <EuiButtonIcon
-          aria-label="row inspect icon button"
+          aria-label={i18n.translate('xpack.sessionView.sessionLeaderTable.inspect', {
+            defaultMessage: 'Inspect',
+          })}
           color="primary"
           iconType="inspect"
           onClick={() => onInspect(actionProps)}
@@ -212,7 +217,9 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
         closePopover={handleClosePopover}
         button={
           <EuiButtonIcon
-            aria-label="row open in session viewer icon button"
+            aria-label={i18n.translate('xpack.sessionView.sessionLeaderTable.openInSessionView', {
+              defaultMessage: 'Open in Session View',
+            })}
             color="primary"
             iconType="boxesHorizontal"
             onClick={handleMoreActionsClick(eventId)}
@@ -230,7 +237,9 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
                 handleClosePopover();
               }}
             >
-              Analyze Session
+              {i18n.translate('xpack.sessionView.sessionLeaderTable.analyzeSession', {
+                defaultMessage: 'Analyze Session',
+              })}
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="openSessionViewer"
@@ -239,7 +248,9 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
                 handleClosePopover();
               }}
             >
-              Open in session viewer
+              {i18n.translate('xpack.sessionView.sessionLeaderTable.openInSessionView', {
+                defaultMessage: 'Open in Session View',
+              })}
             </EuiContextMenuItem>,
           ]}
         />

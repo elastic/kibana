@@ -51,6 +51,7 @@
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
     "xpack.securitySolution": "plugins/security_solution",
+    "xpack.sessionView": "plugins/session_view",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": ["plugins/saved_objects_tagging"],
