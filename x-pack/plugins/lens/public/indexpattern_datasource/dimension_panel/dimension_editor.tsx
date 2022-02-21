@@ -52,11 +52,11 @@ import {
   formulaOperationName,
   DimensionEditorTabs,
   CalloutWarning,
-  LabelInput,
   DimensionEditorTab,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
+import { NameInput } from '../../shared_components';
 
 const operationPanels = getOperationDisplay();
 
@@ -775,7 +775,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">
           {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
-            <LabelInput
+            <NameInput
               // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
               key={defaultLabel}
               value={selectedColumn.label}

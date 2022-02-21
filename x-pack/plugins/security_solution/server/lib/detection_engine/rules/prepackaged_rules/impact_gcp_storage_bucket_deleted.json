@@ -4,7 +4,7 @@
   ],
   "description": "Identifies when a Google Cloud Platform (GCP) storage bucket is deleted. An adversary may delete a storage bucket in order to disrupt their target's business operations.",
   "false_positives": [
-    "Storage buckets may be deleted by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Bucket deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Storage buckets may be deleted by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Bucket deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "index": [
     "filebeat-*",
@@ -48,5 +48,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

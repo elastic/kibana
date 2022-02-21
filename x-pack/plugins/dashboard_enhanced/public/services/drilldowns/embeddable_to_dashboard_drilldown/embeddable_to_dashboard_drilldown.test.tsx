@@ -28,6 +28,7 @@ describe('.isConfigValid()', () => {
         dashboardId: '',
         useCurrentDateRange: false,
         useCurrentFilters: false,
+        openInNewTab: false,
       })
     ).toBe(false);
   });
@@ -38,6 +39,7 @@ describe('.isConfigValid()', () => {
         dashboardId: 'id',
         useCurrentDateRange: false,
         useCurrentFilters: false,
+        openInNewTab: false,
       })
     ).toBe(true);
   });
@@ -112,6 +114,7 @@ describe('.execute() & getHref', () => {
       dashboardId: 'id',
       useCurrentFilters: false,
       useCurrentDateRange: false,
+      openInNewTab: false,
       ...config,
     };
 
