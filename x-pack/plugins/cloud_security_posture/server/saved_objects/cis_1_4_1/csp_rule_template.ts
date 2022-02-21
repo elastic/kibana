@@ -5,32 +5,39 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '../../../../../../src/core/server';
+import { SavedObjectsType, SavedObjectsValidationMap } from '../../../../../../src/core/server';
+import { type CspRuleTemplateSchema, cspRuleTemplateSchema, cspRuleTemplateSavedObjectType } from '../../../common/schemas/csp_rule_template';
 
-export const ruleTemplateSavedObjectType = 'csp-rule-template';
-
-export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+const ruleTemplateAssetSavedObjectMappings: SavedObjectsType<CspRuleTemplateSchema>['mappings'] = {
   dynamic: false,
   properties: {
     name: {
-      type: 'keyword',
+      type: 'text', // search
+      fields: {
+        // TODO: how is fields mapping shared with UI ?
+        raw: {
+          type: 'keyword', // sort
+        },
+      },
     },
-    rule_id: {
-      type: 'keyword',
-    },
-    version: {
-      type: 'long',
+    description: {
+      type: 'text',
     },
   },
 };
 
-export const cspRuleTemplateAssetType: SavedObjectsType = {
-  name: ruleTemplateSavedObjectType,
+const validationMap: SavedObjectsValidationMap = {
+  '1.0.0': cspRuleTemplateSchema,
+};
+
+export const cspRuleTemplateAssetType: SavedObjectsType<CspRuleTemplateSchema> = {
+  name: cspRuleTemplateSavedObjectType,
+  schemas: validationMap,
   hidden: false,
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
   },
   namespaceType: 'agnostic',
-  mappings: ruleAssetSavedObjectMappings,
+  mappings: ruleTemplateAssetSavedObjectMappings,
 };
