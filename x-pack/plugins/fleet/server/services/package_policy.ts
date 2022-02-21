@@ -571,13 +571,13 @@ class PackagePolicyService {
     ids: string[],
     options?: { user?: AuthenticatedUser },
     packagePolicy?: PackagePolicy,
-    packageInfo?: PackageInfo,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
     const result: UpgradePackagePolicyResponse = [];
 
     for (const id of ids) {
       try {
+        let packageInfo: PackageInfo | undefined = undefined;
         if (!packagePolicy) {
           ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
         } else if (!packageInfo) {
@@ -648,10 +648,10 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     id: string,
     packagePolicy?: PackagePolicy,
-    packageInfo?: PackageInfo,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
+      let packageInfo: PackageInfo | undefined = undefined;
       if (!packagePolicy) {
         ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
       } else if (!packageInfo) {

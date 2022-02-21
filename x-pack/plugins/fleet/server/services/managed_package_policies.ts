@@ -95,7 +95,6 @@ async function upgradePackagePolicy(
     soClient,
     packagePolicy.id,
     packagePolicy,
-    undefined,
     installedPackage.version
   );
 
