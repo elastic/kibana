@@ -396,7 +396,7 @@ describe('gauge', () => {
       colorMode: 'palette',
       ticksPosition: 'bands',
     };
-    test('removes metricAccessor correctly', () => {
+    test('removes metric correctly', () => {
       expect(
         getGaugeVisualization({
           paletteService,
@@ -411,7 +411,7 @@ describe('gauge', () => {
         minAccessor: 'min-accessor',
       });
     });
-    test('removes minAccessor correctly', () => {
+    test('removes min correctly', () => {
       expect(
         getGaugeVisualization({
           paletteService,
@@ -443,7 +443,7 @@ describe('gauge', () => {
     it('should return the type only if the layer is in the state', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
-        minAccessor: 'minAccessor',
+        minAccessor: 'min-accessor',
         goalAccessor: 'value-accessor',
       };
       const instance = getGaugeVisualization({
@@ -487,10 +487,10 @@ describe('gauge', () => {
             type: 'function',
             function: 'gauge',
             arguments: {
-              metricAccessor: ['metric-accessor'],
-              minAccessor: ['min-accessor'],
-              maxAccessor: ['max-accessor'],
-              goalAccessor: ['goal-accessor'],
+              metric: ['metric-accessor'],
+              min: ['min-accessor'],
+              max: ['max-accessor'],
+              goal: ['goal-accessor'],
               colorMode: ['none'],
               ticksPosition: ['auto'],
               labelMajorMode: ['auto'],
@@ -507,7 +507,7 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        minAccessor: 'minAccessor',
+        minAccessor: 'min-accessor',
       };
       expect(
         getGaugeVisualization({

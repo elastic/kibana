@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies when a Virtual Private Cloud a virtual private cloud (VPC) route is created in Google Cloud Platform (GCP). Google Cloud routes define the paths that network traffic takes from a virtual machine (VM) instance to other destinations. These destinations can be inside a Google VPC network or outside it. An adversary may create a route in order to impact the flow of network traffic in their target's cloud environment.",
+  "description": "Identifies when a virtual private cloud (VPC) route is created in Google Cloud Platform (GCP). Google Cloud routes define the paths that network traffic takes from a virtual machine (VM) instance to other destinations. These destinations can be inside a Google VPC network or outside it. An adversary may create a route in order to impact the flow of network traffic in their target's cloud environment.",
   "false_positives": [
     "Virtual Private Cloud routes may be created by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
   ],
@@ -32,5 +32,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }
