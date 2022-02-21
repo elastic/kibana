@@ -29,16 +29,6 @@ export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>
         defaultMessage: 'Enables legacy charts library for gauge charts in visualize.',
       }
     ),
-    deprecation: {
-      message: i18n.translate(
-        'visTypeGauge.advancedSettings.visualization.legacyGaugeChartsLibrary.deprecation',
-        {
-          defaultMessage:
-            'The legacy charts library for gauge in visualize is deprecated and will not be supported in a future version.',
-        }
-      ),
-      docLinksKey: 'visualizationSettings',
-    },
     category: ['visualization'],
     schema: schema.boolean(),
   },
