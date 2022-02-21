@@ -758,7 +758,7 @@ export interface Visualization<T = unknown> {
     label: string;
     icon?: IconType;
     disabled?: boolean;
-    tooltipContent?: string;
+    toolTipContent?: string;
     initialDimensions?: Array<{
       groupId: string;
       columnId: string;
