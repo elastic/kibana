@@ -244,17 +244,15 @@ export class LensPlugin {
       const { getLensAttributeService } = await import('./async_services');
       const { core: coreStart, plugins } = startServices();
 
-      const [, visualizationMap] = await Promise.all([
-        this.initParts(
-          core,
-          data,
-          charts,
-          expressions,
-          fieldFormats,
-          plugins.fieldFormats.deserialize
-        ),
-        this.editorFrameService!.loadVisualizations(),
-      ]);
+      await this.initParts(
+        core,
+        data,
+        charts,
+        expressions,
+        fieldFormats,
+        plugins.fieldFormats.deserialize
+      );
+      const visualizationMap = await this.editorFrameService!.loadVisualizations();
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),

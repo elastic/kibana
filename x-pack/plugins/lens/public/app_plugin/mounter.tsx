@@ -115,14 +115,13 @@ export async function mountApp(
     getPresentationUtilContext,
     topNavMenuEntryGenerators,
   } = mountProps;
-  const [coreStart, startDependencies] = await core.getStartServices();
-  // const instance = await createEditorFrame();
-  const historyLocationState = params.history.location.state as HistoryLocationState;
-
-  const [lensServices, instance] = await Promise.all([
-    getLensServices(coreStart, startDependencies, attributeService),
+  const [[coreStart, startDependencies], instance] = await Promise.all([
+    core.getStartServices(),
     createEditorFrame(),
   ]);
+  const historyLocationState = params.history.location.state as HistoryLocationState;
+
+  const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
 
   const { stateTransfer, data, storage } = lensServices;
 
