@@ -8,13 +8,12 @@
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
 import { isMainThread, MessagePort, workerData } from 'worker_threads';
-import _ from 'lodash';
 import path from 'path';
-import Printer from 'pdfmake';
 
 import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
 import { assetPath } from './constants';
+import { _, Printer } from './worker_dependencies';
 
 export interface WorkerData {
   port: MessagePort;
