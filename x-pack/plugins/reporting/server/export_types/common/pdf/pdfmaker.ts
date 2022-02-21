@@ -179,7 +179,7 @@ export class PdfMaker {
 
   private async cleanupWorker(): Promise<void> {
     if (this.worker) {
-      await this.worker.terminate().catch();
+      await this.worker.terminate().catch(); // best effort
       this.worker = undefined;
     }
   }
@@ -198,7 +198,7 @@ export class PdfMaker {
             reject(workerError);
           }
         });
-        this.worker.on('exit', () => {});
+        this.worker.on('exit', () => {}); // do nothing on errors
 
         // Send the initial request
         const generatePdfRequest: GeneratePdfRequest = {
