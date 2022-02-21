@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { APP_PARENT_ID } from '../../common/constants';
+import { STACK_APP_ID } from '../../common/constants';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 export const useIsMainApplication = () => {
   const { appId } = useCasesContext();
 
-  return appId === APP_PARENT_ID;
+  return appId === STACK_APP_ID;
 };

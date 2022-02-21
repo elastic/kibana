@@ -22,7 +22,7 @@ export const APP_PATH = '/app/management/insightsAndAlerting/cases' as const;
  * Alerts and Insights section. To do that, Cases registers to the management
  * application. This constant holds the application ID of the management plugin
  */
-export const APP_PARENT_ID = 'management' as const;
+export const STACK_APP_ID = 'management' as const;
 
 /**
  * Saved objects
