@@ -25,7 +25,6 @@ import { HttpInterceptHaltError } from './http_intercept_halt_error';
 import {
   ExecutionContextContainer,
   ExecutionContextSetup,
-  KibanaExecutionContext,
 } from '../execution_context';
 
 interface Params {
