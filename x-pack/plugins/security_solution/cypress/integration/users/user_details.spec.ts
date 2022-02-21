@@ -20,7 +20,7 @@ import {
 } from '../../tasks/alerts';
 import { USER_COLUMN } from '../../screens/alerts';
 
-describe('user details flyout', () => {
+describe.skip('user details flyout', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
