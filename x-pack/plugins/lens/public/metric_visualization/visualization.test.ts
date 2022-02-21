@@ -271,7 +271,6 @@ describe('metric_visualization', () => {
             label: 'shazm',
             isStaticValue: false,
             hasTimeShift: false,
-            hasFilter: false,
           };
         },
       };

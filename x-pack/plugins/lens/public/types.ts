@@ -505,7 +505,6 @@ export interface OperationMetadata {
  */
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
-  hasFilter: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
