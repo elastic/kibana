@@ -22,7 +22,6 @@ import type { Duration } from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
-import { isUndefined, omitBy } from 'lodash';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
@@ -341,18 +340,9 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      if (parentContext) {
-        const apmContext = omitBy(
-          {
-            appId: parentContext.name,
-            page: parentContext.page,
-            id: parentContext.id,
-          },
-          isUndefined
-        );
-
-        apm.addLabels(apmContext);
-        executionContext?.set(parentContext);
+      if (executionContext && parentContext) {
+        executionContext.set(parentContext);
+        apm.addLabels(executionContext.getAsLabels());
       }
 
       executionContext?.setRequestId(requestId);

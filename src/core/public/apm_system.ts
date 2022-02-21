@@ -70,12 +70,7 @@ export class ApmSystem {
     start.executionContext.context$.subscribe((c) => {
       // We're using labels because we want the context to be indexed
       // https://www.elastic.co/guide/en/apm/get-started/current/metadata.html
-      const apmContext = {
-        appId: c.name,
-        page: c.page,
-        id: c.id,
-      };
-
+      const apmContext = start.executionContext.getAsLabels();
       this.apm?.addLabels(apmContext);
     });
 

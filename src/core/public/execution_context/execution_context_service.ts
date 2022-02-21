@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { CoreService } from '../../types';
 
@@ -16,8 +16,16 @@ export type ExecutionContext = Record<string, any>;
 export interface ExecutionContextSetup {
   context$: Observable<ExecutionContext>;
   set(c$: ExecutionContext): void;
-  getAll(): ExecutionContext;
+  get(): ExecutionContext;
   clear(): void;
+  /**
+   * returns apm labels
+   **/
+  getAsLabels(): Labels;
+  /**
+   * merges the current global context with the specific event context
+   **/
+  withGlobalContext(context?: ExecutionContext): ExecutionContext;
 }
 
 /**
@@ -43,10 +51,7 @@ export class ExecutionContextService
     this.contract = {
       context$: this.context$.asObservable(),
       clear: () => {
-        this.context$.next({
-          url: window.location.pathname,
-          name: this.appId,
-        });
+        this.context$.next({});
       },
       set: (c: ExecutionContext) => {
         const newVal = {
@@ -59,8 +64,27 @@ export class ExecutionContextService
           this.context$.next(newVal);
         }
       },
-      getAll: () => {
+      get: () => {
         return this.context$.value;
+      },
+      getAsLabels: () => {
+        const executionContext = this.context$.value;
+        return omitBy(
+          {
+            appId: executionContext?.name,
+            id: executionContext?.id,
+            page: executionContext?.page,
+          },
+          isUndefined
+        ) as Labels;
+      },
+      withGlobalContext: (context: ExecutionContext) => {
+        return {
+          appId: this.appId,
+          url: window.location.pathname,
+          ...this.context$.value,
+          ...(context || {}),
+        };
       },
     };
 

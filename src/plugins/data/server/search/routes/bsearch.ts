@@ -10,7 +10,6 @@ import { catchError, first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import type { ExecutionContextSetup } from 'src/core/server';
 import apm from 'elastic-apm-node';
-import { isUndefined, omitBy } from 'lodash';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -36,16 +35,7 @@ export function registerBsearchRoute(
       onBatchItem: async ({ request: requestData, options }) => {
         const { executionContext, ...restOptions } = options || {};
 
-        apm.addLabels(
-          omitBy(
-            {
-              appId: executionContext?.name,
-              id: executionContext?.id,
-              page: executionContext?.page,
-            },
-            isUndefined
-          )
-        );
+        apm.addLabels(executionContextService.getAsLabels());
 
         return executionContextService.withContext(executionContext, () =>
           search
