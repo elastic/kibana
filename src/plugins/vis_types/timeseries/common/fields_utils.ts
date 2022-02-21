@@ -66,5 +66,5 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
       },
     });
   }
-  return firstFieldLabel;
+  return firstFieldLabel ?? '';
 };

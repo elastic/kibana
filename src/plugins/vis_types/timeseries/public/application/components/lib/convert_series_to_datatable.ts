@@ -10,6 +10,7 @@ import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/
 import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
+import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart } from '../../../services';
@@ -131,7 +132,7 @@ export const convertSeriesToDataTable = async (
         id++;
         columns.push({
           id,
-          name: layer.terms_field || '',
+          name: getMultiFieldLabel(getFieldsForTerms(layer.terms_field)),
           isMetric: false,
           type: BUCKET_TYPES.TERMS,
         });
