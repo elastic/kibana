@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
-import { EuiCheckbox, EuiSpacer, CommonProps } from '@elastic/eui';
+import { EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import {
   CombinedField,
   CombinedFieldsReadOnlyForm,
@@ -27,7 +27,7 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const SimpleSettings: FC<Props & CommonProps> = ({
+export const SimpleSettings: FC<Props> = ({
   index,
   initialized,
   onIndexChange,
@@ -36,7 +36,6 @@ export const SimpleSettings: FC<Props & CommonProps> = ({
   indexNameError,
   combinedFields,
   canCreateDataView,
-  ...otherProps
 }) => {
   const IndexNameForm = getIndexNameFormComponent();
 
@@ -48,7 +47,6 @@ export const SimpleSettings: FC<Props & CommonProps> = ({
         onIndexNameChange={onIndexChange}
         onIndexNameValidationStart={() => {}}
         onIndexNameValidationEnd={() => {}}
-        {...otherProps}
       />
 
       <EuiSpacer size="m" />

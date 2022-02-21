@@ -48,6 +48,7 @@ export class IndexNameForm extends Component<CommonProps & Props> {
 
   render() {
     const errors = [...(this.props.indexNameError ? [this.props.indexNameError] : [])];
+    const { ...rest } = this.props;
 
     return (
       <>
@@ -66,7 +67,7 @@ export class IndexNameForm extends Component<CommonProps & Props> {
             aria-label={i18n.translate('xpack.fileUpload.indexNameForm.indexNameReqField', {
               defaultMessage: 'Index name, required field',
             })}
-            {...this.props}
+            {...rest}
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
