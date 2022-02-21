@@ -65,7 +65,7 @@ export function FormRowSelect({
           selectedOptions={selectedOptions}
           onChange={handleOnChange}
           placeholder={i18n.translate(
-            'xpack.apm.agentConfig.servicePage.service.placeholder',
+            'xpack.apm.agentConfig.servicePage.environment.placeholder',
             { defaultMessage: 'Select Option' }
           )}
         />
