@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CONTROL_TYPES } from '../../editor_utils';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
@@ -23,6 +23,10 @@ function isListControl(control: RangeControl | ListControl): control is ListCont
 
 function isRangeControl(control: RangeControl | ListControl): control is RangeControl {
   return control.type === CONTROL_TYPES.RANGE;
+}
+
+interface UnknownControl {
+  type: string;
 }
 
 interface InputControlVisProps {
@@ -90,7 +94,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
           />
         );
       } else {
-        throw new Error(`Unhandled control type ${control!.type}`);
+        throw new Error(`Unhandled control type ${(control as UnknownControl)!.type}`);
       }
 
       return (

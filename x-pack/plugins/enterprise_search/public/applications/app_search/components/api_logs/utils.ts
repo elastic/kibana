@@ -13,7 +13,7 @@ export const getDateString = (offSetDays?: number) => {
 
 export const getStatusColor = (status: number) => {
   let color = '';
-  if (status >= 100 && status < 300) color = 'secondary';
+  if (status >= 100 && status < 300) color = 'success';
   if (status >= 300 && status < 400) color = 'primary';
   if (status >= 400 && status < 500) color = 'warning';
   if (status >= 500) color = 'danger';

@@ -6,14 +6,14 @@
  */
 
 import { addTypeToTermJoin } from './add_type_to_termjoin';
-import { LAYER_TYPE, SOURCE_TYPES } from '../constants';
+import { SOURCE_TYPES } from '../constants';
 import { LayerDescriptor } from '../descriptor_types';
 
 describe('addTypeToTermJoin', () => {
   test('Should handle missing type attribute', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: 'VECTOR',
         joins: [
           {
             right: {},

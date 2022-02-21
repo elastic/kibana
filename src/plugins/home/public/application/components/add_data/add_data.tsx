@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';

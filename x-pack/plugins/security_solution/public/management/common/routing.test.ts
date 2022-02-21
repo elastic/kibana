@@ -139,11 +139,10 @@ describe('routing', () => {
         view_type: 'list',
         filter: 'test',
         included_policies: 'globally',
-        excluded_policies: 'unassigned',
       };
 
       expect(getTrustedAppsListPath(location)).toEqual(
-        `/administration/trusted_apps?page_index=${location.page_index}&page_size=${location.page_size}&view_type=${location.view_type}&show=${location.show}&filter=${location.filter}&included_policies=${location.included_policies}&excluded_policies=${location.excluded_policies}`
+        `/administration/trusted_apps?page_index=${location.page_index}&page_size=${location.page_size}&view_type=${location.view_type}&show=${location.show}&filter=${location.filter}&included_policies=${location.included_policies}`
       );
     });
 
@@ -155,7 +154,6 @@ describe('routing', () => {
         view_type: 'list',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
       const path = getTrustedAppsListPath(location);
 
@@ -172,7 +170,6 @@ describe('routing', () => {
         view_type: 'list',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
       const path = getTrustedAppsListPath(location);
 
@@ -189,7 +186,6 @@ describe('routing', () => {
         view_type: 'list',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
       const path = getTrustedAppsListPath(location);
 
@@ -206,7 +202,6 @@ describe('routing', () => {
         view_type: 'grid',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
       const path = getTrustedAppsListPath(location);
 

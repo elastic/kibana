@@ -39,9 +39,15 @@ export class XyVisualization {
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
           useLegacyTimeAxis,
+          kibanaTheme: core.theme,
         })
       );
-      return getXyVisualization({ paletteService: palettes, fieldFormats, useLegacyTimeAxis });
+      return getXyVisualization({
+        paletteService: palettes,
+        fieldFormats,
+        useLegacyTimeAxis,
+        kibanaTheme: core.theme,
+      });
     });
   }
 }

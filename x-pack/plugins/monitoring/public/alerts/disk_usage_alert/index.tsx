@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import {
   RULE_DETAILS,
   RULE_DISK_USAGE,
@@ -21,7 +21,7 @@ import { MonitoringAlertTypeParams, validate } from '../components/param_details
 
 export function createDiskUsageAlertType(
   config: MonitoringConfig
-): AlertTypeModel<MonitoringAlertTypeParams> {
+): RuleTypeModel<MonitoringAlertTypeParams> {
   return {
     id: RULE_DISK_USAGE,
     description: RULE_DETAILS[RULE_DISK_USAGE].description,
@@ -29,7 +29,7 @@ export function createDiskUsageAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaDiskThreshold}`;
     },
-    alertParamsExpression: (props: LazyExpressionProps) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <LazyExpression
         {...props}
         config={config}

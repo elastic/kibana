@@ -1,19 +1,13 @@
-[[logging-configuration-migration]]
-== Logging configuration migration
+[[logging-config-changes]]
+== Logging configuration changes
 
-Compatibility with the legacy logging system is assured until the end of the `v7` version. 
-All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
-root appenders, make sure that it contains `default` appender to provide backward compatibility.
-
-NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
-These will be removed when the `default` appender is no longer required. If you define an appender for a logger, 
-the log messages aren't handled by the `root` logger anymore and are not forwarded to the legacy logging service.
+WARNING: {kib} 8.0.0 and later uses a new logging system. Before you upgrade, read the documentation for your {kib} version.
 
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]
 |===
 
-| Parameter | Platform log record in **pattern** format | Legacy Platform log record **text** format
+| Parameter | Log record in **pattern** format | Legacy log record in **text** format
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`
 
@@ -31,7 +25,7 @@ the log messages aren't handled by the `root` logger anymore and are not forward
 [options="header"]
 |===
 
-| Parameter | Platform log record in **json** format | Legacy Platform log record **json** format
+| Parameter | Log record in **json** format | Legacy log record **json** format
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`
 
@@ -47,34 +41,4 @@ the log messages aren't handled by the `root` logger anymore and are not forward
 
 | error | `{ message, name, stack }` | `{ message, name, stack, code, signal }`
 
-|===
-
-[[logging-cli-migration]]
-=== Logging configuration via CLI
-
-As is the case for any of Kibana's config settings, you can specify your logging configuration via the CLI. For convenience, the `--verbose` and `--silent` flags exist as shortcuts and will continue to be supported beyond v7.
-
-If you wish to override these flags, you can always do so by passing your preferred logging configuration directly to the CLI. For example, with the following configuration:
-
-[source,yaml]
-----
-logging:
-  appenders:
-    custom:
-      type: console
-      layout:
-        type: pattern
-        pattern: "[%date][%level] %message"
-----
-
-you can override the flags with:
-
-[options="header"]
-|===
-
-| legacy logging | {kib} Platform logging | cli shortcuts
-
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | --verbose
-
-|--silent| --logging.root.level=off | --silent
 |===

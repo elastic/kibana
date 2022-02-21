@@ -12,12 +12,12 @@ import 'react-resizable/css/styles.css';
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import ReactGridLayout, { Layout } from 'react-grid-layout';
+import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import { GridData } from '../../../../common';
 import { ViewMode } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -54,9 +54,9 @@ function ResponsiveGrid({
   size: { width: number };
   isViewMode: boolean;
   layout: Layout[];
-  onLayoutChange: () => void;
+  onLayoutChange: ReactGridLayoutProps['onLayoutChange'];
   children: JSX.Element[];
-  maximizedPanelId: string;
+  maximizedPanelId?: string;
   useMargins: boolean;
 }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
@@ -154,7 +154,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           id: 'dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
         }),
-        body: error.message,
+        body: (error as { message: string }).message,
         toastLifeTimeMs: 5000,
       });
     }
@@ -242,10 +242,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }) => (
+    const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }, index) => (
       <DashboardGridItem
-        id={explicitInput.id}
         key={explicitInput.id}
+        id={explicitInput.id}
+        index={index + 1}
         type={type}
         container={container}
         PanelComponent={kibana.services.embeddable.EmbeddablePanel}
@@ -253,6 +254,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         focusedPanelId={focusedPanelIndex}
       />
     ));
+
+    // in print mode, dashboard layout is not controlled by React Grid Layout
+    if (viewMode === ViewMode.PRINT) {
+      return <>{dashboardPanels}</>;
+    }
 
     return (
       <ResponsiveSizedGrid

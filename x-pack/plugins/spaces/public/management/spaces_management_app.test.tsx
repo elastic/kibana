@@ -18,7 +18,7 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { featuresPluginMock } from '../../../features/public/mocks';
 import type { PluginsStart } from '../plugin';
@@ -51,6 +51,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       element: container,
       setBreadcrumbs,
       history: scopedHistoryMock.create({ pathname }),
+      theme$: themeServiceMock.createTheme$(),
     });
 
   return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };

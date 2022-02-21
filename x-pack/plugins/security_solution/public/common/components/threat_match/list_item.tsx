@@ -9,7 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedEntry, ThreatMapEntries, Entry } from './types';
 import { EntryItem } from './entry_item';

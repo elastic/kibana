@@ -6,8 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../../test/common/config.js')

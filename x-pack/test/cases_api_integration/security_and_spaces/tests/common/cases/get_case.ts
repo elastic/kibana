@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
+import { AttributesTypeUser, getCaseDetailsUrl } from '../../../../../../plugins/cases/common/api';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   defaultUser,
@@ -24,6 +24,7 @@ import {
   createComment,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   secOnly,
@@ -37,6 +38,7 @@ import {
   obsSec,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -71,23 +73,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comment).to.eql({
         type: postCommentUserReq.type,
         comment: postCommentUserReq.comment,
-        associationType: 'case',
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
         updated_by: null,
         owner: 'securitySolutionFixture',
       });
-    });
-
-    it('should return a 400 when passing the includeSubCaseComments', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id?includeSubCaseComments=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
     });
 
     it('unhappy path - 404s when case is not there', async () => {
@@ -154,7 +145,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(comment).to.eql({
           type: postCommentUserReq.type,
           comment: postCommentUserReq.comment,
-          associationType: 'case',
           created_by: getUserInfo(secOnly),
           pushed_at: null,
           pushed_by: null,
@@ -201,6 +191,30 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 403,
           auth: { user: secOnly, space: 'space2' },
         });
+      });
+    });
+
+    describe('deprecations', () => {
+      for (const paramValue of [true, false]) {
+        it(`should return a warning header if includeComments=${paramValue}`, async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          const res = await supertest
+            .get(`${getCaseDetailsUrl(theCase.id)}?includeComments=${paramValue}`)
+            .expect(200);
+          const warningHeader = res.header.warning;
+
+          assertWarningHeader(warningHeader);
+
+          const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+          expect(warningValue).to.be('Deprecated query parameter includeComments');
+        });
+      }
+
+      it('should not return a warning header if includeComments is not provided', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseDetailsUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+        expect(warningHeader).to.be(undefined);
       });
     });
   });

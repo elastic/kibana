@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../services/policies/policies');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 describe('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -27,9 +34,24 @@ describe('When on the host isolation exceptions page', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
 
-  const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
+  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+
+  const setEndpointPrivileges = (overrides: Partial<EndpointPrivileges> = {}) => {
+    const newPrivileges = _useUserPrivileges();
+
+    useUserPrivilegesMock.mockReturnValue({
+      ...newPrivileges,
+      endpointPrivileges: {
+        ...newPrivileges.endpointPrivileges,
+        ...overrides,
+      },
+    });
+  };
+
   const waitForApiCall = () => {
-    return waitFor(() => expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled());
+    return waitFor(() => {
+      expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+    });
   };
 
   beforeEach(() => {
@@ -69,7 +91,9 @@ describe('When on the host isolation exceptions page', () => {
 
     describe('And data exists', () => {
       beforeEach(async () => {
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        getHostIsolationExceptionItemsMock.mockImplementation(() =>
+          getFoundExceptionListItemSchemaMock(1)
+        );
       });
 
       it('should show loading indicator while retrieving data and hide it when it gets it', async () => {
@@ -83,24 +107,25 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptionListLoader')).toBeTruthy();
 
         // release the request
         releaseApiResponse!(getFoundExceptionListItemSchemaMock());
 
         //  check the loader is gone
         await waitForElementToBeRemoved(
-          renderResult.getByTestId('hostIsolationExceptionsContent-loader')
+          renderResult.getByTestId('hostIsolationExceptionListLoader')
         );
       });
 
-      it('should display the search bar and item count', async () => {
+      it('should display the search bar, item count and policy filter', async () => {
         render();
         await waitForApiCall();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
         expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
-          'Showing 1 exception'
+          'Showing 1 host isolation exception'
         );
+        expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
       });
 
       it('should show items on the list', async () => {
@@ -142,7 +167,15 @@ describe('When on the host isolation exceptions page', () => {
         userEvent.click(renderResult.getByTestId('searchButton'));
 
         // wait for the page render
-        await waitForApiCall();
+        await waitFor(() =>
+          expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
+            http: mockedContext.coreStart.http,
+            filter:
+              '(exception-list-agnostic.attributes.item_id:(*this*does*not*exists*) OR exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
+            page: 1,
+            perPage: 10,
+          })
+        );
 
         // check the url changed
         expect(mockedContext.history.location.search).toBe('?filter=this%20does%20not%20exists');
@@ -150,12 +183,47 @@ describe('When on the host isolation exceptions page', () => {
         // check the searchbar is still there
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
       });
+
+      it('should apply a policy filter when a filter is selected', async () => {
+        const policies = await sendGetEndpointSpecificPackagePoliciesMock();
+        const firstPolicy = policies.items[0];
+        (sendGetEndpointSpecificPackagePolicies as jest.Mock).mockResolvedValue(policies);
+
+        render();
+        await waitForApiCall();
+
+        // press the filter button
+        const button = renderResult.getByTestId('policiesSelectorButton');
+        expect(button).toBeTruthy();
+        userEvent.click(button);
+
+        // find the first policy option and click it
+        const option = within(renderResult.getByTestId('policiesSelector-popover')).getByText(
+          firstPolicy.name
+        );
+        userEvent.click(option);
+
+        // wait for the page render
+        await waitFor(() =>
+          expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
+            http: mockedContext.coreStart.http,
+            filter: `((exception-list-agnostic.attributes.tags:"policy:${firstPolicy.id}"))`,
+            page: 1,
+            perPage: 10,
+          })
+        );
+
+        // check the url changed
+        expect(mockedContext.history.location.search).toBe(`?included_policies=${firstPolicy.id}`);
+      });
     });
 
     describe('has canIsolateHost privileges', () => {
       beforeEach(async () => {
-        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        setEndpointPrivileges({ canIsolateHost: true });
+        getHostIsolationExceptionItemsMock.mockImplementation(() =>
+          getFoundExceptionListItemSchemaMock(1)
+        );
       });
 
       it('should show the create flyout when the add button is pressed', async () => {
@@ -163,6 +231,9 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
         userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
         await waitForApiCall();
+        await waitFor(() => {
+          expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+        });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
 
@@ -170,6 +241,9 @@ describe('When on the host isolation exceptions page', () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
         await waitForApiCall();
+        await waitFor(() => {
+          expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+        });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
@@ -177,7 +251,7 @@ describe('When on the host isolation exceptions page', () => {
 
     describe('does not have canIsolateHost privileges', () => {
       beforeEach(() => {
-        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+        setEndpointPrivileges({ canIsolateHost: false });
       });
 
       it('should not show the create flyout if the user navigates to the create url', () => {
@@ -190,6 +264,48 @@ describe('When on the host isolation exceptions page', () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
         render();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
+    });
+
+    describe('and the back button is present', () => {
+      beforeEach(async () => {
+        renderResult = render();
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH, {
+            onBackButtonNavigateTo: [{ appId: 'appId' }],
+            backButtonLabel: 'back to fleet',
+            backButtonUrl: '/fleet',
+          });
+        });
+      });
+
+      it('back button is present', () => {
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).not.toBeNull();
+        expect(button).toHaveAttribute('href', '/fleet');
+      });
+
+      it('back button is still present after push history', () => {
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+        });
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).not.toBeNull();
+        expect(button).toHaveAttribute('href', '/fleet');
+      });
+    });
+
+    describe('and the back button is not present', () => {
+      beforeEach(async () => {
+        renderResult = render();
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+        });
+      });
+
+      it('back button is not present when missing history params', () => {
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).toBeNull();
       });
     });
   });

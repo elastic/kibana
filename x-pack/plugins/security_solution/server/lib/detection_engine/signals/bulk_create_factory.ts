@@ -13,6 +13,7 @@ import { BuildRuleMessage } from './rule_messages';
 import { RefreshTypes } from '../types';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { errorAggregator, makeFloatString } from './utils';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
@@ -52,10 +53,12 @@ export const bulkCreateFactory =
     ]);
     const start = performance.now();
 
-    const { body: response } = await esClient.bulk({
-      refresh: refreshForBulkCreate,
-      body: bulkBody,
-    });
+    const response = await withSecuritySpan('writeAlertsBulk', () =>
+      esClient.bulk({
+        refresh: refreshForBulkCreate,
+        body: bulkBody,
+      })
+    );
 
     const end = performance.now();
     logger.debug(

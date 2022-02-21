@@ -23,7 +23,7 @@ export const CallOutDismissButton: FC<CallOutDismissButtonProps> = ({
   onClick = noop,
 }) => {
   const { type } = message;
-  const buttonColor = type === 'success' ? 'secondary' : type;
+  const buttonColor = type;
   const buttonText = text ?? i18n.DISMISS_BUTTON;
   const handleClick = useCallback(() => onClick(message), [onClick, message]);
 

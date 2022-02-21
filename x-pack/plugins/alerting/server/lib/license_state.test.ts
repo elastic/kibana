@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertType } from '../types';
+import { RuleType } from '../types';
 import { Subject } from 'rxjs';
 import { LicenseState, ILicenseState } from './license_state';
 import { licensingMock } from '../../../licensing/server/mocks';
@@ -53,11 +53,11 @@ describe('checkLicense()', () => {
   });
 });
 
-describe('getLicenseCheckForAlertType', () => {
+describe('getLicenseCheckForRuleType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const alertType: AlertType<never, never, never, never, never, 'default', 'recovered'> = {
+  const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered'> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -82,10 +82,10 @@ describe('getLicenseCheckForAlertType', () => {
 
   test('should return false when license not defined', () => {
     expect(
-      licenseState.getLicenseCheckForAlertType(
-        alertType.id,
-        alertType.name,
-        alertType.minimumLicenseRequired
+      licenseState.getLicenseCheckForRuleType(
+        ruleType.id,
+        ruleType.name,
+        ruleType.minimumLicenseRequired
       )
     ).toEqual({
       isValid: false,
@@ -96,10 +96,10 @@ describe('getLicenseCheckForAlertType', () => {
   test('should return false when license not available', () => {
     license.next(createUnavailableLicense());
     expect(
-      licenseState.getLicenseCheckForAlertType(
-        alertType.id,
-        alertType.name,
-        alertType.minimumLicenseRequired
+      licenseState.getLicenseCheckForRuleType(
+        ruleType.id,
+        ruleType.name,
+        ruleType.minimumLicenseRequired
       )
     ).toEqual({
       isValid: false,
@@ -111,10 +111,10 @@ describe('getLicenseCheckForAlertType', () => {
     const expiredLicense = licensingMock.createLicense({ license: { status: 'expired' } });
     license.next(expiredLicense);
     expect(
-      licenseState.getLicenseCheckForAlertType(
-        alertType.id,
-        alertType.name,
-        alertType.minimumLicenseRequired
+      licenseState.getLicenseCheckForRuleType(
+        ruleType.id,
+        ruleType.name,
+        ruleType.minimumLicenseRequired
       )
     ).toEqual({
       isValid: false,
@@ -128,10 +128,10 @@ describe('getLicenseCheckForAlertType', () => {
     });
     license.next(basicLicense);
     expect(
-      licenseState.getLicenseCheckForAlertType(
-        alertType.id,
-        alertType.name,
-        alertType.minimumLicenseRequired
+      licenseState.getLicenseCheckForRuleType(
+        ruleType.id,
+        ruleType.name,
+        ruleType.minimumLicenseRequired
       )
     ).toEqual({
       isValid: false,
@@ -145,10 +145,10 @@ describe('getLicenseCheckForAlertType', () => {
     });
     license.next(goldLicense);
     expect(
-      licenseState.getLicenseCheckForAlertType(
-        alertType.id,
-        alertType.name,
-        alertType.minimumLicenseRequired
+      licenseState.getLicenseCheckForRuleType(
+        ruleType.id,
+        ruleType.name,
+        ruleType.minimumLicenseRequired
       )
     ).toEqual({
       isValid: true,
@@ -160,7 +160,7 @@ describe('getLicenseCheckForAlertType', () => {
       license: { status: 'active', type: 'gold' },
     });
     license.next(goldLicense);
-    licenseState.getLicenseCheckForAlertType(alertType.id, alertType.name, 'gold');
+    licenseState.getLicenseCheckForRuleType(ruleType.id, ruleType.name, 'gold');
     expect(mockNotifyUsage).not.toHaveBeenCalled();
   });
 
@@ -169,7 +169,7 @@ describe('getLicenseCheckForAlertType', () => {
       license: { status: 'active', type: 'basic' },
     });
     license.next(basicLicense);
-    licenseState.getLicenseCheckForAlertType(alertType.id, alertType.name, 'basic');
+    licenseState.getLicenseCheckForRuleType(ruleType.id, ruleType.name, 'basic');
     expect(mockNotifyUsage).not.toHaveBeenCalled();
   });
 
@@ -178,21 +178,21 @@ describe('getLicenseCheckForAlertType', () => {
       license: { status: 'active', type: 'gold' },
     });
     license.next(goldLicense);
-    licenseState.getLicenseCheckForAlertType(
-      alertType.id,
-      alertType.name,
-      alertType.minimumLicenseRequired,
+    licenseState.getLicenseCheckForRuleType(
+      ruleType.id,
+      ruleType.name,
+      ruleType.minimumLicenseRequired,
       { notifyUsage: true }
     );
-    expect(mockNotifyUsage).toHaveBeenCalledWith('Alert: Test');
+    expect(mockNotifyUsage).toHaveBeenCalledWith('Rule: Test');
   });
 });
 
-describe('ensureLicenseForAlertType()', () => {
+describe('ensureLicenseForRuleType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const alertType: AlertType<never, never, never, never, never, string, string> = {
+  const ruleType: RuleType<never, never, never, never, never, string, string> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -217,18 +217,18 @@ describe('ensureLicenseForAlertType()', () => {
 
   test('should throw when license not defined', () => {
     expect(() =>
-      licenseState.ensureLicenseForAlertType(alertType)
+      licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert type test is disabled because license information is not available at this time."`
+      `"Rule type test is disabled because license information is not available at this time."`
     );
   });
 
   test('should throw when license not available', () => {
     license.next(createUnavailableLicense());
     expect(() =>
-      licenseState.ensureLicenseForAlertType(alertType)
+      licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert type test is disabled because license information is not available at this time."`
+      `"Rule type test is disabled because license information is not available at this time."`
     );
   });
 
@@ -236,9 +236,9 @@ describe('ensureLicenseForAlertType()', () => {
     const expiredLicense = licensingMock.createLicense({ license: { status: 'expired' } });
     license.next(expiredLicense);
     expect(() =>
-      licenseState.ensureLicenseForAlertType(alertType)
+      licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert type test is disabled because your basic license has expired."`
+      `"Rule type test is disabled because your basic license has expired."`
     );
   });
 
@@ -248,9 +248,9 @@ describe('ensureLicenseForAlertType()', () => {
     });
     license.next(basicLicense);
     expect(() =>
-      licenseState.ensureLicenseForAlertType(alertType)
+      licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert test is disabled because it requires a Gold license. Go to License Management to view upgrade options."`
+      `"Rule test is disabled because it requires a Gold license. Go to License Management to view upgrade options."`
     );
   });
 
@@ -259,7 +259,7 @@ describe('ensureLicenseForAlertType()', () => {
       license: { status: 'active', type: 'gold' },
     });
     license.next(goldLicense);
-    licenseState.ensureLicenseForAlertType(alertType);
+    licenseState.ensureLicenseForRuleType(ruleType);
   });
 
   test('should call notifyUsage', () => {
@@ -267,8 +267,8 @@ describe('ensureLicenseForAlertType()', () => {
       license: { status: 'active', type: 'gold' },
     });
     license.next(goldLicense);
-    licenseState.ensureLicenseForAlertType(alertType);
-    expect(mockNotifyUsage).toHaveBeenCalledWith('Alert: Test');
+    licenseState.ensureLicenseForRuleType(ruleType);
+    expect(mockNotifyUsage).toHaveBeenCalledWith('Rule: Test');
   });
 });
 

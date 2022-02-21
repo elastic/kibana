@@ -310,6 +310,13 @@ describe('Execution', () => {
       const { result } = await run('var name="foo"', { variables });
       expect(result).toBe('bar');
     });
+
+    test('can access variables set from the parent expression', async () => {
+      const { result } = await run(
+        'var_set name="a" value="bar" | var_set name="b" value={var name="a"} | var name="b"'
+      );
+      expect(result).toBe('bar');
+    });
   });
 
   describe('inspector adapters', () => {

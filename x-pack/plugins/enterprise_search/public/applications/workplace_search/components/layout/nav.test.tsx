@@ -50,6 +50,11 @@ describe('useWorkplaceSearchNav', () => {
             href: '/users_and_roles',
           },
           {
+            id: 'apiKeys',
+            name: 'API keys',
+            href: '/api_keys',
+          },
+          {
             id: 'security',
             name: 'Security',
             href: '/security',

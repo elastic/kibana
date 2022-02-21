@@ -15,7 +15,7 @@ import {
   EuiBottomBar,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -45,6 +45,7 @@ export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const {
     services: {
+      theme,
       application: { navigateToApp },
     },
   } = useKibana();
@@ -86,7 +87,8 @@ export const PolicyFormLayout = React.memo(() => {
                 defaultMessage="Integration {name} has been updated."
                 values={{ name: policyName }}
               />
-            </span>
+            </span>,
+            { theme$: theme.theme$ }
           ),
         });
 
@@ -103,7 +105,7 @@ export const PolicyFormLayout = React.memo(() => {
         });
       }
     }
-  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
+  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState, theme.theme$]);
 
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 

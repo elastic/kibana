@@ -16,6 +16,7 @@ import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -65,6 +66,7 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -84,22 +86,24 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               items: [
                 navTabs.hosts,
                 navTabs.network,
-                ...(navTabs.ueba != null ? [navTabs.ueba] : []),
+                ...(navTabs.users != null ? [navTabs.users] : []),
               ],
             },
             {
               ...securityNavGroup.investigate,
               items: hasCasesReadPermissions
-                ? [navTabs.timelines, navTabs.case]
+                ? [navTabs.timelines, navTabs.cases]
                 : [navTabs.timelines],
             },
             {
               ...securityNavGroup.manage,
               items: [
                 navTabs.endpoints,
+                ...(isPolicyListEnabled ? [navTabs.policies] : []),
                 navTabs.trusted_apps,
                 navTabs.event_filters,
                 ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
+                navTabs.blocklist,
               ],
             },
           ]
@@ -107,10 +111,16 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
         ? [
             {
               ...securityNavGroup.investigate,
-              items: [navTabs.case],
+              items: [navTabs.cases],
             },
           ]
         : [],
-    [uiCapabilities.siem.show, navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]
+    [
+      uiCapabilities.siem.show,
+      navTabs,
+      hasCasesReadPermissions,
+      canSeeHostIsolationExceptions,
+      isPolicyListEnabled,
+    ]
   );
 }

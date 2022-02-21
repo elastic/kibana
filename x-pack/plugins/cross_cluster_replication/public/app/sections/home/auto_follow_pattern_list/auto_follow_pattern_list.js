@@ -8,7 +8,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContent, EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';

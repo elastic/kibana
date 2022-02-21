@@ -39,6 +39,3 @@ jobs:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
           commit_user: kibanamachine
           commit_email: 42973632+kibanamachine@users.noreply.github.com
-          auto_merge: 'true'
-          auto_merge_method: 'squash'
-          manual_backport_command_template: 'node scripts/backport --pr %pullNumber%'

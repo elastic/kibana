@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { CANVAS_APP } from '../../../../common/lib';
 import { decode, encode } from '../../../../common/lib/embeddable_dataurl';
 import { CanvasElement, CanvasPage } from '../../../../types';
@@ -60,7 +60,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         const updatedInput = { ...originalInput, ...incomingInput };
 
         const expression = `embeddable config="${encode(updatedInput)}"
-  type="${type}" 
+  type="${type}"
 | render`;
 
         dispatch(
@@ -77,7 +77,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
         const expression = `embeddable config="${encode(incomingInput)}"
-  type="${type}" 
+  type="${type}"
 | render`;
         dispatch(addElement(selectedPage.id, { expression }));
       }

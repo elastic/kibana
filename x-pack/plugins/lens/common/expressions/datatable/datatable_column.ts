@@ -6,6 +6,7 @@
  */
 
 import type { Direction } from '@elastic/eui';
+import { SortingHint } from '../..';
 import type {
   CustomPaletteState,
   PaletteOutput,
@@ -28,6 +29,7 @@ export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
   type: 'lens_datatable_column';
   palette?: PaletteOutput<CustomPaletteState>;
   summaryRowValue?: unknown;
+  sortingHint?: SortingHint;
 };
 
 export interface ColumnState {
@@ -53,7 +55,7 @@ export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column
 export const datatableColumn: ExpressionFunctionDefinition<
   'lens_datatable_column',
   null,
-  ColumnState,
+  ColumnState & { sortingHint?: SortingHint },
   DatatableColumnResult
 > = {
   name: 'lens_datatable_column',
@@ -64,6 +66,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
   args: {
     columnId: { types: ['string'], help: '' },
     alignment: { types: ['string'], help: '' },
+    sortingHint: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },

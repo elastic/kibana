@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -22,7 +22,7 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -60,18 +60,21 @@ export class TaskManagerPlugin
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
+  private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
+    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -92,15 +95,26 @@ export class TaskManagerPlugin
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
 
+    const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
+      elasticsearch: coreServices.elasticsearch,
+    }));
+
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
+
     // Routes
     const router = core.http.createRouter();
-    const { serviceStatus$, monitoredHealth$ } = healthRoute(
+    const { serviceStatus$, monitoredHealth$ } = healthRoute({
       router,
-      this.monitoringStats$,
-      this.logger,
-      this.taskManagerId,
-      this.config!
-    );
+      monitoringStats$: this.monitoringStats$,
+      logger: this.logger,
+      taskManagerId: this.taskManagerId,
+      config: this.config!,
+      usageCounter: this.usageCounter!,
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -175,9 +189,11 @@ export class TaskManagerPlugin
     this.taskPollingLifecycle = new TaskPollingLifecycle({
       config: this.config!,
       definitions: this.definitions,
+      unusedTypes: REMOVED_TYPES,
       logger: this.logger,
       executionContext,
       taskStore,
+      usageCounter: this.usageCounter,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       ...managedConfiguration,

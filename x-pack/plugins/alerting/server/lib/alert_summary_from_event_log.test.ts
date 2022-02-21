@@ -19,9 +19,11 @@ describe('alertSummaryFromEventLog', () => {
   test('no events and muted ids', async () => {
     const rule = createRule({});
     const events: IValidatedEvent[] = [];
+    const executionEvents: IValidatedEvent[] = [];
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -34,7 +36,7 @@ describe('alertSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "values": Array [],
+          "valuesWithTimestamp": Object {},
         },
         "id": "rule-123",
         "lastRun": undefined,
@@ -63,9 +65,11 @@ describe('alertSummaryFromEventLog', () => {
       muteAll: true,
     });
     const events: IValidatedEvent[] = [];
+    const executionEvents: IValidatedEvent[] = [];
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart: dateString(dateEnd, ONE_HOUR_IN_MILLIS),
       dateEnd: dateString(dateEnd, ONE_HOUR_IN_MILLIS * 2),
     });
@@ -78,7 +82,7 @@ describe('alertSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "values": Array [],
+          "valuesWithTimestamp": Object {},
         },
         "id": "rule-456",
         "lastRun": undefined,
@@ -102,9 +106,11 @@ describe('alertSummaryFromEventLog', () => {
       mutedInstanceIds: ['alert-1', 'alert-2'],
     });
     const events: IValidatedEvent[] = [];
+    const executionEvents: IValidatedEvent[] = [];
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -138,10 +144,12 @@ describe('alertSummaryFromEventLog', () => {
     const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -166,10 +174,12 @@ describe('alertSummaryFromEventLog', () => {
       .advanceTime(10000)
       .addExecute('rut roh!')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -207,10 +217,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addRecoveredAlert('alert-1')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -246,10 +258,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addLegacyResolvedAlert('alert-1')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -284,10 +298,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addRecoveredAlert('alert-1')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -323,10 +339,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group A')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -362,10 +380,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', undefined)
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -401,10 +421,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group B')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -439,14 +461,15 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group A')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
-
     const { lastRun, status, alerts, executionDuration } = summary;
     expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
@@ -481,14 +504,15 @@ describe('alertSummaryFromEventLog', () => {
       .addActiveAlert('alert-1', 'action group A')
       .addRecoveredAlert('alert-2')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
-
     const { lastRun, status, alerts, executionDuration } = summary;
     expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
@@ -536,10 +560,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group B')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -572,12 +598,15 @@ describe('alertSummaryFromEventLog', () => {
   });
 
   const testExecutionDurations = (
-    actualDurations: number[],
-    executionDuration?: { average?: number; values?: number[] }
+    actualDurations: Record<string, number>,
+    executionDuration?: {
+      average?: number;
+      valuesWithTimestamp?: Record<string, number>;
+    }
   ) => {
     expect(executionDuration).toEqual({
-      average: Math.round(mean(actualDurations)),
-      values: actualDurations,
+      average: Math.round(mean(Object.values(actualDurations))),
+      valuesWithTimestamp: actualDurations,
     });
   };
 });
@@ -677,10 +706,13 @@ export class EventsFactory {
     return this;
   }
 
-  getExecutionDurations(): number[] {
+  getExecutionDurations(): Record<string, number> {
     return this.events
       .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
-      .map((ev) => ev?.event?.duration! / (1000 * 1000));
+      .reduce((res: Record<string, number>, ev) => {
+        res[ev?.['@timestamp']!] = ev?.event?.duration! / (1000 * 1000);
+        return res;
+      }, {});
   }
 }
 

@@ -8,7 +8,6 @@
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
@@ -22,11 +21,12 @@ import { MetricsEditMode } from './metrics_edit_mode';
 import { CustomMetricMode } from './types';
 import { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
 import { DropdownButton } from '../../dropdown_button';
+import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
   metric: SnapshotMetricInput;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   onChange: (metric: SnapshotMetricInput) => void;
   onChangeCustomMetrics: (metrics: SnapshotCustomMetricInput[]) => void;
   customMetrics: SnapshotCustomMetricInput[];

@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { Filter } from '@kbn/es-query';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
-import { Query, Filter } from '../../../../../src/plugins/data/public';
+import { Query } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';

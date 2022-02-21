@@ -48,6 +48,9 @@ import {
   TaskRunner,
   TaskRunningInstance,
   TaskRunResult,
+  TASK_MANAGER_RUN_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 
 type Opts = {
@@ -206,9 +209,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running ephemeral task ${this}`);
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager ephemeral run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    apmTrans?.addLabels({ ephemeral: true });
+
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
     });
@@ -261,7 +266,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -295,6 +304,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }

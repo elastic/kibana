@@ -6,10 +6,31 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
+export {
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  SVG,
+  CSS,
+  FONT_FAMILY,
+  FONT_WEIGHT,
+  BOOLEAN_TRUE,
+  BOOLEAN_FALSE,
+} from './constants';
 
-export * from './constants';
-export * from './types';
+export type {
+  Output,
+  ExpressionShapeFunction,
+  ProgressArguments,
+  ProgressOutput,
+  ExpressionProgressFunction,
+  OriginString,
+  ShapeRendererConfig,
+  NodeDimensions,
+  ParentNodeParams,
+  ViewBoxParams,
+  ProgressRendererConfig,
+} from './types';
+
+export { Progress, Shape } from './types';
 
 export { getAvailableShapes, getAvailableProgressShapes } from './lib/available_shapes';

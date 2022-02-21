@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateDetailsFlyoutContent } from '../../../component_template_details';
 

@@ -75,7 +75,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
+import {
+  AggConfigSerialized,
+  IIndexPattern,
+  IndexPattern,
+  IndexPatternField,
+  SerializedSearchSourceFields,
+} from '../..';
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -89,7 +95,8 @@ import type {
   SearchSourceFields,
   SearchSourceOptions,
 } from './types';
-import { FetchHandlers, getSearchParamsFromRequest, RequestFailure, SearchRequest } from './fetch';
+import { getSearchParamsFromRequest, RequestFailure } from './fetch';
+import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
@@ -846,18 +853,43 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false) {
-    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
-    let serializedSearchSourceFields: SearchSourceFields = {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+    const {
+      filter: originalFilters,
+      aggs: searchSourceAggs,
+      parent,
+      size: omit,
+      sort,
+      index,
+      ...searchSourceFields
+    } = this.getFields();
+
+    let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
-      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
+    if (index) {
+      serializedSearchSourceFields.index = index.id;
+    }
+    if (sort) {
+      serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
+    }
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
       };
+    }
+    if (searchSourceAggs) {
+      let aggs = searchSourceAggs;
+      if (typeof aggs === 'function') {
+        aggs = (searchSourceAggs as Function)();
+      }
+      if (aggs instanceof AggConfigs) {
+        serializedSearchSourceFields.aggs = aggs.getAll().map((agg) => agg.serialize());
+      } else {
+        serializedSearchSourceFields.aggs = aggs as AggConfigSerialized[];
+      }
     }
     if (recurse && this.getParent()) {
       serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);

@@ -7,7 +7,7 @@
  */
 
 import { tabifyGetColumns } from './get_columns';
-import { TabbedAggColumn } from './types';
+import type { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 

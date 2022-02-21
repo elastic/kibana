@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { ReindexStatus } from '../../../../../../../common/types';
@@ -109,7 +109,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
         )}
         {(hasFetchFailed || hasReindexingFailed) && (
           <>
-            <EuiSpacer />
             <EuiCallOut
               color="danger"
               iconType="alert"
@@ -130,6 +129,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             >
               {reindexState.errorMessage}
             </EuiCallOut>
+            <EuiSpacer />
           </>
         )}
         <EuiText>

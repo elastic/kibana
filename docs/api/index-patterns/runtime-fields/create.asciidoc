@@ -4,6 +4,8 @@
 <titleabbrev>Create runtime field</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-create>> instead.]
+
 experimental[] Create a runtime field
 
 [[index-patterns-runtime-field-create-request]]

@@ -6,10 +6,10 @@
  */
 
 import { alertReducer } from './alert_reducer';
-import { Alert } from '../../../types';
+import { Rule } from '../../../types';
 
 describe('alert reducer', () => {
-  let initialAlert: Alert;
+  let initialAlert: Rule;
   beforeAll(() => {
     initialAlert = {
       params: {},
@@ -21,7 +21,7 @@ describe('alert reducer', () => {
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
-    } as unknown as Alert;
+    } as unknown as Rule;
   });
 
   // setAlert
@@ -83,7 +83,7 @@ describe('alert reducer', () => {
     const updatedAlert = alertReducer(
       { alert: initialAlert },
       {
-        command: { type: 'setAlertParams' },
+        command: { type: 'setRuleParams' },
         payload: {
           key: 'testParam',
           value: 'new test params property',
@@ -95,7 +95,7 @@ describe('alert reducer', () => {
     const updatedAlertParamsProperty = alertReducer(
       { alert: updatedAlert.alert },
       {
-        command: { type: 'setAlertParams' },
+        command: { type: 'setRuleParams' },
         payload: {
           key: 'testParam',
           value: 'test params property updated',

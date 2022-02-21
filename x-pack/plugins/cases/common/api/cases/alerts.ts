@@ -14,5 +14,4 @@ const AlertRt = rt.type({
 });
 
 export const AlertResponseRt = rt.array(AlertRt);
-
 export type AlertResponse = rt.TypeOf<typeof AlertResponseRt>;

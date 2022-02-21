@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -29,6 +29,8 @@ import {
   createUrlOverrides,
   processResults,
 } from '../../../common/components/utils';
+
+import { Chat } from '../../../../../../cloud/public';
 
 import { MODE } from './constants';
 
@@ -383,6 +385,7 @@ export class FileDataVisualizerView extends Component {
             )}
           </>
         )}
+        <Chat />
       </div>
     );
   }

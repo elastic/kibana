@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { addParameters } from '@storybook/react';
 import React from 'react';
 
 import { FleetServerHostsFlyout as Component } from '.';
 
-addParameters({
-  docs: {
-    inlineStories: false,
-  },
-});
 export default {
   component: Component,
-  title: 'Sections/Fleet/Settings',
+  title: 'Sections/Fleet/Settings/FleetServerHostFlyout',
 };
 
 interface Args {

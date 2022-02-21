@@ -17,7 +17,7 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceAvatarComponent } from '../space_avatar';

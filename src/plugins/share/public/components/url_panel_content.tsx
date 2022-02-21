@@ -7,7 +7,6 @@
  */
 
 import React, { Component, ReactElement } from 'react';
-
 import {
   EuiButton,
   EuiCopy,
@@ -25,29 +24,27 @@ import {
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { HttpStart } from 'kibana/public';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from 'src/core/public';
 
-import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
 import {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
+import type { BrowserUrlService } from '../types';
 
-interface Props {
+export interface UrlPanelContentProps {
   allowShortUrl: boolean;
   isEmbedded?: boolean;
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
-  basePath: string;
-  post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+  urlService: BrowserUrlService;
 }
 
 export enum ExportUrlAsType {
@@ -73,11 +70,11 @@ interface State {
   showPublicUrlSwitch: boolean;
 }
 
-export class UrlPanelContent extends Component<Props, State> {
+export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
-  constructor(props: Props) {
+  constructor(props: UrlPanelContentProps) {
     super(props);
 
     this.shortUrlCache = undefined;
@@ -143,21 +140,27 @@ export class UrlPanelContent extends Component<Props, State> {
   }
 
   public render() {
+    const shortUrlSwitch = this.renderShortUrlSwitch();
+    const publicUrlSwitch = this.renderPublicUrlSwitch();
+
+    const urlRow = (!!shortUrlSwitch || !!publicUrlSwitch) && (
+      <EuiFormRow
+        label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
+      >
+        <>
+          <EuiSpacer size={'s'} />
+          {shortUrlSwitch}
+          {publicUrlSwitch}
+        </>
+      </EuiFormRow>
+    );
+
     return (
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
-
-          <EuiFormRow
-            label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
-          >
-            <>
-              <EuiSpacer size={'s'} />
-              {this.renderShortUrlSwitch()}
-              {this.renderPublicUrlSwitch()}
-            </>
-          </EuiFormRow>
+          {urlRow}
 
           <EuiSpacer size="m" />
 
@@ -361,16 +364,16 @@ export class UrlPanelContent extends Component<Props, State> {
     });
 
     try {
-      const shortUrl = await shortenUrl(this.getSnapshotUrl(), {
-        basePath: this.props.basePath,
-        post: this.props.post,
-      });
+      const snapshotUrl = this.getSnapshotUrl();
+      const shortUrl = await this.props.urlService.shortUrls
+        .get(null)
+        .createFromLongUrl(snapshotUrl);
 
       if (!this.mounted) {
         return;
       }
 
-      this.shortUrlCache = shortUrl;
+      this.shortUrlCache = shortUrl.url;
       this.setState(
         {
           isCreatingShortUrl: false,
@@ -451,19 +454,19 @@ export class UrlPanelContent extends Component<Props, State> {
       />
     ) : undefined;
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="share.urlPanel.generateLinkAsLabel"
-            defaultMessage="Generate the link as"
-          />
-        }
-        helpText={generateLinkAsHelp}
-      >
+      <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}
+          legend={{
+            children: (
+              <FormattedMessage
+                id="share.urlPanel.generateLinkAsLabel"
+                defaultMessage="Generate the link as"
+              />
+            ),
+          }}
         />
       </EuiFormRow>
     );
@@ -474,7 +477,7 @@ export class UrlPanelContent extends Component<Props, State> {
       this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
       !this.props.allowShortUrl
     ) {
-      return;
+      return null;
     }
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />

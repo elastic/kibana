@@ -140,6 +140,7 @@ export const MaxLinesInput = ({
       value={inputValue}
       min={MIN_TRUNCATE_LINES}
       max={MAX_TRUNCATE_LINES}
+      step={1}
       compressed
       disabled={isDisabled}
       onChange={(e) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isTab } from '../../../../timelines/public';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -85,6 +85,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
+    const canUseMaps = kibana.services.application.capabilities.maps.show;
+
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
         return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
@@ -136,13 +138,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
 
     const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
     const [tabsFilterQuery] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,
@@ -173,15 +175,24 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   border
                 />
 
-                <EmbeddedMap
-                  query={query}
-                  filters={filters}
-                  startDate={from}
-                  endDate={to}
-                  setQuery={setQuery}
-                />
-
-                <EuiSpacer />
+                {canUseMaps && (
+                  <>
+                    <EuiPanel
+                      hasBorder
+                      paddingSize="none"
+                      data-test-subj="conditional-embeddable-map"
+                    >
+                      <EmbeddedMap
+                        query={query}
+                        filters={filters}
+                        startDate={from}
+                        endDate={to}
+                        setQuery={setQuery}
+                      />
+                    </EuiPanel>
+                    <EuiSpacer />
+                  </>
+                )}
 
                 <NetworkKpiComponent
                   filterQuery={filterQuery}

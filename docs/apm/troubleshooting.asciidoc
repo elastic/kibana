@@ -47,37 +47,14 @@ This section can help with any of the following:
 There are a number of factors that could be at play here.
 One important thing to double-check first is your index template.
 
-*Index template*
-An APM index template must exist for the APM app to work correctly.
-By default, this index template is created by APM Server on startup.
-However, this only happens if `setup.template.enabled` is `true` in `apm-server.yml`.
-You can create the index template manually by running `apm-server setup`.
+*Index templates*
+For the APM app to work correctly, an index template must exist for each APM data stream.
+By default, {fleet} sets up APM index templates when the APM integration is installed.
 Take note that index templates *cannot* be applied retroactively -- they are only applied at index creation time.
 More information is available in {apm-guide-ref}/apm-server-configuration.html[Set up and configure].
 
-You can check for the existence of an APM index template using the
-{ref}/indices-get-template.html[Get index template API].
-If you're using the default index naming pattern, that request would be:
-
-[source,js]
---------------------------------------------------
-GET /_template/apm-{version}
---------------------------------------------------
-// CONSOLE
-
-*Using Logstash, Kafka, etc.*
-If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
-then the index template will not be set up automatically. Instead, you'll need to
-{apm-guide-ref}/apm-server-template.html[load the template manually].
-
-*Using a custom index names*
-This problem can also occur if you've customized the index name that you write APM data to.
-If you change the default, you must also configure the `setup.template.name` and `setup.template.pattern` options.
-See {apm-guide-ref}/configuration-template.html[Load the Elasticsearch index template].
-If the Elasticsearch index template has already been successfully loaded to the index,
-you can customize the indices that the APM app uses to display data.
-Navigate to *APM* > *Settings* > *Indices*, and change all `xpack.apm.indices.*` values to
-include the new index pattern. For example: `customIndexName-*`.
+You can check for the existence of APM index templates in Kibana.
+Go to **Stack Management** > **Index Management** > **Index Templates** and search for `apm`.
 
 [float]
 [[troubleshooting-too-many-transactions]]
@@ -164,20 +141,24 @@ You can also use the Agent's public API to manually set a name for the transacti
 === Fields are not searchable
 
 In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.
-The recommended index template file for APM Server is installed by the APM Server packages.
-This template, by default, enables and disables indexing on certain fields.
+The recommended index templates for APM are installed by {fleet} when the Elastic APM integration is installed.
+These templates, by default, enable and disable indexing on certain fields.
 
 As an example, some agents store cookie values in `http.request.cookies`.
 Since `http.request` has disabled dynamic indexing, and `http.request.cookies` is not declared in a custom mapping,
 the values in `http.request.cookies` are not indexed and thus not searchable.
 
-*Ensure an index pattern exists*
-As a first step, you should ensure the correct index pattern exists.
-Open the main menu, then click *Stack Management > Index Patterns*.
-In the pattern list, you should see an apm index pattern; The default is `apm-*`.
-If you don't, the index pattern doesn't exist. See <<no-apm-data-found>> for information on how to fix this problem.
+*Ensure an APM data view exists*
+As a first step, you should ensure the correct data view exists.
+In {kib}, go to *Stack Management* > *Data views*.
+You should see the APM data view--the default is
+`traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*`.
+If you don't, the data view doesn't exist.
+To fix this, navigate to the APM app in {kib} and select *Add data*.
+In the APM tutorial, click *Load Kibana objects* to create the APM data view.
 
-Selecting the `apm-*` index pattern shows a listing of every field defined in the pattern.
+If creating an APM data view doesn't solve the problem,
+see <<no-apm-data-found>> for further troubleshooting.
 
 *Ensure a field is searchable*
 There are two things you can do to if you'd like to ensure a field is searchable:
@@ -185,18 +166,9 @@ There are two things you can do to if you'd like to ensure a field is searchable
 1. Index your additional data as {apm-guide-ref}/metadata.html[labels] instead.
 These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
 
-2. Use the {apm-guide-ref}/configuration-template.html[`append_fields`] feature. As an example,
-adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
-
-[source,yml]
-----
-setup.template.enabled: true
-setup.template.overwrite: true
-setup.template.append_fields:
-  - name: http.request.cookies
-    type: object
-    dynamic: true
-----
+2. Create a custom mapping for the field.
+// link will be added in a later PR.
+// docs will be added in https://github.com/elastic/apm-server/pull/6940
 
 [float]
 [[service-map-rum-connections]]

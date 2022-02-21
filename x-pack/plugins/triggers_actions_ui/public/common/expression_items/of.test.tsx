@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { OfExpression } from './of';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('of expression', () => {
   it('renders of builtin aggregation types', () => {

@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
   IUiSettingsClient,
   HttpSetup,
+  ThemeServiceStart,
 } from 'kibana/public';
 import type { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import type {
@@ -37,6 +38,7 @@ export interface TimelionVisDependencies extends Partial<CoreStart> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;
+  theme: ThemeServiceStart;
 }
 
 /** @internal */
@@ -71,13 +73,14 @@ export class TimelionVisPlugin
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    { uiSettings, http }: CoreSetup,
+    { uiSettings, http, theme }: CoreSetup,
     { expressions, visualizations, data, charts }: TimelionVisSetupDependencies
   ) {
     const dependencies: TimelionVisDependencies = {
       http,
       uiSettings,
       timefilter: data.query.timefilter.timefilter,
+      theme,
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));

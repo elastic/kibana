@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from 'src/plugins/data/public';
+import type { IEsSearchResponse } from 'src/plugins/data/public';
 
 import {
   CtiEnrichment,

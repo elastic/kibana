@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Result } from '../../../result/types';
+import { Result, ResultMeta } from '../../../result/types';
 import { CurationResult } from '../../types';
 
 /**
@@ -19,19 +19,32 @@ import { CurationResult } from '../../types';
  * remove this file when that happens
  */
 
+const mergeMetas = (partialMeta: ResultMeta, secondPartialMeta: ResultMeta): ResultMeta => {
+  return {
+    ...(partialMeta || {}),
+    ...secondPartialMeta,
+  };
+};
+
 export const convertToResultFormat = (document: CurationResult): Result => {
   const result = {} as Result;
 
   // Convert `key: 'value'` into `key: { raw: 'value' }`
   Object.entries(document).forEach(([key, value]) => {
-    result[key] = {
-      raw: value,
-      snippet: null, // Don't try to provide a snippet, we can't really guesstimate it
-    };
+    // don't convert _meta if exists
+    if (key === '_meta') {
+      result[key] = value as ResultMeta;
+    } else {
+      result[key] = {
+        raw: value,
+        snippet: null, // Don't try to provide a snippet, we can't really guesstimate it
+      };
+    }
   });
 
   // Add the _meta obj needed by Result
-  result._meta = convertIdToMeta(document.id);
+  const convertedMetaObj = convertIdToMeta(document.id);
+  result._meta = mergeMetas(result._meta, convertedMetaObj);
 
   return result;
 };

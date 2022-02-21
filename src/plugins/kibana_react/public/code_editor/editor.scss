@@ -6,6 +6,12 @@
   position: relative;
   height: 100%;
 
+  &__placeholderContainer {
+    color: $euiTextSubduedColor;
+    width: max-content;
+    pointer-events: none;
+  }
+
   &__keyboardHint {
     position: absolute;
     top: 0;
@@ -19,6 +25,23 @@
 
     &--isInactive {
       display: none;
+    }
+  }
+
+  &__controls {
+    top: $euiSizeXS;
+    right: $euiSize;
+    position: absolute;
+    z-index: 1000
+  }
+
+  &__isFullScreen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    .kibanaCodeEditor__controls {
+      top: $euiSizeL;
+      right: $euiSizeL;
     }
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
+import { VisualizeConstants } from '../../../src/plugins/visualizations/common/constants';
 import { FORMATS_UI_SETTINGS } from '../../../src/plugins/field_formats/common';
 
 // TODO: Remove & Refactor to use the TTV page objects
@@ -57,6 +57,7 @@ export class VisualizePageObject extends FtrService {
       defaultIndex: 'logstash-*',
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
     });
   }
 

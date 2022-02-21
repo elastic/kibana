@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchSourceFields } from 'src/plugins/data/common';
+import type { SerializedSearchSourceFields } from 'src/plugins/data/common';
 
 export interface FakeRequest {
   headers: Record<string, string>;
@@ -14,7 +14,7 @@ export interface FakeRequest {
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
   title: string;
-  searchSource: SearchSourceFields;
+  searchSource: SerializedSearchSourceFields;
   columns?: string[];
 }
 

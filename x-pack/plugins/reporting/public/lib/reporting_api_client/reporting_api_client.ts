@@ -68,12 +68,20 @@ interface IReportingAPI {
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
 
+/**
+ * Client class for interacting with Reporting APIs
+ * @implements IReportingAPI
+ */
 export class ReportingAPIClient implements IReportingAPI {
+  private http: HttpSetup;
+
   constructor(
-    private http: HttpSetup,
+    http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string
-  ) {}
+  ) {
+    this.http = http;
+  }
 
   public getKibanaAppHref(job: Job): string {
     const searchParams = stringify({ jobId: job.id });
@@ -183,7 +191,10 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
+    return this.http.post(`${API_GENERATE_IMMEDIATE}`, {
+      asResponse: true,
+      body: JSON.stringify(params),
+    });
   }
 
   public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {

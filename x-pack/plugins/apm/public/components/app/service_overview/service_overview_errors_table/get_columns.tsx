@@ -9,16 +9,20 @@ import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 
 type ErrorGroupMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
@@ -28,14 +32,14 @@ export function getColumns({
   serviceName: string;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
-}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['error_groups'][0]>> {
+}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
   return [
     {
       field: 'name',
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
         defaultMessage: 'Name',
       }),
-      render: (_, { name, group_id: errorGroupId }) => {
+      render: (_, { name, groupId: errorGroupId }) => {
         return (
           <TruncateWithTooltip
             text={name}
@@ -77,30 +81,34 @@ export function getColumns({
         }
       ),
       align: RIGHT_ALIGNMENT,
-      render: (_, { occurrences, group_id: errorGroupId }) => {
+      render: (_, { occurrences, groupId: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
             ?.timeseries;
         const previousPeriodTimeseries =
           errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
             ?.timeseries;
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
 
         return (
           <SparkPlot
-            color="euiColorVis7"
+            color={currentPeriodColor}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
-                defaultMessage: `{occurrencesCount} occ.`,
+                defaultMessage: `{occurrences} occ.`,
                 values: {
-                  occurrencesCount: asInteger(occurrences),
+                  occurrences: asInteger(occurrences),
                 },
               }
             )}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimeseries : undefined
             }
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },

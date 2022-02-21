@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ImportModal } from './import_modal';
 

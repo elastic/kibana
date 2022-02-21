@@ -13,8 +13,8 @@ import {
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../../common';
-import type { BrowserFields } from '../../../../../common';
+} from '../../../../../common/utils/accessibility';
+import type { BrowserFields } from '../../../../../common/search_strategy';
 import { getCategoryColumns } from './category_columns';
 import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 

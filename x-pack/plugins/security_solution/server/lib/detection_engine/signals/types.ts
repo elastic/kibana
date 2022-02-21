@@ -12,7 +12,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
-  AlertType,
+  RuleType,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -30,7 +30,7 @@ import {
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
-import { TelemetryEventsSender } from '../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
@@ -115,12 +115,16 @@ export interface SignalSource {
     };
     rule: {
       id: string;
+      description?: string;
       false_positives?: string[];
       immutable?: boolean;
     };
     /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
     original_time?: string;
+    /** signal.reason was introduced in 7.15 and pre-7.15 signals do not have it. */
+    reason?: string;
+    status?: string;
     threshold_result?: ThresholdResult;
   };
   kibana?: SearchTypes;
@@ -180,6 +184,7 @@ export type WrappedEventHit = BaseHit<EventHit>;
 export type AlertSearchResponse = estypes.SearchResponse<RACAlert>;
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
+export type AlertSourceHit = estypes.SearchHit<RACAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
@@ -196,7 +201,7 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
-): obj is AlertType<
+): obj is RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
@@ -207,7 +212,7 @@ export const isAlertExecutor = (
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = AlertType<
+export type SignalRuleAlertTypeDefinition = RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
@@ -309,7 +314,7 @@ export interface SearchAfterAndBulkCreateParams {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
@@ -321,7 +326,7 @@ export interface SearchAfterAndBulkCreateParams {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -356,6 +361,7 @@ export interface MultiAggBucket {
   }>;
   docCount: number;
   maxTimestamp: string;
+  minTimestamp: string;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

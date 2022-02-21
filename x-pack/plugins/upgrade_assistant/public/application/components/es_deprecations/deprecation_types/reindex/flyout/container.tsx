@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -64,6 +64,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   const flyoutContents = showWarningsStep ? (
     <WarningsFlyoutStep
       warnings={reindexState.reindexWarnings ?? []}
+      meta={reindexState.meta}
       hideWarningsStep={() => setShowWarningsStep(false)}
       continueReindex={() => {
         setShowWarningsStep(false);

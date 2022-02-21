@@ -6,8 +6,16 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { AlertSummary } from '../../../types';
+import { AlertSummary, ExecutionDuration } from '../../../types';
 import { RewriteRequestCase, AsApiContract } from '../../../../../actions/common';
+
+const transformExecutionDuration: RewriteRequestCase<ExecutionDuration> = ({
+  values_with_timestamp: valuesWithTimestamp,
+  ...rest
+}) => ({
+  valuesWithTimestamp,
+  ...rest,
+});
 
 const rewriteBodyRes: RewriteRequestCase<AlertSummary> = ({
   rule_type_id: ruleTypeId,
@@ -26,18 +34,23 @@ const rewriteBodyRes: RewriteRequestCase<AlertSummary> = ({
   statusEndDate,
   errorMessages,
   lastRun,
-  executionDuration,
+  executionDuration: executionDuration ? transformExecutionDuration(executionDuration) : undefined,
 });
 
 export async function loadAlertSummary({
   http,
   ruleId,
+  numberOfExecutions,
 }: {
   http: HttpSetup;
   ruleId: string;
+  numberOfExecutions?: number;
 }): Promise<AlertSummary> {
   const res = await http.get<AsApiContract<AlertSummary>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_alert_summary`
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_alert_summary`,
+    {
+      query: { number_of_executions: numberOfExecutions },
+    }
   );
   return rewriteBodyRes(res);
 }

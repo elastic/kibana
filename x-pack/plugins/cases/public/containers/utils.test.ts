@@ -97,7 +97,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
-        text: 'Alerts in this case have been also had their status updated',
+        text: 'Updated the statuses of attached alerts.',
       });
     });
 

@@ -12,5 +12,7 @@ import {
   FeatureUsageTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<FeatureUsageTestPluginSetup, FeatureUsageTestPluginStart> =
-  () => new FeatureUsageTestPlugin();
+export const plugin: PluginInitializer<
+  FeatureUsageTestPluginSetup,
+  FeatureUsageTestPluginStart
+> = () => new FeatureUsageTestPlugin();

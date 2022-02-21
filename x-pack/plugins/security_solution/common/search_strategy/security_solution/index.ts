@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
@@ -72,28 +72,23 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
+  CtiDataSourceRequestOptions,
+  CtiDataSourceStrategyResponse,
 } from './cti';
-import {
-  HostRulesRequestOptions,
-  HostRulesStrategyResponse,
-  HostTacticsRequestOptions,
-  HostTacticsStrategyResponse,
-  RiskScoreRequestOptions,
-  RiskScoreStrategyResponse,
-  UebaQueries,
-  UserRulesRequestOptions,
-  UserRulesStrategyResponse,
-} from './ueba';
 
+import {
+  HostsKpiRiskyHostsRequestOptions,
+  HostsKpiRiskyHostsStrategyResponse,
+} from './hosts/kpi/risky_hosts';
+
+export * from './cti';
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
-export * from './ueba';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
-  | UebaQueries
   | NetworkQueries
   | NetworkKpiQueries
   | CtiQueries
@@ -104,7 +99,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.SearchDocValueField[];
+  docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -124,16 +119,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
-  : T extends UebaQueries.riskScore
-  ? RiskScoreStrategyResponse
   : T extends HostsQueries.hostsRiskScore
   ? HostsRiskScoreStrategyResponse
-  : T extends UebaQueries.hostRules
-  ? HostRulesStrategyResponse
-  : T extends UebaQueries.userRules
-  ? UserRulesStrategyResponse
-  : T extends UebaQueries.hostTactics
-  ? HostTacticsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -146,6 +133,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
@@ -178,6 +167,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -200,6 +191,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -226,18 +219,12 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniqueFlowsRequestOptions
   : T extends NetworkKpiQueries.uniquePrivateIps
   ? NetworkKpiUniquePrivateIpsRequestOptions
-  : T extends UebaQueries.riskScore
-  ? RiskScoreRequestOptions
-  : T extends UebaQueries.hostRules
-  ? HostRulesRequestOptions
-  : T extends UebaQueries.userRules
-  ? UserRulesRequestOptions
-  : T extends UebaQueries.hostTactics
-  ? HostTacticsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

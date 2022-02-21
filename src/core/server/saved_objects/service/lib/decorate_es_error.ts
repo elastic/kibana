@@ -8,7 +8,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { ElasticsearchErrorDetails } from '../../../elasticsearch';
+import { ElasticsearchErrorDetails, isSupportedEsServer } from '../../../elasticsearch';
 
 const responseErrors = {
   isServiceUnavailable: (statusCode?: number) => statusCode === 503,
@@ -20,8 +20,7 @@ const responseErrors = {
   isBadRequest: (statusCode?: number) => statusCode === 400,
   isTooManyRequests: (statusCode?: number) => statusCode === 429,
 };
-const { ConnectionError, NoLivingConnectionsError, TimeoutError, ProductNotSupportedError } =
-  esErrors;
+const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
 const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
 
@@ -31,7 +30,6 @@ type EsErrors =
   | esErrors.ConnectionError
   | esErrors.NoLivingConnectionsError
   | esErrors.TimeoutError
-  | esErrors.ProductNotSupportedError
   | esErrors.ResponseError;
 
 export function decorateEsError(error: EsErrors) {
@@ -44,7 +42,6 @@ export function decorateEsError(error: EsErrors) {
     error instanceof ConnectionError ||
     error instanceof NoLivingConnectionsError ||
     error instanceof TimeoutError ||
-    error instanceof ProductNotSupportedError ||
     responseErrors.isServiceUnavailable(error.statusCode)
   ) {
     return SavedObjectsErrorHelpers.decorateEsUnavailableError(error, reason);
@@ -72,6 +69,11 @@ export function decorateEsError(error: EsErrors) {
     );
     if (match && match.length > 0) {
       return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(error, match[1]);
+    }
+    // Throw EsUnavailable error if the 404 is not from elasticsearch
+    // Needed here to verify Product support for any non-ignored 404 responses from calls to ES
+    if (!isSupportedEsServer(error?.meta?.headers)) {
+      return SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }

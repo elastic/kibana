@@ -9,8 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import {
+  isPrereleaseVersion,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
@@ -38,6 +41,7 @@ interface Props {
   http: HttpStart;
   basePath: string;
   isCloudEnabled: boolean;
+  kibanaVersion: string;
 }
 
 const INITIAL_STATE = {
@@ -50,10 +54,12 @@ function getFleetLink({
   isFleetEnabled,
   hasFleetAgents,
   basePath,
+  kibanaVersion,
 }: {
   isFleetEnabled: boolean;
   hasFleetAgents: boolean;
   basePath: string;
+  kibanaVersion: string;
 }) {
   if (!isFleetEnabled) {
     return;
@@ -66,7 +72,9 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
+        href: isPrereleaseVersion(kibanaVersion)
+          ? `${basePath}/app/integrations#/detail/apm/overview`
+          : `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
       };
 }
 
@@ -75,6 +83,7 @@ function TutorialConfigAgent({
   http,
   basePath,
   isCloudEnabled,
+  kibanaVersion,
 }: Props) {
   const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,6 +147,7 @@ function TutorialConfigAgent({
           isFleetEnabled: data.isFleetEnabled,
           hasFleetAgents,
           basePath,
+          kibanaVersion,
         })}
       />
 

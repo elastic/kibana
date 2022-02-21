@@ -8,63 +8,68 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('errors', () => {
-    it('returns 404 error on non-existing index_pattern', async () => {
-      const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-      const response = await supertest.post(`/api/index_patterns/index_pattern/${id}/fields`).send({
-        fields: {
-          foo: {},
-        },
-      });
+    configArray.forEach((config) => {
+      describe(config.name, () => {
+        it('returns 404 error on non-existing index_pattern', async () => {
+          const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+          const response = await supertest.post(`${config.path}/${id}/fields`).send({
+            fields: {
+              foo: {},
+            },
+          });
 
-      expect(response.status).to.be(404);
-    });
-
-    it('returns error when "fields" payload attribute is invalid', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-        },
-      });
-      const response2 = await supertest
-        .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
-        .send({
-          fields: 123,
+          expect(response.status).to.be(404);
         });
 
-      expect(response2.status).to.be(400);
-      expect(response2.body.statusCode).to.be(400);
-      expect(response2.body.message).to.be(
-        '[request body.fields]: expected value of type [object] but got [number]'
-      );
-    });
+        it('returns error when "fields" payload attribute is invalid', async () => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
+          const response1 = await supertest.post(config.path).send({
+            [config.serviceKey]: {
+              title,
+            },
+          });
+          const response2 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
+            .send({
+              fields: 123,
+            });
 
-    it('returns error if not changes are specified', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-        },
-      });
-
-      const response2 = await supertest
-        .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
-        .send({
-          fields: {
-            foo: {},
-            bar: {},
-            baz: {},
-          },
+          expect(response2.status).to.be(400);
+          expect(response2.body.statusCode).to.be(400);
+          expect(response2.body.message).to.be(
+            '[request body.fields]: expected value of type [object] but got [number]'
+          );
         });
 
-      expect(response2.status).to.be(400);
-      expect(response2.body.statusCode).to.be(400);
-      expect(response2.body.message).to.be('Change set is empty.');
+        it('returns error if not changes are specified', async () => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
+          const response1 = await supertest.post(config.path).send({
+            [config.serviceKey]: {
+              title,
+            },
+          });
+
+          const response2 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
+            .send({
+              fields: {
+                foo: {},
+                bar: {},
+                baz: {},
+              },
+            });
+
+          expect(response2.status).to.be(400);
+          expect(response2.body.statusCode).to.be(400);
+          expect(response2.body.message).to.be('Change set is empty.');
+        });
+      });
     });
   });
 }

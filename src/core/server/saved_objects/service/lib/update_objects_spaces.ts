@@ -11,6 +11,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
 import type { Logger } from '../../../logging';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
@@ -120,6 +121,10 @@ type ObjectToDeleteAliasesFor = Pick<
 
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 
+function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError {
+  return Boolean(doc && 'error' in doc);
+}
+
 /**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
@@ -200,10 +205,19 @@ export async function updateObjectsSpaces({
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: bulkGetDocs } },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       )
     : undefined;
-
+  // fail fast if we can't verify a 404 response is from Elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
@@ -224,8 +238,14 @@ export async function updateObjectsSpaces({
     let versionProperties;
     if (esRequestIndex !== undefined) {
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      // @ts-expect-error MultiGetHit._source is optional
-      if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
+      const isErrorDoc = isMgetError(doc);
+
+      if (
+        isErrorDoc ||
+        !doc?.found ||
+        // @ts-expect-error MultiGetHit._source is optional
+        !rawDocExistsInNamespace(registry, doc, namespace)
+      ) {
         const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
         return {
           tag: 'Left',
@@ -319,7 +339,7 @@ export async function updateObjectsSpaces({
 
         const { type, id, updatedSpaces, esRequestIndex } = expectedResult.value;
         if (esRequestIndex !== undefined) {
-          const response = bulkOperationResponse?.body.items[esRequestIndex] ?? {};
+          const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
           const rawResponse = Object.values(response)[0] as any;
           const error = getBulkOperationError(type, id, rawResponse);
           if (error) {

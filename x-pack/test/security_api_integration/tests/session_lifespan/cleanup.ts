@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up session expired because of lifespan', async function () {
-      this.timeout(60000);
+      this.timeout(100000);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -96,9 +96,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Cleanup routine runs every 10s, let's wait for 40s to make sure it runs multiple times and
+      // Cleanup routine runs every 20s, let's wait for 60s to make sure it runs multiple times and
       // when lifespan is exceeded.
-      await setTimeoutAsync(40000);
+      await setTimeoutAsync(60000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up session expired because of lifespan when providers override global session config', async function () {
-      this.timeout(60000);
+      this.timeout(100000);
 
       const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
         await Promise.all([
@@ -136,9 +136,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(await getNumberOfSessionDocuments()).to.be(4);
 
-      // Cleanup routine runs every 10s, let's wait for 40s to make sure it runs multiple times and
+      // Cleanup routine runs every 20s, let's wait for 40s to make sure it runs multiple times and
       // when lifespan is exceeded.
-      await setTimeoutAsync(40000);
+      await setTimeoutAsync(60000);
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);

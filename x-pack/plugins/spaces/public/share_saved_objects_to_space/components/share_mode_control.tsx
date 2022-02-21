@@ -19,7 +19,7 @@ import {
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { useSpaces } from '../../spaces_context';
@@ -139,7 +139,7 @@ export const ShareModeControl = (props: Props) => {
           onChange(updatedSpaceIds);
         }}
         legend={buttonGroupLegend}
-        color="secondary"
+        color="success"
         isFullWidth={true}
         isDisabled={!canShareToAllSpaces}
       />

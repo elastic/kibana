@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const TotalTime = ({ startTime, totalTime }) => {
   return (

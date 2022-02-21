@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
 import styled from 'styled-components';
@@ -22,7 +22,7 @@ const StyledEuiBadge = styled(EuiBadge)`
   text-transform: capitalize;
 `;
 
-interface Props {
+interface BaseProps {
   contextId: string;
   eventId: string;
   fieldName: string;
@@ -30,14 +30,33 @@ interface Props {
   value: string | number | undefined | null;
 }
 
+type Props = BaseProps &
+  Pick<EuiBadgeProps, 'iconType' | 'iconSide' | 'onClick' | 'onClickAriaLabel'>;
+
 const RuleStatusComponent: React.FC<Props> = ({
   contextId,
   eventId,
   fieldName,
   isDraggable,
   value,
+  onClick,
+  onClickAriaLabel,
+  iconSide,
+  iconType,
 }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
+  const badge = (
+    <StyledEuiBadge
+      color={color}
+      onClick={onClick}
+      onClickAriaLabel={onClickAriaLabel}
+      iconType={iconType}
+      iconSide={iconSide}
+    >
+      {value}
+    </StyledEuiBadge>
+  );
+
   return isDraggable ? (
     <DefaultDraggable
       field={fieldName}
@@ -46,10 +65,10 @@ const RuleStatusComponent: React.FC<Props> = ({
       value={`${value}`}
       tooltipContent={fieldName}
     >
-      <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
+      {badge}
     </DefaultDraggable>
   ) : (
-    <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
+    badge
   );
 };
 

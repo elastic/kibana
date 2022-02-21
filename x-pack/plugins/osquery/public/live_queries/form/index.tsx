@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useMutation } from 'react-query';
 import deepMerge from 'deepmerge';
@@ -227,6 +227,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
           setAdvancedContentState('open');
+        } else {
+          setFieldValue('ecs_mapping', {});
         }
       } else {
         setFieldValue('savedQueryId', null);
@@ -235,11 +237,23 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [setFieldValue]
   );
 
+  const commands = useMemo(
+    () => [
+      {
+        name: 'submitOnCmdEnter',
+        bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
+        exec: () => submit(),
+      },
+    ],
+    [submit]
+  );
+
   const queryComponentProps = useMemo(
     () => ({
       disabled: queryStatus === 'disabled',
+      commands,
     }),
-    [queryStatus]
+    [queryStatus, commands]
   );
 
   const flyoutFormDefaultValue = useMemo(

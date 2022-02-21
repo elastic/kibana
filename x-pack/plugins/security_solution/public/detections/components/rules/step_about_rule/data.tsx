@@ -7,7 +7,7 @@
 
 import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';

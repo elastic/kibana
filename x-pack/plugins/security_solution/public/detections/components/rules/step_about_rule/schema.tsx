@@ -291,3 +291,33 @@ export const schema: FormSchema<AboutStepRule> = {
     labelAppend: OptionalFieldLabel,
   },
 };
+
+export const threatIndicatorPathRequiredSchemaValue = {
+  type: FIELD_TYPES.TEXT,
+  label: i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
+    {
+      defaultMessage: 'Indicator prefix override',
+    }
+  ),
+  helpText: i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
+    {
+      defaultMessage:
+        'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
+    }
+  ),
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.threatIndicatorPathFieldEmptyError',
+          {
+            defaultMessage: 'Indicator prefix override must not be empty',
+          }
+        )
+      ),
+      type: VALIDATION_TYPES.FIELD,
+    },
+  ],
+};

@@ -57,7 +57,7 @@ export class LicenseManagementUIPlugin
       id: PLUGIN.id,
       title: PLUGIN.title,
       order: 0,
-      mount: async ({ element, setBreadcrumbs, history }) => {
+      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart, { telemetry }] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
@@ -90,6 +90,7 @@ export class LicenseManagementUIPlugin
             initialLicense,
           },
           docLinks: appDocLinks,
+          theme$,
         };
 
         const { renderApp } = await import('./application');

@@ -25,13 +25,13 @@ import {
 export function PalettePanelContainer({
   isOpen,
   handleClose,
-  children,
   siblingRef,
+  children,
 }: {
   isOpen: boolean;
   handleClose: () => void;
-  children: React.ReactElement | React.ReactElement[];
   siblingRef: MutableRefObject<HTMLDivElement | null>;
+  children?: React.ReactElement | React.ReactElement[];
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
@@ -56,6 +56,7 @@ export function PalettePanelContainer({
           <div
             role="dialog"
             aria-labelledby="lnsPalettePanelContainerTitle"
+            data-test-subj="lns-indexPattern-PalettePanelContainer"
             className="lnsPalettePanelContainer"
           >
             <EuiFlyoutHeader hasBorder className="lnsPalettePanelContainer__header">
@@ -90,7 +91,7 @@ export function PalettePanelContainer({
               </EuiFlexGroup>
             </EuiFlyoutHeader>
 
-            <div className="lnsPalettePanelContainer__content">{children}</div>
+            {children && <div className="lnsPalettePanelContainer__content">{children}</div>}
 
             <EuiFlyoutFooter className="lnsPalettePanelContainer__footer">
               <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>

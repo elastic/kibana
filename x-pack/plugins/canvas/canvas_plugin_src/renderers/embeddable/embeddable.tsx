@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   IEmbeddable,
   EmbeddableFactory,
@@ -20,6 +21,7 @@ import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { RendererFactory, EmbeddableInput } from '../../../types';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+import type { EmbeddableContainerContext } from '../../../../../../src/plugins/embeddable/public/';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -31,6 +33,10 @@ const embeddablesRegistry: {
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
+  const embeddableContainerContext: EmbeddableContainerContext = {
+    getCurrentPath: () => window.location.hash,
+  };
+
   return (embeddableObject: IEmbeddable) => {
     return (
       <div
@@ -38,7 +44,12 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
-          <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <plugins.embeddable.EmbeddablePanel
+              embeddable={embeddableObject}
+              containerContext={embeddableContainerContext}
+            />
+          </KibanaThemeProvider>
         </I18nContext>
       </div>
     );

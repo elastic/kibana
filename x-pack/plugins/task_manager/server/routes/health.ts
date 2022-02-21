@@ -12,9 +12,11 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
+import { IClusterClient } from 'src/core/server';
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   MonitoringStats,
@@ -47,16 +49,34 @@ const LEVEL_SUMMARY = {
  */
 type TaskManagerServiceStatus = ServiceStatus<never>;
 
-export function healthRoute(
-  router: IRouter,
-  monitoringStats$: Observable<MonitoringStats>,
-  logger: Logger,
-  taskManagerId: string,
-  config: TaskManagerConfig
-): {
+export interface HealthRouteParams {
+  router: IRouter;
+  monitoringStats$: Observable<MonitoringStats>;
+  logger: Logger;
+  taskManagerId: string;
+  config: TaskManagerConfig;
+  kibanaVersion: string;
+  kibanaIndexName: string;
+  getClusterClient: () => Promise<IClusterClient>;
+  usageCounter?: UsageCounter;
+}
+
+export function healthRoute(params: HealthRouteParams): {
   serviceStatus$: Observable<TaskManagerServiceStatus>;
   monitoredHealth$: Observable<MonitoredHealth>;
 } {
+  const {
+    router,
+    monitoringStats$,
+    logger,
+    taskManagerId,
+    config,
+    kibanaVersion,
+    kibanaIndexName,
+    getClusterClient,
+    usageCounter,
+  } = params;
+
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
@@ -95,6 +115,8 @@ export function healthRoute(
   router.get(
     {
       path: '/api/task_manager/_health',
+      // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
+      // options: { tags: ['access:taskManager'] },
       validate: false,
     },
     async function (
@@ -102,6 +124,39 @@ export function healthRoute(
       req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
+      // If we are able to count usage, we want to check whether the user has access to
+      // the `taskManager` feature, which is only available as part of the Global All privilege.
+      if (usageCounter) {
+        const clusterClient = await getClusterClient();
+        const hasPrivilegesResponse = await clusterClient
+          .asScoped(req)
+          .asCurrentUser.security.hasPrivileges({
+            body: {
+              application: [
+                {
+                  application: `kibana-${kibanaIndexName}`,
+                  resources: ['*'],
+                  privileges: [`api:${kibanaVersion}:taskManager`],
+                },
+              ],
+            },
+          });
+
+        // Keep track of total access vs admin access
+        usageCounter.incrementCounter({
+          counterName: `taskManagerHealthApiAccess`,
+          counterType: 'taskManagerHealthApi',
+          incrementBy: 1,
+        });
+        if (hasPrivilegesResponse.has_all_requested) {
+          usageCounter.incrementCounter({
+            counterName: `taskManagerHealthApiAdminAccess`,
+            counterType: 'taskManagerHealthApi',
+            incrementBy: 1,
+          });
+        }
+      }
+
       return res.ok({
         body: lastMonitoredStats
           ? getHealthStatus(lastMonitoredStats)

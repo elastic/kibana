@@ -29,6 +29,7 @@ export const routeValidationConfig = {
   query: schema.object({
     method: acceptedHttpVerb,
     path: nonEmptyString,
+    withProductOrigin: schema.maybe(schema.boolean()),
   }),
   body: schema.stream(),
 };

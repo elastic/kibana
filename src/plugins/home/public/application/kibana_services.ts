@@ -19,6 +19,7 @@ import {
 import { UiCounterMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { DataViewsContract } from '../../../data_views/public';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -27,7 +28,7 @@ import { ConfigSchema } from '../../config';
 import { SharePluginSetup } from '../../../share/public';
 
 export interface HomeKibanaServices {
-  indexPatternService: any;
+  dataViewsService: DataViewsContract;
   kibanaVersion: string;
   share: SharePluginSetup;
   chrome: ChromeStart;

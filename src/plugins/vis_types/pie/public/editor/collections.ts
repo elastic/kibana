@@ -7,7 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LabelPositions, ValueFormats } from '../types';
+import {
+  LabelPositions,
+  ValueFormats,
+  EmptySizeRatios,
+} from '../../../../chart_expressions/expression_partition_vis/common';
 
 export const getLabelPositions = [
   {
@@ -36,5 +40,29 @@ export const getValuesFormats = [
       defaultMessage: 'Show value',
     }),
     value: ValueFormats.VALUE,
+  },
+];
+
+export const emptySizeRatioOptions = [
+  {
+    id: 'emptySizeRatioOption-small',
+    value: EmptySizeRatios.SMALL,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.small', {
+      defaultMessage: 'Small',
+    }),
+  },
+  {
+    id: 'emptySizeRatioOption-medium',
+    value: EmptySizeRatios.MEDIUM,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    id: 'emptySizeRatioOption-large',
+    value: EmptySizeRatios.LARGE,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.large', {
+      defaultMessage: 'Large',
+    }),
   },
 ];

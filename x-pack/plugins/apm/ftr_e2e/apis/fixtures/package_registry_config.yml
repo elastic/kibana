@@ -1,0 +1,4 @@
+package_paths:
+  - /packages/production
+  - /packages/snapshot
+  - /packages/test-packages

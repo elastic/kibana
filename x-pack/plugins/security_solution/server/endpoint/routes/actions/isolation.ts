@@ -33,8 +33,8 @@ import {
 import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
-import { userCanIsolate } from '../../../../common/endpoint/actions';
 import { doLogsEndpointActionDsExists } from '../../utils';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -43,6 +43,8 @@ export function registerHostIsolationRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  const logger = endpointContext.logFactory.get('hostIsolation');
+
   // perform isolation
   router.post(
     {
@@ -50,7 +52,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, true)
+    withEndpointAuthz(
+      { all: ['canIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, true)
+    )
   );
 
   // perform UN-isolate
@@ -60,7 +66,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, false)
+    withEndpointAuthz(
+      { all: ['canUnIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, false)
+    )
   );
 }
 
@@ -73,7 +83,8 @@ const createFailedActionResponseEntry = async ({
   doc: LogsEndpointActionResponse;
   logger: Logger;
 }): Promise<void> => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  // 8.0+ requires internal user to write to system indices
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
@@ -100,24 +111,8 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    // only allow admin users
+    endpointContext.service.getFeatureUsageService().notifyUsage('HOST_ISOLATION');
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    if (!userCanIsolate(user?.roles)) {
-      return res.forbidden({
-        body: {
-          message: 'You do not have permission to perform this action',
-        },
-      });
-    }
-
-    // isolation requires plat+
-    if (isolate && !endpointContext.service.getLicenseService()?.isPlatinumPlus()) {
-      return res.forbidden({
-        body: {
-          message: 'Your license level does not allow for this action',
-        },
-      });
-    }
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
@@ -181,17 +176,23 @@ export const isolationRequestHandler = function (
       logger,
       dataStreamName: ENDPOINT_ACTIONS_DS,
     });
+
+    // 8.0+ requires internal user to write to system indices
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+
     // if the new endpoint indices/data streams exists
-    // write the action request to the new index as the current user
+    // write the action request to the new endpoint index
     if (doesLogsEndpointActionsDsExist) {
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>({
-          index: `${ENDPOINT_ACTIONS_DS}-default`,
-          body: {
-            ...doc,
+        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
+          {
+            index: `${ENDPOINT_ACTIONS_DS}-default`,
+            body: {
+              ...doc,
+            },
           },
-        });
+          { meta: true }
+        );
         if (logsEndpointActionsResult.statusCode !== 201) {
           return res.customError({
             statusCode: 500,
@@ -208,24 +209,21 @@ export const isolationRequestHandler = function (
       }
     }
 
+    // write actions to .fleet-actions index
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
-      // write as the current user if the new indices do not exist
-      // <v7.16 requires the current user to be super user
-      fleetActionIndexResult = await esClient.index<EndpointAction>({
-        index: AGENT_ACTIONS_INDEX,
-        body: {
-          ...doc.EndpointActions,
-          '@timestamp': doc['@timestamp'],
-          agents,
-          timeout: 300, // 5 minutes
-          user_id: doc.user.id,
+      fleetActionIndexResult = await esClient.index<EndpointAction>(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: {
+            ...doc.EndpointActions,
+            '@timestamp': doc['@timestamp'],
+            agents,
+            timeout: 300, // 5 minutes
+            user_id: doc.user.id,
+          },
         },
-      });
+        { meta: true }
+      );
 
       if (fleetActionIndexResult.statusCode !== 201) {
         return res.customError({

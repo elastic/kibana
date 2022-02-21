@@ -6,6 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type {
   Logger,
   KibanaRequest,
@@ -28,7 +29,7 @@ import {
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedRuleType } from '../rule_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -44,8 +45,9 @@ export interface TaskRunnerContext {
   ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: number;
+  maxEphemeralActionsPerRule: number;
   cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
 }
 
 export class TaskRunnerFactory {
@@ -69,7 +71,7 @@ export class TaskRunnerFactory {
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
   >(
-    alertType: NormalizedAlertType<
+    ruleType: NormalizedRuleType<
       Params,
       ExtractedParams,
       State,
@@ -92,6 +94,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alertType, taskInstance, this.taskRunnerContext!);
+    >(ruleType, taskInstance, this.taskRunnerContext!);
   }
 }

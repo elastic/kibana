@@ -20,7 +20,7 @@ import {
   EuiFieldText,
   EuiModal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneEmbeddableInput } from '..';

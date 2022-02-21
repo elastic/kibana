@@ -13,7 +13,7 @@ import { applicationServiceMock } from '../../../../../src/core/public/mocks';
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { SearchBar } from './search_bar';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock(
   'react-virtualized-auto-sizer',

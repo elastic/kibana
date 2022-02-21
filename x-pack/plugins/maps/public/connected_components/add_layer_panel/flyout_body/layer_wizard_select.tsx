@@ -18,7 +18,7 @@ import {
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getLayerWizards, LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
@@ -157,7 +157,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiCard
             title={layerWizard.title}
             titleSize="xs"
-            betaBadgeLabel={layerWizard.isBeta ? 'beta' : undefined}
+            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : undefined }}
             icon={icon}
             onClick={onClick}
             description={layerWizard.description}

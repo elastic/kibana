@@ -52,10 +52,12 @@ import {
   SearchOpts,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
+import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 
 export interface TaskClaimingOpts {
   logger: Logger;
   definitions: TaskTypeDictionary;
+  unusedTypes: string[];
   taskStore: TaskStore;
   maxAttempts: number;
   excludedTaskTypes: string[];
@@ -106,6 +108,8 @@ interface TaskClaimingBatch<Concurrency extends BatchConcurrency, TaskType> {
 type UnlimitedBatch = TaskClaimingBatch<BatchConcurrency.Unlimited, Set<string>>;
 type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
 
+export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
+
 export class TaskClaiming {
   public readonly errors$ = new Subject<Error>();
   public readonly maxAttempts: number;
@@ -118,6 +122,7 @@ export class TaskClaiming {
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
+  private readonly unusedTypes: string[];
 
   /**
    * Constructs a new TaskStore.
@@ -134,6 +139,7 @@ export class TaskClaiming {
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
+    this.unusedTypes = opts.unusedTypes;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -222,7 +228,7 @@ export class TaskClaiming {
             return of(accumulatedResult);
           }
           return from(
-            this.executClaimAvailableTasks({
+            this.executeClaimAvailableTasks({
               claimOwnershipUntil,
               claimTasksById: claimTasksById.splice(0, capacity),
               size: capacity,
@@ -246,7 +252,7 @@ export class TaskClaiming {
     );
   }
 
-  private executClaimAvailableTasks = async ({
+  private executeClaimAvailableTasks = async ({
     claimOwnershipUntil,
     claimTasksById = [],
     size,
@@ -400,21 +406,23 @@ export class TaskClaiming {
         : queryForScheduledTasks,
       filterDownBy(InactiveTasks)
     );
-    const script = updateFieldsAndMarkAsFailed(
-      {
+    const script = updateFieldsAndMarkAsFailed({
+      fieldUpdates: {
         ownerId: this.taskStore.taskManagerId,
         retryAt: claimOwnershipUntil,
       },
-      claimTasksById || [],
-      taskTypesToClaim,
-      taskTypesToSkip,
-      pick(this.taskMaxAttempts, taskTypesToClaim)
-    );
+      claimTasksById: claimTasksById || [],
+      claimableTaskTypes: taskTypesToClaim,
+      skippedTaskTypes: taskTypesToSkip,
+      unusedTaskTypes: this.unusedTypes,
+      taskMaxAttempts: pick(this.taskMaxAttempts, taskTypesToClaim),
+    });
 
     const apmTrans = apm.startTransaction(
-      'markAvailableTasksAsClaimed',
-      `taskManager markAvailableTasksAsClaimed`
+      TASK_MANAGER_MARK_AS_CLAIMED,
+      TASK_MANAGER_TRANSACTION_TYPE
     );
+
     try {
       const result = await this.taskStore.updateByQuery(
         {

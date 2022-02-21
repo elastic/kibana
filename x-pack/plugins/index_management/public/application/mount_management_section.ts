@@ -54,7 +54,7 @@ export async function mountManagementSection(
   isFleetEnabled: boolean,
   kibanaVersion: SemVer
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -91,6 +91,7 @@ export async function mountManagementSection(
     url,
     docLinks,
     kibanaVersion,
+    theme$,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

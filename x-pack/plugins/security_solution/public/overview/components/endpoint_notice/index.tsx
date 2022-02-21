@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
 import { getEndpointListPath } from '../../../management/common/routing';

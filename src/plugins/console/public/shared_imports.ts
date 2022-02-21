@@ -11,3 +11,5 @@ import { sendRequest, XJson } from '../../es_ui_shared/public';
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
+
+export { KibanaThemeProvider, toMountPoint } from '../../kibana_react/public';

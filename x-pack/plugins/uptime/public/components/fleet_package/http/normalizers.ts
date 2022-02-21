@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HTTPFields, ConfigKeys, ContentType, contentTypesToMode } from '../types';
+import { HTTPFields, ConfigKey, ContentType, contentTypesToMode } from '../types';
 import {
   Normalizer,
   commonNormalizers,
@@ -22,47 +22,47 @@ const defaultHTTPValues = {
   ...defaultHTTPAdvancedFields,
 };
 
-export const getHTTPNormalizer = (key: ConfigKeys) => {
+export const getHTTPNormalizer = (key: ConfigKey) => {
   return getNormalizer(key, defaultHTTPValues);
 };
 
-export const getHTTPJsonToJavascriptNormalizer = (key: ConfigKeys) => {
+export const getHTTPJsonToJavascriptNormalizer = (key: ConfigKey) => {
   return getJsonToJavascriptNormalizer(key, defaultHTTPValues);
 };
 
 export const httpNormalizers: HTTPNormalizerMap = {
-  [ConfigKeys.METADATA]: getHTTPJsonToJavascriptNormalizer(ConfigKeys.METADATA),
-  [ConfigKeys.URLS]: getHTTPNormalizer(ConfigKeys.URLS),
-  [ConfigKeys.MAX_REDIRECTS]: getHTTPNormalizer(ConfigKeys.MAX_REDIRECTS),
-  [ConfigKeys.USERNAME]: getHTTPNormalizer(ConfigKeys.USERNAME),
-  [ConfigKeys.PASSWORD]: getHTTPNormalizer(ConfigKeys.PASSWORD),
-  [ConfigKeys.PROXY_URL]: getHTTPNormalizer(ConfigKeys.PROXY_URL),
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: getHTTPJsonToJavascriptNormalizer(
-    ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
+  [ConfigKey.METADATA]: getHTTPJsonToJavascriptNormalizer(ConfigKey.METADATA),
+  [ConfigKey.URLS]: getHTTPNormalizer(ConfigKey.URLS),
+  [ConfigKey.MAX_REDIRECTS]: getHTTPNormalizer(ConfigKey.MAX_REDIRECTS),
+  [ConfigKey.USERNAME]: getHTTPNormalizer(ConfigKey.USERNAME),
+  [ConfigKey.PASSWORD]: getHTTPNormalizer(ConfigKey.PASSWORD),
+  [ConfigKey.PROXY_URL]: getHTTPNormalizer(ConfigKey.PROXY_URL),
+  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: getHTTPJsonToJavascriptNormalizer(
+    ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE
   ),
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: getHTTPJsonToJavascriptNormalizer(
-    ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
+  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: getHTTPJsonToJavascriptNormalizer(
+    ConfigKey.RESPONSE_BODY_CHECK_POSITIVE
   ),
-  [ConfigKeys.RESPONSE_BODY_INDEX]: getHTTPNormalizer(ConfigKeys.RESPONSE_BODY_INDEX),
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: getHTTPJsonToJavascriptNormalizer(
-    ConfigKeys.RESPONSE_HEADERS_CHECK
+  [ConfigKey.RESPONSE_BODY_INDEX]: getHTTPNormalizer(ConfigKey.RESPONSE_BODY_INDEX),
+  [ConfigKey.RESPONSE_HEADERS_CHECK]: getHTTPJsonToJavascriptNormalizer(
+    ConfigKey.RESPONSE_HEADERS_CHECK
   ),
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: getHTTPNormalizer(ConfigKeys.RESPONSE_HEADERS_INDEX),
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: getHTTPJsonToJavascriptNormalizer(
-    ConfigKeys.RESPONSE_STATUS_CHECK
+  [ConfigKey.RESPONSE_HEADERS_INDEX]: getHTTPNormalizer(ConfigKey.RESPONSE_HEADERS_INDEX),
+  [ConfigKey.RESPONSE_STATUS_CHECK]: getHTTPJsonToJavascriptNormalizer(
+    ConfigKey.RESPONSE_STATUS_CHECK
   ),
-  [ConfigKeys.REQUEST_BODY_CHECK]: (fields) => {
-    const requestBody = fields?.[ConfigKeys.REQUEST_BODY_CHECK]?.value;
-    const requestHeaders = fields?.[ConfigKeys.REQUEST_HEADERS_CHECK]?.value;
+  [ConfigKey.REQUEST_BODY_CHECK]: (fields) => {
+    const requestBody = fields?.[ConfigKey.REQUEST_BODY_CHECK]?.value;
+    const requestHeaders = fields?.[ConfigKey.REQUEST_HEADERS_CHECK]?.value;
     if (requestBody) {
       const headers = requestHeaders
-        ? JSON.parse(fields?.[ConfigKeys.REQUEST_HEADERS_CHECK]?.value)
-        : defaultHTTPAdvancedFields[ConfigKeys.REQUEST_HEADERS_CHECK];
+        ? JSON.parse(fields?.[ConfigKey.REQUEST_HEADERS_CHECK]?.value)
+        : defaultHTTPAdvancedFields[ConfigKey.REQUEST_HEADERS_CHECK];
       const requestBodyValue =
         requestBody !== null && requestBody !== undefined
           ? JSON.parse(requestBody)
-          : defaultHTTPAdvancedFields[ConfigKeys.REQUEST_BODY_CHECK]?.value;
-      let requestBodyType = defaultHTTPAdvancedFields[ConfigKeys.REQUEST_BODY_CHECK]?.type;
+          : defaultHTTPAdvancedFields[ConfigKey.REQUEST_BODY_CHECK]?.value;
+      let requestBodyType = defaultHTTPAdvancedFields[ConfigKey.REQUEST_BODY_CHECK]?.type;
       Object.keys(headers || []).some((headerKey) => {
         if (headerKey === 'Content-Type' && contentTypesToMode[headers[headerKey] as ContentType]) {
           requestBodyType = contentTypesToMode[headers[headerKey] as ContentType];
@@ -74,13 +74,13 @@ export const httpNormalizers: HTTPNormalizerMap = {
         type: requestBodyType,
       };
     } else {
-      return defaultHTTPAdvancedFields[ConfigKeys.REQUEST_BODY_CHECK];
+      return defaultHTTPAdvancedFields[ConfigKey.REQUEST_BODY_CHECK];
     }
   },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: getHTTPJsonToJavascriptNormalizer(
-    ConfigKeys.REQUEST_HEADERS_CHECK
+  [ConfigKey.REQUEST_HEADERS_CHECK]: getHTTPJsonToJavascriptNormalizer(
+    ConfigKey.REQUEST_HEADERS_CHECK
   ),
-  [ConfigKeys.REQUEST_METHOD_CHECK]: getHTTPNormalizer(ConfigKeys.REQUEST_METHOD_CHECK),
+  [ConfigKey.REQUEST_METHOD_CHECK]: getHTTPNormalizer(ConfigKey.REQUEST_METHOD_CHECK),
   ...commonNormalizers,
   ...tlsNormalizers,
 };

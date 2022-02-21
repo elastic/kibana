@@ -7,7 +7,7 @@
 {kib} enables you to give
 shape to your data and navigate the Elastic Stack.  With {kib}, you can:
 
-* *Search, observe, and protect.*
+* *Search, observe, and protect your data.*
 From discovering documents to analyzing logs to finding security vulnerabilities,
 {kib} is your portal for accessing these capabilities and more.
 
@@ -58,9 +58,9 @@ your organization from threats before damage and loss occur.
 [[visualize-and-analyze]]
 === Analyze
 
-Data analysis is a core functionality of {kib}. Quickly search through large amounts
+With {kib} <<get-started,*Analytics*>>, you can quickly search through large amounts
 of data, explore fields and values,
-and then use {kib}’s drag-and-drop interface to rapidly build charts, tables, metrics, and more.
+and then use the drag-and-drop interface to rapidly build charts, tables, metrics, and more.
 
 [role="screenshot"]
 image::images/visualization-journey.png[User data analysis journey]
@@ -70,8 +70,9 @@ image::images/visualization-journey.png[User data analysis journey]
 |===
 
 | *1*
-| *Add data.* The best way to add {es} data to {kib} is to use one of our guided processes,
-available from the <<kibana-home-page,home page>>.
+| *Add data.* The best way to add data to the Elastic Stack is to use one of our many <<connect-to-elasticsearch,integrations>>.
+Alternatively, you can add a sample data set or upload a file. All three options are available
+on the home page.
 
 | *2*
 | *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
@@ -126,7 +127,7 @@ When the alert triggers, you can send a notification to a system that is part of
 email, Slack, PagerDuty, ServiceNow, and other third party integrations.
 
 A dedicated view for creating, searching,
-and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>
+and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
 
 [role="screenshot"]
 image::images/rules-and-connectors.png[Rules and Connectors view]
@@ -143,13 +144,9 @@ You might be managing tens, hundreds, or even thousands of dashboards, visualiza
 [[organize-in-spaces]]
 ==== Collect related items in a space
 
-{kib}
-<<xpack-spaces, Spaces>> is built for organizing your visualizations, dashboards, and {data-sources}.
+{kib} provides <<xpack-spaces, spaces>> for organizing your visualizations, dashboards, {data-sources}, and more.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
-
-Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
-*Canvas* workpads, graphs, tags, and machine learning jobs.
 
 [role="screenshot"]
 image::images/select-your-space.png[Space selector view]
@@ -157,10 +154,10 @@ image::images/select-your-space.png[Space selector view]
 [float]
 ==== Organize your content with tags
 
-Tags are keywords or labels that you assign to {kib} saved objects,
+Tags are keywords or labels that you assign to saved objects,
 such as dashboards and visualizations, so you can classify them in a way that is meaningful to you.
 For example, if you tag objects with “design”, you can search and
-filter on the tag to see related objects.
+filter on the tag to see all related objects.
 Tags are also good for grouping content into categories within a space.
 
 Don’t worry if you have hundreds of dashboards that need to be tagged. Use <<managing-tags,*Tags*>>
@@ -172,15 +169,14 @@ them in bulk operations.
 === Secure {kib}
 
 {kib} offers a range of security features for you to control who has access to what.
-The security features are automatically turned on when
-{ref}/get-started-enable-security.html[security is enabled in
-{es}]. For a description of all available configuration options,
-see <<security-settings-kb,Security settings in {kib}>>.
+{ref}/configuring-stack-security.html[Security is enabled automatically] when you enroll {kib} with a secured {es} cluster.
+For a description of all available configuration options,
+refer to <<security-settings-kb,Security settings in {kib}>>.
 
 [float]
 ==== Log in
 {kib} supports several <<kibana-authentication,authentication providers>>,
-allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
+allowing you to login using {es}’s built-in realms, or with your own single sign-on provider.
 
 [role="screenshot"]
 image::security/images/kibana-login.png[Login page]
@@ -216,9 +212,9 @@ users’ behavior. For more information, see <<xpack-security-audit-logging,{kib
 
 [float]
 [[kibana-navigation-search]]
-=== Quickly find apps and objects
+=== Find apps and objects
 
-To find {kib} apps and the objects you create, use the search field in the global header.
+To quickly find apps and the objects you create, use the search field in the global header.
 Search suggestions include deep links into applications,
 allowing you to directly navigate to the views you need most.
 
@@ -237,7 +233,7 @@ To get the most from the search feature, follow these tips:
 |Search by type
 |`type:dashboard`
 
-Available types: `application`, `canvas-workpad`, `dashboard`, `index-pattern`, `lens`, `maps`, `query`, `search`, `visualization`
+Available types: `application`, `canvas-workpad`, `dashboard`, `data-view`, `lens`, `maps`, `query`, `search`, `visualization`
 
 |Search by tag
 |`tag:mytagname` +
@@ -261,7 +257,7 @@ image::images/tags-search.png[Example of searching for tags]
 [float]
 === View all {kib} has to offer
 
-To view the full list of {kib} apps and features, go to https://www.elastic.co/kibana/features[{kib} features].
+To view the full list of apps and features, go to https://www.elastic.co/kibana/features[{kib} features].
 
 [float]
 [[try-kibana]]

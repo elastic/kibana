@@ -42,6 +42,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await security.testUser.setRoles(['kibana_admin']);
         await security.testUser.setRoles(['test_api_keys']);
         await pageObjects.common.navigateToApp('apiKeys');
+
+        // Delete any API keys created outside of these tests
+        await pageObjects.apiKeys.bulkDeleteApiKeys();
       });
 
       afterEach(async () => {

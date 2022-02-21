@@ -26,6 +26,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
@@ -42,6 +43,9 @@ export const IGNORE_FILE_GLOBS = [
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
+  // Required to match the name in the docs.elastic.dev repo.
+  'nav-kibana-dev.docnav.json',
+
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
@@ -55,10 +59,10 @@ export const IGNORE_FILE_GLOBS = [
   // filename must match upstream filenames from lodash
   'packages/elastic-safer-lodash-set/**/*',
 
-  // TODO fix file names in APM to remove these
-  'x-pack/plugins/apm/public/**/*',
-
   'x-pack/plugins/maps/server/fonts/**/*',
+
+  // Bundled package names typically use a format like ${pkgName}-${pkgVersion}, so don't lint them
+  'x-pack/plugins/fleet/server/bundled_packages/**/*',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -97,6 +101,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'typings/*',
 ];
 
 /**

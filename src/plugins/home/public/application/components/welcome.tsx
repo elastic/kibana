@@ -24,7 +24,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getServices } from '../kibana_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
 

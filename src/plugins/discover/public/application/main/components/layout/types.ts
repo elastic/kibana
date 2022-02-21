@@ -7,7 +7,7 @@
  */
 
 import {
-  IndexPattern,
+  DataView,
   IndexPatternAttributes,
   Query,
   SavedObject,
@@ -16,23 +16,24 @@ import {
 import { ISearchSource } from '../../../../../../data/public';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
-import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { RequestAdapter } from '../../../../../../inspector';
+import { ElasticSearchHit } from '../../../../types';
 
 export interface DiscoverLayoutProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;
   onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   resetSavedSearch: () => void;
+  expandedDoc?: ElasticSearchHit;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;
   searchSource: ISearchSource;
-  services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
 }

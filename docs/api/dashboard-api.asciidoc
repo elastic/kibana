@@ -4,7 +4,7 @@
 deprecated::[7.15.0,Both of these APIs have been deprecated in favor of <<saved-objects-api-import>> and <<saved-objects-api-export>>.]
 
 Import and export dashboards with the corresponding saved objects, such as visualizations, saved
-searches, and index patterns.
+searches, and data views.
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.

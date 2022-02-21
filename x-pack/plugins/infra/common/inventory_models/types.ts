@@ -252,7 +252,7 @@ export const ESCaridnalityAggRT = rt.type({
 export const ESBucketScriptAggRT = rt.type({
   bucket_script: rt.intersection([
     rt.type({
-      buckets_path: rt.record(rt.string, rt.union([rt.undefined, rt.string])),
+      buckets_path: rt.record(rt.string, rt.string),
       script: rt.type({
         source: rt.string,
         lang: rt.keyof({ painless: null, expression: null }),

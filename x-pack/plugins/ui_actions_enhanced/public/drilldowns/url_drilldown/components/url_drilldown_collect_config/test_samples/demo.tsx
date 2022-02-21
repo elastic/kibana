@@ -20,6 +20,7 @@ export const Demo = () => {
       <UrlDrilldownCollectConfig
         config={config}
         onConfig={onConfig}
+        exampleUrl="https://www.example.com"
         variables={[
           {
             label: 'event.key',

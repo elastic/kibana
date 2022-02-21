@@ -8,6 +8,7 @@
 import { curry, isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import moment from 'moment';
 import { postPagerduty } from './lib/post_pagerduty';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -97,8 +98,8 @@ function validateParams(paramsObject: unknown): string | void {
   const validatedTimestamp = validateTimestamp(timestamp);
   if (validatedTimestamp != null) {
     try {
-      const date = Date.parse(validatedTimestamp);
-      if (isNaN(date)) {
+      const date = moment(validatedTimestamp);
+      if (!date.isValid()) {
         return i18n.translate('xpack.actions.builtin.pagerduty.invalidTimestampErrorMessage', {
           defaultMessage: `error parsing timestamp "{timestamp}"`,
           values: {
@@ -293,7 +294,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
-    ...(validatedTimestamp ? { timestamp: validatedTimestamp } : {}),
+    ...(validatedTimestamp ? { timestamp: moment(validatedTimestamp).toISOString() } : {}),
     ...omitBy(pick(params, ['component', 'group', 'class']), isUndefined),
   };
 

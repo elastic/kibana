@@ -9,7 +9,7 @@ import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common
 import { AlertingFrameworkHealth, AlertsHealth } from '../../../../../alerting/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 
-const rewriteAlertingFrameworkHeath: RewriteRequestCase<AlertsHealth> = ({
+const rewriteAlertingFrameworkHealth: RewriteRequestCase<AlertsHealth> = ({
   decryption_health: decryptionHealth,
   execution_health: executionHealth,
   read_health: readHealth,
@@ -24,12 +24,13 @@ const rewriteAlertingFrameworkHeath: RewriteRequestCase<AlertsHealth> = ({
 const rewriteBodyRes: RewriteRequestCase<AlertingFrameworkHealth> = ({
   is_sufficiently_secure: isSufficientlySecure,
   has_permanent_encryption_key: hasPermanentEncryptionKey,
-  alerting_framework_heath: alertingFrameworkHeath,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  alerting_framework_health: alertingFrameworkHealth,
   ...res
 }: AsApiContract<AlertingFrameworkHealth>) => ({
   isSufficientlySecure,
   hasPermanentEncryptionKey,
-  alertingFrameworkHeath,
+  alertingFrameworkHealth,
   ...res,
 });
 
@@ -41,11 +42,11 @@ export async function alertingFrameworkHealth({
   const res = await http.get<AsApiContract<AlertingFrameworkHealth>>(
     `${BASE_ALERTING_API_PATH}/_health`
   );
-  const alertingFrameworkHeath = rewriteAlertingFrameworkHeath(
-    res.alerting_framework_heath as unknown as AsApiContract<AlertsHealth>
+  const alertingFrameworkHealthRewrited = rewriteAlertingFrameworkHealth(
+    res.alerting_framework_health as unknown as AsApiContract<AlertsHealth>
   );
   return {
     ...rewriteBodyRes(res),
-    alertingFrameworkHeath,
+    alertingFrameworkHealth: alertingFrameworkHealthRewrited,
   };
 }

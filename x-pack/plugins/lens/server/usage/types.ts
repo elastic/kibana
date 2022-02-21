@@ -10,6 +10,7 @@ export interface LensTelemetryState {
   byDate: Record<string, Record<string, number>>;
   suggestionsByDate: Record<string, Record<string, number>>;
   saved: LensVisualizationUsage;
+  multiterms: LensMultitermsUsage;
 }
 
 export interface LensVisualizationUsage {
@@ -21,6 +22,12 @@ export interface LensVisualizationUsage {
   saved_90_days_total: number;
 }
 
+export interface LensMultitermsUsage {
+  saved_multiterms_overall: Record<string, number>;
+  saved_multiterms_30_days: Record<string, number>;
+  saved_multiterms_90_days: Record<string, number>;
+}
+
 export interface LensClickUsage {
   events_30_days: Record<string, number>;
   events_90_days: Record<string, number>;
@@ -28,4 +35,13 @@ export interface LensClickUsage {
   suggestion_events_90_days: Record<string, number>;
 }
 
-export type LensUsage = LensVisualizationUsage & LensClickUsage;
+export interface GenericSavedUsage {
+  saved_overall: Record<string, number>;
+  saved_30_days: Record<string, number>;
+  saved_90_days: Record<string, number>;
+  saved_overall_total: number;
+  saved_30_days_total: number;
+  saved_90_days_total: number;
+}
+
+export type LensUsage = LensVisualizationUsage & LensMultitermsUsage & LensClickUsage;

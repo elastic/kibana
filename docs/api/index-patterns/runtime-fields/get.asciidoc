@@ -4,6 +4,8 @@
 <titleabbrev>Get runtime field</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-get>> instead.]
+
 experimental[] Get a runtime field
 
 [[index-patterns-runtime-field-get-request]]

@@ -56,5 +56,6 @@ const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> 
     />
   );
 };
+ClosureOptionsRadioComponent.displayName = 'ClosureOptionsRadio';
 
 export const ClosureOptionsRadio = React.memo(ClosureOptionsRadioComponent);

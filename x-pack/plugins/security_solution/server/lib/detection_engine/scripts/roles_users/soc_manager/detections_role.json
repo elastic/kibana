@@ -18,7 +18,7 @@
         "privileges": ["read", "write"]
       },
       {
-        "names": [".siem-signals-*"],
+        "names": [".alerts-security*", ".siem-signals-*"],
         "privileges": ["read", "write", "manage"]
       },
       {
@@ -37,8 +37,6 @@
         "ml": ["read"],
         "siem": ["all", "read_alerts", "crud_alerts"],
         "securitySolutionCases": ["all"],
-        "indexPatterns": ["all"],
-        "savedObjectsManagement": ["all"],
         "actions": ["all"],
         "builtInAlerts": ["all"]
       },

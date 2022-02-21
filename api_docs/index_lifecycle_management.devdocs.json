@@ -1,0 +1,93 @@
+{
+  "id": "indexLifecycleManagement",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "indexLifecycleManagement",
+        "id": "def-public.IlmLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "indexLifecycleManagement",
+            "scope": "public",
+            "docId": "kibIndexLifecycleManagementPluginApi",
+            "section": "def-public.IlmLocatorParams",
+            "text": "IlmLocatorParams"
+          },
+          " extends ",
+          "SerializableRecord"
+        ],
+        "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexLifecycleManagement",
+            "id": "def-public.IlmLocatorParams.page",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "\"policies_list\" | \"policy_edit\" | \"policy_create\""
+            ],
+            "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexLifecycleManagement",
+            "id": "def-public.IlmLocatorParams.policyName",
+            "type": "string",
+            "tags": [],
+            "label": "policyName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "indexLifecycleManagement",
+        "id": "def-public.ILM_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ILM_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ILM_LOCATOR_ID\""
+        ],
+        "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -7,6 +7,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { Unit } from '@elastic/datemath';
+import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   PreviewResponse,
@@ -19,15 +21,27 @@ import { transformOutput } from './transforms';
 
 const emptyPreviewRule: PreviewResponse = {
   previewId: undefined,
-  errors: [],
-  warnings: [],
+  logs: [],
 };
 
-export const usePreviewRule = () => {
+export const usePreviewRule = (timeframe: Unit = 'h') => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
+  let invocationCount = RULE_PREVIEW_INVOCATION_COUNT.HOUR;
+
+  switch (timeframe) {
+    case 'd':
+      invocationCount = RULE_PREVIEW_INVOCATION_COUNT.DAY;
+      break;
+    case 'w':
+      invocationCount = RULE_PREVIEW_INVOCATION_COUNT.WEEK;
+      break;
+    case 'M':
+      invocationCount = RULE_PREVIEW_INVOCATION_COUNT.MONTH;
+      break;
+  }
 
   useEffect(() => {
     if (!rule) {
@@ -45,7 +59,7 @@ export const usePreviewRule = () => {
         try {
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
-            rule: { ...transformOutput(rule), invocationCount: 1 },
+            rule: { ...transformOutput(rule), invocationCount },
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
@@ -67,7 +81,7 @@ export const usePreviewRule = () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError]);
+  }, [rule, addError, invocationCount]);
 
   return { isLoading, response, rule, setRule };
 };

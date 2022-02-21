@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
@@ -20,7 +20,7 @@ export const mockQueryBar: FieldValueQueryBar = {
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -94,7 +94,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,

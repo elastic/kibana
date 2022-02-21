@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { isEmpty } from 'lodash';
+import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, MountPoint } from 'kibana/public';
 import { useKibana } from '../../../../utils/kibana_react';
-import { Case, SubCase } from '../../../../../../cases/common';
+import { Case } from '../../../../../../cases/common';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { AddToCaseProps } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
-
-const appendSearch = (search?: string) =>
-  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
-
-const getCreateCaseUrl = (search?: string | null) =>
-  `/cases/create${appendSearch(search ?? undefined)}`;
+import { CasesDeepLinkId } from '../../../../../../cases/public';
 
 async function addToCase(
   http: HttpSetup,
-  theCase: Case | SubCase,
+  theCase: Case,
   attributes: TypedLensByValueInput['attributes'],
   timeRange?: { from: string; to: string }
 ) {
@@ -47,33 +41,22 @@ export const useAddToCase = ({
   lensAttributes,
   getToastText,
   timeRange,
-}: AddToCaseProps & { getToastText: (thaCase: Case | SubCase) => MountPoint<HTMLElement> }) => {
+  appId,
+}: AddToCaseProps & {
+  appId?: 'security' | 'observability';
+  getToastText: (thaCase: Case) => MountPoint<HTMLElement>;
+}) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isCasesOpen, setIsCasesOpen] = useState(false);
 
   const {
     http,
-    application: { navigateToApp, getUrlForApp },
+    application: { navigateToApp },
     notifications: { toasts },
   } = useKibana().services;
 
-  const createCaseUrl = useMemo(
-    () => getUrlForApp(observabilityFeatureId) + getCreateCaseUrl(),
-    [getUrlForApp]
-  );
-
-  const goToCreateCase = useCallback(
-    async (ev) => {
-      ev.preventDefault();
-      return navigateToApp(observabilityFeatureId, {
-        path: getCreateCaseUrl(),
-      });
-    },
-    [navigateToApp]
-  );
-
   const onCaseClicked = useCallback(
-    (theCase?: Case | SubCase) => {
+    (theCase?: Case) => {
       if (theCase && lensAttributes) {
         setIsCasesOpen(false);
         setIsSaving(true);
@@ -108,18 +91,16 @@ export const useAddToCase = ({
           }
         );
       } else {
-        navigateToApp(observabilityFeatureId, {
-          path: getCreateCaseUrl(),
+        navigateToApp(appId || observabilityFeatureId, {
+          deepLinkId: CasesDeepLinkId.casesCreate,
           openInNewTab: true,
         });
       }
     },
-    [getToastText, http, lensAttributes, navigateToApp, timeRange, toasts]
+    [appId, getToastText, http, lensAttributes, navigateToApp, timeRange, toasts]
   );
 
   return {
-    createCaseUrl,
-    goToCreateCase,
     onCaseClicked,
     isSaving,
     isCasesOpen,

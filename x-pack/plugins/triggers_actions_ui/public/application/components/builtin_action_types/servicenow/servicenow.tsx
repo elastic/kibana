@@ -21,6 +21,7 @@ import {
   ServiceNowITOMActionParams,
 } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
+import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helpers';
 
 const validateConnector = async (
   action: ServiceNowActionConnector
@@ -138,6 +139,10 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
+    customConnectorSelectItem: {
+      getText: getConnectorDescriptiveTitle,
+      getComponent: getSelectedConnectorIcon,
+    },
   };
 }
 
@@ -174,6 +179,10 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_sir_params')),
+    customConnectorSelectItem: {
+      getText: getConnectorDescriptiveTitle,
+      getComponent: getSelectedConnectorIcon,
+    },
   };
 }
 

@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useRef, useEffect } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../management/components/hooks/use_test_id_generator';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 

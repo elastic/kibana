@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { GeoPointContentWithMap } from './geo_point_content_with_map';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import {
   BooleanContent,
   DateContent,

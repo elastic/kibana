@@ -10,6 +10,7 @@ import { resolve } from 'path';
 
 import dedent from 'dedent';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { EsVersion } from '../../../functional_test_runner';
 
 const options = {
   help: { desc: 'Display this menu and exit.' },
@@ -147,6 +148,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
     configs: configs.map((c) => resolve(c)),
     createLogger,
     extraKbnOpts: userOptions._,
+    esVersion: EsVersion.getDefault(),
   };
 }
 

@@ -26,7 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../../../common/model';

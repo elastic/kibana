@@ -12,6 +12,7 @@ import { UptimeAppColors } from '../../apps/uptime_app';
 import { UptimeThemeContext } from '../../contexts';
 
 interface StatusBadgeProps {
+  isMobile?: boolean;
   status?: string;
   stepNo: number;
 }
@@ -46,15 +47,17 @@ export function textFromStatus(status?: string) {
   }
 }
 
-export const StatusBadge: FC<StatusBadgeProps> = ({ status, stepNo }) => {
+export const StatusBadge: FC<StatusBadgeProps> = ({ status, stepNo, isMobile }) => {
   const theme = useContext(UptimeThemeContext);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText>
-          <strong>{stepNo}.</strong>
-        </EuiText>
-      </EuiFlexItem>
+      {!isMobile && (
+        <EuiFlexItem grow={false}>
+          <EuiText className="eui-textNoWrap">
+            <strong>{stepNo}.</strong>
+          </EuiText>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiBadge color={colorFromStatus(theme.colors, status)}>{textFromStatus(status)}</EuiBadge>
       </EuiFlexItem>

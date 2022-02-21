@@ -6248,13 +6248,13 @@
                       "docsCount": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of documents in the index, including hidden nested documents."
+                          "description": "The number of lucene documents in the index, including hidden nested documents."
                         }
                       },
                       "docsDeleted": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of deleted documents in the index, including hidden nested documents."
+                          "description": "The number of deleted lucene documents in the index, including hidden nested documents."
                         }
                       },
                       "alias": {
@@ -6273,6 +6273,12 @@
                         "type": "long",
                         "_meta": {
                           "description": "The size in bytes of the index, for primaries and replicas."
+                        }
+                      },
+                      "savedObjectsDocsCount": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of saved objects documents in the index."
                         }
                       }
                     }
@@ -7736,7 +7742,19 @@
             "description": "Non-default value of setting."
           }
         },
+        "bfetch:disable": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "visualization:visualize:legacyPieChartsLibrary": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "visualization:visualize:legacyHeatmapChartsLibrary": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -7779,6 +7797,12 @@
           }
         },
         "observability:enableComparisonByDefault": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableInfrastructureView": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -9250,10 +9274,38 @@
             "description": "Number of TSVB visualizations using \"last value\" as a time range"
           }
         },
+        "timeseries_use_es_indices_total": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB visualizations using elasticsearch indices"
+          }
+        },
         "timeseries_table_use_aggregate_function": {
           "type": "long",
           "_meta": {
             "description": "Number of TSVB table visualizations using aggregate function"
+          }
+        },
+        "timeseries_types": {
+          "properties": {
+            "table": {
+              "type": "long"
+            },
+            "gauge": {
+              "type": "long"
+            },
+            "markdown": {
+              "type": "long"
+            },
+            "top_n": {
+              "type": "long"
+            },
+            "timeseries": {
+              "type": "long"
+            },
+            "metric": {
+              "type": "long"
+            }
           }
         }
       }

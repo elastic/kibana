@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, FunctionComponent } from 'react';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { SelectField, useFormData } from '../../../../../../../../shared_imports';
+import { SelectField, useFormData, useKibana } from '../../../../../../../../shared_imports';
 
 import { UseField } from '../../../../../form';
 
@@ -20,18 +20,6 @@ import { LearnMoreLink } from '../../../../learn_more_link';
 import { NodeAttrsDetails } from './node_attrs_details';
 
 import { SharedProps } from './types';
-
-const learnMoreLink = (
-  <LearnMoreLink
-    text={
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
-        defaultMessage="Learn about shard allocation"
-      />
-    }
-    docPath="modules-cluster.html#cluster-shard-allocation-settings"
-  />
-);
 
 const i18nTexts = {
   allocateToDataNodesOption: i18n.translate(
@@ -52,7 +40,8 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
   const [formData] = useFormData({
     watch: [allocationNodeAttributePath],
   });
-
+  const { docLinks } = useKibana().services;
+  const shardAllocationSettingsUrl = docLinks.links.elasticsearch.shardAllocationSettings;
   const selectedAllocationNodeAttribute = get(formData, allocationNodeAttributePath);
 
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
@@ -79,7 +68,6 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
   }
 
   nodeAllocationOptions = nodeAllocationOptions.concat(nodeOptions);
-
   return (
     <>
       <EuiText size="s">
@@ -87,7 +75,19 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.customOption.description"
             defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
-            values={{ learnMoreLink }}
+            values={{
+              learnMoreLink: (
+                <LearnMoreLink
+                  text={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
+                      defaultMessage="Learn about shard allocation"
+                    />
+                  }
+                  docPath={shardAllocationSettingsUrl}
+                />
+              ),
+            }}
           />
         </p>
       </EuiText>

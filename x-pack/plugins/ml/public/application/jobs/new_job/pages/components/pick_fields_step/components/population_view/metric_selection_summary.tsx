@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator } from '../../../../../common/job_creator';

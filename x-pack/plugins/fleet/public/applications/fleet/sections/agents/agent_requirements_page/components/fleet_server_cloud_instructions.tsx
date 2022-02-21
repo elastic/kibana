@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFleetStatus, useStartServices } from '../../../../hooks';
 
@@ -43,14 +43,14 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
           <h2>
             <FormattedMessage
               id="xpack.fleet.fleetServerSetup.cloudSetupTitle"
-              defaultMessage="Enable APM & Fleet"
+              defaultMessage="Enable Fleet Server"
             />
           </h2>
         }
         body={
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.cloudSetupText"
-            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling APM & Fleet. For more information see the {link}"
+            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. The easiest way to get one is by adding an Integration Server, which runs the Fleet Server integration. You can add it to your deployment in the Cloud Console. For more information see the {link}"
             values={{
               link: (
                 <EuiLink

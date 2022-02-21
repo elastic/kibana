@@ -14,7 +14,7 @@ import {
   IKibanaSearchResponse,
   ISearchOptionsSerializable,
 } from '../../../common/search';
-import { ISearchStart } from '../types';
+import type { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
   bfetch: BfetchServerSetup,

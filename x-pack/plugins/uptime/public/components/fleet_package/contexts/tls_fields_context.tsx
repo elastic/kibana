@@ -6,24 +6,24 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ITLSFields } from '../types';
+import { TLSFields } from '../types';
 import { defaultValues as tlsDefaultValues } from '../tls/default_values';
 
-interface ITLSFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<ITLSFields>>;
-  fields: ITLSFields;
-  defaultValues: ITLSFields;
+interface TLSFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<TLSFields>>;
+  fields: TLSFields;
+  defaultValues: TLSFields;
 }
 
-interface ITLSFieldsContextProvider {
+interface TLSFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: ITLSFields;
+  defaultValues?: TLSFields;
 }
 
-export const initialValues: ITLSFields = tlsDefaultValues;
+export const initialValues: TLSFields = tlsDefaultValues;
 
-const defaultContext: ITLSFieldsContext = {
-  setFields: (_fields: React.SetStateAction<ITLSFields>) => {
+const defaultContext: TLSFieldsContext = {
+  setFields: (_fields: React.SetStateAction<TLSFields>) => {
     throw new Error('setFields was not initialized, set it when you invoke the context');
   },
   fields: initialValues, // mutable
@@ -35,8 +35,8 @@ export const TLSFieldsContext = createContext(defaultContext);
 export const TLSFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: ITLSFieldsContextProvider) => {
-  const [fields, setFields] = useState<ITLSFields>(defaultValues);
+}: TLSFieldsContextProvider) => {
+  const [fields, setFields] = useState<TLSFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

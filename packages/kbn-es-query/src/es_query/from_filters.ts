@@ -11,7 +11,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { BoolQuery, IndexPatternBase } from './types';
+import { BoolQuery, DataViewBase } from './types';
 import { handleNestedFilter } from './handle_nested_filter';
 
 /**
@@ -48,7 +48,7 @@ const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContain
  */
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
-  indexPattern: IndexPatternBase | undefined,
+  indexPattern: DataViewBase | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false
 ): BoolQuery => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));

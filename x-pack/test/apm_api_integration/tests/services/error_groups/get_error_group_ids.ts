@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { take } from 'lodash';
-import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { ApmServices } from '../../../common/config';
 
 export async function getErrorGroupIds({
@@ -15,25 +14,24 @@ export async function getErrorGroupIds({
   serviceName = 'opbeans-java',
   count = 5,
 }: {
-  apmApiClient: PromiseReturnType<ApmServices['apmApiClient']>;
+  apmApiClient: Awaited<ReturnType<ApmServices['apmApiClient']>>;
   start: number;
   end: number;
   serviceName?: string;
   count?: number;
 }) {
   const { body } = await apmApiClient.readUser({
-    endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
+    endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/main_statistics`,
     params: {
       path: { serviceName },
       query: {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
-        transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         kuery: '',
       },
     },
   });
 
-  return take(body.error_groups.map((group) => group.group_id).sort(), count);
+  return take(body.errorGroups.map((group) => group.groupId).sort(), count);
 }

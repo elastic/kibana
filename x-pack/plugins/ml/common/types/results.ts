@@ -11,10 +11,14 @@ import { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
 }
+
+export interface MLRectAnnotationDatum extends RectAnnotationDatum {
+  header: number;
+}
 export interface GetDatafeedResultsChartDataResult {
   bucketResults: number[][];
   datafeedResults: number[][];
-  annotationResultsRect: RectAnnotationDatum[];
+  annotationResultsRect: MLRectAnnotationDatum[];
   annotationResultsLine: LineAnnotationDatum[];
   modelSnapshotResultsLine: LineAnnotationDatum[];
 }

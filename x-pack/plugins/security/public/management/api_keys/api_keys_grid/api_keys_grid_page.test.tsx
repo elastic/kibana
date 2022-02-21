@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../api_keys_management_app';
@@ -33,6 +33,7 @@ describe('APIKeysGridPage', () => {
   const consoleWarnMock = jest.spyOn(console, 'error').mockImplementation();
 
   const coreStart = coreMock.createStart();
+  const theme$ = themeServiceMock.createTheme$();
   const apiClientMock = apiKeysAPIClientMock.create();
   const { authc } = securityMock.createSetup();
 
@@ -85,7 +86,7 @@ describe('APIKeysGridPage', () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
@@ -113,7 +114,7 @@ describe('APIKeysGridPage', () => {
     });
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
@@ -135,7 +136,7 @@ describe('APIKeysGridPage', () => {
     });
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
@@ -159,7 +160,7 @@ describe('APIKeysGridPage', () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}

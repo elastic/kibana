@@ -4,6 +4,8 @@
 <titleabbrev>Delete index pattern</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-api-delete>> instead.]
+
 experimental[] Delete {kib} index patterns.
 
 WARNING: Once you delete an index pattern, _it cannot be recovered_.

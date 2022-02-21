@@ -7,17 +7,26 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
-import { UnmountCallback } from 'src/core/public';
-import { CloudSetup } from '../../../cloud/public';
-import { ILicense } from '../../../licensing/public';
+import { Observable } from 'rxjs';
+import {
+  I18nStart,
+  ScopedHistory,
+  ApplicationStart,
+  UnmountCallback,
+  CoreTheme,
+} from 'src/core/public';
+import { DocLinksStart } from 'kibana/public';
 
-import { KibanaContextProvider, APP_WRAPPER_CLASS } from '../shared_imports';
-
+import {
+  CloudSetup,
+  ILicense,
+  KibanaContextProvider,
+  APP_WRAPPER_CLASS,
+  RedirectAppLinks,
+  KibanaThemeProvider,
+} from '../shared_imports';
 import { App } from './app';
-
 import { BreadcrumbService } from './services/breadcrumbs';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export const renderApp = (
   element: Element,
@@ -26,15 +35,21 @@ export const renderApp = (
   application: ApplicationStart,
   breadcrumbService: BreadcrumbService,
   license: ILicense,
+  theme$: Observable<CoreTheme>,
+  docLinks: DocLinksStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
   const { getUrlForApp } = application;
   render(
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <I18nContext>
-        <KibanaContextProvider services={{ cloud, breadcrumbService, license, getUrlForApp }}>
-          <App history={history} />
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider
+            services={{ cloud, breadcrumbService, license, getUrlForApp, docLinks }}
+          >
+            <App history={history} />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>
     </RedirectAppLinks>,
     element

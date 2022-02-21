@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugins/spaces/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import { DataViewsContract } from '../../../data_views/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
@@ -28,6 +29,7 @@ const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) =
 const SavedObjectsTablePage = ({
   coreStart,
   dataStart,
+  dataViewsApi,
   taggingApi,
   spacesApi,
   allowedTypes,
@@ -37,6 +39,7 @@ const SavedObjectsTablePage = ({
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
+  dataViewsApi: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
   allowedTypes: SavedObjectManagementTypeInfo[];
@@ -63,7 +66,6 @@ const SavedObjectsTablePage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);
@@ -82,7 +84,7 @@ const SavedObjectsTablePage = ({
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
         savedObjectsClient={coreStart.savedObjects.client}
-        indexPatterns={dataStart.indexPatterns}
+        dataViews={dataViewsApi}
         search={dataStart.search}
         http={coreStart.http}
         overlays={coreStart.overlays}

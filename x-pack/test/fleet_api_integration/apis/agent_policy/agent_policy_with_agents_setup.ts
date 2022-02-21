@@ -21,15 +21,15 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
 
   async function getEnrollmentKeyForPolicyId(policyId: string) {
-    const listRes = await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
+    const listRes = await supertest.get(`/api/fleet/enrollment_api_keys`).expect(200);
 
-    const key = listRes.body.list.find(
+    const key = listRes.body.items.find(
       (item: { policy_id: string; id: string }) => item.policy_id === policyId
     );
 
     expect(key).not.empty();
 
-    const res = await supertest.get(`/api/fleet/enrollment-api-keys/${key.id}`).expect(200);
+    const res = await supertest.get(`/api/fleet/enrollment_api_keys/${key.id}`).expect(200);
 
     return res.body.item;
   }

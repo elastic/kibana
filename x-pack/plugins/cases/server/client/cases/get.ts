@@ -16,7 +16,6 @@ import {
   CaseResolveResponseRt,
   CaseResolveResponse,
   User,
-  UsersRt,
   AllTagsFindRequest,
   AllTagsFindRequestRt,
   excess,
@@ -25,12 +24,12 @@ import {
   AllReportersFindRequest,
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
-  ENABLE_CASE_CONNECTOR,
   CasesByAlertId,
   CasesByAlertIdRt,
   CaseAttributes,
-} from '../../../common';
-import { countAlertsForID, createCaseError, flattenCaseSavedObject } from '../../common';
+} from '../../../common/api';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -60,7 +59,7 @@ export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
 ): Promise<CasesByAlertId> => {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -80,7 +79,6 @@ export const getCasesByAlertID = async (
     // This will likely only return one comment saved object, the response aggregation will contain
     // the keys we need to retrieve the cases
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
-      unsecuredSavedObjectsClient,
       alertId: alertID,
       filter,
     });
@@ -101,7 +99,6 @@ export const getCasesByAlertID = async (
     }
 
     const casesInfo = await caseService.getCases({
-      unsecuredSavedObjectsClient,
       caseIds,
     });
 
@@ -147,52 +144,23 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
-  /**
-   * Whether to include the attachments for all children of a case in the response
-   */
-  includeSubCaseComments?: boolean;
 }
 
 /**
- * Retrieves a case and optionally its comments and sub case comments.
+ * Retrieves a case and optionally its comments.
  *
  * @ignore
  */
 export const get = async (
-  { id, includeComments, includeSubCaseComments }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
-    if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
-      throw Boom.badRequest(
-        'The `includeSubCaseComments` is not supported when the case connector feature is disabled'
-      );
-    }
-
-    let theCase: SavedObject<CaseAttributes>;
-    let subCaseIds: string[] = [];
-    if (ENABLE_CASE_CONNECTOR) {
-      const [caseInfo, subCasesForCaseId] = await Promise.all([
-        caseService.getCase({
-          unsecuredSavedObjectsClient,
-          id,
-        }),
-        caseService.findSubCasesByCaseId({
-          unsecuredSavedObjectsClient,
-          ids: [id],
-        }),
-      ]);
-
-      theCase = caseInfo;
-      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
-    } else {
-      theCase = await caseService.getCase({
-        unsecuredSavedObjectsClient,
-        id,
-      });
-    }
+    const theCase: SavedObject<CaseAttributes> = await caseService.getCase({
+      id,
+    });
 
     await authorization.ensureAuthorized({
       operation: Operations.getCase,
@@ -203,26 +171,22 @@ export const get = async (
       return CaseResponseRt.encode(
         flattenCaseSavedObject({
           savedObject: theCase,
-          subCaseIds,
         })
       );
     }
 
     const theComments = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
       id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
     });
 
     return CaseResponseRt.encode(
       flattenCaseSavedObject({
         savedObject: theCase,
         comments: theComments.saved_objects,
-        subCaseIds,
         totalComment: theComments.total,
         totalAlerts: countAlertsForID({ comments: theComments, id }),
       })
@@ -233,28 +197,21 @@ export const get = async (
 };
 
 /**
- * Retrieves a case resolving its ID and optionally loading its comments and sub case comments.
+ * Retrieves a case resolving its ID and optionally loading its comments.
  *
  * @experimental
  */
 export const resolve = async (
-  { id, includeComments, includeSubCaseComments }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
-    if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
-      throw Boom.badRequest(
-        'The `includeSubCaseComments` is not supported when the case connector feature is disabled'
-      );
-    }
-
     const {
       saved_object: resolvedSavedObject,
       ...resolveData
     }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
-      unsecuredSavedObjectsClient,
       id,
     });
 
@@ -268,40 +225,27 @@ export const resolve = async (
       ],
     });
 
-    let subCaseIds: string[] = [];
-    if (ENABLE_CASE_CONNECTOR) {
-      const subCasesForCaseId = await caseService.findSubCasesByCaseId({
-        unsecuredSavedObjectsClient,
-        ids: [resolvedSavedObject.id],
-      });
-      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
-    }
-
     if (!includeComments) {
       return CaseResolveResponseRt.encode({
         ...resolveData,
         case: flattenCaseSavedObject({
           savedObject: resolvedSavedObject,
-          subCaseIds,
         }),
       });
     }
 
     const theComments = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
       id: resolvedSavedObject.id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
     });
 
     return CaseResolveResponseRt.encode({
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
-        subCaseIds,
         comments: theComments.saved_objects,
         totalComment: theComments.total,
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
@@ -328,34 +272,18 @@ export async function getTags(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findCases);
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.findCases
+    );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    const cases = await caseService.getTags({
+    const tags = await caseService.getTags({
       unsecuredSavedObjectsClient,
       filter,
     });
 
-    const tags = new Set<string>();
-    const mappedCases: Array<{
-      owner: string;
-      id: string;
-    }> = [];
-
-    // Gather all necessary information in one pass
-    cases.saved_objects.forEach((theCase) => {
-      theCase.attributes.tags.forEach((tag) => tags.add(tag));
-      mappedCases.push({
-        id: theCase.id,
-        owner: theCase.attributes.owner,
-      });
-    });
-
-    ensureSavedObjectsAreAuthorized(mappedCases);
-
-    return [...tags.values()];
+    return tags;
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -376,38 +304,18 @@ export async function getReporters(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getReporters);
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getReporters
+    );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    const cases = await caseService.getReporters({
+    const reporters = await caseService.getReporters({
       unsecuredSavedObjectsClient,
       filter,
     });
 
-    const reporters = new Map<string, User>();
-    const mappedCases: Array<{
-      owner: string;
-      id: string;
-    }> = [];
-
-    // Gather all necessary information in one pass
-    cases.saved_objects.forEach((theCase) => {
-      const user = theCase.attributes.created_by;
-      if (user.username != null) {
-        reporters.set(user.username, user);
-      }
-
-      mappedCases.push({
-        id: theCase.id,
-        owner: theCase.attributes.owner,
-      });
-    });
-
-    ensureSavedObjectsAreAuthorized(mappedCases);
-
-    return UsersRt.encode([...reporters.values()]);
+    return reporters;
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }

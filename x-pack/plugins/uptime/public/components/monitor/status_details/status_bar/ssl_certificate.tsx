@@ -8,7 +8,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Tls, X509Expiry } from '../../../../../common/runtime_types';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants';
 import { MonListDescription, MonListTitle } from './status_bar';

@@ -19,6 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const browser = getService('browser');
 
+  function isCloudEnvironment() {
+    return config.get('servers.elasticsearch.hostname') !== 'localhost';
+  }
+
   describe('users', function () {
     const optionalUser: UserFormValues = {
       username: 'OptionalUser',
@@ -37,7 +41,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
-      if (config.get('servers.elasticsearch.hostname') === 'localhost') {
+
+      // In Cloud default users are defined in file realm, such users aren't exposed through the Users API.
+      if (isCloudEnvironment()) {
+        expect(users).to.not.have.property('elastic');
+        expect(users).to.not.have.property('kibana_system');
+        expect(users).to.not.have.property('kibana');
+      } else {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
         expect(users.elastic.deprecated).to.be(false);
@@ -49,9 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(users.kibana.roles).to.eql(['kibana_system']);
         expect(users.kibana.reserved).to.be(true);
         expect(users.kibana.deprecated).to.be(true);
-      } else {
-        expect(users.anonymous.roles).to.eql(['anonymous']);
-        expect(users.anonymous.reserved).to.be(true);
       }
     });
 
@@ -196,7 +203,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('Deactivate/Activate user', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/118728
+      describe.skip('Deactivate/Activate user', () => {
         it('deactivates user when confirming', async () => {
           await PageObjects.security.deactivatesUser(optionalUser);
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

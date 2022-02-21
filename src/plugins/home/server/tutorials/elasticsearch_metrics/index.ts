@@ -54,8 +54,8 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }

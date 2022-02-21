@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
-import type { SynthtraceEsClient } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
 
 export const config = {
   PROD_LIST_RATE: 75,
@@ -22,12 +22,12 @@ export async function generateData({
   start,
   end,
 }: {
-  synthtraceEsClient: SynthtraceEsClient;
+  synthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
 }) {
-  const serviceGoProdInstance = service(serviceName, 'production', 'go').instance('instance-a');
+  const serviceGoProdInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
 
   const transactionNameProductList = 'GET /api/product/list';
   const transactionNameProductId = 'GET /api/product/:id';

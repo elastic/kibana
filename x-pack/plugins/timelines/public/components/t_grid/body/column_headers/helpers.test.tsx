@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { mount } from 'enzyme';
 import { omit, set } from 'lodash/fp';
 import React from 'react';
@@ -23,7 +23,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../constants';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
@@ -318,6 +318,108 @@ describe('helpers', () => {
       expect(
         getColumnHeaders([headerDoesNotMatchBrowserField], mockBrowserFields).map(omit('display'))
       ).toEqual(expected);
+    });
+
+    describe('augment the `header` with metadata from `browserFields`', () => {
+      test('it should augment the `header` when field category is base', () => {
+        const fieldName = 'test_field';
+        const testField = {
+          aggregatable: true,
+          category: 'base',
+          description:
+            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+          example: '2016-05-23T08:05:34.853Z',
+          format: 'date',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          name: fieldName,
+          searchable: true,
+          type: 'date',
+        };
+
+        const browserField = { base: { fields: { [fieldName]: testField } } };
+
+        const header: ColumnHeaderOptions = {
+          columnHeaderType: 'not-filtered',
+          id: fieldName,
+        };
+
+        expect(
+          getColumnHeaders([header], browserField).map(
+            omit(['display', 'actions', 'isSortable', 'defaultSortDirection', 'schema'])
+          )
+        ).toEqual([
+          {
+            ...header,
+            ...browserField.base.fields[fieldName],
+          },
+        ]);
+      });
+
+      test("it should augment the `header` when field is top level and name isn't splittable", () => {
+        const fieldName = 'testFieldName';
+        const testField = {
+          aggregatable: true,
+          category: fieldName,
+          description: 'test field description',
+          example: '2016-05-23T08:05:34.853Z',
+          format: 'date',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          name: fieldName,
+          searchable: true,
+          type: 'date',
+        };
+
+        const browserField = { [fieldName]: { fields: { [fieldName]: testField } } };
+
+        const header: ColumnHeaderOptions = {
+          columnHeaderType: 'not-filtered',
+          id: fieldName,
+        };
+
+        expect(
+          getColumnHeaders([header], browserField).map(
+            omit(['display', 'actions', 'isSortable', 'defaultSortDirection', 'schema'])
+          )
+        ).toEqual([
+          {
+            ...header,
+            ...browserField[fieldName].fields[fieldName],
+          },
+        ]);
+      });
+
+      test('it should augment the `header` when field is splittable', () => {
+        const fieldName = 'test.field.splittable';
+        const testField = {
+          aggregatable: true,
+          category: 'test',
+          description: 'test field description',
+          example: '2016-05-23T08:05:34.853Z',
+          format: 'date',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          name: fieldName,
+          searchable: true,
+          type: 'date',
+        };
+
+        const browserField = { test: { fields: { [fieldName]: testField } } };
+
+        const header: ColumnHeaderOptions = {
+          columnHeaderType: 'not-filtered',
+          id: fieldName,
+        };
+
+        expect(
+          getColumnHeaders([header], browserField).map(
+            omit(['display', 'actions', 'isSortable', 'defaultSortDirection', 'schema'])
+          )
+        ).toEqual([
+          {
+            ...header,
+            ...browserField.test.fields[fieldName],
+          },
+        ]);
+      });
     });
   });
 

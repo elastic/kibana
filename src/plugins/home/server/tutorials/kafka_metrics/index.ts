@@ -54,8 +54,8 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['message_queue'],
   };
 }

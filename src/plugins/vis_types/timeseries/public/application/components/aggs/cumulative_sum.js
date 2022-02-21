@@ -14,7 +14,7 @@ import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   htmlIdGenerator,
   EuiFlexGroup,

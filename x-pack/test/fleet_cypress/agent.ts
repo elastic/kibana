@@ -11,11 +11,12 @@ import { ChildProcess, spawn } from 'child_process';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
-interface AgentManagerParams {
+export interface AgentManagerParams {
   user: string;
   password: string;
   kibanaUrl: string;
   esHost: string;
+  esPort: string;
 }
 
 export class AgentManager extends Manager {
@@ -23,19 +24,11 @@ export class AgentManager extends Manager {
   private log: ToolingLog;
   private agentProcess?: ChildProcess;
   private requestOptions: AxiosRequestConfig;
-  constructor(params: AgentManagerParams, log: ToolingLog) {
+  constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
     this.log = log;
     this.params = params;
-    this.requestOptions = {
-      headers: {
-        'kbn-xsrf': 'kibana',
-      },
-      auth: {
-        username: this.params.user,
-        password: this.params.password,
-      },
-    };
+    this.requestOptions = requestOptions;
   }
 
   public async setup() {
@@ -50,10 +43,10 @@ export class AgentManager extends Manager {
   public async startAgent() {
     this.log.info('Getting agent enrollment key');
     const { data: apiKeys } = await axios.get(
-      this.params.kibanaUrl + '/api/fleet/enrollment-api-keys',
+      this.params.kibanaUrl + '/api/fleet/enrollment_api_keys',
       this.requestOptions
     );
-    const policy = apiKeys.list[1];
+    const policy = apiKeys.items[1];
 
     this.log.info('Running the agent');
 
@@ -87,7 +80,7 @@ export class AgentManager extends Manager {
         `${this.params.kibanaUrl}/api/fleet/agents`,
         this.requestOptions
       );
-      done = agents.list[0]?.status === 'online';
+      done = agents.items[0]?.status === 'online';
       if (++retries > 12) {
         this.log.error('Giving up on enrolling the agent after a minute');
         throw new Error('Agent timed out while coming online');

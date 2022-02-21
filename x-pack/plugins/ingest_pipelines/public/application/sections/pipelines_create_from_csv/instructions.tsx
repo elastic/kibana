@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -18,7 +18,7 @@ export const Instructions: FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.ingestPipelines.createFromCsv.instructions"
-                defaultMessage="Use a CSV file to define how to map your custom data source to the 
+                defaultMessage="Use a CSV file to define how to map your custom data source to the
                 Elastic Common Schema (ECS). For each {source} , you can specify a {destination}
                 and format adjustments. Refer to the &nbsp;{templateLink} for the supported headers."
                 values={{

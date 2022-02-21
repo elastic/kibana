@@ -1,0 +1,636 @@
+{
+  "id": "data.ui",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "data",
+        "id": "def-public.FilterItem",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterItem",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FilterItemProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterItem.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FilterItemProps"
+            ],
+            "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.FilterLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterLabel",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FilterLabelProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterLabel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FilterLabelProps"
+            ],
+            "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QueryStringInput",
+        "type": "Function",
+        "tags": [],
+        "label": "QueryStringInput",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataUiPluginApi",
+            "section": "def-public.QueryStringInputProps",
+            "text": "QueryStringInputProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataUiPluginApi",
+                "section": "def-public.QueryStringInputProps",
+                "text": "QueryStringInputProps"
+              }
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "data",
+        "id": "def-public.QueryStringInputProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryStringInputProps",
+        "description": [],
+        "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              ")[]"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.disableAutoFocus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFocus",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.screenTitle",
+            "type": "string",
+            "tags": [],
+            "label": "screenTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.prepend",
+            "type": "Any",
+            "tags": [],
+            "label": "prepend",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.persistedLog",
+            "type": "Object",
+            "tags": [],
+            "label": "persistedLog",
+            "description": [],
+            "signature": [
+              "PersistedLog",
+              "<any> | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.bubbleSubmitEvent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "bubbleSubmitEvent",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.disableLanguageSwitcher",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableLanguageSwitcher",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.languageSwitcherPopoverAnchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "languageSwitcherPopoverAnchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.onBlur",
+            "type": "Function",
+            "tags": [],
+            "label": "onBlur",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "((query: ",
+              "Query",
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "Query"
+                ],
+                "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeQueryInputFocus",
+            "description": [],
+            "signature": [
+              "((isFocused: boolean) => void) | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFocused",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [],
+            "signature": [
+              "((query: ",
+              "Query",
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onSubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "Query"
+                ],
+                "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.submitOnBlur",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "submitOnBlur",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "SuggestionsListSize",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.isClearable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isClearable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.iconType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.nonKqlMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nonKqlMode",
+            "description": [],
+            "signature": [
+              "\"lucene\" | \"text\" | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.nonKqlModeHelpText",
+            "type": "string",
+            "tags": [],
+            "label": "nonKqlModeHelpText",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.autoSubmit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoSubmit",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.storageKey",
+            "type": "string",
+            "tags": [],
+            "label": "storageKey",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QueryStringInputProps.timeRangeForSuggestionsOverride",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeRangeForSuggestionsOverride",
+            "description": [
+              "\nOverride whether autocomplete suggestions are restricted by time range."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "data",
+        "id": "def-public.IndexPatternSelectProps",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexPatternSelectProps",
+        "description": [],
+        "signature": [
+          "Omit",
+          "<Omit<",
+          "EuiComboBoxProps",
+          "<any>, \"onChange\" | \"selectedOptions\" | \"options\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
+          "EuiComboBoxProps",
+          "<any>, \"onChange\" | \"selectedOptions\" | \"options\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
+        ],
+        "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.SearchBar",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "SearchBar",
+        "description": [],
+        "signature": [
+          "React.ComponentClass<Pick<Omit<",
+          "SearchBarOwnProps",
+          " & ",
+          "SearchBarInjectedDeps",
+          ", \"kibana\">, keyof ",
+          "SearchBarOwnProps",
+          " | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\">, any> & { WrappedComponent: React.ComponentType<Omit<",
+          "SearchBarOwnProps",
+          " & ",
+          "SearchBarInjectedDeps",
+          ", \"kibana\"> & ReactIntl.InjectedIntlProps>; }"
+        ],
+        "path": "src/plugins/data/public/ui/search_bar/index.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.SearchBarProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchBarProps",
+        "description": [],
+        "signature": [
+          "SearchBarOwnProps",
+          " & ",
+          "SearchBarInjectedDeps"
+        ],
+        "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.StatefulSearchBarProps",
+        "type": "Type",
+        "tags": [],
+        "label": "StatefulSearchBarProps",
+        "description": [],
+        "signature": [
+          "SearchBarOwnProps",
+          " & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; }"
+        ],
+        "path": "src/plugins/data/public/ui/search_bar/create_search_bar.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

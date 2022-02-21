@@ -8,8 +8,10 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
+
 import type { Response } from 'node-fetch';
+
+import { splitPkgKey as split } from '../../../../common';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -19,7 +21,6 @@ import type {
   InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
   GetCategoriesRequest,
 } from '../../../types';
 import {
@@ -31,12 +32,9 @@ import {
 } from '../archive';
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
-import {
-  PackageKeyInvalidError,
-  PackageNotFoundError,
-  PackageCacheError,
-  RegistryResponseError,
-} from '../../../errors';
+import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -46,33 +44,7 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-/**
- * Extract the package name and package version from a string.
- *
- * @param pkgkey a string containing the package name delimited by the package version
- */
-export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // If no version is provided, use the provided package key as the
-  // package name and return an empty version value
-  if (!pkgkey.includes('-')) {
-    return { pkgName: pkgkey, pkgVersion: '' };
-  }
-
-  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
-
-  if (pkgName === '') {
-    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
-  }
-
-  // this will return the entire string if `indexOf` return -1
-  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semverValid(pkgVersion)) {
-    throw new PackageKeyInvalidError(
-      'Package key parsing failed: package version was not a valid semver'
-    );
-  }
-  return { pkgName, pkgVersion };
-}
+export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
@@ -94,18 +66,72 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
+
+async function _fetchFindLatestPackage(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const { ignoreConstraints = false } = options ?? {};
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
-  setKibanaVersion(url);
+  if (!ignoreConstraints) {
+    setKibanaVersion(url);
+  }
 
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
+  const res = await fetchUrl(url.toString(), 1);
+  const searchResults: RegistryPackage[] = JSON.parse(res);
+
+  return searchResults;
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+    }
+
     return searchResults[0];
-  } else {
-    throw new PackageNotFoundError(`${packageName} not found`);
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      throw error;
+    }
+
+    return bundledPackage;
+  }
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      return undefined;
+    }
+
+    return searchResults[0];
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      return undefined;
+    }
+
+    return bundledPackage;
   }
 }
 
@@ -138,18 +164,15 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
-  // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
   const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? true;
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
   if (disableVersionCheck) {
     return;
   }
 
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on main, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'main') {
+  if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }

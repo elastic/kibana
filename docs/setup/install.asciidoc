@@ -33,7 +33,7 @@ our Debian repository.
 
 `rpm`::
 
-The `rpm` package is suitable for installation on Red Hat, Centos, SLES,
+The `rpm` package is suitable for installation on Red Hat, SLES,
 OpenSuSE and other RPM-based systems.  RPMs may be downloaded from the
 Elastic website or from our RPM repository.
 +
@@ -45,12 +45,6 @@ Images are available for running Kibana as a Docker container. They may be
 downloaded from the Elastic Docker Registry.
 +
 <<docker,Running Kibana on Docker>>
-
-`brew`::
-
-Formulae are available from the Elastic Homebrew tap for installing {kib} on macOS with the Homebrew package manager.
-+
-<<brew>>
 
 IMPORTANT: If your Elasticsearch installation is protected by
 {ref}/elasticsearch-security.html[{stack-security-features}] see
@@ -66,5 +60,3 @@ include::install/deb.asciidoc[]
 include::install/rpm.asciidoc[]
 
 include::{kib-repo-dir}/setup/docker.asciidoc[]
-
-include::install/brew.asciidoc[]

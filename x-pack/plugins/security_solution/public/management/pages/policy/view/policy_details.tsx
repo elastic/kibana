@@ -12,10 +12,8 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
 import { AgentsSummary } from './agents_summary';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { PolicyFormLayout } from './policy_forms/components';
 import {
   BackToExternalAppButton,
   BackToExternalAppButtonProps,
@@ -26,10 +24,6 @@ import { useAppUrl } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
 
 export const PolicyDetails = React.memo(() => {
-  // TODO: Remove this and related code when removing FF
-  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-    'trustedAppsByPolicyEnabled'
-  );
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
   const { getAppUrl } = useAppUrl();
 
@@ -57,7 +51,7 @@ export const PolicyDetails = React.memo(() => {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.policy.details.backToListTitle',
         {
-          defaultMessage: 'Back to endpoint hosts',
+          defaultMessage: 'View all endpoints',
         }
       ),
       backButtonUrl: getAppUrl({ path: endpointListPath }),
@@ -106,13 +100,8 @@ export const PolicyDetails = React.memo(() => {
       );
     }
 
-    // TODO: Remove this and related code when removing FF
-    if (isTrustedAppsByPolicyEnabled) {
-      return <PolicyTabs />;
-    }
-
-    return <PolicyFormLayout />;
-  }, [isTrustedAppsByPolicyEnabled, policyApiError, policyItem]);
+    return <PolicyTabs />;
+  }, [policyApiError, policyItem]);
 
   return (
     <AdministrationListPage
@@ -122,7 +111,7 @@ export const PolicyDetails = React.memo(() => {
       headerBackComponent={backToEndpointList}
       actions={policyApiError ? undefined : headerRightContent}
       restrictWidth={true}
-      hasBottomBorder={!isTrustedAppsByPolicyEnabled} // TODO: Remove this and related code when removing FF
+      hasBottomBorder={false}
     >
       {pageBody}
     </AdministrationListPage>

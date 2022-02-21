@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../routes';
+import { LOG_SETTINGS_DOCS_URL } from '../../../routes';
 
 import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
@@ -135,7 +135,7 @@ export const LogRetentionPanel: React.FC = () => {
             defaultMessage: 'Log retention is determined by the ILM policies for your deployment.',
           })}
           <br />
-          <EuiLink href={`${DOCS_PREFIX}/logs.html`} target="_blank">
+          <EuiLink href={LOG_SETTINGS_DOCS_URL} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
               defaultMessage: 'Learn more about log retention for Enterprise Search.',
             })}

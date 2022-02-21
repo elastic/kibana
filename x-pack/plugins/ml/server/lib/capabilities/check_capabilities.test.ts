@@ -26,17 +26,13 @@ const mlIsNotEnabled = async () => false;
 
 const mlClientNonUpgrade = {
   info: async () => ({
-    body: {
-      upgrade_mode: false,
-    },
+    upgrade_mode: false,
   }),
 } as unknown as MlClient;
 
 const mlClientUpgrade = {
   info: async () => ({
-    body: {
-      upgrade_mode: true,
-    },
+    upgrade_mode: true,
   }),
 } as unknown as MlClient;
 
@@ -51,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(31);
+      expect(count).toBe(32);
     });
   });
 
@@ -101,6 +97,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateMlAlerts).toBe(false);
+      expect(capabilities.canViewMlNodes).toBe(false);
     });
 
     test('full capabilities', async () => {
@@ -146,6 +143,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(true);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(true);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(true);
+      expect(capabilities.canViewMlNodes).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {

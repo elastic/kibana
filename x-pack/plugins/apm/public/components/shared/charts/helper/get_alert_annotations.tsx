@@ -19,14 +19,14 @@ import {
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
 import type { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
 import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { asDuration, asPercent } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type Alert = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
@@ -107,7 +107,7 @@ export function getAlertAnnotations({
     const color = getAlertColor({ severityLevel, theme });
     const experimentalLabel = i18n.translate(
       'xpack.apm.alertAnnotationTooltipExperimentalText',
-      { defaultMessage: 'Experimental' }
+      { defaultMessage: 'Technical preview' }
     );
     const header = `${getAlertHeader({
       severityLevel,

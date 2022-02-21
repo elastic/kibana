@@ -17,6 +17,9 @@ import { TRANSACTION_DURATION } from '../configurations/constants/elasticsearch_
 import * as lensAttributes from '../configurations/lens_attributes';
 import * as indexPattern from './use_app_index_pattern';
 import * as theme from '../../../../hooks/use_theme';
+import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
+import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_config';
+import { themeServiceMock } from 'src/core/public/mocks';
 
 const mockSingleSeries = [
   {
@@ -51,7 +54,18 @@ describe('useExpViewTimeRange', function () {
   const lensAttributesSpy = jest.spyOn(lensAttributes, 'LensAttributes');
 
   function Wrapper({ children }: { children: JSX.Element }) {
-    return <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>;
+    return (
+      <ExploratoryViewContextProvider
+        reportTypes={reportTypesList}
+        dataTypes={dataTypes}
+        indexPatterns={{}}
+        reportConfigMap={obsvReportConfigMap}
+        setHeaderActionMenu={jest.fn()}
+        theme$={themeServiceMock.createTheme$()}
+      >
+        <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>
+      </ExploratoryViewContextProvider>
+    );
   }
 
   it('updates lens attributes with report type from storage', async function () {

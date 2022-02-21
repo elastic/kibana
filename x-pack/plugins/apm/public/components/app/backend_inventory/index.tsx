@@ -19,7 +19,6 @@ export function BackendInventory() {
   const {
     query: { environment },
   } = useApmParams('/backends');
-
   const kueryBarBoolFilter = getKueryBarBoolFilter({
     environment,
   });

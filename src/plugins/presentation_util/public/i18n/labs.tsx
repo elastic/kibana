@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 
 export const LabsStrings = {
@@ -89,7 +89,7 @@ export const LabsStrings = {
         }),
       getDescriptionMessage: () =>
         i18n.translate('presentationUtil.labs.components.descriptionMessage', {
-          defaultMessage: 'Try out our features that are in progress or experimental.',
+          defaultMessage: 'Try out features that are in progress or in technical preview.',
         }),
       getResetToDefaultLabel: () =>
         i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {

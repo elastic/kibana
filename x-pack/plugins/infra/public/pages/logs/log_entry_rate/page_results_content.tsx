@@ -10,7 +10,7 @@ import moment from 'moment';
 import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { encode, RisonValue } from 'rison-node';
-import type { Query } from '../../../../../../../src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { TimeKey } from '../../../../common/time';

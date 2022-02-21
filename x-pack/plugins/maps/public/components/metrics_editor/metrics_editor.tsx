@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import type { IndexPatternField } from 'src/plugins/data/public';
 import { MetricEditor } from './metric_editor';

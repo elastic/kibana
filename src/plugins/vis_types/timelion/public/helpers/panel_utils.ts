@@ -68,7 +68,7 @@ export const MAIN_GROUP_ID = 1;
 export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
   ({
     ...domain,
-    padding: 50,
+    padding: 20,
     paddingUnit: 'pixel',
   } as unknown as AxisSpec['domain']);
 

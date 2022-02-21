@@ -20,7 +20,7 @@ import {
   isOperator,
 } from '@kbn/securitysolution-list-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
-import { FieldSpec } from 'src/plugins/data/common';
+import type { FieldSpec } from 'src/plugins/data/common';
 
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';

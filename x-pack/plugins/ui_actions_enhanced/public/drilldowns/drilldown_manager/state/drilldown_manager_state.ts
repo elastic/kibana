@@ -107,9 +107,7 @@ export class DrilldownManagerState {
       triggerIncompatible: !this.deps.triggers.find((t) => t === firstTrigger),
     };
   };
-  public readonly events$ = new BehaviorSubject<DrilldownTableItem[]>(
-    this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
-  );
+  public readonly events$: BehaviorSubject<DrilldownTableItem[]>;
 
   /**
    * State for each drilldown type used for new drilldown creation, so when user
@@ -134,6 +132,10 @@ export class DrilldownManagerState {
     this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
     this.canUnlockMoreDrilldowns = deps.actionFactories.some(
       (factory) => !factory.isCompatibleLicense
+    );
+
+    this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
+      this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
     );
 
     deps.dynamicActionManager.state.state$

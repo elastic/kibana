@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {

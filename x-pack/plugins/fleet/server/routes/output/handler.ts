@@ -21,6 +21,7 @@ import type {
 } from '../../../common';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
+import { agentPolicyService } from '../../services';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -40,27 +41,28 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   }
 };
 
-export const getOneOuputHandler: RequestHandler<TypeOf<typeof GetOneOutputRequestSchema.params>> =
-  async (context, request, response) => {
-    const soClient = context.core.savedObjects.client;
-    try {
-      const output = await outputService.get(soClient, request.params.outputId);
+export const getOneOuputHandler: RequestHandler<
+  TypeOf<typeof GetOneOutputRequestSchema.params>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const output = await outputService.get(soClient, request.params.outputId);
 
-      const body: GetOneOutputResponse = {
-        item: output,
-      };
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
 
-      return response.ok({ body });
-    } catch (error) {
-      if (error.isBoom && error.output.statusCode === 404) {
-        return response.notFound({
-          body: { message: `Output ${request.params.outputId} not found` },
-        });
-      }
-
-      return defaultIngestErrorHandler({ error, response });
+    return response.ok({ body });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
     }
-  };
+
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
 
 export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
@@ -68,9 +70,15 @@ export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await outputService.update(soClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+    }
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -94,9 +102,13 @@ export const postOuputHandler: RequestHandler<
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
     const output = await outputService.create(soClient, data, { id });
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    }
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -108,24 +120,25 @@ export const postOuputHandler: RequestHandler<
   }
 };
 
-export const deleteOutputHandler: RequestHandler<TypeOf<typeof DeleteOutputRequestSchema.params>> =
-  async (context, request, response) => {
-    const soClient = context.core.savedObjects.client;
-    try {
-      await outputService.delete(soClient, request.params.outputId);
+export const deleteOutputHandler: RequestHandler<
+  TypeOf<typeof DeleteOutputRequestSchema.params>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    await outputService.delete(soClient, request.params.outputId);
 
-      const body: DeleteOutputResponse = {
-        id: request.params.outputId,
-      };
+    const body: DeleteOutputResponse = {
+      id: request.params.outputId,
+    };
 
-      return response.ok({ body });
-    } catch (error) {
-      if (error.isBoom && error.output.statusCode === 404) {
-        return response.notFound({
-          body: { message: `Output ${request.params.outputId} not found` },
-        });
-      }
-
-      return defaultIngestErrorHandler({ error, response });
+    return response.ok({ body });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
     }
-  };
+
+    return defaultIngestErrorHandler({ error, response });
+  }
+};

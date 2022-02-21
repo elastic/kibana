@@ -6,7 +6,6 @@
  */
 
 import { isString } from 'lodash';
-import { getExportType as getTypeCsvDeprecated } from '../export_types/csv';
 import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_searchsource_immediate';
 import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
 import { getExportType as getTypePng } from '../export_types/png';
@@ -88,7 +87,6 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
   type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
   const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
     getTypeCsv,
-    getTypeCsvDeprecated,
     getTypeCsvFromSavedObject,
     getTypePng,
     getTypePngV2,

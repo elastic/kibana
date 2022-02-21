@@ -8,11 +8,7 @@
 import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE } from '../../screens/timeline';
 
-import {
-  investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { investigateFirstAlertInTimeline } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -25,8 +21,6 @@ describe('Alerts timeline', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);

@@ -37,156 +37,149 @@ interface Props {
   loading: boolean;
 }
 
-export const Layout = React.memo(
-  ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
-    const [showLoading, setShowLoading] = useState(true);
-    const {
-      metric,
-      groupBy,
-      sort,
-      nodeType,
-      changeView,
-      view,
-      autoBounds,
-      boundsOverride,
-      legend,
-    } = useWaffleOptionsContext();
-    const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
-    const { applyFilterQuery } = useWaffleFiltersContext();
-    const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
-    const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
-    const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+export const Layout = ({
+  shouldLoadDefault,
+  currentView,
+  reload,
+  interval,
+  nodes,
+  loading,
+}: Props) => {
+  const [showLoading, setShowLoading] = useState(true);
+  const { metric, groupBy, sort, nodeType, changeView, view, autoBounds, boundsOverride, legend } =
+    useWaffleOptionsContext();
+  const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
+  const { applyFilterQuery } = useWaffleFiltersContext();
+  const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
+  const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
+  const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
 
-    const options = {
-      formatter: InfraFormatterType.percent,
-      formatTemplate: '{{value}}',
-      legend: createLegend(legendPalette, legendSteps, legendReverseColors),
-      metric,
-      sort,
-      groupBy,
-    };
+  const options = {
+    formatter: InfraFormatterType.percent,
+    formatTemplate: '{{value}}',
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors),
+    metric,
+    sort,
+    groupBy,
+  };
 
-    useInterval(
-      () => {
-        if (!loading) {
-          jumpToTime(Date.now());
-        }
-      },
-      isAutoReloading ? 5000 : null
-    );
+  useInterval(
+    () => {
+      if (!loading) {
+        jumpToTime(Date.now());
+      }
+    },
+    isAutoReloading ? 5000 : null
+  );
 
-    const dataBounds = calculateBoundsFromNodes(nodes);
-    const bounds = autoBounds ? dataBounds : boundsOverride;
+  const dataBounds = calculateBoundsFromNodes(nodes);
+  const bounds = autoBounds ? dataBounds : boundsOverride;
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+  const { onViewChange } = useWaffleViewState();
+
+  useEffect(() => {
+    if (currentView) {
+      onViewChange(currentView);
+    }
+  }, [currentView, onViewChange]);
+
+  useEffect(() => {
+    // load snapshot data after default view loaded, unless we're not loading a view
+    if (currentView != null || !shouldLoadDefault) {
+      reload();
+    }
+
+    /**
+     * INFO: why disable exhaustive-deps
+     * We need to wait on the currentView not to be null because it is loaded async and could change the view state.
+     * We don't actually need to watch the value of currentView though, since the view state will be synched up by the
+     * changing params in the reload method so we should only "watch" the reload method.
+     *
+     * TODO: Should refactor this in the future to make it more clear where all the view state is coming
+     * from and it's precedence [query params, localStorage, defaultView, out of the box view]
+     */
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
-    const { onViewChange } = useWaffleViewState();
+  }, [reload, shouldLoadDefault]);
 
-    useEffect(() => {
-      if (currentView) {
-        onViewChange(currentView);
-      }
-    }, [currentView, onViewChange]);
+  useEffect(() => {
+    setShowLoading(true);
+  }, [options.metric, nodeType]);
 
-    useEffect(() => {
-      // load snapshot data after default view loaded, unless we're not loading a view
-      if (currentView != null || !shouldLoadDefault) {
-        reload();
-      }
+  useEffect(() => {
+    const hasNodes = nodes && nodes.length;
+    // Don't show loading screen when we're auto-reloading
+    setShowLoading(!hasNodes);
+  }, [nodes]);
 
-      /**
-       * INFO: why disable exhaustive-deps
-       * We need to wait on the currentView not to be null because it is loaded async and could change the view state.
-       * We don't actually need to watch the value of currentView though, since the view state will be synched up by the
-       * changing params in the reload method so we should only "watch" the reload method.
-       *
-       * TODO: Should refactor this in the future to make it more clear where all the view state is coming
-       * from and it's precedence [query params, localStorage, defaultView, out of the box view]
-       */
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [reload, shouldLoadDefault]);
-
-    useEffect(() => {
-      setShowLoading(true);
-    }, [options.metric, nodeType]);
-
-    useEffect(() => {
-      const hasNodes = nodes && nodes.length;
-      // Don't show loading screen when we're auto-reloading
-      setShowLoading(!hasNodes);
-    }, [nodes]);
-
-    return (
-      <>
-        <PageContent>
-          <AutoSizer bounds>
-            {({ measureRef: pageMeasureRef, bounds: { width = 0 } }) => (
-              <MainContainer ref={pageMeasureRef}>
-                <AutoSizer bounds>
-                  {({
-                    measureRef: topActionMeasureRef,
-                    bounds: { height: topActionHeight = 0 },
-                  }) => (
-                    <>
-                      <TopActionContainer ref={topActionMeasureRef}>
-                        <EuiFlexGroup
-                          justifyContent="spaceBetween"
-                          alignItems="center"
-                          gutterSize="m"
-                        >
-                          <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                          <EuiFlexItem grow={false}>
-                            <ViewSwitcher view={view} onChange={changeView} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </TopActionContainer>
-                      <AutoSizer bounds>
-                        {({ measureRef, bounds: { height = 0 } }) => (
-                          <>
-                            <NodesOverview
-                              nodes={nodes}
-                              options={options}
-                              nodeType={nodeType}
-                              loading={loading}
-                              showLoading={showLoading}
-                              reload={reload}
-                              onDrilldown={applyFilterQuery}
-                              currentTime={currentTime}
-                              view={view}
-                              autoBounds={autoBounds}
-                              boundsOverride={boundsOverride}
+  return (
+    <>
+      <PageContent>
+        <AutoSizer bounds>
+          {({ measureRef: pageMeasureRef, bounds: { width = 0 } }) => (
+            <MainContainer ref={pageMeasureRef}>
+              <AutoSizer bounds>
+                {({ measureRef: topActionMeasureRef, bounds: { height: topActionHeight = 0 } }) => (
+                  <>
+                    <TopActionContainer ref={topActionMeasureRef}>
+                      <EuiFlexGroup
+                        justifyContent="spaceBetween"
+                        alignItems="center"
+                        gutterSize="m"
+                      >
+                        <Toolbar nodeType={nodeType} currentTime={currentTime} />
+                        <EuiFlexItem grow={false}>
+                          <ViewSwitcher view={view} onChange={changeView} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </TopActionContainer>
+                    <AutoSizer bounds>
+                      {({ measureRef, bounds: { height = 0 } }) => (
+                        <>
+                          <NodesOverview
+                            nodes={nodes}
+                            options={options}
+                            nodeType={nodeType}
+                            loading={loading}
+                            showLoading={showLoading}
+                            reload={reload}
+                            onDrilldown={applyFilterQuery}
+                            currentTime={currentTime}
+                            view={view}
+                            autoBounds={autoBounds}
+                            boundsOverride={boundsOverride}
+                            formatter={formatter}
+                            bottomMargin={height}
+                            topMargin={topActionHeight}
+                          />
+                          {view === 'map' && (
+                            <BottomDrawer
+                              measureRef={measureRef}
+                              interval={interval}
                               formatter={formatter}
-                              bottomMargin={height}
-                              topMargin={topActionHeight}
-                            />
-                            {view === 'map' && (
-                              <BottomDrawer
-                                measureRef={measureRef}
-                                interval={interval}
+                              width={width}
+                            >
+                              <Legend
                                 formatter={formatter}
-                                width={width}
-                              >
-                                <Legend
-                                  formatter={formatter}
-                                  bounds={bounds}
-                                  dataBounds={dataBounds}
-                                  legend={options.legend}
-                                />
-                              </BottomDrawer>
-                            )}
-                          </>
-                        )}
-                      </AutoSizer>
-                    </>
-                  )}
-                </AutoSizer>
-              </MainContainer>
-            )}
-          </AutoSizer>
-        </PageContent>
-      </>
-    );
-  }
-);
+                                bounds={bounds}
+                                dataBounds={dataBounds}
+                                legend={options.legend}
+                              />
+                            </BottomDrawer>
+                          )}
+                        </>
+                      )}
+                    </AutoSizer>
+                  </>
+                )}
+              </AutoSizer>
+            </MainContainer>
+          )}
+        </AutoSizer>
+      </PageContent>
+    </>
+  );
+};
 
 const MainContainer = euiStyled.div`
   position: relative;

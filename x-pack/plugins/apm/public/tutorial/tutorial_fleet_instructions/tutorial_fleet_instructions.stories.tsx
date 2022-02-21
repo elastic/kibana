@@ -23,6 +23,7 @@ function Wrapper({ hasFleetPoliciesWithApmIntegration }: Args) {
       http={http}
       basePath="http://localhost:5601"
       isDarkTheme={false}
+      kibanaVersion="8.0.0"
     />
   );
 }

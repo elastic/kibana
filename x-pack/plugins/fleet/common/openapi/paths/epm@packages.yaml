@@ -7,8 +7,6 @@ get:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: ../components/schemas/search_result.yaml
+            $ref: ../components/schemas/get_packages_response.yaml
   operationId: list-all-packages
 parameters: []

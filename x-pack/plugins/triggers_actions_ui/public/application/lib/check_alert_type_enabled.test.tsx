@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertType } from '../../types';
+import { RuleType } from '../../types';
 import { checkAlertTypeEnabled } from './check_alert_type_enabled';
 
 describe('checkAlertTypeEnabled', () => {
@@ -18,7 +18,7 @@ describe('checkAlertTypeEnabled', () => {
   });
 
   test('returns isEnabled:true when alert type is enabled', async () => {
-    const alertType: AlertType = {
+    const alertType: RuleType = {
       id: 'test',
       name: 'Test',
       actionVariables: {
@@ -42,7 +42,7 @@ describe('checkAlertTypeEnabled', () => {
   });
 
   test('returns isEnabled:false when alert type is disabled by license', async () => {
-    const alertType: AlertType = {
+    const alertType: RuleType = {
       id: 'test',
       name: 'Test',
       actionVariables: {

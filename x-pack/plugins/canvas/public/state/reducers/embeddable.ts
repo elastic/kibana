@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { handleActions } from 'redux-actions';
 import { State } from '../../../types';
 

@@ -16,8 +16,10 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  combineErrorMessages,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 const supportedTypes = new Set([
   'string',
@@ -71,7 +73,10 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     }
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 

@@ -9,17 +9,18 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { CompleteRule, threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -68,10 +69,10 @@ export const createIndicatorMatchAlertType = (
         bulkCreate,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry: undefined,
+        eventsTelemetry,
         listClient,
         logger,
-        completeRule: completeRule as CompleteRule<ThreatRuleParams>,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

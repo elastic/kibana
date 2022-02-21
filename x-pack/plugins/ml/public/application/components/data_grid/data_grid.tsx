@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonEmpty,
@@ -113,14 +113,6 @@ export const DataGrid: FC<Props> = memo(
     //     onMouseLeave: () => hoveredRow$.next(null),
     //   };
     // };
-
-    // If the charts are visible, hide the column actions icon.
-    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
-      if (chartsVisible === true) {
-        d.actions = false;
-      }
-      return d;
-    });
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
@@ -341,7 +333,7 @@ export const DataGrid: FC<Props> = memo(
             <div className="mlDataGrid" ref={mutationRef}>
               <EuiDataGrid
                 aria-label={isWithHeader(props) ? props.title : ''}
-                columns={columnsWithChartsActionized.map((c) => {
+                columns={columnsWithCharts.map((c) => {
                   c.initialWidth = 165;
                   return c;
                 })}

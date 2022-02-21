@@ -24,7 +24,7 @@ import {
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';

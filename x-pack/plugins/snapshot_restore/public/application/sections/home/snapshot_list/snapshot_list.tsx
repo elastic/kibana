@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 

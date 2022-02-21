@@ -25,7 +25,7 @@ import { ImportedEvents } from '../imported_events';
 import { readFile, parseICSFile, filterEvents } from './utils';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const MAX_FILE_SIZE_MB = 100;
 

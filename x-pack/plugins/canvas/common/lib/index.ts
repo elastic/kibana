@@ -6,7 +6,6 @@
  */
 
 export * from './datatable';
-export * from './autocomplete';
 export * from './constants';
 export * from './errors';
 export * from './expression_form_handlers';

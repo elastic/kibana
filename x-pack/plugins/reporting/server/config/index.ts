@@ -19,6 +19,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
+    unused('capture.browser.type', { level: 'warning' }),
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
     unused('poll.jobsRefresh.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
     unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
@@ -29,38 +30,32 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           configPath: `${fromPath}.roles.enabled`,
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
-            defaultMessage: 'Setting "{fromPath}.roles" is deprecated',
+            defaultMessage: `The "{fromPath}.roles" setting is deprecated`,
             values: { fromPath },
           }),
           // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
           // https://github.com/elastic/kibana/issues/79905
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
-              `Use Kibana application privileges to grant reporting privileges.` +
-              ` Using  "{fromPath}.roles.allow" to grant reporting privileges` +
-              ` is deprecated.` +
-              ` The "{fromPath}.roles.enabled" setting will default to false` +
-              ` in a future release.`,
-            values: { fromPath },
+              `The default mechanism for Reporting privileges will work differently in future versions,` +
+              ` which will affect the behavior of this cluster. Set "xpack.reporting.roles.enabled" to` +
+              ` "false" to adopt the future behavior before upgrading.`,
           }),
           correctiveActions: {
             manualSteps: [
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
                 defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
               }),
-              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOnePartOne', {
-                defaultMessage: `Remove "xpack.reporting.roles.allow" to "false" in kibana.yml, if present.`,
-              }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
-                defaultMessage:
-                  `Create one or more roles that grant the Kibana application` +
-                  ` privilege for reporting from **Management > Security > Roles**.`,
+                defaultMessage: `Remove "xpack.reporting.roles.allow" in kibana.yml, if present.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
                 defaultMessage:
-                  `Grant reporting privileges to users by assigning one of the new roles.` +
-                  ` Users assigned a reporting role specified in "xpack.reporting.roles.allow"` +
-                  ` will no longer have reporting privileges, they must be assigned an application privilege based role.`,
+                  `Go to Management > Security > Roles to create one or more roles that grant` +
+                  ` the Kibana application privilege for Reporting.`,
+              }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepFour', {
+                defaultMessage: `Grant Reporting privileges to users by assigning one of the new roles.`,
               }),
             ],
           },
@@ -72,7 +67,6 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     capture: {
       maxAttempts: true,
       timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
-      networkPolicy: false, // show as [redacted]
       zoom: true,
     },
     csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },

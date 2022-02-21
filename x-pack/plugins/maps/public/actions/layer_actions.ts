@@ -545,13 +545,17 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const targetLayer = getLayerById(layerId, getState());
-    if (!targetLayer || !('getFields' in targetLayer)) {
+    const targetLayer: ILayer | undefined = getLayerById(layerId, getState());
+    if (!targetLayer) {
       return;
     }
 
     const style = targetLayer!.getCurrentStyle();
     if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+      return;
+    }
+
+    if (!('getFields' in targetLayer)) {
       return;
     }
 

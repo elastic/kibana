@@ -72,7 +72,7 @@ Check out <DocLink id="kibDevDocsKPTTutorial" text="the KibanaPageTemplate tutor
 
 ### Index Patterns
 
-<DocLink id="kibDataPlugin" section="index-patterns-api" text="Index Patterns" /> are a high-level, space-aware
+<DocLink id="kibDataPlugin" section="data-views-api" text="Index Patterns" /> are a high-level, space-aware
 abstraction layer that sits above Data Streams and Elasticsearch indices. Index Patterns provide users
 the ability to define and customize the data they wish to search and filter on, on a per-space basis.
 For example, users can specify a set of indices, and they can customize the field list with runtime fields,
@@ -121,6 +121,12 @@ Object`. Saved objects come pre-wired with support for bulk export/import, secur
 sharing and space isolation, and tags.
 
 **Github labels**: `Team:Core`, `Feature:Saved Objects`
+
+## Advanced Settings
+
+<DocLink id="kibDevTutorialAdvancedSettings" text="Advanced Settings and the uiSettings service" /> should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
+
+**Github labels**: `Team:Core`, `Feature:uiSettings`, `Feature:Advanced Settings`
 
 # Integration building blocks
 

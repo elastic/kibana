@@ -11,7 +11,7 @@ import { useGetTags, UseGetTags } from './use_get_tags';
 import { tags } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,11 +24,11 @@ describe('useGetTags', () => {
   });
 
   it('init', async () => {
+    const { result } = renderHook<string, UseGetTags>(() => useGetTags(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
       expect(result.current).toEqual({
         tags: [],
         isLoading: true,
@@ -45,7 +45,6 @@ describe('useGetTags', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
@@ -55,7 +54,6 @@ describe('useGetTags', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         tags,
@@ -73,7 +71,6 @@ describe('useGetTags', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.fetchTags();
       expect(spyOnGetTags).toHaveBeenCalledTimes(2);
     });
@@ -89,7 +86,6 @@ describe('useGetTags', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({

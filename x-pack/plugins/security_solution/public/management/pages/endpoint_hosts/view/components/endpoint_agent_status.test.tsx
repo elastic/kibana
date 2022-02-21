@@ -34,7 +34,7 @@ describe('When using the EndpointAgentStatus component', () => {
     (KibanaServices.get as jest.Mock).mockReturnValue(mockedContext.startServices);
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
-    endpointMeta = httpMocks.responseProvider.metadataList().hosts[0].metadata;
+    endpointMeta = httpMocks.responseProvider.metadataList().data[0].metadata;
     render = async (props: EndpointAgentStatusProps) => {
       renderResult = mockedContext.render(<EndpointAgentStatus {...props} />);
       return renderResult;

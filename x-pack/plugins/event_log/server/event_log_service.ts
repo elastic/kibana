@@ -92,6 +92,10 @@ export class EventLogService implements IEventLogService {
     return this.savedObjectProviderRegistry.registerProvider(type, provider);
   }
 
+  async isEsContextReady() {
+    return await this.esContext.waitTillReady();
+  }
+
   getIndexPattern() {
     return this.esContext.esNames.indexPattern;
   }

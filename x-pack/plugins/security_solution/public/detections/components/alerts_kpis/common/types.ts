@@ -11,8 +11,8 @@ export interface AlertsStackByOption {
 }
 
 export type AlertsStackByField =
-  | 'kibana.alert.rule.risk_score'
-  | 'kibana.alert.rule.severity'
+  | 'kibana.alert.risk_score'
+  | 'kibana.alert.severity'
   | 'kibana.alert.rule.threat.tactic.name'
   | 'destination.ip'
   | 'event.action'

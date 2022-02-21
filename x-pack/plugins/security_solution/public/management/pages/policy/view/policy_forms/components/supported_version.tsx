@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { popupVersionsMap } from '../protections/popup_options_to_versions';
 

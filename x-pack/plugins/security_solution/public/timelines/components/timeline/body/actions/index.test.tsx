@@ -12,6 +12,10 @@ import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../
 import { Actions } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../../detections/components/user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+}));
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
@@ -126,7 +130,7 @@ describe('Actions', () => {
     test('it enables for eventType=signal', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
-        kibana: { alert: { rule: { uuid: ['123'] } } },
+        kibana: { alert: { rule: { uuid: ['123'], parameters: {} } } },
       };
       const wrapper = mount(
         <TestProviders>
@@ -169,7 +173,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
-    test('it enables for event.kind: alert and agent.type: endpoint', () => {
+    test('it disables for event.kind: alert and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
@@ -183,7 +187,7 @@ describe('Actions', () => {
 
       expect(
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(false);
+      ).toBe(true);
     });
     test('it shows the analyze event button when the event is from an endpoint', () => {
       const ecsData = {

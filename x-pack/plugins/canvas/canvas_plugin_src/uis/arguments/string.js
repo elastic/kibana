@@ -9,6 +9,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+
 import { ArgumentStrings } from '../../../i18n';
 
 const { String: strings } = ArgumentStrings;
@@ -23,8 +25,11 @@ const StringArgInput = ({ argValue, typeInstance, onValueChange, argId }) => {
 
   const onChange = useCallback(
     (ev) => {
-      const onChangeFn = confirm ? setValue : onValueChange;
-      onChangeFn(ev.target.value);
+      const { value } = ev.target;
+      setValue(value);
+      if (!confirm) {
+        onValueChange(value);
+      }
     },
     [confirm, onValueChange]
   );
@@ -56,5 +61,5 @@ export const string = () => ({
   name: 'string',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(StringArgInput),
+  simpleTemplate: templateFromReactComponent(withDebounceArg(StringArgInput)),
 });

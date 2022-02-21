@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type {
@@ -19,6 +20,7 @@ import { getObjectKey, isLeft, isRight } from './internal_utils';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';
 import { ALL_NAMESPACES_STRING } from './utils';
+import { SavedObjectsErrorHelpers } from './errors';
 
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
@@ -77,6 +79,10 @@ interface ParsedObject {
   id: string;
   overwrite: boolean;
   spaces: Set<string>;
+}
+
+function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
 }
 
 /**
@@ -139,7 +145,7 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
         for (let i = 0; i < spaces.size; i++) {
           const aliasDoc = bulkGetResponse?.body.docs[getResponseIndex++];
           const index = aliasSpacesIndex++; // increment whether the alias was found or not
-          if (aliasDoc?.found) {
+          if (isMgetDoc(aliasDoc) && aliasDoc.found) {
             const legacyUrlAlias: LegacyUrlAlias | undefined =
               aliasDoc._source![LEGACY_URL_ALIAS_TYPE]; // if the 'disabled' field is not present, the source will be empty
             if (!legacyUrlAlias?.disabled) {
@@ -160,7 +166,7 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
       }
 
       let existingDocument: PreflightCheckForCreateResult['existingDocument'];
-      if (objectDoc.found) {
+      if (isMgetDoc(objectDoc) && objectDoc.found) {
         // @ts-expect-error MultiGetHit._source is optional
         if (!rawDocExistsInNamespaces(registry, objectDoc, [...spaces])) {
           const error = {
@@ -267,9 +273,20 @@ async function bulkGetObjectsAndAliases(
   const bulkGetResponse = docsToBulkGet.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: docsToBulkGet } },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       )
     : undefined;
+
+  // throw if we can't verify a 404 response is from Elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
 
   return { bulkGetResponse, aliasSpaces };
 }

@@ -10,8 +10,8 @@ import { resolve, relative } from 'path';
 import { Stats, createReadStream, createWriteStream } from 'fs';
 import { stat, rename } from 'fs/promises';
 import { Readable, Writable } from 'stream';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import { createPromiseFromStreams } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
 import {
   prioritizeMappings,
   readDirectory,

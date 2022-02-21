@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState, useCallback, useMemo } from 'react'
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   FIELD_TYPES,

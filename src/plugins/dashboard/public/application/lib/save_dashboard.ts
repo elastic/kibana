@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 
+import { isFilterPinned } from '@kbn/es-query';
 import { convertTimeToUTCString } from '.';
 import { NotificationsStart } from '../../services/core';
 import { DashboardSavedObject } from '../../saved_dashboards';
@@ -16,7 +17,7 @@ import { SavedObjectSaveOpts } from '../../services/saved_objects';
 import { dashboardSaveToastStrings } from '../../dashboard_strings';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
-import { RefreshInterval, TimefilterContract, esFilters } from '../../services/data';
+import { RefreshInterval, TimefilterContract } from '../../services/data';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import { DashboardSessionStorage } from './dashboard_session_storage';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
@@ -81,9 +82,7 @@ export const saveDashboard = async ({
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
 
   // only save unpinned filters
-  const unpinnedFilters = savedDashboard
-    .getFilters()
-    .filter((filter) => !esFilters.isFilterPinned(filter));
+  const unpinnedFilters = savedDashboard.getFilters().filter((filter) => !isFilterPinned(filter));
   savedDashboard.searchSource.setField('filter', unpinnedFilters);
 
   try {

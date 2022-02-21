@@ -48,7 +48,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   checked,
   columnValues,
-  data,
   ecsData,
   eventId,
   eventIdToNoteIds,
@@ -107,10 +106,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const isContextMenuDisabled = useMemo(() => {
     return (
       eventType !== 'signal' &&
-      !(
-        (ecsData.event?.kind?.includes('event') || ecsData.event?.kind?.includes('alert')) &&
-        ecsData.agent?.type?.includes('endpoint')
-      )
+      !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
     );
   }, [ecsData, eventType]);
 
@@ -165,7 +161,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </EventsTdContent>
       </div>
       <>
-        {timelineId !== TimelineId.active && eventType === 'signal' && (
+        {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"

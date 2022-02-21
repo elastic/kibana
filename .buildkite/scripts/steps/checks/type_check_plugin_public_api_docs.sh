@@ -11,6 +11,9 @@ checks-reporter-with-killswitch "Build TS Refs" \
     --no-cache \
     --force
 
+set +e;
+echo "--- running check types and build api docs in parallel";
+
 checks-reporter-with-killswitch "Check Types" \
   node scripts/type_check &> target/check_types.log &
 check_types_pid=$!

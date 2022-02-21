@@ -12,7 +12,7 @@ import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
+export function defineGetRolesRoutes({ router, authz, getFeatures }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/role/{name}',
@@ -22,15 +22,18 @@ export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const { body: elasticsearchRoles } =
+        const [features, elasticsearchRoles] = await Promise.all([
+          getFeatures(),
           await context.core.elasticsearch.client.asCurrentUser.security.getRole({
             name: request.params.name,
-          });
-
+          }),
+        ]);
         const elasticsearchRole = elasticsearchRoles[request.params.name];
+
         if (elasticsearchRole) {
           return response.ok({
             body: transformElasticsearchRoleToRole(
+              features,
               // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
               elasticsearchRole,
               request.params.name,

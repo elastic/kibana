@@ -12,7 +12,7 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
 

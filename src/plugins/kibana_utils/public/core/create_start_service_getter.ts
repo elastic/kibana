@@ -8,7 +8,7 @@
 
 import { CoreStart, StartServicesAccessor } from '../../../../core/public';
 
-export interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
+interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
   plugins: Plugins;
   self: OwnContract;
   core: Core;

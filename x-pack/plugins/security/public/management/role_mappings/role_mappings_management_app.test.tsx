@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
 import { roleMappingsManagementApp } from './role_mappings_management_app';
@@ -46,6 +46,7 @@ async function mountApp(basePath: string, pathname: string) {
         element: container,
         setBreadcrumbs,
         history: scopedHistoryMock.create({ pathname }),
+        theme$: themeServiceMock.createTheme$(),
       });
   });
 
@@ -100,7 +101,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
+        Role Mapping Edit Page: {"action":"edit","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
       </div>
     `);
 
@@ -128,7 +129,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}}}
+        Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}}}
       </div>
     `);
 

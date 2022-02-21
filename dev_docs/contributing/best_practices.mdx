@@ -141,6 +141,9 @@ export type foo: string | AnInterface;
 
 Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
+You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.0/app/home). Note that because anonymous access is enabled, some
+of the demos are currently not working. 
+
 ## Performance
 
 Build with scalability in mind.
@@ -149,6 +152,8 @@ Build with scalability in mind.
 - Consider data with high cardinality fields
 - Consider large data sets, that span a long time range
 - Consider slow internet and low bandwidth environments
+
+<DocLink id="kibDevPerformance" text="Read more about performance."/>
 
 ## Accessibility
 
@@ -202,13 +207,13 @@ Kibana code base, try not to contribute to this volatility. Doing this can:
 
 All of the above contributes to more bugs being found in the QA cycle and can cause a delay in the release. Prefer instead to merge
 your large change right _after_ feature freeze. If you are worried about missing your initial release version goals, review our
-[release train philophy](https://github.com/elastic/dev/blob/master/shared/time-based-releases.md). It's okay!
+<DocLink id="devTimeBasedReleases" text="release train philosophy"/>. It's okay!
 
 </DocCallOut>
 
 ### Size
 
-When possible, build features with incrementals sets of small and focused PRs, but don't check in unused code, and don't expose any feature on master that you would not be comfortable releasing.
+When possible, build features with incremental sets of small and focused PRs, but don't check in unused code, and don't expose any feature on main that you would not be comfortable releasing.
 
 ![product_stages](../assets/product_stages.png)
 

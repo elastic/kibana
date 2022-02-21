@@ -8,7 +8,8 @@
 
 import Path from 'path';
 
-import { run, REPO_ROOT, createFlagError } from '@kbn/dev-utils';
+import { run, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';

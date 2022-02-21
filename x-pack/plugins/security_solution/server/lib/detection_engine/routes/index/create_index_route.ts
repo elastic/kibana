@@ -97,7 +97,7 @@ export const createDetectionIndex = async (
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
-      body: getSignalsTemplate(index, spaceId, aadIndexAliasName) as Record<string, unknown>,
+      body: getSignalsTemplate(index, aadIndexAliasName) as Record<string, unknown>,
     });
   }
   // Check if the old legacy siem signals template exists and remove it
@@ -141,10 +141,14 @@ const addFieldAliasesToIndices = async ({
   esClient: ElasticsearchClient;
   index: string;
 }) => {
-  const { body: indexMappings } = await esClient.indices.get({ index });
+  const indexMappings = await esClient.indices.get({ index });
   const indicesByVersion: Record<number, string[]> = {};
   const versions: Set<number> = new Set();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
+    // The `version` tells us which set of backwards compatibility mappings to apply: `version` never changes
+    // and represents what was actually shipped. `aliases_version` tells us if the most up to date backwards
+    // compatibility mappings have already been applied to the index. `aliases_version` DOES get updated when we apply
+    // new compatibility mappings like runtime fields and aliases.
     const version: number = get(mapping.mappings?._meta, 'version') ?? 0;
     const aliasesVersion: number = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
     // Only attempt to add backwards compatibility mappings to indices whose names start with the alias
@@ -182,7 +186,7 @@ const addIndexAliases = async ({
   index: string;
   aadIndexAliasName: string;
 }) => {
-  const { body: indices } = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
+  const indices = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
   const aliasActions = {
     actions: Object.keys(indices).map((concreteIndexName) => {
       return {

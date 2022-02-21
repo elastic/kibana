@@ -9,12 +9,10 @@
 import {
   mockGetSavedObjectFromSource,
   mockRawDocExistsInNamespace,
+  mockIsNotFoundFromUnsupportedServer,
 } from './internal_bulk_resolve.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
@@ -34,10 +32,12 @@ beforeEach(() => {
   );
   mockRawDocExistsInNamespace.mockReset();
   mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default
+  mockIsNotFoundFromUnsupportedServer.mockReset();
+  mockIsNotFoundFromUnsupportedServer.mockReturnValue(false);
 });
 
 describe('internalBulkResolve', () => {
-  let client: DeeplyMockedKeys<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let serializer: SavedObjectsSerializer;
   let incrementCounterInternal: jest.Mock<any, any>;
 
@@ -66,52 +66,48 @@ describe('internalBulkResolve', () => {
   function mockBulkResults(
     ...results: Array<{ found: boolean; targetId?: string; disabled?: boolean }>
   ) {
-    client.bulk.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        items: results.map(({ found, targetId, disabled }) => ({
-          update: {
-            _index: 'doesnt-matter',
-            status: 0,
-            get: {
-              found,
-              _source: {
-                ...((targetId || disabled) && {
-                  [LEGACY_URL_ALIAS_TYPE]: { targetId, disabled },
-                }),
-              },
-              ...VERSION_PROPS,
+    client.bulk.mockResponseOnce({
+      items: results.map(({ found, targetId, disabled }) => ({
+        update: {
+          _index: 'doesnt-matter',
+          status: 0,
+          get: {
+            found,
+            _source: {
+              ...((targetId || disabled) && {
+                [LEGACY_URL_ALIAS_TYPE]: { targetId, disabled },
+              }),
             },
+            ...VERSION_PROPS,
           },
-        })),
-        errors: false,
-        took: 0,
-      })
-    );
+        },
+      })),
+      errors: false,
+      took: 0,
+    });
   }
 
   /** Mocks the elasticsearch client so it returns the expected results for an mget operation*/
   function mockMgetResults(...results: Array<{ found: boolean }>) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        docs: results.map((x) => {
-          return x.found
-            ? {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                _source: {
-                  foo: 'bar',
-                },
-                ...VERSION_PROPS,
-                found: true,
-              }
-            : {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                found: false,
-              };
-        }),
-      })
-    );
+    client.mget.mockResponseOnce({
+      docs: results.map((x) => {
+        return x.found
+          ? {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              _source: {
+                foo: 'bar',
+              },
+              ...VERSION_PROPS,
+              found: true,
+            }
+          : {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              found: false,
+            };
+      }),
+    });
   }
 
   /** Asserts that bulk is called for the given aliases */
@@ -155,20 +151,42 @@ describe('internalBulkResolve', () => {
     const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(UNSUPPORTED_TYPE);
     return { type: UNSUPPORTED_TYPE, id, error };
   }
+
   function expectNotFoundError(id: string) {
     const error = SavedObjectsErrorHelpers.createGenericNotFoundError(OBJ_TYPE, id);
     return { type: OBJ_TYPE, id, error };
   }
+
   function expectExactMatchResult(id: string) {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'exactMatch' };
   }
+
   function expectAliasMatchResult(id: string) {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'aliasMatch', alias_target_id: id };
   }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   function expectConflictResult(id: string, alias_target_id: string) {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'conflict', alias_target_id };
   }
+
+  it('throws if mget call results in non-ES-originated 404 error', async () => {
+    const objects = [{ type: OBJ_TYPE, id: '1' }];
+    const params = setup(objects, { namespace: 'space-x' });
+    mockBulkResults(
+      { found: false } // fetch alias for obj 1
+    );
+    mockMgetResults(
+      { found: false } // fetch obj 1 (actual result body doesn't matter, just needs statusCode and headers)
+    );
+    mockIsNotFoundFromUnsupportedServer.mockReturnValue(true);
+
+    await expect(() => internalBulkResolve(params)).rejects.toThrow(
+      SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
+    );
+    expect(client.bulk).toHaveBeenCalledTimes(1);
+    expect(client.mget).toHaveBeenCalledTimes(1);
+  });
 
   it('returns an empty array if no object args are passed in', async () => {
     const params = setup([], { namespace: 'space-x' });

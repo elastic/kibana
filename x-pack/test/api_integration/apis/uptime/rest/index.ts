@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../../plugins/uptime/server/lib/saved_objects';
+} from '../../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -70,6 +70,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
+    });
+
+    describe('uptime CRUD routes', () => {
+      loadTestFile(require.resolve('./get_monitor'));
+      loadTestFile(require.resolve('./add_monitor'));
+      loadTestFile(require.resolve('./edit_monitor'));
+      loadTestFile(require.resolve('./delete_monitor'));
     });
   });
 }

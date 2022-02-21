@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../../data/server';
 
 export function splitByFilter(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
@@ -18,7 +18,7 @@ export function splitByFilter(req, panel, series, esQueryConfig, seriesIndex) {
     overwrite(
       doc,
       `aggs.${series.id}.filter`,
-      esQuery.buildEsQuery(seriesIndex.indexPattern, [series.filter], [], esQueryConfig)
+      buildEsQuery(seriesIndex.indexPattern, [series.filter], [], esQueryConfig)
     );
 
     return next(doc);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Aggregators } from '../types';
+import { Aggregators } from '../../../../../common/alerting/metrics';
+
 export const createPercentileAggregation = (
   type: Aggregators.P95 | Aggregators.P99,
   field: string

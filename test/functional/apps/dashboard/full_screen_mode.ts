@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -92,6 +93,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isChromeVisible).to.be(true);
       });
       await filterBar.removeFilter('bytes');
+    });
+
+    it('exits full screen mode when back button pressed', async () => {
+      await PageObjects.dashboard.clickFullScreenMode();
+      await browser.goBack();
+      await retry.try(async () => {
+        const isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+      });
+
+      await browser.goForward();
+      await retry.try(async () => {
+        const isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+      });
     });
   });
 }

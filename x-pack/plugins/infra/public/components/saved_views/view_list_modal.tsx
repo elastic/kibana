@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';

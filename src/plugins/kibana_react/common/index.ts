@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109898
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './eui_styled_components';
+export type { EuiTheme } from './eui_styled_components';
+export {
+  EuiThemeProviderDecorator,
+  css,
+  euiStyled,
+  EuiThemeProvider,
+  createGlobalStyle,
+  keyframes,
+  withTheme,
+} from './eui_styled_components';

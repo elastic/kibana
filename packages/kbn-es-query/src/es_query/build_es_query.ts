@@ -12,7 +12,7 @@ import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query } from '../filters';
-import { BoolQuery, IndexPatternBase } from './types';
+import { BoolQuery, DataViewBase } from './types';
 import { KueryQueryOptions } from '../kuery';
 
 /**
@@ -42,7 +42,7 @@ function removeMatchAll<T>(filters: T[]) {
  * @public
  */
 export function buildEsQuery(
-  indexPattern: IndexPatternBase | undefined,
+  indexPattern: DataViewBase | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {

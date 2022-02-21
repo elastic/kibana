@@ -12,7 +12,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../..
 import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
 import { PluginStartContract as CasesPluginStart } from '../../../../../../../plugins/cases/server';
-import { CasesPatchRequest } from '../../../../../../../plugins/cases/common';
+import { CasesPatchRequest } from '../../../../../../../plugins/cases/common/api';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

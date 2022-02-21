@@ -25,7 +25,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { ColorPicker } from '../color_picker';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);

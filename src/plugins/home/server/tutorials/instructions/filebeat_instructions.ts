@@ -13,268 +13,307 @@ import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 import { cloudPasswordAndResetLink } from './cloud_instructions';
 
-export const createFilebeatInstructions = (context?: TutorialContext) => ({
-  INSTALL: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.install.osxTitle', {
-        defaultMessage: 'Download and install Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
-        values: {
-          linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf filebeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd filebeat-{config.kibana.version}-darwin-x86_64/',
-      ],
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTitle', {
-        defaultMessage: 'Download and install Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
-        values: {
-          linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i filebeat-{config.kibana.version}-amd64.deb',
-      ],
-      textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPost', {
-        defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
-        values: {
-          linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
-        },
-      }),
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTitle', {
-        defaultMessage: 'Download and install Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
-        values: {
-          linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi filebeat-{config.kibana.version}-x86_64.rpm',
-      ],
-      textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPost', {
-        defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
-        values: {
-          linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
-        },
-      }),
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.install.windowsTitle', {
-        defaultMessage: 'Download and install Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.windowsTextPre', {
-        defaultMessage:
-          'First time using Filebeat? See the [Quick Start]({guideLinkUrl}).\n\
+export const createFilebeatInstructions = (context: TutorialContext) => {
+  const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/filebeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
+
+  return {
+    INSTALL: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.install.osxTitle', {
+          defaultMessage: 'Download and install Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.osxTextPre', {
+          defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
+          values: {
+            linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'tar xzvf filebeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'cd filebeat-{config.kibana.version}-darwin-x86_64/',
+        ],
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTitle', {
+          defaultMessage: 'Download and install Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPre', {
+          defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
+          values: {
+            linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-amd64.deb',
+          'sudo dpkg -i filebeat-{config.kibana.version}-amd64.deb',
+        ],
+        textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPost', {
+          defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
+          values: {
+            linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
+          },
+        }),
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTitle', {
+          defaultMessage: 'Download and install Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPre', {
+          defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
+          values: {
+            linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-x86_64.rpm',
+          'sudo rpm -vi filebeat-{config.kibana.version}-x86_64.rpm',
+        ],
+        textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPost', {
+          defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
+          values: {
+            linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
+          },
+        }),
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.install.windowsTitle', {
+          defaultMessage: 'Download and install Filebeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.install.windowsTextPre',
+          {
+            defaultMessage:
+              'First time using Filebeat? See the [Quick Start]({guideLinkUrl}).\n\
  1. Download the Filebeat Windows zip file from the [Download]({filebeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Filebeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Filebeat as a Windows service.',
-        values: {
-          folderPath: '`C:\\Program Files`',
-          guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
-          filebeatLinkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
-          directoryName: 'filebeat-{config.kibana.version}-windows',
-        },
-      }),
-      commands: ['cd "C:\\Program Files\\Filebeat"', '.\\install-service-filebeat.ps1'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatInstructions.install.windowsTextPost',
-        {
+            values: {
+              folderPath: '`C:\\Program Files`',
+              guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
+              filebeatLinkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
+              directoryName: 'filebeat-{config.kibana.version}-windows',
+            },
+          }
+        ),
+        commands: ['cd "C:\\Program Files\\Filebeat"', '.\\install-service-filebeat.ps1'],
+        textPost: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.install.windowsTextPost',
+          {
+            defaultMessage:
+              'Modify the settings under {propertyName} in the {filebeatPath} file to point to your Elasticsearch installation.',
+            values: {
+              propertyName: '`output.elasticsearch`',
+              filebeatPath: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
+            },
+          }
+        ),
+      },
+    },
+    START: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.start.osxTitle', {
+          defaultMessage: 'Start Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.osxTextPre', {
           defaultMessage:
-            'Modify the settings under {propertyName} in the {filebeatPath} file to point to your Elasticsearch installation.',
-          values: {
-            propertyName: '`output.elasticsearch`',
-            filebeatPath: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
-          },
-        }
-      ),
-    },
-  },
-  START: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.start.osxTitle', {
-        defaultMessage: 'Start Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.osxTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['./filebeat setup', './filebeat -e'],
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.start.debTitle', {
-        defaultMessage: 'Start Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.debTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['sudo filebeat setup', 'sudo service filebeat start'],
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.start.rpmTitle', {
-        defaultMessage: 'Start Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.rpmTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['sudo filebeat setup', 'sudo service filebeat start'],
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.start.windowsTitle', {
-        defaultMessage: 'Start Filebeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.windowsTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['.\\filebeat.exe setup', 'Start-Service filebeat'],
-    },
-  },
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`filebeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`/etc/filebeat/filebeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`/etc/filebeat/filebeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.filebeatInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.windowsTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatInstructions.config.windowsTextPost',
-        {
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['./filebeat setup', './filebeat -e'],
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.start.debTitle', {
+          defaultMessage: 'Start Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.debTextPre', {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-          values: {
-            passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
-          },
-        }
-      ),
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['sudo filebeat setup', 'sudo service filebeat start'],
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.start.rpmTitle', {
+          defaultMessage: 'Start Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.rpmTextPre', {
+          defaultMessage:
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['sudo filebeat setup', 'sudo service filebeat start'],
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.start.windowsTitle', {
+          defaultMessage: 'Start Filebeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.windowsTextPre', {
+          defaultMessage:
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['.\\filebeat.exe setup', 'Start-Service filebeat'],
+      },
     },
-  },
-});
+    CONFIG: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
+          values: {
+            path: '`filebeat.yml`',
+          },
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.config.osxTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
+          values: {
+            path: '`/etc/filebeat/filebeat.yml`',
+          },
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.config.debTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+            Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+            default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
+          values: {
+            path: '`/etc/filebeat/filebeat.yml`',
+          },
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.config.rpmTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+            Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+            default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.filebeatInstructions.config.windowsTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.config.windowsTextPre',
+          {
+            defaultMessage: 'Modify {path} to set the connection information:',
+            values: {
+              path: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
+            },
+          }
+        ),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.filebeatInstructions.config.windowsTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+            Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+            default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+    },
+  };
+};
 
 export const createFilebeatCloudInstructions = () => ({
   CONFIG: {
@@ -430,7 +469,7 @@ export function filebeatStatusCheck(moduleName: string) {
 export function onPremInstructions(
   moduleName: string,
   platforms: readonly Platform[] = [],
-  context?: TutorialContext
+  context: TutorialContext
 ) {
   const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions(context);
 
@@ -463,8 +502,12 @@ export function onPremInstructions(
   };
 }
 
-export function onPremCloudInstructions(moduleName: string, platforms: readonly Platform[] = []) {
-  const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions();
+export function onPremCloudInstructions(
+  moduleName: string,
+  platforms: readonly Platform[] = [],
+  context: TutorialContext
+) {
+  const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions(context);
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
 
@@ -500,8 +543,12 @@ export function onPremCloudInstructions(moduleName: string, platforms: readonly 
   };
 }
 
-export function cloudInstructions(moduleName: string, platforms: readonly Platform[] = []) {
-  const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions();
+export function cloudInstructions(
+  moduleName: string,
+  platforms: readonly Platform[] = [],
+  context: TutorialContext
+) {
+  const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions(context);
   const FILEBEAT_CLOUD_INSTRUCTIONS = createFilebeatCloudInstructions();
 
   const variants = [];

@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
-
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
+import type { MlCommonDataGrid } from './common_data_grid';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI
+  mlCommonUI: MlCommonUI,
+  commonDataGrid: MlCommonDataGrid
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -31,6 +31,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async assertRegressionTablePanelExists() {
       await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
+    },
+
+    async scrollRocCurveChartIntoView() {
+      await testSubjects.scrollIntoView('mlDFAnalyticsClassificationExplorationRocCurveChart');
     },
 
     async assertClassificationEvaluatePanelElementsExists() {
@@ -57,18 +61,130 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       });
     },
 
-    async getResultTableRows() {
-      return (await testSubjects.find('mlExplorationDataGrid loaded')).findAllByTestSubject(
-        'dataGridRowCell'
+    async assertResultsTablePreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'mlExplorationDataGridHistogramButton',
+          'aria-pressed'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async enableResultsTablePreviewHistogramCharts(expectedButtonState: boolean) {
+      await retry.tryForTime(5000, async () => {
+        const actualState =
+          (await testSubjects.getAttribute(
+            'mlExplorationDataGridHistogramButton',
+            'aria-pressed'
+          )) === 'true';
+
+        if (actualState !== expectedButtonState) {
+          await testSubjects.click('mlExplorationDataGridHistogramButton');
+          await this.assertResultsTablePreviewHistogramChartButtonCheckState(expectedButtonState);
+        }
+      });
+    },
+
+    async assertResultsTablePreviewHistogramChartsMissing(
+      expectedHistogramCharts: Array<{
+        chartAvailable: boolean;
+        id: string;
+        legend?: string;
+      }>
+    ) {
+      for (const expected of expectedHistogramCharts.values()) {
+        const id = expected.id;
+        await testSubjects.missingOrFail(`mlDataGridChart-${id}`);
+      }
+    },
+
+    async assertResultsTablePreviewHistogramCharts(
+      expectedHistogramCharts: Array<{
+        chartAvailable: boolean;
+        id: string;
+        legend?: string;
+      }>
+    ) {
+      // For each chart, get the content of each header cell and assert
+      // the legend text and column id and if the chart should be present or not.
+      await retry.tryForTime(5000, async () => {
+        for (const expected of expectedHistogramCharts.values()) {
+          const id = expected.id;
+          await testSubjects.existOrFail(`mlDataGridChart-${id}`);
+
+          if (expected.chartAvailable) {
+            await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
+          }
+
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${id}-legend`);
+          if (expected.legend) {
+            expect(actualLegend).to.eql(
+              expected.legend,
+              `Legend text for column '${id}' should be '${expected.legend}' (got '${actualLegend}')`
+            );
+          }
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${id}-id`);
+          expect(actualId).to.eql(
+            expected.id,
+            `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
+          );
+        }
+      });
+    },
+
+    async assertColumnSelectPopoverOpenState(expectedState: boolean) {
+      await commonDataGrid.assertColumnSelectPopoverOpenState(
+        'mlExplorationDataGrid',
+        expectedState
+      );
+    },
+
+    async toggleColumnSelectPopoverState(state: boolean) {
+      await commonDataGrid.toggleColumnSelectPopoverState('mlExplorationDataGrid', state);
+    },
+
+    async hideAllResultsTableColumns() {
+      await commonDataGrid.hideAllColumns('mlExplorationDataGrid');
+      await this.assertResultsTableEmpty();
+    },
+
+    async showAllResultsTableColumns() {
+      await commonDataGrid.showAllColumns('mlExplorationDataGrid');
+      await this.assertResultsTableNotEmpty();
+    },
+
+    async assertColumnSortPopoverOpenState(expectedOpenState: boolean) {
+      await commonDataGrid.assertColumnSortPopoverOpenState(
+        'mlExplorationDataGrid',
+        expectedOpenState
+      );
+    },
+
+    async toggleColumnSortPopoverState(expectedState: boolean) {
+      await commonDataGrid.toggleColumnSortPopoverState('mlExplorationDataGrid', expectedState);
+    },
+
+    async setColumnToSortBy(columnId: string, sortDirection: 'asc' | 'desc') {
+      await commonDataGrid.setColumnToSortBy('mlExplorationDataGrid', columnId, sortDirection);
+    },
+
+    async assertResultsTableColumnValues(column: number, expectedColumnValues: string[]) {
+      await commonDataGrid.assertEuiDataGridColumnValues(
+        'mlExplorationDataGrid',
+        column,
+        expectedColumnValues
       );
     },
 
     async assertResultsTableNotEmpty() {
-      const resultTableRows = await this.getResultTableRows();
-      expect(resultTableRows.length).to.be.greaterThan(
-        0,
-        `DFA results table should have at least one row (got '${resultTableRows.length}')`
-      );
+      await commonDataGrid.assertEuiDataGridNotEmpty('mlExplorationDataGrid loaded');
+    },
+
+    async assertResultsTableEmpty() {
+      await commonDataGrid.assertEuiDataGridEmpty('mlExplorationDataGrid loaded');
     },
 
     async assertTotalFeatureImportanceEvaluatePanelExists() {
@@ -125,11 +241,15 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       });
     },
 
-    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+    async assertScatterplotMatrixLoaded() {
       await testSubjects.existOrFail('mlDFExpandableSection-splom > mlScatterplotMatrix loaded', {
         timeout: 5000,
       });
-      await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
+    },
+
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await this.assertScatterplotMatrixLoaded();
+      await this.scrollScatterplotMatrixIntoView();
       await mlCommonUI.assertColorsInCanvasElement(
         'mlDFExpandableSection-splom',
         expectedValue,
@@ -241,6 +361,48 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async scrollResultsIntoView() {
       await this.scrollContentSectionIntoView('results');
+    },
+
+    async expandContentSection(sectionId: string, shouldExpand: boolean) {
+      const contentSubj = `mlDFExpandableSection-${sectionId}-content`;
+      const expandableContentExists = await testSubjects.exists(contentSubj, { timeout: 1000 });
+
+      if (expandableContentExists !== shouldExpand) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(
+            `mlDFExpandableSection-${sectionId}-toggle-button`
+          );
+          if (shouldExpand) {
+            await testSubjects.existOrFail(contentSubj, { timeout: 1000 });
+          } else {
+            await testSubjects.missingOrFail(contentSubj, { timeout: 1000 });
+          }
+        });
+      }
+    },
+
+    async expandAnalysisSection(shouldExpand: boolean) {
+      await this.expandContentSection('analysis', shouldExpand);
+    },
+
+    async expandRegressionEvaluationSection(shouldExpand: boolean) {
+      await this.expandContentSection('RegressionEvaluation', shouldExpand);
+    },
+
+    async expandClassificationEvaluationSection(shouldExpand: boolean) {
+      await this.expandContentSection('ClassificationEvaluation', shouldExpand);
+    },
+
+    async expandFeatureImportanceSection(shouldExpand: boolean) {
+      await this.expandContentSection('FeatureImportanceSummary', shouldExpand);
+    },
+
+    async expandScatterplotMatrixSection(shouldExpand: boolean) {
+      await this.expandContentSection('splom', shouldExpand);
+    },
+
+    async expandResultsSection(shouldExpand: boolean) {
+      await this.expandContentSection('results', shouldExpand);
     },
   };
 }

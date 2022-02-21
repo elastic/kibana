@@ -17,6 +17,7 @@ import {
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -29,29 +30,36 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const soClient = context.core.savedObjects.client;
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const agentService = osqueryContext.service.getAgentService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      })) ?? { items: [] as PackagePolicy[] };
+      const { items: packagePolicies } = (await packagePolicyService?.list(
+        internalSavedObjectsClient,
+        {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        }
+      )) ?? { items: [] as PackagePolicy[] };
       const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
         satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
       );
       const agentPolicyIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
-      const agentPolicies = await agentPolicyService?.getByIds(soClient, agentPolicyIds);
+      const agentPolicies = await agentPolicyService?.getByIds(
+        internalSavedObjectsClient,
+        agentPolicyIds
+      );
 
       if (agentPolicies?.length) {
         await pMap(
           agentPolicies,
           (agentPolicy: GetAgentPoliciesResponseItem) =>
-            agentService
-              ?.getAgentStatusForAgentPolicy(esClient, agentPolicy.id)
+            agentService?.asInternalUser
+              .getAgentStatusForAgentPolicy(agentPolicy.id)
               .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
           { concurrency: 10 }
         );

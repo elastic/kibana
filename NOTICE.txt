@@ -1,5 +1,5 @@
 Kibana source code with Kibana X-Pack source code
-Copyright 2012-2021 Elasticsearch B.V.
+Copyright 2012-2022 Elasticsearch B.V.
 
 ---
 Pretty handling of logarithmic axes.
@@ -295,7 +295,7 @@ MIT License http://www.opensource.org/licenses/mit-license
 ---
 This product includes code that is adapted from mapbox-gl-js, which is
 available under a "BSD-3-Clause" license.
-https://github.com/mapbox/mapbox-gl-js/blob/master/src/util/image.js
+https://github.com/mapbox/mapbox-gl-js/blob/v1.13.2/src/util/image.js
 
 Copyright (c) 2016, Mapbox
 

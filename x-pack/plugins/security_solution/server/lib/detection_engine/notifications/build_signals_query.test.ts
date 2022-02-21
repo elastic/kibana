@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_RULE_ID } from '@kbn/rule-data-utils';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 describe('buildSignalsSearchQuery', () => {
@@ -29,11 +30,18 @@ describe('buildSignalsSearchQuery', () => {
             filter: [
               {
                 bool: {
-                  should: {
-                    match: {
-                      'signal.rule.rule_id': ruleId,
+                  should: [
+                    {
+                      match: {
+                        'signal.rule.rule_id': ruleId,
+                      },
                     },
-                  },
+                    {
+                      match: {
+                        [ALERT_RULE_RULE_ID]: ruleId,
+                      },
+                    },
+                  ],
                   minimum_should_match: 1,
                 },
               },

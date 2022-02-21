@@ -22,6 +22,7 @@ import {
 } from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
 import { QueryFilter } from './types';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface GetFilterArgs {
   type: Type;
@@ -65,9 +66,8 @@ export const getFilter = async ({
     if (savedId != null && index != null) {
       try {
         // try to get the saved object first
-        const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
-          'query',
-          savedId
+        const savedObject = await withSecuritySpan('getSavedFilter', () =>
+          services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
         return getQueryFilter(
           savedObject.attributes.query.query,

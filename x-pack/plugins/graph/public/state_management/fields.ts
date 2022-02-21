@@ -84,8 +84,8 @@ export const updateSaveButtonSaga = ({ notifyReact }: GraphStoreDependencies) =>
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
-  function* syncFields() {
+export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies): (() => Generator) => {
+  function* syncFields(): Generator<any, any, any> {
     const workspace = getWorkspace();
     if (!workspace) {
       return;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SynthtraceEsClient, createLogger, LogLevel } from '@elastic/apm-synthtrace';
+import { apm, createLogger, LogLevel } from '@elastic/apm-synthtrace';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function synthtraceEsClientService(context: InheritedFtrProviderContext) {
   const es = context.getService('es');
 
-  return new SynthtraceEsClient(es, createLogger(LogLevel.info));
+  return new apm.ApmSynthtraceEsClient(es, createLogger(LogLevel.info));
 }

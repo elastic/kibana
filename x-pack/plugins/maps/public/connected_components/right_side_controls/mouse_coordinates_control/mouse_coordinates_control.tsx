@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 
 export interface Props {

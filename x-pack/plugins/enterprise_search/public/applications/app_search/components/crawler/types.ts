@@ -179,6 +179,10 @@ export enum CrawlerStatus {
   Skipped = 'skipped',
 }
 
+export enum CrawlType {
+  Full = 'full',
+  Partial = 'partial',
+}
 export interface CrawlRequestFromServer {
   id: string;
   status: CrawlerStatus;
@@ -195,25 +199,69 @@ export interface CrawlRequest {
   completedAt: string | null;
 }
 
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    urlsAllowed?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    urls_allowed?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlConfig {
+  domainAllowlist: string[];
+  seedUrls: string[];
+  sitemapUrls: string[];
+  maxCrawlDepth: number;
+}
+
+export interface CrawlConfigFromServer {
+  domain_allowlist: string[];
+  seed_urls: string[];
+  sitemap_urls: string[];
+  max_crawl_depth: number;
+}
+
+export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+  stats: CrawlRequestStatsFromServer;
+};
+
+export type CrawlRequestWithDetails = CrawlRequest & {
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+  stats: CrawlRequestStats | null;
+};
+
 export type CrawlEventStage = 'crawl' | 'process';
 
-export interface CrawlEventFromServer {
-  id: string;
+export type CrawlEventFromServer = CrawlRequestFromServer & {
   stage: CrawlEventStage;
-  status: CrawlerStatus;
-  created_at: string;
-  began_at: string | null;
-  completed_at: string | null;
-}
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+};
 
-export interface CrawlEvent {
-  id: string;
+export type CrawlEvent = CrawlRequest & {
   stage: CrawlEventStage;
-  status: CrawlerStatus;
-  createdAt: string;
-  beganAt: string | null;
-  completedAt: string | null;
-}
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+};
 
 export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   [CrawlerStatus.Pending]: i18n.translate(
@@ -258,6 +306,17 @@ export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   ),
 };
 
+export const readableCrawlTypes: { [key in CrawlType]: string } = {
+  [CrawlType.Full]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.full',
+    { defaultMessage: 'Full' }
+  ),
+  [CrawlType.Partial]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.partial',
+    { defaultMessage: 'Partial' }
+  ),
+};
+
 export interface CrawlSchedule {
   frequency: number;
   unit: CrawlUnits;
@@ -270,4 +329,18 @@ export enum CrawlUnits {
   days = 'day',
   weeks = 'week',
   months = 'month',
+}
+
+export interface DomainConfigFromServer {
+  id: string;
+  name: string;
+  seed_urls: string[];
+  sitemap_urls: string[];
+}
+
+export interface DomainConfig {
+  id: string;
+  name: string;
+  seedUrls: string[];
+  sitemapUrls: string[];
 }

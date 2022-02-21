@@ -14,8 +14,14 @@ const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
-  const template = handlebars.compile(templateStr, { noEscape: true });
-  let compiledTemplate = template(vars);
+  let compiledTemplate: string;
+  try {
+    const template = handlebars.compile(templateStr, { noEscape: true });
+    compiledTemplate = template(vars);
+  } catch (err) {
+    throw new Error(`Error while compiling agent template: ${err.message}`);
+  }
+
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
 
   const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});

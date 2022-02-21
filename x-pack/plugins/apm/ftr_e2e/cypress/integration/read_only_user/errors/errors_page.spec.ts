@@ -91,19 +91,13 @@ describe('Errors page', () => {
       it('sorts by ocurrences', () => {
         cy.visit(javaServiceErrorsPageHref);
         cy.contains('span', 'Occurrences').click();
-        cy.url().should(
-          'include',
-          '&sortField=occurrenceCount&sortDirection=asc'
-        );
+        cy.url().should('include', '&sortField=occurrences&sortDirection=asc');
       });
 
       it('sorts by latest occurrences', () => {
         cy.visit(javaServiceErrorsPageHref);
-        cy.contains('span', 'Latest occurrence').click();
-        cy.url().should(
-          'include',
-          '&sortField=latestOccurrenceAt&sortDirection=asc'
-        );
+        cy.contains('span', 'Last seen').click();
+        cy.url().should('include', '&sortField=lastSeen&sortDirection=asc');
       });
     });
   });

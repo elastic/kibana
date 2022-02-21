@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MatrixHistogramTypeToAggName } from '../../../../../../common';
+import { MatrixHistogramTypeToAggName } from '../../../../../../common/search_strategy';
 import { buildAlertsHistogramQuery } from './query.alerts_histogram.dsl';
 
 export const alertsMatrixHistogramConfig = {

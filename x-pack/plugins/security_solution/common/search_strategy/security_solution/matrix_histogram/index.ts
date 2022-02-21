@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import { AuthenticationHit } from '../hosts';
 import { Inspect, Maybe, TimerangeInput } from '../../common';
 import { RequestBasicOptions } from '../';
@@ -64,6 +65,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
   includeMissingData?: boolean;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {

@@ -16,8 +16,9 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -53,11 +54,11 @@ interface Props {
 
 export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const {
-    services: { http, docLinks, data, share, uiSettings, application },
+    services: { http, docLinks, dataViews, share, uiSettings, application },
   } = useKibana<CoreStart & AppPluginStartDependencies>();
   const addBasePath = http.basePath.prepend;
-  const indexPatternService = data.indexPatterns;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   // Home does not have a locator implemented, so hard-code it here.
@@ -99,7 +100,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         }),
       },
     },
-    docsLink: docLinks.links.kibana,
+    docsLink: docLinks.links.kibana.guide,
   };
 
   // Show card for console if none of the manage data plugins are available, most likely in OSS
@@ -109,13 +110,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
-      const hasUserIndexPattern = await indexPatternService.hasUserDataView().catch(() => true);
+      const hasUserIndexPattern = await dataViews.hasUserDataView().catch(() => true);
 
       setNewKibanaInstance(!hasUserIndexPattern);
+      setIsLoading(false);
     };
 
     fetchIsNewKibanaInstance();
-  }, [indexPatternService]);
+  }, [dataViews]);
 
   const renderAppCard = (appId: string) => {
     const app = kibanaApps.find(({ id }) => id === appId);
@@ -144,6 +146,16 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboard', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <KibanaPageTemplate

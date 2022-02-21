@@ -27,6 +27,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly description;
   public readonly note;
   public readonly getSupportedTriggers;
+  public readonly navigateToLens;
   public readonly icon;
   public readonly image;
   public readonly stage;
@@ -43,6 +44,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly updateVisTypeOnParamsChange;
   public readonly schemas;
 
   constructor(opts: VisTypeDefinition<TVisParams>) {
@@ -54,6 +56,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.description = opts.description ?? '';
     this.note = opts.note ?? '';
     this.getSupportedTriggers = opts.getSupportedTriggers;
+    this.navigateToLens = opts.navigateToLens;
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
@@ -71,6 +74,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
+    this.updateVisTypeOnParamsChange = opts.updateVisTypeOnParamsChange;
 
     this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
   }

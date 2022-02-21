@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { TemplateClone } from '../../../public/application/sections/template_clone';
 import { WithAppDependencies } from '../helpers';
 

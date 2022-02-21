@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSelect } from '@elastic/eui';
+import { EuiPanel, EuiComboBox } from '@elastic/eui';
 import styled from 'styled-components';
-import React, { useCallback } from 'react';
-import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT, alertsStackByOptions } from './config';
-import type { AlertsStackByField } from './types';
+import React, { useCallback, useMemo } from 'react';
+import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
+import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
 export const KpiPanel = styled(EuiPanel)<{ height?: number }>`
@@ -25,24 +25,45 @@ export const KpiPanel = styled(EuiPanel)<{ height?: number }>`
   }
 `;
 interface StackedBySelectProps {
-  selected: AlertsStackByField;
-  onSelect: (selected: AlertsStackByField) => void;
+  selected: string;
+  onSelect: (selected: string) => void;
 }
 
-export const StackBySelect: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {
-  const setSelectedOptionCallback = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      onSelect(event.target.value as AlertsStackByField);
+export const StackByComboBoxWrapper = styled.div`
+  width: 400px;
+`;
+
+export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {
+  const onChange = useCallback(
+    (options) => {
+      if (options && options.length > 0) {
+        onSelect(options[0].value);
+      } else {
+        onSelect('');
+      }
     },
     [onSelect]
   );
-
+  const selectedOptions = useMemo(() => {
+    return [{ label: selected, value: selected }];
+  }, [selected]);
+  const stackOptions = useStackByFields();
+  const singleSelection = useMemo(() => {
+    return { asPlainText: true };
+  }, []);
   return (
-    <EuiSelect
-      onChange={setSelectedOptionCallback}
-      options={alertsStackByOptions}
-      prepend={i18n.STACK_BY_LABEL}
-      value={selected}
-    />
+    <StackByComboBoxWrapper>
+      <EuiComboBox
+        aria-label={i18n.STACK_BY_ARIA_LABEL}
+        placeholder={i18n.STACK_BY_PLACEHOLDER}
+        prepend={i18n.STACK_BY_LABEL}
+        singleSelection={singleSelection}
+        sortMatchesBy="startsWith"
+        options={stackOptions}
+        selectedOptions={selectedOptions}
+        compressed
+        onChange={onChange}
+      />
+    </StackByComboBoxWrapper>
   );
 };

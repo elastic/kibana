@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
 import { Labels } from '../../../../../../../charts/public';

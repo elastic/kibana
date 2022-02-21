@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Filter, Query } from '@kbn/es-query';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
@@ -25,12 +26,8 @@ import type {
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
@@ -78,6 +75,8 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: auto;
 `;
 
+const casesFeatures = { alerts: { sync: false } };
+
 export interface TGridStandaloneProps {
   appId: string;
   casesOwner: string;
@@ -87,14 +86,16 @@ export interface TGridStandaloneProps {
   } | null;
   afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   end: string;
   entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
-  filterStatus: AlertStatus;
+  filterStatus?: AlertStatus;
   hasAlertsCrudPermissions: ({
     ruleConsumer,
     ruleProducer,
@@ -107,6 +108,7 @@ export interface TGridStandaloneProps {
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
+  onStateChange?: (state: State) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
@@ -119,6 +121,8 @@ export interface TGridStandaloneProps {
   bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
+  showCheckboxes?: boolean;
+  queryFields?: string[];
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
@@ -127,8 +131,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   casesOwner,
   casePermissions,
   columns,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   end,
   entityType = 'alerts',
   loadingText,
@@ -151,6 +157,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   trailingControlColumns,
   data,
   unit,
+  showCheckboxes = true,
+  queryFields = [],
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -162,7 +170,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const {
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
-    queryFields,
+    queryFields: queryFieldsFromState,
     sort: sortStore,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
@@ -176,7 +184,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const combinedQueries = useMemo(
     () =>
       combineQueries({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         dataProviders: EMPTY_DATA_PROVIDERS,
         indexPattern: indexPatterns,
         browserFields,
@@ -199,9 +207,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         (acc, c) => (c.linkField != null ? [...acc, c.id, c.linkField] : [...acc, c.id]),
         []
       ),
-      ...(queryFields ?? []),
+      ...(queryFieldsFromState ?? []),
     ],
-    [columnsHeader, queryFields]
+    [columnsHeader, queryFieldsFromState]
   );
 
   const sortField = useMemo(
@@ -218,6 +226,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    dataViewId,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
@@ -290,7 +299,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         dataProviders: EMPTY_DATA_PROVIDERS,
         indexPattern: indexPatterns,
         browserFields,
@@ -320,7 +329,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         indexNames,
         itemsPerPage: itemsPerPageStore,
         itemsPerPageOptions,
-        showCheckboxes: true,
+        showCheckboxes,
       })
     );
     dispatch(
@@ -331,6 +340,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         sort,
         loadingText,
         unit,
+        queryFields,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -384,6 +394,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       browserFields={browserFields}
                       data={nonDeletedEvents}
                       defaultCellActions={defaultCellActions}
+                      disabledCellActions={disabledCellActions}
                       filterQuery={filterQuery}
                       hasAlertsCrud={hasAlertsCrud}
                       hasAlertsCrudPermissions={hasAlertsCrudPermissions}
@@ -405,6 +416,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       unit={unit}
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
+                      showCheckboxes={showCheckboxes}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>
@@ -412,7 +424,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </TimelineContext.Provider>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} disableAlerts />
+        <AddToCaseAction {...addToCaseActionProps} casesFeatures={casesFeatures} />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );

@@ -7,17 +7,16 @@
 
 import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from 'kibana/server';
 import { ESConnectorFields } from '.';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
   CaseConnector,
+  CaseExternalServiceBasic,
   CaseFullExternalService,
   CaseStatuses,
-  CaseType,
-  CASE_SAVED_OBJECT,
   ConnectorTypes,
-  noneConnectorId,
-  SECURITY_SOLUTION_OWNER,
-} from '../../common';
+  NONE_CONNECTOR_ID,
+} from '../../common/api';
+import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 
@@ -81,8 +80,8 @@ export const createJiraConnector = ({
 };
 
 export const createExternalService = (
-  overrides?: Partial<CaseFullExternalService>
-): CaseFullExternalService => ({
+  overrides?: Partial<CaseExternalServiceBasic>
+): CaseExternalServiceBasic => ({
   connector_id: '100',
   connector_name: '.jira',
   external_id: '100',
@@ -110,7 +109,6 @@ export const basicCaseFields = {
   title: 'Super Bad Security Issue',
   status: CaseStatuses.open,
   tags: ['defacement'],
-  type: CaseType.individual,
   updated_at: '2019-11-25T21:54:48.952Z',
   updated_by: {
     full_name: 'elastic',
@@ -179,7 +177,7 @@ export const createSavedObjectReferences = ({
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
 } = {}): SavedObjectReference[] => [
-  ...(connector && connector.id !== noneConnectorId
+  ...(connector && connector.id !== NONE_CONNECTOR_ID
     ? [
         {
           id: connector.id,

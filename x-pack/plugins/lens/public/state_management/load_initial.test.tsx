@@ -64,19 +64,21 @@ describe('Initializing the store', () => {
     const datasource2State = { datasource2: '' };
     const services = makeDefaultServices();
     services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-      exactMatchDoc,
-      visualizationType: 'testVis',
-      title: '',
-      state: {
-        datasourceStates: {
-          testDatasource: datasource1State,
-          testDatasource2: datasource2State,
+      attributes: {
+        exactMatchDoc,
+        visualizationType: 'testVis',
+        title: '',
+        state: {
+          datasourceStates: {
+            testDatasource: datasource1State,
+            testDatasource2: datasource2State,
+          },
+          visualization: {},
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
-        visualization: {},
-        query: { query: '', language: 'lucene' },
-        filters: [],
+        references: [],
       },
-      references: [],
     });
 
     const storeDeps = mockStoreDeps({
@@ -150,7 +152,7 @@ describe('Initializing the store', () => {
     it('starts new searchSessionId', async () => {
       const { store } = await makeLensStore({ preloadedState });
       await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
+        await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined }));
       });
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
@@ -222,7 +224,7 @@ describe('Initializing the store', () => {
       });
 
       expect(deps.lensServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
-        { query: { match_phrase: { src: 'test' } } },
+        { query: { match_phrase: { src: 'test' } }, meta: { index: 'injected!' } },
       ]);
 
       expect(store.getState()).toEqual({
@@ -281,10 +283,14 @@ describe('Initializing the store', () => {
     it('redirects if saved object is an aliasMatch', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
       deps.lensServices.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-        ...defaultDoc,
-        sharingSavedObjectProps: {
-          outcome: 'aliasMatch',
-          aliasTargetId: 'id2',
+        attributes: {
+          ...defaultDoc,
+        },
+        metaInfo: {
+          sharingSavedObjectProps: {
+            outcome: 'aliasMatch',
+            aliasTargetId: 'id2',
+          },
         },
       });
 

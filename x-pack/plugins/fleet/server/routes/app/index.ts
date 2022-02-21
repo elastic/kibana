@@ -5,40 +5,52 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { PLUGIN_ID, APP_API_ROUTES } from '../../constants';
+import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common';
 import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
+import type { FleetAuthzRouter } from '../security';
+import type { FleetRequestHandler } from '../../types';
+import { CheckPermissionsRequestSchema } from '../../types';
 
-export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
+export const getCheckPermissionsHandler: FleetRequestHandler<
+  unknown,
+  TypeOf<typeof CheckPermissionsRequestSchema.query>
+> = async (context, request, response) => {
   const missingSecurityBody: CheckPermissionsResponse = {
     success: false,
     error: 'MISSING_SECURITY',
   };
 
-  if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
+  if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
-    const security = appContextService.getSecurity();
-    const user = security.authc.getCurrentUser(request);
-
-    // Defensively handle situation where user is undefined (should only happen when ES security is disabled)
-    // This should be covered by the `getSecurityLicense().isEnabled()` check above, but we leave this for robustness.
-    if (!user) {
-      return response.ok({
-        body: missingSecurityBody,
-      });
-    }
-
-    if (!user?.roles.includes('superuser')) {
+    if (!context.fleet.authz.fleet.all) {
       return response.ok({
         body: {
           success: false,
-          error: 'MISSING_SUPERUSER_ROLE',
+          error: 'MISSING_PRIVILEGES',
         } as CheckPermissionsResponse,
       });
+    }
+    // check the manage_service_account cluster privilege
+    else if (request.query.fleetServerSetup) {
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+        body: { cluster: ['manage_service_account'] },
+      });
+
+      if (!hasAllPrivileges) {
+        return response.ok({
+          body: {
+            success: false,
+            error: 'MISSING_FLEET_SERVER_SETUP_PRIVILEGES',
+          } as CheckPermissionsResponse,
+        });
+      }
     }
 
     return response.ok({ body: { success: true } as CheckPermissionsResponse });
@@ -46,9 +58,10 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 };
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
+  // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const { body: tokenResponse } = await esClient.transport.request<{
+    const tokenResponse = await esClient.transport.request<{
       created?: boolean;
       token?: GenerateServiceTokenResponse;
     }>({
@@ -71,11 +84,11 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
   }
 };
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
-      validate: {},
+      validate: CheckPermissionsRequestSchema,
       options: { tags: [] },
     },
     getCheckPermissionsHandler
@@ -85,7 +98,20 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
       validate: {},
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    generateServiceTokenHandler
+  );
+
+  router.post(
+    {
+      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
+      validate: {},
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     generateServiceTokenHandler
   );

@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
+import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common/api';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
@@ -43,6 +43,7 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
     </>
   );
 };
+SwimlaneComponent.displayName = 'Swimlane';
 
 // eslint-disable-next-line import/no-default-export
 export { SwimlaneComponent as default };

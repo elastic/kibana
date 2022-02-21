@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { AppState } from '../../state';
+import type { AppState } from '../../state';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -76,6 +76,9 @@ export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.in
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
+export const monitorManagementListSelector = ({ monitorManagementList }: AppState) =>
+  monitorManagementList;
+
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
@@ -89,3 +92,5 @@ export const journeySelector = ({ journeys }: AppState) => journeys;
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
 
 export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
+
+export const uptimeWriteSelector = (state: AppState) => state;

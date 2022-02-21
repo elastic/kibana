@@ -79,7 +79,7 @@ export const TimelinesPageComponent: React.FC = () => {
               </EuiFlexGroup>
             </HeaderPage>
 
-            <TimelinesContainer>
+            <TimelinesContainer data-test-subj="timelines-container">
               <StatefulOpenTimeline
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
                 isModal={false}
@@ -93,7 +93,6 @@ export const TimelinesPageComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

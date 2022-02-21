@@ -13,6 +13,7 @@ import { LayerTemplate } from './layer_template';
 import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
 
 export const choroplethLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.choropleth.desc', {
     defaultMessage: 'Shaded areas to compare statistics across boundaries',

@@ -196,6 +196,9 @@ export const checkNonAggregatableFieldExistsRequest = (
     index,
     size,
     body: searchBody,
+    // Small es optimization
+    // Since we only need to know if at least 1 doc exists for the query
+    track_total_hits: 1,
   };
 };
 

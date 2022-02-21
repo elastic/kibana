@@ -1,0 +1,107 @@
+[[data-views-api-create]]
+=== Create data view API
+++++
+<titleabbrev>Create data view</titleabbrev>
+++++
+
+experimental[] Create data views.
+
+
+[[data-views-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/data_views/data_view`
+
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view`
+
+
+[[data-views-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+
+[[data-views-api-create-body-params]]
+==== Request body
+
+`override`:: (Optional, boolean) Overrides an existing data view if a
+data view with the provided title already exists. The default is `false`.
+
+`refresh_fields`:: (Optional, boolean) Reloads data view fields after
+the data view is stored. The default is `false`.
+
+`data_view`:: (Required, object) The data view object. All fields are optional.
+
+
+[[data-views-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[data-views-api-create-example]]
+==== Examples
+
+Create a data view with a custom title:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view
+{
+  "data_view": {
+     "title": "hello"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Customize the creation behavior:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view
+{
+  "override": false,
+  "refresh_fields": true,
+  "data_view": {
+     "title": "hello"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+At creation, all data view fields are optional:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view
+{
+  "data_view": {
+      "id": "...",
+      "version": "...",
+      "title": "...",
+      "type": "...",
+      "timeFieldName": "...",
+      "sourceFilters": [],
+      "fields": {},
+      "typeMeta": {},
+      "fieldFormats": {},
+      "fieldAttrs": {},
+      "runtimeFieldMap": {}
+      "allowNoIndex": "..."
+    }
+}
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the data view object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view": {...}
+}
+--------------------------------------------------

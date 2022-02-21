@@ -18,7 +18,6 @@ import {
   RoleMappingsBaseActions,
   RoleMappingsBaseValues,
 } from '../../../shared/role_mapping';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { AttributeName, SingleUserRoleMapping, ElasticsearchUser } from '../../../shared/types';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
@@ -64,7 +63,6 @@ interface RoleMappingsValues extends RoleMappingsBaseValues {
   singleUserRoleMapping: UserMapping | null;
   singleUserRoleMappings: UserMapping[];
   roleType: Role;
-  selectedAuthProviders: string[];
   selectedGroups: Set<string>;
 }
 
@@ -77,7 +75,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     setSingleUserRoleMapping: (singleUserRoleMapping: UserMapping) => ({ singleUserRoleMapping }),
     setRoleMappings: ({ roleMappings }: { roleMappings: WSRoleMapping[] }) => ({ roleMappings }),
     setRoleMappingErrors: (errors: string[]) => ({ errors }),
-    handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
     handleUsernameSelectChange: (username: string) => ({ username }),
     handleGroupSelectionChange: (groupIds: string[]) => ({ groupIds }),
@@ -130,13 +127,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         resetState: () => [],
       },
     ],
-    multipleAuthProvidersConfig: [
-      false,
-      {
-        setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        resetState: () => false,
-      },
-    ],
     availableGroups: [
       [],
       {
@@ -153,7 +143,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       [],
       {
         setRoleMappingsData: (_, { elasticsearchRoles }) => elasticsearchRoles,
-        closeUsersAndRolesFlyout: () => [ANY_AUTH_PROVIDER],
       },
     ],
     elasticsearchUsers: [
@@ -237,29 +226,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           return newSelectedGroupNames;
         },
         closeUsersAndRolesFlyout: () => new Set(),
-      },
-    ],
-    availableAuthProviders: [
-      [],
-      {
-        setRoleMappingsData: (_, { authProviders }) => authProviders,
-      },
-    ],
-    selectedAuthProviders: [
-      [ANY_AUTH_PROVIDER],
-      {
-        handleAuthProviderChange: (previous, { value }) => {
-          const previouslyContainedAny = previous.includes(ANY_AUTH_PROVIDER);
-          const newSelectionsContainAny = value.includes(ANY_AUTH_PROVIDER);
-          const hasItems = value.length > 0;
-
-          if (value.length === 1) return value;
-          if (!newSelectionsContainAny && hasItems) return value;
-          if (previouslyContainedAny && hasItems)
-            return value.filter((v) => v !== ANY_AUTH_PROVIDER);
-          return [ANY_AUTH_PROVIDER];
-        },
-        setRoleMapping: (_, { roleMapping }) => roleMapping.authProvider,
       },
     ],
     roleMappingFlyoutOpen: [
@@ -412,13 +378,11 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         roleMapping,
         selectedGroups,
         includeInAllGroups,
-        selectedAuthProviders,
       } = values;
 
       const body = JSON.stringify({
         roleType,
         allGroups: includeInAllGroups,
-        authProvider: selectedAuthProviders,
         rules: {
           [attributeName]: attributeValue,
         },

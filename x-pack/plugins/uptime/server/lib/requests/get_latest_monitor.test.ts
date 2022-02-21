@@ -46,25 +46,23 @@ describe('getLatestMonitor', () => {
       },
     };
     mockEsSearchResult = {
-      body: {
-        hits: {
-          hits: [
-            {
-              _id: 'fejwio32',
-              _source: {
-                '@timestamp': '123456',
-                monitor: {
-                  duration: {
-                    us: 12345,
-                  },
-                  id: 'testMonitor',
-                  status: 'down',
-                  type: 'http',
+      hits: {
+        hits: [
+          {
+            _id: 'fejwio32',
+            _source: {
+              '@timestamp': '123456',
+              monitor: {
+                duration: {
+                  us: 12345,
                 },
+                id: 'testMonitor',
+                status: 'down',
+                type: 'http',
               },
             },
-          ],
-        },
+          },
+        ],
       },
     };
   });
@@ -72,7 +70,7 @@ describe('getLatestMonitor', () => {
   it('returns data in expected shape', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     const result = await getLatestMonitor({
       uptimeEsClient,
@@ -100,6 +98,6 @@ describe('getLatestMonitor', () => {
     expect(result.timestamp).toBe('123456');
     expect(result.monitor).not.toBeFalsy();
     expect(result?.monitor?.id).toBe('testMonitor');
-    expect(mockEsClient.search).toHaveBeenCalledWith(expectedGetLatestSearchParams);
+    expect(mockEsClient.search).toHaveBeenCalledWith(expectedGetLatestSearchParams, { meta: true });
   });
 });

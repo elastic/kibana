@@ -56,6 +56,10 @@ describe('getTotalCount', () => {
     expect(getTotalCount(null)).toEqual(0);
   });
 
+  it('returns 0 when total is undefined (not tracking)', () => {
+    expect(getTotalCount(undefined)).toEqual(0);
+  });
+
   it('returns total when total is a number', () => {
     expect(getTotalCount(5)).toEqual(5);
   });

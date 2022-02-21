@@ -12,9 +12,9 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { getSelectOptions, TimeComparison } from './';
-import * as urlHelpers from '../../shared/Links/url_helpers';
+import * as urlHelpers from '../../shared/links/url_helpers';
 import moment from 'moment';
 import { getComparisonTypes } from './get_comparison_types';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';

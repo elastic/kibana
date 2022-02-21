@@ -99,6 +99,13 @@ export const ALERT_ERROR_TIMEOUT_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_DISABLED_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonDisabled',
+  {
+    defaultMessage: 'Rule failed to execute because rule ran after it was disabled.',
+  }
+);
+
 export const alertsErrorReasonTranslationsMapping = {
   read: ALERT_ERROR_READING_REASON,
   decrypt: ALERT_ERROR_DECRYPTING_REASON,
@@ -106,4 +113,5 @@ export const alertsErrorReasonTranslationsMapping = {
   unknown: ALERT_ERROR_UNKNOWN_REASON,
   license: ALERT_ERROR_LICENSE_REASON,
   timeout: ALERT_ERROR_TIMEOUT_REASON,
+  disabled: ALERT_ERROR_DISABLED_REASON,
 };

@@ -20,18 +20,24 @@ import {
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  CASES_URL,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../../../../plugins/cases/common/constants';
+import {
   AttributesTypeUser,
   CommentsResponse,
-  CASES_URL,
-  CaseType,
-  CASE_SAVED_OBJECT,
   CaseAttributes,
-  CASE_USER_ACTION_SAVED_OBJECT,
   CaseUserActionAttributes,
-  CASE_COMMENT_SAVED_OBJECT,
   CasePostRequest,
   CaseUserActionResponse,
-} from '../../../../../../plugins/cases/common';
+  PushedUserAction,
+  ConnectorUserAction,
+  CommentUserAction,
+  CreateCaseUserAction,
+  CaseStatuses,
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -107,12 +113,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(userActions).to.have.length(2);
       expect(userActions[0].action).to.eql('create');
-      expect(includesAllCreateCaseActionFields(userActions[0].action_field)).to.eql(true);
 
       expect(userActions[1].action).to.eql('create');
-      expect(userActions[1].action_field).to.eql(['comment']);
-      expect(userActions[1].old_value).to.eql(null);
-      expect(JSON.parse(userActions[1].new_value!)).to.eql({
+      expect(userActions[1].type).to.eql('comment');
+      expect((userActions[1] as CommentUserAction).payload.comment).to.eql({
         comment: 'A comment for my case',
         type: 'user',
         owner: 'securitySolution',
@@ -133,13 +137,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      actionsRemover.add('default', '1cd34740-06ad-11ec-babc-0b08808e8e01', 'action', 'actions');
+      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'action', 'actions');
 
       await expectImportToHaveOneCase(supertestService);
 
       const userActions = await getCaseUserActions({
         supertest: supertestService,
-        caseID: '2e85c3f0-06ad-11ec-babc-0b08808e8e01',
+        caseID: 'afeefae0-5cea-11ec-a615-15461784e410',
       });
       expect(userActions).to.have.length(3);
 
@@ -159,32 +163,25 @@ const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<s
 
 const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionResponse) => {
   expect(userAction.action).to.eql('create');
-  expect(includesAllCreateCaseActionFields(userAction.action_field)).to.eql(true);
 };
 
 const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) => {
-  expect(userAction.action).to.eql('push-to-service');
-  expect(userAction.action_field).to.eql(['pushed']);
-  expect(userAction.old_value).to.eql(null);
+  const pushedUserAction = userAction as PushedUserAction;
+  expect(userAction.action).to.eql('push_to_service');
+  expect(userAction.type).to.eql('pushed');
 
-  const parsedPushNewValue = JSON.parse(userAction.new_value!);
-  expect(parsedPushNewValue.connector_name).to.eql('A jira connector');
-  expect(parsedPushNewValue).to.not.have.property('connector_id');
-  expect(userAction.new_val_connector_id).to.eql('1cd34740-06ad-11ec-babc-0b08808e8e01');
+  expect(pushedUserAction.payload.externalService.connector_name).to.eql('A jira connector');
+  expect(pushedUserAction.payload.externalService.connector_id).to.eql(
+    '51a4cbe0-5cea-11ec-a615-15461784e410'
+  );
 };
 
 const expectImportToHaveUpdateConnector = (userAction: CaseUserActionResponse) => {
+  const connectorUserAction = userAction as ConnectorUserAction;
   expect(userAction.action).to.eql('update');
-  expect(userAction.action_field).to.eql(['connector']);
+  expect(userAction.type).to.eql('connector');
 
-  const parsedUpdateNewValue = JSON.parse(userAction.new_value!);
-  expect(parsedUpdateNewValue).to.not.have.property('id');
-  // the new val connector id is null because it is the none connector
-  expect(userAction.new_val_connector_id).to.eql(null);
-
-  const parsedUpdateOldValue = JSON.parse(userAction.old_value!);
-  expect(parsedUpdateOldValue).to.not.have.property('id');
-  expect(userAction.old_val_connector_id).to.eql('1cd34740-06ad-11ec-babc-0b08808e8e01');
+  expect(connectorUserAction.payload.connector.id).to.eql('none');
 };
 
 const ndjsonToObject = (input: string) => {
@@ -225,43 +222,36 @@ const expectCaseCreateUserAction = (
   userActions: Array<SavedObject<CaseUserActionAttributes>>,
   caseRequest: CasePostRequest
 ) => {
-  const userActionForCaseCreate = findUserActionSavedObject(
-    userActions,
-    'create',
-    createCaseActionFields
-  );
-
+  const userActionForCaseCreate = findUserActionSavedObject(userActions, 'create', 'create_case');
   expect(userActionForCaseCreate?.attributes.action).to.eql('create');
+  const createCaseUserAction = userActionForCaseCreate!.attributes as CreateCaseUserAction;
 
-  const parsedCaseNewValue = JSON.parse(userActionForCaseCreate?.attributes.new_value as string);
   const {
     connector: { id: ignoreParsedId, ...restParsedConnector },
     ...restParsedCreateCase
-  } = parsedCaseNewValue;
+  } = createCaseUserAction.payload;
 
   const {
     connector: { id: ignoreConnectorId, ...restConnector },
     ...restCreateCase
   } = caseRequest;
 
-  expect(restParsedCreateCase).to.eql({ ...restCreateCase, type: CaseType.individual });
+  expect(restParsedCreateCase).to.eql({
+    ...restCreateCase,
+    status: CaseStatuses.open,
+  });
   expect(restParsedConnector).to.eql(restConnector);
-
-  expect(userActionForCaseCreate?.attributes.old_value).to.eql(null);
-  expect(
-    includesAllCreateCaseActionFields(userActionForCaseCreate?.attributes.action_field)
-  ).to.eql(true);
 };
 
 const expectCreateCommentUserAction = (
   userActions: Array<SavedObject<CaseUserActionAttributes>>
 ) => {
-  const userActionForComment = findUserActionSavedObject(userActions, 'create', ['comment']);
+  const userActionForComment = findUserActionSavedObject(userActions, 'create', 'comment');
+  const createCommentUserAction = userActionForComment!.attributes as CommentUserAction;
 
   expect(userActionForComment?.attributes.action).to.eql('create');
-  expect(JSON.parse(userActionForComment!.attributes.new_value!)).to.eql(postCommentUserReq);
-  expect(userActionForComment?.attributes.old_value).to.eql(null);
-  expect(userActionForComment?.attributes.action_field).to.eql(['comment']);
+  expect(userActionForComment?.attributes.type).to.eql('comment');
+  expect(createCommentUserAction.payload.comment).to.eql(postCommentUserReq);
 };
 
 const expectExportToHaveAComment = (objects: SavedObject[]) => {
@@ -274,22 +264,6 @@ const expectExportToHaveAComment = (objects: SavedObject[]) => {
   expect(commentSO.attributes.type).to.eql(postCommentUserReq.type);
 };
 
-const createCaseActionFields = [
-  'description',
-  'status',
-  'tags',
-  'title',
-  'connector',
-  'settings',
-  'owner',
-];
-
-const includesAllCreateCaseActionFields = (actionFields?: string[]): boolean => {
-  return createCaseActionFields.every(
-    (field) => actionFields != null && actionFields.includes(field)
-  );
-};
-
 const findSavedObjectsByType = <ReturnType>(
   savedObjects: SavedObject[],
   type: string
@@ -300,14 +274,7 @@ const findSavedObjectsByType = <ReturnType>(
 const findUserActionSavedObject = (
   savedObjects: Array<SavedObject<CaseUserActionAttributes>>,
   action: string,
-  actionFields: string[]
+  type: string
 ): SavedObject<CaseUserActionAttributes> | undefined => {
-  return savedObjects.find(
-    (so) =>
-      so.attributes.action === action && hasAllStrings(so.attributes.action_field, actionFields)
-  );
-};
-
-const hasAllStrings = (collection: string[], stringsToFind: string[]): boolean => {
-  return stringsToFind.every((str) => collection.includes(str));
+  return savedObjects.find((so) => so.attributes.action === action && so.attributes.type === type);
 };

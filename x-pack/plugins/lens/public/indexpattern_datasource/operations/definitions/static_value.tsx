@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { OperationDefinition } from './index';
-import { ReferenceBasedIndexPatternColumn } from './column_types';
+import { ReferenceBasedIndexPatternColumn, GenericIndexPatternColumn } from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
@@ -46,6 +46,12 @@ export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatter
   };
 }
 
+function isStaticValueColumnLike(
+  col: GenericIndexPatternColumn
+): col is StaticValueIndexPatternColumn {
+  return Boolean('params' in col && col.params && 'value' in col.params);
+}
+
 export const staticValueOperation: OperationDefinition<
   StaticValueIndexPatternColumn,
   'managedReference'
@@ -75,6 +81,7 @@ export const staticValueOperation: OperationDefinition<
       dataType: 'number',
       isBucketed: false,
       scale: 'ratio',
+      isStaticValue: true,
     };
   },
   toExpression: (layer, columnId) => {
@@ -102,8 +109,8 @@ export const staticValueOperation: OperationDefinition<
   },
   buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
     const existingStaticValue =
-      previousColumn?.params &&
-      'value' in previousColumn.params &&
+      previousColumn &&
+      isStaticValueColumnLike(previousColumn) &&
       isValidNumber(previousColumn.params.value)
         ? previousColumn.params.value
         : undefined;
@@ -116,6 +123,7 @@ export const staticValueOperation: OperationDefinition<
       label: ofName(previousParams.value),
       dataType: 'number',
       operationType: 'static_value',
+      isStaticValue: true,
       isBucketed: false,
       scale: 'ratio',
       params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
@@ -207,6 +215,7 @@ export const staticValueOperation: OperationDefinition<
           compressed
           value={inputValue ?? ''}
           onChange={onChangeHandler}
+          step="any"
         />
       </div>
     );

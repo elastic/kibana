@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { EntityControl } from '../entity_control';

@@ -10,7 +10,7 @@ import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { WaterfallContainer } from './index';
-import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
 import {
   inferredSpans,
   manyChildrenWithSameLength,
@@ -19,11 +19,20 @@ import {
   traceWithErrors,
   urlParams as testUrlParams,
 } from './waterfall_container.stories.data';
+import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
 
 type Args = ComponentProps<typeof WaterfallContainer>;
 
+const apmPluginContextMock = {
+  core: {
+    http: {
+      basePath: { prepend: () => {} },
+    },
+  },
+} as unknown as ApmPluginContextValue;
+
 const stories: Meta<Args> = {
-  title: 'app/TransactionDetails/Waterfall',
+  title: 'app/TransactionDetails/waterfall',
   component: WaterfallContainer,
   decorators: [
     (StoryComponent) => (
@@ -32,7 +41,7 @@ const stories: Meta<Args> = {
           '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
         ]}
       >
-        <MockApmPluginContextWrapper>
+        <MockApmPluginContextWrapper value={apmPluginContextMock}>
           <StoryComponent />
         </MockApmPluginContextWrapper>
       </MemoryRouter>

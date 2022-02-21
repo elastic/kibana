@@ -14,14 +14,15 @@ import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
 ) => {
+  // Initialize services needed by Policy middleware
+  const trustedAppsService = new TrustedAppsHttpService(coreStart.http);
+  const middlewareContext: MiddlewareRunnerContext = {
+    coreStart,
+    trustedAppsService,
+  };
+
   return (store) => (next) => async (action) => {
     next(action);
-
-    const trustedAppsService = new TrustedAppsHttpService(coreStart.http);
-    const middlewareContext: MiddlewareRunnerContext = {
-      coreStart,
-      trustedAppsService,
-    };
 
     policySettingsMiddlewareRunner(middlewareContext, store, action);
     policyTrustedAppsMiddlewareRunner(middlewareContext, store, action);

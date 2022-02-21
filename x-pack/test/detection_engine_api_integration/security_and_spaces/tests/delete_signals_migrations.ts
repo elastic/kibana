@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
       // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
       const indexSettings = body[createdMigration.index].settings.index;
-      expect(indexSettings.lifecycle.name).to.eql(
+      expect(indexSettings?.lifecycle?.name).to.eql(
         `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`
       );
     });

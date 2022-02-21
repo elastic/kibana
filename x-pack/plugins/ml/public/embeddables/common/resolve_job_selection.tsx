@@ -13,6 +13,7 @@ import { getInitialGroupsMap } from '../../application/components/job_selector/j
 import {
   KibanaContextProvider,
   toMountPoint,
+  wrapWithTheme,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { getMlGlobalServices } from '../../application/app';
 import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
@@ -34,6 +35,7 @@ export async function resolveJobSelection(
   const {
     http,
     uiSettings,
+    theme,
     application: { currentAppId$ },
   } = coreStart;
 
@@ -70,18 +72,23 @@ export async function resolveJobSelection(
 
       const flyoutSession = coreStart.overlays.openFlyout(
         toMountPoint(
-          <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-            <JobSelectorFlyout
-              selectedIds={selectedJobIds}
-              withTimeRangeSelector={false}
-              dateFormatTz={dateFormatTz}
-              singleSelection={false}
-              timeseriesOnly={true}
-              onFlyoutClose={onFlyoutClose}
-              onSelectionConfirmed={onSelectionConfirmed}
-              maps={maps}
-            />
-          </KibanaContextProvider>
+          wrapWithTheme(
+            <KibanaContextProvider
+              services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}
+            >
+              <JobSelectorFlyout
+                selectedIds={selectedJobIds}
+                withTimeRangeSelector={false}
+                dateFormatTz={dateFormatTz}
+                singleSelection={false}
+                timeseriesOnly={true}
+                onFlyoutClose={onFlyoutClose}
+                onSelectionConfirmed={onSelectionConfirmed}
+                maps={maps}
+              />
+            </KibanaContextProvider>,
+            theme.theme$
+          )
         ),
         {
           'data-test-subj': 'mlFlyoutJobSelector',

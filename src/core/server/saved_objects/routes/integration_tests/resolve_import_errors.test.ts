@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv4 } from '../../import/lib/__mocks__';
+jest.mock('uuid');
+
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
@@ -18,9 +18,8 @@ import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { SavedObjectsImporter } from '../..';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
@@ -52,8 +51,6 @@ describe(`POST ${URL}`, () => {
   };
 
   beforeEach(async () => {
-    mockUuidv4.mockReset();
-    mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
@@ -336,7 +333,8 @@ describe(`POST ${URL}`, () => {
 
   describe('createNewCopies enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
-      mockUuidv4.mockReturnValue('new-id-1');
+      const mockUuid = jest.requireMock('uuid');
+      mockUuid.v4 = jest.fn().mockReturnValue('new-id-1');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
       const obj1 = {
         type: 'visualization',

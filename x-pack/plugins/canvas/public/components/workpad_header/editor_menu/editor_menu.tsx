@@ -91,7 +91,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
       if (embeddableInput) {
         const config = encode(embeddableInput);
         const expression = `embeddable config="${config}"
-  type="${factory.type}" 
+  type="${factory.type}"
 | render`;
 
         addElement({ expression });
@@ -123,6 +123,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
   const factories = embeddablesService
     ? Array.from(embeddablesService.getEmbeddableFactories()).filter(
         ({ type, isEditable, canCreateNew, isContainerType }) =>
+          // @ts-expect-error ts 4.5 upgrade
           isEditable() &&
           !isContainerType &&
           canCreateNew() &&

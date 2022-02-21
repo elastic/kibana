@@ -8,24 +8,26 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   CaseResponse,
   CaseStatuses,
   CommentType,
+  ConnectorTypes,
+  getCaseUserActionUrl,
 } from '../../../../../../plugins/cases/common/api';
-import {
-  userActionPostResp,
-  postCaseReq,
-  postCommentUserReq,
-  getPostCaseRequest,
-} from '../../../../common/lib/mock';
+import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
+import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
   updateCase,
   getCaseUserActions,
   superUserSpace1Auth,
+  deleteCases,
+  createComment,
+  updateComment,
+  deleteComment,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -36,6 +38,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -47,308 +50,258 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings, owner]`, async () => {
-      const { id: connectorId, ...restConnector } = userActionPostResp.connector;
+    it('creates a create case user action when a case is created', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const createCaseUserAction = userActions[0] as CreateCaseUserAction;
 
-      const userActionNewValueNoId = {
-        ...userActionPostResp,
-        connector: {
-          ...restConnector,
-        },
-      };
-
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(body.length).to.eql(1);
-
-      expect(body[0].action_field).to.eql([
-        'description',
-        'status',
-        'tags',
-        'title',
-        'connector',
-        'settings',
-        'owner',
-      ]);
-      expect(body[0].action).to.eql('create');
-      expect(body[0].old_value).to.eql(null);
-      expect(body[0].old_val_connector_id).to.eql(null);
-      // this will be null because it is for the none connector
-      expect(body[0].new_val_connector_id).to.eql(null);
-      expect(JSON.parse(body[0].new_value)).to.eql(userActionNewValueNoId);
+      expect(userActions.length).to.eql(1);
+      expect(createCaseUserAction.action).to.eql('create');
+      expect(createCaseUserAction.type).to.eql('create_case');
+      expect(createCaseUserAction.payload.description).to.eql(postCaseReq.description);
+      expect(createCaseUserAction.payload.status).to.eql('open');
+      expect(createCaseUserAction.payload.tags).to.eql(postCaseReq.tags);
+      expect(createCaseUserAction.payload.title).to.eql(postCaseReq.title);
+      expect(createCaseUserAction.payload.settings).to.eql(postCaseReq.settings);
+      expect(createCaseUserAction.payload.owner).to.eql(postCaseReq.owner);
+      expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
-    it(`on close case, user action: 'update' should be called with actionFields: ['status']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    it('creates a delete case user action when a case is deleted', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      await deleteCases({ supertest, caseIDs: [theCase.id] });
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
 
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+      const userAction = userActions[1];
+
+      // One for creation and one for deletion
+      expect(userActions.length).to.eql(2);
+
+      expect(userAction.action).to.eql('delete');
+      expect(userAction.type).to.eql('delete_case');
+      expect(userAction.payload).to.eql({});
+    });
+
+    it('creates a status update user action when changing the status', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      await updateCase({
+        supertest,
+        params: {
           cases: [
             {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: 'closed',
+              id: theCase.id,
+              version: theCase.version,
+              status: CaseStatuses.closed,
             },
           ],
-        })
-        .expect(200);
+        },
+      });
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const statusUserAction = userActions[1];
 
-      expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['status']);
-      expect(body[1].action).to.eql('update');
-      expect(body[1].old_value).to.eql('open');
-      expect(body[1].new_value).to.eql('closed');
+      expect(userActions.length).to.eql(2);
+      expect(statusUserAction.type).to.eql('status');
+      expect(statusUserAction.action).to.eql('update');
+      expect(statusUserAction.payload).to.eql({ status: 'closed' });
     });
 
-    it(`on update case connector, user action: 'update' should be called with actionFields: ['connector']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
+    it('creates a connector update user action', async () => {
       const newConnector = {
         id: '123',
         name: 'Connector',
-        type: '.jira',
+        type: ConnectorTypes.jira as const,
         fields: { issueType: 'Task', priority: 'High', parent: null },
       };
 
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+      const theCase = await createCase(supertest, postCaseReq);
+      await updateCase({
+        supertest,
+        params: {
           cases: [
             {
-              id: postedCase.id,
-              version: postedCase.version,
+              id: theCase.id,
+              version: theCase.version,
               connector: newConnector,
             },
           ],
-        })
-        .expect(200);
-
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['connector']);
-      expect(body[1].action).to.eql('update');
-      // this is null because it is the none connector
-      expect(body[1].old_val_connector_id).to.eql(null);
-      expect(JSON.parse(body[1].old_value)).to.eql({
-        name: 'none',
-        type: '.none',
-        fields: null,
+        },
       });
-      expect(JSON.parse(body[1].new_value)).to.eql({
-        name: 'Connector',
-        type: '.jira',
-        fields: { issueType: 'Task', priority: 'High', parent: null },
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const connectorUserAction = userActions[1];
+
+      expect(userActions.length).to.eql(2);
+      expect(connectorUserAction.type).to.eql('connector');
+      expect(connectorUserAction.action).to.eql('update');
+      expect(connectorUserAction.payload).to.eql({
+        connector: {
+          id: '123',
+          name: 'Connector',
+          type: '.jira',
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
       });
-      expect(body[1].new_val_connector_id).to.eql('123');
     });
 
-    it(`on update tags, user action: 'add' and 'delete' should be called with actionFields: ['tags']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+    it('creates an add and delete tag user action', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      await updateCase({
+        supertest,
+        params: {
           cases: [
             {
-              id: postedCase.id,
-              version: postedCase.version,
+              id: theCase.id,
+              version: theCase.version,
               tags: ['cool', 'neat'],
             },
           ],
-        })
-        .expect(200);
+        },
+      });
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const addTagsUserAction = userActions[1];
+      const deleteTagsUserAction = userActions[2];
 
-      expect(body.length).to.eql(3);
-      expect(body[1].action_field).to.eql(['tags']);
-      expect(body[1].action).to.eql('add');
-      expect(body[1].old_value).to.eql(null);
-      expect(body[1].new_value).to.eql('cool, neat');
-      expect(body[2].action_field).to.eql(['tags']);
-      expect(body[2].action).to.eql('delete');
-      expect(body[2].old_value).to.eql(null);
-      expect(body[2].new_value).to.eql('defacement');
+      expect(userActions.length).to.eql(3);
+      expect(addTagsUserAction.type).to.eql('tags');
+      expect(addTagsUserAction.action).to.eql('add');
+      expect(addTagsUserAction.payload).to.eql({ tags: ['cool', 'neat'] });
+      expect(deleteTagsUserAction.type).to.eql('tags');
+      expect(deleteTagsUserAction.action).to.eql('delete');
+      expect(deleteTagsUserAction.payload).to.eql({ tags: ['defacement'] });
     });
 
-    it(`on update title, user action: 'update' should be called with actionFields: ['title']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
+    it('creates an update title user action', async () => {
       const newTitle = 'Such a great title';
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+      const theCase = await createCase(supertest, postCaseReq);
+
+      await updateCase({
+        supertest,
+        params: {
           cases: [
             {
-              id: postedCase.id,
-              version: postedCase.version,
+              id: theCase.id,
+              version: theCase.version,
               title: newTitle,
             },
           ],
-        })
-        .expect(200);
+        },
+      });
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const titleUserAction = userActions[1];
 
-      expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['title']);
-      expect(body[1].action).to.eql('update');
-      expect(body[1].old_value).to.eql(postCaseReq.title);
-      expect(body[1].new_value).to.eql(newTitle);
+      expect(userActions.length).to.eql(2);
+      expect(titleUserAction.type).to.eql('title');
+      expect(titleUserAction.action).to.eql('update');
+      expect(titleUserAction.payload).to.eql({ title: newTitle });
     });
 
-    it(`on update description, user action: 'update' should be called with actionFields: ['description']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
+    it('creates a description update user action', async () => {
       const newDesc = 'Such a great description';
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
+      const theCase = await createCase(supertest, postCaseReq);
+
+      await updateCase({
+        supertest,
+        params: {
           cases: [
             {
-              id: postedCase.id,
-              version: postedCase.version,
+              id: theCase.id,
+              version: theCase.version,
               description: newDesc,
             },
           ],
-        })
-        .expect(200);
+        },
+      });
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const titleUserAction = userActions[1];
 
-      expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['description']);
-      expect(body[1].action).to.eql('update');
-      expect(body[1].old_value).to.eql(postCaseReq.description);
-      expect(body[1].new_value).to.eql(newDesc);
+      expect(userActions.length).to.eql(2);
+      expect(titleUserAction.type).to.eql('description');
+      expect(titleUserAction.action).to.eql('update');
+      expect(titleUserAction.payload).to.eql({ description: newDesc });
     });
 
-    it(`on new comment, user action: 'create' should be called with actionFields: ['comments']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+    it('creates a create comment user action', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
+      const caseWithComments = await createComment({
+        supertest,
+        caseId: theCase.id,
+        params: postCommentUserReq,
+      });
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const commentUserAction = userActions[1];
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['comment']);
-      expect(body[1].action).to.eql('create');
-      expect(body[1].old_value).to.eql(null);
-      expect(JSON.parse(body[1].new_value)).to.eql(postCommentUserReq);
+      expect(userActions.length).to.eql(2);
+      expect(commentUserAction.type).to.eql('comment');
+      expect(commentUserAction.action).to.eql('create');
+      expect(commentUserAction.comment_id).to.eql(caseWithComments.comments![0].id);
+      expect(commentUserAction.payload).to.eql({ comment: postCommentUserReq });
     });
 
-    it(`on update comment, user action: 'update' should be called with actionFields: ['comments']`, async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
+    it('creates an update comment user action', async () => {
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
+      const theCase = await createCase(supertest, postCaseReq);
+      const caseWithComments = await createComment({
+        supertest,
+        caseId: theCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: theCase.id,
+        req: {
+          id: caseWithComments.comments![0].id,
+          version: caseWithComments.comments![0].version,
           comment: newComment,
           type: CommentType.user,
           owner: 'securitySolutionFixture',
-        })
-        .expect(200);
-
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(body.length).to.eql(3);
-      expect(body[2].action_field).to.eql(['comment']);
-      expect(body[2].action).to.eql('update');
-      expect(JSON.parse(body[2].old_value)).to.eql(postCommentUserReq);
-      expect(JSON.parse(body[2].new_value)).to.eql({
-        comment: newComment,
-        type: CommentType.user,
-        owner: 'securitySolutionFixture',
+        },
       });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const commentUserAction = userActions[2];
+
+      expect(userActions.length).to.eql(3);
+      expect(commentUserAction.type).to.eql('comment');
+      expect(commentUserAction.action).to.eql('update');
+      expect(commentUserAction.comment_id).to.eql(caseWithComments.comments![0].id);
+      expect(commentUserAction.payload).to.eql({
+        comment: {
+          comment: newComment,
+          type: CommentType.user,
+          owner: 'securitySolutionFixture',
+        },
+      });
+    });
+
+    it('creates a delete comment user action', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const caseWithComments = await createComment({
+        supertest,
+        caseId: theCase.id,
+        params: postCommentUserReq,
+      });
+
+      await deleteComment({
+        supertest,
+        caseId: theCase.id,
+        commentId: caseWithComments.comments![0].id,
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const commentUserAction = userActions[2];
+      const { id, version: _, ...restComment } = caseWithComments.comments![0];
+
+      expect(userActions.length).to.eql(3);
+      expect(commentUserAction.type).to.eql('comment');
+      expect(commentUserAction.action).to.eql('delete');
+      expect(commentUserAction.comment_id).to.eql(id);
+      expect(commentUserAction.payload).to.eql({ comment: restComment });
     });
 
     describe('rbac', () => {
@@ -403,6 +356,19 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseUserActionUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
+      });
     });
   });
 };

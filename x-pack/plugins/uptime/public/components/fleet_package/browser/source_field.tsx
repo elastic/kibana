@@ -6,10 +6,11 @@
  */
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiFormRow,
   EuiFieldText,
   EuiFieldPassword,
@@ -18,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { usePolicyConfigContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
@@ -59,18 +61,21 @@ export const defaultValues = {
   fileName: '',
 };
 
-const getDefaultTab = (defaultConfig: SourceConfig) => {
+const getDefaultTab = (defaultConfig: SourceConfig, isZipUrlSourceEnabled = true) => {
   if (defaultConfig.inlineScript && defaultConfig.isGeneratedScript) {
     return SourceType.SCRIPT_RECORDER;
   } else if (defaultConfig.inlineScript) {
     return SourceType.INLINE;
   }
 
-  return SourceType.ZIP;
+  return isZipUrlSourceEnabled ? SourceType.ZIP : SourceType.INLINE;
 };
 
 export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
-  const [sourceType, setSourceType] = useState<SourceType>(getDefaultTab(defaultConfig));
+  const { isZipUrlSourceEnabled } = usePolicyConfigContext();
+  const [sourceType, setSourceType] = useState<SourceType>(
+    getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
+  );
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
   useEffect(() => {
@@ -84,9 +89,10 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
     />
   );
 
-  const tabs = [
+  const zipUrlSourceTabId = 'syntheticsBrowserZipURLConfig';
+  const allTabs = [
     {
-      id: 'syntheticsBrowserZipURLConfig',
+      id: zipUrlSourceTabId,
       name: zipUrlLabel,
       'data-test-subj': `syntheticsSourceTab__zipUrl`,
       content: (
@@ -328,6 +334,10 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       ),
     },
   ];
+
+  const tabs = isZipUrlSourceEnabled
+    ? allTabs
+    : allTabs.filter((tab: EuiTabbedContentTab) => tab.id !== zipUrlSourceTabId);
 
   return (
     <EuiTabbedContent

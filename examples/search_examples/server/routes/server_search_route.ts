@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { IEsSearchRequest } from 'src/plugins/data/server';
 import { schema } from '@kbn/config-schema';
 import { IEsSearchResponse } from 'src/plugins/data/common';
@@ -26,36 +27,51 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
     },
     async (context, request, response) => {
       const { index, field } = request.query;
-      // Run a synchronous search server side, by enforcing a high keepalive and waiting for completion.
-      // If you wish to run the search with polling (in basic+), you'd have to poll on the search API.
-      // Please reach out to the @app-arch-team if you need this to be implemented.
-      const res = await context
-        .search!.search(
-          {
-            params: {
-              index,
-              body: {
-                aggs: {
-                  '1': {
-                    avg: {
-                      field,
+
+      // User may abort the request without waiting for the results
+      // we need to handle this scenario by aborting underlying server requests
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+
+      try {
+        const res = await context
+          .search!.search(
+            {
+              params: {
+                index,
+                body: {
+                  aggs: {
+                    '1': {
+                      avg: {
+                        field,
+                      },
                     },
                   },
                 },
               },
-              waitForCompletionTimeout: '5m',
-              keepAlive: '5m',
-            },
-          } as IEsSearchRequest,
-          {}
-        )
-        .toPromise();
+            } as IEsSearchRequest,
+            { abortSignal }
+          )
+          .toPromise();
 
-      return response.ok({
-        body: {
-          aggs: (res as IEsSearchResponse).rawResponse.aggregations,
-        },
-      });
+        return response.ok({
+          body: {
+            aggs: (res as IEsSearchResponse).rawResponse.aggregations,
+          },
+        });
+      } catch (e) {
+        return response.customError({
+          statusCode: e.statusCode ?? 500,
+          body: {
+            message: e.message,
+          },
+        });
+      }
     }
   );
+}
+
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
 }

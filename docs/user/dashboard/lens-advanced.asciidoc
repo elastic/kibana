@@ -34,7 +34,7 @@ Open the visualization editor, then make sure the correct fields appear.
 
 . On the dashboard, click *Create visualization*.
 
-. Make sure the *kibana_sample_data_ecommerce* index appears, then set the <<set-time-filter,time filter>> to *Last 30 days*.
+. Make sure the *kibana_sample_data_ecommerce* {data-source} appears, then set the <<set-time-filter,time filter>> to *Last 30 days*.
 
 [discrete]
 [[custom-time-interval]]
@@ -296,6 +296,9 @@ To use custom time shifts, enter the time value and increment, then press Enter.
 image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
 
 . Click *Save and return*.
+
+Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one in the time picker in the top right, spanning the same duration.
+For example, if *Last 7 days* is selected in the time picker, *previous* will show data from 14 days ago to 7 days ago. This mode can't be used together with date histograms.
 
 [float]
 [[compare-time-as-percent]]

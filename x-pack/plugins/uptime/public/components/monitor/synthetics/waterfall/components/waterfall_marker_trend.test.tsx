@@ -17,16 +17,22 @@ describe('<WaterfallMarkerTrend />', () => {
 
   jest.spyOn(moment.prototype, 'diff').mockImplementation(mockDiff);
 
+  const timestamp = '2021-12-03T14:35:41.072Z';
+
   let activeStep: JourneyStep | undefined;
   beforeEach(() => {
     activeStep = {
-      '@timestamp': '123',
+      '@timestamp': timestamp,
       _id: 'id',
       synthetics: {
         type: 'step/end',
         step: {
           index: 0,
+          status: 'succeeded',
           name: 'test-name',
+          duration: {
+            us: 9999,
+          },
         },
       },
       monitor: {
@@ -38,7 +44,8 @@ describe('<WaterfallMarkerTrend />', () => {
         },
       },
     };
-    mockDiff.mockReturnValue(0);
+    // value diff in milliseconds
+    mockDiff.mockReturnValue(10 * 1000);
   });
 
   const BASE_PATH = 'xyz';
@@ -51,7 +58,6 @@ describe('<WaterfallMarkerTrend />', () => {
       {
         core: {
           http: {
-            // @ts-expect-error incomplete implementation for testing purposes
             basePath: {
               get: () => BASE_PATH,
             },
@@ -63,14 +69,20 @@ describe('<WaterfallMarkerTrend />', () => {
     expect(heading.innerHTML).toEqual('test title');
     expect(getByLabelText('append title').innerHTML.indexOf(BASE_PATH)).not.toBe(-1);
     expect(getByText('kpi-over-time'));
-    expect(getByLabelText('attributes').innerHTML.indexOf('0s')).not.toBe(-1);
-    expect(getByLabelText('attributes').innerHTML.indexOf('0h')).toBe(-1);
-    expect(getByLabelText('attributes').innerHTML.indexOf('0m')).toBe(-1);
-    expect(getByLabelText('attributes').innerHTML.indexOf('0d')).toBe(-1);
+    const attributesText = getByLabelText('attributes').innerHTML;
+
+    expect(attributesText.includes('"2021-12-03T14:35:41.072Z"')).toBeTruthy();
+    const attributes = JSON.parse(attributesText);
+    expect(
+      moment(attributes[0].time.from)
+        .add(10 * 1000 * 48, 'millisecond')
+        .toISOString()
+    ).toBe(timestamp);
   });
 
-  it('handles days', () => {
-    mockDiff.mockReturnValue(10);
+  it('handles timespan difference', () => {
+    const oneMinDiff = 60 * 1000;
+    mockDiff.mockReturnValue(oneMinDiff);
     const { getByLabelText } = render(
       <TestWrapper activeStep={activeStep} basePath={BASE_PATH}>
         <WaterfallMarkerTrend title="test title" field="field" />
@@ -79,45 +91,29 @@ describe('<WaterfallMarkerTrend />', () => {
 
     const attributesText = getByLabelText('attributes').innerHTML;
 
-    expect(attributesText.indexOf('480s')).toBe(-1);
-    expect(attributesText.indexOf('480h')).toBe(-1);
-    expect(attributesText.indexOf('480m')).toBe(-1);
-    expect(attributesText.indexOf('480d')).not.toBe(-1);
-  });
-
-  it('handles hours', () => {
-    mockDiff.mockReturnValueOnce(0);
-    mockDiff.mockReturnValue(10);
-    const { getByLabelText } = render(
-      <TestWrapper activeStep={activeStep} basePath={BASE_PATH}>
-        <WaterfallMarkerTrend title="test title" field="field" />
-      </TestWrapper>
+    expect(attributesText).toBe(
+      JSON.stringify([
+        {
+          name: 'test title(test-name)',
+          selectedMetricField: 'field',
+          time: { to: '2021-12-03T14:35:41.072Z', from: '2021-12-03T13:47:41.072Z' },
+          seriesType: 'area',
+          dataType: 'synthetics',
+          reportDefinitions: {
+            'monitor.name': [null],
+            'synthetics.step.name.keyword': ['test-name'],
+          },
+          operationType: 'last_value',
+        },
+      ])
     );
 
-    const attributesText = getByLabelText('attributes').innerHTML;
-
-    expect(attributesText.indexOf('480s')).toBe(-1);
-    expect(attributesText.indexOf('480h')).not.toBe(-1);
-    expect(attributesText.indexOf('480m')).toBe(-1);
-    expect(attributesText.indexOf('480d')).toBe(-1);
-  });
-
-  it('handles minutes', () => {
-    mockDiff.mockReturnValueOnce(0);
-    mockDiff.mockReturnValueOnce(0);
-    mockDiff.mockReturnValue(10);
-    const { getByLabelText } = render(
-      <TestWrapper activeStep={activeStep} basePath={BASE_PATH}>
-        <WaterfallMarkerTrend title="test title" field="field" />
-      </TestWrapper>
-    );
-
-    const attributesText = getByLabelText('attributes').innerHTML;
-
-    expect(attributesText.indexOf('480s')).toBe(-1);
-    expect(attributesText.indexOf('480h')).toBe(-1);
-    expect(attributesText.indexOf('480m')).not.toBe(-1);
-    expect(attributesText.indexOf('480d')).toBe(-1);
+    const attributes = JSON.parse(attributesText);
+    expect(
+      moment(attributes[0].time.from)
+        .add(oneMinDiff * 48, 'millisecond')
+        .toISOString()
+    ).toBe(timestamp);
   });
 
   it('returns null for missing active step', () => {

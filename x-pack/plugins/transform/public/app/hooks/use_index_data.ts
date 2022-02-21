@@ -203,11 +203,11 @@ export const useIndexData = (
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
     setRowCountRelation(
       typeof resp.hits.total === 'number'
         ? ('eq' as estypes.SearchTotalHitsRelation)
-        : resp.hits.total.relation
+        : resp.hits.total!.relation
     );
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);

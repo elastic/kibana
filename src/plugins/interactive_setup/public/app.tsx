@@ -13,7 +13,7 @@ import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { StatusResult } from '../common';
 import { ClusterAddressForm } from './cluster_address_form';

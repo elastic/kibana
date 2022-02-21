@@ -11,7 +11,8 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
 import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
@@ -92,10 +93,16 @@ export function updateMapSetting(
   settingKey: string,
   settingValue: string | boolean | number | object
 ) {
-  return {
-    type: UPDATE_MAP_SETTING,
-    settingKey,
-    settingValue,
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: UPDATE_MAP_SETTING,
+      settingKey,
+      settingValue,
+    });
+
+    if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
+      dispatch(autoFitToBounds());
+    }
   };
 }
 

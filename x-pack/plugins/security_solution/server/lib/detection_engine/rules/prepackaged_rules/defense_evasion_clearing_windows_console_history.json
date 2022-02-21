@@ -1,0 +1,58 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when a user attempts to clear console history. An adversary may clear the command history of a compromised account to conceal the actions undertaken during an intrusion.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Clearing Windows Console History",
+  "query": "process where event.action == \"start\" and\n  (process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or process.pe.original_file_name == \"PowerShell.EXE\") and\n     (process.args : \"*Clear-History*\" or\n     (process.args : (\"*Remove-Item*\", \"rm\") and process.args : (\"*ConsoleHost_history.txt*\", \"*(Get-PSReadlineOption).HistorySavePath*\")) or\n     (process.args : \"*Set-PSReadlineOption*\" and process.args : \"*SaveNothing*\"))\n",
+  "references": [
+    "https://stefanos.cloud/blog/kb/how-to-clear-the-powershell-command-history/",
+    "https://www.shellhacks.com/clear-history-powershell/",
+    "https://community.sophos.com/sophos-labs/b/blog/posts/powershell-command-history-forensics"
+  ],
+  "risk_score": 47,
+  "rule_id": "b5877334-677f-4fb9-86d5-a9721274223b",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.003",
+              "name": "Clear Command History",
+              "reference": "https://attack.mitre.org/techniques/T1070/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

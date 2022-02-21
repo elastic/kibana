@@ -19,22 +19,24 @@ addParameters({
 
 export default {
   component: Component,
-  title: 'Sections/Fleet/Settings',
+  title: 'Sections/Fleet/Settings/HostInput',
 };
 
 interface Args {
   width: number;
   label: string;
   helpText: string;
+  disabled: boolean;
 }
 
 const args: Args = {
   width: 250,
   label: 'Demo label',
   helpText: 'Demo helpText',
+  disabled: false,
 };
 
-export const HostsInput = ({ width, label, helpText }: Args) => {
+export const HostsInput = ({ width, label, helpText, disabled }: Args) => {
   const [value, setValue] = useState<string[]>([]);
   return (
     <div style={{ width }}>
@@ -44,9 +46,31 @@ export const HostsInput = ({ width, label, helpText }: Args) => {
         value={value}
         onChange={setValue}
         label={label}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
+HostsInput.args = args;
+
+export const HostsInputDisabled = ({ value }: { value: string[] }) => {
+  return (
+    <div style={{ maxWidth: '350px' }}>
+      <Component
+        id="test-host-input"
+        helpText={'Host input help text'}
+        value={value}
+        onChange={() => {}}
+        label={'Host input label'}
+        disabled={true}
       />
     </div>
   );
 };
 
-HostsInput.args = args;
+HostsInputDisabled.args = { value: ['http://test1.fr', 'http://test2.fr'] };
+HostsInputDisabled.argTypes = {
+  value: {
+    control: { type: 'object' },
+  },
+};

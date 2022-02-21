@@ -25,11 +25,11 @@ import {
   esFilters,
   Filter,
   FilterManager,
-  IndexPattern,
   Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '../../../../../data/public';
+import { DataView } from '../../../../../data/common';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
@@ -82,6 +82,10 @@ export interface AppState {
    * Hide mini distribution/preview charts when in Field Statistics mode
    */
   hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: number;
 }
 
 interface GetStateParams {
@@ -124,7 +128,7 @@ export interface GetStateReturn {
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     filterManager: FilterManager,
     data: DataPublicPluginStart
   ) => () => void;
@@ -251,7 +255,7 @@ export function getState({
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     initializeAndSync: (
-      indexPattern: IndexPattern,
+      indexPattern: DataView,
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {

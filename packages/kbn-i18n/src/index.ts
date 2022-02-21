@@ -6,8 +6,60 @@
  * Side Public License, v 1.
  */
 
-import * as i18nCore from './core';
-import * as loader from './loader';
+import {
+  formats,
+  addTranslation,
+  getTranslation,
+  setLocale,
+  getLocale,
+  setDefaultLocale,
+  getDefaultLocale,
+  setFormats,
+  getFormats,
+  getRegisteredLocales,
+  translate,
+  init,
+  load,
+  isPseudoLocale,
+  translateUsingPseudoLocale,
+} from './core';
 
-export const i18n = i18nCore;
-export const i18nLoader = loader;
+import {
+  registerTranslationFile,
+  registerTranslationFiles,
+  getTranslationsByLocale,
+  getAllTranslations,
+  getAllTranslationsFromPaths,
+  getRegisteredLocales as getRegisteredLocalesForLoader,
+} from './loader';
+
+const i18n = {
+  formats,
+  addTranslation,
+  getTranslation,
+  setLocale,
+  getLocale,
+  setDefaultLocale,
+  getDefaultLocale,
+  setFormats,
+  getFormats,
+  getRegisteredLocales,
+  translate,
+  init,
+  load,
+  isPseudoLocale,
+  translateUsingPseudoLocale,
+};
+
+const i18nLoader = {
+  registerTranslationFile,
+  registerTranslationFiles,
+  getTranslationsByLocale,
+  getAllTranslations,
+  getAllTranslationsFromPaths,
+  getRegisteredLocales: getRegisteredLocalesForLoader,
+};
+
+export type { Translation } from './translation';
+export type { Formats, TranslateArguments } from './core';
+export { i18n, i18nLoader };

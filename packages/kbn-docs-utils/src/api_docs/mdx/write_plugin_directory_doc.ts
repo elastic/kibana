@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import moment from 'moment';
 import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
@@ -78,7 +78,7 @@ id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
 summary: Directory of public APIs available through plugins or packages.
-date: 2021-09-22
+date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---

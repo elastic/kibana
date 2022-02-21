@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const path = require('path');
@@ -6,12 +14,11 @@ const path = require('path');
 const STORYBOOKS = [
   'apm',
   'canvas',
-  'codeeditor',
   'ci_composite',
+  'cloud',
   'custom_integrations',
-  'url_template_editor',
-  'dashboard',
   'dashboard_enhanced',
+  'dashboard',
   'data_enhanced',
   'embeddable',
   'expression_error',
@@ -23,11 +30,13 @@ const STORYBOOKS = [
   'expression_tagcloud',
   'fleet',
   'infra',
-  'security_solution',
-  'ui_actions_enhanced',
+  'kibana_react',
+  'lists',
   'observability',
   'presentation',
-  'lists',
+  'security_solution',
+  'shared_ux',
+  'ui_actions_enhanced',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
@@ -73,7 +82,7 @@ const upload = () => {
       .trim()
       .split('\n')
       .map((path) => path.replace('/', ''))
-      .filter((path) => path != 'composite');
+      .filter((path) => path !== 'composite');
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)

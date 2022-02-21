@@ -153,3 +153,17 @@ export const QUERY_PREVIEW_EQL_SEQUENCE_DESCRIPTION = i18n.translate(
       'No histogram is available at this time for EQL sequence queries. You can use the inspect in the top right corner to view query details.',
   }
 );
+
+export const QUERY_PREVIEW_SEE_ALL_ERRORS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllErrors',
+  {
+    defaultMessage: 'See all errors',
+  }
+);
+
+export const QUERY_PREVIEW_SEE_ALL_WARNINGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllWarnings',
+  {
+    defaultMessage: 'See all warnings',
+  }
+);

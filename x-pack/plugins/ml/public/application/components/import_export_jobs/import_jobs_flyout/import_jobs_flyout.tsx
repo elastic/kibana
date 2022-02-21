@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 
@@ -52,7 +52,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     services: {
       data: {
-        indexPatterns: { getTitles: getIndexPatternTitles },
+        dataViews: { getTitles: getDataViewTitles },
       },
       notifications: { toasts },
       mlServices: { mlUsageCollection },
@@ -131,7 +131,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getIndexPatternTitles,
+        getDataViewTitles,
         getFilters
       );
 
@@ -330,7 +330,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
         defaultMessage: 'Delete',
       })}
-      color={deleteDisabled ? 'subdued' : 'danger'}
+      color={deleteDisabled ? 'text' : 'danger'}
       disabled={deleteDisabled}
       onClick={() => deleteJob(index)}
     />

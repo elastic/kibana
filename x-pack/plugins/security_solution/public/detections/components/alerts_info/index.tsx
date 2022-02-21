@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useState, useEffect } from 'react';
 
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';

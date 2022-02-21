@@ -15,7 +15,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { createEsDocuments } from './create_test_data';
+import { createEsDocuments } from '../lib/create_test_data';
 
 const ALERT_TYPE_ID = '.es-query';
 const ACTION_TYPE_ID = '.index';

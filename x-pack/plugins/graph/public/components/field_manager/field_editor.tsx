@@ -25,7 +25,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';

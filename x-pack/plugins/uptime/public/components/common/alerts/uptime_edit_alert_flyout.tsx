@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
-  Alert,
+  Rule,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../../../../triggers_actions_ui/public';
 
 interface Props {
   alertFlyoutVisible: boolean;
-  initialAlert: Alert;
+  initialAlert: Rule;
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

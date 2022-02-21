@@ -13,14 +13,12 @@ export default function ({ getService, getPageObjects }) {
   const security = getService('security');
 
   describe('Add layer panel', () => {
-    const LAYER_NAME = 'World Countries';
-
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all']);
+      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader']);
       await PageObjects.maps.openNewMap();
       await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectEMSBoundariesSource();
-      await PageObjects.maps.selectVectorLayer(LAYER_NAME);
+      await PageObjects.maps.selectDocumentsSource();
+      await PageObjects.maps.selectGeoIndexPatternLayer('logstash-*');
     });
 
     after(async () => {
@@ -28,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show unsaved layer in layer TOC', async () => {
-      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+      const vectorLayerExists = await PageObjects.maps.doesLayerExist('logstash-*');
       expect(vectorLayerExists).to.be(true);
     });
 
@@ -36,17 +34,12 @@ export default function ({ getService, getPageObjects }) {
       const mapSaveButton = await testSubjects.find('mapSaveButton');
       const isDisabled = await mapSaveButton.getAttribute('disabled');
       expect(isDisabled).to.be('true');
-
-      const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-      expect(panelOpen).to.be(true);
-      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-      expect(vectorLayerExists).to.be(true);
     });
 
     it('should remove layer on cancel', async () => {
-      await PageObjects.maps.cancelLayerAdd(LAYER_NAME);
+      await PageObjects.maps.cancelLayerAdd('logstash-*');
 
-      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+      const vectorLayerExists = await PageObjects.maps.doesLayerExist('logstash-*');
       expect(vectorLayerExists).to.be(false);
     });
   });

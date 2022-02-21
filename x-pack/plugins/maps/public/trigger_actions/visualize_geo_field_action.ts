@@ -8,6 +8,9 @@
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { getUsageCollection } from '../kibana_services';
+import { APP_ID } from '../../common/constants';
+
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -43,6 +46,13 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   execute: async (context) => {
     const { app, path, state } = await getMapsLink(context);
 
+    const usageCollection = getUsageCollection();
+    usageCollection?.reportUiCounter(
+      APP_ID,
+      'visualize_geo_field',
+      context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'
+    );
+
     getCore().application.navigateToApp(app, {
       path,
       state,
@@ -52,8 +62,6 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
 
 const getMapsLink = async (context: VisualizeFieldContext) => {
   const indexPattern = await getIndexPatternService().get(context.indexPatternId);
-  const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);
-  const supportsClustering = field?.aggregatable;
   // create initial layer descriptor
   const hasTooltips =
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
@@ -61,7 +69,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     {
       id: uuid(),
       visible: true,
-      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+      type: LAYER_TYPE.MVT_VECTOR,
       sourceDescriptor: {
         id: uuid(),
         type: SOURCE_TYPES.ES_SEARCH,
@@ -69,7 +77,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
         label: indexPattern.title,
         indexPatternId: context.indexPatternId,
         geoField: context.fieldName,
-        scalingType: supportsClustering ? SCALING_TYPES.CLUSTERS : SCALING_TYPES.LIMIT,
+        scalingType: SCALING_TYPES.MVT,
       },
     },
   ];

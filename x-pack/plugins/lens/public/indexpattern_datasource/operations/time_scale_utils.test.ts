@@ -7,7 +7,7 @@
 
 import type { IndexPatternLayer } from '../types';
 import type { TimeScaleUnit } from '../../../common/expressions';
-import type { IndexPatternColumn } from './definitions';
+import type { DateHistogramIndexPatternColumn, GenericIndexPatternColumn } from './definitions';
 import { adjustTimeScaleLabelSuffix, adjustTimeScaleOnOtherColumnChange } from './time_scale_utils';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
@@ -97,9 +97,9 @@ describe('time scale utils', () => {
   });
 
   describe('adjustTimeScaleOnOtherColumnChange', () => {
-    const baseColumn: IndexPatternColumn = {
+    const baseColumn: GenericIndexPatternColumn = {
       operationType: 'count',
-      sourceField: 'Records',
+      sourceField: '___records___',
       label: 'Count of records per second',
       dataType: 'number',
       isBucketed: false,
@@ -135,7 +135,7 @@ describe('time scale utils', () => {
                 label: '',
                 sourceField: 'date',
                 params: { interval: 'auto' },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           'col1',

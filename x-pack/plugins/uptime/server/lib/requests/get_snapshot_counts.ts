@@ -10,6 +10,7 @@ import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { EXCLUDE_RUN_ONCE_FILTER } from '../../../common/constants/client_defaults';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;
@@ -84,7 +85,7 @@ const statusCountBody = (filters: ESFilter[], context: QueryContext) => {
               field: 'summary',
             },
           },
-
+          EXCLUDE_RUN_ONCE_FILTER,
           ...filters,
         ],
       },

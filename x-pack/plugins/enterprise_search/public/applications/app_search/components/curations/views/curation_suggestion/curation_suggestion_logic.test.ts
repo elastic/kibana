@@ -14,7 +14,7 @@ import {
 
 import '../../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { HydratedCurationSuggestion } from '../../types';
@@ -150,7 +150,7 @@ const MOCK_RESPONSE = {
 
 describe('CurationSuggestionLogic', () => {
   const { mount } = new LogicMounter(CurationSuggestionLogic);
-  const { flashAPIErrors, setQueuedErrorMessage } = mockFlashMessageHelpers;
+  const { setErrorMessage, setQueuedErrorMessage } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
 
   const mountLogic = (props: object = {}) => {
@@ -177,7 +177,7 @@ describe('CurationSuggestionLogic', () => {
       callback();
       await nextTick();
 
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      expect(setErrorMessage).toHaveBeenCalledWith('error');
     });
   };
 

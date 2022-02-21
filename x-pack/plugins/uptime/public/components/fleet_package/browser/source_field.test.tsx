@@ -9,12 +9,19 @@ import 'jest-canvas-mock';
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
+import { IPolicyConfigContextProvider } from '../contexts/policy_config_context';
 import { SourceField, defaultValues } from './source_field';
-import { BrowserSimpleFieldsContextProvider } from '../contexts';
+import { BrowserSimpleFieldsContextProvider, PolicyConfigContextProvider } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
@@ -37,11 +44,15 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
 const onChange = jest.fn();
 
 describe('<SourceField />', () => {
-  const WrappedComponent = () => {
+  const WrappedComponent = ({
+    isZipUrlSourceEnabled,
+  }: Omit<IPolicyConfigContextProvider, 'children'>) => {
     return (
-      <BrowserSimpleFieldsContextProvider>
-        <SourceField onChange={onChange} />
-      </BrowserSimpleFieldsContextProvider>
+      <PolicyConfigContextProvider isZipUrlSourceEnabled={isZipUrlSourceEnabled}>
+        <BrowserSimpleFieldsContextProvider>
+          <SourceField onChange={onChange} />
+        </BrowserSimpleFieldsContextProvider>
+      </PolicyConfigContextProvider>
     );
   };
 
@@ -59,5 +70,17 @@ describe('<SourceField />', () => {
     await waitFor(() => {
       expect(onChange).toBeCalledWith({ ...defaultValues, zipUrl });
     });
+  });
+
+  it('shows ZipUrl source type by default', async () => {
+    render(<WrappedComponent />);
+
+    expect(screen.getByTestId('syntheticsSourceTab__zipUrl')).toBeInTheDocument();
+  });
+
+  it('does not show ZipUrl source type when isZipUrlSourceEnabled = false', async () => {
+    render(<WrappedComponent isZipUrlSourceEnabled={false} />);
+
+    expect(screen.queryByTestId('syntheticsSourceTab__zipUrl')).not.toBeInTheDocument();
   });
 });

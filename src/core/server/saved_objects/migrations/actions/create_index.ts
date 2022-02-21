@@ -55,72 +55,74 @@ export const createIndex = ({
   mappings,
   aliases = [],
 }: CreateIndexParams): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
-  const createIndexTask: TaskEither.TaskEither<RetryableEsClientError, AcknowledgeResponse> =
-    () => {
-      const aliasesObject = aliasArrayToRecord(aliases);
+  const createIndexTask: TaskEither.TaskEither<
+    RetryableEsClientError,
+    AcknowledgeResponse
+  > = () => {
+    const aliasesObject = aliasArrayToRecord(aliases);
 
-      return client.indices
-        .create(
-          {
-            index: indexName,
-            // wait until all shards are available before creating the index
-            // (since number_of_shards=1 this does not have any effect atm)
-            wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-            // Wait up to 60s for the cluster state to update and all shards to be
-            // started
-            timeout: DEFAULT_TIMEOUT,
-            body: {
-              mappings,
-              aliases: aliasesObject,
-              settings: {
-                index: {
-                  // ES rule of thumb: shards should be several GB to 10's of GB, so
-                  // Kibana is unlikely to cross that limit.
-                  number_of_shards: 1,
-                  auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-                  // Set an explicit refresh interval so that we don't inherit the
-                  // value from incorrectly configured index templates (not required
-                  // after we adopt system indices)
-                  refresh_interval: '1s',
-                  // Bump priority so that recovery happens before newer indices
-                  priority: 10,
-                },
+    return client.indices
+      .create(
+        {
+          index: indexName,
+          // wait until all shards are available before creating the index
+          // (since number_of_shards=1 this does not have any effect atm)
+          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+          // Wait up to 60s for the cluster state to update and all shards to be
+          // started
+          timeout: DEFAULT_TIMEOUT,
+          body: {
+            mappings,
+            aliases: aliasesObject,
+            settings: {
+              index: {
+                // ES rule of thumb: shards should be several GB to 10's of GB, so
+                // Kibana is unlikely to cross that limit.
+                number_of_shards: 1,
+                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+                // Set an explicit refresh interval so that we don't inherit the
+                // value from incorrectly configured index templates (not required
+                // after we adopt system indices)
+                refresh_interval: '1s',
+                // Bump priority so that recovery happens before newer indices
+                priority: 10,
               },
             },
           },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
-        )
-        .then((res) => {
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      )
+      .then((res) => {
+        /**
+         * - acknowledged=false, we timed out before the cluster state was
+         *   updated on all nodes with the newly created index, but it
+         *   probably will be created sometime soon.
+         * - shards_acknowledged=false, we timed out before all shards were
+         *   started
+         * - acknowledged=true, shards_acknowledged=true, index creation complete
+         */
+        return Either.right({
+          acknowledged: Boolean(res.acknowledged),
+          shardsAcknowledged: res.shards_acknowledged,
+        });
+      })
+      .catch((error) => {
+        if (error?.body?.error?.type === 'resource_already_exists_exception') {
           /**
-           * - acknowledged=false, we timed out before the cluster state was
-           *   updated on all nodes with the newly created index, but it
-           *   probably will be created sometime soon.
-           * - shards_acknowledged=false, we timed out before all shards were
-           *   started
-           * - acknowledged=true, shards_acknowledged=true, index creation complete
+           * If the target index already exists it means a previous create
+           * operation had already been started. However, we can't be sure
+           * that all shards were started so return shardsAcknowledged: false
            */
           return Either.right({
-            acknowledged: Boolean(res.body.acknowledged),
-            shardsAcknowledged: res.body.shards_acknowledged,
+            acknowledged: true,
+            shardsAcknowledged: false,
           });
-        })
-        .catch((error) => {
-          if (error?.body?.error?.type === 'resource_already_exists_exception') {
-            /**
-             * If the target index already exists it means a previous create
-             * operation had already been started. However, we can't be sure
-             * that all shards were started so return shardsAcknowledged: false
-             */
-            return Either.right({
-              acknowledged: true,
-              shardsAcknowledged: false,
-            });
-          } else {
-            throw error;
-          }
-        })
-        .catch(catchRetryableEsClientErrors);
-    };
+        } else {
+          throw error;
+        }
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
   return pipe(
     createIndexTask,

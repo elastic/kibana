@@ -21,6 +21,7 @@ export const ConfigSchema = schema.object({
   }),
   listIndex: schema.string({ defaultValue: '.lists' }),
   listItemIndex: schema.string({ defaultValue: '.items' }),
+  maxExceptionsImportSize: schema.number({ defaultValue: 10000, min: 1 }),
   maxImportPayloadBytes: schema.number({ defaultValue: 9000000, min: 1 }),
 });
 

@@ -10,108 +10,6 @@ exports[`Source Viewer component renders error state 1`] = `
       "getComputedFields": [Function],
     }
   }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
   width={123}
 >
   <EuiEmptyPrompt
@@ -136,129 +34,144 @@ exports[`Source Viewer component renders error state 1`] = `
       </h2>
     }
   >
-    <div
-      className="euiEmptyPrompt"
+    <EuiPanel
+      className="euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+      color="transparent"
+      paddingSize="none"
     >
-      <EuiIcon
-        color="subdued"
-        size="xxl"
-        type="alert"
-      >
-        <span
-          color="subdued"
-          data-euiicon-type="alert"
-          size="xxl"
-        />
-      </EuiIcon>
-      <EuiSpacer
-        size="m"
+      <div
+        className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
       >
         <div
-          className="euiSpacer euiSpacer--m"
-        />
-      </EuiSpacer>
-      <EuiTitle
-        size="m"
-      >
-        <h2
-          className="euiTitle euiTitle--medium"
+          className="euiEmptyPrompt__main"
         >
-          An Error Occurred
-        </h2>
-      </EuiTitle>
-      <EuiTextColor
-        color="subdued"
-      >
-        <span
-          className="euiTextColor euiTextColor--subdued"
-          style={Object {}}
-        >
-          <EuiSpacer
-            size="m"
+          <div
+            className="euiEmptyPrompt__icon"
+          >
+            <EuiIcon
+              color="subdued"
+              size="xxl"
+              type="alert"
+            >
+              <span
+                color="subdued"
+                data-euiicon-type="alert"
+                size="xxl"
+              />
+            </EuiIcon>
+          </div>
+          <div
+            className="euiEmptyPrompt__content"
           >
             <div
-              className="euiSpacer euiSpacer--m"
-            />
-          </EuiSpacer>
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
+              className="euiEmptyPrompt__contentInner"
             >
-              <div>
-                Could not fetch data at this time. Refresh the tab to try again.
-                <EuiSpacer
-                  size="s"
+              <EuiTitle
+                size="m"
+              >
+                <h2
+                  className="euiTitle euiTitle--medium"
                 >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiButton
-                  iconType="refresh"
-                  onClick={[Function]}
+                  An Error Occurred
+                </h2>
+              </EuiTitle>
+              <EuiTextColor
+                color="subdued"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
-                  <EuiButtonDisplay
-                    baseClassName="euiButton"
-                    disabled={false}
-                    element="button"
-                    iconType="refresh"
-                    isDisabled={false}
-                    onClick={[Function]}
-                    type="button"
+                  <EuiSpacer
+                    size="m"
                   >
-                    <button
-                      className="euiButton euiButton--primary"
-                      disabled={false}
-                      onClick={[Function]}
-                      style={
-                        Object {
-                          "minWidth": undefined,
-                        }
-                      }
-                      type="button"
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
                     >
-                      <EuiButtonContent
-                        className="euiButton__content"
-                        iconSide="left"
-                        iconType="refresh"
-                        textProps={
-                          Object {
-                            "className": "euiButton__text",
-                          }
-                        }
-                      >
-                        <span
-                          className="euiButtonContent euiButton__content"
+                      <div>
+                        Could not fetch data at this time. Refresh the tab to try again.
+                        <EuiSpacer
+                          size="s"
                         >
-                          <EuiIcon
-                            className="euiButtonContent__icon"
-                            color="inherit"
-                            size="m"
-                            type="refresh"
+                          <div
+                            className="euiSpacer euiSpacer--s"
+                          />
+                        </EuiSpacer>
+                        <EuiButton
+                          iconType="refresh"
+                          onClick={[Function]}
+                        >
+                          <EuiButtonDisplay
+                            baseClassName="euiButton"
+                            disabled={false}
+                            element="button"
+                            iconType="refresh"
+                            isDisabled={false}
+                            onClick={[Function]}
+                            type="button"
                           >
-                            <span
-                              className="euiButtonContent__icon"
-                              color="inherit"
-                              data-euiicon-type="refresh"
-                              size="m"
-                            />
-                          </EuiIcon>
-                          <span
-                            className="euiButton__text"
-                          >
-                            Refresh
-                          </span>
-                        </span>
-                      </EuiButtonContent>
-                    </button>
-                  </EuiButtonDisplay>
-                </EuiButton>
-              </div>
+                            <button
+                              className="euiButton euiButton--primary"
+                              disabled={false}
+                              onClick={[Function]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButton__content"
+                                iconSide="left"
+                                iconType="refresh"
+                                textProps={
+                                  Object {
+                                    "className": "euiButton__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButton__content"
+                                >
+                                  <EuiIcon
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    size="m"
+                                    type="refresh"
+                                  >
+                                    <span
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      data-euiicon-type="refresh"
+                                      size="m"
+                                    />
+                                  </EuiIcon>
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Refresh
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonDisplay>
+                        </EuiButton>
+                      </div>
+                    </div>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
             </div>
-          </EuiText>
-        </span>
-      </EuiTextColor>
-    </div>
+          </div>
+        </div>
+      </div>
+    </EuiPanel>
   </EuiEmptyPrompt>
 </DocViewerSource>
 `;
@@ -271,108 +184,6 @@ exports[`Source Viewer component renders json code editor 1`] = `
   indexPattern={
     Object {
       "getComputedFields": [Function],
-    }
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
     }
   }
   width={123}
@@ -630,108 +441,6 @@ exports[`Source Viewer component renders loading state 1`] = `
   indexPattern={
     Object {
       "getComputedFields": [Function],
-    }
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
     }
   }
   width={123}

@@ -7,7 +7,7 @@
 
 import React, { memo, ReactNode, useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';

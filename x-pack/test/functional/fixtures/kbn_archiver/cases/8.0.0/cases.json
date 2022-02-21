@@ -1,0 +1,834 @@
+{
+  "attributes": {
+    "actionTypeId": ".jira",
+    "config": {
+      "apiUrl": "https://example.com",
+      "projectKey": "CASES"
+    },
+    "isMissingSecrets": true,
+    "name": "Jira"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "6773fba0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "action": "8.0.0"
+  },
+  "references": [],
+  "type": "action",
+  "updated_at": "2021-12-16T14:35:24.136Z",
+  "version": "WzY3NywxXQ=="
+}
+
+{
+  "attributes": {
+    "actionTypeId": ".resilient",
+    "config": {
+      "apiUrl": "https://example.com/",
+      "orgId": "201"
+    },
+    "isMissingSecrets": true,
+    "name": "IBM"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "b3214df0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "action": "8.0.0"
+  },
+  "references": [],
+  "type": "action",
+  "updated_at": "2021-12-16T14:37:31.097Z",
+  "version": "WzcxOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [
+        {
+          "key": "issueType",
+          "value": "10001"
+        },
+        {
+          "key": "parent",
+          "value": null
+        },
+        {
+          "key": "priority",
+          "value": "Lowest"
+        }
+      ],
+      "name": "Jira",
+      "type": ".jira"
+    },
+    "created_at": "2021-12-16T14:34:48.709Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "description": "migrating user actions and update!",
+    "external_service": {
+      "connector_name": "IBM",
+      "external_id": "17574",
+      "external_title": "17574",
+      "external_url": "https://example.com/#incidents/17574",
+      "pushed_at": "2021-12-16T14:37:53.016Z",
+      "pushed_by": {
+        "email": "",
+        "full_name": "",
+        "username": "elastic"
+      }
+    },
+    "owner": "securitySolution",
+    "settings": {
+      "syncAlerts": false
+    },
+    "status": "in-progress",
+    "tags": [
+      "actions",
+      "migration"
+    ],
+    "title": "User actions!",
+    "type": "individual",
+    "updated_at": "2021-12-16T14:38:09.649Z",
+    "updated_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "6773fba0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "connectorId",
+      "type": "action"
+    },
+    {
+      "id": "b3214df0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "pushConnectorId",
+      "type": "action"
+    }
+  ],
+  "type": "cases",
+  "updated_at": "2021-12-16T14:38:09.653Z",
+  "version": "WzcyOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-12-16T14:34:48.709Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "description",
+      "status",
+      "tags",
+      "title",
+      "connector",
+      "settings",
+      "owner"
+    ],
+    "new_value": "{\"type\":\"individual\",\"title\":\"User actions\",\"tags\":[\"user\",\"actions\"],\"description\":\"migrating user actions\",\"connector\":{\"name\":\"none\",\"type\":\".none\",\"fields\":null},\"settings\":{\"syncAlerts\":true},\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "5275af50-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665288709,
+    546
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:34:48.901Z",
+  "version": "WzY2NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "a comment updated!",
+    "created_at": "2021-12-16T14:35:42.872Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "owner": "securitySolution",
+    "pushed_at": "2021-12-16T14:36:46.443Z",
+    "pushed_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "type": "user",
+    "updated_at": "2021-12-16T14:36:04.120Z",
+    "updated_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "72a03e30-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-comments": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665342872,
+    689
+  ],
+  "type": "cases-comments",
+  "updated_at": "2021-12-16T14:36:46.444Z",
+  "version": "WzcxMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-12-16T14:35:42.872Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"a comment\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "72e73240-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "72a03e30-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665342872,
+    666
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:35:43.332Z",
+  "version": "WzY4MywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:35:48.826Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "title"
+    ],
+    "new_value": "User actions!",
+    "old_value": "User actions",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "7685b5c0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665348826,
+    684
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:35:49.404Z",
+  "version": "WzY5MywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:35:55.421Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "description"
+    ],
+    "new_value": "migrating user actions and update!",
+    "old_value": "migrating user actions",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "7a2d8810-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665355421,
+    682
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:35:55.537Z",
+  "version": "WzY5NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:36:04.120Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"a comment updated!\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": "{\"comment\":\"a comment\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "7f942160-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "72a03e30-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665364120,
+    676
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:04.598Z",
+  "version": "WzY5OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "add",
+    "action_at": "2021-12-16T14:36:13.840Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "tags"
+    ],
+    "new_value": "migration",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "8591a380-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665373840,
+    678
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:14.648Z",
+  "version": "WzcwMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "delete",
+    "action_at": "2021-12-16T14:36:13.840Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "tags"
+    ],
+    "new_value": "user",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "8591a381-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665373840,
+    680
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:14.648Z",
+  "version": "WzcwMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:36:17.764Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "settings"
+    ],
+    "new_value": "{\"syncAlerts\":false}",
+    "old_value": "{\"syncAlerts\":true}",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "87fadb50-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665377764,
+    694
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:18.693Z",
+  "version": "WzcwMywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:36:21.509Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "status"
+    ],
+    "new_value": "in-progress",
+    "old_value": "open",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "89ca4420-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665381509,
+    696
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:21.730Z",
+  "version": "WzcwNSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:36:32.716Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"name\":\"Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10001\",\"parent\":null,\"priority\":\"High\"}}",
+    "old_value": "{\"name\":\"none\",\"type\":\".none\",\"fields\":null}",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "9060aae0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "6773fba0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "connectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665392716,
+    692
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:32.781Z",
+  "version": "WzcwNywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2021-12-16T14:36:46.443Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2021-12-16T14:36:46.443Z\",\"pushed_by\":{\"username\":\"elastic\",\"full_name\":\"\",\"email\":\"\"},\"connector_name\":\"Jira\",\"external_id\":\"26225\",\"external_title\":\"CASES-229\",\"external_url\":\"https://example.com/browse/CASES-229\"}",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "988579d0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "6773fba0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "pushConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665406443,
+    687
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:36:46.445Z",
+  "version": "WzcwOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:37:46.863Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"name\":\"IBM\",\"type\":\".resilient\",\"fields\":{\"incidentTypes\":[\"17\",\"4\"],\"severityCode\":\"5\"}}",
+    "old_value": "{\"name\":\"Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10001\",\"parent\":null,\"priority\":\"High\"}}",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "bcb76020-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "b3214df0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "connectorId",
+      "type": "action"
+    },
+    {
+      "id": "6773fba0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "oldConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665466863,
+    716
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:37:47.170Z",
+  "version": "WzcyMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2021-12-16T14:37:53.016Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2021-12-16T14:37:53.016Z\",\"pushed_by\":{\"username\":\"elastic\",\"full_name\":\"\",\"email\":\"\"},\"connector_name\":\"IBM\",\"external_id\":\"17574\",\"external_title\":\"17574\",\"external_url\":\"https://example.com/#incidents/17574\"}",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "c0338e90-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "b3214df0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "pushConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665473016,
+    705
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:37:53.017Z",
+  "version": "WzcyMywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-12-16T14:38:01.895Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"name\":\"Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10001\",\"parent\":null,\"priority\":\"Lowest\"}}",
+    "old_value": "{\"name\":\"IBM\",\"type\":\".resilient\",\"fields\":{\"incidentTypes\":[\"17\",\"4\"],\"severityCode\":\"5\"}}",
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "c5b6d7a0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "6773fba0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "connectorId",
+      "type": "action"
+    },
+    {
+      "id": "b3214df0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "oldConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665481895,
+    712
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:38:02.266Z",
+  "version": "WzcyNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "and another comment!",
+    "created_at": "2021-12-16T14:38:09.649Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "owner": "securitySolution",
+    "pushed_at": null,
+    "pushed_by": null,
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "ca1d17f0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-comments": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665489649,
+    721
+  ],
+  "type": "cases-comments",
+  "updated_at": "2021-12-16T14:38:09.651Z",
+  "version": "WzcyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-12-16T14:38:09.649Z",
+    "action_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"and another comment!\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "securitySolution"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "ca8f61c0-5e7d-11ec-9ee9-cd64f0b77b3c",
+  "migrationVersion": {
+    "cases-user-actions": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "5257a000-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "ca1d17f0-5e7d-11ec-9ee9-cd64f0b77b3c",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1639665489649,
+    719
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-12-16T14:38:10.396Z",
+  "version": "WzcyOSwxXQ=="
+}

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -17,7 +17,7 @@ import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../observability/public';
 import { getNodeLogsUrl } from '../../../../../link_to';
 
 const TabComponent = (props: TabProps) => {

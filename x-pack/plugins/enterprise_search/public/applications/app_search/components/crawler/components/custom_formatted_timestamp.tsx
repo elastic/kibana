@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { FormattedDateTime } from '../../../utils/formatted_date_time';
 

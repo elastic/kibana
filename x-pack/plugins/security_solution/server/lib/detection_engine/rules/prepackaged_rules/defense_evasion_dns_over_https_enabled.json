@@ -2,7 +2,7 @@
   "author": [
     "Austin Songer"
   ],
-  "description": "Identifies when a user enables DNS-over-HTTPS. This can be used to hide internet activity or be used to hide the process of exfiltrating data. With this enabled organization will lose visibility into data such as query type, response and originating IP that are used to determine bad actors.",
+  "description": "Identifies when a user enables DNS-over-HTTPS. This can be used to hide internet activity or the process of exfiltrating data. With this enabled, an organization will lose visibility into data such as query type, response, and originating IP, which are used to determine bad actors.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

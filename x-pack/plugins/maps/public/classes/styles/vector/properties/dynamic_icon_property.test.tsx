@@ -73,14 +73,14 @@ describe('get mapbox icon-image expression (via internal _getMbIconImageExpressi
       const iconStyle = makeProperty({
         iconPaletteId: 'filledShapes',
       });
-      expect(iconStyle._getMbIconImageExpression(15)).toEqual([
+      expect(iconStyle._getMbIconImageExpression()).toEqual([
         'match',
         ['to-string', ['get', 'foobar']],
         'US',
-        'circle-15',
+        'circle',
         'CN',
-        'marker-15',
-        'square-15',
+        'marker',
+        'square',
       ]);
     });
 
@@ -92,12 +92,12 @@ describe('get mapbox icon-image expression (via internal _getMbIconImageExpressi
           { stop: 'MX', icon: 'marker' },
         ],
       });
-      expect(iconStyle._getMbIconImageExpression(15)).toEqual([
+      expect(iconStyle._getMbIconImageExpression()).toEqual([
         'match',
         ['to-string', ['get', 'foobar']],
         'MX',
-        'marker-15',
-        'circle-15',
+        'marker',
+        'circle',
       ]);
     });
   });

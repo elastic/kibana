@@ -1,0 +1,32 @@
+{
+  "type": "tcp",
+  "locations": [],
+  "enabled": true,
+  "schedule": {
+    "number": "3",
+    "unit": "m"
+  },
+  "service.name": "",
+  "tags": [],
+  "timeout": "16",
+  "__ui": {
+    "is_tls_enabled": true,
+    "is_zip_url_tls_enabled": false
+  },
+  "hosts": "example-host:40",
+  "proxy_url": "",
+  "proxy_use_local_resolver": false,
+  "check.receive": "",
+  "check.send": "",
+  "ssl.certificate_authorities": "",
+  "ssl.certificate": "",
+  "ssl.key": "",
+  "ssl.key_passphrase": "examplepassphrase",
+  "ssl.verification_mode": "full",
+  "ssl.supported_protocols": [
+    "TLSv1.1",
+    "TLSv1.3"
+  ],
+  "name": "Test HTTP Monitor 04",
+  "namespace": "testnamespace"
+}

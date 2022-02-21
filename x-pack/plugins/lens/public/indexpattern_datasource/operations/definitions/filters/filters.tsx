@@ -6,7 +6,7 @@
  */
 
 import './filters.scss';
-import React, { MouseEventHandler, useState } from 'react';
+import React, { useState } from 'react';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -101,6 +101,15 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
               language: 'kuery',
             },
           },
+          ...((
+            previousColumn as { params?: { secondaryFields?: string[] } }
+          ).params?.secondaryFields?.map((field) => ({
+            label: '',
+            input: {
+              query: `${field} : *`,
+              language: 'kuery',
+            },
+          })) ?? []),
         ],
       };
     }
@@ -172,7 +181,7 @@ export const FilterList = ({
   indexPattern: IndexPattern;
   defaultQuery: Filter;
 }) => {
-  const [isOpenByCreation, setIsOpenByCreation] = useState(false);
+  const [activeFilterId, setActiveFilterId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
   );
@@ -183,14 +192,19 @@ export const FilterList = ({
     setLocalFilters(updatedFilters);
   };
 
-  const onAddFilter = () =>
+  const onAddFilter = () => {
+    const newFilterId = generateId();
+
     updateFilters([
       ...localFilters,
       {
         ...defaultQuery,
-        id: generateId(),
+        id: newFilterId,
       },
     ]);
+
+    setActiveFilterId(newFilterId);
+  };
   const onRemoveFilter = (id: string) =>
     updateFilters(localFilters.filter((filter) => filter.id !== id));
 
@@ -206,6 +220,14 @@ export const FilterList = ({
           : filter
       )
     );
+
+  const changeActiveFilter = (filterId: string) => {
+    let newActiveFilterId = filterId;
+    if (activeFilterId === filterId) {
+      newActiveFilterId = ''; // toggle off
+    }
+    setActiveFilterId(newActiveFilterId);
+  };
 
   return (
     <>
@@ -235,17 +257,18 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
+                isOpen={filter.id === activeFilterId}
+                triggerClose={() => changeActiveFilter('')}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {
                   onChangeValue(f.id, f.input, f.label);
                 }}
-                Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                button={
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
-                    onClick={onClick}
+                    onClick={() => changeActiveFilter(filter.id)}
                     color={isInvalid ? 'danger' : 'text'}
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
@@ -253,7 +276,7 @@ export const FilterList = ({
                   >
                     {filter.label || filter.input.query || defaultLabel}
                   </EuiLink>
-                )}
+                }
               />
             </DraggableBucketContainer>
           );
@@ -262,7 +285,6 @@ export const FilterList = ({
       <NewBucketButton
         onClick={() => {
           onAddFilter();
-          setIsOpenByCreation(true);
         }}
         label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
           defaultMessage: 'Add a filter',

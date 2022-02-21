@@ -72,7 +72,7 @@ describe.each([
 
   it.each([
     ['header', 'testGrid-header'],
-    ['expand/collapse placeholder', 'testGrid-header-expandCollapsePlaceHolder'],
+    ['expand/collapse button', 'testGrid-header-expandCollapseAllButton'],
     ['name column', 'testGrid-header-layout-titleHolder'],
     ['description column', 'testGrid-header-layout-descriptionHolder'],
     ['description column', 'testGrid-header-layout-cardActionsPlaceholder'],
@@ -126,6 +126,57 @@ describe.each([
       render();
 
       expect(renderResult.getByTestId('card-1-criteriaConditions')).not.toBeNull();
+    });
+  });
+
+  describe('and when cards are expanded/collapsed all together', () => {
+    it('should call onExpandCollapse callback when expand all', () => {
+      render();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('testGrid-header-expandCollapseAllButton'));
+      });
+
+      expect(expandCollapseHandler).toHaveBeenCalledWith({
+        expanded: items,
+        collapsed: [],
+      });
+    });
+
+    it('should call onExpandCollapse callback when collapse all', () => {
+      cardComponentPropsProvider = jest.fn((item) => {
+        return {
+          'data-test-subj': `card-${items.indexOf(item as AnyArtifact)}`,
+          expanded: true,
+        };
+      });
+      render();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('testGrid-header-expandCollapseAllButton'));
+      });
+
+      expect(expandCollapseHandler).toHaveBeenCalledWith({
+        expanded: [],
+        collapsed: items,
+      });
+    });
+
+    it('should call onExpandCollapse callback when expand all if not all items are expanded', () => {
+      cardComponentPropsProvider = jest.fn((item) => {
+        const index = items.indexOf(item as AnyArtifact);
+        return {
+          'data-test-subj': `card-${index}`,
+          expanded: index === 0 ? false : true,
+        };
+      });
+      render();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('testGrid-header-expandCollapseAllButton'));
+      });
+
+      expect(expandCollapseHandler).toHaveBeenLastCalledWith({
+        expanded: items,
+        collapsed: [],
+      });
     });
   });
 });

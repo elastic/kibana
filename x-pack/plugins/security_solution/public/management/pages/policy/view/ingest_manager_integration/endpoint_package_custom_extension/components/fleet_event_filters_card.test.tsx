@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { FleetEventFiltersCard } from './fleet_event_filters_card';
 import * as reactTestingLibrary from '@testing-library/react';
 import { EventFiltersHttpService } from '../../../../../event_filters/service';
@@ -47,7 +47,8 @@ const mockTheme = getMockTheme({
   },
 });
 
-const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
+// Casting to unknown to avoid ts error because there is an static method in the class
+const EventFiltersHttpServiceMock = EventFiltersHttpService as unknown as jest.Mock;
 const useToastsMock = useToasts as jest.Mock;
 
 const summary: GetExceptionSummaryResponse = {
@@ -97,8 +98,8 @@ describe('Fleet event filters card', () => {
       };
     });
     const component = await renderComponent();
-    expect(component.getByText('Event Filters')).not.toBeNull();
-    expect(component.getByText('Manage event filters')).not.toBeNull();
+    expect(component.getByText('Event filters')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
@@ -109,8 +110,8 @@ describe('Fleet event filters card', () => {
       };
     });
     const component = await renderComponent();
-    expect(component.getByText('Event Filters')).not.toBeNull();
-    expect(component.getByText('Manage event filters')).not.toBeNull();
+    expect(component.getByText('Event filters')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
     await reactTestingLibrary.waitFor(() => expect(addDanger).toBeCalledTimes(1));
   });
 });

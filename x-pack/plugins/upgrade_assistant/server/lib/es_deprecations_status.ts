@@ -19,7 +19,7 @@ import {
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
 ): Promise<ESUpgradeStatus> {
-  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
+  const deprecations = await dataClient.asCurrentUser.migration.deprecations();
 
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
@@ -139,7 +139,7 @@ const getCorrectiveAction = (
   );
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
-  const requiresMlAction = /model snapshot/.test(message);
+  const requiresMlAction = /[Mm]odel snapshot/.test(message);
 
   if (requiresReindexAction) {
     return {

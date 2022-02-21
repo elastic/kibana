@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import SemVer from 'semver/classes/semver';
@@ -40,6 +40,11 @@ describe('WarningsFlyoutStep', () => {
     warnings: [] as ReindexWarning[],
     hideWarningsStep: jest.fn(),
     continueReindex: jest.fn(),
+    meta: {
+      indexName: 'foo',
+      reindexName: 'reindexed-foo',
+      aliases: [],
+    },
   };
 
   it('renders', () => {

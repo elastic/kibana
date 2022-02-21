@@ -10,8 +10,9 @@ import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { State, inputsModel, inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';

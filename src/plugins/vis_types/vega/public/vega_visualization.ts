@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
@@ -16,13 +16,14 @@ import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
 type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
   render(visData: VegaParser): Promise<void>;
+  resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
 
-export const createVegaVisualization = ({
-  core,
-  getServiceSettings,
-}: VegaVisualizationDependencies): VegaVisType =>
+export const createVegaVisualization = (
+  { core, getServiceSettings }: VegaVisualizationDependencies,
+  renderMode: RenderMode
+): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
@@ -64,6 +65,7 @@ export const createVegaVisualization = ({
 
     async _render(vegaParser: VegaParser) {
       if (vegaParser) {
+        vegaParser.searchAPI.inspectorAdapters?.vega.clearError();
         // New data received, rebuild the graph
         if (this.vegaView) {
           await this.vegaView.destroy();
@@ -82,6 +84,7 @@ export const createVegaVisualization = ({
           serviceSettings,
           filterManager,
           timefilter,
+          renderMode,
         };
 
         if (vegaParser.useMap) {
@@ -93,6 +96,10 @@ export const createVegaVisualization = ({
         }
         await this.vegaView?.init();
       }
+    }
+
+    async resize(dimensions?: { height: number; width: number }) {
+      return this.vegaView?.resize(dimensions);
     }
 
     destroy() {

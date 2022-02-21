@@ -8,7 +8,8 @@
 import React, { memo, useEffect, useMemo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
-import { PolicyConfig, DataStream } from './types';
+import { DataStream } from './types';
+import { PolicyConfig } from './types';
 import {
   usePolicyConfigContext,
   defaultHTTPSimpleFields,

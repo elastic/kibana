@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies suspicious process access events from unknown memory region. Endpoint security solutions usually hook userland Windows APIs in order to decide if the code that is being executed is malicious or not. It's possible to bypass hooked functions by writing malicious functions that call syscalls directly.",
+  "description": "Identifies suspicious process access events from an unknown memory region. Endpoint security solutions usually hook userland Windows APIs in order to decide if the code that is being executed is malicious or not. It's possible to bypass hooked functions by writing malicious functions that call syscalls directly.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -45,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

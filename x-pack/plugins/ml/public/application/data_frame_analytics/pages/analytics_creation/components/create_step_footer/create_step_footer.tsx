@@ -54,6 +54,8 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
   }, []);
 
   useEffect(() => {
+    if (showProgress === false) return;
+
     const interval = setInterval(async () => {
       try {
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
@@ -129,11 +131,11 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
             <EuiFlexItem grow={false}>
               <BackToListPanel />
             </EuiFlexItem>
-            {jobFinished === true && (
+            {jobFinished === true ? (
               <EuiFlexItem grow={false}>
                 <ViewResultsPanel jobId={jobId} analysisType={jobType} />
               </EuiFlexItem>
-            )}
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

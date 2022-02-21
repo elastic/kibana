@@ -1,13 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`is rendered 1`] = `
+exports[`<ExitFullScreenButton /> is rendered 1`] = `
 <ExitFullScreenButtonUi
   chrome={
     Object {
-      "setIsVisible": [Function],
+      "setIsVisible": [MockFunction] {
+        "calls": Array [
+          Array [
+            false,
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
     }
   }
-  onExitFullScreenMode={[Function]}
+  onExitFullScreenMode={[MockFunction]}
+  toggleChrome={true}
 >
   <div>
     <EuiScreenReaderOnly>
@@ -23,7 +36,7 @@ exports[`is rendered 1`] = `
         aria-label="Exit full screen mode"
         className="dshExitFullScreenButton"
         data-test-subj="exitFullScreenModeLogo"
-        onClick={[Function]}
+        onClick={[MockFunction]}
       >
         <EuiFlexGroup
           alignItems="center"

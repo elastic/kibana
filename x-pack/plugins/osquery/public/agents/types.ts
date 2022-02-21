@@ -14,8 +14,12 @@ interface BaseDataPoint {
   doc_count: number;
 }
 
+interface AggDataPoint extends estypes.AggregationsTermsAggregateBase {
+  buckets: AggregationDataPoint[];
+}
+
 export type AggregationDataPoint = BaseDataPoint & {
-  [key: string]: estypes.AggregationsTermsAggregate<AggregationDataPoint>;
+  [key: string]: AggDataPoint;
 };
 
 export interface Group {

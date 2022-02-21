@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { GenericMetricsChart } from '../../../../plugins/apm/server/lib/metrics/fetch_and_transform_metrics';
+import { GenericMetricsChart } from '../../../../plugins/apm/server/routes/metrics/fetch_and_transform_metrics';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -73,13 +73,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             it('has correct series overall values', () => {
               expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
                 .toMatchInline(`
-                              Array [
-                                0.714,
-                                0.3877,
-                                0.75,
-                                0.2543,
-                              ]
-                          `);
+                Array [
+                  0.714,
+                  0.3877,
+                  0.75,
+                  0.2543,
+                ]
+              `);
             });
           });
 
@@ -105,11 +105,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             it('has correct series overall values', () => {
               expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
                 .toMatchInline(`
-                              Array [
-                                0.722093920925555,
-                                0.718173546796348,
-                              ]
-                          `);
+                Array [
+                  0.722093920925555,
+                  0.718173546796348,
+                ]
+              `);
             });
           });
         });
@@ -375,11 +375,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             it('has correct series overall values', () => {
               expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
                 .toMatchInline(`
-                              Array [
-                                0,
-                                3,
-                              ]
-                          `);
+                Array [
+                  0,
+                  3,
+                ]
+              `);
             });
           });
 

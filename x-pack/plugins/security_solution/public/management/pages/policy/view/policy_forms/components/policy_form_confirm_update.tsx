@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer, EuiConfirmModal, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export const ConfirmUpdate = React.memo<{

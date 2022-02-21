@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 
 interface Props {

@@ -13,7 +13,7 @@ import {
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n/react';
+import { FormattedNumber } from '@kbn/i18n-react';
 
 import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { FormattedDateTime } from '../../../../utils/formatted_date_time';

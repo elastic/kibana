@@ -2,9 +2,9 @@
   "author": [
     "Austin Songer"
   ],
-  "description": "Identifies the deletion of Azure Kubernetes Pods. Adversary may delete a kubernetes pod to disrupt the normal behavior of the environment.",
+  "description": "Identifies the deletion of Azure Kubernetes Pods. Adversaries may delete a Kubernetes pod to disrupt the normal behavior of the environment.",
   "false_positives": [
-    "Pods may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Pods deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Pods may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Pods deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-25m",
   "index": [
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

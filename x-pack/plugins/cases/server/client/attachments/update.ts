@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { pick } from 'lodash/fp';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { checkEnabledCaseConnectorOrThrow, CommentableCase, createCaseError } from '../../common';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import {
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-  CaseResponse,
-  CommentPatchRequest,
-  CommentRequest,
-} from '../../../common';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { Actions, ActionTypes, CaseResponse, CommentPatchRequest } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
@@ -36,10 +30,6 @@ export interface UpdateArgs {
    * The full attachment request with the fields updated with appropriate values
    */
   updateRequest: CommentPatchRequest;
-  /**
-   * The ID of a sub case, if specified a sub case will be searched for to perform the attachment update instead of on a case
-   */
-  subCaseID?: string;
 }
 
 interface CombinedCaseParams {
@@ -49,52 +39,28 @@ interface CombinedCaseParams {
   caseID: string;
   logger: Logger;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
-  subCaseId?: string;
 }
 
-async function getCommentableCase({
+async function createCommentableCase({
   attachmentService,
   caseService,
   unsecuredSavedObjectsClient,
   caseID,
-  subCaseId,
   logger,
   lensEmbeddableFactory,
 }: CombinedCaseParams) {
-  if (subCaseId) {
-    const [caseInfo, subCase] = await Promise.all([
-      caseService.getCase({
-        unsecuredSavedObjectsClient,
-        id: caseID,
-      }),
-      caseService.getSubCase({
-        unsecuredSavedObjectsClient,
-        id: subCaseId,
-      }),
-    ]);
-    return new CommentableCase({
-      attachmentService,
-      caseService,
-      collection: caseInfo,
-      subCase,
-      unsecuredSavedObjectsClient,
-      logger,
-      lensEmbeddableFactory,
-    });
-  } else {
-    const caseInfo = await caseService.getCase({
-      unsecuredSavedObjectsClient,
-      id: caseID,
-    });
-    return new CommentableCase({
-      attachmentService,
-      caseService,
-      collection: caseInfo,
-      unsecuredSavedObjectsClient,
-      logger,
-      lensEmbeddableFactory,
-    });
-  }
+  const caseInfo = await caseService.getCase({
+    id: caseID,
+  });
+
+  return new CommentableCase({
+    attachmentService,
+    caseService,
+    caseInfo,
+    unsecuredSavedObjectsClient,
+    logger,
+    lensEmbeddableFactory,
+  });
 }
 
 /**
@@ -103,7 +69,7 @@ async function getCommentableCase({
  * @ignore
  */
 export async function update(
-  { caseID, subCaseID, updateRequest: queryParams }: UpdateArgs,
+  { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> {
   const {
@@ -118,8 +84,6 @@ export async function update(
   } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseID);
-
     const {
       id: queryCommentId,
       version: queryCommentVersion,
@@ -128,12 +92,11 @@ export async function update(
 
     decodeCommentRequest(queryRestAttributes);
 
-    const commentableCase = await getCommentableCase({
+    const commentableCase = await createCommentableCase({
       attachmentService,
       caseService,
       unsecuredSavedObjectsClient,
       caseID,
-      subCaseId: subCaseID,
       logger,
       lensEmbeddableFactory,
     });
@@ -160,9 +123,7 @@ export async function update(
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 
-    const saveObjType = subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-
-    const caseRef = myComment.references.find((c) => c.type === saveObjType);
+    const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
       throw Boom.notFound(
         `This comment ${queryCommentId} does not exist in ${commentableCase.id}).`
@@ -183,32 +144,21 @@ export async function update(
         user,
       });
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.update,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'update',
-          actionAt: updatedDate,
-          actionBy: user,
-          caseId: caseID,
-          subCaseId: subCaseID,
-          commentId: updatedComment.id,
-          fields: ['comment'],
-          // casting because typescript is complaining that it's not a Record<string, unknown> even though it is
-          newValue: queryRestAttributes as CommentRequest,
-          oldValue:
-            // We are interested only in ContextBasicRt attributes
-            // myComment.attribute contains also CommentAttributesBasicRt attributes
-            pick(Object.keys(queryRestAttributes), myComment.attributes),
-          owner: myComment.attributes.owner,
-        }),
-      ],
+      caseId: caseID,
+      attachmentId: updatedComment.id,
+      payload: { attachment: queryRestAttributes },
+      user,
+      owner: myComment.attributes.owner,
     });
 
     return await updatedCase.encode();
   } catch (error) {
     throw createCaseError({
-      message: `Failed to patch comment case id: ${caseID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to patch comment case id: ${caseID}: ${error}`,
       error,
       logger,
     });

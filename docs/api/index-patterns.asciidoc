@@ -1,6 +1,8 @@
 [[index-patterns-api]]
 == Index patterns APIs
 
+deprecated::[8.0.0,Use <<data-views-api>> instead.]
+
 experimental[] Manage {kib} index patterns.
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly

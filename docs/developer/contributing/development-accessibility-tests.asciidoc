@@ -90,7 +90,7 @@ Failures can seem confusing if you've never seen one before. Here is a breakdown
    [aria-hidden-focus]: Ensures aria-hidden elements do not contain focusable elements
      Help: https://dequeuniversity.com/rules/axe/3.5/aria-hidden-focus?application=axeAPI
      Elements:
-       - #example
+       - <span aria-hidden="true"><button type="button">Submit</button></span>
        at Accessibility.testAxeReport (test/accessibility/services/a11y/a11y.ts:90:15)
        at Accessibility.testAppSnapshot (test/accessibility/services/a11y/a11y.ts:58:18)
        at process._tickCallback (internal/process/next_tick.js:68:7)
@@ -100,5 +100,5 @@ Failures can seem confusing if you've never seen one before. Here is a breakdown
 * "Dashboard" and "create dashboard button" are the names of the test suite and specific test that failed.
 * Always in brackets, "[aria-hidden-focus]" is the name of the axe rule that failed, followed by a short description.
 * "Help: <url>" links to the axe documentation for that rule, including severity, remediation tips, and good and bad code examples.
-* "Elements:"  points to where in the DOM the failure originated (using CSS selector syntax). In this example, the problem came from an element with the ID `example`. If the selector is too complicated to find the source of the problem, use the browser plugins mentioned earlier to locate it. If you have a general idea where the issue is coming from, you can also try adding unique IDs to the page to narrow down the location.
+* "Elements:"  points to where in the DOM the failure originated (using HTML syntax). In this example, the problem came from a span with the `aria-hidden="true"` attribute and a nested `<button>` tag. If the selector is too complicated to find the source of the problem, use the browser plugins mentioned earlier to locate it. If you have a general idea where the issue is coming from, you can also try adding unique IDs to the page to narrow down the location.
 * The stack trace points to the internals of axe. The stack trace is there in case the test failure is a bug in axe and not in your code, although this is unlikely.

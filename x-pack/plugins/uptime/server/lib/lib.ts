@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  ISavedObjectsRepository,
-} from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
-import { savedObjectsAdapter } from './saved_objects';
+import { savedObjectsAdapter } from './saved_objects/saved_objects';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { RequestStatus } from '../../../../../src/plugins/inspector';
 import { getInspectResponse } from '../../../observability/server';
@@ -57,7 +52,7 @@ export function createUptimeESClient({
 }: {
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   return {
     baseESClient: esClient,
@@ -79,7 +74,7 @@ export function createUptimeESClient({
       let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
       try {
-        res = await esClient.search(esParams);
+        res = await esClient.search(esParams, { meta: true });
         esRequestStatus = RequestStatus.OK;
       } catch (e) {
         esError = e;
@@ -122,7 +117,7 @@ export function createUptimeESClient({
       const startTime = process.hrtime();
 
       try {
-        res = await esClient.count(esParams);
+        res = await esClient.count(esParams, { meta: true });
       } catch (e) {
         esError = e;
       }

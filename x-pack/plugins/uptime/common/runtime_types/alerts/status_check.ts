@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-
 export const StatusCheckFiltersType = t.type({
   'monitor.type': t.array(t.string),
   'observer.geo.name': t.array(t.string),

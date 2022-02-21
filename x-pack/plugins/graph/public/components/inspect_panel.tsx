@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 

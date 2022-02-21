@@ -9,12 +9,13 @@ import './_time_range_selector.scss';
 import PropTypes from 'prop-types';
 import React, { Component, useState, useEffect } from 'react';
 
-import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
+import { EuiDatePicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
+import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
 
 export class TimeRangeSelector extends Component {
   constructor(props) {
@@ -162,6 +163,24 @@ export class TimeRangeSelector extends Component {
     const { startItems, endItems } = this.getTabItems();
     return (
       <div className="time-range-selector">
+        {this.props.hasManagedJob === true && this.state.endTab !== 0 ? (
+          <>
+            <ManagedJobsWarningCallout
+              jobsCount={this.props.jobsCount}
+              message={i18n.translate(
+                'xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription',
+                {
+                  defaultMessage:
+                    '{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} with a specific end time might impact other parts of the product.',
+                  values: {
+                    jobsCount: this.props.jobsCount,
+                  },
+                }
+              )}
+            />
+            <EuiSpacer />
+          </>
+        ) : null}
         <div className="time-range-section-container">
           <TabStack
             title={

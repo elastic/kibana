@@ -27,6 +27,10 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9900 !important;
     min-width: 24px;
   }
+  .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
+    // needs to appear under modal
+    z-index: 5900 !important;
+  }
   .euiToolTip {
     z-index: 9950 !important;
   }

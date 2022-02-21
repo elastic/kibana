@@ -22,6 +22,7 @@ import { hostsKpiAuthentications, hostsKpiAuthenticationsEntities } from './kpi/
 import { hostsKpiHosts, hostsKpiHostsEntities } from './kpi/hosts';
 import { hostsKpiUniqueIps, hostsKpiUniqueIpsEntities } from './kpi/unique_ips';
 import { riskScore } from './risk_score';
+import { hostsKpiRiskyHosts } from './kpi/risky_hosts';
 
 export const hostsFactory: Record<
   HostsQueries | HostsKpiQueries,
@@ -40,6 +41,7 @@ export const hostsFactory: Record<
   [HostsKpiQueries.kpiAuthenticationsEntities]: hostsKpiAuthenticationsEntities,
   [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
   [HostsKpiQueries.kpiHostsEntities]: hostsKpiHostsEntities,
+  [HostsKpiQueries.kpiRiskyHosts]: hostsKpiRiskyHosts,
   [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
   [HostsKpiQueries.kpiUniqueIpsEntities]: hostsKpiUniqueIpsEntities,
 };

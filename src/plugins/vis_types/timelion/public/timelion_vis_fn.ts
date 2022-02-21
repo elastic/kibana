@@ -8,14 +8,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
-import {
-  getTimelionRequestHandler,
-  TimelionSuccessResponse,
-} from './helpers/timelion_request_handler';
+import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
-import { KibanaContext, Filter, Query, TimeRange } from '../../../data/public';
+import { KibanaContext, Query, TimeRange } from '../../../data/public';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
@@ -28,6 +26,7 @@ export interface TimelionRenderValue {
 export interface TimelionVisParams {
   expression: string;
   interval: string;
+  ariaLabel?: string;
 }
 
 export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -58,11 +57,26 @@ export const getTimelionVisualizationConfig = (
       default: 'auto',
       help: '',
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('timelion.function.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the timelion',
+      }),
+      required: false,
+    },
   },
-  async fn(input, args, { getSearchSessionId, getExecutionContext }) {
+  async fn(input, args, { getSearchSessionId, getExecutionContext, variables }) {
+    const { getTimelionRequestHandler } = await import('./async_services');
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
-    const visParams = { expression: args.expression, interval: args.interval };
+    const visParams = {
+      expression: args.expression,
+      interval: args.interval,
+      ariaLabel:
+        args.ariaLabel ??
+        (variables?.embeddableTitle as string) ??
+        getExecutionContext?.()?.description,
+    };
 
     const response = await timelionRequestHandler({
       timeRange: get(input, 'timeRange') as TimeRange,

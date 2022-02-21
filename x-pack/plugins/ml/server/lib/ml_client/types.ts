@@ -48,7 +48,6 @@ export type MlClientParams =
   | Parameters<MlClient['getRecords']>
   | Parameters<MlClient['getTrainedModels']>
   | Parameters<MlClient['getTrainedModelsStats']>
-  | Parameters<MlClient['getTrainedModelDeploymentStats']>
   | Parameters<MlClient['startTrainedModelDeployment']>
   | Parameters<MlClient['stopTrainedModelDeployment']>
   | Parameters<MlClient['info']>

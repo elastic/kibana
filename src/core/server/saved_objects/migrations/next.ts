@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type {
   AllActionStates,
   ReindexSourceToTempOpenPit,
@@ -53,7 +52,7 @@ type ActionMap = ReturnType<typeof nextActionMap>;
  * E.g. given 'INIT', provides the response type of the action triggered by
  * `next` in the 'INIT' control state.
  */
-export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
+export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 

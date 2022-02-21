@@ -10,9 +10,9 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
+  FieldSpec,
 } from '../../../../../../src/plugins/data/common';
 import type { DocValueFields, Maybe } from '../common';
-import { FieldSpec } from '../../../../../../src/plugins/data/common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 
-import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common';
+import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
@@ -265,19 +265,21 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
-                <EuiSelect
-                  fullWidth
-                  data-test-subj="subcategorySelect"
-                  options={subcategoryOptions}
-                  // Needs an empty string instead of undefined to select the blank option when changing categories
-                  value={subcategory ?? ''}
-                  isLoading={isLoadingChoices}
-                  disabled={isLoadingChoices}
-                  hasNoInitialSelection
-                  onChange={(e) => onChangeCb('subcategory', e.target.value)}
-                />
-              </EuiFormRow>
+              {subcategoryOptions?.length > 0 ? (
+                <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
+                  <EuiSelect
+                    fullWidth
+                    data-test-subj="subcategorySelect"
+                    options={subcategoryOptions}
+                    // Needs an empty string instead of undefined to select the blank option when changing categories
+                    value={subcategory ?? ''}
+                    isLoading={isLoadingChoices}
+                    disabled={isLoadingChoices}
+                    hasNoInitialSelection
+                    onChange={(e) => onChangeCb('subcategory', e.target.value)}
+                  />
+                </EuiFormRow>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
@@ -296,6 +298,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
     </>
   );
 };
+ServiceNowSIRFieldsComponent.displayName = 'ServiceNowSIRFieldsComponent';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowSIRFieldsComponent as default };

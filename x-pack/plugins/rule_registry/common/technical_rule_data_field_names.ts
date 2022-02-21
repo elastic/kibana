@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from '@kbn/rule-data-utils/technical_field_names';
-export * from '@kbn/rule-data-utils/alerts_as_data_status';
-export * from '@kbn/rule-data-utils/alerts_as_data_rbac';
+export * from '@kbn/rule-data-utils';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
 import { modifyUrl } from '@kbn/std';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 

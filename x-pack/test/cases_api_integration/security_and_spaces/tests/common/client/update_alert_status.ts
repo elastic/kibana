@@ -15,7 +15,11 @@ import {
   deleteAllCaseItems,
   getSignalsWithES,
 } from '../../../../common/lib/utils';
-import { CasesResponse, CaseStatuses, CommentType } from '../../../../../../plugins/cases/common';
+import {
+  CasesResponse,
+  CaseStatuses,
+  CommentType,
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

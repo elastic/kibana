@@ -314,16 +314,37 @@ export const MOBILE_APP = i18n.translate('xpack.observability.expView.fieldLabel
   defaultMessage: 'Mobile App',
 });
 
-export const MEMORY_USAGE = i18n.translate(
+export const SYSTEM_MEMORY_USAGE = i18n.translate(
   'xpack.observability.expView.fieldLabels.mobile.memoryUsage',
   {
-    defaultMessage: 'Memory Usage',
+    defaultMessage: 'System memory usage',
   }
 );
 
 export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
-  defaultMessage: 'CPU Usage',
+  defaultMessage: 'CPU usage',
 });
+
+export const SYSTEM_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.system',
+  {
+    defaultMessage: 'System CPU usage',
+  }
+);
+
+export const DOCKER_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.docker',
+  {
+    defaultMessage: 'Docker CPU usage',
+  }
+);
+
+export const K8S_POD_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.k8sDocker',
+  {
+    defaultMessage: 'K8s pod CPU usage',
+  }
+);
 
 export const TRANSACTIONS_PER_MINUTE = i18n.translate(
   'xpack.observability.expView.fieldLabels.transactionPerMinute',

@@ -42,57 +42,70 @@ exports[`policy table shows empty state when there are no policies 1`] = `
   role="main"
 >
   <div
-    class="euiEmptyPrompt"
+    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
   >
-    <span
-      color="subdued"
-      data-euiicon-type="managementApp"
-    />
     <div
-      class="euiSpacer euiSpacer--m"
-    />
-    <h1
-      class="euiTitle euiTitle--medium"
-    >
-      Create your first index lifecycle policy
-    </h1>
-    <span
-      class="euiTextColor euiTextColor--subdued"
+      class="euiEmptyPrompt__main"
     >
       <div
-        class="euiSpacer euiSpacer--m"
-      />
-      <div
-        class="euiText euiText--medium"
-      >
-        <p>
-           An index lifecycle policy helps you manage your indices as they age.
-        </p>
-      </div>
-    </span>
-    <div
-      class="euiSpacer euiSpacer--l"
-    />
-    <button
-      class="euiButton euiButton--primary euiButton--fill"
-      data-test-subj="createPolicyButton"
-      type="button"
-    >
-      <span
-        class="euiButtonContent euiButton__content"
+        class="euiEmptyPrompt__icon"
       >
         <span
-          class="euiButtonContent__icon"
-          color="inherit"
-          data-euiicon-type="plusInCircle"
+          color="subdued"
+          data-euiicon-type="managementApp"
         />
-        <span
-          class="euiButton__text"
+      </div>
+      <div
+        class="euiEmptyPrompt__content"
+      >
+        <div
+          class="euiEmptyPrompt__contentInner"
         >
-          Create policy
-        </span>
-      </span>
-    </button>
+          <h1
+            class="euiTitle euiTitle--medium"
+          >
+            Create your first index lifecycle policy
+          </h1>
+          <span
+            class="euiTextColor euiTextColor--subdued"
+          >
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiText euiText--medium"
+            >
+              <p>
+                 An index lifecycle policy helps you manage your indices as they age.
+              </p>
+            </div>
+          </span>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <button
+            class="euiButton euiButton--primary euiButton--fill"
+            data-test-subj="createPolicyButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="plusInCircle"
+              />
+              <span
+                class="euiButton__text"
+              >
+                Create policy
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

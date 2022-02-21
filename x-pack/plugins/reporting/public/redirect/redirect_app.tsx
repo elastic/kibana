@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import type { ScopedHistory } from 'src/core/public';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
 import { LocatorParams } from '../../common/types';
@@ -24,6 +25,7 @@ import './redirect_app.scss';
 interface Props {
   apiClient: ReportingAPIClient;
   history: ScopedHistory;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
@@ -39,7 +41,7 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
+export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMode, share }) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {
@@ -53,9 +55,9 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
           const result = await apiClient.getInfo(jobId as string);
           locatorParams = result?.locatorParams?.[0];
         } else {
-          locatorParams = (window as unknown as Record<string, LocatorParams>)[
+          locatorParams = screenshotMode.getScreenshotContext<LocatorParams>(
             REPORTING_REDIRECT_LOCATOR_STORE_KEY
-          ];
+          );
         }
 
         if (!locatorParams) {
@@ -70,7 +72,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
         throw e;
       }
     })();
-  }, [share, apiClient]);
+  }, [apiClient, screenshotMode, share]);
 
   return (
     <div className="reportingRedirectApp__interstitialPage">

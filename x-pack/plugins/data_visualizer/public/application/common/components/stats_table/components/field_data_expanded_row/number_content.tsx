@@ -15,7 +15,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
@@ -127,48 +127,50 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="secondary"
+          barColor="success"
           compressed={true}
           onAddFilter={onAddFilter}
         />
       )}
-      {distribution && (
-        <ExpandedRowPanel
-          dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
-          className="dvPanel__wrapper"
-          grow={false}
-        >
-          <EuiFlexItem grow={false}>
-            <ExpandedRowFieldHeader>
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.distributionTitle"
-                defaultMessage="Distribution"
-              />
-            </ExpandedRowFieldHeader>
-          </EuiFlexItem>
+      {distribution &&
+        stats.distribution?.percentiles.length !== undefined &&
+        stats.distribution?.percentiles.length > 2 && (
+          <ExpandedRowPanel
+            dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
+            className="dvPanel__wrapper"
+            grow={false}
+          >
+            <EuiFlexItem grow={false}>
+              <ExpandedRowFieldHeader>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.distributionTitle"
+                  defaultMessage="Distribution"
+                />
+              </ExpandedRowFieldHeader>
+            </EuiFlexItem>
 
-          <EuiFlexItem className={'metricDistributionChartContainer'}>
-            <MetricDistributionChart
-              width={METRIC_DISTRIBUTION_CHART_WIDTH}
-              height={METRIC_DISTRIBUTION_CHART_HEIGHT}
-              chartData={distributionChartData}
-              fieldFormat={fieldFormat}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" textAlign={'center'}>
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
-                defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
-                values={{
-                  minPercent: numberAsOrdinal(distribution.minPercentile),
-                  maxPercent: numberAsOrdinal(distribution.maxPercentile),
-                }}
+            <EuiFlexItem className={'metricDistributionChartContainer'}>
+              <MetricDistributionChart
+                width={METRIC_DISTRIBUTION_CHART_WIDTH}
+                height={METRIC_DISTRIBUTION_CHART_HEIGHT}
+                chartData={distributionChartData}
+                fieldFormat={fieldFormat}
               />
-            </EuiText>
-          </EuiFlexItem>
-        </ExpandedRowPanel>
-      )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" textAlign={'center'}>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
+                  defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
+                  values={{
+                    minPercent: numberAsOrdinal(distribution.minPercentile),
+                    maxPercent: numberAsOrdinal(distribution.maxPercentile),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </ExpandedRowPanel>
+        )}
     </ExpandedRowContent>
   );
 };

@@ -245,27 +245,6 @@ describe('ConnectorsDropdown', () => {
     ).toBeTruthy();
   });
 
-  test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {
-    const newWrapper = mount(
-      <ConnectorsDropdown
-        {...props}
-        selectedConnector={'servicenow-1'}
-        hideConnectorServiceNowSir={true}
-      />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
-    const selectProps = newWrapper.find(EuiSuperSelect).props();
-    const options = selectProps.options as Array<{ 'data-test-subj': string }>;
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-1')
-    ).toBeTruthy();
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
-    ).toBeFalsy();
-  });
-
   test('it does not throw when accessing the icon if the connector type is not registered', () => {
     expect(() =>
       mount(

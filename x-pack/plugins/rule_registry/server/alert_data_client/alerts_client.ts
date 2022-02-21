@@ -9,19 +9,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import type {
-  getEsQueryConfig as getEsQueryConfigTyped,
-  getSafeSortIds as getSafeSortIdsTyped,
-  isValidFeatureId as isValidFeatureIdTyped,
+import {
+  getEsQueryConfig,
+  getSafeSortIds,
+  isValidFeatureId,
   STATUS_VALUES,
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import {
-  getEsQueryConfig as getEsQueryConfigNonTyped,
-  getSafeSortIds as getSafeSortIdsNonTyped,
-  isValidFeatureId as isValidFeatureIdNonTyped,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   InlineScript,
@@ -46,10 +40,6 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 
-const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
-const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
-const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
-
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
   [K in Props]-?: NonNullable<Obj[K]>;
@@ -69,6 +59,7 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
       source?.fields?.[SPACE_IDS][0] != null)
   );
 };
+
 export interface ConstructorOptions {
   logger: Logger;
   authorization: PublicMethodsOf<AlertingAuthorization>;
@@ -277,16 +268,16 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
+      if (!result?.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
       }
 
-      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
-        await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.body.hits.hits.map((item) =>
+        result?.hits.hits.map((item) =>
           this.auditLogger?.log(
             alertAuditEvent({
               action: operationAlertAuditActionMap[operation],
@@ -297,7 +288,7 @@ export class AlertsClient {
         );
       }
 
-      return result.body;
+      return result;
     } catch (error) {
       const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
@@ -329,7 +320,7 @@ export class AlertsClient {
         },
       });
 
-      await this.ensureAllAuthorized(mgetRes.body.docs, operation);
+      await this.ensureAllAuthorized(mgetRes.docs, operation);
 
       for (const id of ids) {
         this.auditLogger?.log(
@@ -341,7 +332,8 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+      const bulkUpdateRequest = mgetRes.docs.flatMap((item) => {
+        // @ts-expect-error doesn't handle error branch in MGetResponse
         const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
           {
@@ -534,7 +526,7 @@ export class AlertsClient {
         alert?.hits.hits[0]._source,
         status as STATUS_VALUES
       );
-      const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
+      const response = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
         index,

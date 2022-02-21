@@ -21,8 +21,8 @@ describe('ServiceAlertTrigger', () => {
         <ServiceAlertTrigger
           defaults={{}}
           fields={[null]}
-          setAlertParams={() => {}}
-          setAlertProperty={() => {}}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
         />,
         {
           wrapper: Wrapper,

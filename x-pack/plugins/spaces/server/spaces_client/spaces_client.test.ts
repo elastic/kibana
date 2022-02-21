@@ -77,7 +77,7 @@ describe('#getAll', () => {
     } as any);
     const mockConfig = createMockConfig({ maxSpaces: 1234 });
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const actualSpaces = await client.getAll();
 
     expect(actualSpaces).toEqual(expectedSpaces);
@@ -90,7 +90,10 @@ describe('#getAll', () => {
   });
 
   test(`throws Boom.badRequest when an invalid purpose is provided'`, async () => {
-    const client = new SpacesClient(null as any, null as any, null as any);
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    const mockConfig = createMockConfig();
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"unsupported space purpose: invalid_purpose"`);
@@ -122,7 +125,7 @@ describe('#get', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const id = savedObject.id;
     const actualSpace = await client.get(id);
 
@@ -181,7 +184,7 @@ describe('#create', () => {
 
     const mockConfig = createMockConfig({ maxSpaces });
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
     const actualSpace = await client.create(spaceToCreate);
 
@@ -207,7 +210,7 @@ describe('#create', () => {
 
     const mockConfig = createMockConfig({ maxSpaces });
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
     expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
@@ -267,7 +270,7 @@ describe('#update', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const id = savedObject.id;
     const actualSpace = await client.update(id, spaceToUpdate);
 
@@ -309,7 +312,7 @@ describe('#delete', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(reservedSavedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
     expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The foo space cannot be deleted because it is reserved."`
@@ -324,7 +327,7 @@ describe('#delete', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
     await client.delete(id);
 
@@ -339,7 +342,12 @@ describe('#delete', () => {
       const mockConfig = createMockConfig();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
 
-      const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        []
+      );
       const aliases = [
         { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
         { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },

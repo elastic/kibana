@@ -18,7 +18,7 @@ import type { ChangeEvent } from 'react';
 import React, { Component, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';

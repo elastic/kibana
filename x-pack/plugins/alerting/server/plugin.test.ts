@@ -16,7 +16,7 @@ import { KibanaRequest } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
 import { AlertsConfig } from './config';
-import { AlertType } from './types';
+import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 
@@ -99,7 +99,7 @@ describe('Alerting Plugin', () => {
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
+      const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
@@ -126,7 +126,7 @@ describe('Alerting Plugin', () => {
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleAlertType,
+            ...sampleRuleType,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             minimumLicenseRequired: 'foo' as any,
           })
@@ -135,52 +135,52 @@ describe('Alerting Plugin', () => {
 
       it('should not throw when license type is gold', async () => {
         setup.registerType({
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'gold',
         });
       });
 
       it('should not throw when license type is basic', async () => {
         setup.registerType({
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
         });
       });
 
       it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
 
       it('should apply value for ruleTaskTimeout if specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           ruleTaskTimeout: '20h',
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('20h');
       });
 
       it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
       });
 
       it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           cancelAlertsOnRuleTimeout: false,
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });

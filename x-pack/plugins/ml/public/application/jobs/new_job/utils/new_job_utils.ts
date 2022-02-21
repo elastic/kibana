@@ -12,7 +12,7 @@ import {
   toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
-  IndexPatternBase,
+  DataViewBase,
 } from '@kbn/es-query';
 import { IUiSettingsClient } from 'kibana/public';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
@@ -38,7 +38,7 @@ export function getDefaultDatafeedQuery() {
 
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
-  indexPattern: IndexPatternBase | undefined,
+  indexPattern: DataViewBase | undefined,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs

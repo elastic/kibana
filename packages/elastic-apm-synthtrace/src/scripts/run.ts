@@ -7,136 +7,115 @@
  */
 import datemath from '@elastic/datemath';
 import yargs from 'yargs/yargs';
-import { cleanWriteTargets } from '../lib/utils/clean_write_targets';
+import { Argv } from 'yargs';
 import { intervalToMs } from './utils/interval_to_ms';
-import { getCommonResources } from './utils/get_common_resources';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
 import { startLiveDataUpload } from './utils/start_live_data_upload';
+import { parseRunCliFlags } from './utils/parse_run_cli_flags';
+import { getCommonServices } from './utils/get_common_services';
+
+function options(y: Argv) {
+  return y
+    .positional('file', {
+      describe: 'File that contains the trace scenario',
+      demandOption: true,
+      string: true,
+    })
+    .option('target', {
+      describe: 'Elasticsearch target, including username/password',
+      demandOption: true,
+      string: true,
+    })
+    .option('from', {
+      description: 'The start of the time window',
+    })
+    .option('to', {
+      description: 'The end of the time window',
+    })
+    .option('live', {
+      description: 'Generate and index data continuously',
+      boolean: true,
+    })
+    .option('clean', {
+      describe: 'Clean APM indices before indexing new data',
+      default: false,
+      boolean: true,
+    })
+    .option('workers', {
+      describe: 'Amount of Node.js worker threads',
+      default: 5,
+    })
+    .option('bucketSize', {
+      describe: 'Size of bucket for which to generate data',
+      default: '15m',
+    })
+    .option('interval', {
+      describe: 'The interval at which to index data',
+      default: '10s',
+    })
+    .option('clientWorkers', {
+      describe: 'Number of concurrently connected ES clients',
+      default: 5,
+    })
+    .option('batchSize', {
+      describe: 'Number of documents per bulk index request',
+      default: 1000,
+    })
+    .option('logLevel', {
+      describe: 'Log level',
+      default: 'info',
+    })
+    .option('writeTarget', {
+      describe: 'Target to index',
+      string: true,
+    })
+    .option('scenarioOpts', {
+      describe: 'Options specific to the scenario',
+      coerce: (arg) => {
+        return arg as Record<string, any> | undefined;
+      },
+    })
+    .conflicts('to', 'live');
+}
+
+export type RunCliFlags = ReturnType<typeof options>['argv'];
 
 yargs(process.argv.slice(2))
-  .command(
-    '*',
-    'Generate data and index into Elasticsearch',
-    (y) => {
-      return y
-        .positional('file', {
-          describe: 'File that contains the trace scenario',
-          demandOption: true,
-          string: true,
-        })
-        .option('target', {
-          describe: 'Elasticsearch target, including username/password',
-          demandOption: true,
-          string: true,
-        })
-        .option('from', {
-          description: 'The start of the time window',
-        })
-        .option('to', {
-          description: 'The end of the time window',
-        })
-        .option('live', {
-          description: 'Generate and index data continuously',
-          boolean: true,
-        })
-        .option('clean', {
-          describe: 'Clean APM indices before indexing new data',
-          default: false,
-          boolean: true,
-        })
-        .option('workers', {
-          describe: 'Amount of Node.js worker threads',
-          default: 5,
-        })
-        .option('bucketSize', {
-          describe: 'Size of bucket for which to generate data',
-          default: '15m',
-        })
-        .option('interval', {
-          describe: 'The interval at which to index data',
-          default: '10s',
-        })
-        .option('clientWorkers', {
-          describe: 'Number of concurrently connected ES clients',
-          default: 5,
-        })
-        .option('batchSize', {
-          describe: 'Number of documents per bulk index request',
-          default: 1000,
-        })
-        .option('logLevel', {
-          describe: 'Log level',
-          default: 'info',
-        })
-        .conflicts('to', 'live');
-    },
-    async (argv) => {
-      const file = String(argv.file || argv._[0]);
+  .command('*', 'Generate data and index into Elasticsearch', options, async (argv) => {
+    const runOptions = parseRunCliFlags(argv);
 
-      const { target, workers, clean, clientWorkers, batchSize } = argv;
+    const { logger } = getCommonServices(runOptions);
 
-      const { scenario, intervalInMs, bucketSizeInMs, logger, writeTargets, client, logLevel } =
-        await getCommonResources({
-          ...argv,
-          file,
-        });
+    const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
+    const from = argv.from
+      ? datemath.parse(String(argv.from))!.valueOf()
+      : to - intervalToMs('15m');
 
-      if (clean) {
-        await cleanWriteTargets({ writeTargets, client, logger });
-      }
+    const live = argv.live;
 
-      const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
-      const from = argv.from
-        ? datemath.parse(String(argv.from))!.valueOf()
-        : to - intervalToMs('15m');
+    logger.info(
+      `Starting data generation\n: ${JSON.stringify(
+        {
+          ...runOptions,
+          from: new Date(from).toISOString(),
+          to: new Date(to).toISOString(),
+        },
+        null,
+        2
+      )}`
+    );
 
-      const live = argv.live;
+    startHistoricalDataUpload({
+      ...runOptions,
+      from,
+      to,
+    });
 
-      logger.info(
-        `Starting data generation\n: ${JSON.stringify(
-          {
-            intervalInMs,
-            bucketSizeInMs,
-            workers,
-            target,
-            writeTargets,
-            from: new Date(from).toISOString(),
-            to: new Date(to).toISOString(),
-            live,
-          },
-          null,
-          2
-        )}`
-      );
-
-      startHistoricalDataUpload({
-        from,
-        to,
-        file,
-        bucketSizeInMs,
-        client,
-        workers,
-        clientWorkers,
-        batchSize,
-        writeTargets,
-        logger,
-        logLevel,
-        target,
+    if (live) {
+      startLiveDataUpload({
+        ...runOptions,
+        start: to,
       });
-
-      if (live) {
-        startLiveDataUpload({
-          bucketSizeInMs,
-          client,
-          intervalInMs,
-          logger,
-          scenario,
-          start: to,
-          clientWorkers,
-          batchSize,
-          writeTargets,
-        });
-      }
     }
-  )
+  })
   .parse();

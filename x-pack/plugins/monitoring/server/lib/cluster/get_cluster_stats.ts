@@ -14,11 +14,10 @@ import { getClustersStats } from './get_clusters_stats';
  * This will fetch the cluster stats and cluster state as a single object for the cluster specified by the {@code req}.
  *
  * @param {Object} req The incoming user's request
- * @param {String} esIndexPattern The Elasticsearch index pattern
  * @param {String} clusterUuid The requested cluster's UUID
  * @return {Promise} The object cluster response.
  */
-export function getClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
+export function getClusterStats(req: LegacyRequest, clusterUuid: string) {
   if (!clusterUuid) {
     throw badRequest(
       i18n.translate('xpack.monitoring.clusterStats.uuidNotSpecifiedErrorMessage', {
@@ -29,7 +28,7 @@ export function getClusterStats(req: LegacyRequest, esIndexPattern: string, clus
   }
 
   // passing clusterUuid so `get_clusters` will filter for single cluster
-  return getClustersStats(req, esIndexPattern, clusterUuid).then((clusters) => {
+  return getClustersStats(req, clusterUuid).then((clusters) => {
     if (!clusters || clusters.length === 0) {
       throw notFound(
         i18n.translate('xpack.monitoring.clusterStats.uuidNotFoundErrorMessage', {

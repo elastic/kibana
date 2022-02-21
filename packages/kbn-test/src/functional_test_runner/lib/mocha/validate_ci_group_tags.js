@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 /**
  * Traverse the suites configured and ensure that each suite has no more than one ciGroup assigned

@@ -6,23 +6,20 @@
  */
 
 import { useEffect } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
-
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-
-import type { TransactionDistributionChartData } from '../../../shared/charts/transaction_distribution_chart';
-
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
 import { useFetchParams } from '../../correlations/use_fetch_params';
+import { getTransactionDistributionChartData } from '../../correlations/get_transaction_distribution_chart_data';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export const useTransactionDistributionChartData = () => {
   const params = useFetchParams();
+  const euiTheme = useTheme();
 
   const {
     core: { notifications },
@@ -40,8 +37,7 @@ export const useTransactionDistributionChartData = () => {
         params.start &&
         params.end
       ) {
-        return callApmApi({
-          endpoint: 'POST /internal/apm/latency/overall_distribution',
+        return callApmApi('POST /internal/apm/latency/overall_distribution', {
           params: {
             body: {
               ...params,
@@ -87,8 +83,7 @@ export const useTransactionDistributionChartData = () => {
           params.start &&
           params.end
         ) {
-          return callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
+          return callApmApi('POST /internal/apm/latency/overall_distribution', {
             params: {
               body: {
                 ...params,
@@ -122,28 +117,11 @@ export const useTransactionDistributionChartData = () => {
     }
   }, [errorHistogramError, notifications.toasts]);
 
-  const transactionDistributionChartData: TransactionDistributionChartData[] =
-    [];
-
-  if (Array.isArray(overallLatencyHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
-      histogram: overallLatencyHistogram,
-    });
-  }
-
-  if (Array.isArray(errorHistogramData.overallHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
-        { defaultMessage: 'Failed transactions' }
-      ),
-      histogram: errorHistogramData.overallHistogram,
-    });
-  }
+  const transactionDistributionChartData = getTransactionDistributionChartData({
+    euiTheme,
+    allTransactionsHistogram: overallLatencyHistogram,
+    failedTransactionsHistogram: errorHistogramData.overallHistogram,
+  });
 
   return {
     chartData: transactionDistributionChartData,

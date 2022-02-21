@@ -22,13 +22,8 @@ import { xyChart } from '../common/expressions/xy_chart/xy_chart';
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 
-import { heatmap } from '../common/expressions/heatmap_chart/heatmap_chart';
-import { heatmapGridConfig } from '../common/expressions/heatmap_chart/heatmap_grid';
-import { heatmapLegendConfig } from '../common/expressions/heatmap_chart/heatmap_legend';
-
 import { mergeTables } from '../common/expressions/merge_tables';
 import { renameColumns } from '../common/expressions/rename_columns/rename_columns';
-import { pie } from '../common/expressions/pie_chart/pie_chart';
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
@@ -43,7 +38,6 @@ export const setupExpressions = (
   [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
-    pie,
     xyChart,
     mergeTables,
     counterRate,
@@ -57,9 +51,6 @@ export const setupExpressions = (
     datatableColumn,
     tickLabelsConfig,
     axisTitlesVisibilityConfig,
-    heatmap,
-    heatmapLegendConfig,
-    heatmapGridConfig,
     axisExtentConfig,
     labelsOrientationConfig,
     getDatatable(formatFactory),

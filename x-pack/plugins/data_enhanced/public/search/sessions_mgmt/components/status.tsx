@@ -135,8 +135,8 @@ const getStatusAttributes = ({
         });
 
         return {
-          textColor: 'secondary',
-          icon: <EuiIcon color="secondary" type="checkInCircleFilled" />,
+          textColor: 'success',
+          icon: <EuiIcon color="success" type="checkInCircleFilled" />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };

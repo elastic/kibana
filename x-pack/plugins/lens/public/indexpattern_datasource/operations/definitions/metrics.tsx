@@ -13,6 +13,7 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  combineErrorMessages,
 } from './helpers';
 import {
   FormattedIndexPatternColumn,
@@ -23,6 +24,7 @@ import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -46,6 +48,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   ofName,
   priority,
   optionalTimeScaling,
+  supportsDate,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -53,6 +56,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   priority?: number;
   optionalTimeScaling?: boolean;
   description?: string;
+  supportsDate?: boolean;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -74,12 +78,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
-        supportedTypes.includes(fieldType) &&
+        (supportedTypes.includes(fieldType) || (supportsDate && fieldType === 'date')) &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
         return {
-          dataType: 'number',
+          dataType: fieldType === 'date' ? 'date' : 'number',
           isBucketed: false,
           scale: 'ratio',
         };
@@ -103,7 +107,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
         label: labelLookup(field.displayName, previousColumn),
-        dataType: 'number',
+        dataType: supportsDate && field.type === 'date' ? 'date' : 'number',
         operationType: type,
         sourceField: field.name,
         isBucketed: false,
@@ -118,6 +122,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       return {
         ...oldColumn,
         label: labelLookup(field.displayName, oldColumn),
+        dataType: field.type,
         sourceField: field.name,
       };
     },
@@ -132,7 +137,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      combineErrorMessages([
+        getInvalidFieldMessage(
+          layer.columns[columnId] as FieldBasedIndexPatternColumn,
+          indexPattern
+        ),
+        getDisallowedPreviousShiftMessage(layer, columnId),
+      ]),
     filterable: true,
     documentation: {
       section: 'elasticsearch',
@@ -178,6 +189,7 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
   }),
+  supportsDate: true,
 });
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
@@ -194,6 +206,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
   }),
+  supportsDate: true,
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({

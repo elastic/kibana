@@ -7,19 +7,29 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { ToolbarPopover } from '../../shared_components';
 import type { VisualizationToolbarProps } from '../../types';
 import type { DatatableVisualizationState } from '../visualization';
+import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
 
-  const onChange = useCallback(() => {
+  const onToggleFitRow = useCallback(() => {
     const current = state.fitRowToContent ?? false;
     setState({
       ...state,
       fitRowToContent: !current,
+    });
+  }, [setState, state]);
+
+  const onTogglePagination = useCallback(() => {
+    const current = state.paging ?? { size: DEFAULT_PAGE_SIZE, enabled: false };
+
+    setState({
+      ...state,
+      paging: { ...current, enabled: !current.enabled },
     });
   }, [setState, state]);
 
@@ -45,8 +55,30 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             label=""
             showLabel={false}
             checked={Boolean(state.fitRowToContent)}
-            onChange={onChange}
+            onChange={onToggleFitRow}
           />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
+            defaultMessage: 'Paginate table',
+          })}
+          display="columnCompressedSwitch"
+        >
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.table.visualOptionsPaginateTableTooltip', {
+              defaultMessage: 'Pagination is hidden if there are less than 10 items',
+            })}
+            position="right"
+          >
+            <EuiSwitch
+              compressed
+              data-test-subj="lens-table-pagination-switch"
+              label=""
+              showLabel={false}
+              checked={Boolean(state.paging?.enabled)}
+              onChange={onTogglePagination}
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </ToolbarPopover>
     </EuiFlexGroup>

@@ -9,14 +9,29 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { DefaultDraggable } from '../draggables';
+import { EMPTY_VALUE_LABEL } from './translation';
+import { hasValueToDisplay } from '../../utils/validators';
 
 export interface LegendItem {
   color?: string;
   dataProviderId: string;
   field: string;
   timelineId?: string;
-  value: string;
+  value: string | number;
 }
+
+/**
+ * Renders the value or a placeholder in case the value is empty
+ */
+const ValueWrapper = React.memo<{ value: LegendItem['value'] }>(({ value }) =>
+  hasValueToDisplay(value) ? (
+    <>{value}</>
+  ) : (
+    <em data-test-subj="value-wrapper-empty">{EMPTY_VALUE_LABEL}</em>
+  )
+);
+
+ValueWrapper.displayName = 'ValueWrapper';
 
 const DraggableLegendItemComponent: React.FC<{
   legendItem: LegendItem;
@@ -41,7 +56,9 @@ const DraggableLegendItemComponent: React.FC<{
             isDraggable={false}
             timelineId={timelineId}
             value={value}
-          />
+          >
+            <ValueWrapper value={value} />
+          </DefaultDraggable>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>

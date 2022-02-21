@@ -6,44 +6,81 @@
  */
 
 import { ChildProcess, spawn } from 'child_process';
-import { copyFile } from 'fs/promises';
-import { unlinkSync } from 'fs';
-import { resolve } from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Manager } from './resource_manager';
-export interface ElasticsearchConfig {
-  esHost: string;
-  user: string;
-  password: string;
-}
+import { getLatestVersion } from './artifact_manager';
+import { AgentManagerParams } from './agent';
 
 export class FleetManager extends Manager {
-  private directoryPath: string;
   private fleetProcess?: ChildProcess;
-  private esConfig: ElasticsearchConfig;
+  private config: AgentManagerParams;
   private log: ToolingLog;
-  constructor(directoryPath: string, esConfig: ElasticsearchConfig, log: ToolingLog) {
+  private requestOptions: AxiosRequestConfig;
+  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
-    // TODO: check if the file exists
-    this.esConfig = esConfig;
-    this.directoryPath = directoryPath;
+    this.config = config;
     this.log = log;
+    this.requestOptions = requestOptions;
   }
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
-    await copyFile(resolve(__dirname, 'fleet_server.yml'), resolve('.', 'fleet-server.yml'));
-    return new Promise((res, rej) => {
-      const env = {
-        ELASTICSEARCH_HOSTS: this.esConfig.esHost,
-        ELASTICSEARCH_USERNAME: this.esConfig.user,
-        ELASTICSEARCH_PASSWORD: this.esConfig.password,
-      };
-      const file = resolve(this.directoryPath, 'fleet-server');
-      // TODO: handle logging properly
-      this.fleetProcess = spawn(file, [], { stdio: 'inherit', env });
-      this.fleetProcess.on('error', rej);
-      // TODO: actually wait for the fleet server to start listening
-      setTimeout(res, 15000);
+    return new Promise(async (res, rej) => {
+      try {
+        // default fleet server policy no longer created by default
+        const {
+          data: {
+            item: { id: policyId },
+          },
+        } = await axios.post(
+          `${this.config.kibanaUrl}/api/fleet/agent_policies`,
+          {
+            name: 'Default Fleet Server policy',
+            description: '',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            has_fleet_server: true,
+          },
+          this.requestOptions
+        );
+
+        const response = await axios.post(
+          `${this.config.kibanaUrl}/api/fleet/service_tokens`,
+          {},
+          this.requestOptions
+        );
+        const serviceToken = response.data.value;
+        const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+        this.log.info(artifact);
+
+        const host = 'host.docker.internal';
+
+        const args = [
+          'run',
+          '-p',
+          `8220:8220`,
+          '--add-host',
+          'host.docker.internal:host-gateway',
+          '--env',
+          'FLEET_SERVER_ENABLE=true',
+          '--env',
+          `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.config.esPort}`,
+          '--env',
+          `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+          '--env',
+          `FLEET_SERVER_POLICY=${policyId}`,
+          '--rm',
+          artifact,
+        ];
+        this.log.info('docker ' + args.join(' '));
+        this.fleetProcess = spawn('docker', args, {
+          stdio: 'inherit',
+        });
+        this.fleetProcess.on('error', rej);
+        setTimeout(res, 15000);
+      } catch (error) {
+        rej(error);
+      }
     });
   }
 
@@ -60,6 +97,5 @@ export class FleetManager extends Manager {
       });
       delete this.fleetProcess;
     }
-    unlinkSync(resolve('.', 'fleet-server.yml'));
   }
 }

@@ -9,7 +9,6 @@ import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
-import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
@@ -24,7 +23,7 @@ export type HasDataMap = Record<
   DataContextApps,
   {
     status: FETCH_STATUS;
-    hasData?: boolean | Alert[];
+    hasData?: boolean;
     indices?: string | ApmIndicesConfig;
     serviceName?: string;
   }
@@ -96,9 +95,15 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
                 break;
               case 'infra_logs':
-              case 'infra_metrics':
                 const resultInfra = await getDataHandler(app)?.hasData();
                 updateState({ hasData: resultInfra });
+                break;
+              case 'infra_metrics':
+                const resultInfraMetrics = await getDataHandler(app)?.hasData();
+                updateState({
+                  hasData: resultInfraMetrics?.hasData,
+                  indices: resultInfraMetrics?.indices,
+                });
                 break;
             }
           } catch (e) {
@@ -123,7 +128,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
-            hasData: alerts,
+            hasData: alerts.length > 0,
             status: FETCH_STATUS.SUCCESS,
           },
         }));
@@ -148,9 +153,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some((app) => {
     const appHasData = hasDataMap[app]?.hasData;
-    return (
-      appHasData === true || (Array.isArray(appHasData) && (appHasData as Alert[])?.length > 0)
-    );
+    return appHasData === true;
   });
 
   return (

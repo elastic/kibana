@@ -10,7 +10,7 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getCreateRequest,
-  getRuleExecutionStatusSucceeded,
+  getRuleExecutionSummarySucceeded,
   getFindResultWithSingleHit,
   createMlRuleRequest,
   getBasicEmptySearchResponse,
@@ -43,8 +43,8 @@ describe.each([
     clients.rulesClient.create.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // creation succeeds
-    clients.ruleExecutionLogClient.getCurrentStatus.mockResolvedValue(
-      getRuleExecutionStatusSucceeded()
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
+      getRuleExecutionSummarySucceeded()
     );
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -53,25 +53,10 @@ describe.each([
     createRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200 with a rule created via RulesClient', async () => {
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getCreateRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    test('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      // @ts-expect-error
-      const response = await server.inject(getCreateRequest(), contextWithoutSecuritySolution);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns 200 if license is not platinum', async () => {

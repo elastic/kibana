@@ -9,9 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 /*
  * Logstash Overview route.
@@ -45,24 +43,24 @@ export function logstashOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
+        const moduleType = 'logstash';
+        const dsDataset = 'node_stats';
         const [metrics, clusterStatus] = await Promise.all([
-          getMetrics(req, lsIndexPattern, metricSet, [
+          getMetrics(req, moduleType, metricSet, [
             {
               bool: {
                 should: [
+                  { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'metricset.name': dsDataset } },
                   { term: { type: 'logstash_stats' } },
-                  { term: { 'metricset.name': 'stats' } },
                 ],
               },
             },
           ]),
-          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
+          getClusterStatus(req, { clusterUuid }),
         ]);
 
         return {

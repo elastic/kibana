@@ -10,17 +10,19 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { basename } from 'path';
-import { AxiosResponse } from 'axios';
-import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
+import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
-import {
-  PACKAGE_POLICY_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common';
+
+import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
+import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
 const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
 const separator = '----------------------------------------';
@@ -76,42 +78,13 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     url: kibana,
   });
 
-  // touch the Trusted Apps List so it can be created
-  // and
   // setup fleet with endpoint integrations
+  // and
+  // and ensure the trusted apps list is created
   logger.info('setting up Fleet with endpoint and creating trusted apps list');
-  const [installedEndpointPackage] = await Promise.all([
-    setupFleetForEndpoint(kbnClient).then((response) => response.endpointPackage),
+  ensureCreateEndpointTrustedAppsList(kbnClient);
 
-    kbnClient.request({
-      method: 'GET',
-      path: TRUSTED_APPS_LIST_API,
-    }),
-  ]);
-
-  // Setup a list of real endpoint policies and return a method to randomly select one
-  const randomPolicyId: () => string = await (async () => {
-    const randomN = (max: number): number => Math.floor(Math.random() * max);
-    const policyIds: string[] =
-      (await fetchEndpointPolicies(kbnClient)).data.items.map((policy) => policy.id) || [];
-
-    // If the number of existing policies is less than 5, then create some more policies
-    if (policyIds.length < 5) {
-      for (let i = 0, t = 5 - policyIds.length; i < t; i++) {
-        policyIds.push(
-          (
-            await indexFleetEndpointPolicy(
-              kbnClient,
-              `Policy for Trusted App assignment ${i + 1}`,
-              installedEndpointPackage.version
-            )
-          ).integrationPolicies[0].id
-        );
-      }
-    }
-
-    return () => policyIds[randomN(policyIds.length)];
-  })();
+  const randomPolicyId = await randomPolicyIdGenerator(kbnClient, logger);
 
   return pMap(
     Array.from({ length: count }),
@@ -125,8 +98,8 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
       return kbnClient
         .request<TrustedApp>({
           method: 'POST',
-          path: TRUSTED_APPS_CREATE_API,
-          body,
+          path: EXCEPTION_LIST_ITEM_URL,
+          body: newTrustedAppToCreateExceptionListItem(body),
         })
         .then(({ data }) => {
           logger.write(data.id);
@@ -164,15 +137,28 @@ const createRunLogger = () => {
   });
 };
 
-const fetchEndpointPolicies = (
-  kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
-  return kbnClient.request<GetPolicyListResponse>({
-    method: 'GET',
-    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
-    query: {
-      perPage: 100,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-    },
-  });
+const ensureCreateEndpointTrustedAppsList = async (kbn: KbnClient) => {
+  const newListDefinition: CreateExceptionListSchema = {
+    description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    meta: undefined,
+    name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+    os_types: [],
+    tags: [],
+    type: 'endpoint',
+    namespace_type: 'agnostic',
+  };
+
+  await kbn
+    .request({
+      method: 'POST',
+      path: EXCEPTION_LIST_URL,
+      body: newListDefinition,
+    })
+    .catch((e) => {
+      // Ignore if list was already created
+      if (e.response.status !== 409) {
+        throw e;
+      }
+    });
 };

@@ -8,7 +8,7 @@
 import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import type { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
 import type { Role } from '../../../../../../../common/model';
@@ -49,6 +49,7 @@ const setup = (config: TestConfig) => {
       onChangeAll={onChangeAll}
       canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
       privilegeIndex={config.privilegeIndex}
+      allSpacesSelected={true}
     />
   );
 

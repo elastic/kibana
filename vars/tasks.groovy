@@ -173,6 +173,14 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
+    whenChanged([
+      'x-pack/plugins/osquery/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-osqueryCypress', './test/scripts/jenkins_osquery_cypress.sh'))
+      }
+    }
+
   }
 }
 

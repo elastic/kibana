@@ -12,19 +12,29 @@ import {
   EuiSpacer,
   EuiText,
   EuiCodeBlock,
+  EuiTabbedContent,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { CreateAgentInstructions } from './agent_instructions_mappings';
+import React, { ComponentType } from 'react';
+import styled from 'styled-components';
+import {
+  AgentRuntimeAttachmentProps,
+  CreateAgentInstructions,
+} from './agent_instructions_mappings';
 import {
   Markdown,
   useKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
-import { NewPackagePolicy } from '../apm_policy_form/typings';
+import type {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
-import { replaceTemplateStrings } from './replace_template_strings';
+import { renderMustache } from './render_mustache';
 
 function AccordionButtonContent({
   agentName,
@@ -97,96 +107,175 @@ function TutorialConfigAgent({
 }
 
 interface Props {
+  policy: PackagePolicy;
   newPolicy: NewPackagePolicy;
+  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
   agentName: AgentName;
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
+  AgentRuntimeAttachment?: ComponentType<AgentRuntimeAttachmentProps>;
 }
 
+const StyledEuiAccordion = styled(EuiAccordion)`
+  // This is an alternative fix suggested by the EUI team to fix drag elements inside EuiAccordion
+  // This Issue tracks the fix on the Eui side https://github.com/elastic/eui/issues/3548#issuecomment-639041283
+  .euiAccordion__childWrapper {
+    transform: none;
+  }
+`;
+
 export function AgentInstructionsAccordion({
+  policy,
   newPolicy,
+  onChange,
   agentName,
   title,
   createAgentInstructions,
   variantId,
+  AgentRuntimeAttachment,
 }: Props) {
   const docLinks = useKibana().services.docLinks;
   const vars = newPolicy?.inputs?.[0]?.vars;
   const apmServerUrl = vars?.url.value;
   const secretToken = vars?.secret_token.value;
   const steps = createAgentInstructions(apmServerUrl, secretToken);
+  const stepsElements = steps.map(
+    (
+      { title: stepTitle, textPre, textPost, customComponentName, commands },
+      index
+    ) => {
+      const commandBlock = commands
+        ? renderMustache({
+            text: commands,
+            docLinks,
+          })
+        : '';
+
+      return (
+        <section key={index}>
+          <EuiText>
+            <h4>{stepTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            {textPre && (
+              <InstructionsContent
+                markdown={renderMustache({ text: textPre, docLinks })}
+              />
+            )}
+            {commandBlock && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable language="bash">
+                  {commandBlock}
+                </EuiCodeBlock>
+              </>
+            )}
+            {customComponentName === 'TutorialConfigAgent' && (
+              <TutorialConfigAgent
+                variantId={variantId}
+                apmServerUrl={apmServerUrl}
+                secretToken={secretToken}
+              />
+            )}
+            {customComponentName === 'TutorialConfigAgentRumScript' && (
+              <TutorialConfigAgent
+                variantId="js_script"
+                apmServerUrl={apmServerUrl}
+                secretToken={secretToken}
+              />
+            )}
+            {textPost && (
+              <>
+                <EuiSpacer />
+                <InstructionsContent
+                  markdown={renderMustache({ text: textPost, docLinks })}
+                />
+              </>
+            )}
+          </EuiText>
+          <EuiSpacer />
+        </section>
+      );
+    }
+  );
+
+  const manualInstrumentationContent = (
+    <>
+      <EuiSpacer />
+      {stepsElements}
+    </>
+  );
+
   return (
-    <EuiAccordion
+    <StyledEuiAccordion
       id={agentName}
       buttonContent={
         <AccordionButtonContent agentName={agentName} title={title} />
       }
     >
-      <EuiSpacer />
-      {steps.map(
-        (
-          {
-            title: stepTitle,
-            textPre,
-            textPost,
-            customComponentName,
-            commands,
-          },
-          index
-        ) => {
-          const commandBlock = replaceTemplateStrings(
-            Array.isArray(commands) ? commands.join('\n') : commands || '',
-            docLinks
-          );
-          return (
-            <section key={index}>
-              <EuiText>
-                <h4>{stepTitle}</h4>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="s">
-                {textPre && (
-                  <InstructionsContent
-                    markdown={replaceTemplateStrings(textPre, docLinks)}
-                  />
-                )}
-                {commandBlock && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiCodeBlock isCopyable language="bash">
-                      {commandBlock}
-                    </EuiCodeBlock>
-                  </>
-                )}
-                {customComponentName === 'TutorialConfigAgent' && (
-                  <TutorialConfigAgent
-                    variantId={variantId}
-                    apmServerUrl={apmServerUrl}
-                    secretToken={secretToken}
-                  />
-                )}
-                {customComponentName === 'TutorialConfigAgentRumScript' && (
-                  <TutorialConfigAgent
-                    variantId="js_script"
-                    apmServerUrl={apmServerUrl}
-                    secretToken={secretToken}
-                  />
-                )}
-                {textPost && (
+      {AgentRuntimeAttachment ? (
+        <>
+          <EuiSpacer />
+          <EuiTabbedContent
+            tabs={[
+              {
+                id: 'manual-instrumentation',
+                name: i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.manualInstrumentation',
+                  { defaultMessage: 'Manual instrumentation' }
+                ),
+                content: manualInstrumentationContent,
+              },
+              {
+                id: 'auto-attachment',
+                name: (
+                  <EuiFlexGroup
+                    justifyContent="flexStart"
+                    alignItems="baseline"
+                    gutterSize="s"
+                  >
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate(
+                        'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment',
+                        { defaultMessage: 'Auto-Attachment' }
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge
+                        label={i18n.translate(
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label',
+                          { defaultMessage: 'BETA' }
+                        )}
+                        tooltipContent={i18n.translate(
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent',
+                          {
+                            defaultMessage:
+                              'Auto-attachment for Java is not GA. Please help us by reporting any bugs.',
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+                content: (
                   <>
                     <EuiSpacer />
-                    <InstructionsContent
-                      markdown={replaceTemplateStrings(textPost, docLinks)}
+                    <AgentRuntimeAttachment
+                      policy={policy}
+                      newPolicy={newPolicy}
+                      onChange={onChange}
                     />
                   </>
-                )}
-              </EuiText>
-              <EuiSpacer />
-            </section>
-          );
-        }
+                ),
+              },
+            ]}
+          />
+        </>
+      ) : (
+        manualInstrumentationContent
       )}
-    </EuiAccordion>
+    </StyledEuiAccordion>
   );
 }

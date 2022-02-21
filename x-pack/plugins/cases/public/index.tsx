@@ -14,9 +14,17 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export type { CasesUiPlugin };
 export type { CasesUiStart } from './types';
-export type { AllCasesProps } from './components/all_cases';
-export type { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
-export type { CaseViewProps } from './components/case_view';
-export type { ConfigureCasesProps } from './components/configure_cases';
-export type { CreateCaseProps } from './components/create';
-export type { RecentCasesProps } from './components/recent_cases';
+export type { GetCasesProps } from './methods/get_cases';
+export type { GetCreateCaseFlyoutProps } from './methods/get_create_case_flyout';
+export type { GetAllCasesSelectorModalProps } from './methods/get_all_cases_selector_modal';
+export type { GetRecentCasesProps } from './methods/get_recent_cases';
+
+export type { ICasesDeepLinkId } from './common/navigation';
+export {
+  getCasesDeepLinks,
+  CasesDeepLinkId,
+  generateCaseViewPath,
+  getCreateCasePath,
+  getCaseViewPath,
+  getCasesConfigurePath,
+} from './common/navigation';

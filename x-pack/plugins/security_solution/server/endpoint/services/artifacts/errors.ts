@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 /**
  * Indicates that the internal manifest that is managed by ManifestManager is invalid or contains

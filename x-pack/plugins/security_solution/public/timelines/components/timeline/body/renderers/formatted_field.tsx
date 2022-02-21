@@ -18,13 +18,14 @@ import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../../components/formatted_ip';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { Port } from '../../../../../network/components/port';
 import { PORT_NAMES } from '../../../../../network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
   DATE_FIELD_TYPE,
   HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
   EVENT_MODULE_FIELD_NAME,
@@ -40,6 +41,7 @@ import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { AgentStatuses } from './agent_statuses';
+import { UserName } from './user_name';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -57,6 +59,7 @@ const FormattedFieldValueComponent: React.FC<{
   isButton?: boolean;
   isDraggable?: boolean;
   onClick?: () => void;
+  onClickAriaLabel?: string;
   title?: string;
   truncate?: boolean;
   value: string | number | undefined | null;
@@ -73,11 +76,13 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray = false,
   isDraggable = true,
   onClick,
+  onClickAriaLabel,
   title,
   truncate = true,
   value,
   linkValue,
 }) => {
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -148,6 +153,20 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
       />
     );
+  } else if (usersEnabled && fieldName === USER_NAME_FIELD_NAME) {
+    return (
+      <UserName
+        Component={Component}
+        contextId={contextId}
+        eventId={eventId}
+        fieldName={fieldName}
+        isDraggable={isDraggable}
+        isButton={isButton}
+        onClick={onClick}
+        title={title}
+        value={value}
+      />
+    );
   } else if (fieldFormat === BYTES_FORMAT) {
     return (
       <Bytes
@@ -190,6 +209,10 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         isDraggable={isDraggable}
         value={value}
+        onClick={onClick}
+        onClickAriaLabel={onClickAriaLabel}
+        iconType={isButton ? 'arrowDown' : undefined}
+        iconSide={isButton ? 'right' : undefined}
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
@@ -215,7 +238,6 @@ const FormattedFieldValueComponent: React.FC<{
       Component,
       eventId,
       fieldName,
-      linkValue,
       isDraggable,
       truncate,
       title,

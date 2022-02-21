@@ -8,7 +8,7 @@
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeDisplay } from './privilege_display';
 

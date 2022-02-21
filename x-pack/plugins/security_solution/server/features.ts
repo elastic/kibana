@@ -11,6 +11,7 @@ import { KibanaFeatureConfig, SubFeatureConfig } from '../../features/common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../src/plugins/data_views/common';
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
   id: CASES_FEATURE_ID,
@@ -117,9 +118,15 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
     all: {
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-all', 'lists-read', 'rac'],
+      api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac'],
       savedObject: {
-        all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
+        all: [
+          'alert',
+          'exception-list',
+          'exception-list-agnostic',
+          DATA_VIEW_SAVED_OBJECT_TYPE,
+          ...savedObjectTypes,
+        ],
         read: [],
       },
       alerting: {
@@ -138,7 +145,12 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
       api: [APP_ID, 'lists-read', 'rac'],
       savedObject: {
         all: [],
-        read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
+        read: [
+          'exception-list',
+          'exception-list-agnostic',
+          DATA_VIEW_SAVED_OBJECT_TYPE,
+          ...savedObjectTypes,
+        ],
       },
       alerting: {
         rule: {

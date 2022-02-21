@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';

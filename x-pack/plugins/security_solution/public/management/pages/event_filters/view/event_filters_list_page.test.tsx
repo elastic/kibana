@@ -7,14 +7,22 @@
 
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import React from 'react';
-import { fireEvent, act } from '@testing-library/react';
+import { fireEvent, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EventFiltersListPage } from './event_filters_list_page';
 import { eventFiltersListQueryHttpMock } from '../test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 
 // Needed to mock the data services used by the ExceptionItem component
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../services/policies/policies');
+
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 describe('When on the Event Filters List Page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -90,7 +98,7 @@ describe('When on the Event Filters List Page', () => {
       );
       render();
 
-      expect(renderResult.getByTestId('eventFiltersContent-loader')).toBeTruthy();
+      expect(renderResult.getByTestId('eventFilterListLoader')).toBeTruthy();
 
       const wasReceived = dataReceived();
       releaseApiResponse!();
@@ -177,6 +185,24 @@ describe('When on the Event Filters List Page', () => {
     });
   });
 
+  describe('And policies select is dispatched', () => {
+    it('should apply policy filter', async () => {
+      const policies = await sendGetEndpointSpecificPackagePoliciesMock();
+      (sendGetEndpointSpecificPackagePolicies as jest.Mock).mockResolvedValue(policies);
+
+      renderResult = render();
+      await waitFor(() => {
+        expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+      });
+
+      const firstPolicy = policies.items[0];
+
+      userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+      userEvent.click(renderResult.getByTestId(`policiesSelector-popover-items-${firstPolicy.id}`));
+      await waitFor(() => expect(waitForAction('userChangedUrl')).not.toBeNull());
+    });
+  });
+
   describe('and the back button is present', () => {
     beforeEach(async () => {
       renderResult = render();
@@ -195,11 +221,27 @@ describe('When on the Event Filters List Page', () => {
       expect(button).toHaveAttribute('href', '/fleet');
     });
 
-    it('back button is not present', () => {
+    it('back button is still present after push history', () => {
       act(() => {
         history.push('/administration/event_filters');
       });
-      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+  });
+
+  describe('and the back button is not present', () => {
+    beforeEach(async () => {
+      renderResult = render();
+      act(() => {
+        history.push('/administration/event_filters');
+      });
+    });
+
+    it('back button is not present when missing history params', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).toBeNull();
     });
   });
 });

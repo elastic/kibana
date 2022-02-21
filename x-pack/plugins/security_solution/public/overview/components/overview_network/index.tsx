@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useCallback } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';

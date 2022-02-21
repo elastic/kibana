@@ -52,14 +52,15 @@ import {
 } from '../../../../../common/constants';
 import { TransformStats } from '../types';
 import {
+  HOST_METADATA_LIST_ROUTE,
   metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
 } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -132,7 +133,8 @@ const timepickerRanges = [
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 
-describe('when on the endpoint list page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/115489
+describe.skip('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
   const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
 
@@ -170,6 +172,10 @@ describe('when on the endpoint list page', () => {
   });
 
   it('should NOT display timeline', async () => {
+    setEndpointListApiMockImplementation(coreStart.http, {
+      endpointsResults: [],
+    });
+
     const renderResult = render();
     const timelineFlyout = renderResult.queryByTestId('flyoutOverlay');
     expect(timelineFlyout).toBeNull();
@@ -243,7 +249,7 @@ describe('when on the endpoint list page', () => {
           total: 4,
         });
         setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
+          endpointsResults: mockedEndpointListData.data,
           totalAgentsUsingEndpoint: 5,
         });
       });
@@ -260,7 +266,7 @@ describe('when on the endpoint list page', () => {
           total: 5,
         });
         setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
+          endpointsResults: mockedEndpointListData.data,
           totalAgentsUsingEndpoint: 5,
         });
       });
@@ -277,7 +283,7 @@ describe('when on the endpoint list page', () => {
           total: 6,
         });
         setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
+          endpointsResults: mockedEndpointListData.data,
           totalAgentsUsingEndpoint: 5,
         });
       });
@@ -291,6 +297,10 @@ describe('when on the endpoint list page', () => {
 
   describe('when there is no selected host in the url', () => {
     it('should not show the flyout', () => {
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
+      });
+
       const renderResult = render();
       expect.assertions(1);
       return renderResult.findByTestId('endpointDetailsFlyout').catch((e) => {
@@ -307,7 +317,7 @@ describe('when on the endpoint list page', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 5 });
-          const hostListData = mockedEndpointData.hosts;
+          const hostListData = mockedEndpointData.data;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
           firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
@@ -518,7 +528,7 @@ describe('when on the endpoint list page', () => {
   describe.skip('when polling on Endpoint List', () => {
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        const hostListData = mockEndpointResultList({ total: 4 }).hosts;
+        const hostListData = mockEndpointResultList({ total: 4 }).data;
 
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: hostListData,
@@ -546,7 +556,7 @@ describe('when on the endpoint list page', () => {
       expect(total[0].textContent).toEqual('4 Hosts');
 
       setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: mockEndpointResultList({ total: 1 }).hosts,
+        endpointsResults: mockEndpointResultList({ total: 1 }).data,
       });
 
       await reactTestingLibrary.act(async () => {
@@ -1019,6 +1029,57 @@ describe('when on the endpoint list page', () => {
         expect(activityLogCallout).not.toBeNull();
       });
 
+      it('should display a callout message if no log data also on refetch', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
+
+        // click refresh button
+        const refreshLogButton = await renderResult.findByTestId('superDatePickerApplyTimeButton');
+        userEvent.click(refreshLogButton);
+
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogNoDataCallout = await renderResult.findByTestId(
+          'activityLogNoDataCallout'
+        );
+        expect(activityLogNoDataCallout).not.toBeNull();
+      });
+
       it('should not display scroll trigger when showing callout message', async () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
@@ -1090,7 +1151,7 @@ describe('when on the endpoint list page', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
-          if (requestOptions.path === '/api/endpoint/metadata') {
+          if (requestOptions.path === HOST_METADATA_LIST_ROUTE) {
             return mockEndpointResultList({ total: 0 });
           }
           throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
@@ -1116,9 +1177,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display policy response sub-panel', async () => {
-        expect(
-          await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutHeader')
-        ).not.toBeNull();
+        expect(await renderResult.findByTestId('flyoutSubHeaderBackButton')).not.toBeNull();
         expect(
           await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutBody')
         ).not.toBeNull();
@@ -1205,7 +1264,7 @@ describe('when on the endpoint list page', () => {
 
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
-        expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
+        expect(subHeaderBackLink.textContent).toBe('Endpoint details');
         expect(subHeaderBackLink.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=details`
         );
@@ -1377,7 +1436,7 @@ describe('when on the endpoint list page', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
 
     const mockEndpointListApi = () => {
-      const { hosts } = mockEndpointResultList();
+      const { data: hosts } = mockEndpointResultList();
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: {
@@ -1481,7 +1540,11 @@ describe('when on the endpoint list page', () => {
           state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeNull();
@@ -1491,7 +1554,25 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is not displayed when no endpoint policy', () => {
+      const transforms: TransformStats[] = [
+        { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: [],
+      });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeNull();
@@ -1504,7 +1585,11 @@ describe('when on the endpoint list page', () => {
           state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
       render();
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeInTheDocument();
@@ -1521,7 +1606,11 @@ describe('when on the endpoint list page', () => {
           state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
       render();
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).not.toHaveTextContent(transforms[0].id);

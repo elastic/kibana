@@ -9,7 +9,10 @@
 export { ElasticsearchService } from './elasticsearch_service';
 export { config, configSchema } from './elasticsearch_config';
 export { ElasticsearchConfig } from './elasticsearch_config';
-export type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from './version_check/ensure_es_version';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
@@ -36,5 +39,20 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchErrorDetails,
+  // unauthorized error handler
+  UnauthorizedErrorHandlerOptions,
+  UnauthorizedErrorHandlerResultRetryParams,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
+  UnauthorizedErrorHandlerResult,
+  UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandler,
+  UnauthorizedError,
 } from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
+export { pollEsNodesVersion } from './version_check/ensure_es_version';
+export {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+  PRODUCT_RESPONSE_HEADER,
+} from './supported_server_response_check';

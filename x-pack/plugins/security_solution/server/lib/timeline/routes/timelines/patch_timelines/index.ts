@@ -23,7 +23,7 @@ import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status'
 
 export const patchTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.patch(

@@ -8,7 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { MountPoint } from '../types';
 
 const defaultWrapperClass = 'kbnMountWrapper';

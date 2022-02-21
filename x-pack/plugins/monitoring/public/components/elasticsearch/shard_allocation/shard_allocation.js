@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import './shard_allocation.scss';
 import { ClusterView } from './components/cluster_view';
@@ -24,7 +24,7 @@ export const ShardAllocation = (props) => {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.replicaLabel', {
         defaultMessage: 'Replica',
       }),
-      color: 'secondary',
+      color: 'success',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.relocatingLabel', {

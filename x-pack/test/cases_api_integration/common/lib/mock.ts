@@ -6,13 +6,6 @@
  */
 
 import {
-  CommentSchemaType,
-  ContextTypeGeneratedAlertType,
-  createAlertsString,
-  isCommentGeneratedAlert,
-  transformConnectorComment,
-} from '../../../../plugins/cases/server/connectors';
-import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
@@ -22,12 +15,8 @@ import {
   CommentRequestAlertType,
   CommentType,
   CaseStatuses,
-  CaseType,
-  CasesClientPostRequest,
-  SubCaseResponse,
-  AssociationType,
-  SubCasesFindResponse,
   CommentRequest,
+  CommentRequestActionsType,
 } from '../../../../plugins/cases/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -60,22 +49,6 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
   ...req,
 });
 
-/**
- * The fields for creating a collection style case.
- */
-export const postCollectionReq: CasePostRequest = {
-  ...postCaseReq,
-  type: CaseType.collection,
-};
-
-/**
- * This is needed because the post api does not allow specifying the case type. But the response will include the type.
- */
-export const userActionPostResp: CasesClientPostRequest = {
-  ...postCaseReq,
-  type: CaseType.individual,
-};
-
 export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
   type: CommentType.user,
@@ -90,12 +63,18 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
-  alerts: createAlertsString([
-    { _id: 'test-id', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
-    { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
-  ]),
-  type: CommentType.generatedAlert,
+export const postCommentActionsReq: CommentRequestActionsType = {
+  comment: 'comment text',
+  actions: {
+    targets: [
+      {
+        hostname: 'host-name',
+        endpointId: 'endpoint-id',
+      },
+    ],
+    type: 'isolate',
+  },
+  type: CommentType.actions,
   owner: 'securitySolutionFixture',
 };
 
@@ -108,7 +87,6 @@ export const postCaseResp = (
   comments: [],
   totalAlerts: 0,
   totalComment: 0,
-  type: req.type ?? CaseType.individual,
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
@@ -118,15 +96,13 @@ export const postCaseResp = (
 
 interface CommentRequestWithID {
   id: string;
-  comment: CommentSchemaType | CommentRequest;
+  comment: CommentRequest;
 }
 
 export const commentsResp = ({
   comments,
-  associationType,
 }: {
   comments: CommentRequestWithID[];
-  associationType: AssociationType;
 }): Array<Partial<CommentResponse>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
@@ -137,41 +113,12 @@ export const commentsResp = ({
       updated_by: null,
     };
 
-    if (isCommentGeneratedAlert(comment)) {
-      return {
-        associationType,
-        ...transformConnectorComment(comment),
-        ...baseFields,
-      };
-    } else {
-      return {
-        associationType,
-        ...comment,
-        ...baseFields,
-      };
-    }
+    return {
+      ...comment,
+      ...baseFields,
+    };
   });
 };
-
-export const subCaseResp = ({
-  id,
-  totalAlerts,
-  totalComment,
-  status = CaseStatuses.open,
-}: {
-  id: string;
-  status?: CaseStatuses;
-  totalAlerts: number;
-  totalComment: number;
-}): Partial<SubCaseResponse> => ({
-  status,
-  id,
-  totalAlerts,
-  totalComment,
-  closed_by: null,
-  created_by: defaultUser,
-  updated_by: defaultUser,
-});
 
 const findCommon = {
   page: 1,
@@ -185,9 +132,4 @@ const findCommon = {
 export const findCasesResp: CasesFindResponse = {
   ...findCommon,
   cases: [],
-};
-
-export const findSubCasesResp: SubCasesFindResponse = {
-  ...findCommon,
-  subCases: [],
 };

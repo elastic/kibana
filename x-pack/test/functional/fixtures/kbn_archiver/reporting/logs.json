@@ -439,3 +439,60 @@
   "updated_at": "2020-07-16T20:34:01.098Z",
   "version": "WzIsMl0="
 }
+
+{
+  "attributes": {
+    "fieldAttrs": "{\"name\":{\"count\":1},\"updated_at\":{\"count\":1}}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "timestamp",
+    "title": "sparse_data",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "8e5af470-62de-11ec-a5fd-9f30aac1abbf",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-12-22T04:22:06.170Z",
+  "version": "WzI0MTQsMV0="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "name",
+      "updated_at"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Sparse Columns"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "c4367dd0-62de-11ec-a5fd-9f30aac1abbf",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "8e5af470-62de-11ec-a5fd-9f30aac1abbf",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2021-12-22T04:22:25.584Z",
+  "version": "WzI0MjAsMV0="
+}

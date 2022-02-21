@@ -4,6 +4,8 @@
 <titleabbrev>Create index pattern</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-api-create>> instead.]
+
 experimental[] Create {kib} index patterns.
 
 [[index-patterns-api-create-request]]

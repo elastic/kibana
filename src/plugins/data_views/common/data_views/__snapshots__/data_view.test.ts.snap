@@ -775,7 +775,6 @@ Object {
     },
   },
   "id": "test-pattern",
-  "intervalName": undefined,
   "runtimeFieldMap": Object {
     "runtime_field": Object {
       "script": Object {

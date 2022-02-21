@@ -46,7 +46,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
     this.#elasticsearch = new ElasticsearchService(
-      this.initializerContext.logger.get('elasticsearch')
+      this.initializerContext.logger.get('elasticsearch'),
+      initializerContext.env.packageInfo.version
     );
     this.#verification = new VerificationService(
       this.initializerContext.logger.get('verification')

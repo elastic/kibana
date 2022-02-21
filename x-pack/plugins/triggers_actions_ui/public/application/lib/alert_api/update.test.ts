@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Alert } from '../../../types';
+import { Rule } from '../../../types';
 import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
 import { updateAlert } from './update';
 import { AlertNotifyWhenType } from '../../../../../alerting/common';
@@ -30,7 +30,7 @@ describe('updateAlert', () => {
       apiKeyOwner: null,
       notifyWhen: 'onThrottleInterval' as AlertNotifyWhenType,
     };
-    const resolvedValue: Alert = {
+    const resolvedValue: Rule = {
       ...alertToUpdate,
       id: '12/3',
       enabled: true,
