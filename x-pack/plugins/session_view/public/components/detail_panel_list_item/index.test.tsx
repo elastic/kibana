@@ -28,7 +28,7 @@ describe('DetailPanelListItem component', () => {
     it('renders DetailPanelListItem correctly', async () => {
       renderResult = mockedContext.render(<DetailPanelListItem>{TEST_CHILD}</DetailPanelListItem>);
 
-      expect(renderResult.queryByTestId('detail-panel-list-item')).toBeVisible();
+      expect(renderResult.queryByTestId('sessionViewer:detail-panel-list-item')).toBeVisible();
       expect(renderResult.queryByText(TEST_STRING)).toBeVisible();
     });
 
@@ -38,7 +38,7 @@ describe('DetailPanelListItem component', () => {
       );
 
       expect(renderResult.queryByTestId('test-copy-button')).toBeNull();
-      fireEvent.mouseEnter(renderResult.getByTestId('detail-panel-list-item'));
+      fireEvent.mouseEnter(renderResult.getByTestId('sessionViewer:detail-panel-list-item'));
       await waitFor(() => screen.queryByTestId('test-copy-button'));
       expect(renderResult.queryByTestId('test-copy-button')).toBeVisible();
     });
