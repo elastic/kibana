@@ -49,6 +49,6 @@ export const createExceptionListItemForCreate = (listId: string): CreateExceptio
     namespace_type: 'agnostic',
     tags: [GLOBAL_ARTIFACT_TAG],
     type: 'simple',
-    os_types: [],
+    os_types: ['windows'],
   };
 };

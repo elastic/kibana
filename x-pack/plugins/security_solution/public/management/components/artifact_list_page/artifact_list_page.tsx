@@ -160,8 +160,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       useCallback(
         ({ pageIndex, pageSize }) => {
           setUrlParams({
-            // ensure page is reset if user changes page size
-            page: pageSize !== uiPagination.pageSize ? 1 : pageIndex + 1,
+            page: pageIndex + 1,
             pageSize,
           });
 
@@ -169,7 +168,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           // the user is back at the top of the list
           window.scrollTo(0, 0);
         },
-        [setUrlParams, uiPagination.pageSize]
+        [setUrlParams]
       );
 
     const handleOnSearch = useCallback(
@@ -211,17 +210,15 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         title={labels.pageTitle}
         subtitle={labels.pageAboutInfo}
         actions={
-          doesDataExist && (
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              isDisabled={isFlyoutOpened}
-              onClick={handleOpenCreateFlyoutClick}
-              data-test-subj={getTestId('pageAddButton')}
-            >
-              {labels.pageAddButtonTitle}
-            </EuiButton>
-          )
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            isDisabled={isFlyoutOpened}
+            onClick={handleOpenCreateFlyoutClick}
+            data-test-subj={getTestId('pageAddButton')}
+          >
+            {labels.pageAddButtonTitle}
+          </EuiButton>
         }
       >
         {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
