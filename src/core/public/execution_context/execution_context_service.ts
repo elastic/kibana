@@ -71,12 +71,11 @@ export class ExecutionContextService
         return this.context$.value;
       },
       getAsLabels: () => {
-        const executionContext = this.mergeContext();
         return omitBy(
           {
-            name: executionContext?.name,
-            id: executionContext?.id,
-            page: executionContext?.page,
+            name: this.appId,
+            id: this.context$.value?.id,
+            page: this.context$.value?.page,
           },
           isUndefined
         ) as Labels;

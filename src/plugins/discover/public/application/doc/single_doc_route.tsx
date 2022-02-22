@@ -40,7 +40,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'single-doc',
-    id: indexPatternId || '',
+    id: indexPatternId,
   });
 
   useEffect(() => {
