@@ -88,4 +88,80 @@ describe('import_rules_type_dependents', () => {
     const errors = importRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
+
+  test('You can ommit "actions"', () => {
+    const schema: ImportRulesSchema = {
+      ...getImportRulesSchemaMock(),
+    };
+    delete schema.actions;
+    const errors = importRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
+
+  test('You can pass an empty array for "actions"', () => {
+    const schema: ImportRulesSchema = {
+      ...getImportRulesSchemaMock(),
+      actions: [],
+    };
+    const errors = importRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
+
+  test('You cannot omit action params.message when actions are present', () => {
+    const schema: ImportRulesSchema = {
+      ...getImportRulesSchemaMock(),
+      actions: [
+        {
+          id: '123',
+          group: 'group',
+          action_type_id: '.slack',
+          params: {},
+        },
+      ],
+    };
+    const errors = importRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "actions" exist, "actions.params" requires a "message" property - "action" with "id" of "123"',
+    ]);
+  });
+
+  test('You cannot have action.params.message be empty when actions are present', () => {
+    const schema: ImportRulesSchema = {
+      ...getImportRulesSchemaMock(),
+      actions: [
+        {
+          id: '123',
+          group: 'group',
+          action_type_id: '.slack',
+          params: {
+            message: '',
+          },
+        },
+      ],
+    };
+    const errors = importRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "actions" exist, "actions.params.message" requires a non empty "message" value - "action" with "id" of "123"',
+    ]);
+  });
+
+  test('You cannot have action.params.message be null when actions are present', () => {
+    const schema: ImportRulesSchema = {
+      ...getImportRulesSchemaMock(),
+      actions: [
+        {
+          id: '123',
+          group: 'group',
+          action_type_id: '.slack',
+          params: {
+            message: null,
+          },
+        },
+      ],
+    };
+    const errors = importRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "actions" exist, "actions.params.message" requires a non empty "message" value - "action" with "id" of "123"',
+    ]);
+  });
 });
