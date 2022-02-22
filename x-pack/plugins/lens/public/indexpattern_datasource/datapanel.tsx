@@ -594,7 +594,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 
   const [popoverOpen, setPopoverOpen] = useState(false);
-
+  const triggerLabel = indexPatternRefs.reduce(
+    (title, indexPatt) =>
+      indexPatt.title === currentIndexPattern.title && indexPatt.readableTitle
+        ? indexPatt.readableTitle
+        : title,
+    currentIndexPattern.title
+  );
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -614,7 +620,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <ChangeIndexPattern
                 data-test-subj="indexPattern-switcher"
                 trigger={{
-                  label: currentIndexPattern.title,
+                  label: triggerLabel,
                   title: currentIndexPattern.title,
                   'data-test-subj': 'indexPattern-switch-link',
                   fontWeight: 'bold',
