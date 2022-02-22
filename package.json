@@ -75,6 +75,7 @@
   },
   "resolutions": {
     "**/@babel/runtime": "^7.17.2",
+    "**/@elastic/transport": "^8.0.2",
     "**/@types/node": "16.10.2",
     "**/chokidar": "^3.4.3",
     "**/deepmerge": "^4.2.2",
