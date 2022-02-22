@@ -51,6 +51,7 @@ export interface RegistryRuleType
     | 'ruleTaskTimeout'
     | 'minimumScheduleInterval'
     | 'defaultScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -331,6 +332,7 @@ export class RuleTypeRegistry {
             ruleTaskTimeout,
             minimumScheduleInterval,
             defaultScheduleInterval,
+            doesSetRecoveryContext,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -345,6 +347,7 @@ export class RuleTypeRegistry {
           ruleTaskTimeout,
           minimumScheduleInterval,
           defaultScheduleInterval,
+          doesSetRecoveryContext,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,
