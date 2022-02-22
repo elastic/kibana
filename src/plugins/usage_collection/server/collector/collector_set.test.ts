@@ -95,6 +95,15 @@ describe('CollectorSet', () => {
           type: 'MY_TEST_COLLECTOR',
           result: { passTest: 1000 },
         },
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            failed: { count: 0, names: [] },
+          },
+        },
       ]);
     });
 
@@ -115,7 +124,17 @@ describe('CollectorSet', () => {
         // Do nothing
       }
       // This must return an empty object instead of null/undefined
-      expect(result).toStrictEqual([]);
+      expect(result).toStrictEqual([
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 0, names: [] },
+            failed: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+          },
+        },
+      ]);
     });
 
     it('should not break if isReady is not a function', async () => {
@@ -135,6 +154,15 @@ describe('CollectorSet', () => {
           type: 'MY_TEST_COLLECTOR',
           result: { test: 1 },
         },
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            failed: { count: 0, names: [] },
+          },
+        },
       ]);
     });
 
@@ -153,6 +181,15 @@ describe('CollectorSet', () => {
         {
           type: 'MY_TEST_COLLECTOR',
           result: { test: 1 },
+        },
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            failed: { count: 0, names: [] },
+          },
         },
       ]);
     });
@@ -535,6 +572,31 @@ describe('CollectorSet', () => {
             "result": Object {},
             "type": "ready_col",
           },
+          Object {
+            "result": Object {
+              "failed": Object {
+                "count": 0,
+                "names": Array [],
+              },
+              "not_ready": Object {
+                "count": 1,
+                "names": Array [
+                  "not_ready_col",
+                ],
+              },
+              "not_ready_timeout": Object {
+                "count": 0,
+                "names": Array [],
+              },
+              "succeeded": Object {
+                "count": 1,
+                "names": Array [
+                  "ready_col",
+                ],
+              },
+            },
+            "type": "usage_collector_stats",
+          },
         ]
       `);
     });
@@ -584,6 +646,31 @@ describe('CollectorSet', () => {
             "result": Object {},
             "type": "ready_col",
           },
+          Object {
+            "result": Object {
+              "failed": Object {
+                "count": 0,
+                "names": Array [],
+              },
+              "not_ready": Object {
+                "count": 0,
+                "names": Array [],
+              },
+              "not_ready_timeout": Object {
+                "count": 1,
+                "names": Array [
+                  "timeout_col",
+                ],
+              },
+              "succeeded": Object {
+                "count": 1,
+                "names": Array [
+                  "ready_col",
+                ],
+              },
+            },
+            "type": "usage_collector_stats",
+          },
         ]
       `);
     });
@@ -608,7 +695,7 @@ describe('CollectorSet', () => {
         esClient: mockEsClient,
         soClient: mockSoClient,
       });
-      expect(results).toHaveLength(1);
+      expect(results).toHaveLength(2);
     });
 
     it('adds extra context to collectors with extendFetchContext config', async () => {
@@ -634,7 +721,7 @@ describe('CollectorSet', () => {
         soClient: mockSoClient,
         kibanaRequest: request,
       });
-      expect(results).toHaveLength(1);
+      expect(results).toHaveLength(2);
     });
   });
 });

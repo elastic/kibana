@@ -161,7 +161,7 @@ Array [
           },
           "terms": Object {
             "field": "service.name",
-            "size": 500,
+            "size": 50,
           },
         },
       },
@@ -187,6 +187,7 @@ Array [
     "apm": Object {
       "events": Array [
         "metric",
+        "error",
       ],
     },
     "body": Object {
@@ -213,7 +214,7 @@ Array [
           },
           "terms": Object {
             "field": "service.name",
-            "size": 500,
+            "size": 50,
           },
         },
       },

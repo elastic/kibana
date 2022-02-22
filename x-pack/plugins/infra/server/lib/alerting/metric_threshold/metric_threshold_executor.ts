@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { first, isEqual, last } from 'lodash';
+import moment from 'moment';
 import {
   ActionGroupIdsOf,
-  RecoveredActionGroup,
-  AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertTypeState as RuleTypeState,
-  AlertInstance as Alert,
-} from '../../../../../alerting/server';
+import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
-  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
-import { createFormatter } from '../../../../common/formatters';
-import { AlertStates, Comparator } from './types';
-import { evaluateRule, EvaluatedRuleParams } from './lib/evaluate_rule';
+import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -147,7 +145,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const groups = [...new Set([...prevGroups, ...resultGroups])];
 
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
-
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -286,6 +283,8 @@ const formatAlertResult = <AlertResult>(
     comparator: Comparator;
     warningThreshold?: number[];
     warningComparator?: Comparator;
+    timeSize: number;
+    timeUnit: TimeUnitChar;
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
@@ -305,6 +304,7 @@ const formatAlertResult = <AlertResult>(
   const formatter = createFormatter('percent');
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
   const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
+
   return {
     ...alertResult,
     currentValue:

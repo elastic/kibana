@@ -25,63 +25,63 @@ describe('lifespan', () => {
       expect(() => getStatusInfo([], new Date('blah'))).toThrowError('Invalid Date');
     });
 
-    it('sets reopen to 1 when status goes from open -> closed -> open', () => {
+    it('causes a reopen status goes from open -> closed -> open', () => {
       expect(
         getStatusInfo(
           [
-            createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
-            createStatusChangeSavedObject(CaseStatuses.open, new Date()),
+            createStatusChangeSavedObject(CaseStatuses.closed, new Date(1)),
+            createStatusChangeSavedObject(CaseStatuses.open, new Date(2)),
           ],
           new Date(0)
-        ).numberOfReopens
-      ).toBe(1);
+        ).reopenDates
+      ).toEqual([new Date(2).toISOString()]);
     });
 
-    it('sets reopen to 1 when status goes from open -> closed -> in-progress', () => {
+    it('causes a reopen when status goes from open -> closed -> in-progress', () => {
       expect(
         getStatusInfo(
           [
-            createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
-            createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date()),
+            createStatusChangeSavedObject(CaseStatuses.closed, new Date(1)),
+            createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(2)),
           ],
           new Date(0)
-        ).numberOfReopens
-      ).toBe(1);
+        ).reopenDates
+      ).toEqual([new Date(2).toISOString()]);
     });
 
-    it('does not set reopen to 1 when status goes from open -> closed -> closed', () => {
+    it('does not cause a reopen when status goes from open -> closed -> closed', () => {
       expect(
         getStatusInfo(
           [
-            createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
-            createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
+            createStatusChangeSavedObject(CaseStatuses.closed, new Date(1)),
+            createStatusChangeSavedObject(CaseStatuses.closed, new Date(2)),
           ],
           new Date(0)
-        ).numberOfReopens
-      ).toBe(0);
+        ).reopenDates
+      ).toEqual([]);
     });
 
-    it('does not set reopen to 1 when status goes from open -> in-progress', () => {
+    it('does not cause a reopen when status goes from open -> in-progress', () => {
       expect(
         getStatusInfo(
           [createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date())],
           new Date(0)
-        ).numberOfReopens
-      ).toBe(0);
+        ).reopenDates
+      ).toEqual([]);
     });
 
-    it('sets reopen to 2 when status goes from open -> closed -> open twice', () => {
+    it('causes two reopens when status goes from open -> closed -> open twice', () => {
       expect(
         getStatusInfo(
           [
-            createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
-            createStatusChangeSavedObject(CaseStatuses.open, new Date()),
-            createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
-            createStatusChangeSavedObject(CaseStatuses.open, new Date()),
+            createStatusChangeSavedObject(CaseStatuses.closed, new Date(1)),
+            createStatusChangeSavedObject(CaseStatuses.open, new Date(2)),
+            createStatusChangeSavedObject(CaseStatuses.closed, new Date(3)),
+            createStatusChangeSavedObject(CaseStatuses.open, new Date(4)),
           ],
           new Date(0)
-        ).numberOfReopens
-      ).toBe(2);
+        ).reopenDates
+      ).toEqual([new Date(2).toISOString(), new Date(4).toISOString()]);
     });
 
     it('sets the openDuration to 1 and inProgressDuration to 0 when open -> close', () => {
@@ -113,8 +113,8 @@ describe('lifespan', () => {
       expect(inProgressDuration).toBe(10);
     });
 
-    it('ignores non-status user actions with an invalid payload', () => {
-      const { numberOfReopens } = getStatusInfo(
+    it('ignores non-status user actions with an invalid payload and does not cause a reopen', () => {
+      const { reopenDates } = getStatusInfo(
         [
           {
             attributes: { payload: { hello: 1, status: CaseStatuses.closed }, type: 'status' },
@@ -123,11 +123,11 @@ describe('lifespan', () => {
         new Date(0)
       );
 
-      expect(numberOfReopens).toBe(0);
+      expect(reopenDates).toEqual([]);
     });
 
-    it('ignores non-status user actions with an invalid type', () => {
-      const { numberOfReopens } = getStatusInfo(
+    it('ignores non-status user actions with an invalid type and does not cause a reopen', () => {
+      const { reopenDates } = getStatusInfo(
         [
           {
             attributes: { payload: { status: CaseStatuses.closed }, type: 'awesome' },
@@ -136,11 +136,11 @@ describe('lifespan', () => {
         new Date(0)
       );
 
-      expect(numberOfReopens).toBe(0);
+      expect(reopenDates).toEqual([]);
     });
 
-    it('ignores non-status user actions with an created_at time', () => {
-      const { numberOfReopens } = getStatusInfo(
+    it('ignores non-status user actions with an created_at time and does not cause a reopen', () => {
+      const { reopenDates } = getStatusInfo(
         [
           {
             attributes: {
@@ -152,7 +152,7 @@ describe('lifespan', () => {
         new Date(0)
       );
 
-      expect(numberOfReopens).toBe(0);
+      expect(reopenDates).toEqual([]);
     });
 
     it('does not add the current time to a duration when the case is closed', () => {
@@ -193,7 +193,6 @@ function createStatusChangeSavedObject(
       action_id: '',
       case_id: '',
       comment_id: null,
-      sub_case_id: '',
     },
   };
 }

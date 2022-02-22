@@ -51,9 +51,6 @@ describe('POST /api/reporting/generate', () => {
     const mockSetupDeps = createMockPluginSetup({
       security: {
         license: { isEnabled: () => true },
-        authc: {
-          getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
-        },
       },
       router: httpSetup.createRouter(''),
     });
@@ -63,6 +60,11 @@ describe('POST /api/reporting/generate', () => {
         licensing: {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+        },
+        security: {
+          authc: {
+            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+          },
         },
       },
       mockConfigSchema

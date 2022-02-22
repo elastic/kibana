@@ -6,7 +6,6 @@
  */
 
 import { HttpFetchError } from 'src/core/public';
-
 import {
   isGetTransformNodesResponseSchema,
   isGetTransformsResponseSchema,
@@ -18,6 +17,8 @@ import { isTransformStats } from '../../../common/types/transform_stats';
 import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 
 import { useApi } from './use_api';
+import { TRANSFORM_ERROR_TYPE } from '../common/transform';
+import { isDefined } from '../../../common/types/common';
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
@@ -25,6 +26,7 @@ export const useGetTransforms = (
   setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
   setTransformNodes: React.Dispatch<React.SetStateAction<number>>,
   setErrorMessage: React.Dispatch<React.SetStateAction<HttpFetchError | undefined>>,
+  setTransformIdsWithoutConfig: React.Dispatch<React.SetStateAction<string[] | undefined>>,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   blockRefresh: boolean
 ): GetTransforms => {
@@ -67,6 +69,25 @@ export const useGetTransforms = (
         }
 
         return;
+      }
+
+      // There might be some errors with fetching certain transforms
+      // For example, when task exists and is running but the config is deleted
+      if (Array.isArray(transformConfigs.errors) && transformConfigs.errors.length > 0) {
+        const danglingTaskIdMatches = transformConfigs.errors
+          .filter((e) => e.type === TRANSFORM_ERROR_TYPE.DANGLING_TASK)
+          .map((e) => {
+            // Getting the transform id from the ES error message
+            const matches = /\[([^)]+)\]/.exec(e.reason);
+            return Array.isArray(matches) && matches.length >= 1 ? matches[1] : undefined;
+          })
+          .filter(isDefined);
+
+        setTransformIdsWithoutConfig(
+          danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined
+        );
+      } else {
+        setTransformIdsWithoutConfig(undefined);
       }
 
       const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {

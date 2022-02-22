@@ -14,7 +14,7 @@ import {
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
@@ -44,15 +44,13 @@ export const createRulesRoute = (
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
@@ -81,7 +79,7 @@ export const createRulesRoute = (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
           esClient.asCurrentUser,
@@ -106,13 +104,11 @@ export const createRulesRoute = (
           await rulesClient.muteAll({ id: createdRule.id });
         }
 
-        const ruleStatus = await context.securitySolution.getExecutionLogClient().getCurrentStatus({
-          ruleId: createdRule.id,
-          spaceId: context.securitySolution.getSpaceId(),
-        });
+        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
+
         const [validated, errors] = newTransformValidate(
           createdRule,
-          ruleStatus,
+          ruleExecutionSummary,
           isRuleRegistryEnabled
         );
         if (errors != null) {

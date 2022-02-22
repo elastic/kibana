@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { AnalysisResult, InputOverrides } from '../../../../../../file_upload/common';
-import { MB, FILE_FORMATS } from '../../../../../common';
+import { MB, FILE_FORMATS } from '../../../../../common/constants';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;

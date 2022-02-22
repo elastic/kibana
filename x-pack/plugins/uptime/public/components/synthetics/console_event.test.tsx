@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ConsoleEvent } from './console_event';
 

@@ -10,6 +10,7 @@ import moment from 'moment-timezone';
 import React from 'react';
 
 import { LocalizedDateTooltip } from '.';
+import { TestProviders } from '../../common/mock';
 
 describe('LocalizedDateTooltip', () => {
   beforeEach(() => {
@@ -29,9 +30,11 @@ describe('LocalizedDateTooltip', () => {
 
   test('it renders the child content', () => {
     const wrapper = mount(
-      <LocalizedDateTooltip date={date.toDate()}>
-        <SampleContent />
-      </LocalizedDateTooltip>
+      <TestProviders>
+        <LocalizedDateTooltip date={date.toDate()}>
+          <SampleContent />
+        </LocalizedDateTooltip>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="sample-content"]').exists()).toEqual(true);
@@ -39,9 +42,11 @@ describe('LocalizedDateTooltip', () => {
 
   test('it renders', () => {
     const wrapper = mount(
-      <LocalizedDateTooltip date={date.toDate()}>
-        <SampleContent />
-      </LocalizedDateTooltip>
+      <TestProviders>
+        <LocalizedDateTooltip date={date.toDate()}>
+          <SampleContent />
+        </LocalizedDateTooltip>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(true);

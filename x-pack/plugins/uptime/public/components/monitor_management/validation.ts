@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isValidNamespace } from '../../../../fleet/common';
 import {
   ConfigKey,
   DataStream,
@@ -11,12 +12,10 @@ import {
   MonitorFields,
   isServiceLocationInvalid,
 } from '../../../common/runtime_types';
-import { Validation, Validator } from '../../../common/types';
+import { Validation } from '../../../common/types';
 
 export const digitsOnly = /^[0-9]*$/g;
 export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
-
-type ValidationLibrary = Record<string, Validator>;
 
 // returns true if invalid
 function validateHeaders<T>(headers: T): boolean {
@@ -56,7 +55,7 @@ const validateTimeout = ({
 };
 
 // validation functions return true when invalid
-const validateCommon: ValidationLibrary = {
+export const validateCommon: Validation = {
   [ConfigKey.NAME]: ({ [ConfigKey.NAME]: value }) => {
     return !value || typeof value !== 'string';
   },
@@ -65,8 +64,17 @@ const validateCommon: ValidationLibrary = {
     const parsedFloat = parseFloat(number);
     return !parsedFloat || !unit || parsedFloat < 1;
   },
-  [ConfigKey.TIMEOUT]: ({ [ConfigKey.TIMEOUT]: timeout, [ConfigKey.SCHEDULE]: schedule }) => {
+  [ConfigKey.TIMEOUT]: ({
+    [ConfigKey.MONITOR_TYPE]: monitorType,
+    [ConfigKey.TIMEOUT]: timeout,
+    [ConfigKey.SCHEDULE]: schedule,
+  }) => {
     const { number, unit } = schedule as MonitorFields[ConfigKey.SCHEDULE];
+
+    // Timeout is not currently supported by browser monitors
+    if (monitorType === DataStream.BROWSER) {
+      return false;
+    }
 
     return (
       !timeout ||
@@ -83,9 +91,13 @@ const validateCommon: ValidationLibrary = {
       !Array.isArray(locations) || locations.length < 1 || locations.some(isServiceLocationInvalid)
     );
   },
+  [ConfigKey.NAMESPACE]: ({ [ConfigKey.NAMESPACE]: value }) => {
+    const { error = '', valid } = isValidNamespace(value ?? '');
+    return valid ? false : error;
+  },
 };
 
-const validateHTTP: ValidationLibrary = {
+const validateHTTP: Validation = {
   [ConfigKey.RESPONSE_STATUS_CHECK]: ({ [ConfigKey.RESPONSE_STATUS_CHECK]: value }) => {
     const statusCodes = value as MonitorFields[ConfigKey.RESPONSE_STATUS_CHECK];
     return statusCodes.length ? statusCodes.some((code) => !`${code}`.match(digitsOnly)) : false;
@@ -105,14 +117,14 @@ const validateHTTP: ValidationLibrary = {
   ...validateCommon,
 };
 
-const validateTCP: Record<string, Validator> = {
+const validateTCP: Validation = {
   [ConfigKey.HOSTS]: ({ [ConfigKey.HOSTS]: value }) => {
     return !value || !`${value}`.match(includesValidPort);
   },
   ...validateCommon,
 };
 
-const validateICMP: ValidationLibrary = {
+const validateICMP: Validation = {
   [ConfigKey.HOSTS]: ({ [ConfigKey.HOSTS]: value }) => !value,
   [ConfigKey.WAIT]: ({ [ConfigKey.WAIT]: value }) =>
     !!value &&
@@ -127,7 +139,7 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
   return isNaN(throttleValue) || (allowZero ? throttleValue < 0 : throttleValue <= 0);
 };
 
-const validateBrowser: ValidationLibrary = {
+const validateBrowser: Validation = {
   ...validateCommon,
   [ConfigKey.SOURCE_ZIP_URL]: ({
     [ConfigKey.SOURCE_ZIP_URL]: zipUrl,

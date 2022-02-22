@@ -22,6 +22,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { PolicyData } from '../../../../../../common/endpoint/types';
+import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
 import {
   EffectedPolicySelect,
   EffectedPolicySelection,
@@ -33,7 +34,6 @@ import {
   getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
 } from '../../../../components/effected_policy_select/utils';
-import { isValidIPv4OrCIDR } from '../../utils';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,

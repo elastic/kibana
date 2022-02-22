@@ -16,7 +16,7 @@ interface CommonProps {
 }
 
 export const PolicyEventFiltersEmptyUnexisting = memo<CommonProps>(({ policyId, policyName }) => {
-  const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
+  const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName, { show: 'create' });
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt

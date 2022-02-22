@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*",
+    "server/**/*",
+    "common/**/*",
+    "../../../typings/**/*"
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/expressions/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/data_views/tsconfig.json" },
+    { "path": "../../../src/plugins/field_formats/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../plugins/lens/tsconfig.json" },
+    { "path": "../../../examples/developer_examples/tsconfig.json" },
+  ]
+}

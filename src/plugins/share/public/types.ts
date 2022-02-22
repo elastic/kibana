@@ -10,6 +10,14 @@ import { ComponentType } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Capabilities } from 'src/core/public';
+import type { UrlService } from '../common/url_service';
+import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+
+export type BrowserUrlService = UrlService<
+  BrowserShortUrlClientFactoryCreateParams,
+  BrowserShortUrlClient
+>;
 
 /**
  * @public

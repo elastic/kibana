@@ -15,6 +15,7 @@ import {
   mockEcsDataWithAlert,
   mockTimelineDetails,
   mockTimelineResult,
+  mockAADEcsDataWithAlert,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
@@ -28,10 +29,17 @@ import type { ISearchStart } from '../../../../../../../src/plugins/data/public'
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { KibanaServices } from '../../../common/lib/kibana';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
 }));
+
+jest.mock('../../../common/lib/kibana');
 
 describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
@@ -40,6 +48,9 @@ describe('alert actions', () => {
   let updateTimelineIsLoading: UpdateTimelineLoading;
   let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
+  let mockKibanaServices: jest.Mock;
+  let fetchMock: jest.Mock;
+  let toastMock: jest.Mock;
 
   beforeEach(() => {
     // jest carries state between mocked implementations when using
@@ -51,6 +62,14 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+    mockKibanaServices = KibanaServices.get as jest.Mock;
+
+    fetchMock = jest.fn();
+    toastMock = jest.fn();
+    mockKibanaServices.mockReturnValue({
+      http: { fetch: fetchMock },
+      notifications: { toasts: { addError: toastMock } },
+    });
 
     searchStrategyClient = {
       ...dataPluginMock.createStartContract().search,
@@ -268,6 +287,9 @@ describe('alert actions', () => {
           updateTimelineIsLoading,
           searchStrategyClient,
         });
+        const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
+
+        delete defaultTimelinePropsWithoutNote.ruleNote;
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -278,7 +300,17 @@ describe('alert actions', () => {
           isLoading: false,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith({
+          ...defaultTimelinePropsWithoutNote,
+          timeline: {
+            ...defaultTimelinePropsWithoutNote.timeline,
+            dataProviders: [],
+            kqlQuery: {
+              filterQuery: null,
+            },
+            resolveTimelineConfig: undefined,
+          },
+        });
       });
     });
 
@@ -289,8 +321,7 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule,
-              // @ts-expect-error
-              timeline_id: null,
+              timeline_id: [''],
             },
           },
         };
@@ -362,6 +393,7 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            resolveTimelineConfig: undefined,
             dataProviders: [
               {
                 and: [],
@@ -404,6 +436,59 @@ describe('alert actions', () => {
   });
 
   describe('determineToAndFrom', () => {
+    const ecsDataMockWithNoTemplateTimeline = getThresholdDetectionAlertAADMock({
+      ...mockAADEcsDataWithAlert,
+      kibana: {
+        alert: {
+          ...mockAADEcsDataWithAlert.kibana?.alert,
+          rule: {
+            ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+            parameters: {
+              ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+              threshold: {
+                field: ['destination.ip'],
+                value: 1,
+              },
+            },
+            name: ['mock threshold rule'],
+            saved_id: [],
+            type: ['threshold'],
+            uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+            timeline_id: undefined,
+            timeline_title: undefined,
+          },
+          threshold_result: {
+            count: 99,
+            from: '2021-01-10T21:11:45.839Z',
+            cardinality: [
+              {
+                field: 'source.ip',
+                value: 1,
+              },
+            ],
+            terms: [
+              {
+                field: 'destination.ip',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+    });
+    beforeEach(() => {
+      fetchMock.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: ecsDataMockWithNoTemplateTimeline[0]._id,
+              _index: 'mock',
+              _source: ecsDataMockWithNoTemplateTimeline[0],
+            },
+          ],
+        },
+      });
+    });
     test('it uses ecs.Data.timestamp if one is provided', () => {
       const ecsDataMock: Ecs = {
         ...mockEcsDataWithAlert,
@@ -424,14 +509,12 @@ describe('alert actions', () => {
     });
 
     test('it uses original_time and threshold_result.from for threshold alerts', async () => {
-      const ecsDataMock = getThresholdDetectionAlertAADMock();
-
       const expectedFrom = '2021-01-10T21:11:45.839Z';
       const expectedTo = '2021-01-10T21:12:45.839Z';
 
       await sendAlertToTimelineAction({
         createTimeline,
-        ecsData: ecsDataMock,
+        ecsData: ecsDataMockWithNoTemplateTimeline,
         updateTimelineIsLoading,
         searchStrategyClient,
       });
@@ -470,6 +553,88 @@ describe('alert actions', () => {
         from: expectedFrom,
         to: expectedTo,
       });
+    });
+  });
+
+  describe('show toasts when data is malformed', () => {
+    const ecsDataMockWithNoTemplateTimeline = getThresholdDetectionAlertAADMock({
+      ...mockAADEcsDataWithAlert,
+      kibana: {
+        alert: {
+          ...mockAADEcsDataWithAlert.kibana?.alert,
+          rule: {
+            ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+            parameters: {
+              ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+              threshold: {
+                field: ['destination.ip'],
+                value: 1,
+              },
+            },
+            name: ['mock threshold rule'],
+            saved_id: [],
+            type: ['threshold'],
+            uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+            timeline_id: undefined,
+            timeline_title: undefined,
+          },
+          threshold_result: {
+            count: 99,
+            from: '2021-01-10T21:11:45.839Z',
+            cardinality: [
+              {
+                field: 'source.ip',
+                value: 1,
+              },
+            ],
+            terms: [
+              {
+                field: 'destination.ip',
+                value: 1,
+              },
+            ],
+          },
+        },
+      },
+    });
+    beforeEach(() => {
+      fetchMock.mockResolvedValue({
+        hits: 'not correctly formed doc',
+      });
+    });
+    test('renders a toast and calls create timeline with basic defaults', async () => {
+      const expectedFrom = DEFAULT_FROM_MOMENT.toISOString();
+      const expectedTo = DEFAULT_TO_MOMENT.toISOString();
+      const timelineProps = {
+        ...defaultTimelineProps,
+        timeline: {
+          ...defaultTimelineProps.timeline,
+          dataProviders: [],
+          dateRange: {
+            start: expectedFrom,
+            end: expectedTo,
+          },
+          description: '',
+          kqlQuery: {
+            filterQuery: null,
+          },
+          resolveTimelineConfig: undefined,
+        },
+        from: expectedFrom,
+        to: expectedTo,
+      };
+
+      delete timelineProps.ruleNote;
+
+      await sendAlertToTimelineAction({
+        createTimeline,
+        ecsData: ecsDataMockWithNoTemplateTimeline,
+        updateTimelineIsLoading,
+        searchStrategyClient,
+      });
+      expect(createTimeline).toHaveBeenCalledTimes(1);
+      expect(createTimeline).toHaveBeenCalledWith(timelineProps);
+      expect(toastMock).toHaveBeenCalled();
     });
   });
 });

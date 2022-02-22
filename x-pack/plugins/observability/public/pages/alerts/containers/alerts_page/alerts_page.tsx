@@ -140,9 +140,8 @@ function AlertsPage() {
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
   const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
-    return callObservabilityApi({
+    return callObservabilityApi('GET /api/observability/rules/alerts/dynamic_index_pattern', {
       signal,
-      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
       params: {
         query: {
           namespace: 'default',
@@ -166,7 +165,7 @@ function AlertsPage() {
       {
         id: 'dynamic-observability-alerts-table-index-pattern',
         title: indexNames.join(','),
-        fields: await plugins.data.indexPatterns.getFieldsForWildcard({
+        fields: await plugins.dataViews.getFieldsForWildcard({
           pattern: indexNames.join(','),
           allowNoIndex: true,
         }),

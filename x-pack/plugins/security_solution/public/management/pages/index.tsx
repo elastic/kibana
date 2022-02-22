@@ -15,6 +15,7 @@ import {
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
@@ -27,6 +28,7 @@ import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
+import { BlocklistContainer } from './blocklist';
 
 const NoPermissions = memo(() => {
   return (
@@ -46,7 +48,7 @@ const NoPermissions = memo(() => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
+              defaultMessage="You must have the superuser role to use this feature. If you do not have the superuser role and do not have permissions to edit user roles, contact your Kibana administrator."
             />
           </EuiText>
         }
@@ -110,6 +112,7 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
       />
+      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>

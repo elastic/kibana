@@ -75,11 +75,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
     const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(
-      savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
-      { uiSettings, data }
-    );
+    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
   public isCompatible = async (context: ActionContext) => {
@@ -144,11 +140,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
     await this.apiClient
       .createImmediateReport(immediateJobParams)
-      .then((rawResponse) => {
+      .then(({ body, response }) => {
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([body as BlobPart], {
+          type: response?.headers.get('content-type') || undefined,
+        });
 
         // Hack for IE11 Support
         // @ts-expect-error

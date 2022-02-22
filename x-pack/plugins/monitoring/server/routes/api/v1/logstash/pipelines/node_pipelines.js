@@ -8,8 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
 
 /**
@@ -46,10 +44,8 @@ export function logstashNodePipelinesRoute(server) {
       },
     },
     handler: async (req) => {
-      const config = server.config();
-      const { ccs, pagination, sort, queryText } = req.payload;
+      const { pagination, sort, queryText } = req.payload;
       const { clusterUuid, logstashUuid } = req.params;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       const throughputMetric = 'logstash_node_pipeline_throughput';
       const nodesCountMetric = 'logstash_node_pipeline_nodes_count';
@@ -66,7 +62,6 @@ export function logstashNodePipelinesRoute(server) {
       try {
         const response = await getPaginatedPipelines({
           req,
-          lsIndexPattern,
           clusterUuid,
           logstashUuid,
           metrics: { throughputMetric, nodesCountMetric },
@@ -77,7 +72,7 @@ export function logstashNodePipelinesRoute(server) {
 
         return {
           ...response,
-          nodeSummary: await getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
+          nodeSummary: await getNodeInfo(req, { clusterUuid, logstashUuid }),
         };
       } catch (err) {
         throw handleError(err, req);

@@ -19,6 +19,8 @@ import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -95,7 +97,7 @@ export function handleResponse(
 }
 
 export function buildGetIndicesQuery(
-  esIndexPattern: string,
+  req: LegacyRequest,
   clusterUuid: string,
   {
     start,
@@ -113,9 +115,18 @@ export function buildGetIndicesQuery(
     });
   }
   const metricFields = ElasticsearchMetric.getMetricFields();
+  const dataset = 'index'; // data_stream.dataset
+  const type = 'index_stats'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    dataset,
+    moduleType,
+  });
 
   return {
-    index: esIndexPattern,
+    index: indexPatterns,
     size,
     ignore_unavailable: true,
     filter_path: [
@@ -145,7 +156,9 @@ export function buildGetIndicesQuery(
     ],
     body: {
       query: createQuery({
-        types: ['index', 'index_stats'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -167,21 +180,18 @@ export function buildGetIndicesQuery(
 
 export function getIndices(
   req: LegacyRequest,
-  esIndexPattern: string,
   showSystemIndices: boolean = false,
   shardStats: any
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
-
   const { min: start, max: end } = req.payload.timeRange;
 
   const clusterUuid = req.params.clusterUuid;
-  const config = req.server.config();
-  const params = buildGetIndicesQuery(esIndexPattern, clusterUuid, {
+  const config = req.server.config;
+  const params = buildGetIndicesQuery(req, clusterUuid, {
     start,
     end,
     showSystemIndices,
-    size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
+    size: config.ui.max_bucket_size,
   });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

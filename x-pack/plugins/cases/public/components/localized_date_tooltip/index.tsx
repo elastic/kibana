@@ -6,9 +6,9 @@
  */
 
 import { EuiToolTip, EuiText, useEuiTheme } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import React from 'react';
+import { useTimeZone } from '../../common/lib/kibana';
 
 export const LocalizedDateTooltip = React.memo<{
   children: React.ReactNode;
@@ -23,17 +23,12 @@ export const LocalizedDateTooltip = React.memo<{
       anchorClassName={className}
       content={
         <EuiText data-test-subj="dates-container" size="s">
-          {fieldName != null ? <p data-test-subj="field-name">{fieldName}</p> : null}
-          <strong>
-            <FormattedRelative
-              data-test-subj="humanized-relative-date"
-              value={moment.utc(date).toDate()}
-            />
-          </strong>
-          <ul>
-            <li data-test-subj="with-day-of-week">{moment.utc(date).local().format('llll')}</li>
-            <li data-test-subj="with-time-zone-offset-in-hours">{moment(date).format()}</li>
-          </ul>
+          {fieldName != null ? (
+            <p data-test-subj="field-name">
+              <strong>{fieldName}</strong>
+            </p>
+          ) : null}
+          <p>{moment.tz(date, useTimeZone()).format('llll')}</p>
         </EuiText>
       }
     >

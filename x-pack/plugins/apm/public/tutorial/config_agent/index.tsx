@@ -13,7 +13,7 @@ import {
   isPrereleaseVersion,
   SUPPORTED_APM_PACKAGE_VERSION,
 } from '../../../common/fleet';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';

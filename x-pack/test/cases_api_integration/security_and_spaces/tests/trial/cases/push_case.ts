@@ -245,25 +245,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(theCase.status).to.eql('closed');
     });
 
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    it.skip('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
-      const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
-        serviceNowSimulatorURL,
-        actionsRemover,
-        configureReq: {
-          closure_type: 'close-by-pushing',
-        },
-      });
-
-      const theCase = await pushCase({
-        supertest,
-        caseId: postedCase.id,
-        connectorId: connector.id,
-      });
-      expect(theCase.status).to.eql(CaseStatuses.open);
-    });
-
     it('unhappy path - 404s when case does not exist', async () => {
       await pushCase({
         supertest,

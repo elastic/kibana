@@ -15,7 +15,7 @@ import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -98,21 +98,22 @@ export function TransactionDurationAlertTrigger(props: Props) {
         windowUnit: params.windowUnit as TimeUnit,
       });
       if (interval && start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/alerts/chart_preview/transaction_duration',
-          params: {
-            query: {
-              aggregationType: params.aggregationType,
-              environment: params.environment,
-              serviceName: params.serviceName,
-              transactionType: params.transactionType,
-              interval,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/alerts/chart_preview/transaction_duration',
+          {
+            params: {
+              query: {
+                aggregationType: params.aggregationType,
+                environment: params.environment,
+                serviceName: params.serviceName,
+                transactionType: params.transactionType,
+                interval,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [

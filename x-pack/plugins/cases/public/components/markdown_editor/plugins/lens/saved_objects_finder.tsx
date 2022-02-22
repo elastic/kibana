@@ -102,6 +102,8 @@ export type SavedObjectFinderUiProps = {
   uiSettings: CoreStart['uiSettings'];
 } & SavedObjectFinderProps;
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 export class SavedObjectFinderUi extends React.Component<
   SavedObjectFinderUiProps,
   SavedObjectFinderState

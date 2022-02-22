@@ -270,6 +270,7 @@ export class ExecuteReportTask implements ReportingTask {
     const store = await this.getStore();
     const doc = {
       completed_at: completedTime,
+      metrics: output.metrics,
       output: docOutput,
     };
     docId = `/${report._index}/_doc/${report._id}`;
@@ -358,12 +359,15 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
-            eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
-
             await promisify(finished)(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
+
+            eventLog.logExecutionComplete({
+              ...(report.metrics ?? {}),
+              byteSize: stream.bytesWritten,
+            });
 
             if (output) {
               this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);

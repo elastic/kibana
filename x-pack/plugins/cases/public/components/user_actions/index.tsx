@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import styled from 'styled-components';
 
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
@@ -46,13 +45,16 @@ export const UserActions = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, subCaseId, commentId } = useCaseViewParams();
+    const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
 
-    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
-      getManualAlertIdsWithNoRuleId(caseData.comments)
+    const alertIdsWithoutRuleInfo = useMemo(
+      () => getManualAlertIdsWithNoRuleId(caseData.comments),
+      [caseData.comments]
     );
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
     const {
       loadingCommentIds,
@@ -77,7 +79,6 @@ export const UserActions = React.memo(
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
           showLoading={false}
           statusActionButton={statusActionButton}
-          subCaseId={subCaseId}
         />
       ),
       [
@@ -86,7 +87,6 @@ export const UserActions = React.memo(
         handleUpdate,
         handleManageMarkdownEditId,
         statusActionButton,
-        subCaseId,
         commentRefs,
       ]
     );

@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 export const createFormToggleAction = (testBed: TestBed, dataTestSubject: string) => async () => {
   const { form, component } = testBed;

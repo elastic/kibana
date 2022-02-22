@@ -9,6 +9,7 @@ import './expression.scss';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
@@ -70,28 +71,27 @@ function getColorStyling(
     return {};
   }
 
-  const { continuity = 'above', rangeMin, stops, colors } = palette.params;
-  const penultimateStop = stops[stops.length - 2];
+  const { rangeMin, rangeMax, stops, colors } = palette.params;
 
-  if (continuity === 'none' && (value < rangeMin || value > penultimateStop)) {
+  if (value > rangeMax) {
     return {};
   }
-  if (continuity === 'below' && value > penultimateStop) {
-    return {};
-  }
-  if (continuity === 'above' && value < rangeMin) {
+  if (value < rangeMin) {
     return {};
   }
   const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
-  const rawIndex = stops.findIndex((v) => v > value);
+  let rawIndex = stops.findIndex((v) => v > value);
 
-  let colorIndex = rawIndex;
-  if (['all', 'below'].includes(continuity) && value < rangeMin && colorIndex < 0) {
-    colorIndex = 0;
+  if (!isFinite(rangeMax) && value > stops[stops.length - 1]) {
+    rawIndex = stops.length - 1;
   }
-  if (['all', 'above'].includes(continuity) && value > penultimateStop && colorIndex < 0) {
-    colorIndex = stops.length - 1;
+
+  // in this case first stop is -Infinity
+  if (!isFinite(rangeMin) && value < (isFinite(stops[0]) ? stops[0] : stops[1])) {
+    rawIndex = 0;
   }
+
+  const colorIndex = rawIndex;
 
   const color = colors[colorIndex];
   const styling = {
@@ -110,7 +110,7 @@ export function MetricChart({
   formatFactory,
   uiSettings,
 }: MetricChartProps & { formatFactory: FormatFactory; uiSettings: IUiSettingsClient }) {
-  const { metricTitle, accessor, mode, colorMode, palette } = args;
+  const { metricTitle, accessor, mode, colorMode, palette, titlePosition, textAlign, size } = args;
   const firstTable = Object.values(data.tables)[0];
 
   const getEmptyState = () => (
@@ -145,19 +145,27 @@ export function MetricChart({
 
   return (
     <VisualizationContainer className="lnsMetricExpression__container" style={color}>
-      <AutoScale key={value}>
-        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
-          {value}
-        </div>
+      <AutoScale
+        key={value}
+        titlePosition={titlePosition}
+        textAlign={textAlign}
+        size={size}
+        minScale={mode === 'full' ? undefined : 0.05}
+      >
         {mode === 'full' && (
           <div
             data-test-subj="lns_metric_title"
-            className="lnsMetricExpression__title"
+            className={classNames('lnsMetricExpression__title', {
+              reverseOrder: ['bottom', 'right'].includes(titlePosition ?? ''),
+            })}
             style={colorMode === ColorMode.Background ? color : undefined}
           >
             {metricTitle}
           </div>
         )}
+        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
+          {value}
+        </div>
       </AutoScale>
     </VisualizationContainer>
   );

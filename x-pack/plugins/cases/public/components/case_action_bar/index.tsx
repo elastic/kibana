@@ -8,19 +8,19 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { Case } from '../../../common/ui/types';
-import { CaseStatuses, CaseType } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { CASE_OPENED_BY } from '../../components/status/translations';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
-import { getStatusDate } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { getStatusDate } from './helpers';
 
-interface CaseActionBarProps {
+export interface CaseActionBarProps {
   caseData: Case;
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
@@ -36,7 +36,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   onRefresh,
   onUpdateField,
 }) => {
-  const { isSyncAlertsEnabled } = useCasesFeatures();
+  const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const onStatusChanged = useCallback(
     (status: CaseStatuses) =>
@@ -60,15 +60,15 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center">
-          {caseData.type !== CaseType.collection && (
-            <EuiFlexItem grow={false}>
-              <StatusContextMenu
-                currentStatus={caseData.status}
-                disabled={!userCanCrud || isLoading}
-                onStatusChanged={onStatusChanged}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            {i18n.STATUS}
+            <StatusContextMenu
+              currentStatus={caseData.status}
+              disabled={!userCanCrud || isLoading}
+              onStatusChanged={onStatusChanged}
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <p>

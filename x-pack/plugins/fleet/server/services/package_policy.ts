@@ -28,7 +28,6 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
-  SO_SEARCH_LIMIT,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -42,6 +41,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
+  InstallablePackage,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -56,7 +56,6 @@ import type {
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
-  RegistryPackage,
   DryRunPackagePolicy,
 } from '../types';
 import type { ExternalCallback } from '..';
@@ -72,6 +71,7 @@ import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
+import { getArchivePackage } from './epm/archive';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -104,6 +104,8 @@ class PackagePolicyService {
       overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
+    // trailing whitespace causes issues creating API keys
+    packagePolicy.name = packagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       const existingPoliciesWithName = await this.list(soClient, {
         perPage: 1,
@@ -112,7 +114,9 @@ class PackagePolicyService {
 
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
-        throw new IngestManagerError('There is already an integration policy with the same name');
+        throw new IngestManagerError(
+          `There is already an integration policy with the same name: ${packagePolicy.name}`
+        );
       }
     }
 
@@ -131,7 +135,8 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
-      let pkgInfo;
+      let pkgInfo: PackageInfo;
+
       if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
       else {
         const [, packageInfo] = await Promise.all([
@@ -159,16 +164,21 @@ class PackagePolicyService {
       }
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      let installablePackage: InstallablePackage | undefined =
+        getArchivePackage(pkgInfo)?.packageInfo;
+
+      if (!installablePackage) {
+        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      }
 
       inputs = await this._compilePackagePolicyInputs(
-        registryPkgInfo,
+        installablePackage,
         pkgInfo,
         packagePolicy.vars || {},
         inputs
       );
 
-      elasticsearch = registryPkgInfo.elasticsearch;
+      elasticsearch = installablePackage.elasticsearch;
     }
 
     const isoDate = new Date().toISOString();
@@ -360,10 +370,11 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    packagePolicy: UpdatePackagePolicy,
+    packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser },
     currentVersion?: string
   ): Promise<PackagePolicy> {
+    const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
@@ -396,14 +407,20 @@ class PackagePolicyService {
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      let installablePackage: InstallablePackage | undefined =
+        getArchivePackage(pkgInfo)?.packageInfo;
+
+      if (!installablePackage) {
+        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      }
+
       inputs = await this._compilePackagePolicyInputs(
-        registryPkgInfo,
+        installablePackage,
         pkgInfo,
         packagePolicy.vars || {},
         inputs
       );
-      elasticsearch = registryPkgInfo.elasticsearch;
+      elasticsearch = installablePackage.elasticsearch;
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -730,14 +747,23 @@ class PackagePolicyService {
             })),
           } as NewPackagePolicyInput;
         });
+        let agentPolicyId;
+        // fallback to first agent policy id in case no policy_id is specified, BWC with 8.0
+        if (!newPolicy.policy_id) {
+          const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+            perPage: 1,
+          });
+          if (agentPolicies.length > 0) {
+            agentPolicyId = agentPolicies[0].id;
+          }
+        }
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
           namespace: newPolicy.namespace ?? 'default',
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
-          policy_id:
-            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
+          policy_id: newPolicy.policy_id ?? agentPolicyId,
           output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
@@ -786,14 +812,19 @@ class PackagePolicyService {
   }
 
   public async _compilePackagePolicyInputs(
-    registryPkgInfo: RegistryPackage,
+    installablePackage: InstallablePackage,
     pkgInfo: PackageInfo,
     vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
-      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);
+      const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input);
+      const compiledStreams = await _compilePackageStreams(
+        installablePackage,
+        pkgInfo,
+        vars,
+        input
+      );
       return {
         ...input,
         compiled_input: compiledInput,
@@ -904,7 +935,6 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
 }
 
 async function _compilePackagePolicyInput(
-  registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
@@ -929,7 +959,7 @@ async function _compilePackagePolicyInput(
     return undefined;
   }
 
-  const [pkgInputTemplate] = await getAssetsData(registryPkgInfo, (path: string) =>
+  const [pkgInputTemplate] = await getAssetsData(pkgInfo, (path: string) =>
     path.endsWith(`/agent/input/${packageInput.template_path!}`)
   );
 
@@ -945,13 +975,13 @@ async function _compilePackagePolicyInput(
 }
 
 async function _compilePackageStreams(
-  registryPkgInfo: RegistryPackage,
+  installablePackage: InstallablePackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
+    _compilePackageStream(pkgInfo, vars, input, stream)
   );
 
   return await Promise.all(streamsPromises);
@@ -994,7 +1024,6 @@ export function _applyIndexPrivileges(
 }
 
 async function _compilePackageStream(
-  registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
@@ -1037,7 +1066,7 @@ async function _compilePackageStream(
   const datasetPath = packageDataStream.path;
 
   const [pkgStreamTemplate] = await getAssetsData(
-    registryPkgInfo,
+    pkgInfo,
     (path: string) => path.endsWith(streamFromPkg.template_path),
     datasetPath
   );
@@ -1369,37 +1398,10 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
 
     // Ensure that any value from the original object is persisted on the newly merged resulting object,
     // even if we merge other data about the given variable
-    if (keepOriginalValue && originalVar?.value) {
+    if (keepOriginalValue && originalVar?.value !== undefined) {
       result.vars[name].value = originalVar.value;
     }
   }
 
   return result;
-}
-
-export async function incrementPackageName(
-  soClient: SavedObjectsClientContract,
-  packageName: string
-) {
-  // Fetch all packagePolicies having the package name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
-  });
-
-  // Retrieve highest number appended to package policy name and increment it by one
-  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
-
-  const pkgPoliciesWithMatchingNames = packagePolicyData?.items
-    ? packagePolicyData.items
-        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort((a, b) => a - b)
-    : [];
-
-  return `${packageName}-${
-    pkgPoliciesWithMatchingNames.length
-      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-      : 1
-  }`;
 }

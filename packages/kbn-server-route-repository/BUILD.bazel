@@ -38,7 +38,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-config-schema:npm_module_types",
-  "//packages/kbn-io-ts-utils",
+  "//packages/kbn-io-ts-utils:npm_module_types",
   "@npm//@hapi/boom",
   "@npm//fp-ts",
   "@npm//utility-types",

@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 export const createSavePolicyAction = (testBed: TestBed) => async () => {
   const { find, component } = testBed;

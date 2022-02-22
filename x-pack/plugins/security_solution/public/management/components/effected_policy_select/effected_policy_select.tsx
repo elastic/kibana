@@ -28,6 +28,7 @@ import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { useAppUrl } from '../../../common/lib/kibana/hooks';
+import { Loader } from '../../../common/components/loader';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
@@ -42,6 +43,20 @@ const StyledEuiSelectable = styled.div`
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     border-top-width: 0;
+  }
+`;
+
+const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
+  @media only screen and (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    align-items: center;
+  }
+`;
+
+const StyledButtonGroup = styled(EuiButtonGroup)`
+  display: flex;
+  justify-content: right;
+  .euiButtonGroupButton {
+    padding-right: ${(props) => props.theme.eui.paddingSizes.l};
   }
 `;
 
@@ -79,6 +94,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     isGlobal,
     isPlatinumPlus,
     description,
+    isLoading = false,
     onChange,
     listProps,
     options,
@@ -97,7 +113,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
-          iconType: isGlobal ? 'checkInCircleFilled' : '',
+          iconType: isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('global'),
         },
         {
@@ -105,7 +121,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
-          iconType: !isGlobal ? 'checkInCircleFilled' : '',
+          iconType: !isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('perPolicy'),
         },
       ],
@@ -206,37 +222,40 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <StyledEuiFlexItemButtonGroup grow={1}>
             <EuiFormRow fullWidth>
-              <EuiButtonGroup
+              <StyledButtonGroup
                 legend="Global Policy Toggle"
                 options={toggleGlobal}
                 idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
                 onChange={handleGlobalButtonChange}
                 color="primary"
-                isFullWidth
+                data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
               />
             </EuiFormRow>
-          </EuiFlexItem>
+          </StyledEuiFlexItemButtonGroup>
         </EuiFlexGroup>
         <EuiSpacer />
-        {!isGlobal && (
-          <EuiFormRow fullWidth>
-            <StyledEuiSelectable>
-              <EuiSelectable<OptionPolicyData>
-                {...otherSelectableProps}
-                options={selectableOptions}
-                listProps={listProps || DEFAULT_LIST_PROPS}
-                onChange={handleOnPolicySelectChange}
-                searchProps={SEARCH_PROPS}
-                searchable={true}
-                data-test-subj={getTestId('policiesSelectable')}
-              >
-                {listBuilderCallback}
-              </EuiSelectable>
-            </StyledEuiSelectable>
-          </EuiFormRow>
-        )}
+        {!isGlobal &&
+          (isLoading ? (
+            <Loader size="l" data-test-subj={getTestId('policiesLoader')} />
+          ) : (
+            <EuiFormRow fullWidth>
+              <StyledEuiSelectable>
+                <EuiSelectable<OptionPolicyData>
+                  {...otherSelectableProps}
+                  options={selectableOptions}
+                  listProps={listProps || DEFAULT_LIST_PROPS}
+                  onChange={handleOnPolicySelectChange}
+                  searchProps={SEARCH_PROPS}
+                  searchable={true}
+                  data-test-subj={getTestId('policiesSelectable')}
+                >
+                  {listBuilderCallback}
+                </EuiSelectable>
+              </StyledEuiSelectable>
+            </EuiFormRow>
+          ))}
       </EffectivePolicyFormContainer>
     );
   }

@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButton } from '@elastic/eui';
 import { caseStatuses, CaseStatuses } from '../../../common/api';
-import { Status, statuses } from '../status';
+import { statuses } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
 
 interface Props {

@@ -10,29 +10,17 @@ import {
   Chart,
   CurveType,
   LineSeries,
+  PartialTheme,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { merge } from 'lodash';
 import React from 'react';
 import { useChartTheme } from '../../../../../../observability/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
-
-export type Color =
-  | 'euiColorVis0'
-  | 'euiColorVis1'
-  | 'euiColorVis2'
-  | 'euiColorVis3'
-  | 'euiColorVis4'
-  | 'euiColorVis5'
-  | 'euiColorVis6'
-  | 'euiColorVis7'
-  | 'euiColorVis8'
-  | 'euiColorVis9';
 
 function hasValidTimeseries(
   series?: Coordinate[] | null
@@ -48,19 +36,21 @@ export function SparkPlot({
   comparisonSeries = [],
   valueLabel,
   compact,
+  comparisonSeriesColor,
 }: {
-  color: Color;
+  color: string;
   series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
+  comparisonSeriesColor: string;
 }) {
   const theme = useTheme();
   const defaultChartTheme = useChartTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+  const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
-  const sparkplotChartTheme = merge({}, defaultChartTheme, {
+  const sparkplotChartTheme: PartialTheme = {
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     lineSeriesStyle: {
       point: { opacity: 0 },
@@ -69,9 +59,7 @@ export function SparkPlot({
       point: { opacity: 0 },
     },
     ...(hasComparisonSeries ? comparisonChartTheme : {}),
-  });
-
-  const colorValue = theme.eui[color];
+  };
 
   const chartSize = {
     height: theme.eui.euiSizeL,
@@ -95,7 +83,7 @@ export function SparkPlot({
         {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
             <Settings
-              theme={sparkplotChartTheme}
+              theme={[sparkplotChartTheme, ...defaultChartTheme]}
               showLegend={false}
               tooltip="none"
             />
@@ -106,7 +94,7 @@ export function SparkPlot({
               xAccessor={'x'}
               yAccessors={['y']}
               data={series}
-              color={colorValue}
+              color={color}
               curve={CurveType.CURVE_MONOTONE_X}
             />
             {hasComparisonSeries && (
@@ -117,7 +105,7 @@ export function SparkPlot({
                 xAccessor={'x'}
                 yAccessors={['y']}
                 data={comparisonSeries}
-                color={theme.eui.euiColorLightestShade}
+                color={comparisonSeriesColor}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
             )}

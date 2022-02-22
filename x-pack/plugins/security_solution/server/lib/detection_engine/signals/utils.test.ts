@@ -7,13 +7,14 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
@@ -45,7 +46,7 @@ import {
   isRACAlert,
   getField,
 } from './utils';
-import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
+import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
@@ -61,8 +62,8 @@ import {
   sampleAlertDocNoSortIdWithTimestamp,
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
-import { ShardError } from '../../types';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import type { ShardError } from '../../types';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -70,8 +71,6 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
-
-const ruleStatusClient = ruleExecutionLogClientMock.create();
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -569,12 +568,11 @@ describe('utils', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItem: jest.fn().mockResolvedValue({
-            data: [getExceptionListItemSchemaMock()],
-            page: 1,
-            per_page: 10000,
-            total: 1,
-          }),
+          findExceptionListsItemPointInTimeFinder: jest
+            .fn()
+            .mockImplementationOnce(({ executeFunctionOnStream }) => {
+              executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
+            }),
         } as unknown as ExceptionListClient);
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
@@ -582,23 +580,25 @@ describe('utils', () => {
         lists: getListArrayMock(),
       });
 
-      expect(client.findExceptionListsItem).toHaveBeenCalledWith({
-        listId: ['list_id_single', 'endpoint_list'],
-        namespaceType: ['single', 'agnostic'],
-        page: 1,
-        perPage: 10000,
-        filter: [],
-        sortOrder: undefined,
-        sortField: undefined,
-      });
+      expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ['list_id_single', 'endpoint_list'],
+          namespaceType: ['single', 'agnostic'],
+          perPage: 1_000,
+          filter: [],
+          maxSize: undefined,
+          sortOrder: undefined,
+          sortField: undefined,
+        })
+      );
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
-    test('it throws if "getExceptionListClient" fails', async () => {
+    test('it throws if "findExceptionListsItemPointInTimeFinder" fails anywhere', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
         ({
-          getExceptionList: jest.fn().mockRejectedValue(err),
+          findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
         } as unknown as ExceptionListClient);
 
       await expect(() =>
@@ -606,22 +606,9 @@ describe('utils', () => {
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
         })
-      ).rejects.toThrowError('unable to fetch exception list items');
-    });
-
-    test('it throws if "findExceptionListsItem" fails', async () => {
-      const err = new Error('error fetching list');
-      listMock.getExceptionListClient = () =>
-        ({
-          findExceptionListsItem: jest.fn().mockRejectedValue(err),
-        } as unknown as ExceptionListClient);
-
-      await expect(() =>
-        getExceptions({
-          client: listMock.getExceptionListClient(),
-          lists: getListArrayMock(),
-        })
-      ).rejects.toThrowError('unable to fetch exception list items');
+      ).rejects.toThrowError(
+        'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
+      );
     });
 
     test('it returns empty array if "findExceptionListsItem" returns null', async () => {
@@ -664,26 +651,30 @@ describe('utils', () => {
           },
         },
       };
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        ruleName: 'myfakerulename',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['myfa*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
+      });
     });
 
     test('returns true when missing timestamp field', async () => {
@@ -710,26 +701,31 @@ describe('utils', () => {
           },
         },
       };
+
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        ruleName: 'myfakerulename',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['myfa*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
+      });
     });
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
@@ -741,26 +737,33 @@ describe('utils', () => {
           fields: {},
         },
       };
+
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+        ruleName: 'Endpoint Security',
+      });
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        ruleName: 'Endpoint Security',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+      });
     });
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
@@ -772,26 +775,35 @@ describe('utils', () => {
           fields: {},
         },
       };
+
+      // SUT uses rule execution logger's context to check the rule name
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+        ruleName: 'NOT Endpoint Security',
+      });
+
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        ruleName: 'NOT Endpoint Security',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.',
+      });
     });
   });
 

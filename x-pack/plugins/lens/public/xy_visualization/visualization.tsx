@@ -15,12 +15,13 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
-import { State, visualizationTypes } from './types';
-import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { State, visualizationTypes, XYSuggestion } from './types';
+import { SeriesType, XYLayerConfig, YAxisMode } from '../../common/expressions';
 import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -177,6 +178,8 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+
   initialize(addNewLayer, state) {
     return (
       state || {
@@ -240,14 +243,14 @@ export const getXyVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
         icon: LensIconChartMixedXy,
       },
       {
         type: layerTypes.REFERENCELINE,
         label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
-          defaultMessage: 'Add reference layer',
+          defaultMessage: 'Reference lines',
         }),
         icon: LensIconChartBarReferenceLine,
         disabled:
@@ -522,6 +525,83 @@ export const getXyVisualization = ({
       ...prevState,
       layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
+  },
+
+  updateLayersConfigurationFromContext({ prevState, layerId, context }) {
+    const { chartType, axisPosition, palette, metrics } = context;
+    const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
+      return prevState;
+    }
+    const axisMode = axisPosition as YAxisMode;
+    const yConfig = metrics.map((metric, idx) => {
+      return {
+        color: metric.color,
+        forAccessor: metric.accessor ?? foundLayer.accessors[idx],
+        ...(axisMode && { axisMode }),
+      };
+    });
+    const newLayer = {
+      ...foundLayer,
+      ...(chartType && { seriesType: chartType as SeriesType }),
+      ...(palette && { palette }),
+      yConfig,
+    };
+
+    const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+
+    return {
+      ...prevState,
+      layers: newLayers,
+    };
+  },
+
+  getVisualizationSuggestionFromContext({ suggestions, context }) {
+    const visualizationStateLayers = [];
+    let datasourceStateLayers = {};
+    const fillOpacity = context.configuration.fill ? Number(context.configuration.fill) : undefined;
+    for (let suggestionIdx = 0; suggestionIdx < suggestions.length; suggestionIdx++) {
+      const currentSuggestion = suggestions[suggestionIdx] as XYSuggestion;
+      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
+      const contextLayer = context.layers.find(
+        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
+      );
+      if (this.updateLayersConfigurationFromContext && contextLayer) {
+        const updatedSuggestionState = this.updateLayersConfigurationFromContext({
+          prevState: currentSuggestion.visualizationState as unknown as State,
+          layerId: currentSuggestionsLayers[0].layerId as string,
+          context: contextLayer,
+        });
+
+        visualizationStateLayers.push(...updatedSuggestionState.layers);
+        datasourceStateLayers = {
+          ...datasourceStateLayers,
+          ...currentSuggestion.datasourceState.layers,
+        };
+      }
+    }
+    let suggestion = suggestions[0] as XYSuggestion;
+    suggestion = {
+      ...suggestion,
+      datasourceState: {
+        ...suggestion.datasourceState,
+        layers: {
+          ...suggestion.datasourceState.layers,
+          ...datasourceStateLayers,
+        },
+      },
+      visualizationState: {
+        ...suggestion.visualizationState,
+        fillOpacity,
+        yRightExtent: context.configuration.extents?.yRightExtent,
+        yLeftExtent: context.configuration.extents?.yLeftExtent,
+        legend: context.configuration.legend,
+        gridlinesVisibilitySettings: context.configuration.gridLinesVisibility,
+        valuesInLegend: true,
+        layers: visualizationStateLayers,
+      },
+    };
+    return suggestion;
   },
 
   removeDimension({ prevState, layerId, columnId, frame }) {

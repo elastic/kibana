@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import { FILE_FORMATS } from '../../../../../common';
+import { FILE_FORMATS } from '../../../../../common/constants';
 
 export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
   const items = createDisplayItems(results);

@@ -74,17 +74,17 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const scenario of [
           {
             user: globalRead,
-            expectedTags: ['sec', 'obs'],
+            expectedTags: ['obs', 'sec'],
           },
           {
             user: superUser,
-            expectedTags: ['sec', 'obs'],
+            expectedTags: ['obs', 'sec'],
           },
           { user: secOnlyRead, expectedTags: ['sec'] },
           { user: obsOnlyRead, expectedTags: ['obs'] },
           {
             user: obsSecRead,
-            expectedTags: ['sec', 'obs'],
+            expectedTags: ['obs', 'sec'],
           },
         ]) {
           const tags = await getTags({

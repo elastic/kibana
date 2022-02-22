@@ -36,7 +36,7 @@ import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delet
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
-import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
+import { getRuleExecutionEventsRoute } from '../lib/detection_engine/routes/rules/get_rule_execution_events_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -58,7 +58,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
-import { TelemetryEventsSender } from '../lib/telemetry/sender';
+import { ITelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 import {
@@ -68,13 +68,15 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { ITelemetryReceiver } from '../lib/telemetry/receiver';
+import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
-  telemetrySender: TelemetryEventsSender,
+  telemetrySender: ITelemetryEventsSender,
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
   logger: Logger,
@@ -82,11 +84,12 @@ export const initRoutes = (
   ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  previewTelemetryReceiver: ITelemetryReceiver
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
-  // All REST rule creation, deletion, updating, etc......
+  // All REST rule creation, deletion, updating, etc
   createRulesRoute(router, ml, isRuleRegistryEnabled);
   readRulesRoute(router, logger, isRuleRegistryEnabled);
   updateRulesRoute(router, ml, isRuleRegistryEnabled);
@@ -114,6 +117,8 @@ export const initRoutes = (
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
   performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
+  getRuleExecutionEventsRoute(router);
+
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
@@ -133,8 +138,6 @@ export const initRoutes = (
 
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
-
-  findRuleStatusInternalRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
@@ -161,4 +164,10 @@ export const initRoutes = (
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
   getSourcererDataViewRoute(router, getStartServices);
+
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  if (previewTelemetryUrlEnabled) {
+    // telemetry preview endpoint for e2e integration tests only at the moment.
+    telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
 };

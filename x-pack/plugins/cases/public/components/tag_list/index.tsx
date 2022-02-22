@@ -18,7 +18,6 @@ import {
   EuiPopover,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
 import { Form, FormDataProvider, useForm, getUseField, Field } from '../../common/shared_imports';
@@ -35,17 +34,6 @@ export interface TagListProps {
   onSubmit: (a: string[]) => void;
   tags: string[];
 }
-
-const ColumnFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    & {
-      max-width: 100%;
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-        flex-direction: row;
-      }
-    }
-  `}
-`;
 
 export const TagList = React.memo(
   ({ userCanCrud = true, isLoading, onSubmit, tags }: TagListProps) => {

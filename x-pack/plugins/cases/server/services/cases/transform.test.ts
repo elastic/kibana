@@ -267,7 +267,6 @@ describe('case transforms', () => {
 
     it('creates an empty references array to delete the connector_id when connector_id is null and the original references is undefined', () => {
       const transformedAttributes = transformAttributesToESModel({
-        // TODO: It was null. Check if it is correct
         external_service: createExternalService({ connector_id: 'none' }),
       });
 
@@ -390,7 +389,6 @@ describe('case transforms', () => {
     it('sets external_service.connector_id to none when a reference cannot be found', () => {
       const transformedSO = transformSavedObjectToExternalModel(
         createCaseSavedObjectResponse({
-          // TODO: It was null. Check if it is correct
           externalService: createExternalService({ connector_id: 'none' }),
         })
       );

@@ -7,17 +7,13 @@
 
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { SanitizedAlert } from '../../../../../alerting/common';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-} from '../../../../../../../src/core/server';
-import { RulesClient } from '../../../../../alerting/server';
-import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
+} from 'kibana/server';
 
-import { RuleParams } from '../schemas/rule_schemas';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 export interface OutputError {
@@ -197,66 +193,4 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
   }, {});
-};
-
-/**
- *
- * @param id rule id
- * @param currentStatusAndFailures array of rule statuses where the 0th status is the current status and 1-5 positions are the historical failures
- * @param acc accumulated rule id : statuses
- */
-export const mergeStatuses = (
-  id: string,
-  currentStatusAndFailures: IRuleStatusSOAttributes[],
-  acc: RuleStatusResponse
-): RuleStatusResponse => {
-  if (currentStatusAndFailures.length === 0) {
-    return {
-      ...acc,
-    };
-  }
-  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
-    currentStatusAndFailures[0]
-  );
-  return {
-    ...acc,
-    [id]: {
-      current_status: convertedCurrentStatus,
-      failures: currentStatusAndFailures
-        .slice(1)
-        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem)),
-    },
-  } as RuleStatusResponse;
-};
-
-export type GetFailingRulesResult = Record<string, SanitizedAlert<RuleParams>>;
-
-export const getFailingRules = async (
-  ids: string[],
-  rulesClient: RulesClient
-): Promise<GetFailingRulesResult> => {
-  try {
-    const errorRules = await Promise.all(
-      ids.map(async (id) =>
-        rulesClient.resolve({
-          id,
-        })
-      )
-    );
-    return errorRules
-      .filter((rule) => rule.executionStatus.status === 'error')
-      .reduce<GetFailingRulesResult>((acc, failingRule) => {
-        return {
-          [failingRule.id]: {
-            ...failingRule,
-          },
-          ...acc,
-        };
-      }, {});
-  } catch (exc) {
-    if (exc instanceof CustomHttpRequestError) {
-      throw exc;
-    }
-    throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);
-  }
 };

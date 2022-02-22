@@ -37,7 +37,7 @@ import { MockUrlParamsContextProvider } from '../../../../context/url_params_con
 import {
   APIReturnType,
   createCallApmApi,
-} from '../../../../services/rest/createCallApmApi';
+} from '../../../../services/rest/create_call_apm_api';
 import { LatencyChart } from './';
 
 interface Args {

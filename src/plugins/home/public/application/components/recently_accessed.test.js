@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 const createRecentlyAccessed = (length) => {
   const recentlyAccessed = [];

@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
+import {
+  GetRuleExecutionEventsResponse,
+  RulesSchema,
+} from '../../../../../../common/detection_engine/schemas/response';
+
+import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { savedRuleMock, rulesMock } from '../mock';
+
 import {
   PatchRuleProps,
   CreateRulesProps,
   UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
-  RuleStatusResponse,
   Rule,
   FetchRuleProps,
   FetchRulesResponse,
   FetchRulesProps,
 } from '../types';
-import { savedRuleMock, rulesMock } from '../mock';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
   Promise.resolve(getRulesSchemaMock());
@@ -49,78 +53,30 @@ export const getPrePackagedRulesStatus = async ({
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> =>
   Promise.resolve(true);
 
-export const getRuleStatusById = async ({
-  id,
-  signal,
-}: {
-  id: string;
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  Promise.resolve({
-    myOwnRuleID: {
-      current_status: {
-        alert_id: 'alertId',
-        status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: RuleExecutionStatus.succeeded,
-        last_failure_at: null,
-        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-        last_failure_message: null,
-        last_success_message: 'it is a success',
-        gap: null,
-        bulk_create_time_durations: ['2235.01'],
-        search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
-      },
-      failures: [],
-    },
-  });
-
-export const getRulesStatusByIds = async ({
-  ids,
-  signal,
-}: {
-  ids: string[];
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  Promise.resolve({
-    '12345678987654321': {
-      current_status: {
-        alert_id: 'alertId',
-        status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: RuleExecutionStatus.succeeded,
-        last_failure_at: null,
-        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-        last_failure_message: null,
-        last_success_message: 'it is a success',
-        gap: null,
-        bulk_create_time_durations: ['2235.01'],
-        search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
-      },
-      failures: [],
-    },
-  });
-
 export const fetchRuleById = jest.fn(
   async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
 );
 
-export const fetchRules = async ({
-  filterOptions = {
-    filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
-    showCustomRules: false,
-    showElasticRules: false,
-    tags: [],
-  },
-  pagination = {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
+export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
+  Promise.resolve(rulesMock);
+
+export const fetchRuleExecutionEvents = async ({
+  ruleId,
   signal,
-}: FetchRulesProps): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
+}: {
+  ruleId: string;
+  signal?: AbortSignal;
+}): Promise<GetRuleExecutionEventsResponse> => {
+  return Promise.resolve({
+    events: [
+      {
+        date: '2021-12-29T10:42:59.996Z',
+        status: RuleExecutionStatus.succeeded,
+        message: 'Rule executed successfully',
+      },
+    ],
+  });
+};
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);

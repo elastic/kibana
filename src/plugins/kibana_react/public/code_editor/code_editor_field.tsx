@@ -7,10 +7,7 @@
  */
 
 import React from 'react';
-import {
-  euiLightVars as lightTheme,
-  euiDarkVars as darkTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import { EuiFormControlLayout } from '@elastic/eui';
 import { CodeEditor, Props } from './code_editor';
 

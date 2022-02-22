@@ -11,6 +11,9 @@ const chalk = require('chalk');
 
 const { log: defaultLog } = require('./log');
 
+export const SYSTEM_INDICES_SUPERUSER =
+  process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser';
+
 exports.NativeRealm = class NativeRealm {
   constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
     const auth = { username: 'elastic', password: elasticPassword };
@@ -50,18 +53,30 @@ exports.NativeRealm = class NativeRealm {
     });
   }
 
+  async clusterReady() {
+    return await this._autoRetry({ maxAttempts: 10 }, async () => {
+      const { status } = await this._client.cluster.health();
+      if (status === 'red') {
+        throw new Error(`not ready, cluster health is ${status}`);
+      }
+    });
+  }
+
   async setPasswords(options) {
+    await this.clusterReady();
+
     if (!(await this.isSecurityEnabled())) {
       this._log.info('security is not enabled, unable to set native realm passwords');
       return;
     }
 
     const reservedUsers = await this.getReservedUsers();
-    await Promise.all(
-      reservedUsers.map(async (user) => {
+    await Promise.all([
+      ...reservedUsers.map(async (user) => {
         await this.setPassword(user, options[`password.${user}`]);
-      })
-    );
+      }),
+      this._createSystemIndicesUser(),
+    ]);
   }
 
   async getReservedUsers(retryOpts = {}) {
@@ -93,7 +108,7 @@ exports.NativeRealm = class NativeRealm {
   }
 
   async _autoRetry(opts, fn) {
-    const { attempt = 1, maxAttempts = 3 } = opts;
+    const { attempt = 1, maxAttempts = 3, sleep = 1000 } = opts;
 
     try {
       return await fn(attempt);
@@ -104,7 +119,7 @@ exports.NativeRealm = class NativeRealm {
 
       const sec = 1.5 * attempt;
       this._log.warning(`assuming ES isn't initialized completely, trying again in ${sec} seconds`);
-      await new Promise((resolve) => setTimeout(resolve, sec * 1000));
+      await new Promise((resolve) => setTimeout(resolve, sleep));
 
       const nextOpts = {
         ...opts,
@@ -112,5 +127,40 @@ exports.NativeRealm = class NativeRealm {
       };
       return await this._autoRetry(nextOpts, fn);
     }
+  }
+
+  async _createSystemIndicesUser() {
+    if (!(await this.isSecurityEnabled())) {
+      this._log.info('security is not enabled, unable to create role and user');
+      return;
+    }
+
+    await this._client.security.putRole({
+      name: SYSTEM_INDICES_SUPERUSER,
+      refresh: 'wait_for',
+      cluster: ['all'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+          allow_restricted_indices: true,
+        },
+      ],
+      applications: [
+        {
+          application: '*',
+          privileges: ['*'],
+          resources: ['*'],
+        },
+      ],
+      run_as: ['*'],
+    });
+
+    await this._client.security.putUser({
+      username: SYSTEM_INDICES_SUPERUSER,
+      refresh: 'wait_for',
+      password: this._elasticPassword,
+      roles: [SYSTEM_INDICES_SUPERUSER],
+    });
   }
 };

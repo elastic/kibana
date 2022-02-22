@@ -13,7 +13,7 @@ import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
 import { KibanaThemeProvider } from '../../kibana_react/public';

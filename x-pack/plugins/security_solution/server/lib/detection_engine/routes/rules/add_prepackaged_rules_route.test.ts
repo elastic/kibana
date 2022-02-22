@@ -104,34 +104,11 @@ describe('add_prepackaged_rules_route', () => {
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
+    test('returns 200', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if rulesClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({
-        message: 'Not Found',
-        status_code: 404,
-      });
-    });
-
-    test('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      const response = await server.inject(
-        addPrepackagedRulesRequest(),
-        // @ts-expect-error
-        contextWithoutSecuritySolution
-      );
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 

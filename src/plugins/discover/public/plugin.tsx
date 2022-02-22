@@ -22,7 +22,7 @@ import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
+import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -31,28 +31,19 @@ import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../d
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
   setDocViewsRegistry,
   setUrlTracker,
-  setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
-  getServices,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
-import {
-  DiscoverUrlGeneratorState,
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGenerator,
-  SEARCH_SESSION_ID_QUERY_PARAM,
-} from './url_generator';
 import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
@@ -64,12 +55,9 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-
-declare module '../../share/public' {
-  export interface UrlGeneratorStateMapping {
-    [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
-  }
-}
+import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
+import { useDiscoverServices } from './utils/use_discover_services';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from './constants';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -124,11 +112,6 @@ export interface DiscoverSetup {
 
 export interface DiscoverStart {
   /**
-   * @deprecated Use URL locator instead. URL generator will be removed.
-   */
-  readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
-
-  /**
    * `share` plugin URL locator for Discover app. Use it to generate links into
    * Discover application, for example, navigate:
    *
@@ -177,6 +160,7 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;
@@ -204,27 +188,10 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
-
-  /**
-   * @deprecated
-   */
-  private urlGenerator?: DiscoverStart['urlGenerator'];
   private locator?: DiscoverAppLocator;
 
-  setup(
-    core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
-    plugins: DiscoverSetupPlugins
-  ): DiscoverSetup {
+  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-
-    if (plugins.share) {
-      this.urlGenerator = plugins.share.urlGenerators.registerUrlGenerator(
-        new DiscoverUrlGenerator({
-          appBasePath: baseUrl,
-          useHash: core.uiSettings.get('state:storeInSessionStorage'),
-        })
-      );
-    }
 
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(
@@ -242,9 +209,12 @@ export class DiscoverPlugin
       }),
       order: 10,
       component: (props) => {
-        const Component = getServices().uiSettings.get(DOC_TABLE_LEGACY)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const services = useDiscoverServices();
+        const DocView = services.uiSettings.get(DOC_TABLE_LEGACY)
           ? DocViewerLegacyTable
           : DocViewerTable;
+
         return (
           <React.Suspense
             fallback={
@@ -253,7 +223,7 @@ export class DiscoverPlugin
               </DeferredSpinner>
             }
           >
-            <Component {...props} />
+            <DocView {...props} />
           </React.Suspense>
         );
       },
@@ -339,7 +309,6 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        const [, depsStart] = await core.getStartServices();
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
@@ -349,14 +318,18 @@ export class DiscoverPlugin
         const unlistenParentHistory = params.history.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
+
+        const [coreStart, discoverStartPlugins] = await core.getStartServices();
+        const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+
         // make sure the index pattern list is up to date
-        await depsStart.data.indexPatterns.clearCache();
+        await discoverStartPlugins.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element);
+        const unmount = renderApp(params.element, services);
         return () => {
           unlistenParentHistory();
           unmount();
@@ -413,13 +386,9 @@ export class DiscoverPlugin
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 
-    const services = buildServices(core, plugins, this.initializerContext);
-    setServices(services);
-
-    injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
+    injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {
-      urlGenerator: this.urlGenerator,
       locator: this.locator,
     };
   }
@@ -439,7 +408,12 @@ export class DiscoverPlugin
       };
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices);
+    const getDiscoverServices = async () => {
+      const [coreStart, discoverStartPlugins] = await core.getStartServices();
+      return buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+    };
+
+    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }

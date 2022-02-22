@@ -36,7 +36,6 @@ RUNTIME_DEPS = [
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
   "@npm//babel-loader",
-  "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//core-js",
   "@npm//css-loader",
   "@npm//fflate",

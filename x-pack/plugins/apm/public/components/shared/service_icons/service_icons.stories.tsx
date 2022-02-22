@@ -12,7 +12,7 @@ import { createKibanaReactContext } from '../../../../../../../src/plugins/kiban
 import {
   APIReturnType,
   createCallApmApi,
-} from '../../../services/rest/createCallApmApi';
+} from '../../../services/rest/create_call_apm_api';
 import { ServiceIcons } from './';
 
 type ServiceDetailsReturnType =

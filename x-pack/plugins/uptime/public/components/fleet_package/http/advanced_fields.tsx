@@ -14,11 +14,11 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
-  EuiDescribedFormGroup,
   EuiCheckbox,
   EuiSpacer,
   EuiFieldPassword,
 } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { useHTTPAdvancedFieldsContext } from '../contexts';
 
@@ -32,9 +32,11 @@ import { ComboBox } from '../combo_box';
 
 interface Props {
   validate: Validation;
+  children?: React.ReactNode;
+  minColumnWidth?: string;
 }
 
-export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
+export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWidth }) => {
   const { fields, setFields } = useHTTPAdvancedFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -55,7 +57,8 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
       data-test-subj="syntheticsHTTPAdvancedFieldsAccordion"
     >
       <EuiSpacer size="xl" />
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -247,9 +250,10 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             )}
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
       <EuiSpacer size="xl" />
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -315,8 +319,9 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             )}
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
+      </DescribedFormGroupWithWrap>
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -460,7 +465,8 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             data-test-subj="syntheticsResponseBodyCheckNegative"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
+      {children}
     </EuiAccordion>
   );
 });
