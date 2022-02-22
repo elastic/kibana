@@ -34,11 +34,17 @@ Object {
     },
     Object {
       "arguments": Object {
+        "centralMajorMode": Array [
+          "custom",
+        ],
         "colorMode": Array [
           "palette",
         ],
         "labelMajorMode": Array [
           "auto",
+        ],
+        "labelMinor": Array [
+          "some custom sublabel",
         ],
         "metric": Array [],
         "shape": Array [

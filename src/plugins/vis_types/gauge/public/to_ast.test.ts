@@ -26,6 +26,12 @@ describe('gauge vis toExpressionAst function', () => {
             labels: false,
             color: 'rgba(105,112,125,0.2)',
           },
+          labels: {
+            show: true,
+          },
+          style: {
+            subText: 'some custom sublabel',
+          },
         },
       },
       data: {
