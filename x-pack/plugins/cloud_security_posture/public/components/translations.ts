@@ -35,7 +35,7 @@ export const CSP_EVALUATION_BADGE_FAILED = i18n.translate(
 );
 
 export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
-  'xpack.csp.cspEvaluationBadge.failedLabelText',
+  'xpack.csp.cspEvaluationBadge.passedLabelText',
   {
     defaultMessage: 'PASSED',
   }
