@@ -18,6 +18,7 @@ import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -74,7 +75,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
         columnFilters: [
           {
             language: 'kuery',
-            query: `processor.event: transaction`,
+            query: `${PROCESSOR_EVENT}: transaction`,
           },
         ],
         timeScale: 'm',
@@ -84,12 +85,24 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
         columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
         columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
     ],
   };
