@@ -12,6 +12,7 @@
     "features",
     "inspector",
     "data",
+    "fieldFormats",
     "fileUpload",
     "uiActions",
     "navigation",

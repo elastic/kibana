@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './types';
-export * from './choropleth_chart';
+export { setupLensChoroplethChart } from './choropleth_chart';

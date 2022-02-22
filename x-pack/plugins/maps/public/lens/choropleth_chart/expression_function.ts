@@ -7,26 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import type { LensMultiTable } from '../../../../../lens/common';
-import type { ChoroplethConfig } from './types';
+import type { LensMultiTable } from '../../../../lens/common';
+import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 
-interface ChoroplethRender {
+interface ChoroplethChartRender {
   type: 'render';
   as: 'lens_choropleth_chart_renderer';
   value: ChoroplethChartProps;
 }
 
-export interface ChoroplethChartProps {
-  data: LensMultiTable;
-  args: ChoroplethConfig;
-}
-
-export const choroplethChart: ExpressionFunctionDefinition<
+export const getExpressionFunction = (): ExpressionFunctionDefinition<
   'lens_choropleth_chart',
   LensMultiTable,
-  Omit<ChoroplethConfig, 'layerId' | 'layerType'>,
-  ChoroplethRender
-> = {
+  Omit<ChoroplethChartConfig, 'layerId' | 'layerType'>,
+  ChoroplethChartRender
+> => ({
   name: 'lens_choropleth_chart',
   type: 'render',
   help: 'A choropleth chart',
@@ -75,6 +70,6 @@ export const choroplethChart: ExpressionFunctionDefinition<
         data,
         args,
       },
-    } as ChoroplethRender;
+    } as ChoroplethChartRender;
   },
-};
+});

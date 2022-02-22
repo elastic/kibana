@@ -58,6 +58,7 @@ import type { PresentationUtilPluginStart } from '../../../../src/plugins/presen
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import {
   MapsAppLocatorDefinition,
   MapsAppRegionMapLocatorDefinition,
@@ -73,7 +74,7 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
-import { setupLens } from './lens/setup';
+import { setupLensChoroplethChart } from './lens';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -90,6 +91,7 @@ export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
@@ -131,7 +133,7 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+  public setup(core: CoreSetup<MapsPluginStartDependencies, MapsPluginStart>, plugins: MapsPluginSetupDependencies): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -175,7 +177,7 @@ export class MapsPlugin
       },
     });
 
-    setupLens(plugins.expressions);
+    setupLensChoroplethChart(core, plugins.expressions);
 
     // register wrapper around legacy tile_map and region_map visualizations
     plugins.expressions.registerFunction(createRegionMapFn);

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { choroplethChart } from './expressions';
-
-export function setupLens(expressions: ExpressionsSetup) {
-  expressions.registerFunction(choroplethChart);
-}
+export { setupLensChoroplethChart } from './setup';
