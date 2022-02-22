@@ -67,7 +67,7 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion
-      renderResult.queryByTestId('detail-panel-accordion')?.querySelector('button')?.click();
+      renderResult.queryByTestId('sessionViewer:detail-panel-accordion')?.querySelector('button')?.click();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
       expect(renderResult.queryByText('os.kernel')).toBeVisible();
