@@ -416,23 +416,25 @@ export function AddFilterModal({
     if (addFilterMode === 'query_builder') {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
+      let builtCustomFilter = [];
       const body = JSON.parse(queryDsl);
-      const builtCustomFilter = buildCustomFilter(
-        newIndex,
-        body,
-        disabled,
-        negate,
-        alias,
-        $state.store
-      );
-      onSubmit([builtCustomFilter]);
+      if (Array.isArray(body)) {
+        builtCustomFilter = body.map((query) =>
+          buildCustomFilter(newIndex, query, disabled, negate, alias, $state.store)
+        );
+      } else {
+        builtCustomFilter = [
+          buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store),
+        ];
+      }
+      onSubmit(builtCustomFilter);
       if (alias) {
         saveFilters({
           title: customLabel,
           description: '',
           shouldIncludeFilters: false,
           shouldIncludeTimefilter: false,
-          filters: [builtCustomFilter],
+          filters: builtCustomFilter,
         });
       }
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
@@ -691,7 +693,12 @@ export function AddFilterModal({
   };
 
   return (
-    <EuiModal style={{ minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal
+      style={{ minWidth: 992 }}
+      maxWidth={992}
+      onClose={onCancel}
+      className="kbnQueryBar--addFilterModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
