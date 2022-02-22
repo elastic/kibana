@@ -123,7 +123,6 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
           <EmbeddableHistogram
             title={ALERTS_GRAPH_TITLE}
             appendTitle={appendTitle}
-            dataTypesIndexPatterns={patternList?.join(',')}
             customLensAttrs={customLensAttrs}
             customTimeRange={{ from: startDate, to: endDate }}
             isSingleMetric={false}

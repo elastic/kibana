@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexItem, EuiPanel, EuiSelect } from '@elastic/eui';
+import styled from 'styled-components';
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { timelineActions } from '../../../timelines/store/timeline';
@@ -63,6 +64,10 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   subtitle: undefined,
   title: i18n.NAVIGATION_EVENTS_TITLE,
 };
+
+const StyledEuiPanel = styled(EuiPanel)`
+  height: 300px;
+`;
 
 const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
@@ -133,14 +138,13 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
     ),
     [selectedStackByOption?.value, setSelectedChartOptionCallback]
   );
-  const { patternList, dataViewId } = useSourcererDataView();
-  const customLensAttrs = useMemo(() => {
-    const configs = getEventsHistogramCongifs({ stackByField: selectedStackByOption.value });
-    return {
-      ...configs,
-      references: configs.references.map((ref) => ({ ...ref, id: dataViewId })),
-    };
-  }, [dataViewId, selectedStackByOption.value]);
+
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+
+  const customLensAttrs = useMemo(
+    () => getEventsHistogramCongifs({ stackByField: selectedStackByOption.value }),
+    [selectedStackByOption.value]
+  );
 
   return (
     <>
@@ -156,16 +160,15 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         />
       )}
       {!globalFullScreen && (
-        <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
+        <StyledEuiPanel color="transparent" hasBorder>
           <EmbeddableHistogram
             title={i18n.NAVIGATION_EVENTS_TITLE}
             appendTitle={appendTitle}
-            dataTypesIndexPatterns={patternList?.join(',')}
             customLensAttrs={customLensAttrs}
-            customTimeRange={{ from: startDate, to: endDate }}
+            customTimeRange={timerange}
             isSingleMetric={false}
           />
-        </EuiPanel>
+        </StyledEuiPanel>
       )}
       <StatefulEventsViewer
         defaultCellActions={defaultCellActions}

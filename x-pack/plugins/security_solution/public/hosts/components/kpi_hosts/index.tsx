@@ -17,7 +17,6 @@ import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risk
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../containers/host_risk_score';
 import { ExploratoryCharts } from './embeddables';
-import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {

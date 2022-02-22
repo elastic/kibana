@@ -22,7 +22,6 @@ import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { AUTHENTICATIONS } from '../../components/authentications_table/translations';
 import { authentication } from '../../configs/authentication';
 
@@ -91,13 +90,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
     type,
   });
 
-  const { patternList, dataViewId } = useSourcererDataView();
-  const customLensAttrs = useMemo(() => {
-    return {
-      ...authentication,
-      references: authentication.references.map((ref) => ({ ...ref, id: dataViewId })),
-    };
-  }, [dataViewId]);
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
 
   useEffect(() => {
     return () => {
@@ -122,9 +115,8 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
       <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
         <EmbeddableHistogram
           title={AUTHENTICATIONS}
-          dataTypesIndexPatterns={patternList?.join(',')}
-          customLensAttrs={customLensAttrs}
-          customTimeRange={{ from: startDate, to: endDate }}
+          customLensAttrs={authentication}
+          customTimeRange={timerange}
           isSingleMetric={false}
         />
       </EuiPanel>
