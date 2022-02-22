@@ -18,12 +18,12 @@ import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
-import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 
 import {
+  createCachedFieldValueFormatter,
   getFieldsForTerms,
   getMultiFieldLabel,
   MULTI_FIELD_VALUES_SEPARATOR,
@@ -54,11 +54,7 @@ function sanitizeUrl(url) {
 class TableVis extends Component {
   constructor(props) {
     super(props);
-
-    const fieldFormatsService = getFieldFormats();
-    const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
-
-    this.dateFormatter = new DateFormat({}, this.props.getConfig);
+    this.fieldFormatsService = getFieldFormats();
     this.state = {
       accessDeniedDrilldownUrl: null,
     };
@@ -78,30 +74,21 @@ class TableVis extends Component {
     }
   };
 
-  renderRow = (row, pivotIds) => {
+  renderRow = (row, pivotIds, fieldValuesFormatter) => {
     const { model, fieldFormatMap, getConfig } = this.props;
 
     let rowDisplay = row.key;
 
-    // we should skip url field formatting for key if tsvb have drilldown_url
     if (pivotIds.length) {
-      const formatPart = (pivot, value) => {
-        // @todo use indexPattern.getFormatterForField instead
-        if (fieldFormatMap?.[pivot] && fieldFormatMap[pivot]?.id !== FIELD_FORMAT_IDS.URL) {
-          const formatter = createFieldFormatter(pivot, fieldFormatMap, 'html');
-          return <span dangerouslySetInnerHTML={{ __html: formatter(value) }} />; // eslint-disable-line react/no-danger
-        } else {
-          return model.pivot_type === 'date' ? this.dateFormatter.convert(value) : value;
-        }
-      };
+      rowDisplay = pivotIds
+        .map((item, index) => {
+          const value = (Array.isArray(row.key) ? row.key : [row.key])[index];
+          const formatted = fieldValuesFormatter(item, value, 'html');
 
-      if (pivotIds.length) {
-        rowDisplay = pivotIds
-          .map((item, index) =>
-            formatPart(item, (Array.isArray(row.key) ? row.key : [row.key])[index])
-          )
-          .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
-      }
+          // eslint-disable-next-line react/no-danger
+          return <span dangerouslySetInnerHTML={{ __html: formatted ?? value }} />;
+        })
+        .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
     }
 
     if (model.drilldown_url) {
@@ -257,14 +244,31 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model } = this.props;
+    const { visData, model, indexPattern } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
+
+    const fields = (
+      model.pivot_type
+        ? Array.isArray(model.pivot_type)
+          ? model.pivot_type
+          : [model.pivot_type]
+        : []
+    ).map((type, index) => ({
+      name: (Array.isArray(model.pivot_id) ? model.pivot_id : [model.pivot_id])[index],
+      type,
+    }));
+
+    const fieldValuesFormatter = createCachedFieldValueFormatter(
+      indexPattern,
+      fields,
+      this.fieldFormatsService
+    );
     const pivotIds = getFieldsForTerms(model.pivot_id);
     const header = this.renderHeader(pivotIds);
     let rows = null;
 
     if (isArray(visData.series) && visData.series.length) {
-      rows = visData.series.map((item) => this.renderRow(item, pivotIds));
+      rows = visData.series.map((item) => this.renderRow(item, pivotIds, fieldValuesFormatter));
     }
 
     return (
@@ -303,6 +307,7 @@ TableVis.propTypes = {
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
+  indexPattern: PropTypes.object,
 };
 
 // default export required for React.Lazy

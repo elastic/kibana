@@ -54,7 +54,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
 
-  const fieldsForSeries = meta?.index ? await extractFields({ id: meta.index }) : [];
+  const fieldsForSeries = meta?.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
   const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);
 
   if (buckets) {

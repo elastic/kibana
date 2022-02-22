@@ -7,9 +7,10 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { isNestedField, FieldSpec } from '../../../data/common';
+import { isNestedField, FieldSpec, DataView } from '../../../data/common';
 import { FieldNotFoundError } from './errors';
 import type { FetchedIndexPattern, SanitizedFieldType } from './types';
+import { FieldFormat, FieldFormatsRegistry } from '../../../field_formats/common';
 
 export const extractFieldLabel = (
   fields: SanitizedFieldType[],
@@ -67,6 +68,44 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
     });
   }
   return firstFieldLabel ?? '';
+};
+
+export const createCachedFieldValueFormatter = (
+  indexPattern?: DataView | null,
+  fields?: SanitizedFieldType[],
+  fieldFormatService?: FieldFormatsRegistry
+) => {
+  const cache = new Map<string, FieldFormat>();
+
+  return (fieldName: string, value: string, contentType: 'text' | 'html' = 'text') => {
+    const cachedFormatter = cache.get(fieldName);
+    if (cachedFormatter) {
+      return cachedFormatter.convert(value, contentType);
+    }
+
+    if (indexPattern) {
+      const field = indexPattern.fields.getByName(fieldName);
+      if (field) {
+        const formatter = indexPattern.getFormatterForField(field);
+
+        if (formatter) {
+          cache.set(fieldName, formatter);
+          return formatter.convert(value, contentType);
+        }
+      }
+    } else if (fieldFormatService && fields) {
+      const f = fields.find((item) => item.name === fieldName);
+
+      if (f) {
+        const formatter = fieldFormatService.getDefaultInstance(f.type);
+
+        if (formatter) {
+          cache.set(fieldName, formatter);
+          return formatter.convert(value, contentType);
+        }
+      }
+    }
+  };
 };
 
 export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';

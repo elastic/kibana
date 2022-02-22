@@ -8,35 +8,14 @@
 
 import { BUCKET_TYPES, PANEL_TYPES } from '../../../../../common/enums';
 import {
+  createCachedFieldValueFormatter,
   getFieldsForTerms,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
 import type { Panel, PanelData, Series } from '../../../../../common/types';
-import type { FieldFormat, FieldFormatsRegistry } from '../../../../../../../field_formats/common';
+import type { FieldFormatsRegistry } from '../../../../../../../field_formats/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
-import type { DataView } from '../../../../../../../data_views/common';
-
-const createCachedFieldFormatter = (indexPattern?: DataView | null) => {
-  const cache = new Map<string, FieldFormat>();
-
-  return (fieldName: string, value: string, contentType: 'text' | 'html' = 'text') => {
-    if (cache.has(fieldName)) {
-      return cache.get(fieldName)!.convert(value, contentType);
-    }
-    if (indexPattern) {
-      const field = indexPattern.fields.find(({ name }) => name === fieldName);
-      if (field) {
-        const formatter = indexPattern.getFormatterForField(field);
-
-        if (formatter) {
-          cache.set(fieldName, formatter);
-          return formatter.convert(value, contentType);
-        }
-      }
-    }
-  };
-};
 
 export function formatLabel(
   resp: unknown,
@@ -56,8 +35,13 @@ export function formatLabel(
       termsIds.length && splitMode === BUCKET_TYPES.TERMS && panel.type !== PANEL_TYPES.MARKDOWN;
 
     if (shouldFormatLabels) {
-      const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
-      const formatField = createCachedFieldFormatter(indexPattern);
+      const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.dataView });
+      let fields: any[] | undefined;
+
+      if (!indexPattern && meta.indexPatternString) {
+        fields = await extractFields(meta.indexPatternString);
+      }
+      const formatField = createCachedFieldValueFormatter(indexPattern, fields, fieldFormatService);
 
       results
         .filter(({ seriesId }) => series.id === seriesId)
