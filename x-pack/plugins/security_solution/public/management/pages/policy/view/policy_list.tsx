@@ -29,12 +29,12 @@ export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
 
   // load the list of policies
-  const result = useGetEndpointSpecificPolicies({
+  const { data, isFetching, error } = useGetEndpointSpecificPolicies({
     page: pagination.page,
     perPage: pagination.pageSize,
   });
 
-  const totalItemCount = result?.data?.total ?? 0;
+  const totalItemCount = data?.total ?? 0;
 
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
@@ -189,12 +189,12 @@ export const PolicyList = memo(() => {
       <EuiHorizontalRule margin="xs" />
       <EuiBasicTable
         data-test-subj="policyListTable"
-        items={result?.data?.items || []}
+        items={data?.items || []}
         columns={policyColumns}
         pagination={tablePagination}
         onChange={handleTableOnChange}
-        loading={result.isFetching}
-        error={result.error !== null ? policyListErrorMessage : ''}
+        loading={isFetching}
+        error={error !== null ? policyListErrorMessage : ''}
       />
     </AdministrationListPage>
   );
