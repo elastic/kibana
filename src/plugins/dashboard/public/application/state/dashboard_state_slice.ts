@@ -94,6 +94,9 @@ export const dashboardStateSlice = createSlice({
     setQuery: (state, action: PayloadAction<Query>) => {
       state.query = action.payload;
     },
+    setCurrentSkin: (state, action) => {
+      state.skin = action.payload;
+    },
   },
 });
 
@@ -117,4 +120,5 @@ export const {
   setTitle,
   setQuery,
   setTags,
+  setCurrentSkin,
 } = dashboardStateSlice.actions;

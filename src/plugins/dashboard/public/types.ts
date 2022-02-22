@@ -69,6 +69,7 @@ export interface DashboardState {
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
+  skin?: string;
 
   controlGroupInput?: DashboardControlGroupInput;
 }

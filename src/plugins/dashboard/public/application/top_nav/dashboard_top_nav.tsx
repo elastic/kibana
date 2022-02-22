@@ -34,6 +34,7 @@ import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from 
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
 import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import {
+  setCurrentSkin,
   setFullScreenMode,
   setHidePanelTitles,
   setSavedQueryId,
@@ -54,6 +55,7 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '../../../../presentation_util/public';
+import { openSkinsMenuPopover } from '../../skins/skins_menu';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -120,6 +122,7 @@ export function DashboardTopNav({
   const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [intervals, setIntervals] = useState<NodeJS.Timer[]>([]);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
@@ -345,6 +348,146 @@ export function DashboardTopNav({
     toasts,
   ]);
 
+  const matrix = (canvas: HTMLCanvasElement, cols: number, ypos: number[]) => {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = '#0001';
+    ctx.fillRect(canvas.clientLeft, canvas.clientTop, w, h);
+
+    // Set color to green and font to 15pt monospace in the drawing context
+    ctx.fillStyle = '#0f0';
+    ctx.font = '15pt monospace';
+
+    // for each column put a random character at the end
+    ypos.forEach((y, ind) => {
+      // generate a random character
+      const text = String.fromCharCode(Math.random() * 128);
+
+      // x coordinate of the column, y coordinate is already given
+      const x = ind * 20;
+      // render the character at (x, y)
+      ctx.fillText(text, x, y);
+
+      if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+      else ypos[ind] = y + 20;
+    });
+  };
+
+  const createDiv = (name: string) => {
+    const div = document.createElement('div');
+    if (name === 'wrapper' || name === 'spiderman') {
+      div.setAttribute('id', name);
+    } else {
+      div.setAttribute('class', name);
+    }
+    return div;
+  };
+
+  const spiderman = useCallback(() => {
+    const wrapper = createDiv('wrapper');
+    document.body.appendChild(wrapper);
+
+    const spidermanDiv = createDiv('spiderman');
+    wrapper.appendChild(spidermanDiv);
+
+    const head = createDiv('head');
+    spidermanDiv.appendChild(head);
+    const eyeLeft = createDiv('eye-left');
+    head.appendChild(eyeLeft);
+    const eyeRight = createDiv('eye-right');
+    head.appendChild(eyeRight);
+
+    const body = createDiv('body');
+    spidermanDiv.appendChild(body);
+    const spider = createDiv('spider');
+    body.appendChild(spider);
+    const armLeft = createDiv('arm-left');
+    body.appendChild(armLeft);
+    const armRight = createDiv('arm-right');
+    body.appendChild(armRight);
+
+    const legs = createDiv('legs');
+    spidermanDiv.appendChild(legs);
+    const bootLeft = createDiv('boot-left');
+    legs.appendChild(bootLeft);
+    const bootRight = createDiv('boot-right');
+    legs.appendChild(bootRight);
+  }, []);
+
+  const applyAdditionalStyle = useCallback(
+    (name: string) => {
+      if (name === 'matrix') {
+        const localIntervals = [] as NodeJS.Timer[];
+        const canvasElements = document.getElementsByTagName('canvas');
+        for (let i = 0; i < canvasElements.length; i++) {
+          const canvas = canvasElements.item(i) as HTMLCanvasElement;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) continue;
+          // set the width and height of the canvas
+          const w = canvas.width; // document.body.offsetWidth);
+          const h = canvas.height; // document.body.offsetHeight);
+
+          // draw a black rectangle of width and height same as that of the canvas
+          ctx.fillStyle = '#000';
+          ctx.fillRect(canvas.clientLeft, canvas.clientTop, w, h);
+
+          const cols = Math.floor(w / 20) + 1;
+          const ypos = Array(cols).fill(30);
+
+          const interval = setInterval(() => {
+            matrix(canvas, cols, ypos);
+          }, 50);
+          localIntervals.push(interval);
+        }
+        setIntervals(localIntervals);
+      } else if (name === 'spiderman') {
+        spiderman();
+      }
+    },
+    [spiderman]
+  );
+
+  // cleanup
+  useEffect(() => {
+    return () => {
+      if (dashboardAppState.getLatestDashboardState().skin !== 'matrix') {
+        for (let i = 0; i < intervals.length; i++) {
+          if (intervals[i]) clearInterval(intervals[i]);
+        }
+      }
+    };
+  });
+
+  const onSkinSelected = useCallback(
+    (name: string) => {
+      dispatchDashboardStateChange(setCurrentSkin(name));
+      applyAdditionalStyle(name);
+    },
+    [applyAdditionalStyle, dispatchDashboardStateChange]
+  );
+
+  const onSkinClear = useCallback(() => {
+    dispatchDashboardStateChange(setCurrentSkin(undefined));
+  }, [dispatchDashboardStateChange]);
+
+  const runSkins = useCallback(
+    (anchorElement?: any) => {
+      openSkinsMenuPopover(
+        anchorElement,
+        dashboardAppState.getLatestDashboardState().skin,
+        (name) => {
+          onSkinSelected(name);
+        },
+        onSkinClear
+      );
+    },
+    [onSkinSelected, onSkinClear, dashboardAppState]
+  );
+
   const runClone = useCallback(() => {
     const currentState = dashboardAppState.getLatestDashboardState();
     const onClone = async (
@@ -442,6 +585,7 @@ export function DashboardTopNav({
       [TopNavIds.OPTIONS]: showOptions,
       [TopNavIds.SAVE]: runSaveAs,
       [TopNavIds.CLONE]: runClone,
+      [TopNavIds.SKINS]: runSkins,
     } as { [key: string]: NavAction };
 
     if (share) {
@@ -465,6 +609,7 @@ export function DashboardTopNav({
     share,
     isLabsEnabled,
     isLabsShown,
+    runSkins,
   ]);
 
   UseUnmount(() => {
@@ -577,9 +722,11 @@ export function DashboardTopNav({
     .map(getVisTypeQuickButton)
     .filter((button) => button) as QuickButtonProps[];
 
+  const topNavMenu = <TopNavMenu {...getNavBarProps()} />;
+
   return (
     <>
-      <TopNavMenu {...getNavBarProps()} />
+      {topNavMenu}
       {isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
