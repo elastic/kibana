@@ -11,7 +11,6 @@ import { mergeMap, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
-import { PdfWorkerOutOfMemoryError } from '../../../../common/errors';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
 import { PdfMaker } from '../../common/pdf';
