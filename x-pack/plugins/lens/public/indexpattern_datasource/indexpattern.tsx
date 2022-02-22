@@ -49,6 +49,7 @@ import { getFiltersInLayer, getVisualDefaultsForLayer, isColumnInvalid } from '.
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
+  DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
   getErrorMessages,
   insertNewColumn,
@@ -586,7 +587,13 @@ export function getIndexPatternDatasource({
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
           const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-          return buckets.some((colId) => layer.columns[colId].operationType === 'date_histogram');
+          return buckets.some((colId) => {
+            const column = layer.columns[colId];
+            return (
+              isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+              !column.params.ignoreTimeRange
+            );
+          });
         })
       );
     },
