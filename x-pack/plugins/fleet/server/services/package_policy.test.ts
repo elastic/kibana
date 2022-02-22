@@ -49,6 +49,7 @@ import {
   updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
+  _compilePackagePolicyInputs,
 } from './package_policy';
 import { appContextService } from './app_context';
 
@@ -171,7 +172,7 @@ type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePoli
 describe('Package policy service', () => {
   describe('_compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -234,7 +235,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a two level dataset name', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -286,7 +287,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -349,7 +350,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the package level', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -417,7 +418,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and no streams', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [],
           policy_templates: [
@@ -459,7 +460,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and streams', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -564,7 +565,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package without input', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           policy_templates: [
             {
@@ -580,7 +581,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package with a empty inputs array', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
+      const inputs = await _compilePackagePolicyInputs(
         {
           policy_templates: [
             {

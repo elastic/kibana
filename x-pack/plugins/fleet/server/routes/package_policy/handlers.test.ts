@@ -28,17 +28,12 @@ import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from './index';
 
-type PackagePolicyServicePublicInterface = Omit<
-  PackagePolicyServiceInterface,
-  'getUpgradePackagePolicyInfo'
->;
-
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
 jest.mock(
   '../../services/package_policy',
   (): {
-    packagePolicyService: jest.Mocked<PackagePolicyServicePublicInterface>;
+    packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
   } => {
     return {
       packagePolicyService: {

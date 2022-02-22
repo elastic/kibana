@@ -86,7 +86,7 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
   'read_cross_cluster',
 ]);
 
-class PackagePolicyService {
+class PackagePolicyService implements PackagePolicyServiceInterface {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -162,7 +162,7 @@ class PackagePolicyService {
       }
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      inputs = await this._compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
 
       elasticsearch = pkgInfo.elasticsearch;
     }
@@ -393,7 +393,7 @@ class PackagePolicyService {
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      inputs = await this._compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
       elasticsearch = pkgInfo.elasticsearch;
     }
 
@@ -498,7 +498,11 @@ class PackagePolicyService {
     return result;
   }
 
-  public async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
+  // TODO should move out, public only for unit tests
+  public async getUpgradePackagePolicyInfo(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }> {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new IngestManagerError(
@@ -622,7 +626,7 @@ class PackagePolicyService {
       packageInfo,
       packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
     );
-    updatePackagePolicy.inputs = await this._compilePackagePolicyInputs(
+    updatePackagePolicy.inputs = await _compilePackagePolicyInputs(
       packageInfo,
       updatePackagePolicy.vars || {},
       updatePackagePolicy.inputs as PackagePolicyInput[]
@@ -688,7 +692,7 @@ class PackagePolicyService {
       packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
       true
     );
-    updatedPackagePolicy.inputs = await this._compilePackagePolicyInputs(
+    updatedPackagePolicy.inputs = await _compilePackagePolicyInputs(
       packageInfo,
       updatedPackagePolicy.vars || {},
       updatedPackagePolicy.inputs as PackagePolicyInput[]
@@ -796,7 +800,7 @@ class PackagePolicyService {
     return newPackagePolicy;
   }
 
-  public async buildPackagePolicyFromPackageWithVersion(
+  private async buildPackagePolicyFromPackageWithVersion(
     soClient: SavedObjectsClientContract,
     pkgName: string,
     pkgVersion: string
@@ -832,24 +836,6 @@ class PackagePolicyService {
         return packageToPackagePolicy(packageInfo, '', defaultOutputId);
       }
     }
-  }
-
-  public async _compilePackagePolicyInputs(
-    pkgInfo: PackageInfo,
-    vars: PackagePolicy['vars'],
-    inputs: PackagePolicyInput[]
-  ): Promise<PackagePolicyInput[]> {
-    const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input);
-      const compiledStreams = await _compilePackageStreams(pkgInfo, vars, input);
-      return {
-        ...input,
-        compiled_input: compiledInput,
-        streams: compiledStreams,
-      };
-    });
-
-    return Promise.all(inputsPromises);
   }
 
   public async runExternalCallbacks<A extends ExternalCallback[0]>(
@@ -949,6 +935,24 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
       return { ...stream, id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}` };
     }),
   };
+}
+
+export async function _compilePackagePolicyInputs(
+  pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
+  inputs: PackagePolicyInput[]
+): Promise<PackagePolicyInput[]> {
+  const inputsPromises = inputs.map(async (input) => {
+    const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input);
+    const compiledStreams = await _compilePackageStreams(pkgInfo, vars, input);
+    return {
+      ...input,
+      compiled_input: compiledInput,
+      streams: compiledStreams,
+    };
+  });
+
+  return Promise.all(inputsPromises);
 }
 
 async function _compilePackagePolicyInput(
@@ -1147,8 +1151,104 @@ function _enforceFrozenVars(
   return resultVars;
 }
 
-export type PackagePolicyServiceInterface = PackagePolicyService;
-export const packagePolicyService = new PackagePolicyService();
+export interface PackagePolicyServiceInterface {
+  create(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    packagePolicy: NewPackagePolicy,
+    options?: {
+      spaceId?: string;
+      id?: string;
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      force?: boolean;
+      skipEnsureInstalled?: boolean;
+      skipUniqueNameVerification?: boolean;
+      overwrite?: boolean;
+    }
+  ): Promise<PackagePolicy>;
+
+  bulkCreate(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    packagePolicies: NewPackagePolicy[],
+    agentPolicyId: string,
+    options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
+  ): Promise<PackagePolicy[]>;
+
+  get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
+
+  getByIDs(soClient: SavedObjectsClientContract, ids: string[]): Promise<PackagePolicy[] | null>;
+
+  list(
+    soClient: SavedObjectsClientContract,
+    options: ListWithKuery
+  ): Promise<ListResult<PackagePolicy>>;
+
+  listIds(
+    soClient: SavedObjectsClientContract,
+    options: ListWithKuery
+  ): Promise<ListResult<string>>;
+
+  update(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    id: string,
+    packagePolicyUpdate: UpdatePackagePolicy,
+    options?: { user?: AuthenticatedUser },
+    currentVersion?: string
+  ): Promise<PackagePolicy>;
+
+  delete(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
+  ): Promise<DeletePackagePoliciesResponse>;
+
+  upgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser },
+    packagePolicy?: PackagePolicy,
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyResponse>;
+
+  getUpgradeDryRunDiff(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    packagePolicy?: PackagePolicy,
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyDryRunResponseItem>;
+
+  enrichPolicyWithDefaultsFromPackage(
+    soClient: SavedObjectsClientContract,
+    newPolicy: NewPackagePolicy
+  ): Promise<NewPackagePolicy>;
+
+  buildPackagePolicyFromPackage(
+    soClient: SavedObjectsClientContract,
+    pkgName: string
+  ): Promise<NewPackagePolicy | undefined>;
+
+  runExternalCallbacks<A extends ExternalCallback[0]>(
+    externalCallbackType: A,
+    packagePolicy: A extends 'postPackagePolicyDelete'
+      ? DeletePackagePoliciesResponse
+      : NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+
+  runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
+
+  getUpgradePackagePolicyInfo(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }>;
+}
+export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
 
 export type { PackagePolicyService };
 
