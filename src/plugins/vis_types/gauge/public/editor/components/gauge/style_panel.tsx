@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,9 +18,27 @@ import { getGaugeCollections } from './../../collections';
 
 const gaugeCollections = getGaugeCollections();
 
-function StylePanel({ aggs, setGaugeValue, stateParams }: GaugeOptionsInternalProps) {
-  const diasableAlignment =
+function StylePanel({
+  aggs,
+  setGaugeValue,
+  stateParams,
+  showElasticChartsOptions,
+}: GaugeOptionsInternalProps) {
+  const disableAlignment =
     aggs.byType(AggGroupNames.Metrics).length === 1 && !aggs.byType(AggGroupNames.Buckets);
+
+  const alignmentSelect = (
+    <SelectOption
+      disabled={showElasticChartsOptions || disableAlignment}
+      label={i18n.translate('visTypeGauge.controls.gaugeOptions.alignmentLabel', {
+        defaultMessage: 'Alignment',
+      })}
+      options={gaugeCollections.alignments}
+      paramName="alignment"
+      value={stateParams.gauge.alignment}
+      setValue={setGaugeValue}
+    />
+  );
 
   return (
     <EuiPanel paddingSize="s">
@@ -43,17 +61,20 @@ function StylePanel({ aggs, setGaugeValue, stateParams }: GaugeOptionsInternalPr
         value={stateParams.gauge.gaugeType}
         setValue={setGaugeValue}
       />
-
-      <SelectOption
-        disabled={diasableAlignment}
-        label={i18n.translate('visTypeGauge.controls.gaugeOptions.alignmentLabel', {
-          defaultMessage: 'Alignment',
-        })}
-        options={gaugeCollections.alignments}
-        paramName="alignment"
-        value={stateParams.gauge.alignment}
-        setValue={setGaugeValue}
-      />
+      {showElasticChartsOptions ? (
+        <EuiToolTip
+          content={i18n.translate('visTypeGauge.editors.gauge.alignmentNotAvailable', {
+            defaultMessage:
+              'Alignment is not yet supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+          })}
+          delay="long"
+          position="right"
+        >
+          {alignmentSelect}
+        </EuiToolTip>
+      ) : (
+        alignmentSelect
+      )}
     </EuiPanel>
   );
 }

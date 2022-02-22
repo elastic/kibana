@@ -62,3 +62,7 @@ export interface GaugeVisParams {
   isDisplayWarning: boolean;
   gauge: Gauge;
 }
+
+export interface GaugeTypeProps {
+  showElasticChartsOptions?: boolean;
+}

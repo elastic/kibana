@@ -12,11 +12,13 @@ import { AggGroupNames } from '../../../../data/public';
 import { ColorMode, ColorSchemas } from '../../../../charts/public';
 import { VisTypeDefinition } from '../../../../visualizations/public';
 
-import { GaugeOptions } from '../editor/components';
+import { getGaugeOptions } from '../editor/components';
 import { toExpressionAst } from '../to_ast';
-import { GaugeVisParams, GaugeType } from '../types';
+import { GaugeVisParams, GaugeType, GaugeTypeProps } from '../types';
 
-export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
+export const getGoalVisTypeDefinition = (
+  props: GaugeTypeProps
+): VisTypeDefinition<GaugeVisParams> => ({
   name: 'goal',
   title: i18n.translate('visTypeGauge.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
@@ -65,7 +67,7 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
     },
   },
   editorConfig: {
-    optionsTemplate: GaugeOptions,
+    optionsTemplate: getGaugeOptions(props),
     schemas: [
       {
         group: AggGroupNames.Metrics,
@@ -109,4 +111,4 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
     ],
   },
   requiresSearch: true,
-};
+});

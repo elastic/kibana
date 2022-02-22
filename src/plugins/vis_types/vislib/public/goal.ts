@@ -13,6 +13,6 @@ import { toExpressionAst } from './to_ast';
 import { GaugeVisParams } from './gauge';
 
 export const goalVisTypeDefinition = {
-  ...goalVisType(),
+  ...goalVisType({}),
   toExpressionAst,
 } as VisTypeDefinition<GaugeVisParams>;

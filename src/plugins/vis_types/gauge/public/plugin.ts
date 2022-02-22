@@ -29,8 +29,9 @@ export class VisTypeGaugePlugin {
     { visualizations }: VisTypeGaugeSetupDependencies
   ): VisTypeGaugePluginSetup {
     if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
-      visualizations.createBaseVisualization(gaugeVisType());
-      visualizations.createBaseVisualization(goalVisType());
+      const visTypeProps = { showElasticChartsOptions: true };
+      visualizations.createBaseVisualization(gaugeVisType(visTypeProps));
+      visualizations.createBaseVisualization(goalVisType(visTypeProps));
     }
 
     return {};

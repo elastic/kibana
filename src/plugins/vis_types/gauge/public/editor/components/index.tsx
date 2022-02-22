@@ -9,10 +9,11 @@
 import React, { lazy } from 'react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { GaugeVisParams } from '../../types';
+import { GaugeTypeProps, GaugeVisParams } from '../../types';
 
 const GaugeOptionsLazy = lazy(() => import('./gauge'));
 
-export const GaugeOptions = (props: VisEditorOptionsProps<GaugeVisParams>) => (
-  <GaugeOptionsLazy {...props} />
-);
+export const getGaugeOptions =
+  ({ showElasticChartsOptions }: GaugeTypeProps) =>
+  (props: VisEditorOptionsProps<GaugeVisParams>) =>
+    <GaugeOptionsLazy {...props} showElasticChartsOptions={showElasticChartsOptions} />;

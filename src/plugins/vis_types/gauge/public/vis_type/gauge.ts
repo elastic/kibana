@@ -12,12 +12,14 @@ import { ColorMode, ColorSchemas } from '../../../../charts/public';
 import { AggGroupNames } from '../../../../data/public';
 import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
 
-import { Alignment, GaugeType } from '../types';
+import { Alignment, GaugeType, GaugeTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
-import { GaugeOptions } from '../editor/components';
+import { getGaugeOptions } from '../editor/components';
 import { GaugeVisParams } from '../types';
 
-export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
+export const getGaugeVisTypeDefinition = (
+  props: GaugeTypeProps
+): VisTypeDefinition<GaugeVisParams> => ({
   name: 'gauge',
   title: i18n.translate('visTypeGauge.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
@@ -73,7 +75,7 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
     },
   },
   editorConfig: {
-    optionsTemplate: GaugeOptions,
+    optionsTemplate: getGaugeOptions(props),
     schemas: [
       {
         group: AggGroupNames.Metrics,
@@ -117,4 +119,4 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
     ],
   },
   requiresSearch: true,
-};
+});

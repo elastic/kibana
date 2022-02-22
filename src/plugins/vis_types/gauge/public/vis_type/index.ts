@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
+import { GaugeTypeProps } from '../types';
+import { getGaugeVisTypeDefinition } from './gauge';
+import { getGoalVisTypeDefinition } from './goal';
 
-export const gaugeVisType = () => {
-  return gaugeVisTypeDefinition;
+export const gaugeVisType = (props: GaugeTypeProps) => {
+  return getGaugeVisTypeDefinition(props);
 };
 
-export const goalVisType = () => {
-  return goalVisTypeDefinition;
+export const goalVisType = (props: GaugeTypeProps) => {
+  return getGoalVisTypeDefinition(props);
 };

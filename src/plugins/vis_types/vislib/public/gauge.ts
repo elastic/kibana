@@ -44,6 +44,6 @@ export interface GaugeVisParams {
 }
 
 export const gaugeVisTypeDefinition = {
-  ...gaugeVisType(),
+  ...gaugeVisType({}),
   toExpressionAst,
 } as VisTypeDefinition<GaugeVisParams>;
