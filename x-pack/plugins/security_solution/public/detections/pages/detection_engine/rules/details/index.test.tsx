@@ -35,6 +35,7 @@ import { fillEmptySeverityMappings } from '../helpers';
 jest.mock('../../../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
+
 jest.mock('../helpers', () => {
   const original = jest.requireActual('../helpers');
   return {
@@ -48,6 +49,7 @@ jest.mock('../../../../../common/components/query_bar', () => ({
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
+jest.mock('../../../../components/alerts_kpis/common/hooks');
 jest.mock('../../../../containers/detection_engine/rules', () => {
   const original = jest.requireActual('../../../../containers/detection_engine/rules');
   return {
@@ -124,8 +126,14 @@ const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage)
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
-    (useUserData as jest.Mock).mockReturnValue([{}]);
-    (useParams as jest.Mock).mockReturnValue({});
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        hasIndexWrite: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+      },
+    ]);
+    (useParams as jest.Mock).mockReturnValue({ detailName: 'rule-1' });
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
@@ -164,6 +172,10 @@ describe('RuleDetailsPageComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
+      // @ts-expect-error hasIndexWrite is a property
+      expect(wrapper.find('[data-test-subj="alerts-table"]').first().props().hasIndexWrite).toBe(
+        true
+      );
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
     });

@@ -14,6 +14,7 @@ import { PrePackagedRulesPrompt } from './load_empty_prompt';
 import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useUserData } from '../../../../detections/components/user_info';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -54,6 +55,7 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
   createPrepackagedRules: jest.fn(),
 }));
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../detections/components/user_info');
 
 const props = {
   createPrePackagedRules: jest.fn(),
@@ -68,6 +70,15 @@ describe('PrePackagedRulesPrompt', () => {
   beforeEach(() => {
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        isSignalIndexExists: false,
+        isAuthenticated: false,
+        hasEncryptionKey: false,
+        canUserCRUD: false,
+        hasIndexWrite: false,
+      },
+    ]);
   });
 
   afterEach(() => {

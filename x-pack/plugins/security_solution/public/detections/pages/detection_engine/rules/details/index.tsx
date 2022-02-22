@@ -776,6 +776,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               </Display>
               {ruleId != null && (
                 <AlertsTable
+                  data-test-subj="alerts-table"
                   filterGroup={filterGroup}
                   timelineId={TimelineId.detectionsRulesDetailsPage}
                   defaultFilters={alertsTableDefaultFilters}
