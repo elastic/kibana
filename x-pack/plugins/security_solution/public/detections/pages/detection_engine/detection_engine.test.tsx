@@ -111,6 +111,8 @@ describe('DetectionEnginePageComponent', () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         hasIndexRead: true,
+        hasIndexWrite: true,
+        canUserCRUD: true,
         canUserREAD: true,
       },
     ]);
@@ -130,6 +132,10 @@ describe('DetectionEnginePageComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
+      // @ts-expect-error hasIndexWrite is a property
+      expect(wrapper.find('[data-test-subj="alerts-table"]').first().props().hasIndexWrite).toBe(
+        true
+      );
       expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
     });
   });

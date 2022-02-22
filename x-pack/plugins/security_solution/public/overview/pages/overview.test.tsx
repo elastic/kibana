@@ -28,6 +28,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useHostRiskScore } from '../../hosts/containers/host_risk_score';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -40,6 +41,9 @@ jest.mock('../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
+
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../detections/components/alerts_kpis/common/hooks');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -56,6 +60,7 @@ jest.mock('../../common/components/user_privileges', () => {
       return {
         listPrivileges: { loading: false, error: undefined, result: undefined },
         detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+        kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
         endpointPrivileges: {
           loading: false,
           canAccessEndpointManagement: true,
@@ -289,6 +294,30 @@ describe('Overview', () => {
         );
         expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
       });
+    });
+  });
+
+  describe('Overview privileges', () => {
+    it('displays alerts by category', () => {
+      mockUseSourcererDataView.mockReturnValue({
+        selectedPatterns: [],
+        indicesExist: true,
+        indexPattern: {},
+      });
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({
+        hasKibanaREAD: true,
+        hasIndexRead: true,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="alerts-by-category"]').exists()).toBe(true);
     });
   });
 

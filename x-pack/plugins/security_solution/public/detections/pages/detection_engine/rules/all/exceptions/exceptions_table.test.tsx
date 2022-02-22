@@ -16,6 +16,7 @@ import { ExceptionListsTable } from './exceptions_table';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
+import { useUserData } from '../../../../../components/user_info';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
@@ -41,14 +42,7 @@ jest.mock('../../../../../containers/detection_engine/lists/use_lists_config', (
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
-jest.mock('../../../../../components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([
-    {
-      loading: false,
-      canUserCRUD: false,
-    },
-  ]),
-}));
+jest.mock('../../../../../components/user_info');
 
 describe('ExceptionListsTable', () => {
   const exceptionList1 = getExceptionListSchemaMock();
@@ -56,6 +50,12 @@ describe('ExceptionListsTable', () => {
 
   beforeAll(() => {
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        loading: false,
+        canUserCRUD: false,
+      },
+    ]);
   });
 
   beforeEach(() => {
@@ -86,6 +86,42 @@ describe('ExceptionListsTable', () => {
         endpoint_list: exceptionList1,
       },
     ]);
+  });
+
+  it('exceptions table is selectable when canUserCRUD', async () => {
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        loading: false,
+        canUserCRUD: true,
+      },
+    ]);
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionListsTable />
+      </TestProviders>
+    );
+    // @ts-expect-error isSelectable is a property
+    expect(wrapper.find('[data-test-subj="exceptions-table"]').first().props().isSelectable).toBe(
+      true
+    );
+  });
+
+  it('exceptions table is not selectable when canUserCRUD is false', async () => {
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        loading: false,
+        canUserCRUD: false,
+      },
+    ]);
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionListsTable />
+      </TestProviders>
+    );
+    // @ts-expect-error isSelectable is a property
+    expect(wrapper.find('[data-test-subj="exceptions-table"]').first().props().isSelectable).toBe(
+      false
+    );
   });
 
   it('does not render delete option disabled if list is "endpoint_list"', async () => {

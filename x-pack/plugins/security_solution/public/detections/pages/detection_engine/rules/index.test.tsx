@@ -95,6 +95,20 @@ describe('RulesPage', () => {
     expect(wrapper.find('[data-test-subj="all-rules"]').exists()).toEqual(true);
   });
 
+  it('renders AllRules with hasPermissions true prop', () => {
+    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: true }]);
+    const wrapper = shallow(<RulesPage />);
+    // @ts-expect-error hasIndexWrite is a property
+    expect(wrapper.find('[data-test-subj="all-rules"]').props().hasPermissions).toBe(true);
+  });
+
+  it('renders AllRules with hasPermissions false prop', () => {
+    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: false }]);
+    const wrapper = shallow(<RulesPage />);
+    // @ts-expect-error hasIndexWrite is a property
+    expect(wrapper.find('[data-test-subj="all-rules"]').props().hasPermissions).toBe(false);
+  });
+
   it('renders correct button with correct text - Load Elastic prebuilt rules and timeline templates', async () => {
     (getPrePackagedRulesStatus as jest.Mock).mockResolvedValue({
       rules_not_installed: 3,

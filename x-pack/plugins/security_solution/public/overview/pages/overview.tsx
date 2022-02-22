@@ -107,6 +107,7 @@ const OverviewComponent = () => {
 
                       <EuiFlexItem grow={false}>
                         <AlertsByCategory
+                          data-test-subj="alerts-by-category"
                           deleteQuery={deleteQuery}
                           filters={filters}
                           from={from}

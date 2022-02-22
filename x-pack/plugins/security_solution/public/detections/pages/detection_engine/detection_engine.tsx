@@ -366,6 +366,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             </Display>
 
             <AlertsTable
+              data-test-subj="alerts-table"
               timelineId={TimelineId.detectionsPage}
               loading={loading}
               hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
