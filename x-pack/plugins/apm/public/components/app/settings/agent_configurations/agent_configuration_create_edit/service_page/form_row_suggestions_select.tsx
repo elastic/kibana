@@ -13,7 +13,7 @@ import { allOption } from '../../../../../shared/select_with_combo_box';
 
 interface Props {
   title: string;
-  esField: string;
+  field: string;
   description: string;
   fieldLabel: string;
   value?: string;
@@ -23,7 +23,7 @@ interface Props {
 
 export function FormRowSuggestionsSelect({
   title,
-  esField,
+  field,
   description,
   fieldLabel,
   value,
@@ -40,7 +40,7 @@ export function FormRowSuggestionsSelect({
         <SuggestionsSelect
           allOption={allowAll ? allOption : undefined}
           defaultValue={value}
-          field={esField}
+          field={field}
           onChange={onChange}
           isClearable={false}
           placeholder={i18n.translate(
