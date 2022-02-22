@@ -294,6 +294,7 @@ export class AlertingPlugin {
           ruleType.ruleTaskTimeout ?? alertingConfig.defaultRuleTaskTimeout;
         ruleType.cancelAlertsOnRuleTimeout =
           ruleType.cancelAlertsOnRuleTimeout ?? alertingConfig.cancelAlertsOnRuleTimeout;
+        ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {

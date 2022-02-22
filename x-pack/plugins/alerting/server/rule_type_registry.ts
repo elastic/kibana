@@ -52,6 +52,7 @@ export interface RegistryRuleType
     | 'isExportable'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -338,6 +339,7 @@ export class RuleTypeRegistry {
             isExportable,
             ruleTaskTimeout,
             defaultScheduleInterval,
+            doesSetRecoveryContext,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -351,6 +353,7 @@ export class RuleTypeRegistry {
           isExportable,
           ruleTaskTimeout,
           defaultScheduleInterval,
+          doesSetRecoveryContext,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,
