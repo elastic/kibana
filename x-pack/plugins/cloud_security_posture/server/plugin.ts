@@ -12,7 +12,6 @@ import type {
   Plugin,
   Logger,
 } from '../../../../src/core/server';
-import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
@@ -40,7 +39,6 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    this.logger.debug('csp: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -51,10 +49,6 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
-    this.logger.debug('csp: Started');
-    createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser, this.logger).catch(
-      this.logger.error
-    );
     return {};
   }
   public stop() {}

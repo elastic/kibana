@@ -21,6 +21,7 @@ import { useCloudPostureStatsApi } from '../../../common/api';
 import { statusColors } from '../../../common/constants';
 import { Score } from '../../../../common/types';
 import * as TEXT from '../translations';
+import { NO_DATA_TO_DISPLAY } from '../translations';
 
 // type Trend = Array<[time: number, value: number]>;
 
@@ -50,7 +51,7 @@ const getScoreIcon = (value: Score): IconType => {
 
 const placeholder = (
   <EuiText size="xs" color="subdued">
-    {'No data to display'}
+    {NO_DATA_TO_DISPLAY}
   </EuiText>
 );
 

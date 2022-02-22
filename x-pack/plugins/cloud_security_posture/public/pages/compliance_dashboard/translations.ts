@@ -81,3 +81,7 @@ export const RESOURCE_TYPE = i18n.translate('xpack.csp.resource_type', {
 export const FAILED_FINDINGS = i18n.translate('xpack.csp.failed_findings', {
   defaultMessage: 'Failed Findings',
 });
+
+export const NO_DATA_TO_DISPLAY = i18n.translate('xpack.csp.complianceDashboard.noDataLabel', {
+  defaultMessage: 'No data to display',
+});

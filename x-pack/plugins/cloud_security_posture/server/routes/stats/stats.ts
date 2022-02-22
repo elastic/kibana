@@ -193,6 +193,7 @@ export const defineGetStatsRoute = (router: IRouter, logger: Logger): void =>
           getLatestCycleId(esClient),
         ]);
 
+        // TODO: Utilize ES "Point in Time" feature https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
         const [allFindingsStats, benchmarksStats, resourceTypesAggs] = await Promise.all([
           getAllFindingsStats(esClient, latestCycleID),
           getBenchmarksStats(esClient, latestCycleID, benchmarks),

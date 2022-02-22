@@ -23,7 +23,7 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
   );
 
   const setUrlQuery = useCallback(
-    (query: Partial<ReturnType<typeof getDefaultQuery>>) =>
+    (query: Partial<T>) =>
       push({
         search: encodeQuery({ ...getDefaultQuery(), ...urlQuery, ...query }),
       }),

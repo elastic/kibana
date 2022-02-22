@@ -18,7 +18,7 @@ import { EuiFlexGroup, EuiText, EuiHorizontalRule, EuiFlexItem } from '@elastic/
 import { statusColors } from '../../../common/constants';
 import type { Stats } from '../../../../common/types';
 import * as TEXT from '../translations';
-import { getFormattedNum } from '../../../common/utils/get_formatted_num';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 
 interface CloudPostureScoreChartProps {
   data: Stats;
@@ -52,7 +52,7 @@ const ScoreChart = ({
         id={id}
         data={data}
         valueGetter="percent"
-        valueAccessor={(d) => d.value as number}
+        valueAccessor={(d) => d.value}
         layout={PartitionLayout.sunburst}
         layers={[
           {
@@ -78,9 +78,12 @@ const PercentageInfo = ({
   return (
     <EuiFlexGroup direction="column" justifyContent="center">
       <EuiText style={{ fontSize: 40, fontWeight: 'bold', lineHeight: 1 }}>{percentage}</EuiText>
-      <EuiText size="xs">{`${getFormattedNum(totalPassed)}/${getFormattedNum(
-        totalFindings
-      )} Findings passed`}</EuiText>
+      <EuiText size="xs">
+        <CompactFormattedNumber number={totalPassed} />
+        {'/'}
+        <CompactFormattedNumber number={totalFindings} />
+        {' Findings passed'}
+      </EuiText>
     </EuiFlexGroup>
   );
 };

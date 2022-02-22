@@ -21,7 +21,9 @@ describe('<Benchmarks />', () => {
     jest.resetAllMocks();
   });
 
-  const renderBenchmarks = (queryResponse: UseQueryResult = createReactQueryResponse()) => {
+  const renderBenchmarks = (
+    queryResponse: Partial<UseQueryResult> = createReactQueryResponse()
+  ) => {
     (useCspBenchmarkIntegrations as jest.Mock).mockImplementation(() => queryResponse);
 
     return render(

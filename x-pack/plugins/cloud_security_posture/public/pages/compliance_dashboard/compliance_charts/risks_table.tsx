@@ -19,7 +19,7 @@ import { useHistory } from 'react-router-dom';
 import { CloudPostureStats, ResourceTypeAgg } from '../../../../common/types';
 import { allNavigationItems } from '../../../common/navigation/constants';
 import { encodeQuery } from '../../../common/navigation/query_utils';
-import { getFormattedNum } from '../../../common/utils/get_formatted_num';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import * as TEXT from '../translations';
 import { RULE_FAILED } from '../../../../common/constants';
 
@@ -122,16 +122,19 @@ export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
         name: TEXT.FAILED_FINDINGS,
         render: (totalFailed: ResourceTypeAgg['totalFailed'], resource: ResourceTypeAgg) => (
           <>
-            <EuiText size="s" color="danger">{`${getFormattedNum(resource.totalFailed)}`}</EuiText>
-            <EuiText size="s">{`/${getFormattedNum(resource.totalFindings)}`}</EuiText>
+            <EuiText size="s" color="danger">
+              <CompactFormattedNumber number={resource.totalFailed} />
+            </EuiText>
+            <EuiText size="s">
+              {'/'}
+              <CompactFormattedNumber number={resource.totalFindings} />
+            </EuiText>
           </>
         ),
       },
     ],
     [handleCellClick]
   );
-
-  if (!resourceTypesAggs) return null;
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">

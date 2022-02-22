@@ -29,18 +29,10 @@ import { allNavigationItems } from '../../../common/navigation/constants';
 import { encodeQuery } from '../../../common/navigation/query_utils';
 import { Evaluation } from '../../../../common/types';
 
-type BenchmarksWithIcons = 'CIS Kubernetes';
+const logoMap: ReadonlyMap<string, EuiIconType> = new Map([['CIS Kubernetes', 'logoKubernetes']]);
 
-const logoMap: Record<BenchmarksWithIcons, EuiIconType> = {
-  'CIS Kubernetes': 'logoKubernetes',
-};
-
-const isBenchmarkWithIcon = (benchmark: string): benchmark is BenchmarksWithIcons =>
-  benchmark in logoMap;
-
-const getBenchmarkLogo = (benchmarkName: BenchmarksWithIcons | string): EuiIconType => {
-  if (isBenchmarkWithIcon(benchmarkName)) return logoMap[benchmarkName];
-  return 'logoElastic';
+const getBenchmarkLogo = (benchmarkName: string): EuiIconType => {
+  return logoMap.get(benchmarkName) ?? 'logoElastic';
 };
 
 const getBenchmarkEvaluationQuery = (name: string, evaluation: Evaluation): Query => ({

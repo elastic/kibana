@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPanel,
@@ -53,11 +53,11 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   isError,
   children,
 }) => {
-  const renderChart = useCallback(() => {
+  const renderChart = () => {
     if (isLoading) return <Loading />;
     if (isError) return <Error />;
     return children;
-  }, [isLoading, isError, children]);
+  };
 
   return (
     <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">

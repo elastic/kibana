@@ -26,3 +26,17 @@ export const PAGE_NOT_FOUND = i18n.translate('xpack.csp.page_not_found', {
 export const LOADING = i18n.translate('xpack.csp.loading', {
   defaultMessage: 'Loading...',
 });
+
+export const CSP_EVALUATION_BADGE_FAILED = i18n.translate(
+  'xpack.csp.cspEvaluationBadge.failedLabelText',
+  {
+    defaultMessage: 'FAILED',
+  }
+);
+
+export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
+  'xpack.csp.cspEvaluationBadge.failedLabelText',
+  {
+    defaultMessage: 'PASSED',
+  }
+);

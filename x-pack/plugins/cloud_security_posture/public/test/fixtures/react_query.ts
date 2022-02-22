@@ -13,18 +13,21 @@ interface CreateReactQueryResponseInput<TData = unknown, TError = unknown> {
   error?: TError;
 }
 
+// TODO: Consider alternatives to using `Partial` over `UseQueryResult` for the return type:
+//  1. Fully mock `UseQueryResult`
+//  2. Mock the network layer instead of `useQuery` - see: https://tkdodo.eu/blog/testing-react-query
 export const createReactQueryResponse = <TData = unknown, TError = unknown>({
   status = 'loading',
   error = undefined,
   data = undefined,
-}: CreateReactQueryResponseInput<TData, TError> = {}): UseQueryResult<TData, TError> => {
+}: CreateReactQueryResponseInput<TData, TError> = {}): Partial<UseQueryResult<TData, TError>> => {
   if (status === 'success') {
-    return { status, data } as UseQueryResult<TData, TError>;
+    return { status, data };
   }
 
   if (status === 'error') {
-    return { status, error } as UseQueryResult<TData, TError>;
+    return { status, error };
   }
 
-  return { status } as UseQueryResult<TData, TError>;
+  return { status };
 };

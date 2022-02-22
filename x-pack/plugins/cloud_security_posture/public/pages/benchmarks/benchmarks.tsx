@@ -23,13 +23,15 @@ const PAGE_HEADER: EuiPageHeaderProps = {
   ],
 };
 
+const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
+
 export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
 // TODO: Error state
 export const BENCHMARKS_ERROR_TEXT = 'TODO: Error state';
 const BenchmarksErrorState = () => <div>{BENCHMARKS_ERROR_TEXT}</div>;
 
 export const Benchmarks = () => {
-  useCspBreadcrumbs([allNavigationItems.benchmarks]);
+  useCspBreadcrumbs(BENCHMARKS_BREADCRUMBS);
   const query = useCspBenchmarkIntegrations();
 
   return (

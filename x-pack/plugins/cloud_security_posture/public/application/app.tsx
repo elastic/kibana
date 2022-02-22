@@ -26,14 +26,16 @@ export interface CspAppDeps {
   params: AppMountParameters;
 }
 
+type RoutePropsWithStringPath = RouteProps & { path: string };
+
 // Converts the mapping of page -> component to be of type `RouteProps` while filtering out disabled navigation items
 export const getRoutesFromMapping = <T extends string>(
   navigationItems: Record<T, CspNavigationItem>,
   componentMapping: Record<T, RouteProps['component']>
-): readonly RouteProps[] =>
+): readonly RoutePropsWithStringPath[] =>
   Object.entries(componentMapping)
     .filter(([id, _]) => !navigationItems[id as T].disabled)
-    .map<RouteProps>(([id, component]) => ({
+    .map<RoutePropsWithStringPath>(([id, component]) => ({
       path: navigationItems[id as T].path,
       component: component as RouteProps['component'],
     }));
@@ -48,7 +50,7 @@ export const CspApp = ({ core, deps, params }: CspAppDeps) => (
           <I18nProvider>
             <Switch>
               {routes.map((route) => (
-                <Route key={route.path as string} {...route} />
+                <Route key={route.path} {...route} />
               ))}
               <Route exact path="/" component={RedirectToDashboard} />
               <Route path="*" component={UnknownRoute} />

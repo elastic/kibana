@@ -15,7 +15,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   uiSettings.register({
     [ENABLE_CSP]: {
       name: i18n.translate('xpack.csp.uiSettings.enableCloudSecurityPosture', {
-        defaultMessage: 'Cloud Security',
+        defaultMessage: 'Cloud Security Posture',
       }),
       value: false,
       description: `${i18n.translate('xpack.csp.uiSettings.enableCloudSecurityPostureDescription', {

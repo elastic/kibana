@@ -40,7 +40,7 @@ export const createCspBenchmarkIntegrationFixture = ({
   return {
     integration_name,
     benchmark,
-    rules: outputRules as CspBenchmarkIntegration['rules'],
+    rules: outputRules,
     agent_policy,
     created_by,
     created_at,
