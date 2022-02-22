@@ -42,6 +42,7 @@ import { useHasMlPermissions } from './use_has_ml_permissions';
 import { getRulesTableActions } from './rules_table_actions';
 import { RuleStatusBadge } from '../../../../components/rules/rule_execution_status';
 import {
+  CountMetric,
   DurationMetric,
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
@@ -366,6 +367,40 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         sortable: !!isInMemorySorting,
         truncateText: true,
         width: '14%',
+      },
+      {
+        field: 'execution_summary.last_execution.metrics.total_alerts_detected',
+        name: (
+          <TableHeaderTooltipCell
+            title={i18n.COLUMN_TOTAL_ALERTS_DETECTED}
+            tooltipContent={i18n.COLUMN_TOTAL_ALERTS_DETECTED_TOOLTIP}
+          />
+        ),
+        render: (value: CountMetric | undefined) => (
+          <EuiText data-test-subj="total_alerts_detected" size="s">
+            {value != null ? value.toFixed() : getEmptyTagValue()}
+          </EuiText>
+        ),
+        sortable: !!isInMemorySorting,
+        truncateText: true,
+        width: '16%',
+      },
+      {
+        field: 'execution_summary.last_execution.metrics.total_alerts_created',
+        name: (
+          <TableHeaderTooltipCell
+            title={i18n.COLUMN_TOTAL_ALERTS_CREATED}
+            tooltipContent={i18n.COLUMN_TOTAL_ALERTS_CREATED_TOOLTIP}
+          />
+        ),
+        render: (value: CountMetric | undefined) => (
+          <EuiText data-test-subj="total_alerts_created" size="s">
+            {value != null ? value.toFixed() : getEmptyTagValue()}
+          </EuiText>
+        ),
+        sortable: !!isInMemorySorting,
+        truncateText: true,
+        width: '16%',
       },
       {
         field: 'execution_summary.last_execution.status',

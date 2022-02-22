@@ -284,6 +284,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                 state: runResult.state,
                 success: result.success && runResult.success,
+                totalHits: runResult.totalHits,
                 warning: warningMessages.length > 0,
                 warningMessages,
               };
@@ -355,6 +356,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   newStatus: RuleExecutionStatus.succeeded,
                   message: 'succeeded',
                   metrics: {
+                    totalAlertsCreated: result.createdSignalsCount,
+                    totalAlertsDetected: result.totalHits,
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
                   },
@@ -397,6 +400,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 newStatus: RuleExecutionStatus.failed,
                 message: errorMessage,
                 metrics: {
+                  totalAlertsCreated: result.createdSignalsCount,
+                  totalAlertsDetected: result.totalHits,
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                 },
@@ -432,6 +437,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               newStatus: RuleExecutionStatus.failed,
               message,
               metrics: {
+                totalAlertsCreated: result.createdSignalsCount,
+                totalAlertsDetected: result.totalHits,
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
               },

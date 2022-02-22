@@ -704,6 +704,7 @@ export const createSearchAfterReturnType = ({
   createdSignalsCount,
   createdSignals,
   errors,
+  totalHits,
   warningMessages,
 }: {
   success?: boolean | undefined;
@@ -714,6 +715,7 @@ export const createSearchAfterReturnType = ({
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
+  totalHits?: number | undefined;
   warningMessages?: string[] | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
@@ -725,6 +727,7 @@ export const createSearchAfterReturnType = ({
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
+    totalHits: totalHits ?? 0,
     warningMessages: warningMessages ?? [],
   };
 };
@@ -762,6 +765,7 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
+      totalHits: existingTotalHits,
       warningMessages: existingWarningMessages,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
@@ -774,6 +778,7 @@ export const mergeReturns = (
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
+      totalHits: newTotalHits,
       warningMessages: newWarningMessages,
     }: SearchAfterAndBulkCreateReturnType = next;
 
@@ -786,6 +791,7 @@ export const mergeReturns = (
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
+      totalHits: existingTotalHits + newTotalHits,
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
     };
   });

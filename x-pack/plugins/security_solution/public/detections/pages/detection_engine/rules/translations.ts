@@ -701,6 +701,35 @@ export const COLUMN_INDEXING_TIMES_TOOLTIP = i18n.translate(
   }
 );
 
+export const COLUMN_TOTAL_ALERTS_CREATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.totalAlertsCreatedTitle',
+  {
+    defaultMessage: 'Total Alerts Created',
+  }
+);
+
+export const COLUMN_TOTAL_ALERTS_CREATED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.totalAlertsCreatedTooltip',
+  {
+    defaultMessage: 'Total number of alerts written from the last execution',
+  }
+);
+
+export const COLUMN_TOTAL_ALERTS_DETECTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.totalAlertsDetectedTitle',
+  {
+    defaultMessage: 'Total Alerts Detected',
+  }
+);
+
+export const COLUMN_TOTAL_ALERTS_DETECTED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.totalAlertsDetectedTooltip',
+  {
+    defaultMessage:
+      'Total number of alerts detected before exceptions/de-duplication from the last execution',
+  }
+);
+
 export const COLUMN_QUERY_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimes',
   {

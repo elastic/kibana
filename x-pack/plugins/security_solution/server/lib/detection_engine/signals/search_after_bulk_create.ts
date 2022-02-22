@@ -167,6 +167,7 @@ export const searchAfterAndBulkCreate = async ({
               createdSignals: createdItems,
               bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
               errors: bulkErrors,
+              totalHits,
             }),
           ]);
           signalsCreatedCount += createdCount;

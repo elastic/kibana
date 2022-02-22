@@ -128,8 +128,10 @@ export const eqlExecutor = async ({
     let newSignals: SimpleHit[] | undefined;
     if (response.hits.sequences !== undefined) {
       newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
+      result.totalHits = response.hits.sequences.length;
     } else if (response.hits.events !== undefined) {
       newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
+      result.totalHits = response.hits.events.length;
     } else {
       throw new Error(
         'eql query response should have either `sequences` or `events` but had neither'

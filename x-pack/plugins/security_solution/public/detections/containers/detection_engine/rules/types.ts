@@ -183,6 +183,8 @@ export type RulesSortingFields =
   | 'enabled'
   | 'execution_summary.last_execution.date'
   | 'execution_summary.last_execution.metrics.execution_gap_duration_s'
+  | 'execution_summary.last_execution.metrics.total_alerts_created'
+  | 'execution_summary.last_execution.metrics.total_alerts_detected'
   | 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
   | 'execution_summary.last_execution.metrics.total_search_duration_ms'
   | 'execution_summary.last_execution.status'

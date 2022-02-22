@@ -134,6 +134,8 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
     message: truncateValue(message) ?? '',
     metrics: metrics
       ? {
+          total_alerts_created: metrics.totalAlertsCreated,
+          total_alerts_detected: metrics.totalAlertsDetected,
           total_search_duration_ms: normalizeDurations(metrics.searchDurations),
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),

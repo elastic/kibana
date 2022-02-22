@@ -139,6 +139,7 @@ export const mlExecutor = async ({
         createdSignalsCount: createdItemsCount,
         createdSignals: createdItems,
         bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+        totalHits: anomalyCount,
       }),
     ]);
   });

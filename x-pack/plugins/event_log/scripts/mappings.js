@@ -74,6 +74,12 @@ exports.EcsCustomPropertyMappings = {
                       number_of_triggered_actions: {
                         type: 'long',
                       },
+                      total_alerts_created: {
+                        type: 'long',
+                      },
+                      total_alerts_detected: {
+                        type: 'long',
+                      },
                       total_indexing_duration_ms: {
                         type: 'long',
                       },
