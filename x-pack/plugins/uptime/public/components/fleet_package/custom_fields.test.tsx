@@ -305,7 +305,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     const urlError = getByText('URL is required');
-    const monitorIntervalError = getByText('Monitor interval is required');
+    const monitorIntervalError = getByText('Monitor frequency is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
     const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
@@ -321,7 +321,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(timeout, { target: { value: '1' } });
 
     expect(queryByText('URL is required')).not.toBeInTheDocument();
-    expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+    expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
     expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
     expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
 
@@ -329,7 +329,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } }); // 1 minute
     fireEvent.change(timeout, { target: { value: '611' } }); // timeout cannot be more than monitor interval
 
-    const timeoutError2 = getByText('Timeout must be less than the monitor interval');
+    const timeoutError2 = getByText('Timeout must be less than the monitor frequency');
 
     expect(timeoutError2).toBeInTheDocument();
   });
