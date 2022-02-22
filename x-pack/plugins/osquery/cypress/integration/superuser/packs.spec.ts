@@ -99,7 +99,7 @@ describe('SuperUser - Packs', () => {
         .type(SAVED_QUERY_ID);
       cy.react('List').first().click();
       cy.contains('ID must be unique').should('exist');
-      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Cancel').click();
+      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
     // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
     it.skip('to click the icon and visit discover', () => {
