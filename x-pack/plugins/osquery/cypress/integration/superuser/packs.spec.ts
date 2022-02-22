@@ -89,12 +89,15 @@ describe('SuperUser - Packs', () => {
     });
 
     it('should trigger validation when saved query is being chosen', () => {
+      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      findAndClickButton('Edit');
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       cy.contains('ID must be unique').should('not.exist');
       cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
         .click()
         .type(SAVED_QUERY_ID);
+      cy.react('List').first().click();
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Cancel').click();
     });
