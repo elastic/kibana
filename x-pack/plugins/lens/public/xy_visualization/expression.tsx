@@ -106,7 +106,7 @@ export type XYChartRenderProps = XYChartProps & {
 export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isTimeViz = filteredLayers.every((l) => l.xScaleType === 'time');
   const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
     (column) => column.id === filteredLayers[0].xAccessor
   );
@@ -315,7 +315,7 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
+  const isTimeViz = Boolean(filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -512,10 +512,6 @@ export function XYChart({
         value: pointValue,
       });
     }
-    const currentColumnMeta = table.columns.find((el) => el.id === layer.xAccessor)?.meta;
-    const xAxisFieldName = currentColumnMeta?.field;
-    const isDateField = currentColumnMeta?.type === 'date';
-
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
         row: point.row,
@@ -523,7 +519,6 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
     onClickValue(context);
   };
@@ -541,13 +536,10 @@ export function XYChart({
 
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
 
-    const timeFieldName = isTimeViz ? table.columns[xAxisColumnIndex]?.meta?.field : undefined;
-
     const context: LensBrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      timeFieldName,
     };
     onSelectRange(context);
   };
