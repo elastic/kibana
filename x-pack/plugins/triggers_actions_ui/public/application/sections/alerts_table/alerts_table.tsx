@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   EuiDataGridColumn,
   EuiDataGridControlColumn,
@@ -14,11 +14,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { get } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { get } from 'lodash';
 import { useKibana } from '../../../common/lib/kibana';
 import { QueryBar, useQueryBar, Provider, alertsPageStateContainer } from './query_bar';
 import { getVisibleAlertConsumers } from './get_visible_alert_consumers';
+
 import { useFetchDataViews, usePagination, useSorting } from './hooks';
 
 interface BulkActionsObjectProp {
@@ -27,41 +28,39 @@ interface BulkActionsObjectProp {
   onAlertStatusActionFailure?: void;
 }
 
-interface Sort {
+export interface Sort {
   columnId: string;
   columnType: string;
   sortDirection: 'asc' | 'desc';
 }
 
-interface AlertsTableProps {
+export interface FetchAlertData {
   activePage: number;
-  consumers: AlertConsumers[];
-  bulkActions: BulkActionsObjectProp;
-  columns: EuiDataGridColumn[];
-  alerts: Record<string, any>;
-  // defaultCellActions: TGridCellAction[];
-  deletedEventIds: string[];
-  disabledCellActions: string[];
-  getInspectQuery: () => { request: {}; response: {} };
+  alerts: Record<string, any[]>;
   isInitializing: boolean;
   isLoading: boolean;
-  itemsPerPage: number;
-  itemsPerPageOptions: number[];
-  leadingControlColumns: EuiDataGridControlColumn[];
+  getInspectQuery: () => { request: {}; response: {} };
   onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
   onPageChange: (pageNumber: number, limit: number) => void;
   onSortChange: (sort: Sort[]) => void;
+  refresh: () => void;
+  alertCount: number;
+}
+
+type AlertsTableProps = FetchAlertData & {
+  consumers: AlertConsumers[];
+  bulkActions: BulkActionsObjectProp;
+  columns: EuiDataGridColumn[];
+  // defaultCellActions: TGridCellAction[];
+  deletedEventIds: string[];
+  disabledCellActions: string[];
+  itemsPerPage: number;
+  itemsPerPageOptions: number[];
+  leadingControlColumns: EuiDataGridControlColumn[];
   renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
   showCheckboxes: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
-}
-
-const useFetchAlertData = () => {
-  return {
-    fetchAlertData: () => {},
-    alerts: [],
-    alertsTotal: 0,
-  };
+  useFetchAlertData: () => FetchAlertData;
 };
 
 const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
@@ -86,14 +85,16 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
     application: { capabilities },
     kibanaFeatures,
   } = useKibana().services;
-
   // const [alerts, setAlerts] = useState<ParsedTechnicalFields[]>([]);
   // const [alertsTotal, setAlertsTotal] = useState<number>(0);
   const { sortingColumns, onSort } = useSorting();
   const { pagination, onChangeItemsPerPage, onChangePage } = usePagination();
-  const { fetchAlertData, alerts, alertsTotal } = useFetchAlertData();
-  const { onQueryBarQueryChange, rangeFrom, rangeTo, kuery } = useQueryBar(data, fetchAlertData);
-  const visibleConsumers = getVisibleAlertConsumers(capabilities, kibanaFeatures, props.consumers);
+
+  const { refresh, alerts, alertCount } = props.useFetchAlertData();
+  const { onQueryBarQueryChange, rangeFrom, rangeTo, kuery } = useQueryBar(data, refresh);
+  const visibleConsumers = useMemo(() => {
+    return getVisibleAlertConsumers(capabilities, kibanaFeatures, props.consumers);
+  }, [props.consumers, capabilities, kibanaFeatures]);
   const { dataViews } = useFetchDataViews(visibleConsumers, http, data);
 
   const columns = [
@@ -134,7 +135,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
-        rowCount={alertsTotal}
+        rowCount={alertCount}
         renderCellValue={RenderCellValue}
         inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort }}
@@ -156,6 +157,3 @@ export function AlertsTable(props: AlertsTableProps) {
     </Provider>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export { AlertsTable as default };

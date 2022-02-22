@@ -8,14 +8,14 @@ import { useCallback } from 'react';
 import { useStateContainer } from './state';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
-export function useQueryBar(data: DataPublicPluginStart, fetchData: () => void) {
+export function useQueryBar(data: DataPublicPluginStart, refresh: () => void) {
   const timefilterService = data.query.timefilter.timefilter;
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } = useStateContainer();
 
   const onQueryBarQueryChange = useCallback(
     ({ dateRange, query }) => {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
-        fetchData();
+        refresh();
         return;
       }
       timefilterService.setTime(dateRange);
@@ -23,7 +23,7 @@ export function useQueryBar(data: DataPublicPluginStart, fetchData: () => void) 
       setRangeTo(dateRange.to);
       setKuery(query);
     },
-    [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService, fetchData]
+    [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService, refresh]
   );
   return { onQueryBarQueryChange, rangeFrom, rangeTo, kuery };
 }

@@ -10,7 +10,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToRules } from './constants';
+import { Section, routeToConnectors, routeToRules, routeToInternalAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
@@ -24,6 +24,7 @@ const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
 const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
   section: Section;
@@ -133,6 +134,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               exact
               path={routeToRules}
               component={suspendedComponentWithProps(AlertsList, 'xl')}
+            />
+            <Route
+              exact
+              path={routeToInternalAlerts}
+              component={suspendedComponentWithProps(AlertsPage, 'xl')}
             />
           </Switch>
         </HealthCheck>

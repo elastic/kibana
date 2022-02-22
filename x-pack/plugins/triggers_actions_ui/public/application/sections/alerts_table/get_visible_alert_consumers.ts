@@ -9,12 +9,33 @@ import { Capabilities } from 'src/core/public';
 import { KibanaFeature } from '../../../../../features/public';
 import { Consumer } from './types';
 
+function mapAlertConsumerToKibanaFeature(consumers: AlertConsumers[]) {
+  return consumers.reduce((accum: AlertConsumers[], consumer) => {
+    if (consumer === AlertConsumers.OBSERVABILITY) {
+      accum.push(
+        ...[
+          AlertConsumers.APM,
+          AlertConsumers.LOGS,
+          AlertConsumers.UPTIME,
+          AlertConsumers.INFRASTRUCTURE,
+        ]
+      );
+    } else {
+      accum.push(consumer);
+    }
+    return accum;
+  }, []);
+}
+
 export function getVisibleAlertConsumers(
   capabilities: Capabilities,
   kibanaFeatures: KibanaFeature[],
   consumers?: AlertConsumers[]
 ) {
-  return (consumers ?? Object.values(AlertConsumers))
+  const toFilter = consumers
+    ? mapAlertConsumerToKibanaFeature(consumers)
+    : Object.values(AlertConsumers);
+  return toFilter
     .filter((consumer) => {
       return capabilities[consumer]?.show;
     })

@@ -19,6 +19,7 @@ export function useFetchDataViews(
   const [dataViews, setDataViews] = useState<DataViewBase[]>([]);
   useEffect(() => {
     (async () => {
+      if (consumers.length === 0) return;
       const { index_name: indexNames } = await http.get<{ index_name: string[] }>(
         `${BASE_RAC_ALERTS_API_PATH}/index`,
         {
