@@ -73,6 +73,7 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import { setupLens } from './lens/setup';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -173,6 +174,8 @@ export class MapsPlugin
         return renderApp(params, UsageTracker);
       },
     });
+
+    setupLens(plugins.expressions);
 
     // register wrapper around legacy tile_map and region_map visualizations
     plugins.expressions.registerFunction(createRegionMapFn);

@@ -33,6 +33,7 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../file_upload/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },
