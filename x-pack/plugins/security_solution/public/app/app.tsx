@@ -11,7 +11,6 @@ import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 
@@ -27,6 +26,7 @@ import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
+import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -36,8 +36,6 @@ interface StartAppComponent {
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
-
-const queryClient = new QueryClient();
 
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
@@ -63,7 +61,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <MlCapabilitiesProvider>
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
-                      <QueryClientProvider client={queryClient}>
+                      <ReactQueryClientProvider>
                         <PageRouter
                           history={history}
                           onAppLeave={onAppLeave}
@@ -71,7 +69,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                         >
                           {children}
                         </PageRouter>
-                      </QueryClientProvider>
+                      </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>
