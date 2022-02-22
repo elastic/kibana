@@ -65,7 +65,7 @@ const calculatePostureScore = (total: number, passed: number, failed: number): S
   passed + failed === 0 || total === undefined ? undefined : roundScore(passed / (passed + failed));
 
 const getLatestCycleId = async (esClient: ElasticsearchClient) => {
-  const latestFinding = await esClient.search<LastCycle>(getLatestFindingQuery());
+  const latestFinding = await esClient.search<LastCycle>(getLatestFindingQuery(), { meta: true });
   const lastCycle = latestFinding.body.hits.hits[0];
 
   if (lastCycle?._source?.cycle_id === undefined) {
@@ -78,7 +78,7 @@ export const getBenchmarks = async (esClient: ElasticsearchClient) => {
   const queryResult = await esClient.search<
     {},
     { benchmarks: AggregationsMultiBucketAggregateBase<Pick<GroupFilename, 'key'>> }
-  >(getBenchmarksQuery());
+  >(getBenchmarksQuery(), { meta: true });
   const benchmarksBuckets = queryResult.body.aggregations?.benchmarks;
 
   if (!benchmarksBuckets || !Array.isArray(benchmarksBuckets?.buckets)) {
@@ -93,9 +93,9 @@ export const getAllFindingsStats = async (
   cycleId: string
 ): Promise<BenchmarkStats> => {
   const [findings, passedFindings, failedFindings] = await Promise.all([
-    esClient.count(getFindingsEsQuery(cycleId)),
-    esClient.count(getFindingsEsQuery(cycleId, RULE_PASSED)),
-    esClient.count(getFindingsEsQuery(cycleId, RULE_FAILED)),
+    esClient.count(getFindingsEsQuery(cycleId), { meta: true }),
+    esClient.count(getFindingsEsQuery(cycleId, RULE_PASSED), { meta: true }),
+    esClient.count(getFindingsEsQuery(cycleId, RULE_FAILED), { meta: true }),
   ]);
 
   const totalFindings = findings.body.count;
@@ -121,12 +121,16 @@ export const getBenchmarksStats = async (
   benchmarks: string[]
 ): Promise<BenchmarkStats[]> => {
   const benchmarkPromises = benchmarks.map((benchmark) => {
-    const benchmarkFindings = esClient.count(getFindingsEsQuery(cycleId, undefined, benchmark));
+    const benchmarkFindings = esClient.count(getFindingsEsQuery(cycleId, undefined, benchmark), {
+      meta: true,
+    });
     const benchmarkPassedFindings = esClient.count(
-      getFindingsEsQuery(cycleId, RULE_PASSED, benchmark)
+      getFindingsEsQuery(cycleId, RULE_PASSED, benchmark),
+      { meta: true }
     );
     const benchmarkFailedFindings = esClient.count(
-      getFindingsEsQuery(cycleId, RULE_FAILED, benchmark)
+      getFindingsEsQuery(cycleId, RULE_FAILED, benchmark),
+      { meta: true }
     );
 
     return Promise.all([benchmarkFindings, benchmarkPassedFindings, benchmarkFailedFindings]).then(
@@ -157,7 +161,8 @@ export const getResourceTypesAggs = async (
   cycleId: string
 ): Promise<CloudPostureStats['resourceTypesAggs']> => {
   const resourceTypesQueryResult = await esClient.search<unknown, ResourceTypeBucket>(
-    getRisksEsQuery(cycleId)
+    getRisksEsQuery(cycleId),
+    { meta: true }
   );
 
   const resourceTypesAggs = resourceTypesQueryResult.body.aggregations?.resource_types.buckets;

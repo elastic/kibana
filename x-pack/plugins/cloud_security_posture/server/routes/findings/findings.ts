@@ -89,7 +89,7 @@ export const defineFindingsIndexRoute = (router: IRouter, logger: Logger): void 
         const query = buildQueryRequest(latestCycleIds);
         const esQuery = getFindingsEsQuery(query, options);
 
-        const findings = await esClient.search(esQuery);
+        const findings = await esClient.search(esQuery, { meta: true });
         const hits = findings.body.hits.hits;
 
         return response.ok({ body: hits });
