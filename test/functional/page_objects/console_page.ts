@@ -87,10 +87,10 @@ export class ConsolePageObject extends FtrService {
     const textArea = await this.testSubjects.find('console-textarea');
     // There should be autocomplete for this on all license levels
     await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutoCompleteVisible());
+    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
-  public async isAutoCompleteVisible() {
+  public async isAutocompleteVisible() {
     const element = await this.find.byCssSelector('.ace_autocomplete');
     if (!element) return false;
 
@@ -136,6 +136,11 @@ export class ConsolePageObject extends FtrService {
   public async pressEnter() {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ENTER);
+  }
+
+  public async pressSpace() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.SPACE);
   }
 
   public async clearTextArea() {

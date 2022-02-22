@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterRequest();
       await PageObjects.console.promptAutocomplete();
+      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
     describe('with a missing comma in query', () => {
@@ -55,6 +56,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
+      });
+
+      it('should add a comma on the same line', async () => {
+        await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
+        await PageObjects.console.pressSpace();
+        await PageObjects.console.pressSpace();
+        await PageObjects.console.pressSpace();
+        await PageObjects.console.promptAutocomplete();
+        await PageObjects.console.enterText('boost');
+        await PageObjects.console.pressEnter();
+
+        const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        expect(text).to.contain(',');
       });
     });
   });
