@@ -52,7 +52,6 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
 
 interface AnomalyTimelineProps {
   explorerState: ExplorerState;
-  // setSelectedCells: (cells?: any) => void;
 }
 
 export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
@@ -63,7 +62,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       },
     } = useMlKibana();
 
-    const { anomalyTimelineStateService } = useAnomalyExplorerContext();
+    const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
+      useAnomalyExplorerContext();
 
     const setSelectedCells = anomalyTimelineStateService.setSelectedCells.bind(
       anomalyTimelineStateService
@@ -79,12 +79,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const {
       filterActive,
       viewByLoadedForTimeFormatted,
-      selectedJobs,
+      // selectedJobs,
       viewByFromPage,
       viewByPerPage,
       swimlaneLimit,
       overallAnnotations,
     } = explorerState;
+
+    const selectedJobs = useObservable(anomalyExplorerCommonStateService.getSelectedJobs$());
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 

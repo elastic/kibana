@@ -12,7 +12,6 @@ import {
   skipWhile,
   distinctUntilChanged,
   startWith,
-  withLatestFrom,
   tap,
   debounceTime,
 } from 'rxjs/operators';
@@ -44,7 +43,9 @@ export class AnomalyTimelineStateService {
   private _overallSwimLaneData$ = new BehaviorSubject<OverallSwimlaneData | null>(null);
   private _viewBySwimLaneData$ = new BehaviorSubject<ViewBySwimLaneData | undefined>(undefined);
 
-  private _swimLaneUrlState$ = new BehaviorSubject<AnomalyExplorerSwimLaneUrlState | null>(null);
+  private _swimLaneUrlState$ = new BehaviorSubject<
+    AnomalyExplorerSwimLaneUrlState | undefined | null
+  >(null);
 
   private _containerWidth$ = new Subject<number>();
   private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined>(undefined);
@@ -98,7 +99,7 @@ export class AnomalyTimelineStateService {
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
-      this._containerWidth$.pipe(debounceTime(500), distinctUntilChanged()),
+      this.getContainerWidth$(),
     ])
       .pipe(
         tap(() => {
@@ -120,15 +121,14 @@ export class AnomalyTimelineStateService {
         this._isOverallSwimLaneLoading$.next(false);
       });
 
-    this._overallSwimLaneData$
+    combineLatest([
+      this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this._swimLaneSeverity$,
+      this.getContainerWidth$(),
+      this.getViewBySwimlaneFieldName$(),
+    ])
       .pipe(
-        skipWhile((v) => !v),
-        withLatestFrom(
-          this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-          this._swimLaneSeverity$,
-          this._containerWidth$,
-          this._viewBySwimlaneFieldName$
-        ),
         tap(() => {
           this._isViewBySwimLaneLoading$.next(true);
         }),
@@ -140,10 +140,6 @@ export class AnomalyTimelineStateService {
             swimlaneContainerWidth,
             viewBySwimlaneFieldName,
           ]) => {
-            // console.log(overallSwimLaneData, '___overallSwimLaneData___');
-            // console.log(viewBySwimlaneFieldName, '___viewBySwimlaneFieldName___');
-            // console.log(severity, '___severity___');
-
             return from(
               this.anomalyTimelineService.loadViewBySwimlane(
                 [],
@@ -172,7 +168,7 @@ export class AnomalyTimelineStateService {
 
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this._containerWidth$,
+      this.getContainerWidth$(),
     ]).subscribe(([selectedJobs, containerWidth]) => {
       if (!selectedJobs) return;
       this._bucketSpanInterval = this.anomalyTimelineService
@@ -389,7 +385,7 @@ export class AnomalyTimelineStateService {
   }
 
   public getContainerWidth$(): Observable<number> {
-    return this._containerWidth$.asObservable();
+    return this._containerWidth$.pipe(debounceTime(500), distinctUntilChanged());
   }
 
   /**
@@ -408,7 +404,7 @@ export class AnomalyTimelineStateService {
   }
 
   public getViewBySwimlaneFieldName$(): Observable<string | undefined> {
-    return this._viewBySwimlaneFieldName$.asObservable();
+    return this._viewBySwimlaneFieldName$.pipe(distinctUntilChanged());
   }
 
   public getViewBySwimLaneOptions$(): Observable<string[]> {
