@@ -13,7 +13,8 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
-import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
+import { SecurityPageName } from '../../../../common/constants';
+import { filterHostExternalAlertData, filterNetworkExternalAlertData } from './utils';
 
 export interface SingleMetricOptions {
   alignLnsMetric?: string;
@@ -67,23 +68,34 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   const { tabName } = useParams<{ tabName: string }>();
 
   const tabsFilters = useMemo(() => {
-    if (tabName === NetworkRouteType.alerts) {
-      return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
+    if (location.pathname.includes(SecurityPageName.hosts) && tabName === 'externalAlerts') {
+      return filters.length > 0
+        ? [...filters, ...filterHostExternalAlertData]
+        : filterHostExternalAlertData;
     }
+
+    if (
+      location.pathname.includes(SecurityPageName.network) &&
+      tabName === NetworkRouteType.alerts
+    ) {
+      return filters.length > 0
+        ? [...filters, ...filterNetworkExternalAlertData]
+        : filterNetworkExternalAlertData;
+    }
+
     return filters;
   }, [tabName, filters]);
-  const customLensAttrs = useMemo(
-    () => {
-      const configs = props.customLensAttrs;
-      return({
-      ...configs,
-      state: {...configs.state, query, filters: [...configs.state.filters, ...tabsFilters]},
-      references: configs.references.map((ref) => ({ ...ref, id: dataViewId })),
-    })},
-    [dataViewId, query, filters]
-  );
 
-  const indexPatterns=patternList?.join(',');
+  const customLensAttrs = useMemo(() => {
+    const cfg = props.customLensAttrs;
+    return {
+      ...cfg,
+      state: { ...cfg.state, query, filters: [...cfg.state.filters, ...tabsFilters] },
+      references: cfg.references.map((ref) => ({ ...ref, id: dataViewId })),
+    };
+  }, [props.customLensAttrs, query, tabsFilters, dataViewId]);
+
+  const indexPatterns = patternList?.join(',');
 
   const mergedProps = { ...configs, ...props, indexPatterns, customLensAttrs };
   return <ExploratoryViewEmbeddable {...mergedProps} />;

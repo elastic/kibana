@@ -8,6 +8,7 @@
 import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
+import { Filter } from '@kbn/es-query';
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
 import { MatrixHistogramData } from '../../../../common/search_strategy';
@@ -106,3 +107,86 @@ export const getCustomChartData = (
     return { ...item, color: mapItem?.color ?? defaultLegendColors[idx] };
   });
 };
+
+export const filterHostExternalAlertData: Filter[] = [
+  {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'host.name',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    meta: {
+      alias: '',
+      disabled: false,
+      key: 'bool',
+      negate: false,
+      type: 'custom',
+      value:
+        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
+    },
+  },
+];
+
+export const filterNetworkExternalAlertData: Filter[] = [
+  {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: 'source.ip',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: 'destination.ip',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    meta: {
+      alias: '',
+      disabled: false,
+      key: 'bool',
+      negate: false,
+      type: 'custom',
+      value:
+        '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field": "source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field": "destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}',
+    },
+  },
+];
