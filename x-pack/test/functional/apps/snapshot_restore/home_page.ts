@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     before(async () => {
-      await security.testUser.setRoles(['snapshot_restore_user'], true);
+      await security.testUser.setRoles(['snapshot_restore_user'], false);
       await pageObjects.common.navigateToApp('snapshotRestore');
     });
 
