@@ -40,9 +40,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { OmitMessageVariablesType } from '../../lib/action_variables';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
-  omitOptionalMessageVariables?: boolean;
+  omitMessageVariables?: OmitMessageVariablesType;
   defaultActionMessage?: string;
 }
 
