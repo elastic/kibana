@@ -7,8 +7,8 @@
 
 import rison from 'rison-node';
 
-export function decodeMvtResponseBody(decodedRequestBody: string): object {
-  return rison.decode(decodeURIComponent(decodedRequestBody));
+export function decodeMvtResponseBody(encodedRequestBody: string): object {
+  return rison.decode(decodeURIComponent(encodedRequestBody));
 }
 
 export function encodeMvtResponseBody(unencodedRequestBody: object): string {
