@@ -101,4 +101,5 @@ export interface LogActiveAndRecoveredAlertsParams<
   activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
   recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   ruleLabel: string;
+  canSetRecoveryContext: boolean;
 }
