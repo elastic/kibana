@@ -48,7 +48,7 @@ export const getDetailPanelProcess = (process: Process | null) => {
 
   processData.args = [...args];
   processData.entryLeader = getDetailPanelProcessLeader(process.events[0].process.entry_leader);
-  processData.sessionLeader = getDetailPanelProcessLeader(process.events[0].process.session);
+  processData.sessionLeader = getDetailPanelProcessLeader(process.events[0].process.session_leader);
   processData.groupLeader = getDetailPanelProcessLeader(process.events[0].process.group_leader);
   processData.parent = getDetailPanelProcessLeader(process.events[0].process.parent);
 

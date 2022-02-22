@@ -17,7 +17,7 @@ import {
 
 export const mockEvents: ProcessEvent[] = [
   {
-    '@timestamp': new Date('2021-11-23T15:25:04.210Z'),
+    '@timestamp': '2021-11-23T15:25:04.210Z',
     user: {
       name: '',
       id: '1000',
@@ -50,7 +50,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.210Z'),
+        start: '2021-11-23T15:25:04.210Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -74,7 +74,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.210Z'),
+        start: '2021-11-23T15:25:04.210Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -98,7 +98,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.210Z'),
+        start: '2021-11-23T15:25:04.210Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -122,7 +122,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.210Z'),
+        start: '2021-11-23T15:25:04.210Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -136,7 +136,7 @@ export const mockEvents: ProcessEvent[] = [
       args_count: 0,
       args: [],
       working_directory: '/home/vagrant',
-      start: new Date('2021-11-23T15:25:04.210Z'),
+      start: '2021-11-23T15:25:04.210Z',
     },
     event: {
       action: EventAction.fork,
@@ -161,7 +161,7 @@ export const mockEvents: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': new Date('2021-11-23T15:25:04.218Z'),
+    '@timestamp': '2021-11-23T15:25:04.218Z',
     user: {
       name: '',
       id: '1000',
@@ -194,7 +194,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.218Z'),
+        start: '2021-11-23T15:25:04.218Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -218,7 +218,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.218Z'),
+        start: '2021-11-23T15:25:04.218Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -242,7 +242,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.218Z'),
+        start: '2021-11-23T15:25:04.218Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -266,7 +266,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.218Z'),
+        start: '2021-11-23T15:25:04.218Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -280,7 +280,7 @@ export const mockEvents: ProcessEvent[] = [
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',
-      start: new Date('2021-11-23T15:25:04.218Z'),
+      start: '2021-11-23T15:25:04.218Z',
     },
     event: {
       action: EventAction.exec,
@@ -289,7 +289,7 @@ export const mockEvents: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': new Date('2021-11-23T15:25:05.202Z'),
+    '@timestamp': '2021-11-23T15:25:05.202Z',
     user: {
       name: '',
       id: '1000',
@@ -322,7 +322,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:05.202Z'),
+        start: '2021-11-23T15:25:05.202Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -346,7 +346,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:05.202Z'),
+        start: '2021-11-23T15:25:05.202Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -370,7 +370,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:05.202Z'),
+        start: '2021-11-23T15:25:05.202Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -394,7 +394,7 @@ export const mockEvents: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:05.202Z'),
+        start: '2021-11-23T15:25:05.202Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -404,7 +404,7 @@ export const mockEvents: ProcessEvent[] = [
           },
         },
       },
-      start: new Date('2021-11-23T15:25:05.202Z'),
+      start: '2021-11-23T15:25:05.202Z',
       name: '',
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
@@ -459,7 +459,7 @@ export const mockAlerts: ProcessEvent[] = [
         uuid: '6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38',
       },
     },
-    '@timestamp': new Date('2021-11-23T15:26:34.859Z'),
+    '@timestamp': '2021-11-23T15:26:34.859Z',
     user: {
       name: 'vagrant',
       id: '1000',
@@ -484,7 +484,7 @@ export const mockAlerts: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.859Z'),
+        start: '2021-11-23T15:26:34.859Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -508,7 +508,7 @@ export const mockAlerts: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.859Z'),
+        start: '2021-11-23T15:26:34.859Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -532,7 +532,7 @@ export const mockAlerts: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.859Z'),
+        start: '2021-11-23T15:26:34.859Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -556,7 +556,7 @@ export const mockAlerts: ProcessEvent[] = [
         args: [],
         args_count: 0,
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.859Z'),
+        start: '2021-11-23T15:26:34.859Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -570,7 +570,7 @@ export const mockAlerts: ProcessEvent[] = [
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',
-      start: new Date('2021-11-23T15:26:34.859Z'),
+      start: '2021-11-23T15:26:34.859Z',
       tty: {
         descriptor: 0,
         type: 'char_device',
@@ -626,7 +626,7 @@ export const mockAlerts: ProcessEvent[] = [
         uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
       },
     },
-    '@timestamp': new Date('2021-11-23T15:26:34.860Z'),
+    '@timestamp': '2021-11-23T15:26:34.860Z',
     user: {
       name: 'vagrant',
       id: '1000',
@@ -652,7 +652,7 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 2,
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.860Z'),
+        start: '2021-11-23T15:26:34.860Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -676,7 +676,7 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 2,
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.860Z'),
+        start: '2021-11-23T15:26:34.860Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -700,7 +700,7 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 2,
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.860Z'),
+        start: '2021-11-23T15:26:34.860Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -724,7 +724,7 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 2,
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:26:34.860Z'),
+        start: '2021-11-23T15:26:34.860Z',
         tty: {
           descriptor: 0,
           type: 'char_device',
@@ -738,7 +738,7 @@ export const mockAlerts: ProcessEvent[] = [
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',
-      start: new Date('2021-11-23T15:26:34.860Z'),
+      start: '2021-11-23T15:26:34.860Z',
       tty: {
         descriptor: 0,
         type: 'char_device',
@@ -795,7 +795,7 @@ export const childProcessMock: Process = {
   getOutput: () => '',
   getDetails: () =>
     ({
-      '@timestamp': new Date('2021-11-23T15:25:05.210Z'),
+      '@timestamp': '2021-11-23T15:25:05.210Z',
       event: {
         kind: EventKind.event,
         category: 'process',
@@ -829,7 +829,7 @@ export const childProcessMock: Process = {
         interactive: true,
         name: 'ls',
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:05.210Z'),
+        start: '2021-11-23T15:25:05.210Z',
         pid: 2,
         parent: {
           args: ['bash'],
@@ -839,7 +839,7 @@ export const childProcessMock: Process = {
           interactive: false,
           name: '',
           working_directory: '/home/vagrant',
-          start: new Date('2021-11-23T15:25:04.210Z'),
+          start: '2021-11-23T15:25:04.210Z',
           pid: 1,
           user: {
             id: '1',
@@ -871,7 +871,7 @@ export const processMock: Process = {
   getOutput: () => '',
   getDetails: () =>
     ({
-      '@timestamp': new Date('2021-11-23T15:25:04.210Z'),
+      '@timestamp': '2021-11-23T15:25:04.210Z',
       event: {
         kind: EventKind.event,
         category: 'process',
@@ -906,7 +906,7 @@ export const processMock: Process = {
         interactive: false,
         name: '',
         working_directory: '/home/vagrant',
-        start: new Date('2021-11-23T15:25:04.210Z'),
+        start: '2021-11-23T15:25:04.210Z',
         pid: 1,
         parent: {} as ProcessFields,
         session_leader: {} as ProcessFields,
