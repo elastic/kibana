@@ -61,7 +61,7 @@ export function ApmMainTemplate({
   const { data: fleetApmIntegrations } = useFetcher(
     (callApmApi) => {
       if (!data?.hasData && !shouldBypassNoDataScreen) {
-        return callApmApi('GET /internal/apm/fleet/has_data');
+        return callApmApi('GET /internal/apm/fleet/has_apm_policies');
       }
     },
     [shouldBypassNoDataScreen, data?.hasData]
@@ -70,8 +70,9 @@ export function ApmMainTemplate({
   const noDataConfig = getNoDataConfig({
     basePath,
     docsLink: docLinks!.links.observability.guide,
-    hasData: data?.hasData,
-    hasApmIntegrations: fleetApmIntegrations?.hasData,
+    hasApmData: data?.hasData,
+    hasApmIntegrations: fleetApmIntegrations?.hasApmPolicies,
+    shouldBypassNoDataScreen,
   });
 
   const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
