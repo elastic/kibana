@@ -20,11 +20,13 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
 }) {
   const repository = coreStart.savedObjects.createInternalRepository(['space']);
   try {
+    // Fetch legacy APM indices
     const legacyAPMIndices = await repository.get<Partial<ApmIndicesConfig>>(
       APM_INDICES_SAVED_OBJECT_TYPE,
       APM_INDICES_SAVED_OBJECT_ID
     );
 
+    // Fetch spaces available
     const spaces = await repository.find({
       type: 'space',
       page: 1,
@@ -32,6 +34,7 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
       fields: ['name'], // to avoid fetching *all* fields
     });
 
+    // Create new APM indices space aware for all spaces available
     await repository.bulkCreate(
       spaces.saved_objects.map(({ id: spaceId }) => ({
         id: APM_INDICES_SPACE_SAVED_OBJECT_ID,
@@ -41,6 +44,7 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
       }))
     );
 
+    // Delete legacy APM indices
     await repository.delete(
       APM_INDICES_SAVED_OBJECT_TYPE,
       APM_INDICES_SAVED_OBJECT_ID
