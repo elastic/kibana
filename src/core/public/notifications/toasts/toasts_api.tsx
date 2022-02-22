@@ -9,6 +9,7 @@
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { omitBy, isUndefined } from 'lodash';
 
 import { ErrorToast } from './error_toast';
 import { MountPoint } from '../../types';
@@ -75,15 +76,7 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
       title: toastOrTitle,
     };
   }
-  return Object.entries(toastOrTitle).reduce((obj, [key, value]) => {
-    if (value === undefined) {
-      return obj;
-    }
-    return {
-      ...obj,
-      [key]: value,
-    };
-  }, {} as ToastInputFields);
+  return omitBy(toastOrTitle, isUndefined);
 };
 
 /**
