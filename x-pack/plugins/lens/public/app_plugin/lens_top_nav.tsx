@@ -530,11 +530,11 @@ export const LensTopNavMenu = ({
     setDatasourceState,
   ]);
 
-  const dataViewsPickerProps = {
-    'data-test-subj': 'indexPattern-switcher',
+  const dataViewPickerProps = {
+    'data-test-subj': 'lns-dataView-switcher',
     trigger: {
       label: currentIndexPattern?.title || '',
-      'data-test-subj': 'indexPattern-switch-link',
+      'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
     },
     indexPatternRefs: dataViewsList,
@@ -582,7 +582,7 @@ export const LensTopNavMenu = ({
       onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
       onClearSavedQuery={onClearSavedQueryWrapped}
       indexPatterns={indexPatterns}
-      dataViewPickerComponent={<DataViewPickerComponent {...dataViewsPickerProps} />}
+      dataViewPickerComponent={<DataViewPickerComponent {...dataViewPickerProps} />}
       query={query}
       dateRangeFrom={from}
       dateRangeTo={to}
