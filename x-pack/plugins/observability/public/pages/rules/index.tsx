@@ -150,6 +150,7 @@ export function RulesPage() {
       },
     },
     {
+      field: '*',
       name: i18n.translate('xpack.observability.rules.rulesTable.columns.actionsTitle', {
         defaultMessage: 'Actions',
       }),
@@ -163,7 +164,7 @@ export function RulesPage() {
           onClick: () => {},
           'data-test-subj': 'action-edit',
         },
-      ]
+      ],
     },
   ];
   console.log(rules.data, '!!data');
@@ -192,13 +193,13 @@ export function RulesPage() {
         <EuiFlexItem>
           <EuiBasicTable
             items={rules.data}
+            hasActions={true}
             columns={rulesTableColumns}
             isSelectable={true}
             selection={{
               selectable: () => true,
               onSelectionChange: (selectedItems) => {
                 console.log(selectedItems, '!!selectd');
-                setSelectedIds(selectedItems);
               },
             }}
           />
