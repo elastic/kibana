@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Process, ProcessFields } from '../../../common/types/process_tree';
-import { DetailPanelProcess } from '../../types';
+import { DetailPanelProcess, EuiTabProps } from '../../types';
 
 const getDetailPanelProcessLeader = (leader: ProcessFields) => ({
   ...leader,
@@ -15,15 +15,12 @@ const getDetailPanelProcessLeader = (leader: ProcessFields) => ({
   entryMetaSourceIp: leader.entry_meta?.source.ip || '',
 });
 
-export const getDetailPanelProcess = (process: Process | null) => {
+export const getDetailPanelProcess = (process: Process) => {
   const processData = {} as DetailPanelProcess;
-  if (!process) {
-    return processData;
-  }
 
   processData.id = process.id;
-  processData.start = process.events[0]?.['@timestamp'] || '';
-  processData.end = process.events[process.events.length - 1]?.['@timestamp'] || '';
+  processData.start = process.events[0]['@timestamp'];
+  processData.end = process.events[process.events.length - 1]['@timestamp'];
   const args = new Set<string>();
   processData.executable = [];
 
@@ -53,4 +50,14 @@ export const getDetailPanelProcess = (process: Process | null) => {
   processData.parent = getDetailPanelProcessLeader(process.events[0].process.parent);
 
   return processData;
+};
+
+export const getSelectedTabContent = (tabs: EuiTabProps[], selectedTabId: string) => {
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId);
+
+  if (selectedTab) {
+    return selectedTab.content;
+  }
+
+  return null;
 };

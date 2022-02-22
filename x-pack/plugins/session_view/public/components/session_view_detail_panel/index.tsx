@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, ReactNode } from 'react';
+import React, { useState } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
+import { EuiTabProps } from '../../types';
 import { Process, ProcessEventHost } from '../../../common/types/process_tree';
-import { getDetailPanelProcess } from './helpers';
+import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
 import { DetailPanelHostTab } from '../detail_panel_host_tab';
 
@@ -16,24 +17,17 @@ interface SessionViewDetailPanelDeps {
   onProcessSelected?: (process: Process) => void;
 }
 
-interface EuiTabProps {
-  id: string;
-  name: string;
-  content: ReactNode;
-  disabled?: boolean;
-  append?: ReactNode;
-  prepend?: ReactNode;
-}
-
 /**
  * Detail panel in the session view.
  */
 export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
-  const processDetail = getDetailPanelProcess(selectedProcess);
+
   if (!selectedProcess) {
     return <span>Please select a process</span>;
   }
+
+  const processDetail = getDetailPanelProcess(selectedProcess);
 
   let selectedProcessHost = {} as ProcessEventHost;
   if (selectedProcess.events[0]) {
@@ -88,7 +82,7 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
       <EuiTabs size="l" expand>
         {renderTabs()}
       </EuiTabs>
-      {tabs.find((obj) => obj.id === selectedTabId)?.content}
+      {getSelectedTabContent(tabs, selectedTabId)}
     </>
   );
 };
