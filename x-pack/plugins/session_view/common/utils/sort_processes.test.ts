@@ -6,11 +6,10 @@
  */
 
 import { sortProcesses } from './sort_processes';
-import { Process } from '../types/process_tree';
 import { mockProcessMap } from '../mocks/constants/session_view_process.mock';
 
 describe('sortProcesses(a, b)', () => {
-  it('works', () => {
+  it('sorts processes in ascending order by start time', () => {
     const processes = Object.values(mockProcessMap);
 
     // shuffle some things to ensure all sort lines are hit
@@ -18,17 +17,12 @@ describe('sortProcesses(a, b)', () => {
     processes[0] = processes[processes.length - 1];
     processes[processes.length - 1] = c;
 
-    const sorted = processes.sort(sortProcesses);
+    processes.sort(sortProcesses);
 
-    let lastProcess: Process;
-
-    sorted.forEach((process) => {
-      if (
-        lastProcess &&
-        lastProcess.getDetails().process.start > process.getDetails().process.start
-      ) {
-        throw new Error('processes not sorted by process.start');
-      }
-    });
+    for (let i = 0; i < processes.length - 1; i++) {
+      const current = processes[i];
+      const next = processes[i+1];
+      expect(new Date(next.getDetails().process.start) >= new Date(current.getDetails().process.start)).toBeTruthy();
+    }
   });
 });

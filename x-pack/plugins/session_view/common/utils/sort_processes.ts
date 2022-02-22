@@ -8,14 +8,14 @@
 import { Process } from '../types/process_tree';
 
 export const sortProcesses = (a: Process, b: Process) => {
-  const eventA = a.getDetails();
-  const eventB = b.getDetails();
+  const eventAStartTime = new Date(a.getDetails().process.start);
+  const eventBStartTime = new Date(b.getDetails().process.start);
 
-  if (eventA.process.start < eventB.process.start) {
+  if (eventAStartTime < eventBStartTime) {
     return -1;
   }
 
-  if (eventA.process.start > eventB.process.start) {
+  if (eventAStartTime > eventBStartTime) {
     return 1;
   }
 
