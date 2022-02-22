@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSplitPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
 
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { KpiUniqueIps } from '../common/kpi_unique_ips';
 import { KpiUserAuthentications } from '../common/kpi_user_authentications';
