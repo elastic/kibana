@@ -13,13 +13,18 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { mockAlertDetailsData } from '../../../../common/components/event_details/__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
+import {
+  KibanaServices,
+  useKibana,
+  useGetUserCasesPermissions,
+} from '../../../../common/lib/kibana';
 import {
   mockBrowserFields,
   mockDocValueFields,
   mockRuntimeMappings,
 } from '../../../../common/containers/source/mock';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { mockCasesContext } from '../../../../common/mock/mock_cases_context';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -131,7 +136,14 @@ describe('event details footer component', () => {
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
+        cases: {
+          getCasesContext: () => mockCasesContext,
+        },
       },
+    });
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+      crud: true,
+      read: true,
     });
   });
   afterEach(() => {
@@ -143,7 +155,7 @@ describe('event details footer component', () => {
         <EventDetailsPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.getByTestId('take-action-dropdown-btn')).toBeTruthy();
+    expect(wrapper.getByTestId('side-panel-flyout-footer')).toBeTruthy();
   });
   test('it renders the take action dropdown in the flyout version', () => {
     const wrapper = render(
@@ -151,6 +163,6 @@ describe('event details footer component', () => {
         <EventDetailsPanel {...defaultProps} isFlyoutView={true} />
       </TestProviders>
     );
-    expect(wrapper.getByTestId('take-action-dropdown-btn')).toBeTruthy();
+    expect(wrapper.getByTestId('side-panel-flyout-footer')).toBeTruthy();
   });
 });
