@@ -83,4 +83,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 EOF
 
 buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_KIBANA_URL" ${CLOUD_DEPLOYMENT_KIBANA_URL}
+buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_ELASTICSEARCH_URL" ${CLOUD_DEPLOYMENT_ELASTICSEARCH_URL}
+buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_USERNAME" ${CLOUD_DEPLOYMENT_USERNAME}
+buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_PASSWORD" ${CLOUD_DEPLOYMENT_PASSWORD}
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
