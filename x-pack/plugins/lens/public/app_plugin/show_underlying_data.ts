@@ -146,13 +146,14 @@ export function combineQueryAndFilters(
     const filtersQuery = joinQueries(meta.filters[queryLanguage]);
     newQuery = {
       language: queryLanguage,
-      query: query
+      query: query?.query.trim()
         ? `( ${query.query} ) ${filtersQuery ? `AND ${filtersQuery}` : ''}`
         : filtersQuery,
     };
   }
 
-  const newFilters = filters;
+  // make a copy as the original filters are readonly
+  const newFilters = [...filters];
   if (meta.filters[filtersLanguage]?.length) {
     const queryExpression = joinQueries(meta.filters[filtersLanguage]);
     // Append the new filter based on the queryExpression to the existing ones

@@ -93,7 +93,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
-import type { DiscoverSetup } from '../../../../src/plugins/discover/public';
+import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -124,6 +124,7 @@ export interface LensPluginStartDependencies {
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+  discover?: DiscoverStart;
 }
 
 export interface LensPublicSetup {

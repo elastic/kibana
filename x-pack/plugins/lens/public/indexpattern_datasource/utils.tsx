@@ -25,6 +25,7 @@ import {
   updateColumnParam,
   updateDefaultLabels,
   RangeIndexPatternColumn,
+  FormulaIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -243,10 +244,24 @@ export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
 
 export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[]) {
   // extract filters from filtered metrics
-  const filteredMetrics = columnIds
-    .map((colId) => layer.columns[colId]?.filter)
+  // consider all the columns, included referenced ones to cover also the formula case
+  const filteredMetrics = Object.keys(layer.columns)
+    .map((colId) => {
+      // there's a special case to handle when a formula has a global filter applied
+      // in this case ignore the filter on the formula column and only use the filter
+      // applied to the referenced columns.
+      // This will avoid duplicate filters and issues when a global formula filter is
+      // combine to specific referenced columns filters
+      if (
+        isColumnOfType<FormulaIndexPatternColumn>('formula', layer.columns[colId]) &&
+        layer.columns[colId]?.filter
+      ) {
+        return null;
+      }
+      return layer.columns[colId]?.filter;
+    })
     // filter out empty filters as well
-    .filter((filter) => filter?.query) as Query[];
+    .filter((filter) => filter?.query?.trim()) as Query[];
 
   const { kuery: kqlMetricQueries, lucene: luceneMetricQueries } = groupBy(
     filteredMetrics,
@@ -256,7 +271,7 @@ export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[])
   function extractUsefulQueries(
     queries: FiltersIndexPatternColumn['params']['filters'] | undefined
   ) {
-    return queries?.map(({ input }) => input).filter(({ query }) => query && query !== '*');
+    return queries?.map(({ input }) => input).filter(({ query }) => query?.trim() && query !== '*');
   }
 
   const filterOperation = columnIds
@@ -292,7 +307,7 @@ export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[])
                 language: 'kuery',
               };
             })
-            .filter(({ query }) => query),
+            .filter(({ query }) => query?.trim()),
         };
       }
       if (
