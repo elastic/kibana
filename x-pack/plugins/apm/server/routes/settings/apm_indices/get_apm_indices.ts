@@ -7,8 +7,8 @@
 
 import { SavedObjectsClient } from 'src/core/server';
 import {
-  APM_INDICES_SPACE_SAVED_OBJECT_TYPE,
-  APM_INDICES_SPACE_SAVED_OBJECT_ID,
+  APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+  APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
 import { APMRouteHandlerResources } from '../../typings';
@@ -24,8 +24,8 @@ async function getApmIndicesSavedObject(
 ) {
   const apmIndices = await withApmSpan('get_apm_indices_saved_object', () =>
     savedObjectsClient.get<Partial<ApmIndicesConfig>>(
-      APM_INDICES_SPACE_SAVED_OBJECT_TYPE,
-      APM_INDICES_SPACE_SAVED_OBJECT_ID
+      APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+      APM_INDEX_SETTINGS_SAVED_OBJECT_ID
     )
   );
   return apmIndices.attributes;

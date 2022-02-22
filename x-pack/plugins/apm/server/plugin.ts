@@ -255,7 +255,10 @@ export class APMPlugin
       logger: this.logger,
     });
 
-    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core });
+    migrateLegacyAPMIndicesToSpaceAware({
+      coreStart: core,
+      logger: this.logger,
+    });
   }
 
   public stop() {}
