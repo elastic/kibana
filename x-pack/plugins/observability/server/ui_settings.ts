@@ -50,7 +50,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     }),
     value: 50,
     description: i18n.translate('xpack.observability.maxNumServicesUiSettingDescription', {
-      defaultMessage: 'Maximum number of services displayed in APM app',
+      defaultMessage: 'Maximum number of services displayed in the Services inventory',
     }),
     schema: schema.number(),
   },
