@@ -25,7 +25,7 @@ while read -r config; do
 
     if [[ "$CODE_COVERAGE" == "true" ]]; then
       node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests \
-        --coverage --coverageReporters lcov --coverageDirectory target/jest-coverage
+        --coverage --coverageReporters json --coverageDirectory target/jest-coverage
     else
       node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests
     fi
@@ -37,15 +37,23 @@ while read -r config; do
       echo "^^^ +++"
     else
       if [[ "$CODE_COVERAGE" == "true" ]]; then
-        echo 'Uploading to coveralls...'
-        cat target/jest-coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-        buildkite-agent meta-data set "did-upload-coveralls" 'true'
+        mv target/jest-coverage/coverage-final.json "target/jest-coverage/$(cat /proc/sys/kernel/random/uuid).json"
       fi
-    fi    
+    fi
   fi
 
   ((i=i+1))
 # uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
 done <<< "$(find src x-pack packages -name "$1" -not -path "*/__fixtures__/*" | sort)"
+
+# Combine the reports into one file before uploading anything to coveralls
+# This is just to reduce the number of "jobs" on the coveralls page, as each invocation adds a build
+if [[ -d target/jest-coverage ]]; then
+  mv target/jest-coverage .nyc_output
+  yarn nyc report --reporter=lcov --report-dir=target/jest-coverage-merged
+  cat target/jest-coverage-merged/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  buildkite-agent meta-data set "did-upload-coveralls" 'true'
+fi
+
 
 exit $exitCode
