@@ -28,6 +28,8 @@ import {
   getImportExceptionsListSchemaMock,
 } from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 const getImportRuleBuffer = (connectorId: string) => {
   const rule1 = {
@@ -95,8 +97,39 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('import_rules', () => {
+    describe('importing rules with different roles', () => {
+      beforeEach(async () => {
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+      it('should import rules without actions privileges', async () => {
+        await createUserAndRole(getService, ROLES.hunter_no_actions);
+
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter_no_actions, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+      });
+    });
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

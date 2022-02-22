@@ -35,7 +35,6 @@
         "ml": ["read"],
         "siem": ["all", "read_alerts", "crud_alerts"],
         "securitySolutionCases": ["all"],
-        "actions": ["read"],
         "builtInAlerts": ["all"]
       },
       "spaces": ["*"]

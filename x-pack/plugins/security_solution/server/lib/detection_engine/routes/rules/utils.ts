@@ -16,7 +16,7 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
-import { ActionsClient } from '../../../../../../actions/server';
+import { ActionsClient, FindActionResult } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
@@ -316,7 +316,12 @@ export const getInvalidConnectors = async (
   rules: PromiseFromStreams[],
   actionsClient: ActionsClient
 ): Promise<[BulkError[], PromiseFromStreams[]]> => {
-  const actionsFind = await actionsClient.getAll();
+  let actionsFind: FindActionResult[] = [];
+  try {
+    actionsFind = await actionsClient.getAll();
+  } catch (exc) {
+    // probably doesn't have privileges
+  }
   const actionIds = new Set(actionsFind.map((action) => action.id));
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {

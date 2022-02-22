@@ -1,0 +1,6 @@
+{
+  "password": "changeme",
+  "roles": ["hunter_no_actions"],
+  "full_name": "Hunter No Actions",
+  "email": "detections-reader@example.com"
+}

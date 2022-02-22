@@ -11,6 +11,7 @@ import {
   t1AnalystUser,
   t2AnalystUser,
   hunterUser,
+  hunterNoActionsUser,
   ruleAuthorUser,
   socManagerUser,
   platformEngineerUser,
@@ -19,6 +20,7 @@ import {
   t1AnalystRole,
   t2AnalystRole,
   hunterRole,
+  hunterNoActionsRole,
   ruleAuthorRole,
   socManagerRole,
   platformEngineerRole,
@@ -53,6 +55,13 @@ export const createUserAndRole = async (
       return postRoleAndUser(ROLES.t2_analyst, t2AnalystRole, t2AnalystUser, getService);
     case ROLES.hunter:
       return postRoleAndUser(ROLES.hunter, hunterRole, hunterUser, getService);
+    case ROLES.hunter_no_actions:
+      return postRoleAndUser(
+        ROLES.hunter_no_actions,
+        hunterNoActionsRole,
+        hunterNoActionsUser,
+        getService
+      );
     case ROLES.rule_author:
       return postRoleAndUser(ROLES.rule_author, ruleAuthorRole, ruleAuthorUser, getService);
     case ROLES.soc_manager:
@@ -105,7 +114,7 @@ interface RoleInterface {
     feature: {
       ml: string[];
       siem: string[];
-      actions: string[];
+      actions?: string[];
       builtInAlerts: string[];
     };
     spaces: string[];
