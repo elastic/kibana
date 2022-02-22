@@ -36,7 +36,7 @@ export const getStatusRoute: CaseRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to find cases in route: ${error}`,
+        message: `Failed to get status stats in route: ${error}`,
         error,
       });
     }

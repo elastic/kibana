@@ -12,19 +12,17 @@ import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
-const params = {
-  params: schema.object({
-    case_id: schema.string(),
-  }),
-};
-
 /**
  * @deprecated since version 8.1.0
  */
 export const getUserActionsRoute = createCasesRoute({
   method: 'get',
   path: CASE_USER_ACTIONS_URL,
-  params,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
       if (!context.cases) {

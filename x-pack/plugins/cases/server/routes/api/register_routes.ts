@@ -6,15 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { pick } from 'lodash';
 import { RouteRegistrar } from 'kibana/server';
 import { CasesRequestHandlerContext } from '../../types';
 import { CaseRoute, RegisterRoutesDeps } from './types';
 import { escapeHatch, getIsKibanaRequest, wrapError } from './utils';
-
-export function pickKeys<T, K extends keyof T>(obj: T, ...keys: K[]) {
-  return pick(obj, keys) as Pick<T, K>;
-}
 
 const increaseTelemetryCounters = ({
   telemetryUsageCounter,

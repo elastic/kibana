@@ -44,10 +44,5 @@ export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
   path: string;
   params?: RouteValidatorConfig<P, Q, B>;
-  handler: ({
-    request,
-    context,
-    response,
-    logger,
-  }: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
+  handler: (args: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
 }

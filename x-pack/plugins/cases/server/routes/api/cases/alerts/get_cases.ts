@@ -13,22 +13,22 @@ import { CASE_ALERTS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
 
-const params = {
-  params: schema.object({
-    alert_id: schema.string(),
-  }),
-};
-
 export const getCasesByAlertIdRoute = createCasesRoute({
   method: 'get',
   path: CASE_ALERTS_URL,
-  params,
+  params: {
+    params: schema.object({
+      alert_id: schema.string(),
+    }),
+  },
   handler: async ({ context, request, response }) => {
     try {
       const alertID = request.params.alert_id;
+
       if (alertID == null || alertID === '') {
         throw Boom.badRequest('The `alertId` is not valid');
       }
+
       const casesClient = await context.cases.getCasesClient();
       const options = request.query as CasesByAlertIDRequest;
 
