@@ -20,7 +20,7 @@ export const LazyExitFullScreenButton = React.lazy(() =>
 );
 
 export const LazySolutionToolbarButton = React.lazy(() =>
-  import('./toolbar').then(({ SolutionToolbarButton }) => ({
+  import('./toolbar/index').then(({ SolutionToolbarButton }) => ({
     default: SolutionToolbarButton,
   }))
 );
