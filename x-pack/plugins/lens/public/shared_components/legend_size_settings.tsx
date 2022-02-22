@@ -37,7 +37,7 @@ export const LegendSizeSettings = ({
       delay="regular"
       display="block"
     >
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
             placeholder={i18n.translate('xpack.lens.shared.legendSizeSetting.placeholder', {
