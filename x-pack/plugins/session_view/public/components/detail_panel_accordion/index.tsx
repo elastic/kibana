@@ -7,7 +7,7 @@
 import React, { ReactNode } from 'react';
 import { EuiAccordion, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { useStyles } from './styles';
-import { DetailPanelDescriptionList } from '../DetailPanelDescriptionList';
+import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 
 interface DetailPanelAccordionDeps {
   id: string;

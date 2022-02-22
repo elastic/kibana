@@ -13,9 +13,9 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 const queryClient = new QueryClient();
 
 const SessionViewTableProcessTreeLazy = lazy(
-  () => import('../components/SessionViewTableProcessTree')
+  () => import('../components/session_view_table_process_tree')
 );
-const SessionViewLazy = lazy(() => import('../components/SessionView'));
+const SessionViewLazy = lazy(() => import('../components/session_view'));
 export const getSessionViewTableProcessTreeLazy = () => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>

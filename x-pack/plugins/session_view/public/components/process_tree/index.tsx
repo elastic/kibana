@@ -7,7 +7,7 @@
 import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ProcessTreeNode } from '../ProcessTreeNode';
+import { ProcessTreeNode } from '../process_tree_node';
 import { useProcessTree } from './hooks';
 import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';

@@ -8,8 +8,8 @@ import React, { useState, ReactNode } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 import { Process, ProcessEventHost } from '../../../common/types/process_tree';
 import { getDetailPanelProcess } from './helpers';
-import { DetailPanelProcessTab } from '../DetailPanelProcessTab';
-import { DetailPanelHostTab } from '../DetailPanelHostTab';
+import { DetailPanelProcessTab } from '../detail_panel_process_tab';
+import { DetailPanelHostTab } from '../detail_panel_host_tab';
 
 interface SessionViewDetailPanelDeps {
   selectedProcess: Process | null;

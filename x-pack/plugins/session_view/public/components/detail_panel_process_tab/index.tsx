@@ -8,10 +8,10 @@ import React, { ReactNode } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelProcess } from '../../types';
-import { DetailPanelAccordion } from '../DetailPanelAccordion';
-import { DetailPanelCopy } from '../DetailPanelCopy';
-import { DetailPanelDescriptionList } from '../DetailPanelDescriptionList';
-import { DetailPanelListItem } from '../DetailPanelListItem';
+import { DetailPanelAccordion } from '../detail_panel_accordion';
+import { DetailPanelCopy } from '../detail_panel_copy';
+import { DetailPanelDescriptionList } from '../detail_panel_description_list';
+import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from './styles';
 

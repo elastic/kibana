@@ -16,7 +16,7 @@ import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
 import { useStyles, ButtonType } from './styles';
-import { ProcessTreeAlerts } from '../ProcessTreeAlerts';
+import { ProcessTreeAlerts } from '../process_tree_alerts';
 
 interface ProcessDeps {
   process: Process;

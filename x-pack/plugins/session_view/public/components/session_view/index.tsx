@@ -16,10 +16,10 @@ import { EuiResizableButtonProps } from '@elastic/eui/src/components/resizable_c
 import { EuiResizablePanelProps } from '@elastic/eui/src/components/resizable_container/resizable_panel';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
-import { ProcessTree } from '../ProcessTree';
+import { ProcessTree } from '../process_tree';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
-import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
-import { SessionViewSearchBar } from '../SessionViewSearchBar';
+import { SessionViewDetailPanel } from '../session_view_detail_panel';
+import { SessionViewSearchBar } from '../session_view_search_bar';
 import { useStyles } from './styles';
 import { useFetchSessionViewProcessEvents } from './hooks';
 

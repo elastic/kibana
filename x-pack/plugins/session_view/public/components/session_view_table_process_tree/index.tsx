@@ -10,12 +10,11 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import { CoreStart } from 'kibana/public';
 import { QueryClient, QueryClientProvider } from 'react-query';
-
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { SessionLeaderTable } from '../SessionLeaderTable';
-import { SessionView } from '../SessionView';
 import { ActionProps } from '../../../../timelines/common';
 import { SESSION_ENTRY_LEADERS_ROUTE } from '../../../common/constants';
+import { SessionLeaderTable } from '../session_leader_table';
+import { SessionView } from '../session_view';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewTableProcessTreeProps {

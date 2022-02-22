@@ -7,7 +7,7 @@
 import React, { ReactNode } from 'react';
 import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DetailPanelListItem } from '../DetailPanelListItem';
+import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from './styles';
 
