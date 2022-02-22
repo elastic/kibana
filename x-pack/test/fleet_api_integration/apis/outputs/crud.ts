@@ -148,7 +148,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(postResponse.message).match(/Invalid logstash host/);
+        expect(postResponse.message).match(/Invalid logstash host should not start with http\(s\)/);
       });
 
       it('should toggle default output when creating a new default output ', async function () {

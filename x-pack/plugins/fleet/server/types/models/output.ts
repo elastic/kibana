@@ -11,17 +11,17 @@ import { outputType } from '../../../common/constants';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
-    throw new Error('Invalid logstash host should not start with http(s)');
+    return 'Invalid logstash host should not start with http(s)';
   }
 
   try {
     const url = new URL(`http://${val}`);
 
     if (url.host !== val) {
-      throw new Error('Invalid host');
+      return 'Invalid host';
     }
   } catch (err) {
-    throw new Error('Invalid logstash host');
+    return 'Invalid logstash host';
   }
 }
 
