@@ -31,7 +31,6 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
 };
 
 interface FleetAppProps {
-  basepath: string;
   startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];
@@ -41,7 +40,6 @@ interface FleetAppProps {
   theme$: AppMountParameters['theme$'];
 }
 const FleetApp = ({
-  basepath,
   startServices,
   config,
   history,
@@ -52,7 +50,6 @@ const FleetApp = ({
 }: FleetAppProps) => {
   return (
     <FleetAppContext
-      basepath={basepath}
       startServices={startServices}
       config={config}
       history={history}
@@ -69,14 +66,13 @@ const FleetApp = ({
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history, setHeaderActionMenu, theme$ }: AppMountParameters,
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
   ReactDOM.render(
     <FleetApp
-      basepath={appBasePath}
       startServices={startServices}
       config={config}
       history={history}
