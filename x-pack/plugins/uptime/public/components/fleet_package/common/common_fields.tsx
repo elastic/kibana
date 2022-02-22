@@ -86,7 +86,7 @@ export function CommonFields({ fields, onChange, validate }: Props) {
             ) : (
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
-                defaultMessage="Timeout must be less than the monitor interval"
+                defaultMessage="Timeout must be less than the monitor frequency"
               />
             )
           }
