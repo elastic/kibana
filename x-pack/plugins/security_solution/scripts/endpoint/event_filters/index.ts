@@ -9,7 +9,10 @@ import { run, RunFn, createFailError } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
 import pMap from 'p-map';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -38,10 +41,12 @@ export const cli = () => {
         default: {
           count: 10,
           kibana: 'http://elastic:changeme@localhost:5601',
+          withWildcardPaths: false,
         },
         help: `
-        --count            Number of event filters to create. Default: 10
-        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
+        --count               Number of event filters to create. Default: 10
+        --kibana              The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
+        --withWildcardPaths   When true, generates event filters with file.path.text fields and wildcard-ed file paths
       `,
       },
     }
@@ -76,7 +81,30 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
   await pMap(
     Array.from({ length: flags.count as unknown as number }),
     () => {
-      const body = eventGenerator.generate();
+      let options: Partial<ExceptionListItemSchema> = {};
+      if (flags.withWildcardPaths) {
+        const seed = parseInt((Math.random() * 3).toString(), 10);
+        const os = seed === 0 ? 'linux' : seed === 1 ? 'macos' : 'windows';
+        options = {
+          os_types: [os],
+          entries: [
+            {
+              field: 'file.path.text',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: os === 'windows' ? 'C:\\Fol*\\file.exe' : '/usr/*/app.dmg',
+            },
+            {
+              field: 'file.path.text',
+              operator: 'included',
+              type: 'wildcard',
+              value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
+            },
+          ],
+        };
+      }
+      const body = eventGenerator.generate(options);
+
       if (body.tags?.length && body.tags[0] !== 'policy:all') {
         const nmExceptions = Math.floor(Math.random() * 3) || 1;
         body.tags = Array.from({ length: nmExceptions }, () => {
