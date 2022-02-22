@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -100,16 +99,14 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
           </h3>
         </EuiTitle>
         <DiscoverErrorLink error={error} kuery={kuery}>
-          <EuiButtonEmpty iconType="discoverApp">
-            {i18n.translate(
-              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
-              {
-                defaultMessage:
-                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
-                values: { occurrencesCount },
-              }
-            )}
-          </EuiButtonEmpty>
+          {i18n.translate(
+            'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+            {
+              defaultMessage:
+                'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
+              values: { occurrencesCount },
+            }
+          )}
         </DiscoverErrorLink>
       </HeaderContainer>
 
