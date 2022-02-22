@@ -18,9 +18,9 @@ import { GaugeVisParams, GaugeType } from '../types';
 
 export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
   name: 'goal',
-  title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
+  title: i18n.translate('visTypeGauge.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
-  description: i18n.translate('visTypeVislib.goal.goalDescription', {
+  description: i18n.translate('visTypeGauge.goal.goalDescription', {
     defaultMessage: 'Track how a metric progresses to a goal.',
   }),
   toExpressionAst,
@@ -70,7 +70,7 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('visTypeVislib.goal.metricTitle', { defaultMessage: 'Metric' }),
+        title: i18n.translate('visTypeGauge.goal.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
         aggFilter: [
           '!std_dev',
@@ -90,7 +90,7 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('visTypeVislib.goal.groupTitle', {
+        title: i18n.translate('visTypeGauge.goal.groupTitle', {
           defaultMessage: 'Split group',
         }),
         min: 0,

@@ -19,9 +19,9 @@ import { GaugeVisParams } from '../types';
 
 export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
   name: 'gauge',
-  title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
+  title: i18n.translate('visTypeGauge.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
-  description: i18n.translate('visTypeVislib.gauge.gaugeDescription', {
+  description: i18n.translate('visTypeGauge.gauge.gaugeDescription', {
     defaultMessage: 'Show the status of a metric.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
@@ -78,7 +78,7 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('visTypeVislib.gauge.metricTitle', { defaultMessage: 'Metric' }),
+        title: i18n.translate('visTypeGauge.gauge.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
         aggFilter: [
           '!std_dev',
@@ -98,7 +98,7 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('visTypeVislib.gauge.groupTitle', {
+        title: i18n.translate('visTypeGauge.gauge.groupTitle', {
           defaultMessage: 'Split group',
         }),
         min: 0,

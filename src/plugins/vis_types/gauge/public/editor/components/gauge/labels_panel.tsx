@@ -19,7 +19,7 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="visTypeVislib.controls.gaugeOptions.labelsTitle"
+            id="visTypeGauge.controls.gaugeOptions.labelsTitle"
             defaultMessage="Labels"
           />
         </h3>
@@ -27,7 +27,7 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showLabelsLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showLabelsLabel', {
           defaultMessage: 'Show labels',
         })}
         paramName="show"
@@ -40,7 +40,7 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
 
       <TextInputOption
         disabled={!stateParams.gauge.labels.show}
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.subTextLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.subTextLabel', {
           defaultMessage: 'Sub label',
         })}
         paramName="subText"

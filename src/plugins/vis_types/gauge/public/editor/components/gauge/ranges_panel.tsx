@@ -50,7 +50,7 @@ function RangesPanel({
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="visTypeVislib.controls.gaugeOptions.rangesTitle"
+            id="visTypeGauge.controls.gaugeOptions.rangesTitle"
             defaultMessage="Ranges"
           />
         </h3>
@@ -67,10 +67,10 @@ function RangesPanel({
 
       <SwitchOption
         disabled={stateParams.gauge.colorsRange.length < 2}
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.autoExtendRangeLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.autoExtendRangeLabel', {
           defaultMessage: 'Auto extend range',
         })}
-        tooltip={i18n.translate('visTypeVislib.controls.gaugeOptions.extendRangeTooltip', {
+        tooltip={i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltip', {
           defaultMessage: 'Extends range to the maximum value in your data.',
         })}
         paramName="extendRange"
@@ -95,7 +95,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showOutline', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showOutline', {
           defaultMessage: 'Show outline',
         })}
         paramName="outline"
@@ -104,7 +104,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showLegendLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showLegendLabel', {
           defaultMessage: 'Show legend',
         })}
         paramName="addLegend"
@@ -113,7 +113,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showScaleLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showScaleLabel', {
           defaultMessage: 'Show scale',
         })}
         paramName="show"

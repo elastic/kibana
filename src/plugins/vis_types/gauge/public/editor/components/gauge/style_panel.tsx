@@ -27,7 +27,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams }: GaugeOptionsInternalPr
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="visTypeVislib.controls.gaugeOptions.styleTitle"
+            id="visTypeGauge.controls.gaugeOptions.styleTitle"
             defaultMessage="Style"
           />
         </h3>
@@ -35,7 +35,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams }: GaugeOptionsInternalPr
       <EuiSpacer size="s" />
 
       <SelectOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.gaugeTypeLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.gaugeTypeLabel', {
           defaultMessage: 'Gauge type',
         })}
         options={gaugeCollections.gaugeTypes}
@@ -46,7 +46,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams }: GaugeOptionsInternalPr
 
       <SelectOption
         disabled={diasableAlignment}
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.alignmentLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.alignmentLabel', {
           defaultMessage: 'Alignment',
         })}
         options={gaugeCollections.alignments}
