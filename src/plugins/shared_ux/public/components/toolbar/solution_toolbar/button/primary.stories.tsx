@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { Props, SolutionToolbarButton } from './button';
-import mdx from './button.mdx';
+import { SolutionToolbarButton } from './primary';
+import mdx from './primary.mdx';
 
 export default {
   title: 'Solution Toolbar Button',
@@ -20,6 +20,6 @@ export default {
   },
 };
 
-export const ConnectedComponent = ({ label }: Props) => {
-  return <SolutionToolbarButton label={label} />;
+export const Component = () => {
+  return <SolutionToolbarButton label={'Primary Action'} iconType="apps"/>;
 };

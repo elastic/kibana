@@ -8,10 +8,10 @@
 
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ServicesProvider, SharedUXServices } from '../../../services';
-import { servicesFactory } from '../../../services/mocks';
+import { ServicesProvider, SharedUXServices } from '../../../../services';
+import { servicesFactory } from '../../../../services/mocks';
 
-import { SolutionToolbarButton } from './button';
+import { SolutionToolbarButton } from './primary';
 
 describe('<SolutionToolbarButton />', () => {
   let services: SharedUXServices;
