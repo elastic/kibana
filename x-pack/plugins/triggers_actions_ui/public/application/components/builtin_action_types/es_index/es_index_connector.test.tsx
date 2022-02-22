@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { EsIndexActionConnector } from '../types';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
+import { screen, render, fireEvent } from '@testing-library/react';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('lodash', () => {
@@ -301,28 +302,24 @@ describe('IndexActionConnectorFields renders', () => {
       setCallbacks: () => {},
       isEdit: false,
     };
-    const wrapper = await setup(props);
+    render(<IndexActionConnectorFields {...props} />);
 
-    const indexComboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="connectorIndexesComboBox"]');
+    const indexComboBox = await screen.findByTestId('connectorIndexesComboBox');
 
     // time field switch should show up if index has date type field mapping
     setupGetFieldsResponse(true);
-    indexComboBox.first().simulate('click');
+
+    fireEvent.click(indexComboBox);
 
     await act(async () => {
       const event = { target: { value: mockIndexName } };
-      indexComboBox.find('input').first().simulate('change', event);
-      await nextTick();
-      wrapper.update();
+      fireEvent.change(screen.getByRole('textbox'), event);
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
     expect(getIndexOptions).toHaveBeenCalledTimes(1);
     expect(getIndexOptions).toHaveBeenCalledWith(expect.anything(), mockIndexName);
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(screen.getByText('indexPattern1')).toBeInTheDocument();
+    expect(screen.getByText('indexPattern2')).toBeInTheDocument();
   });
 });

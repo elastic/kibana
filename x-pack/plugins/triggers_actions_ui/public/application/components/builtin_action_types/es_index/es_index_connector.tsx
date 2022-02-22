@@ -124,6 +124,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
           noSuggestions={!indexOptions.length}
           options={indexOptions}
           data-test-subj="connectorIndexesComboBox"
+          data-testid="connectorIndexesComboBox"
           selectedOptions={
             index
               ? [
