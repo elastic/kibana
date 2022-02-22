@@ -9,6 +9,7 @@ import deepMerge from 'deepmerge';
 import { LogMeta } from 'src/core/server';
 import { LevelLogger } from '../';
 import { PLUGIN_ID } from '../../../common/constants';
+import type { TaskRunMetrics } from '../../../common/types';
 import { IReport } from '../store';
 import { ActionType } from './';
 import { EcsLogAdapter } from './adapter';
@@ -18,7 +19,6 @@ import {
   ErrorAction,
   ExecuteError,
   FailedReport,
-  ReportingAction,
   SavedReport,
   ScheduledRetry,
   ScheduledTask,
@@ -26,7 +26,7 @@ import {
 } from './types';
 
 /** @internal */
-export interface ExecutionCompleteMetrics {
+export interface ExecutionCompleteMetrics extends TaskRunMetrics {
   byteSize: number;
 }
 
@@ -36,21 +36,21 @@ export interface IReportingEventLogger {
   stopTiming(): void;
 }
 
+export interface BaseEvent {
+  event: { timezone: string };
+  kibana: {
+    reporting: { id?: string; jobType: string };
+    task?: { id: string };
+  };
+  user?: { name: string };
+}
+
 /** @internal */
 export function reportingEventLoggerFactory(logger: LevelLogger) {
   const genericLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {
-    readonly eventObj: {
-      event: {
-        timezone: string;
-      };
-      kibana: {
-        reporting: ReportingAction<ActionType>['kibana']['reporting'];
-        task?: { id: string };
-      };
-      user?: { name: string };
-    };
+    readonly eventObj: BaseEvent;
 
     readonly report: IReport;
     readonly task?: { id: string };
@@ -102,13 +102,26 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       return event;
     }
 
-    logExecutionComplete({ byteSize }: ExecutionCompleteMetrics): CompletedExecution {
+    logExecutionComplete({
+      byteSize,
+      csv,
+      pdf,
+      png,
+    }: ExecutionCompleteMetrics): CompletedExecution {
       const message = `completed ${this.report.jobtype} execution`;
       this.completionLogger.stopTiming();
       const event = deepMerge(
         {
           message,
-          kibana: { reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize } },
+          kibana: {
+            reporting: {
+              actionType: ActionType.EXECUTE_COMPLETE,
+              byteSize,
+              csv,
+              pdf,
+              png,
+            },
+          },
         } as Partial<CompletedExecution>,
         this.eventObj
       );

@@ -33,7 +33,6 @@ import {
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
 import { unpackProcessorEvents } from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
@@ -97,14 +96,8 @@ export class APMEventClient {
       this.indices
     );
 
-    const { includeLegacyData = false } = params.apm;
-
-    const withPossibleLegacyDataFilter = !includeLegacyData
-      ? addFilterToExcludeLegacyData(withProcessorEventFilter)
-      : withProcessorEventFilter;
-
     const searchParams = {
-      ...withPossibleLegacyDataFilter,
+      ...withProcessorEventFilter,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
@@ -118,7 +111,10 @@ export class APMEventClient {
         const searchPromise = withApmSpan(operationName, () => {
           const controller = new AbortController();
           return cancelEsRequestOnAbort(
-            this.esClient.search(searchParams, { signal: controller.signal }),
+            this.esClient.search(searchParams, {
+              signal: controller.signal,
+              meta: true,
+            }),
             this.request,
             controller
           );
@@ -161,7 +157,7 @@ export class APMEventClient {
                 index: Array.isArray(index) ? index.join(',') : index,
                 ...rest,
               },
-              { signal: controller.signal }
+              { signal: controller.signal, meta: true }
             ),
             this.request,
             controller

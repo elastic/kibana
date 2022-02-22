@@ -132,22 +132,28 @@ describe('check metadata transforms task', () => {
       it('should stop task if transform stats response fails', async () => {
         esClient.transform.getTransformStats.mockRejectedValue({});
         await runTask();
-        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith({
-          transform_id: METADATA_TRANSFORMS_PATTERN,
-        });
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+          {
+            transform_id: METADATA_TRANSFORMS_PATTERN,
+          },
+          { meta: true }
+        );
         expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
         expect(esClient.transform.startTransform).not.toHaveBeenCalled();
       });
 
       it('should attempt transform restart if failing state', async () => {
         const transformStatsResponseMock = buildFailedStatsResponse();
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
         const taskResponse = (await runTask()) as RunResult;
 
-        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith({
-          transform_id: METADATA_TRANSFORMS_PATTERN,
-        });
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+          {
+            transform_id: METADATA_TRANSFORMS_PATTERN,
+          },
+          { meta: true }
+        );
         expect(esClient.transform.stopTransform).toHaveBeenCalledWith({
           transform_id: failedTransformId,
           allow_no_match: true,
@@ -165,7 +171,7 @@ describe('check metadata transforms task', () => {
 
       it('should correctly track transform restart attempts', async () => {
         const transformStatsResponseMock = buildFailedStatsResponse();
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
         esClient.transform.stopTransform.mockRejectedValueOnce({});
         let taskResponse = (await runTask()) as RunResult;
@@ -196,7 +202,7 @@ describe('check metadata transforms task', () => {
 
       it('should correctly back off subsequent restart attempts', async () => {
         let transformStatsResponseMock = buildFailedStatsResponse();
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
         esClient.transform.stopTransform.mockRejectedValueOnce({});
         let taskStartedAt = new Date();
@@ -263,7 +269,7 @@ describe('check metadata transforms task', () => {
             ],
           },
         } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
         taskResponse = (await runTask({
           ...MOCK_TASK_INSTANCE,
           state: taskResponse.state,
@@ -302,7 +308,7 @@ describe('check metadata transforms task', () => {
             count: 1,
           },
         } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
       });
 
       it('should reinstall if missing transforms', async () => {
@@ -417,7 +423,7 @@ describe('check metadata transforms task', () => {
             count: 2,
           },
         } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-        esClient.transform.getTransformStats.mockResolvedValue(goodTransformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(goodTransformStatsResponseMock.body);
         taskResponse = (await runTask({
           ...MOCK_TASK_INSTANCE,
           state: taskResponse.state,
