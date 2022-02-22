@@ -524,7 +524,8 @@ export interface ExecutionContextSetup {
     context$: Observable<KibanaExecutionContext>;
     // (undocumented)
     get(): KibanaExecutionContext;
-    getAsLabels(): Labels;
+    // Warning: (ae-forgotten-export) The symbol "Labels" needs to be exported by the entry point index.d.ts
+    getAsLabels(): Labels_2;
     // (undocumented)
     set(c$: KibanaExecutionContext): void;
     withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
