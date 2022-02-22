@@ -105,7 +105,7 @@ const getCombinedIndexInfos = async (
               index: indexName,
               type: 'index_settings',
               isCritical: level === 'critical',
-              correctiveAction: getCorrectiveAction(message, metadata),
+              correctiveAction: getCorrectiveAction(message, metadata, indexName),
               resolveDuringUpgrade,
             } as EnrichedDeprecationInfo)
         )
@@ -146,13 +146,18 @@ type EsMetadata = Actions & {
 
 const getCorrectiveAction = (
   message: string,
-  metadata?: EsMetadata
+  metadata: EsMetadata,
+  indexName?: string
 ): EnrichedDeprecationInfo['correctiveAction'] => {
   const indexSettingDeprecation = metadata?.actions?.find(
-    (action) => action.action_type === 'remove_settings'
+    (action) => action.action_type === 'remove_settings' && indexName
+  );
+  const clusterSettingDeprecation = metadata?.actions?.find(
+    (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
   );
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
+  const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
 
   if (requiresReindexAction) {
@@ -165,6 +170,13 @@ const getCorrectiveAction = (
     return {
       type: 'indexSetting',
       deprecatedSettings: indexSettingDeprecation!.objects,
+    };
+  }
+
+  if (requiresClusterSettingsAction) {
+    return {
+      type: 'clusterSetting',
+      deprecatedSettings: clusterSettingDeprecation!.objects,
     };
   }
 

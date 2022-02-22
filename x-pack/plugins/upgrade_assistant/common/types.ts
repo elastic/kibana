@@ -199,12 +199,18 @@ export interface IndexSettingAction {
   type: 'indexSetting';
   deprecatedSettings: string[];
 }
+
+export interface ClusterSettingAction {
+  type: 'clusterSetting';
+  deprecatedSettings: string[];
+}
+
 export interface EnrichedDeprecationInfo
   extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
   type: keyof estypes.MigrationDeprecationsResponse;
   isCritical: boolean;
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction;
   resolveDuringUpgrade: boolean;
 }
 

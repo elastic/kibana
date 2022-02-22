@@ -239,6 +239,16 @@ export class ApiService {
       method: 'get',
     });
   }
+
+  public async updateClusterSettings(settings: string[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/cluster_settings`,
+      method: 'post',
+      body: {
+        settings: JSON.stringify(settings),
+      },
+    });
+  }
 }
 
 export const apiService = new ApiService();
