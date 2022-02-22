@@ -73,7 +73,7 @@ function RangesPanel({
         })}
         tooltip={
           showElasticChartsOptions
-            ? i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltip', {
+            ? i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltipNotAvailable', {
                 defaultMessage:
                   'The new charts library supports only extended ranges. To disable it, please, enable the gauge legacy charts library advanced setting.',
               })
@@ -112,10 +112,13 @@ function RangesPanel({
         disabled={showElasticChartsOptions}
         {...(showElasticChartsOptions
           ? {
-              tooltip: i18n.translate('visTypeGauge.controls.gaugeOptions.showOutline', {
-                defaultMessage:
-                  'The outile is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
-              }),
+              tooltip: i18n.translate(
+                'visTypeGauge.controls.gaugeOptions.showOutlineNotAvailable',
+                {
+                  defaultMessage:
+                    'The outile is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+                }
+              ),
             }
           : {})}
       />
@@ -127,6 +130,15 @@ function RangesPanel({
         paramName="addLegend"
         value={stateParams.addLegend}
         setValue={setValue}
+        disabled={showElasticChartsOptions}
+        {...(showElasticChartsOptions
+          ? {
+              tooltip: i18n.translate('visTypeGauge.controls.gaugeOptions.showLegendNotAvailable', {
+                defaultMessage:
+                  'The legend is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+              }),
+            }
+          : {})}
       />
 
       <SwitchOption

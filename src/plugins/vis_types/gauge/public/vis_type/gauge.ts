@@ -82,6 +82,7 @@ export const getGaugeVisTypeDefinition = (
         name: 'metric',
         title: i18n.translate('visTypeGauge.gauge.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
+        ...(props.showElasticChartsOptions ? { max: 1 } : {}),
         aggFilter: [
           '!std_dev',
           '!geo_centroid',
@@ -104,7 +105,7 @@ export const getGaugeVisTypeDefinition = (
           defaultMessage: 'Split group',
         }),
         min: 0,
-        max: 1,
+        max: props.showElasticChartsOptions ? 0 : 1,
         aggFilter: [
           '!geohash_grid',
           '!geotile_grid',
