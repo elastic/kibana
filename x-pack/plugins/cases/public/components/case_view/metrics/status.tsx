@@ -25,7 +25,6 @@ import {
 } from './translations';
 import { getMaybeDate } from '../../formatted_date/maybe_date';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
-import { getEmptyTagValue } from '../../empty_value';
 import { CaseViewMetricsProps } from './types';
 
 export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
@@ -43,7 +42,7 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
       component: (
         <CaseStatusMetricsItem
           title={CASE_IN_PROGRESS_DURATION}
-          value={getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration)}
+          value={getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration) || ''}
         />
       ),
       dataTestSubject: 'case-metrics-lifespan-item-inProgress-duration',
@@ -72,7 +71,7 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
       dataTestSubject: 'case-metrics-lifespan-item-open-to-close-duration',
     };
 
-    if (getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration) !== null) {
+    if (getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration)) {
       items.push(caseInProgressItem);
     }
 
@@ -129,7 +128,7 @@ CreationDate.displayName = 'CreationDate';
 
 const getInProgressDuration = (duration: number) => {
   if (duration <= 0) {
-    return null;
+    return;
   }
 
   return formatDuration(duration);
