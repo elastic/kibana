@@ -249,6 +249,13 @@ export class ApiService {
       },
     });
   }
+
+  public useLoadRemoteClusters() {
+    return this.useRequest<string[]>({
+      path: `${API_BASE_PATH}/remote_clusters`,
+      method: 'get',
+    });
+  }
 }
 
 export const apiService = new ApiService();

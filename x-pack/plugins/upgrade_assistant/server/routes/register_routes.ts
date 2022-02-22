@@ -18,6 +18,7 @@ import { registerUpdateSettingsRoute } from './update_index_settings';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 import { ReindexWorker } from '../lib/reindexing';
 import { registerUpgradeStatusRoute } from './status';
+import { registerRemoteClustersRoute } from './remote_clusters';
 import { registerClusterSettingsRoute } from './cluster_settings';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
@@ -33,5 +34,6 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerMlSnapshotRoutes(dependencies);
   // Route for cloud to retrieve the upgrade status for ES and Kibana
   registerUpgradeStatusRoute(dependencies);
+  registerRemoteClustersRoute(dependencies);
   registerClusterSettingsRoute(dependencies);
 }
