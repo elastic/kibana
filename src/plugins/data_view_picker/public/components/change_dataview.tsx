@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   EuiPopover,
   EuiHorizontalRule,
@@ -19,8 +19,9 @@ import {
   EuiContextMenuItem,
   EuiPanel,
 } from '@elastic/eui';
+import type { DataView } from 'src/plugins/data_views/public';
 import { useKibana } from '../shared_imports';
-import type { DataViewEditorContext } from '../types';
+import type { DataViewPickerContext } from '../types';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
   label: string;
@@ -38,6 +39,7 @@ export function ChangeDataView({
   indexPatternId,
   onChangeDataView,
   onAddField,
+  onDataViewCreated,
   trigger,
   selectableProps,
 }: {
@@ -46,20 +48,25 @@ export function ChangeDataView({
   isMissingCurrent?: boolean;
   onChangeDataView: (newId: string) => void;
   onAddField?: () => void;
+  onDataViewCreated?: (dataView: DataView) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const kibana = useKibana<DataViewEditorContext>();
-  const { application, dataViewFieldEditor, dataViews } = kibana.services;
+  const kibana = useKibana<DataViewPickerContext>();
+  const { application, dataViewFieldEditor, dataViews, dataViewEditor } = kibana.services;
   const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
   const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
     return () => {
-      // Make sure to close the editor when unmounting
+      // Make sure to close the editors when unmounting
       if (closeFieldEditor.current) {
         closeFieldEditor.current();
+      }
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
       }
     };
   }, []);
@@ -89,6 +96,18 @@ export function ChangeDataView({
     () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
     [editField, editPermission]
   );
+
+  const createNewDataView = useCallback(() => {
+    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!indexPatternFieldEditPermission) {
+      return;
+    }
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        onDataViewCreated?.(dataView);
+      },
+    });
+  }, [dataViewEditor, onDataViewCreated]);
 
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
@@ -206,7 +225,14 @@ export function ChangeDataView({
         <EuiContextMenuPanel
           size="s"
           items={[
-            <EuiContextMenuItem key="new" icon="plusInCircleFilled" onClick={() => {}}>
+            <EuiContextMenuItem
+              key="new"
+              icon="plusInCircleFilled"
+              onClick={() => {
+                setPopoverIsOpen(false);
+                createNewDataView?.();
+              }}
+            >
               {i18n.translate('data.query.queryBar.indexPattern.addNewDataView', {
                 defaultMessage: 'New data view...',
               })}

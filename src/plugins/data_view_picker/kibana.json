@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["dataViews", "dataViewFieldEditor"],
+  "requiredPlugins": ["dataViews", "dataViewFieldEditor", "dataViewEditor"],
   "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["kibanaReact"],
   "owner": {

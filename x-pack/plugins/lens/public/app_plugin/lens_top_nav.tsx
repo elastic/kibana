@@ -18,7 +18,11 @@ import {
 import type { StateSetter } from '../types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas, DataViewListItem } from '../../../../../src/plugins/data/common';
+import {
+  tableHasFormulas,
+  DataViewListItem,
+  DataView,
+} from '../../../../../src/plugins/data/common';
 import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -536,6 +540,22 @@ export const LensTopNavMenu = ({
     indexPatternRefs: dataViewsList,
     indexPatternId: currentIndexPattern?.id,
     onAddField: refreshFieldList,
+    onDataViewCreated: (dataView: DataView) => {
+      if (dataView.id) {
+        handleIndexPatternChange({
+          activeDatasources: Object.keys(datasourceStates).reduce(
+            (acc, datasourceId) => ({
+              ...acc,
+              [datasourceId]: datasourceMap[datasourceId],
+            }),
+            {}
+          ),
+          datasourceStates,
+          indexPatternId: dataView.id,
+          setDatasourceState,
+        });
+      }
+    },
     onChangeDataView: (newIndexPatternId: string) =>
       handleIndexPatternChange({
         activeDatasources: Object.keys(datasourceStates).reduce(

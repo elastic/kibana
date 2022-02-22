@@ -21,7 +21,7 @@ export class DataViewPickerPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { application, uiSettings, http } = core;
-    const { dataViews, dataViewFieldEditor } = plugins;
+    const { dataViews, dataViewFieldEditor, dataViewEditor } = plugins;
 
     return {
       /**
@@ -37,6 +37,7 @@ export class DataViewPickerPlugin
             application,
             dataViews,
             dataViewFieldEditor,
+            dataViewEditor,
           }}
           {...props}
         />

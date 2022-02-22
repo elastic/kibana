@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { DataViewEditorContext, DataViewPickerProps } from '../types';
+import { DataViewPickerContext, DataViewPickerProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
 import { ChangeDataView } from './change_dataview';
 export interface DataViewPickerPropsWithServices extends DataViewPickerProps {
-  services: DataViewEditorContext;
+  services: DataViewPickerContext;
 }
 
 export const DataViewPicker = ({
@@ -20,12 +20,13 @@ export const DataViewPicker = ({
   indexPatternId,
   onChangeDataView,
   onAddField,
+  onDataViewCreated,
   trigger,
   selectableProps,
   services,
 }: DataViewPickerPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
-    createKibanaReactContext<DataViewEditorContext>(services);
+    createKibanaReactContext<DataViewPickerContext>(services);
 
   return (
     <KibanaReactContextProvider>
@@ -35,6 +36,7 @@ export const DataViewPicker = ({
         indexPatternId={indexPatternId}
         onChangeDataView={onChangeDataView}
         onAddField={onAddField}
+        onDataViewCreated={onDataViewCreated}
         trigger={trigger}
         selectableProps={selectableProps}
       />

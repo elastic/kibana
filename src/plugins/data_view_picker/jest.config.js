@@ -12,5 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/data_view_picker'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/data_view_picker',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/data_view_picker/{common,public}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/data_view_picker/{public}/**/*.{ts,tsx}'],
 };

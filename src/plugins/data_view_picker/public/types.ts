@@ -9,17 +9,19 @@
 import { FC } from 'react';
 import { ApplicationStart, IUiSettingsClient, HttpSetup } from 'src/core/public';
 import { IndexPatternFieldEditorStart } from 'src/plugins/data_view_field_editor/public';
+import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
 
 import { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataViewsPublicPluginStart, DataView } from 'src/plugins/data_views/public';
 
-export interface DataViewEditorContext {
+export interface DataViewPickerContext {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   application: ApplicationStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViewEditor: DataViewEditorStart;
 }
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
@@ -41,6 +43,7 @@ export interface DataViewPickerProps {
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
   onAddField?: () => void;
+  onDataViewCreated?: (dataView: DataView) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -56,4 +59,5 @@ export interface SetupPlugins {}
 export interface StartPlugins {
   dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViewEditor: DataViewEditorStart;
 }
