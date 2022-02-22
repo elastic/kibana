@@ -32,7 +32,6 @@ export interface Props {
   onClick?: (event: MapMouseEvent, drawControl?: MapboxDraw) => void;
   mbMap: MbMap;
   enable: boolean;
-  updateEditShape: (shapeToDraw: DRAW_SHAPE) => void;
 }
 
 export class DrawControl extends Component<Props> {

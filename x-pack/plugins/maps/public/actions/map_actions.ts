@@ -371,15 +371,11 @@ export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
-
       await asyncForEach(geometries, async (geometry) => {
         await (layer as IVectorLayer).addFeature(geometry);
       });
-
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
-        setTimeout(() => {
-          dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
-        }, 500);
+        dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
       });
     } catch (e) {
       getToasts().addError(e, {
@@ -409,9 +405,7 @@ export function deleteFeatureFromIndex(featureId: string) {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await (layer as IVectorLayer).deleteFeature(featureId);
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
-        setTimeout(() => {
-          dispatch(updateEditShape(DRAW_SHAPE.DELETE));
-        }, 500);
+        dispatch(updateEditShape(DRAW_SHAPE.DELETE));
       });
     } catch (e) {
       getToasts().addError(e, {
