@@ -170,7 +170,7 @@ export const TagList = React.memo(
         <EuiHorizontalRule margin="xs" />
         <div data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {!isEditTags && <Tags tags={tags} color="hollow" />}
+          <Tags tags={tags} />
         </div>
       </div>
     );

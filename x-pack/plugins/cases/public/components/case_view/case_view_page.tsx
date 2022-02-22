@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+} from '@elastic/eui';
 
 import { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/api';
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
@@ -16,7 +23,7 @@ import { UserActions } from '../user_actions';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { ContentWrapper, WhitePageWrapper } from '../wrappers';
+import { ContentWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { EditConnector } from '../edit_connector';
@@ -298,111 +305,121 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
     return (
       <>
-        <HeaderPage
-          showBackButton={true}
-          data-test-subj="case-view-title"
-          titleNode={
-            <EditableTitle
+        <EuiPageBody>
+          <HeaderPage
+            showBackButton={true}
+            data-test-subj="case-view-title"
+            titleNode={
+              <EditableTitle
+                userCanCrud={userCanCrud}
+                isLoading={isLoading && loadingKey === 'title'}
+                title={caseData.title}
+                onSubmit={onSubmitTitle}
+              />
+            }
+            title={caseData.title}
+          >
+            <CaseActionBar
+              caseData={caseData}
+              currentExternalIncident={currentExternalIncident}
               userCanCrud={userCanCrud}
-              isLoading={isLoading && loadingKey === 'title'}
-              title={caseData.title}
-              onSubmit={onSubmitTitle}
+              isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
+              onRefresh={handleRefresh}
+              onUpdateField={onUpdateField}
             />
-          }
-          title={caseData.title}
-        >
-          <CaseActionBar
-            caseData={caseData}
-            currentExternalIncident={currentExternalIncident}
-            userCanCrud={userCanCrud}
-            isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            onRefresh={handleRefresh}
-            onUpdateField={onUpdateField}
-          />
-        </HeaderPage>
-
-        <WhitePageWrapper>
-          <ContentWrapper>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={6}>
-                {initLoadingData && (
-                  <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
-                )}
-                {!initLoadingData && (
-                  <EuiFlexGroup direction="column" responsive={false}>
-                    <EuiFlexItem>
-                      <UserActions
-                        getRuleDetailsHref={ruleDetailsNavigation?.href}
-                        onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                        caseServices={caseServices}
-                        caseUserActions={caseUserActions}
-                        data={caseData}
-                        actionsNavigation={actionsNavigation}
-                        fetchUserActions={refetchCaseUserActions}
-                        isLoadingDescription={isLoading && loadingKey === 'description'}
-                        isLoadingUserActions={isLoadingUserActions}
-                        onShowAlertDetails={onShowAlertDetails}
-                        onUpdateField={onUpdateField}
-                        statusActionButton={
-                          userCanCrud ? (
-                            <StatusActionButton
-                              status={caseData.status}
-                              onStatusChanged={changeStatus}
-                              isLoading={isLoading && loadingKey === 'status'}
-                            />
-                          ) : null
-                        }
-                        updateCase={updateCase}
-                        useFetchAlertData={useFetchAlertData}
-                        userCanCrud={userCanCrud}
+          </HeaderPage>
+          <EuiPageContent
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="none"
+            color="transparent"
+            borderRadius="none"
+          >
+            <EuiPageContentBody>
+              <ContentWrapper>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={6}>
+                    {initLoadingData && (
+                      <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+                    )}
+                    {!initLoadingData && (
+                      <EuiFlexGroup direction="column" responsive={false}>
+                        <EuiFlexItem>
+                          <UserActions
+                            getRuleDetailsHref={ruleDetailsNavigation?.href}
+                            onRuleDetailsClick={ruleDetailsNavigation?.onClick}
+                            caseServices={caseServices}
+                            caseUserActions={caseUserActions}
+                            data={caseData}
+                            actionsNavigation={actionsNavigation}
+                            fetchUserActions={refetchCaseUserActions}
+                            isLoadingDescription={isLoading && loadingKey === 'description'}
+                            isLoadingUserActions={isLoadingUserActions}
+                            onShowAlertDetails={onShowAlertDetails}
+                            onUpdateField={onUpdateField}
+                            statusActionButton={
+                              userCanCrud ? (
+                                <StatusActionButton
+                                  status={caseData.status}
+                                  onStatusChanged={changeStatus}
+                                  isLoading={isLoading && loadingKey === 'status'}
+                                />
+                              ) : null
+                            }
+                            updateCase={updateCase}
+                            useFetchAlertData={useFetchAlertData}
+                            userCanCrud={userCanCrud}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={2}>
+                    {metricsFeatures.length > 0 && (
+                      <CaseViewMetrics
+                        data-test-subj="case-view-metrics"
+                        isLoading={isLoadingMetrics}
+                        metrics={metrics}
+                        features={metricsFeatures}
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={2}>
-                {metricsFeatures.length > 0 && (
-                  <CaseViewMetrics
-                    data-test-subj="case-view-metrics"
-                    isLoading={isLoadingMetrics}
-                    metrics={metrics}
-                    features={metricsFeatures}
-                  />
-                )}
-                {participants.length > 1 && (
-                  <UserList
-                    data-test-subj="case-view-user-list-participants"
-                    email={emailContent}
-                    headline={i18n.PARTICIPANTS}
-                    loading={isLoadingUserActions}
-                    users={participants}
-                  />
-                )}
-                <TagList
-                  data-test-subj="case-view-tag-list"
-                  userCanCrud={userCanCrud}
-                  tags={caseData.tags}
-                  onSubmit={onSubmitTags}
-                  isLoading={isLoading && loadingKey === 'tags'}
-                />
-                <EditConnector
-                  caseData={caseData}
-                  caseServices={caseServices}
-                  connectorName={connectorName}
-                  connectors={connectors}
-                  hasDataToPush={hasDataToPush && userCanCrud}
-                  isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
-                  isValidConnector={isLoadingConnectors ? true : isValidConnector}
-                  onSubmit={onSubmitConnector}
-                  permissionsError={permissionsError}
-                  updateCase={handleUpdateCase}
-                  userActions={caseUserActions}
-                  userCanCrud={userCanCrud}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ContentWrapper>
-        </WhitePageWrapper>
+                    )}
+                    {participants.length > 1 && (
+                      <UserList
+                        data-test-subj="case-view-user-list-participants"
+                        email={emailContent}
+                        headline={i18n.PARTICIPANTS}
+                        loading={isLoadingUserActions}
+                        users={participants}
+                      />
+                    )}
+                    <TagList
+                      data-test-subj="case-view-tag-list"
+                      userCanCrud={userCanCrud}
+                      tags={caseData.tags}
+                      onSubmit={onSubmitTags}
+                      isLoading={isLoading && loadingKey === 'tags'}
+                    />
+                    <EditConnector
+                      caseData={caseData}
+                      caseServices={caseServices}
+                      connectorName={connectorName}
+                      connectors={connectors}
+                      hasDataToPush={hasDataToPush && userCanCrud}
+                      isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
+                      isValidConnector={isLoadingConnectors ? true : isValidConnector}
+                      onSubmit={onSubmitConnector}
+                      permissionsError={permissionsError}
+                      updateCase={handleUpdateCase}
+                      userActions={caseUserActions}
+                      userCanCrud={userCanCrud}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </ContentWrapper>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );

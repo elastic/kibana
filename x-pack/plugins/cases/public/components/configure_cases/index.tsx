@@ -22,7 +22,7 @@ import { ClosureType } from '../../containers/configure/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public/types';
 
-import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
+import { ContentWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
@@ -32,24 +32,6 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-
-const FormWrapper = styled.div`
-  ${({ theme }) => css`
-    & > * {
-      margin-top 40px;
-    }
-
-    & > :first-child {
-      margin-top: 0;
-    }
-
-    padding-top: ${theme.eui.paddingSizes.xl};
-    padding-bottom: ${theme.eui.paddingSizes.xl};
-    .euiFlyout {
-      z-index: ${theme.eui.euiZNavigation + 1};
-    }
-  `}
-`;
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { userCanCrud } = useCasesContext();
@@ -186,61 +168,47 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   return (
     <>
-      <HeaderPage
-        showBackButton={true}
-        data-test-subj="case-configure-title"
-        title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-      />
-      <WhitePageWrapper>
-        <ContentWrapper>
-          <FormWrapper>
-            {!connectorIsValid && (
-              <SectionWrapper style={{ marginTop: 0 }}>
-                <EuiCallOut
-                  title={i18n.WARNING_NO_CONNECTOR_TITLE}
-                  color="warning"
-                  iconType="help"
-                  data-test-subj="configure-cases-warning-callout"
-                >
-                  <FormattedMessage
-                    defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                    id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                    values={{
-                      appropriateLicense: (
-                        <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
-                          {i18n.LINK_APPROPRIATE_LICENSE}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiCallOut>
-              </SectionWrapper>
-            )}
-            <SectionWrapper>
-              <ClosureOptions
-                closureTypeSelected={closureType}
-                disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-                onChangeClosureType={onChangeClosureType}
-              />
-            </SectionWrapper>
-            <SectionWrapper>
-              <Connectors
-                actionTypes={actionTypes}
-                connectors={connectors ?? []}
-                disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-                handleShowEditFlyout={onClickUpdateConnector}
-                isLoading={isLoadingAny}
-                mappings={mappings}
-                onChangeConnector={onChangeConnector}
-                selectedConnector={connector}
-                updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
-              />
-            </SectionWrapper>
-            {ConnectorAddFlyout}
-            {ConnectorEditFlyout}
-          </FormWrapper>
-        </ContentWrapper>
-      </WhitePageWrapper>
+      <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
+      <ContentWrapper>
+        {!connectorIsValid && (
+          <EuiCallOut
+            title={i18n.WARNING_NO_CONNECTOR_TITLE}
+            color="warning"
+            iconType="help"
+            data-test-subj="configure-cases-warning-callout"
+          >
+            <FormattedMessage
+              defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+              id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+              values={{
+                appropriateLicense: (
+                  <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                    {i18n.LINK_APPROPRIATE_LICENSE}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+        )}
+        <ClosureOptions
+          closureTypeSelected={closureType}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+          onChangeClosureType={onChangeClosureType}
+        />
+        <Connectors
+          actionTypes={actionTypes}
+          connectors={connectors ?? []}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+          handleShowEditFlyout={onClickUpdateConnector}
+          isLoading={isLoadingAny}
+          mappings={mappings}
+          onChangeConnector={onChangeConnector}
+          selectedConnector={connector}
+          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
+        />
+        {ConnectorAddFlyout}
+        {ConnectorEditFlyout}
+      </ContentWrapper>
     </>
   );
 });
