@@ -35,14 +35,16 @@ export async function fetchClusters(
     filter_path: [
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_name',
+      'hits.hits._source.elasticsearch.cluster.name',
     ],
     body: {
       size: 1000,
       query: {
         bool: {
           filter: [
-            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: rangeFilter,
             },
@@ -55,60 +57,17 @@ export async function fetchClusters(
     },
   };
 
-  const { body: response } = await esClient.search(params);
-  return get(response, 'hits.hits', []).map((hit: any) => {
-    const clusterName: string =
-      get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
-      get(hit, '_source.cluster_name') ||
-      get(hit, '_source.cluster_uuid');
-    return {
-      clusterUuid: get(hit, '_source.cluster_uuid'),
-      clusterName,
-    };
-  });
-}
+  const response = await esClient.search(params);
 
-export async function fetchClustersLegacy(
-  callCluster: any,
-  index: string,
-  rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
-): Promise<AlertCluster[]> {
-  const params = {
-    index,
-    filter_path: [
-      'hits.hits._source.cluster_settings.cluster.metadata.display_name',
-      'hits.hits._source.cluster_uuid',
-      'hits.hits._source.cluster_name',
-    ],
-    body: {
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
-            {
-              range: rangeFilter,
-            },
-          ],
-        },
-      },
-      collapse: {
-        field: 'cluster_uuid',
-      },
-    },
-  };
-  const response = await callCluster('search', params);
   return get(response, 'hits.hits', []).map((hit: any) => {
     const clusterName: string =
       get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
       get(hit, '_source.cluster_name') ||
-      get(hit, '_source.cluster_uuid');
+      get(hit, '_source.elasticsearch.cluster.name') ||
+      get(hit, '_source.cluster_uuid') ||
+      get(hit, '_source.elasticsearch.cluster.id');
     return {
-      clusterUuid: get(hit, '_source.cluster_uuid'),
+      clusterUuid: get(hit, '_source.cluster_uuid') || get(hit, '_source.elasticsearch.cluster.id'),
       clusterName,
     };
   });

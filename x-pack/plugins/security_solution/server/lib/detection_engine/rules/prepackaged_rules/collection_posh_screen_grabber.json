@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Detects PowerShell Scripts that can take screenshots, which is a common feature in post-exploitation kits and RATs (Remote Access Tools).",
+  "description": "Detects PowerShell scripts that can take screenshots, which is a common feature in post-exploitation kits and remote access tools (RATs).",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -66,5 +66,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

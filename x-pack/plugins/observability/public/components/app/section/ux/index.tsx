@@ -57,7 +57,7 @@ export function UXSection({ bucketSize }: Props) {
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.ux.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show dashboard',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

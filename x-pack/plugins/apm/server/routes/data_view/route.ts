@@ -9,6 +9,7 @@ import { createStaticDataView } from './create_static_data_view';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getDynamicDataView } from './get_dynamic_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { ISavedObjectsRepository } from '../../../../../../src/core/server';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
@@ -24,7 +25,10 @@ const staticDataViewRoute = createApmServerRoute({
     const setupPromise = setupRequest(resources);
     const clientPromise = core
       .start()
-      .then((coreStart) => coreStart.savedObjects.createInternalRepository());
+      .then(
+        (coreStart): ISavedObjectsRepository =>
+          coreStart.savedObjects.createInternalRepository()
+      );
 
     const setup = await setupPromise;
     const savedObjectsClient = await clientPromise;

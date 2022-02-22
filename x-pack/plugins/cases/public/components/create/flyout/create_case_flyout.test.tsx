@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { CreateCaseFlyout } from './create_case_flyout';
-import { TestProviders } from '../../../common/mock';
+import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -23,27 +23,21 @@ const defaultProps = {
 };
 
 describe('CreateCaseFlyout', () => {
+  let mockedContext: AppMockRenderer;
   beforeEach(() => {
+    mockedContext = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders', async () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
     await act(async () => {
       expect(getByTestId('create-case-flyout')).toBeTruthy();
     });
   });
 
-  it('Closing flyout calls onCloseCaseModal', async () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
-    );
+  it('should call onCloseCaseModal when closing the flyout', async () => {
+    const { getByTestId } = mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
     await act(async () => {
       userEvent.click(getByTestId('euiFlyoutCloseButton'));
     });

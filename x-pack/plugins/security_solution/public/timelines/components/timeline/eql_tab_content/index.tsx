@@ -174,6 +174,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
+    dataViewId,
     docValueFields,
     loading: loadingSourcerer,
     runtimeMappings,
@@ -207,18 +208,19 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
+      dataViewId,
       docValueFields,
       endDate: end,
       eqlOptions: restEqlOption,
+      fields: getTimelineQueryFields(),
+      filterQuery: eqlQuery ?? '',
       id: timelineId,
       indexNames: selectedPatterns,
-      fields: getTimelineQueryFields(),
       language: 'eql',
       limit: itemsPerPage,
-      filterQuery: eqlQuery ?? '',
       runtimeMappings,
-      startDate: start,
       skip: !canQueryTimeline(),
+      startDate: start,
       timerangeKind,
     });
 
