@@ -152,7 +152,8 @@ export class ConsolePageObject extends FtrService {
       const editor = await this.getEditor();
       const lines = await editor.findAllByClassName('ace_line_group');
       // there should be only one empty line after clearing the textarea
-      return lines.length === 1;
+      const text = await lines[lines.length - 1].getVisibleText();
+      return lines.length === 1 && text.trim() === '';
     });
   }
 }
