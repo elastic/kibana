@@ -399,6 +399,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             ...layer.columns,
             [columnId]: {
               ...column,
+              dataType: newDataType,
               sourceField: fields[0],
               label: ofName(
                 indexPattern.getFieldByName(fields[0])?.displayName,
@@ -406,10 +407,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 newParams.orderBy.type === 'rare'
               ),
               params: {
-                ...column.params,
+                ...newParams,
                 secondaryFields,
                 parentFormat: getParentFormatter({
-                  ...column.params,
+                  ...newParams,
                   secondaryFields,
                 }),
               },

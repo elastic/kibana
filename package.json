@@ -75,6 +75,7 @@
   },
   "resolutions": {
     "**/@babel/runtime": "^7.17.2",
+    "**/@elastic/transport": "^8.0.2",
     "**/@types/node": "16.10.2",
     "**/chokidar": "^3.4.3",
     "**/deepmerge": "^4.2.2",
@@ -82,7 +83,7 @@
     "**/handlebars/uglify-js": "^3.14.3",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/html-minifier/uglify-js": "^3.14.3",
-    "**/isomorphic-fetch/node-fetch": "^2.6.1",
+    "**/isomorphic-fetch/node-fetch": "^2.6.7",
     "**/istanbul-lib-coverage": "^3.2.0",
     "**/json-schema": "^0.4.0",
     "**/minimist": "^1.2.5",
@@ -93,7 +94,8 @@
     "**/trim": "1.0.1",
     "**/typescript": "4.5.3",
     "**/underscore": "^1.13.1",
-    "globby/fast-glob": "3.2.7"
+    "globby/fast-glob": "3.2.7",
+    "puppeteer/node-fetch": "^2.6.7"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.2",
@@ -304,7 +306,7 @@
     "monaco-editor": "^0.22.3",
     "mustache": "^2.3.2",
     "nock": "12.0.3",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "node-forge": "^1.2.1",
     "nodemailer": "^6.6.2",
     "normalize-path": "^3.0.0",
@@ -635,7 +637,7 @@
     "@types/ncp": "^2.0.1",
     "@types/nock": "^10.0.3",
     "@types/node": "16.10.2",
-    "@types/node-fetch": "^2.5.7",
+    "@types/node-fetch": "^2.6.0",
     "@types/node-forge": "^1.0.0",
     "@types/nodemailer": "^6.4.0",
     "@types/normalize-path": "^3.0.0",
