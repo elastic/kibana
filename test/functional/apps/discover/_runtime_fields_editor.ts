@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.enableValue();
     await fieldEditor.typeScript("emit('abc')");
     await fieldEditor.save();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('discover integration with runtime fields editor', function describeIndexTests() {
@@ -62,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creation of a new field', async function () {
       const field = '_runtimefield';
       await createRuntimeField(field);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
         return fieldNames.includes(field);
@@ -86,9 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows creation of a new field and use it in a saved search', async function () {
-      const fieldName = '_runtimefield-saved-search'
+      const fieldName = '_runtimefield-saved-search';
       await createRuntimeField(fieldName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.clickFieldListItemAdd(fieldName);
       expect(await PageObjects.discover.getDocHeader()).to.have.string(fieldName);
       expect(await PageObjects.discover.saveSearch('Saved Search with runtimefield'));
@@ -103,10 +102,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('deletes a runtime field', async function () {
-      const fieldName = '_runtimefield-to-delete'
+      const fieldName = '_runtimefield-to-delete';
       await createRuntimeField(fieldName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       await PageObjects.discover.removeField(fieldName);
       await fieldEditor.confirmDelete();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -143,9 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // Maybe loading has not completed
             throw new Error('test subject doc-hit is not yet displayed');
           }
-          const runtimeFieldsRow = await testSubjects.exists(
-            `tableDocViewRow-${fieldName}-value` 
-          );
+          const runtimeFieldsRow = await testSubjects.exists(`tableDocViewRow-${fieldName}-value`);
           return hasDocHit && runtimeFieldsRow;
         }
       );
