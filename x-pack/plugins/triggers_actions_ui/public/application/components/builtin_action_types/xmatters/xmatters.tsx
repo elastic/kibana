@@ -67,10 +67,6 @@ export function getActionType(): ActionTypeModel<
       if (action.config.urlConfig && !isValidUrl(action.config.urlConfig)) {
         configErrors.urlConfig = [...configErrors.urlConfig, translations.URL_INVALID];
       }
-      if (action.config.usesBasic && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.user.push(translations.USERNAME_REQUIRED);
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED);
-      }
       if (action.config.usesBasic && action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER);
       }

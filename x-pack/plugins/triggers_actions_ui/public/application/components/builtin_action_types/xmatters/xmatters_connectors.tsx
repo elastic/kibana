@@ -90,6 +90,8 @@ const XmattersActionConnectorFields: React.FunctionComponent<
             setSelectedAuth(XmattersAuthenticationType.URL);
             editActionConfig('usesBasic', false);
             editActionConfig('urlConfig', '');
+            editActionSecrets('user', '');
+            editActionSecrets('password', '');
           }
         }}
       />
