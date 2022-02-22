@@ -1328,6 +1328,82 @@ describe('Lens App', () => {
       expect(defaultLeave).not.toHaveBeenCalled();
     });
 
+    it('should confirm when leaving from a context initial doc with changes made in lens', async () => {
+      const initialProps = {
+        ...makeDefaultProps(),
+        contextOriginatingApp: 'TSVB',
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              timeFieldName: 'order_date',
+              chartType: 'area',
+              axisPosition: 'left',
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+              metrics: [
+                {
+                  agg: 'count',
+                  isFullReference: false,
+                  fieldName: 'document',
+                  params: {},
+                  color: '#68BC00',
+                },
+              ],
+              timeInterval: 'auto',
+            },
+          ],
+          type: 'lnsXY',
+          configuration: {
+            fill: 0.5,
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            extents: {
+              yLeftExtent: {
+                mode: 'full',
+              },
+              yRightExtent: {
+                mode: 'full',
+              },
+            },
+          },
+          savedObjectId: '',
+          vizEditorOriginatingAppUrl: '#/tsvb-link',
+          isVisualizeAction: true,
+        },
+      };
+
+      const mountedApp = await mountWith({
+        props: initialProps as unknown as jest.Mocked<LensAppProps>,
+        preloadedState: {
+          persistedDoc: defaultDoc,
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+          },
+          isSaveable: true,
+        },
+      });
+      const lastCall =
+        mountedApp.props.onAppLeave.mock.calls[
+          mountedApp.props.onAppLeave.mock.calls.length - 1
+        ][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).not.toHaveBeenCalled();
+      expect(confirmLeave).toHaveBeenCalled();
+    });
+
     it('should not confirm when changes are saved', async () => {
       const preloadedState = {
         persistedDoc: {

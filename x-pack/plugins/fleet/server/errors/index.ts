@@ -43,6 +43,7 @@ export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
 export class PackagePolicyValidationError extends IngestManagerError {}
+export class BundledPackageNotFoundError extends IngestManagerError {}
 export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
   constructor(message = 'Cannot perform that action') {
     super(
