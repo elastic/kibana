@@ -4,8 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertsTable } from './alerts_table';
-
-export { AlertsTable };
-// eslint-disable-next-line import/no-default-export
-export { AlertsTable as default };
+export { AlertsTable } from './alerts_table';

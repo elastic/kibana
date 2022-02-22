@@ -17,7 +17,6 @@ import { InitialAlert } from '../sections/alert_form/alert_reducer';
 type Capabilities = Record<string, any>;
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
-export const hasShowAlertsCapability = (capabilities: Capabilities) => true; // capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
 export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.execute;

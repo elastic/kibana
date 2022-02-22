@@ -13,12 +13,11 @@ export {
 } from '../../../../alerting/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../../actions/common';
 
-export type Section = 'connectors' | 'rules' | 'alerts';
+export type Section = 'connectors' | 'rules';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
-export const routeToAlerts = `/alerts_list`;
 export const routeToRuleDetails = `/rule/:ruleId`;
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
