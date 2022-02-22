@@ -160,6 +160,30 @@ export class SettingsPageObject extends FtrService {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
+  async getReadableTitleField() {
+    return this.testSubjects.find('createIndexPatternReadableTitleInput');
+  }
+
+  async setReadableTitleField(indexPatternTitle: string) {
+    const field = await this.getReadableTitleField();
+    field.clearValue();
+    field.type(indexPatternTitle);
+  }
+
+  async getReadableDescriptionField() {
+    const exists = await this.testSubjects.exists('showIndexPatternReadableDescriptionInput');
+    if (exists) {
+      await this.testSubjects.click('showIndexPatternReadableDescriptionInput');
+    }
+    return this.testSubjects.find('createIndexPatternReadableDescriptionInput');
+  }
+
+  async setReadableDescriptionField(indexPatternDescription: string) {
+    const field = await this.getReadableDescriptionField();
+    field.clearValue();
+    field.type(indexPatternDescription);
+  }
+
   async getSaveIndexPatternButton() {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
@@ -169,11 +193,18 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDefaultIndexButton() {
+    await this.testSubjects.click('openDataViewActions');
     await this.testSubjects.click('setDefaultIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  async clickEditIndexButton() {
+    await this.testSubjects.click('openDataViewActions');
+    await this.testSubjects.click('editIndexPatternButton');
+  }
+
   async clickDeletePattern() {
+    await this.testSubjects.click('openDataViewActions');
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
@@ -380,7 +411,9 @@ export class SettingsPageObject extends FtrService {
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    isStandardIndexPattern = true
+    isStandardIndexPattern = true,
+    indexPatternTitle?: string,
+    indexPatternDescription?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -411,6 +444,12 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
+      if (indexPatternTitle) {
+        await this.setReadableTitleField(indexPatternTitle);
+      }
+      if (indexPatternDescription) {
+        await this.setReadableDescriptionField(indexPatternDescription);
+      }
       await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
@@ -430,6 +469,39 @@ export class SettingsPageObject extends FtrService {
       expect(text).to.equal('Rollup');
     }
 
+    return await this.getIndexPatternIdFromUrl();
+  }
+
+  async editIndexPattern(
+    indexPatternName: string,
+    // null to bypass default value
+    timefield: string | null = '@timestamp',
+    indexPatternTitle?: string,
+    indexPatternDescription?: string
+  ) {
+    if (!indexPatternName) {
+      throw new Error('No Data View name provided for edit');
+    }
+
+    const exists = await this.hasIndexPattern(indexPatternName);
+    if (!exists) {
+      throw new Error('Data view for edit does not exist');
+    }
+
+    this.clickEditIndexButton();
+    await this.header.waitUntilLoadingHasFinished();
+    if (timefield) {
+      await this.selectTimeFieldOption(timefield);
+    }
+    if (indexPatternTitle) {
+      await this.setReadableTitleField(indexPatternTitle);
+    }
+    if (indexPatternDescription) {
+      await this.setReadableDescriptionField(indexPatternDescription);
+    }
+    await (await this.getSaveIndexPatternButton()).click();
+
+    await this.header.waitUntilLoadingHasFinished();
     return await this.getIndexPatternIdFromUrl();
   }
 

@@ -18,7 +18,7 @@ interface ReadableTitleFieldProps {
 
 export const ReadableTitleField = ({ editData }: ReadableTitleFieldProps) => {
   const [showDescription, setShowDescription] = useState<boolean>(
-    !!(editData && editData.readableTitleDescription)
+    !!(editData && editData.readableDescription)
   );
 
   return (
@@ -62,15 +62,12 @@ export const ReadableTitleField = ({ editData }: ReadableTitleFieldProps) => {
         <>
           <EuiSpacer size="l" />
           <UseField<string, IndexPatternConfig>
-            path="readableTitleDescription"
+            path="readableDescription"
             componentProps={{
               euiFieldProps: {
-                'aria-label': i18n.translate(
-                  'indexPatternEditor.form.readableTitleDescriptionLabel',
-                  {
-                    defaultMessage: 'Title description field optional',
-                  }
-                ),
+                'aria-label': i18n.translate('indexPatternEditor.form.readableDescriptionLabel', {
+                  defaultMessage: 'Title description field optional',
+                }),
               },
             }}
           >
@@ -97,7 +94,7 @@ export const ReadableTitleField = ({ editData }: ReadableTitleFieldProps) => {
                     }}
                     fullWidth
                     rows={2}
-                    data-test-subj="createIndexPatternReadableTitleDescriptionInput"
+                    data-test-subj="createIndexPatternReadableDescriptionInput"
                     maxLength={150}
                   />
                 </EuiFormRow>
@@ -108,7 +105,10 @@ export const ReadableTitleField = ({ editData }: ReadableTitleFieldProps) => {
       ) : (
         <>
           <EuiSpacer size="s" />
-          <EuiLink onClick={() => setShowDescription(true)}>
+          <EuiLink
+            onClick={() => setShowDescription(true)}
+            data-test-subj="showIndexPatternReadableDescriptionInput"
+          >
             {i18n.translate('indexPatternEditor.form.addDescription', {
               defaultMessage: 'Add description',
             })}

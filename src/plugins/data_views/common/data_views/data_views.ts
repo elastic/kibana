@@ -41,12 +41,12 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
 export type IndexPatternSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'readableTitle' | 'readableTitleDescription'
+  'title' | 'type' | 'typeMeta' | 'readableTitle' | 'readableDescription'
 >;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'readableTitle' | 'readableTitleDescription'
+  'title' | 'type' | 'typeMeta' | 'readableTitle' | 'readableDescription'
 >;
 
 export interface DataViewListItem {
@@ -55,7 +55,7 @@ export interface DataViewListItem {
   type?: string;
   typeMeta?: TypeMeta;
   readableTitle?: string;
-  readableTitleDescription?: string;
+  readableDescription?: string;
 }
 
 export interface DataViewsServiceDeps {
@@ -114,7 +114,7 @@ export class DataViewsService {
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      fields: ['title', 'type', 'typeMeta', 'readableTitle', 'readableTitleDescription'],
+      fields: ['title', 'type', 'typeMeta', 'readableTitle', 'readableDescription'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -185,7 +185,7 @@ export class DataViewsService {
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
       readableTitle: obj?.attributes?.readableTitle,
-      readableTitleDescription: obj?.attributes?.readableTitleDescription,
+      readableDescription: obj?.attributes?.readableDescription,
     }));
   };
 
@@ -393,7 +393,7 @@ export class DataViewsService {
         fieldAttrs,
         allowNoIndex,
         readableTitle,
-        readableTitleDescription,
+        readableDescription,
       },
     } = savedObject;
 
@@ -420,7 +420,7 @@ export class DataViewsService {
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
       readableTitle,
-      readableTitleDescription,
+      readableDescription,
     };
   };
 

@@ -68,7 +68,7 @@ export interface DataViewAttributes {
    */
   allowNoIndex?: boolean;
   readableTitle?: string;
-  readableTitleDescription?: string;
+  readableDescription?: string;
 }
 
 /**
@@ -250,7 +250,7 @@ export interface DataViewSpec {
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
   readableTitle?: string;
-  readableTitleDescription?: string;
+  readableDescription?: string;
 }
 
 export interface SourceFilter {

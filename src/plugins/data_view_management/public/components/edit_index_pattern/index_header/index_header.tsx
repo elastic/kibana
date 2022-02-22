@@ -20,6 +20,10 @@ interface IndexHeaderProps {
   canSave: boolean;
 }
 
+const openActionsAriaLabel = i18n.translate('indexPatternManagement.editDataView.openAcionsAria', {
+  defaultMessage: 'Open Data View Actions',
+});
+
 const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {
   defaultMessage: 'Set as default data view.',
 });
@@ -61,7 +65,9 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{title}</span>}
       description={
-        indexPattern.readableTitleDescription ? indexPattern.readableTitleDescription : null
+        indexPattern.readableDescription ? (
+          <span data-test-subj="indexPatternDescription">{indexPattern.readableDescription}</span>
+        ) : null
       }
       rightSideItems={[
         <EuiPopover
@@ -70,6 +76,8 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
               iconType="arrowDown"
               iconSide="right"
               onClick={() => setOpenActions(true)}
+              aria-label={openActionsAriaLabel}
+              data-test-subj="openDataViewActions"
             >
               Actions
             </EuiButtonEmpty>

@@ -776,7 +776,7 @@ Object {
   },
   "id": "test-pattern",
   "readableTitle": "Title",
-  "readableTitleDescription": "Title Description",
+  "readableDescription": "Title Description",
   "runtimeFieldMap": Object {
     "runtime_field": Object {
       "script": Object {

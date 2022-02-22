@@ -38,14 +38,14 @@ export async function getIndexPatterns(
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
-    const { id, title, readableTitle, readableTitleDescription } = idxPattern;
+    const { id, title, readableTitle, readableDescription } = idxPattern;
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault);
 
     return {
       id,
       title: readableTitle ? readableTitle : title,
-      info: readableTitleDescription,
+      info: readableDescription,
       default: isDefault,
       tags,
       // the prepending of 0 at the default pattern takes care of prioritization

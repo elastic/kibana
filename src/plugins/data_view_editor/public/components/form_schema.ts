@@ -51,12 +51,12 @@ export const schema = {
     }),
     defaultValue: '',
   },
-  readableTitleDescription: {
-    label: i18n.translate('indexPatternEditor.editor.form.readableTitleDescriptionLabel', {
+  readableDescription: {
+    label: i18n.translate('indexPatternEditor.editor.form.readableDescriptionLabel', {
       defaultMessage: 'Description',
     }),
     defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.readableTitleDescriptionHelpText', {
+    helpText: i18n.translate('indexPatternEditor.validations.readableDescriptionHelpText', {
       defaultMessage: '150 characters max',
     }),
   },

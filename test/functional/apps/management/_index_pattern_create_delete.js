@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage')).to.contain(
-            `The index pattern you entered doesn\'t match any data streams, indices, or index aliases.`
+            `The data view you entered doesn\'t match any data streams, indices, or index aliases.`
           );
         });
       });
@@ -112,6 +112,26 @@ export default function ({ getService, getPageObjects }) {
           });
 
           return Promise.all(comparedHeaders);
+        });
+      });
+    });
+
+    describe('edit index pattern', () => {
+      it('edit index pattern details on edit click', async () => {
+        await PageObjects.settings.editIndexPattern(
+          'logstash-*',
+          '@timestamp',
+          'Logstash Star',
+          'Logstash Star description'
+        );
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
+            `Logstash Star`
+          );
+          expect(await testSubjects.getVisibleText('indexPatternDescription')).to.contain(
+            `Logstash Star description`
+          );
         });
       });
     });

@@ -91,7 +91,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             title: editData.title,
             id: editData.id,
             readableTitle: editData.readableTitle,
-            readableTitleDescription: editData.readableTitleDescription,
+            readableDescription: editData.readableDescription,
             ...(editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
@@ -111,7 +111,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         readableTitle: formData.readableTitle,
-        readableTitleDescription: formData.readableTitleDescription,
+        readableDescription: formData.readableDescription,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -313,7 +313,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     (newType) => {
       form.setFieldValue('title', '');
       form.setFieldValue('readableTitle', '');
-      form.setFieldValue('readableTitleDescription', '');
+      form.setFieldValue('readableDescription', '');
       form.setFieldValue('timestampField', '');
       if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
         form.setFieldValue('allowHidden', false);

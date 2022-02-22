@@ -656,7 +656,7 @@ exports[`Discover DataView Management renders correctly 1`] = `
         ],
         "originalSavedObjectBody": Object {},
         "readableTitle": "",
-        "readableTitleDescription": "",
+        "readableDescription": "",
         "resetOriginalSavedObjectBody": [Function],
         "runtimeFieldMap": Object {},
         "setFieldFormat": [Function],

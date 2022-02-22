@@ -73,7 +73,7 @@ const dataViewSpecSchema = schema.object({
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
   readableTitle: schema.maybe(schema.string()),
-  readableTitleDescription: schema.maybe(schema.string()),
+  readableDescription: schema.maybe(schema.string()),
 });
 
 const registerCreateDataViewRouteFactory =
