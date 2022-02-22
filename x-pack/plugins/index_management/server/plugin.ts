@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 
 import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';
@@ -22,10 +22,12 @@ export interface IndexManagementPluginSetup {
 export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly indexDataEnricher: IndexDataEnricher;
+  private logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
     this.apiRoutes = new ApiRoutes();
     this.indexDataEnricher = new IndexDataEnricher();
+    this.logger = initContext.logger.get();
   }
 
   setup(
@@ -56,6 +58,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       lib: {
         handleEsError,
       },
+      logger: this.logger,
     });
 
     return {

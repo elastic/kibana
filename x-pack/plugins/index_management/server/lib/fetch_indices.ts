@@ -6,16 +6,18 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient, Logger } from 'kibana/server';
 import { IndexDataEnricher } from '../services';
 import { Index } from '../index';
 
 async function fetchIndicesCall(
   client: IScopedClusterClient,
+  logger: Logger,
   indexNames?: string[]
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
+  logger.info('Get Indices request started');
   // This call retrieves alias and settings (incl. hidden status) information about indices
   const indices = await client.asCurrentUser.indices.get({
     index: indexNamesString,
@@ -34,17 +36,20 @@ async function fetchIndicesCall(
     // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
   });
+  logger.info('Get Indices request completed');
 
   if (!Object.keys(indices).length) {
     return [];
   }
 
+  logger.info('Get Index Stats request started');
   const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     forbid_closed_indices: false,
     metric: ['docs', 'store'],
   });
+  logger.info('Get Index Stats request completed');
   const indicesNames = Object.keys(indices);
   return indicesNames.map((indexName: string) => {
     const indexData = indices[indexName];
@@ -75,8 +80,9 @@ async function fetchIndicesCall(
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexDataEnricher: IndexDataEnricher,
+  logger: Logger,
   indexNames?: string[]
 ) => {
-  const indices = await fetchIndicesCall(client, indexNames);
-  return await indexDataEnricher.enrichIndices(indices, client);
+  const indices = await fetchIndicesCall(client, logger, indexNames);
+  return await indexDataEnricher.enrichIndices(indices, client, logger);
 };

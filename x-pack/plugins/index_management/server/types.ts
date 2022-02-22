@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, Logger } from 'src/core/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -28,4 +28,5 @@ export interface RouteDependencies {
   lib: {
     handleEsError: typeof handleEsError;
   };
+  logger: Logger;
 }
