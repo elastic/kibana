@@ -124,26 +124,32 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
 
 /**
  * This function returns the appropriate arguments depending on whether
- * or not auto-apply is enabled
+ * or not appliedState is passed in
  */
-const maybeGetAppliedArgs = ({
+const getBuildExpressionArgs = ({
   appliedState,
   visualization,
   datasourceStates,
   activeDatasourceId,
   framePublicAPI: { datasourceLayers, appliedDatasourceLayers },
+  visualizationMap,
 }: {
   appliedState?: AppliedState;
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
   activeDatasourceId: string | null;
   framePublicAPI: FramePublicAPI;
+  visualizationMap: VisualizationMap;
 }) => {
+  const visualizationState = appliedState?.visualization || visualization;
   return {
-    visualization: appliedState?.visualization || visualization,
+    visualization: visualizationState,
     datasourceStates: appliedState?.datasourceStates || datasourceStates,
     activeDatasourceId: appliedState?.activeDatasourceId || activeDatasourceId,
     datasourceLayers: appliedDatasourceLayers || datasourceLayers,
+    activeVisualization: visualization.activeId
+      ? visualizationMap[visualizationState.activeId as string]
+      : null,
   };
 };
 
@@ -263,23 +269,25 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 }) {
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
-  const { visualization, datasourceStates, activeDatasourceId, datasourceLayers } =
-    maybeGetAppliedArgs({
-      visualization: useLensSelector(selectVisualization),
-      datasourceStates: useLensSelector(selectDatasourceStates),
-      activeDatasourceId: useLensSelector(selectActiveDatasourceId),
-      appliedState: useLensSelector(selectAppliedState),
-      framePublicAPI,
-    });
+  const {
+    visualization,
+    datasourceStates,
+    activeDatasourceId,
+    datasourceLayers,
+    activeVisualization,
+  } = getBuildExpressionArgs({
+    visualization: useLensSelector(selectVisualization),
+    datasourceStates: useLensSelector(selectDatasourceStates),
+    activeDatasourceId: useLensSelector(selectActiveDatasourceId),
+    appliedState: useLensSelector(selectAppliedState),
+    visualizationMap,
+    framePublicAPI,
+  });
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
   });
-
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
-    : null;
 
   // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
   // and to prevent race conditions it is ok to leave them there.
