@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { ErrorPanel } from './error_panel';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -25,29 +25,32 @@ interface Props {
 export function SectionContainer({ title, appLink, children, hasError }: Props) {
   const { core } = usePluginContext();
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasShadow={true} color="subdued">
       <EuiAccordion
         initialIsOpen
         id={title}
         buttonContentClassName="accordion-button"
         buttonContent={
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h5>{title}</h5>
           </EuiTitle>
         }
         extraAction={
           appLink?.href && (
-            <EuiButton size="s" href={core.http.basePath.prepend(appLink.href)}>
+            <EuiButtonEmpty
+              iconType={'sortRight'}
+              size="xs"
+              color="text"
+              href={core.http.basePath.prepend(appLink.href)}
+            >
               {appLink.label}
-            </EuiButton>
+            </EuiButtonEmpty>
           )
         }
       >
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasShadow={false} paddingSize="s">
-            {hasError ? <ErrorPanel /> : <>{children}</>}
-          </EuiPanel>
+          <EuiPanel hasShadow={true}>{hasError ? <ErrorPanel /> : <>{children}</>}</EuiPanel>
         </>
       </EuiAccordion>
     </EuiPanel>

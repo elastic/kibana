@@ -25,6 +25,16 @@ export async function createSystemIndicesUser(ctx: FtrProviderContext) {
 
   const es = createEsClientForFtrConfig(config);
 
+  // There are cases where the test config file doesn't have security disabled
+  // but tests are still executed on ES without security. Checking this case
+  // by trying to fetch the users list.
+  try {
+    await es.security.getUser();
+  } catch (error) {
+    log.debug('Could not fetch users, assuming security is disabled');
+    return;
+  }
+
   log.debug('===============creating system indices role and user===============');
 
   await es.security.putRole({

@@ -240,7 +240,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
+    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
   public async getDocTableIndex(index: number) {
@@ -274,6 +274,11 @@ export class DiscoverPageObject extends FtrService {
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
     return result[usedCellIdx];
+  }
+
+  public async clickDocTableRowToggle(rowIndex: number = 0) {
+    const docTable = await this.getDocTable();
+    await docTable.clickRowToggle({ rowIndex });
   }
 
   public async skipToEndOfDocTable() {

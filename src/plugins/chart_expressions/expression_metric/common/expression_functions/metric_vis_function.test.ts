@@ -10,6 +10,7 @@ import { metricVisFunction } from './metric_vis_function';
 import type { MetricArguments } from '../../common';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { LabelPosition } from '../constants';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(metricVisFunction());
@@ -35,6 +36,8 @@ describe('interpreter/functions#metric', () => {
     },
     showLabels: true,
     font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
+    labelFont: { spec: { fontSize: '24px' }, type: 'style', css: '' },
+    labelPosition: LabelPosition.BOTTOM,
     metric: [
       {
         type: 'vis_dimension',

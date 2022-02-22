@@ -12,7 +12,7 @@ import type { AgentPolicy, PackagePolicy } from '../types';
 import { agentPolicyService, packagePolicyService } from '.';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
-import { incrementPackageName } from './package_policy';
+import { incrementPackageName } from './package_policies';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
@@ -36,6 +36,7 @@ jest.mock('./setup', () => {
 
 jest.mock('./agent_policy');
 jest.mock('./package_policy');
+jest.mock('./package_policies');
 
 function getPackagePolicy(name: string, policyId = '') {
   return {

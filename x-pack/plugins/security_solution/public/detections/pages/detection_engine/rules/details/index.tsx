@@ -38,7 +38,6 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
@@ -80,11 +79,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import {
-  APP_UI_ID,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -244,9 +239,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
-  // TODO: Steph/ueba remove when past experimental
-  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -448,14 +440,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ),
     [ruleDetailTab, setRuleDetailTab, pageTabs]
   );
-  const ruleIndices = useMemo(
-    () =>
-      rule?.index ??
-      (uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN),
-    [rule?.index, uebaEnabled]
-  );
+  const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
   const lastExecution = rule?.execution_summary?.last_execution;
   const lastExecutionStatus = lastExecution?.status;

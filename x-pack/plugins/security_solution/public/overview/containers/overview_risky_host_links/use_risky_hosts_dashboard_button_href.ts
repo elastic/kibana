@@ -16,13 +16,15 @@ export const DASHBOARD_REQUEST_BODY = {
 };
 
 export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
-  const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
-  const savedObjectsClient = useKibana().services.savedObjects.client;
+  const {
+    dashboard,
+    savedObjects: { client: savedObjectsClient },
+  } = useKibana().services;
 
   const [buttonHref, setButtonHref] = useState<string | undefined>();
 
   useEffect(() => {
-    if (createDashboardUrl && savedObjectsClient) {
+    if (dashboard?.locator && savedObjectsClient) {
       savedObjectsClient.find<SavedObjectAttributes>(DASHBOARD_REQUEST_BODY).then(
         async (DashboardsSO?: {
           savedObjects?: Array<{
@@ -31,7 +33,7 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
           }>;
         }) => {
           if (DashboardsSO?.savedObjects?.length) {
-            const dashboardUrl = await createDashboardUrl({
+            const dashboardUrl = await dashboard?.locator?.getUrl({
               dashboardId: DashboardsSO.savedObjects[0].id,
               timeRange: {
                 to,
@@ -43,7 +45,7 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
         }
       );
     }
-  }, [createDashboardUrl, from, savedObjectsClient, to]);
+  }, [dashboard, from, savedObjectsClient, to]);
 
   return {
     buttonHref,
