@@ -185,6 +185,7 @@ describe('alert_form', () => {
       wrapper = mountWithIntl(
         <AlertForm
           alert={initialAlert}
+          config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
           operation="create"
@@ -210,6 +211,13 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="my-alert-type-SelectOption"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('renders minimum schedule interval', async () => {
+      await setup();
+      expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
+        `Interval must be at least 1 minute.`
+      );
     });
 
     it('does not render registered alert type which non editable', async () => {
@@ -357,6 +365,7 @@ describe('alert_form', () => {
       wrapper = mountWithIntl(
         <AlertForm
           alert={initialAlert}
+          config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
           operation="create"
@@ -419,6 +428,7 @@ describe('alert_form', () => {
       wrapper = mountWithIntl(
         <AlertForm
           alert={initialAlert}
+          config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
           operation="create"

@@ -6,7 +6,7 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { parseDuration } from '../../../../../alerting/common/parse_duration';
+import { formatDuration, parseDuration } from '../../../../../alerting/common/parse_duration';
 import {
   RuleTypeModel,
   Rule,
@@ -49,9 +49,9 @@ export function validateBaseProperties(
     if (duration < minimumDuration) {
       errors['schedule.interval'].push(
         i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText', {
-          defaultMessage: 'Interval is below minimum ({minimum}).',
+          defaultMessage: 'Interval must be at least {minimum}.',
           values: {
-            minimum: config.minimumScheduleInterval,
+            minimum: formatDuration(config.minimumScheduleInterval, true),
           },
         })
       );

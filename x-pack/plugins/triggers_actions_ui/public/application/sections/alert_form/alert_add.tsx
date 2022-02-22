@@ -240,6 +240,7 @@ const AlertAdd = ({
             <EuiFlyoutBody>
               <AlertForm
                 alert={alert}
+                config={config}
                 dispatch={dispatch}
                 errors={alertErrors}
                 canChangeTrigger={canChangeTrigger}

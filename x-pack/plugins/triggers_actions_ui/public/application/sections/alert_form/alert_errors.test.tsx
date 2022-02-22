@@ -50,7 +50,7 @@ describe('alert_errors', () => {
       const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        'schedule.interval': ['Interval is below minimum (1m).'],
+        'schedule.interval': ['Interval must be at least 1 minute.'],
         alertTypeId: [],
         actionConnectors: [],
       });

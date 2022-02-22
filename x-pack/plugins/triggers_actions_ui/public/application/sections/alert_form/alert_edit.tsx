@@ -198,6 +198,7 @@ export const AlertEdit = ({
               )}
               <AlertForm
                 alert={alert}
+                config={config}
                 dispatch={dispatch}
                 errors={alertErrors}
                 actionTypeRegistry={actionTypeRegistry}

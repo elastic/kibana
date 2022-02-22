@@ -38,6 +38,7 @@ import {
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
+  formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerting/common/parse_duration';
@@ -52,6 +53,7 @@ import {
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -83,6 +85,7 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
 
 interface AlertFormProps<MetaData = Record<string, any>> {
   alert: InitialAlert;
+  config: TriggersActionsUiConfig;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -99,6 +102,7 @@ const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL)
 
 export const AlertForm = ({
   alert,
+  config,
   canChangeTrigger = true,
   dispatch,
   errors,
@@ -588,7 +592,7 @@ export const AlertForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.minimumScheduleInterval setting defines the minimum value.',
         })}
       />
     </>
@@ -667,7 +671,18 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            data-test-subj="intervalFormRow"
             display="rowCompressed"
+            helpText={
+              errors['schedule.interval'].length > 0
+                ? ''
+                : i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkEveryHelpText', {
+                    defaultMessage: 'Interval must be at least {minimum}.',
+                    values: {
+                      minimum: formatDuration(config.minimumScheduleInterval ?? '1m', true),
+                    },
+                  })
+            }
             label={labelForAlertChecked}
             isInvalid={errors['schedule.interval'].length > 0}
             error={errors['schedule.interval']}
