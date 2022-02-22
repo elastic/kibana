@@ -7,7 +7,7 @@
 
 export const testMobileKPIAttr = {
   title: 'Prefilled from exploratory view app',
-  description: '',
+  description: 'undefined',
   references: [
     {
       id: 'apm-*',
@@ -39,7 +39,7 @@ export const testMobileKPIAttr = {
               },
               'y-axis-column-layer0': {
                 isBucketed: false,
-                label: 'Median of System memory usage',
+                label: 'Median of Memory Usage',
                 operationType: 'median',
                 scale: 'ratio',
                 sourceField: 'system.memory.usage',
