@@ -97,9 +97,7 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-export const createPackagePolicyServiceMock = (): jest.Mocked<
-  Partial<PackagePolicyServiceInterface>
-> => {
+export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
