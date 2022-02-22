@@ -25,11 +25,17 @@ interface AggregatedValue {
   values?: Record<string, number | null>;
 }
 interface Aggs {
-  aggregatedValue: AggregatedValue;
+  currentPeriod: {
+    doc_count: number;
+    aggregatedValue?: AggregatedValue;
+  };
   shouldWarn?: {
     value: number;
   };
   shouldTrigger?: {
+    value: number;
+  };
+  missingGroup?: {
     value: number;
   };
 }
@@ -73,6 +79,7 @@ export const getData = async (
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   timeframe: { start: number; end: number },
+  lastPeriodEnd?: number,
   previousResults: GetDataResponse = {},
   afterKey?: Record<string, string>
 ): Promise<GetDataResponse> => {
@@ -90,12 +97,31 @@ export const getData = async (
       const nextAfterKey = groupings.after_key;
       for (const bucket of groupings.buckets) {
         const key = Object.values(bucket.key).join(',');
-        const { shouldWarn, shouldTrigger, aggregatedValue } = bucket;
-        previous[key] = {
-          trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
-          warn: (shouldWarn && shouldWarn.value > 0) || false,
-          value: getValue(aggregatedValue, params),
-        };
+        const {
+          shouldWarn,
+          shouldTrigger,
+          missingGroup,
+          currentPeriod: { aggregatedValue, doc_count: docCount },
+        } = bucket;
+        if (missingGroup && missingGroup.value > 0) {
+          previous[key] = {
+            trigger: false,
+            warn: false,
+            value: null,
+          };
+        } else {
+          const value =
+            params.aggType === Aggregators.COUNT
+              ? docCount
+              : aggregatedValue
+              ? getValue(aggregatedValue, params)
+              : null;
+          previous[key] = {
+            trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
+            warn: (shouldWarn && shouldWarn.value > 0) || false,
+            value,
+          };
+        }
       }
       if (nextAfterKey) {
         return getData(
@@ -107,6 +133,7 @@ export const getData = async (
           compositeSize,
           alertOnGroupDisappear,
           timeframe,
+          lastPeriodEnd,
           previous,
           nextAfterKey
         );
@@ -114,8 +141,17 @@ export const getData = async (
       return previous;
     }
     if (aggs.all) {
-      const { aggregatedValue, shouldWarn, shouldTrigger } = aggs.all.buckets.all;
-      const value = getValue(aggregatedValue, params);
+      const {
+        currentPeriod: { aggregatedValue, doc_count: docCount },
+        shouldWarn,
+        shouldTrigger,
+      } = aggs.all.buckets.all;
+      const value =
+        params.aggType === Aggregators.COUNT
+          ? docCount
+          : aggregatedValue
+          ? getValue(aggregatedValue, params)
+          : null;
       // There is an edge case where there is no results and the shouldWarn/shouldTrigger
       // bucket scripts will be missing. This is only an issue for document count because
       // the value will end up being ZERO, for other metrics it will be null. In this case
@@ -154,6 +190,7 @@ export const getData = async (
       timeframe,
       compositeSize,
       alertOnGroupDisappear,
+      lastPeriodEnd,
       groupBy,
       filterQuery,
       afterKey

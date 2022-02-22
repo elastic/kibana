@@ -5,9 +5,32 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { calculateRateTimeranges } from '../../inventory_metric_threshold/lib/calculate_rate_timeranges';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
-export const createRateAggs = (
+export const createRateAggsBucketScript = (
+  timeframe: { start: number; end: number },
+  id: string
+) => {
+  const { intervalInSeconds } = calculateRateTimeranges({
+    to: timeframe.end,
+    from: timeframe.start,
+  });
+  return {
+    [id]: {
+      bucket_script: {
+        buckets_path: {
+          first: `currentPeriod>${id}_first_bucket.maxValue`,
+          second: `currentPeriod>${id}_second_bucket.maxValue`,
+        },
+        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: null`,
+      },
+    },
+  };
+};
+
+export const createRateAggsBuckets = (
   timeframe: { start: number; end: number },
   id: string,
   field: string
@@ -21,10 +44,9 @@ export const createRateAggs = (
     [`${id}_first_bucket`]: {
       filter: {
         range: {
-          '@timestamp': {
-            gte: firstBucketRange.from,
-            lt: firstBucketRange.to,
-            format: 'epoch_millis',
+          [TIMESTAMP_FIELD]: {
+            gte: moment(firstBucketRange.from).toISOString(),
+            lt: moment(firstBucketRange.to).toISOString(),
           },
         },
       },
@@ -33,23 +55,13 @@ export const createRateAggs = (
     [`${id}_second_bucket`]: {
       filter: {
         range: {
-          '@timestamp': {
-            gte: secondBucketRange.from,
-            lt: secondBucketRange.to,
-            format: 'epoch_millis',
+          [TIMESTAMP_FIELD]: {
+            gte: moment(secondBucketRange.from).toISOString(),
+            lt: moment(secondBucketRange.to).toISOString(),
           },
         },
       },
       aggs: { maxValue: { max: { field } } },
-    },
-    [id]: {
-      bucket_script: {
-        buckets_path: {
-          first: `${id}_first_bucket.maxValue`,
-          second: `${id}_second_bucket.maxValue`,
-        },
-        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: null`,
-      },
     },
   };
 };

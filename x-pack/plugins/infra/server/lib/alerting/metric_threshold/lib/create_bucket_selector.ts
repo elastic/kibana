@@ -11,6 +11,7 @@ import {
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
+import { createLastPeriod } from './wrap_in_period';
 
 const EMPTY_SHOULD_WARN = {
   bucket_script: {
@@ -21,13 +22,20 @@ const EMPTY_SHOULD_WARN = {
 
 export const createBucketSelector = (
   condition: MetricExpressionParams,
-  alertOnGroupDisappear: boolean = false
+  alertOnGroupDisappear: boolean = false,
+  lastPeriodEnd?: number
 ) => {
   const hasWarn = condition.warningThreshold != null && condition.warningComparator != null;
   const isPercentile = [Aggregators.P95, Aggregators.P99].includes(condition.aggType);
-  const bucketPath = isPercentile
-    ? `aggregatedValue[${condition.aggType === Aggregators.P95 ? '95' : '99'}]`
-    : 'aggregatedValue';
+  const isCount = condition.aggType === Aggregators.COUNT;
+  const isRate = condition.aggType === Aggregators.RATE;
+  const bucketPath = isCount
+    ? 'currentPeriod>_count'
+    : isRate
+    ? `aggregatedValue`
+    : isPercentile
+    ? `currentPeriod>aggregatedValue[${condition.aggType === Aggregators.P95 ? '95' : '99'}]`
+    : 'currentPeriod>aggregatedValue';
 
   const shouldWarn = hasWarn
     ? {
@@ -57,16 +65,50 @@ export const createBucketSelector = (
     shouldTrigger,
   };
 
-  if (!alertOnGroupDisappear) {
-    aggs.selectedBucket = {
-      bucket_selector: {
+  if (alertOnGroupDisappear && lastPeriodEnd) {
+    const wrappedPeriod = createLastPeriod(lastPeriodEnd, condition);
+    aggs.lastPeriod = wrappedPeriod.lastPeriod;
+    aggs.missingGroup = {
+      bucket_script: {
         buckets_path: {
-          shouldWarn: 'shouldWarn',
-          shouldTrigger: 'shouldTrigger',
+          lastPeriod: 'lastPeriod>_count',
+          currentPeriod: 'currentPeriod>_count',
         },
-        script: 'params.shouldWarn > 0 || params.shouldTrigger > 0',
+        script: 'params.lastPeriod > 0 && params.currentPeriod < 1 ? 1 : 0',
+      },
+    };
+    aggs.newOrRecoveredGroup = {
+      bucket_script: {
+        buckets_path: {
+          lastPeriod: 'lastPeriod>_count',
+          currentPeriod: 'currentPeriod>_count',
+        },
+        script: 'params.lastPeriod < 1 && params.currentPeriod > 0 ? 1 : 0',
       },
     };
   }
+
+  const evalutionBucketPath =
+    alertOnGroupDisappear && lastPeriodEnd
+      ? {
+          shouldWarn: 'shouldWarn',
+          shouldTrigger: 'shouldTrigger',
+          missingGroup: 'missingGroup',
+          newOrRecoveredGroup: 'newOrRecoveredGroup',
+        }
+      : { shouldWarn: 'shouldWarn', shouldTrigger: 'shouldTrigger' };
+
+  const evaluationScript =
+    alertOnGroupDisappear && lastPeriodEnd
+      ? 'params.missingGroup > 0 || params.shouldWarn > 0 || params.shouldTrigger > 0 || params.newOrRecoveredGroup > 0'
+      : 'params.shouldWarn > 0 || params.shouldTrigger > 0';
+
+  aggs.evaluation = {
+    bucket_selector: {
+      buckets_path: evalutionBucketPath,
+      script: evaluationScript,
+    },
+  };
+
   return aggs;
 };

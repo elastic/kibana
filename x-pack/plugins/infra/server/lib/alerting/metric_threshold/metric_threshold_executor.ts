@@ -32,7 +32,8 @@ import { TimeUnitChar } from '../../../../../observability/common/utils/formatte
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
-  groups: string[];
+  lastRunTimestamp?: number;
+  missingGroups?: string[];
   groupBy?: string | string[];
   filterQuery?: string;
 };
@@ -64,6 +65,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
+    const timeframe = { end: moment().valueOf() };
     const { services, params, state } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
@@ -103,7 +105,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
-        return { groups: [], groupBy: params.groupBy, filterQuery: params.filterQuery };
+        return {
+          lastRunTimestamp: timeframe.end,
+          missingGroups: [],
+          groupBy: params.groupBy,
+          filterQuery: params.filterQuery,
+        };
       }
     }
 
@@ -117,34 +124,33 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
-    const previousGroupBy = state.groupBy;
-    const previousFilterQuery = state.filterQuery;
-    const prevGroups =
-      alertOnGroupDisappear &&
-      isEqual(previousGroupBy, params.groupBy) &&
-      isEqual(previousFilterQuery, params.filterQuery)
-        ? // Filter out the * key from the previous groups, only include it if it's one of
-          // the current groups. In case of a groupBy alert that starts out with no data and no
-          // groups, we don't want to persist the existence of the * alert instance
-          state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
-        : [];
+    const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
+    const groupByIsSame = isEqual(state.groupBy, params.groupBy);
+    const previousMissingGroups =
+      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame ? state.missingGroups : [];
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       config,
-      prevGroups,
       compositeSize,
-      alertOnGroupDisappear
+      alertOnGroupDisappear,
+      state.lastRunTimestamp,
+      timeframe,
+      previousMissingGroups
     );
 
-    // Because each alert result has the same group definitions, just grab the groups from the first one.
-    const resultGroups = Object.keys(first(alertResults)!);
-    // Merge the list of currently fetched groups and previous groups, and uniquify them. This is necessary for reporting
-    // no data results on groups that get removed
-    const groups = [...new Set([...prevGroups, ...resultGroups])];
+    const resultGroupSet = new Set<string>();
+    for (const resultSet of alertResults) {
+      for (const group of Object.keys(resultSet)) {
+        resultGroupSet.add(group);
+      }
+    }
 
+    const groups = [...resultGroupSet];
+    const nextMissingGroups = new Set<string>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
+
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group].shouldFire);
@@ -152,6 +158,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some((result) => result[group].isNoData);
+
+      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
+        nextMissingGroups.add(group);
+      }
 
       const nextState = isNoData
         ? AlertStates.NO_DATA
@@ -171,15 +181,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             })
           )
           .join('\n');
-        /*
-         * Custom recovery actions aren't yet available in the alerting framework
-         * Uncomment the code below once they've been implemented
-         * Reference: https://github.com/elastic/kibana/issues/87048
-         */
-        // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
-        // reason = alertResults
-        //   .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
-        //   .join('\n');
       }
 
       /* NO DATA STATE HANDLING
@@ -210,11 +211,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
 
       if (reason) {
-        const firstResult = first(alertResults);
-        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
+        const timestamp = moment().toISOString();
         const actionGroupId =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
+            : nextState === AlertStates.NO_DATA
+            ? NO_DATA_ACTIONS.id
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
@@ -236,7 +238,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
-    return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
+    return {
+      lastRunTimestamp: timeframe.end,
+      missingGroups: [...nextMissingGroups],
+      groupBy: params.groupBy,
+      filterQuery: params.filterQuery,
+    };
   });
 
 export const FIRED_ACTIONS = {
@@ -250,6 +257,13 @@ export const WARNING_ACTIONS = {
   id: 'metrics.threshold.warning',
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
     defaultMessage: 'Warning',
+  }),
+};
+
+export const NO_DATA_ACTIONS = {
+  id: 'metrics.threshold.nodata',
+  name: i18n.translate('xpack.infra.metrics.alerting.threshold.nodata', {
+    defaultMessage: 'No Data',
   }),
 };
 

@@ -36,10 +36,11 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
-  prevGroups: string[],
   compositeSize: number,
   alertOnGroupDisappear: boolean,
-  timeframe?: { start?: number; end: number }
+  lastPeriodEnd?: number,
+  timeframe?: { start?: number; end: number },
+  missingGroups: string[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, filterQuery } = params;
 
@@ -48,7 +49,12 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const interval = `${criterion.timeSize}${criterion.timeUnit}`;
       const intervalAsSeconds = getIntervalInSeconds(interval);
       const intervalAsMS = intervalAsSeconds * 1000;
-      const calculatedTimerange = createTimerange(intervalAsMS, criterion.aggType, timeframe);
+      const calculatedTimerange = createTimerange(
+        intervalAsMS,
+        criterion.aggType,
+        timeframe,
+        lastPeriodEnd
+      );
 
       const currentValues = await getData(
         esClient,
@@ -58,22 +64,13 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         filterQuery,
         compositeSize,
         alertOnGroupDisappear,
-        calculatedTimerange
+        calculatedTimerange,
+        lastPeriodEnd
       );
 
-      const backfilledPrevGroups: GetDataResponse = {};
-      if (alertOnGroupDisappear) {
-        const currentGroups = Object.keys(currentValues);
-        const missingGroups = difference(prevGroups, currentGroups);
-
-        if (currentGroups.length === 0 && missingGroups.length === 0) {
-          missingGroups.push(UNGROUPED_FACTORY_KEY);
-        }
-        for (const group of missingGroups) {
-          backfilledPrevGroups[group] = {
-            // The value use to be set to ZERO for missing groups when using
-            // Aggregators.COUNT. But that would only trigger if conditions
-            // matched.
+      for (const missingGroup of missingGroups) {
+        if (currentValues[missingGroup] == null) {
+          currentValues[missingGroup] = {
             value: null,
             trigger: false,
             warn: false,
@@ -81,19 +78,14 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         }
       }
 
-      const currentValuesWithBackfilledPrevGroups = {
-        ...currentValues,
-        ...backfilledPrevGroups,
-      };
-
       const evaluations: Record<string, Evaluation> = {};
-      for (const key of Object.keys(currentValuesWithBackfilledPrevGroups)) {
-        const result = currentValuesWithBackfilledPrevGroups[key];
+      for (const key of Object.keys(currentValues)) {
+        const result = currentValues[key];
         evaluations[key] = {
           ...criterion,
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
           currentValue: result.value,
-          timestamp: moment(calculatedTimerange.start).toISOString(),
+          timestamp: moment().toISOString(),
           shouldFire: result.trigger,
           shouldWarn: result.warn,
           isNoData: result.value === null,
