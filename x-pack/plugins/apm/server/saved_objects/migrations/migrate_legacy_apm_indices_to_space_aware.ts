@@ -50,6 +50,6 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
       APM_INDICES_SAVED_OBJECT_ID
     );
   } catch (e) {
-    // Does nothing when an exception happens (repository.get throws an exception when an saved object is not found)
+    // Does nothing when an exception happens (repository.get throws an exception when a saved object is not found)
   }
 }
