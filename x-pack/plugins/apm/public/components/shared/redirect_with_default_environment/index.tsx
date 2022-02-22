@@ -35,7 +35,7 @@ export function RedirectWithDefaultEnvironment({
 
   if (last(matchingRoutes)?.path === '/services') {
     const defaultServiceEnvironment =
-      core.uiSettings.get<boolean>(defaultApmServiceEnvironment) ||
+      core.uiSettings.get<string>(defaultApmServiceEnvironment) ||
       ENVIRONMENT_ALL.value;
 
     history.replace({
