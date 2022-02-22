@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent, act, cleanup } from '@testing-library/react';
-
+import { render, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { FormattedIp } from './index';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
@@ -103,9 +103,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
     const networkDetail = wrapper.getByTestId('network-details');
-    act(() => {
-      fireEvent.click(networkDetail, { bubbles: true });
-    });
+    userEvent.click(networkDetail);
 
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
       panelView: 'networkDetail',
@@ -131,9 +129,8 @@ describe('FormattedIp', () => {
     );
 
     const networkDetail = wrapper.getByTestId('network-details');
-    act(() => {
-      fireEvent.click(networkDetail);
-    });
+    userEvent.click(networkDetail);
+
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
       panelView: 'networkDetail',
       params: {

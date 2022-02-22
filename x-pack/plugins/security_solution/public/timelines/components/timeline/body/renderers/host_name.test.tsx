@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent, act, cleanup } from '@testing-library/react';
-import { HostName } from './host_name';
+import { render, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { timelineActions } from '../../../../store/timeline';
@@ -91,9 +91,8 @@ describe('HostName', () => {
     );
 
     const button = wrapper.getByTestId('host-details-button');
-    act(() => {
-      fireEvent.click(button);
-    });
+    userEvent.click(button);
+
     expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
   });
 
@@ -109,9 +108,8 @@ describe('HostName', () => {
     );
 
     const button = wrapper.getByTestId('host-details-button');
-    act(() => {
-      fireEvent.click(button);
-    });
+    userEvent.click(button);
+
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
       panelView: 'hostDetail',
       params: {
@@ -134,9 +132,8 @@ describe('HostName', () => {
     );
 
     const button = wrapper.getByTestId('host-details-button');
-    act(() => {
-      fireEvent.click(button);
-    });
+    userEvent.click(button);
+
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
       panelView: 'hostDetail',
       params: {
