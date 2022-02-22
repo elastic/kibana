@@ -65,6 +65,7 @@ else
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
     ' > /tmp/deploy.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
+  echo '--- Get cloud deployment info'
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
   CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
 fi
