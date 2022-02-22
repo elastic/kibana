@@ -22,11 +22,12 @@ import {
   SOURCES_PATH,
   getSourcesPath,
 } from '../../routes';
+import { SourceDataItem } from '../../types';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticSourceData } from './source_data';
+import { staticSourceConfig } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -60,6 +61,15 @@ export const SourcesRouter: React.FC = () => {
     return null;
   }
 
+  // TODO: currently just flattening everything, but should create hierarchical routes once Connectors 2.0 is more mature
+  const sources = staticSourceConfig.reduce(
+    (prev, curr) => [
+      ...prev,
+      ...([curr.internal, curr.external, curr.custom].filter((val) => !!val) as SourceDataItem[]),
+    ],
+    [] as SourceDataItem[]
+  );
+
   return (
     <Switch>
       <Route exact path={PRIVATE_SOURCES_PATH}>
@@ -74,7 +84,7 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH}>
         <GitHubViaApp isGithubEnterpriseServer />
       </Route>
-      {staticSourceData.map((sourceData, i) => {
+      {sources.map((sourceData, i) => {
         const { addPath, accountContextOnly } = sourceData;
         return (
           <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
@@ -86,12 +96,12 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         );
       })}
-      {staticSourceData.map((sourceData, i) => (
+      {sources.map((sourceData, i) => (
         <Route key={i} exact path={`${getSourcesPath(sourceData.addPath, isOrganization)}/connect`}>
           <AddSource connect sourceData={sourceData} />
         </Route>
       ))}
-      {staticSourceData.map((sourceData, i) => (
+      {sources.map((sourceData, i) => (
         <Route
           key={i}
           exact
@@ -100,7 +110,7 @@ export const SourcesRouter: React.FC = () => {
           <AddSource reAuthenticate sourceData={sourceData} />
         </Route>
       ))}
-      {staticSourceData.map((sourceData, i) => {
+      {sources.map((sourceData, i) => {
         if (sourceData.configuration.needsConfiguration)
           return (
             <Route

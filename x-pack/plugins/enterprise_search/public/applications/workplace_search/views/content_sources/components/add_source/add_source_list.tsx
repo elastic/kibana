@@ -90,12 +90,11 @@ export const AddSourceList: React.FC = () => {
   const filterConfiguredSources = (source: SourceDataItem) =>
     filterSources(source, configuredSources);
 
-  const visibleAvailableSources = availableSources.filter(
-    filterAvailableSources
-  ) as SourceDataItem[];
-  const visibleConfiguredSources = configuredSources.filter(
-    filterConfiguredSources
-  ) as SourceDataItem[];
+  const visibleAvailableSources = availableSources.filter(filterAvailableSources);
+  const visibleConfiguredSources = configuredSources
+    .filter(filterConfiguredSources)
+    // TODO: Handle this better once Connectors 2.0 is more mature
+    .filter((source) => source.serviceType !== 'external');
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

@@ -69,7 +69,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToExternalChoice = () => setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
-  // TODO: Fix this
+  // TODO: Fix this once we have more than just Sharepoint here
   const goToExternalConfig = () =>
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(ADD_EXTERNAL_PATH, isOrganization)}/`);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
