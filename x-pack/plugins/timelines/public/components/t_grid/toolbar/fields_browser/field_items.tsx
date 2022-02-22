@@ -97,79 +97,6 @@ export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHe
   ...getAlertColumnHeader(timelineId, fieldName),
 });
 
-// /**
-//  * Returns the fields items, values, and descriptions shown when a user expands an event
-//  */
-// export const _getFieldItems = ({
-//   category,
-//   columnHeaders,
-//   highlight = '',
-//   timelineId,
-//   toggleColumn,
-// }: {
-//   category: Partial<BrowserField>;
-//   columnHeaders: ColumnHeaderOptions[];
-//   highlight?: string;
-//   timelineId: string;
-//   toggleColumn: (column: ColumnHeaderOptions) => void;
-// }): any[] =>
-//   uniqBy('name', [
-//     ...Object.values(category != null && category.fields != null ? category.fields : {}),
-//   ]).map((field) => ({
-//     checkbox: (
-//       <EuiToolTip content={i18n.VIEW_COLUMN(field.name ?? '')}>
-//         <EuiCheckbox
-//           aria-label={i18n.VIEW_COLUMN(field.name ?? '')}
-//           checked={columnHeaders.findIndex((c) => c.id === field.name) !== -1}
-//           data-test-subj={`field-${field.name}-checkbox`}
-//           data-colindex={1}
-//           id={field.name ?? ''}
-//           onChange={() =>
-//             toggleColumn({
-//               columnHeaderType: defaultColumnHeaderType,
-//               id: field.name ?? '',
-//               initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-//               ...getAlertColumnHeader(timelineId, field.name ?? ''),
-//             })
-//           }
-//         />
-//       </EuiToolTip>
-//     ),
-//     field: (
-//       <EuiFlexGroup alignItems="center" gutterSize="none">
-//         <EuiFlexItem grow={false}>
-//           <EuiToolTip content={field.type}>
-//             <TypeIcon
-//               data-test-subj={`field-${field.name}-icon`}
-//               type={getIconFromType(field.type ?? null)}
-//             />
-//           </EuiToolTip>
-//         </EuiFlexItem>
-
-//         <EuiFlexItem grow={false}>
-//           <FieldName data-test-subj="field-name" fieldId={field.name ?? ''} highlight={highlight} />
-//         </EuiFlexItem>
-//       </EuiFlexGroup>
-//     ),
-//     description: (
-//       <div data-colindex={3} tabIndex={0}>
-//         <EuiToolTip content={field.description}>
-//           <>
-//             <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
-//               <p>{i18n.DESCRIPTION_FOR_FIELD(field.name ?? '')}</p>
-//             </EuiScreenReaderOnly>
-//             <TruncatableText>
-//               <Description data-test-subj={`field-${field.name}-description`}>
-//                 {`${field.description ?? getEmptyValue()} ${getExampleText(field.example)}`}
-//               </Description>
-//             </TruncatableText>
-//           </>
-//         </EuiToolTip>
-//       </div>
-//     ),
-//     fieldId: field.name ?? '',
-//   }));
-
 const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'name',
@@ -262,7 +189,7 @@ export const getFieldColumns = ({
     : getDefaultFieldTableColumns(highlight)),
 ];
 
-/** Returns whether the table column has actions attached to it or not */
+/** Returns whether the table column has actions attached to it */
 export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
   return !!(column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length;
 };

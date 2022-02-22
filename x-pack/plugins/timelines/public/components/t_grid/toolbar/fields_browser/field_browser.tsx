@@ -156,7 +156,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             <EuiFlexItem>
               <Search
                 data-test-subj="header"
-                filteredBrowserFields={filteredBrowserFields}
                 isSearching={isSearching}
                 onSearchInputChange={onInputChange}
                 searchInput={searchInput}

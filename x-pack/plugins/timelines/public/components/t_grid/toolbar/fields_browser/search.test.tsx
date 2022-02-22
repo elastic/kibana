@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockBrowserFields, TestProviders } from '../../../../mock';
+import { TestProviders } from '../../../../mock';
 import { Search } from './search';
 
 const timelineId = 'test';
@@ -17,7 +17,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -37,7 +36,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput={searchInput}
@@ -53,7 +51,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={true}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -71,7 +68,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={onSearchInputChange}
           searchInput=""
@@ -93,7 +89,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={{}}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -111,7 +106,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -129,7 +123,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={{}}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -145,7 +138,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""

@@ -20,7 +20,6 @@ export interface BrowserFieldItem {
   category: string;
   selected: boolean;
   isRuntime: boolean;
-  highlight?: string;
 }
 
 export type OnFieldSelected = (fieldId: string) => void;
