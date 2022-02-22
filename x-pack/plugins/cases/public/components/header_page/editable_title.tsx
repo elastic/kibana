@@ -22,6 +22,7 @@ import {
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 import { Title } from './title';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`
@@ -48,6 +49,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
   isLoading,
   title,
 }) => {
+  const { releasePhase } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [newTitle, setNewTitle] = useState<string>(title);
@@ -118,7 +120,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
-        <Title title={title} />
+        <Title title={title} releasePhase={releasePhase} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
