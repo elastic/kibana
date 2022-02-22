@@ -22,6 +22,7 @@ import { GaugeOptionsInternalProps } from '../gauge';
 import { Gauge } from '../../../types';
 
 function RangesPanel({
+  showElasticChartsOptions,
   setGaugeValue,
   setTouched,
   setValidity,
@@ -66,13 +67,20 @@ function RangesPanel({
       />
 
       <SwitchOption
-        disabled={stateParams.gauge.colorsRange.length < 2}
+        disabled={showElasticChartsOptions || stateParams.gauge.colorsRange.length < 2}
         label={i18n.translate('visTypeGauge.controls.gaugeOptions.autoExtendRangeLabel', {
           defaultMessage: 'Auto extend range',
         })}
-        tooltip={i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltip', {
-          defaultMessage: 'Extends range to the maximum value in your data.',
-        })}
+        tooltip={
+          showElasticChartsOptions
+            ? i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltip', {
+                defaultMessage:
+                  'The new charts library supports only extended ranges. To disable it, please, enable the gauge legacy charts library advanced setting.',
+              })
+            : i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltip', {
+                defaultMessage: 'Extends range to the maximum value in your data.',
+              })
+        }
         paramName="extendRange"
         value={stateParams.gauge.extendRange}
         setValue={setGaugeValue}
