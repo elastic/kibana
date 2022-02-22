@@ -96,8 +96,7 @@ export const SourceSettings: React.FC = () => {
 
   const editPath = isGithubApp
     ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
-    : (staticSourceData.find((source) => source.serviceType === serviceType) as SourceDataItem)
-        .editPath;
+    : staticSourceData.find((source) => source.serviceType === serviceType)?.editPath;
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);

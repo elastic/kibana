@@ -74,30 +74,41 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH}>
         <GitHubViaApp isGithubEnterpriseServer />
       </Route>
-      {staticSourceData.map(({ addPath, accountContextOnly }, i) => (
-        <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
-          {!hasPlatinumLicense && accountContextOnly ? (
-            <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-          ) : (
-            <AddSource sourceIndex={i} />
-          )}
+      {staticSourceData.map((sourceData, i) => {
+        const { addPath, accountContextOnly } = sourceData;
+        return (
+          <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
+            {!hasPlatinumLicense && accountContextOnly ? (
+              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+            ) : (
+              <AddSource sourceData={sourceData} />
+            )}
+          </Route>
+        );
+      })}
+      {staticSourceData.map((sourceData, i) => (
+        <Route key={i} exact path={`${getSourcesPath(sourceData.addPath, isOrganization)}/connect`}>
+          <AddSource connect sourceData={sourceData} />
         </Route>
       ))}
-      {staticSourceData.map(({ addPath }, i) => (
-        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-          <AddSource connect sourceIndex={i} />
+      {staticSourceData.map((sourceData, i) => (
+        <Route
+          key={i}
+          exact
+          path={`${getSourcesPath(sourceData.addPath, isOrganization)}/reauthenticate`}
+        >
+          <AddSource reAuthenticate sourceData={sourceData} />
         </Route>
       ))}
-      {staticSourceData.map(({ addPath }, i) => (
-        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
-          <AddSource reAuthenticate sourceIndex={i} />
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath, configuration: { needsConfiguration } }, i) => {
-        if (needsConfiguration)
+      {staticSourceData.map((sourceData, i) => {
+        if (sourceData.configuration.needsConfiguration)
           return (
-            <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/configure`}>
-              <AddSource configure sourceIndex={i} />
+            <Route
+              key={i}
+              exact
+              path={`${getSourcesPath(sourceData.addPath, isOrganization)}/configure`}
+            >
+              <AddSource configure sourceData={sourceData} />
             </Route>
           );
       })}

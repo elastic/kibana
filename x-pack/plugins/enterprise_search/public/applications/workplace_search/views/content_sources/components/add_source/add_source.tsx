@@ -19,8 +19,7 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
-import { externalSourceData, staticSourceData } from '../../source_data';
+import { SOURCES_PATH, getSourcesPath, ADD_EXTERNAL_PATH } from '../../../../routes';
 
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
@@ -59,8 +58,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     newCustomSource,
   } = useValues(AddSourceLogic);
 
-  const { serviceType, configuration, features, objTypes, addPath } =
-    staticSourceData[props.sourceIndex];
+  const { serviceType, configuration, features, objTypes, addPath } = props.sourceData;
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -73,9 +71,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const goToExternalChoice = () => setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
   // TODO: Fix this
   const goToExternalConfig = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(externalSourceData.addPath, isOrganization)}/`
-    );
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(ADD_EXTERNAL_PATH, isOrganization)}/`);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);

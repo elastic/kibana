@@ -73,7 +73,6 @@ export interface Configuration {
 }
 
 export interface SourceDataItem {
-  name: string;
   serviceType: string;
   externalServiceType?: string; // the service type of the external version of this connector
   configuration: Configuration;
@@ -84,6 +83,14 @@ export interface SourceDataItem {
   addPath: string;
   editPath?: string; // undefined for GitHub apps, as they are configured on a source level, and don't use a connector where you can edit the configuration
   accountContextOnly: boolean;
+}
+
+export interface SourceDataConfig {
+  name: string;
+  iconName: string;
+  internal?: SourceDataItem;
+  external?: SourceDataItem;
+  custom?: SourceDataItem;
 }
 
 export interface ContentSource {

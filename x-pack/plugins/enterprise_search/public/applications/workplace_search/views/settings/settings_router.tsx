@@ -41,9 +41,9 @@ export const SettingsRouter: React.FC = () => {
       <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>
         <OauthApplication />
       </Route>
-      {staticSourceData.map(({ editPath }, i) => (
-        <Route key={i} exact path={editPath}>
-          <SourceConfig sourceIndex={i} />
+      {staticSourceData.map((sourceData, i) => (
+        <Route key={i} exact path={sourceData.editPath}>
+          <SourceConfig sourceData={sourceData} />
         </Route>
       ))}
       <Route>
