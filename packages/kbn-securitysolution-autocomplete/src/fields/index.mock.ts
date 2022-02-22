@@ -313,12 +313,9 @@ export const fields: DataViewFieldBase[] = [
     name: 'file.path.text',
     type: 'string',
     esTypes: ['text'],
-    count: 0,
-    scripted: false,
     searchable: true,
     aggregatable: false,
-    readFromDocValues: false,
-    subType: { nested: { path: 'file.path' } },
+    subType: { multi: { parent: 'file.path' } },
   },
 ] as unknown as DataViewFieldBase[];
 

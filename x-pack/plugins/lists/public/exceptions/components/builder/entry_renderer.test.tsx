@@ -18,7 +18,10 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  matchesOperator,
+  notMatchOperator,
 } from '@kbn/securitysolution-list-utils';
+import { validateFilePathInput } from '@kbn/securitysolution-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from 'src/plugins/data/common';
 
@@ -30,6 +33,7 @@ import { getFoundListSchemaMock } from '../../../../common/schemas/response/foun
 import { BuilderEntryItem } from './entry_renderer';
 
 jest.mock('@kbn/securitysolution-list-hooks');
+jest.mock('@kbn/securitysolution-utils');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
@@ -738,6 +742,108 @@ describe('BuilderEntryItem', () => {
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+  });
+
+  test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
+    const mockSetWarningsExists = jest.fn();
+    const operator =
+      parseInt((Math.random() * 2).toString(), 10) % 2 === 0 ? matchesOperator : notMatchOperator;
+
+    (validateFilePathInput as jest.Mock).mockReturnValue('some warning message');
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('nestedField.nestedChild.doublyNestedChild'),
+          id: '123',
+          nested: undefined,
+          operator,
+          parent: undefined,
+          value: '',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        listType="endpoint_events"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={mockSetWarningsExists}
+        showLabel={false}
+      />
+    );
+
+    await waitFor(() => {
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
+
+      // Invalid input because field is just a string and not a path
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onSearchChange: (arg: string) => void;
+        }
+      ).onSearchChange('i243kjhfew');
+    });
+
+    expect(mockSetWarningsExists).toHaveBeenCalledWith(true);
+  });
+
+  test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {
+    const mockSetWarningsExists = jest.fn();
+    const operator =
+      parseInt((Math.random() * 2).toString(), 10) % 2 === 0 ? matchesOperator : notMatchOperator;
+
+    (validateFilePathInput as jest.Mock).mockReturnValue(undefined);
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('nestedField.nestedChild.doublyNestedChild'),
+          id: '123',
+          nested: undefined,
+          operator,
+          parent: undefined,
+          value: '',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        listType="endpoint_events"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={mockSetWarningsExists}
+        showLabel={false}
+      />
+    );
+
+    await waitFor(() => {
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
+
+      // valid input as it is a path
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onSearchChange: (arg: string) => void;
+        }
+      ).onSearchChange('c:\\path.exe');
+    });
+
+    expect(mockSetWarningsExists).toHaveBeenCalledWith(false);
   });
 
   test('it disabled field inputs correctly when passed "isDisabled=true"', () => {
