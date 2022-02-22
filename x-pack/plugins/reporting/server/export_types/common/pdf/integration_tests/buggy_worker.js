@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SpacesPluginStart } from '../../../spaces/public';
-
-export interface StartPlugins {
-  spaces?: SpacesPluginStart;
-}
+(async function execute() {
+  throw new Error('This is a bug');
+})();
