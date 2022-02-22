@@ -10,19 +10,21 @@ import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana
 
 export function getNoDataConfig({
   docsLink,
+  shouldBypassNoDataScreen,
+  loading,
   basePath,
   hasApmData,
   hasApmIntegrations,
-  shouldBypassNoDataScreen,
 }: {
   docsLink: string;
+  shouldBypassNoDataScreen: boolean;
+  loading: boolean;
   basePath?: string;
   hasApmData?: boolean;
   hasApmIntegrations?: boolean;
-  shouldBypassNoDataScreen: boolean;
 }): KibanaPageTemplateProps['noDataConfig'] {
   // don't show "no data screen" when there is APM data or it should be bypassed
-  if (hasApmData || shouldBypassNoDataScreen) {
+  if (hasApmData || shouldBypassNoDataScreen || loading) {
     return;
   }
   const noDataConfigDetails = hasApmIntegrations
