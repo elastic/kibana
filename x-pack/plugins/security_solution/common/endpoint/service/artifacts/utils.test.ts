@@ -86,7 +86,7 @@ describe('Endpoint artifact utilities', () => {
         namespace_type: 'agnostic',
         tags: [GLOBAL_ARTIFACT_TAG],
         type: 'simple',
-        os_types: [],
+        os_types: ['windows'],
       });
     });
   });
