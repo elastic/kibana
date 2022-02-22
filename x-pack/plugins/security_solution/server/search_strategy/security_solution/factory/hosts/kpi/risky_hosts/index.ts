@@ -9,18 +9,18 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import type { HostsKpiQueries } from '../../../../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../../../../common/search_strategy';
 
 import type {
   HostsKpiRiskyHostsRequestOptions,
   HostsKpiRiskyHostsStrategyResponse,
-  HostRiskSeverity,
 } from '../../../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiRiskyHostsQuery } from './query.hosts_kpi_risky_hosts.dsl';
 
 interface AggBucket {
-  key: HostRiskSeverity;
+  key: RiskSeverity;
   doc_count: number;
 }
 
@@ -36,7 +36,7 @@ export const hostsKpiRiskyHosts: SecuritySolutionFactory<HostsKpiQueries.kpiRisk
 
     const riskBuckets = getOr([], 'aggregations.risk.buckets', response.rawResponse);
 
-    const riskyHosts: Record<HostRiskSeverity, number> = riskBuckets.reduce(
+    const riskyHosts: Record<RiskSeverity, number> = riskBuckets.reduce(
       (cummulative: Record<string, number>, bucket: AggBucket) => ({
         ...cummulative,
         [bucket.key]: getOr(0, 'unique_hosts.value', bucket),

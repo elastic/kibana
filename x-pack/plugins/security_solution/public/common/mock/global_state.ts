@@ -13,7 +13,7 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
-  HostRiskScoreFields,
+  RiskScoreFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -84,7 +84,7 @@ export const mockGlobalState: State = {
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -105,7 +105,7 @@ export const mockGlobalState: State = {
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -206,15 +206,19 @@ export const mockGlobalState: State = {
           // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
         },
         [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            field: RiskScoreFields.timestamp,
+            direction: Direction.asc,
+          },
+          severitySelection: [],
+        },
       },
     },
     details: {
       queries: {
-        [usersModel.UsersTableType.allUsers]: {
-          activePage: 0,
-          limit: 10,
-          // TODO sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
-        },
         [usersModel.UsersTableType.anomalies]: null,
       },
     },

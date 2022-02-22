@@ -7,13 +7,14 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { HostRiskSeverity } from '../../../../common/search_strategy';
-import { TestProviders } from '../../../common/mock';
-import { HostRiskScore } from './host_risk_score';
+
+import { TestProviders } from '../../../mock';
 
 import { EuiHealth, EuiHealthProps } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScore } from '.';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -23,16 +24,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('HostRiskScore', () => {
+describe('RiskScore', () => {
   const context = {};
   it('renders critical severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <HostRiskScore severity={HostRiskSeverity.critical} />
+        <RiskScore severity={RiskSeverity.critical} />
       </TestProviders>
     );
 
-    expect(container).toHaveTextContent(HostRiskSeverity.critical);
+    expect(container).toHaveTextContent(RiskSeverity.critical);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorDanger }),
@@ -43,11 +44,11 @@ describe('HostRiskScore', () => {
   it('renders hight severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <HostRiskScore severity={HostRiskSeverity.high} />
+        <RiskScore severity={RiskSeverity.high} />
       </TestProviders>
     );
 
-    expect(container).toHaveTextContent(HostRiskSeverity.high);
+    expect(container).toHaveTextContent(RiskSeverity.high);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorVis9_behindText }),
@@ -58,11 +59,11 @@ describe('HostRiskScore', () => {
   it('renders moderate severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <HostRiskScore severity={HostRiskSeverity.moderate} />
+        <RiskScore severity={RiskSeverity.moderate} />
       </TestProviders>
     );
 
-    expect(container).toHaveTextContent(HostRiskSeverity.moderate);
+    expect(container).toHaveTextContent(RiskSeverity.moderate);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorWarning }),
@@ -73,11 +74,11 @@ describe('HostRiskScore', () => {
   it('renders low severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <HostRiskScore severity={HostRiskSeverity.low} />
+        <RiskScore severity={RiskSeverity.low} />
       </TestProviders>
     );
 
-    expect(container).toHaveTextContent(HostRiskSeverity.low);
+    expect(container).toHaveTextContent(RiskSeverity.low);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorVis0 }),
@@ -88,11 +89,11 @@ describe('HostRiskScore', () => {
   it('renders unknown severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <HostRiskScore severity={HostRiskSeverity.unknown} />
+        <RiskScore severity={RiskSeverity.unknown} />
       </TestProviders>
     );
 
-    expect(container).toHaveTextContent(HostRiskSeverity.unknown);
+    expect(container).toHaveTextContent(RiskSeverity.unknown);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorMediumShade }),
@@ -103,10 +104,10 @@ describe('HostRiskScore', () => {
   it("doesn't render background-color when hideBackgroundColor is true", () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <HostRiskScore severity={HostRiskSeverity.critical} hideBackgroundColor />
+        <RiskScore severity={RiskSeverity.critical} hideBackgroundColor />
       </TestProviders>
     );
 
-    expect(queryByTestId('host-risk-score')).toHaveStyleRule('background-color', undefined);
+    expect(queryByTestId('risk-score')).toHaveStyleRule('background-color', undefined);
   });
 });

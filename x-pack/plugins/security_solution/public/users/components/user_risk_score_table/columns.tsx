@@ -13,30 +13,30 @@ import {
 } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink } from '../../../common/components/links';
+
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import { HostRiskScoreColumns } from '.';
+import { UserRiskScoreColumns } from '.';
 
 import * as i18n from './translations';
-import { HostsTableType } from '../../store/model';
-import { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScore } from '../../../common/components/severity/common';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { UserDetailsLink } from '../../../common/components/links';
 
-export const getHostRiskScoreColumns = ({
+export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
 }: {
   dispatchSeverityUpdate: (s: RiskSeverity) => void;
-}): HostRiskScoreColumns => [
+}): UserRiskScoreColumns => [
   {
-    field: 'host.name',
-    name: i18n.HOST_NAME,
+    field: 'user.name',
+    name: i18n.USER_NAME,
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
-    render: (hostName) => {
-      if (hostName != null && hostName.length > 0) {
-        const id = escapeDataProviderId(`host-risk-score-table-hostName-${hostName}`);
+    render: (userName) => {
+      if (userName != null && userName.length > 0) {
+        const id = escapeDataProviderId(`user-risk-score-table-userName-${userName}`);
         return (
           <DraggableWrapper
             key={id}
@@ -45,9 +45,9 @@ export const getHostRiskScoreColumns = ({
               enabled: true,
               excluded: false,
               id,
-              name: hostName,
+              name: userName,
               kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName, operator: IS_OPERATOR },
+              queryMatch: { field: 'user.name', value: userName, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -55,7 +55,7 @@ export const getHostRiskScoreColumns = ({
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
+                <UserDetailsLink userName={userName} />
               )
             }
           />
@@ -66,7 +66,7 @@ export const getHostRiskScoreColumns = ({
   },
   {
     field: 'risk_stats.risk_score',
-    name: i18n.HOST_RISK_SCORE,
+    name: i18n.USER_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
     sortable: true,
@@ -84,9 +84,9 @@ export const getHostRiskScoreColumns = ({
   {
     field: 'risk',
     name: (
-      <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
+      <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
         <>
-          {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          {i18n.USER_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),
@@ -99,7 +99,7 @@ export const getHostRiskScoreColumns = ({
           <RiskScore
             toolTipContent={
               <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
-                <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
+                <EuiText size="xs">{i18n.VIEW_USERS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
               </EuiLink>
             }
             severity={risk}

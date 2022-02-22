@@ -31,6 +31,7 @@ import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/type
 import { useHostRiskScore } from '../../containers/host_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
 
 export interface HostRiskScoreOverTimeProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
@@ -80,7 +81,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   const theme = useTheme();
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     onlyLatest: false,
     timerange,
   });

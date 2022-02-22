@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { HOST_RISK_SEVERITY_COLOUR, HostRiskScore } from '../common/host_risk_score';
-import { HostRiskSeverity } from '../../../../common/search_strategy';
-import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScore, RISK_SEVERITY_COLOUR } from './common';
+import { SeverityCount } from './types';
 
 export const SeverityBadges: React.FC<{
   severityCount: SeverityCount;
@@ -22,7 +22,7 @@ export const SeverityBadges: React.FC<{
     <EuiFlexItem grow={false} />
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="m">
-        {(Object.keys(HOST_RISK_SEVERITY_COLOUR) as HostRiskSeverity[]).map((status) => (
+        {(Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).map((status) => (
           <EuiFlexItem key={status} grow={false}>
             <SeverityBadge status={status} count={severityCount[status] || 0} />
           </EuiFlexItem>
@@ -34,11 +34,11 @@ export const SeverityBadges: React.FC<{
 
 SeverityBadges.displayName = 'SeverityBadges';
 
-const SeverityBadge: React.FC<{ status: HostRiskSeverity; count: number }> = React.memo(
+const SeverityBadge: React.FC<{ status: RiskSeverity; count: number }> = React.memo(
   ({ status, count }) => (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <HostRiskScore severity={status} />
+        <RiskScore severity={status} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiNotificationBadge size="s" color="subdued">

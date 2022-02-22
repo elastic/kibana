@@ -6,11 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import {
-  HostRiskSeverity,
-  HostsSortField,
-  HostRiskScoreSortField,
-} from '../../../common/search_strategy/security_solution/hosts';
+import { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
 
 import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/hosts');
@@ -39,11 +36,11 @@ export const updateHostsSort = actionCreator<{
 }>('UPDATE_HOSTS_SORT');
 
 export const updateHostRiskScoreSort = actionCreator<{
-  sort: HostRiskScoreSortField;
+  sort: RiskScoreSortField;
   hostsType: HostsType;
 }>('UPDATE_HOST_RISK_SCORE_SORT');
 
 export const updateHostRiskScoreSeverityFilter = actionCreator<{
-  severitySelection: HostRiskSeverity[];
+  severitySelection: RiskSeverity[];
   hostsType: HostsType;
 }>('UPDATE_HOST_RISK_SCORE_SEVERITY');

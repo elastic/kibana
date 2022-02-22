@@ -14,27 +14,23 @@ import {
   FilterChecked,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
-import { HostRiskSeverity } from '../../../../common/search_strategy';
-import * as i18n from './translations';
-import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
-import { HostRiskScore } from '../common/host_risk_score';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { State } from '../../../common/store';
+
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { SeverityCount } from './types';
+import { RiskScore } from './common';
 
 interface SeverityItems {
-  risk: HostRiskSeverity;
+  risk: RiskSeverity;
   count: number;
   checked?: FilterChecked;
 }
 export const SeverityFilterGroup: React.FC<{
   severityCount: SeverityCount;
-  type: hostsModel.HostsType;
-}> = ({ severityCount, type }) => {
+  selectedSeverities: RiskSeverity[];
+  onSelect: (newSelection: RiskSeverity[]) => void;
+  title: string;
+}> = ({ severityCount, selectedSeverities, onSelect, title }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const dispatch = useDispatch();
 
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -47,40 +43,29 @@ export const SeverityFilterGroup: React.FC<{
   const filterGroupPopoverId = useGeneratedHtmlId({
     prefix: 'filterGroupPopover',
   });
-  const getHostRiskScoreFilterQuerySelector = useMemo(
-    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
-    []
-  );
-  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    getHostRiskScoreFilterQuerySelector(state, type)
-  );
 
   const items: SeverityItems[] = useMemo(() => {
     const checked: FilterChecked = 'on';
-    return (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
+    return (Object.keys(severityCount) as RiskSeverity[]).map((k) => ({
       risk: k,
       count: severityCount[k],
-      checked: severitySelectionRedux.includes(k) ? checked : undefined,
+      checked: selectedSeverities.includes(k) ? checked : undefined,
     }));
-  }, [severityCount, severitySelectionRedux]);
+  }, [severityCount, selectedSeverities]);
 
   const updateSeverityFilter = useCallback(
-    (selectedSeverity: HostRiskSeverity) => {
-      const currentSelection = severitySelectionRedux ?? [];
+    (selectedSeverity: RiskSeverity) => {
+      const currentSelection = selectedSeverities ?? [];
       const newSelection = currentSelection.includes(selectedSeverity)
         ? currentSelection.filter((s) => s !== selectedSeverity)
         : [...currentSelection, selectedSeverity];
-      dispatch(
-        hostsActions.updateHostRiskScoreSeverityFilter({
-          severitySelection: newSelection,
-          hostsType: type,
-        })
-      );
+
+      onSelect(newSelection);
     },
-    [dispatch, severitySelectionRedux, type]
+    [selectedSeverities, onSelect]
   );
 
-  const totalActiveHosts = useMemo(
+  const totalActiveItem = useMemo(
     () => items.reduce((total, item) => (item.checked === 'on' ? total + item.count : total), 0),
     [items]
   );
@@ -88,17 +73,17 @@ export const SeverityFilterGroup: React.FC<{
   const button = useMemo(
     () => (
       <EuiFilterButton
-        data-test-subj="host-risk-filter-button"
+        data-test-subj="risk-filter-button"
         hasActiveFilters={!!items.find((item) => item.checked === 'on')}
         iconType="arrowDown"
         isSelected={isPopoverOpen}
-        numActiveFilters={totalActiveHosts}
+        numActiveFilters={totalActiveItem}
         onClick={onButtonClick}
       >
-        {i18n.HOST_RISK}
+        {title}
       </EuiFilterButton>
     ),
-    [isPopoverOpen, items, onButtonClick, totalActiveHosts]
+    [isPopoverOpen, items, onButtonClick, totalActiveItem, title]
   );
 
   return (
@@ -113,12 +98,12 @@ export const SeverityFilterGroup: React.FC<{
         <div className="euiFilterSelect__items">
           {items.map((item, index) => (
             <EuiFilterSelectItem
-              data-test-subj={`host-risk-filter-item-${item.risk}`}
+              data-test-subj={`risk-filter-item-${item.risk}`}
               checked={item.checked}
               key={index + item.risk}
               onClick={() => updateSeverityFilter(item.risk)}
             >
-              <HostRiskScore severity={item.risk} />
+              <RiskScore severity={item.risk} />
             </EuiFilterSelectItem>
           ))}
         </div>

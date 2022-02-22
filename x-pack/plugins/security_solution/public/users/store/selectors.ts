@@ -15,3 +15,9 @@ const selectUserPage = (state: State): UsersPageModel => state.users.page;
 
 export const allUsersSelector = () =>
   createSelector(selectUserPage, (users) => users.queries[UsersTableType.allUsers]);
+
+export const userRiskScoreSelector = () =>
+  createSelector(selectUserPage, (users) => users.queries[UsersTableType.risk]);
+
+export const usersRiskScoreSeverityFilterSelector = () =>
+  createSelector(selectUserPage, (users) => users.queries[UsersTableType.risk].severitySelection);

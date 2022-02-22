@@ -35,4 +35,5 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   hideHistogramIfEmpty?: boolean;
   ip?: string;
   hostName?: string;
+  userName?: string;
 };

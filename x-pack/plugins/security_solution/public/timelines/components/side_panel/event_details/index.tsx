@@ -37,6 +37,7 @@ import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -136,7 +137,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   );
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     pagination: {
       cursorStart: 0,
       querySize: 1,

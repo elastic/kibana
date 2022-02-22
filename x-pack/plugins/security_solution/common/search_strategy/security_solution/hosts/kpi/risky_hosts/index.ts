@@ -7,21 +7,13 @@
 
 import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import type { Inspect, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
+import type { RequestBasicOptions, RiskSeverity } from '../../..';
 
 export type HostsKpiRiskyHostsRequestOptions = RequestBasicOptions;
 
 export interface HostsKpiRiskyHostsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   riskyHosts: {
-    [key in HostRiskSeverity]: number;
+    [key in RiskSeverity]: number;
   };
-}
-
-export const enum HostRiskSeverity {
-  unknown = 'Unknown',
-  low = 'Low',
-  moderate = 'Moderate',
-  high = 'High',
-  critical = 'Critical',
 }

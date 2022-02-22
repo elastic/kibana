@@ -8,18 +8,17 @@
 import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Direction,
-  HostsRiskScoreRequestOptions,
-  HostRiskScoreFields,
-  HostRiskScoreSortField,
-} from '../../../../../../common/search_strategy';
+  RiskScoreRequestOptions,
+  RiskScoreFields,
+  RiskScoreSortField,
+} from '../../../../../common/search_strategy';
 
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { createQueryFilterClauses } from '../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;
 
-export const buildHostsRiskScoreQuery = ({
+export const buildRiskScoreQuery = ({
   timerange,
-  hostNames,
   filterQuery,
   defaultIndex,
   pagination: { querySize, cursorStart } = {
@@ -27,7 +26,7 @@ export const buildHostsRiskScoreQuery = ({
     cursorStart: 0,
   },
   sort,
-}: HostsRiskScoreRequestOptions) => {
+}: RiskScoreRequestOptions) => {
   const filter = createQueryFilterClauses(filterQuery);
 
   if (timerange) {
@@ -40,10 +39,6 @@ export const buildHostsRiskScoreQuery = ({
         },
       },
     });
-  }
-
-  if (hostNames) {
-    filter.push({ terms: { 'host.name': hostNames } });
   }
 
   const dslQuery = {
@@ -62,7 +57,7 @@ export const buildHostsRiskScoreQuery = ({
   return dslQuery;
 };
 
-const getQueryOrder = (sort?: HostRiskScoreSortField): Sort => {
+const getQueryOrder = (sort?: RiskScoreSortField): Sort => {
   if (!sort) {
     return [
       {
@@ -71,8 +66,8 @@ const getQueryOrder = (sort?: HostRiskScoreSortField): Sort => {
     ];
   }
 
-  if (sort.field === HostRiskScoreFields.risk) {
-    return [{ [HostRiskScoreFields.riskScore]: sort.direction }];
+  if (sort.field === RiskScoreFields.risk) {
+    return [{ [RiskScoreFields.riskScore]: sort.direction }];
   }
 
   return [{ [sort.field]: sort.direction }];

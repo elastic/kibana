@@ -10,8 +10,8 @@ import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { isTab } from '../../../../timelines/public';
-
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -24,7 +24,7 @@ import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors } from '../../common/store';
+import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -33,7 +33,7 @@ import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { UsersTabs } from './users_tabs';
 import { navTabsUsers } from './nav_tabs';
 import * as i18n from './translations';
-import { usersModel } from '../store';
+import { usersModel, usersSelectors } from '../store';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
@@ -44,6 +44,8 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { UsersKpiComponent } from '../components/kpi_users';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { LastEventIndexKey } from '../../../common/search_strategy';
+import { generateSeverityFilter } from '../../hosts/store/helpers';
+import { UsersTableType } from '../store/model';
 
 const ID = 'UsersQueryId';
 
@@ -68,10 +70,27 @@ const UsersComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
+  const getUsersRiskScoreFilterQuerySelector = useMemo(
+    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelection = useDeepEqualSelector((state: State) =>
+    getUsersRiskScoreFilterQuerySelector(state)
+  );
+
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
   const { uiSettings } = useKibana().services;
-  const tabsFilters = filters;
+
+  const { tabName } = useParams<{ tabName: string }>();
+  const tabsFilters = React.useMemo(() => {
+    if (tabName === UsersTableType.risk) {
+      const severityFilter = generateSeverityFilter(severitySelection);
+
+      return [...severityFilter, ...filters];
+    }
+    return filters;
+  }, [severitySelection, tabName, filters]);
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(

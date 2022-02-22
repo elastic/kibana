@@ -28,8 +28,6 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
   HostFirstLastSeenRequestOptions,
-  HostsRiskScoreStrategyResponse,
-  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -80,9 +78,11 @@ import {
   HostsKpiRiskyHostsRequestOptions,
   HostsKpiRiskyHostsStrategyResponse,
 } from './hosts/kpi/risky_hosts';
+import { RiskScoreStrategyResponse, RiskQueries, RiskScoreRequestOptions } from './risk_score';
 
 export * from './cti';
 export * from './hosts';
+export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
 
@@ -91,6 +91,7 @@ export type FactoryQueryTypes =
   | HostsKpiQueries
   | NetworkQueries
   | NetworkKpiQueries
+  | RiskQueries
   | CtiQueries
   | typeof MatrixHistogramQuery
   | typeof MatrixHistogramQueryEntities;
@@ -119,8 +120,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
-  : T extends HostsQueries.hostsRiskScore
-  ? HostsRiskScoreStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -169,12 +168,12 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? CtiEventEnrichmentStrategyResponse
   : T extends CtiQueries.dataSource
   ? CtiDataSourceStrategyResponse
+  : T extends RiskQueries.riskScore
+  ? RiskScoreStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends HostsQueries.hostsRiskScore
-  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
@@ -225,6 +224,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? CtiEventEnrichmentRequestOptions
   : T extends CtiQueries.dataSource
   ? CtiDataSourceRequestOptions
+  : T extends RiskQueries.riskScore
+  ? RiskScoreRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

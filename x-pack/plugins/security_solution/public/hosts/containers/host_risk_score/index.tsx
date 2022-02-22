@@ -14,12 +14,14 @@ import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import {
-  HostsQueries,
-  HostsRiskScoreStrategyResponse,
+  RiskScoreStrategyResponse,
   getHostRiskIndex,
   HostsRiskScore,
-  HostRiskScoreSortField,
-  HostsRiskScoreRequestOptions,
+  UsersRiskScore,
+  RiskScoreSortField,
+  RiskScoreRequestOptions,
+  RiskQueries,
+  getUserRiskIndex,
 } from '../../../../common/search_strategy';
 import { ESQuery } from '../../../../common/typed_json';
 
@@ -32,8 +34,8 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-export interface HostRiskScoreState {
-  data?: HostsRiskScore[];
+export interface RiskScoreState<RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]> {
+  data?: RiskScoreType;
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
@@ -41,48 +43,114 @@ export interface HostRiskScoreState {
   isModuleEnabled: boolean | undefined;
 }
 
-interface UseHostRiskScore {
-  sort?: HostRiskScoreSortField;
+interface UseRiskScore {
+  sort?: RiskScoreSortField;
   filterQuery?: ESQuery | string;
   skip?: boolean;
   timerange?: { to: string; from: string };
-  hostName?: string;
   onlyLatest?: boolean;
-  pagination?: HostsRiskScoreRequestOptions['pagination'];
+  pagination?: RiskScoreRequestOptions['pagination'];
+  featureEnabled: boolean;
+  defaultIndex: string | undefined;
 }
+
+type UseHostRiskScore = Omit<UseRiskScore, 'featureEnabled' | 'defaultIndex'>;
+
+type UseUserRiskScore = Omit<UseRiskScore, 'featureEnabled' | 'defaultIndex'>;
 
 const isRecord = (item: unknown): item is Record<string, unknown> =>
   typeof item === 'object' && !!item;
 
-export const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
+export const isRiskScoreHit = (item: unknown): item is HostsRiskScore | UsersRiskScore =>
   isRecord(item) &&
-  isRecord(item.host) &&
+  (isRecord(item.host) || isRecord(item.user)) &&
+  isRecord(item.risk_stats) &&
   typeof item.risk_stats?.risk_score === 'number' &&
   typeof item.risk === 'string';
 
+export const useSpaceId = () => {
+  const { spaces } = useKibana().services;
+
+  const [spaceId, setSpaceId] = useState<string>();
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+  return spaceId;
+};
+
 export const useHostRiskScore = ({
   timerange,
-  hostName,
+  onlyLatest,
+  filterQuery,
+  sort,
+  skip = false,
+  pagination,
+}: UseHostRiskScore): [boolean, RiskScoreState<HostsRiskScore[]>] => {
+  const spaceId = useSpaceId();
+  const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
+
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  return useRiskScore<HostsRiskScore[]>({
+    timerange,
+    onlyLatest,
+    filterQuery,
+    sort,
+    skip,
+    pagination,
+    featureEnabled: riskyHostsFeatureEnabled,
+    defaultIndex,
+  });
+};
+
+export const useUserRiskScore = ({
+  timerange,
+  onlyLatest,
+  filterQuery,
+  sort,
+  skip = false,
+  pagination,
+}: UseUserRiskScore): [boolean, RiskScoreState<UsersRiskScore[]>] => {
+  const spaceId = useSpaceId();
+  const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
+
+  const usersFeatureEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  return useRiskScore<UsersRiskScore[]>({
+    timerange,
+    onlyLatest,
+    filterQuery,
+    sort,
+    skip,
+    pagination,
+    featureEnabled: usersFeatureEnabled,
+    defaultIndex,
+  });
+};
+
+export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]>({
+  timerange,
   onlyLatest = true,
   filterQuery,
   sort,
   skip = false,
   pagination,
-}: UseHostRiskScore): [boolean, HostRiskScoreState] => {
+  featureEnabled,
+  defaultIndex,
+}: UseRiskScore): [boolean, RiskScoreState<RiskScoreType>] => {
   const { querySize, cursorStart } = pagination || {};
-  const { data, spaces } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  const [loading, setLoading] = useState<boolean>(riskyHostsFeatureEnabled);
-  const [riskScoreRequest, setHostRiskScoreRequest] = useState<HostsRiskScoreRequestOptions | null>(
-    null
-  );
+
+  const [loading, setLoading] = useState<boolean>(featureEnabled);
+  const [riskScoreRequest, setRiskScoreRequest] = useState<RiskScoreRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
-  const [riskScoreResponse, setHostRiskScoreResponse] = useState<HostRiskScoreState>({
+  const [riskScoreResponse, setRiskScoreResponse] = useState<RiskScoreState<RiskScoreType>>({
     data: undefined,
     inspect: {
       dsl: [],
@@ -95,7 +163,7 @@ export const useHostRiskScore = ({
   });
 
   const riskScoreSearch = useCallback(
-    (request: HostsRiskScoreRequestOptions | null) => {
+    (request: RiskScoreRequestOptions | null) => {
       if (request == null || skip) {
         return;
       }
@@ -105,7 +173,7 @@ export const useHostRiskScore = ({
         setLoading(true);
 
         searchSubscription.current = data.search
-          .search<HostsRiskScoreRequestOptions, HostsRiskScoreStrategyResponse>(request, {
+          .search<RiskScoreRequestOptions, RiskScoreStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -114,11 +182,11 @@ export const useHostRiskScore = ({
               if (isCompleteResponse(response)) {
                 const hits = response?.rawResponse?.hits?.hits;
 
-                setHostRiskScoreResponse((prevResponse) => ({
+                setRiskScoreResponse((prevResponse) => ({
                   ...prevResponse,
-                  data: isHostsRiskScoreHit(hits?.[0]?._source)
-                    ? (hits?.map((hit) => hit._source) as HostsRiskScore[])
-                    : [],
+                  data: isRiskScoreHit(hits?.[0]?._source)
+                    ? (hits?.map((hit) => hit._source) as RiskScoreType)
+                    : ([] as unknown as RiskScoreType),
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
                   totalCount: response.totalCount,
@@ -135,7 +203,7 @@ export const useHostRiskScore = ({
             error: (error) => {
               setLoading(false);
               if (isIndexNotFoundError(error)) {
-                setHostRiskScoreResponse((prevResponse) =>
+                setRiskScoreResponse((prevResponse) =>
                   !prevResponse
                     ? prevResponse
                     : {
@@ -155,29 +223,22 @@ export const useHostRiskScore = ({
       };
       searchSubscription.current.unsubscribe();
       abortCtrl.current.abort();
-      if (riskyHostsFeatureEnabled) {
+      if (featureEnabled) {
         asyncSearch();
       }
 
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip, riskyHostsFeatureEnabled]
+    [data.search, addError, addWarning, skip, featureEnabled]
   );
-  const [spaceId, setSpaceId] = useState<string>();
 
   useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
-    }
-  }, [spaces]);
-
-  useEffect(() => {
-    if (spaceId) {
-      setHostRiskScoreRequest((prevRequest) => {
+    if (defaultIndex) {
+      setRiskScoreRequest((prevRequest) => {
         const myRequest = {
           ...(prevRequest ?? {}),
-          defaultIndex: [getHostRiskIndex(spaceId, onlyLatest)],
-          factoryQueryType: HostsQueries.hostsRiskScore,
+          defaultIndex: [defaultIndex],
+          factoryQueryType: RiskQueries.riskScore,
           filterQuery: createFilter(filterQuery),
           pagination:
             cursorStart !== undefined && querySize !== undefined
@@ -186,7 +247,6 @@ export const useHostRiskScore = ({
                   querySize,
                 }
               : undefined,
-          hostNames: hostName ? [hostName] : undefined,
           timerange: timerange
             ? { to: timerange.to, from: timerange.from, interval: '' }
             : undefined,
@@ -201,14 +261,13 @@ export const useHostRiskScore = ({
     }
   }, [
     filterQuery,
-    spaceId,
     onlyLatest,
     timerange,
     cursorStart,
     querySize,
     sort,
-    hostName,
     getTransformChangesIfTheyExist,
+    defaultIndex,
   ]);
 
   useEffect(() => {

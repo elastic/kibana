@@ -13,9 +13,9 @@ import { createFilter } from '../../../../common/containers/helpers';
 
 import {
   getHostRiskIndex,
-  HostRiskSeverity,
   HostsKpiQueries,
   RequestBasicOptions,
+  RiskSeverity,
 } from '../../../../../common/search_strategy';
 
 import {
@@ -28,6 +28,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { SeverityCount } from '../../../../common/components/severity/types';
 
 export type RiskyHostsScoreRequestOptions = RequestBasicOptions;
 
@@ -76,9 +77,6 @@ interface UseRiskyHostProps {
   to: string;
   skip?: boolean;
 }
-export type SeverityCount = {
-  [k in HostRiskSeverity]: number;
-};
 
 interface RiskScoreKpi {
   error: unknown;
@@ -118,11 +116,11 @@ export const useRiskScoreKpi = ({
 
   const severityCount = useMemo(
     () => ({
-      [HostRiskSeverity.unknown]: 0,
-      [HostRiskSeverity.low]: 0,
-      [HostRiskSeverity.moderate]: 0,
-      [HostRiskSeverity.high]: 0,
-      [HostRiskSeverity.critical]: 0,
+      [RiskSeverity.unknown]: 0,
+      [RiskSeverity.low]: 0,
+      [RiskSeverity.moderate]: 0,
+      [RiskSeverity.high]: 0,
+      [RiskSeverity.critical]: 0,
       ...(result?.riskyHosts ?? {}),
     }),
     [result]

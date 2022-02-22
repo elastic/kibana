@@ -29,6 +29,5 @@ export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields
 
 export interface HostsSortField {
   field: HostsFields;
-
   direction: Direction;
 }

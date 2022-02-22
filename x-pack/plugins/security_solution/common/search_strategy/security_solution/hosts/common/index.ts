@@ -9,7 +9,6 @@ import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
-import { HostRiskSeverity } from '../kpi';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -127,21 +126,3 @@ export interface HostHit extends Hit {
 }
 
 export type HostHits = Hits<number, HostHit>;
-
-export const enum HostRiskScoreFields {
-  timestamp = '@timestamp',
-  hostName = 'host.name',
-  riskScore = 'risk_stats.risk_score',
-  risk = 'risk',
-  // TODO: Steph/Host Risk
-  // ruleRisks = 'rule_risks',
-}
-
-export interface HostRiskScoreItem {
-  _id?: Maybe<string>;
-  [HostRiskScoreFields.hostName]: Maybe<string>;
-  [HostRiskScoreFields.risk]: Maybe<HostRiskSeverity>;
-  [HostRiskScoreFields.riskScore]: Maybe<number>;
-  // TODO: Steph/Host Risk
-  // [HostRiskScoreFields.ruleRisks]: Maybe<RuleRisk[]>;
-}

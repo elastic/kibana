@@ -24,3 +24,10 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
     defaultMessage: 'Anomalies',
   }
 );
+
+export const NAVIGATION_RISK_TITLE = i18n.translate(
+  'xpack.securitySolution.users.navigation.riskTitle',
+  {
+    defaultMessage: 'Users by risk',
+  }
+);

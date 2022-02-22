@@ -11,7 +11,6 @@ export * from './common';
 export * from './details';
 export * from './first_last_seen';
 export * from './kpi';
-export * from './risk_score';
 export * from './overview';
 export * from './uncommon_processes';
 
@@ -23,6 +22,5 @@ export enum HostsQueries {
   hosts = 'hosts',
   hostsEntities = 'hostsEntities',
   overview = 'overviewHost',
-  hostsRiskScore = 'hostsRiskScore',
   uncommonProcesses = 'uncommonProcesses',
 }

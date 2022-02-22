@@ -11,18 +11,19 @@ import { EuiHealth, transparentize } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
-import { HostRiskSeverity } from '../../../../common/search_strategy';
-import { WithHoverActions } from '../../../common/components/with_hover_actions';
 
-export const HOST_RISK_SEVERITY_COLOUR: { [k in HostRiskSeverity]: string } = {
-  [HostRiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
-  [HostRiskSeverity.low]: euiLightVars.euiColorVis0,
-  [HostRiskSeverity.moderate]: euiLightVars.euiColorWarning,
-  [HostRiskSeverity.high]: euiLightVars.euiColorVis9_behindText,
-  [HostRiskSeverity.critical]: euiLightVars.euiColorDanger,
+import { WithHoverActions } from '../../with_hover_actions';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+
+export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
+  [RiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
+  [RiskSeverity.low]: euiLightVars.euiColorVis0,
+  [RiskSeverity.moderate]: euiLightVars.euiColorWarning,
+  [RiskSeverity.high]: euiLightVars.euiColorVis9_behindText,
+  [RiskSeverity.critical]: euiLightVars.euiColorDanger,
 };
 
-const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundColor: boolean }>`
+const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
     padding-right: ${theme.eui.paddingSizes.s};
@@ -39,22 +40,22 @@ const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundC
 const TooltipContainer = styled.div`
   padding: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
-export const HostRiskScore: React.FC<{
-  severity: HostRiskSeverity;
+export const RiskScore: React.FC<{
+  severity: RiskSeverity;
   hideBackgroundColor?: boolean;
   toolTipContent?: JSX.Element;
 }> = ({ severity, hideBackgroundColor = false, toolTipContent }) => {
   const badge = (
-    <HostRiskBadge
+    <RiskBadge
       color={euiLightVars.euiColorDanger}
       $severity={severity}
       $hideBackgroundColor={hideBackgroundColor}
-      data-test-subj="host-risk-score"
+      data-test-subj="risk-score"
     >
-      <EuiHealth className="eui-alignMiddle" color={HOST_RISK_SEVERITY_COLOUR[severity]}>
+      <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
         {severity}
       </EuiHealth>
-    </HostRiskBadge>
+    </RiskBadge>
   );
 
   if (toolTipContent != null) {

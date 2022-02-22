@@ -20,7 +20,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-import { HostRiskScoreFields } from '../../../../common/search_strategy';
+import { buildHostNamesFilter, RiskScoreFields } from '../../../../common/search_strategy';
 import { useHostRiskScore } from '../../containers/host_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
@@ -74,13 +74,10 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     [from, to]
   );
 
-  const sort = useMemo(
-    () => ({ field: HostRiskScoreFields.timestamp, direction: Direction.desc }),
-    []
-  );
+  const sort = useMemo(() => ({ field: RiskScoreFields.timestamp, direction: Direction.desc }), []);
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     timerange,
     onlyLatest: false,
     sort,

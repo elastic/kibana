@@ -14,11 +14,14 @@ import {
   HostsStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
-  HostsRiskScore,
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-import { getHostRiskIndex } from '../../../../../../common/search_strategy';
+import {
+  getHostRiskIndex,
+  buildHostNamesFilter,
+  HostsRiskScore,
+} from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
@@ -26,7 +29,7 @@ import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 import { IScopedClusterClient } from '../../../../../../../../../src/core/server';
 
-import { buildHostsRiskScoreQuery } from '../risk_score/query.hosts_risk.dsl';
+import { buildRiskScoreQuery } from '../../risk_score/query.risk_score.dsl';
 
 import { buildHostsQueryEntities } from './query.all_hosts_entities.dsl';
 import { EndpointAppContext } from '../../../../../endpoint/types';
@@ -117,9 +120,9 @@ async function getHostRiskData(
 ) {
   try {
     const hostRiskResponse = await esClient.asCurrentUser.search<HostsRiskScore>(
-      buildHostsRiskScoreQuery({
+      buildRiskScoreQuery({
         defaultIndex: [getHostRiskIndex(spaceId)],
-        hostNames,
+        filterQuery: buildHostNamesFilter(hostNames),
       })
     );
     return hostRiskResponse;

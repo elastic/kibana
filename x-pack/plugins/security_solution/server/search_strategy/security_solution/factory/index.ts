@@ -12,6 +12,7 @@ import { hostsFactory } from './hosts';
 import { matrixHistogramFactory } from './matrix_histogram';
 import { networkFactory } from './network';
 import { ctiFactoryTypes } from './cti';
+import { riskScoreFactory } from './risk_score';
 
 export const securitySolutionFactory: Record<
   FactoryQueryTypes,
@@ -21,4 +22,5 @@ export const securitySolutionFactory: Record<
   ...matrixHistogramFactory,
   ...networkFactory,
   ...ctiFactoryTypes,
+  ...riskScoreFactory,
 };

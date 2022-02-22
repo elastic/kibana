@@ -9,9 +9,9 @@ import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { HostRiskSeverity } from '../../../../common/search_strategy';
-import { HOST_RISK_SEVERITY_COLOUR } from '../common/host_risk_score';
-import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { RISK_SEVERITY_COLOUR } from './common';
+import { SeverityCount } from './types';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   &.risk-score-severity-bar {
@@ -33,12 +33,12 @@ export const SeverityBar: React.FC<{
 }> = ({ severityCount }) => {
   const palette = useMemo(
     () =>
-      (Object.keys(HOST_RISK_SEVERITY_COLOUR) as HostRiskSeverity[]).reduce(
-        (acc: PalletteArray, status: HostRiskSeverity) => {
+      (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(
+        (acc: PalletteArray, status: RiskSeverity) => {
           const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
           const newEntry: PalletteObject = {
             stop: previousStop + (severityCount[status] || 0),
-            color: HOST_RISK_SEVERITY_COLOUR[status],
+            color: RISK_SEVERITY_COLOUR[status],
           };
           acc.push(newEntry);
           return acc;
