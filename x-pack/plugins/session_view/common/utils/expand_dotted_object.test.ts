@@ -21,13 +21,21 @@ const testFlattenedObj = {
   emptyArray: [],
 };
 describe('expandDottedObject(obj)', () => {
-  it('works', () => {
+  it('retrieves values from flattened keys', () => {
     const expanded: any = expandDottedObject(testFlattenedObj);
 
     expect(expanded.flattened.property.a).toEqual('valueA');
     expect(expanded.flattened.property.b).toEqual('valueB');
-    expect(expanded.regularProp.nestedProp).toEqual('nestedValue');
+  });
+  it('retrieves values from nested keys', () => {
+    const expanded: any = expandDottedObject(testFlattenedObj);
+
     expect(Array.isArray(expanded.nested.array)).toBeTruthy();
     expect(expanded.nested.array[0].arrayProp).toEqual('arrayValue');
+  });
+  it('doesn\'t break regular value access', () => {
+    const expanded: any = expandDottedObject(testFlattenedObj);
+
+    expect(expanded.regularProp.nestedProp).toEqual('nestedValue');
   });
 });
