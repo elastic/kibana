@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { resolve } from 'path';
 import fs from 'fs';
 import Url from 'url';
@@ -14,15 +15,15 @@ import { withProcRunner } from '@kbn/dev-utils';
 import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
-const retrieveIntegrations = () => {
+const retrieveIntegrations = (chunksNumber: number) => {
   const directoryPath = resolve(__dirname, '../../plugins/security_solution/cypress/integration');
   const folderNames = fs.readdirSync(directoryPath);
   const integrationsPaths = folderNames.map((f) =>
     resolve(__dirname, `../../plugins/security_solution/cypress/integration/${f}/*.spec.ts`)
   );
-  const halfLength = Math.ceil(integrationsPaths.length / 2);
+  const chunkSize = Math.ceil(integrationsPaths.length / chunksNumber);
 
-  return [integrationsPaths.slice(0, halfLength), integrationsPaths.slice(-halfLength)];
+  return chunk(integrationsPaths, chunkSize);
 };
 
 export async function SecuritySolutionConfigurableCypressCliTestRunner(
@@ -55,17 +56,16 @@ export async function SecuritySolutionConfigurableCypressCliTestRunner(
   });
 }
 
-export async function SecuritySolutionCypressCliTestRunnerCISet1(context: FtrProviderContext) {
-  const integrations = retrieveIntegrations();
+export async function SecuritySolutionCypressCliTestRunnerCI(
+  context: FtrProviderContext,
+  ciCount: number,
+  ciNumber: number
+) {
+  console.error('>>>>>>> SecuritySolutionCypressCliTestRunnerCI', ciCount, ciNumber);
+  const integrations = retrieveIntegrations(ciCount);
+  console.log('TA TA TA', JSON.stringify(integrations, null, 2));
   return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:spec', {
-    SPEC_LIST: integrations[0].join(','),
-  });
-}
-
-export async function SecuritySolutionCypressCliTestRunnerCISet2(context: FtrProviderContext) {
-  const integrations = retrieveIntegrations();
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:spec', {
-    SPEC_LIST: integrations[1].join(','),
+    SPEC_LIST: integrations[ciNumber - 1].join(','),
   });
 }
 

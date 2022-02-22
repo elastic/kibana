@@ -61,7 +61,7 @@ const uploadPipeline = (pipelineContent) => {
 
     const pipeline = [];
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (
       (await doAnyChangesMatch([

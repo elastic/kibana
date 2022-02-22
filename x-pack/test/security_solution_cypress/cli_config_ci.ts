@@ -6,8 +6,12 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrProviderContext } from './ftr_provider_context';
 
-import { SecuritySolutionCypressCliTestRunnerCISet2 } from './runner';
+import { SecuritySolutionCypressCliTestRunnerCI } from './runner';
+
+const cliNumber = parseInt(process.env.CLI_NUMBER ?? '1', 10);
+const cliCount = parseInt(process.env.CLI_COUNT ?? '1', 10);
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -15,6 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...securitySolutionCypressConfig.getAll(),
 
-    testRunner: SecuritySolutionCypressCliTestRunnerCISet2,
+    testRunner: (context: FtrProviderContext) =>
+      SecuritySolutionCypressCliTestRunnerCI(context, cliCount, cliNumber),
   };
 }
