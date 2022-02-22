@@ -96,3 +96,6 @@ elastic-agent.yml
 fleet-server.yml
 
 /x-pack/plugins/fleet/server/bundled_packages
+
+# TS package type summarizer test artifacts
+/packages/kbn-type-summarizer/tests/__tmp__

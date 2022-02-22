@@ -72,32 +72,22 @@ def _pkg_npm_types_impl(ctx):
   inputs = ctx.files.srcs[:]
   inputs.extend(tsconfig_inputs)
   inputs.extend(deps_inputs)
-  inputs.append(ctx.file._generated_package_json_template)
 
   # output dir declaration
   package_path = ctx.label.package
   package_dir = ctx.actions.declare_directory(ctx.label.name)
   outputs = [package_dir]
 
-  # gathering template args
-  template_args = [
-    "NAME", _get_type_package_name(ctx.attr.package_name)
-  ]
-
   # layout api extractor arguments
   extractor_args = ctx.actions.args()
 
-  ## general args layout
-  ### [0] = base output dir
-  ### [1] = generated package json template input file path
-  ### [2] = stringified template args
-  ### [3] = tsconfig input file path
-  ### [4] = entry point from provided types to summarise
-  extractor_args.add(package_dir.path)
-  extractor_args.add(ctx.file._generated_package_json_template.path)
-  extractor_args.add_joined(template_args, join_with = ",", omit_if_empty = False)
-  extractor_args.add(tsconfig_inputs[0])
-  extractor_args.add(_calculate_entrypoint_path(ctx))
+  extractor_args.add(struct(
+    packageName = ctx.attr.package_name,
+    outputDir = package_dir.path,
+    buildFilePath = ctx.build_file_path,
+    tsconfigPath = tsconfig_inputs[0].path,
+    inputPath = _calculate_entrypoint_path(ctx),
+  ).to_json())
 
   run_node(
     ctx,
@@ -141,7 +131,9 @@ pkg_npm_types = rule(
       doc = """Entrypoint name of the types files group to summarise""",
       default = "index.d.ts",
     ),
-    "package_name": attr.string(),
+    "package_name": attr.string(
+      mandatory = True
+    ),
     "srcs": attr.label_list(
       doc = """Files inside this directory which are inputs for the types to summarise.""",
       allow_files = True,
@@ -151,11 +143,7 @@ pkg_npm_types = rule(
       doc = "Target that executes the npm types package assembler binary",
       executable = True,
       cfg = "host",
-      default = Label("//src/dev/bazel/pkg_npm_types:_packager"),
-    ),
-    "_generated_package_json_template": attr.label(
-      allow_single_file = True,
-      default = "package_json.mustache",
+      default = Label("//packages/kbn-type-summarizer:bazel-cli"),
     ),
   },
 )
