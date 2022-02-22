@@ -30,6 +30,11 @@ import type { TimeRangeBounds } from '../../../../../../src/plugins/data/common'
 import { ANOMALY_SWIM_LANE_HARD_LIMIT, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { mlJobService } from '../services/job_service';
 
+interface SwimLanePagination {
+  viewByFromPage: number;
+  viewByPerPage: number;
+}
+
 /**
  * Service for managing anomaly timeline state.
  */
@@ -50,6 +55,11 @@ export class AnomalyTimelineStateService {
   private _containerWidth$ = new Subject<number>();
   private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined>(undefined);
   private _swimLaneSeverity$ = new BehaviorSubject<number | undefined>(undefined);
+  private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
+    viewByFromPage: 1,
+    viewByPerPage: 10,
+  });
+  private _swimLaneCardinality$ = new BehaviorSubject<number | undefined>(undefined);
   private _viewBySwimlaneFieldName$ = new BehaviorSubject<string | undefined>(undefined);
   private _viewBySwimLaneOptions$ = new BehaviorSubject<string[]>([]);
 
@@ -96,6 +106,18 @@ export class AnomalyTimelineStateService {
       )
       .subscribe(this._swimLaneSeverity$);
 
+    this._swimLaneUrlState$
+      .pipe(
+        map((v) => {
+          return {
+            viewByFromPage: v?.viewByFromPage ?? 1,
+            viewByPerPage: v?.viewByPerPage ?? 10,
+          };
+        }),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(this._swimLanePaginations$);
+
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
@@ -127,6 +149,7 @@ export class AnomalyTimelineStateService {
       this._swimLaneSeverity$,
       this.getContainerWidth$(),
       this.getViewBySwimlaneFieldName$(),
+      this.getSwimLanePagination$(),
     ])
       .pipe(
         tap(() => {
@@ -139,6 +162,7 @@ export class AnomalyTimelineStateService {
             severity,
             swimlaneContainerWidth,
             viewBySwimlaneFieldName,
+            swimLanePagination,
           ]) => {
             return from(
               this.anomalyTimelineService.loadViewBySwimlane(
@@ -150,8 +174,8 @@ export class AnomalyTimelineStateService {
                 selectedJobs!,
                 viewBySwimlaneFieldName!,
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
-                10,
-                1,
+                swimLanePagination.viewByPerPage,
+                swimLanePagination.viewByFromPage,
                 swimlaneContainerWidth,
                 undefined,
                 undefined,
@@ -164,6 +188,7 @@ export class AnomalyTimelineStateService {
       .subscribe((v) => {
         this._viewBySwimLaneData$.next(v);
         this._isViewBySwimLaneLoading$.next(false);
+        this._swimLaneCardinality$.next(v?.cardinality);
       });
 
     combineLatest([
@@ -403,6 +428,26 @@ export class AnomalyTimelineStateService {
     return this._swimLaneSeverity$.getValue();
   }
 
+  public getSwimLanePagination$(): Observable<SwimLanePagination> {
+    return this._swimLanePaginations$.asObservable();
+  }
+
+  public getSwimLanePagination(): SwimLanePagination {
+    return this._swimLanePaginations$.getValue();
+  }
+
+  public setSwimLanePagination(update: Partial<SwimLanePagination>) {
+    const resultUpdate = update;
+    if (resultUpdate.viewByPerPage) {
+      resultUpdate.viewByFromPage = 1;
+    }
+    this._explorerURLStateCallback!(resultUpdate);
+  }
+
+  public getSwimLaneCardinality$(): Observable<number | undefined> {
+    return this._swimLaneCardinality$.pipe(distinctUntilChanged());
+  }
+
   public getViewBySwimlaneFieldName$(): Observable<string | undefined> {
     return this._viewBySwimlaneFieldName$.pipe(distinctUntilChanged());
   }
@@ -498,8 +543,6 @@ export class AnomalyTimelineStateService {
       this._explorerURLStateCallback!(mlExplorerSwimlane, true);
     }
   }
-
-  public setPagination() {}
 
   /**
    * Updates View by swim lane value.

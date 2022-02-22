@@ -76,15 +76,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const timeBuckets = useTimeBuckets();
 
-    const {
-      filterActive,
-      viewByLoadedForTimeFormatted,
-      // selectedJobs,
-      viewByFromPage,
-      viewByPerPage,
-      swimlaneLimit,
-      overallAnnotations,
-    } = explorerState;
+    const { filterActive, viewByLoadedForTimeFormatted, overallAnnotations } = explorerState;
+
+    const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
     const selectedJobs = useObservable(anomalyExplorerCommonStateService.getSelectedJobs$());
 
@@ -110,6 +104,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const viewBySwimlaneOptions = useObservable(
       anomalyTimelineStateService.getViewBySwimLaneOptions$(),
       anomalyTimelineStateService.getViewBySwimLaneOptions()
+    );
+
+    const { viewByPerPage, viewByFromPage } = useObservable(
+      anomalyTimelineStateService.getSwimLanePagination$(),
+      anomalyTimelineStateService.getSwimLanePagination()
     );
 
     const [severityUpdate, setSeverityUpdate] = useState(
@@ -357,10 +356,16 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               swimlaneLimit={swimlaneLimit}
               onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
                 if (perPageUpdate) {
-                  explorerService.setViewByPerPage(perPageUpdate);
+                  // explorerService.setViewByPerPage(perPageUpdate);
+                  anomalyTimelineStateService.setSwimLanePagination({
+                    viewByPerPage: perPageUpdate,
+                  });
                 }
                 if (fromPageUpdate) {
-                  explorerService.setViewByFromPage(fromPageUpdate);
+                  // explorerService.setViewByFromPage(fromPageUpdate);
+                  anomalyTimelineStateService.setSwimLanePagination({
+                    viewByFromPage: fromPageUpdate,
+                  });
                 }
               }}
               isLoading={loading || viewBySwimlaneDataLoading}
