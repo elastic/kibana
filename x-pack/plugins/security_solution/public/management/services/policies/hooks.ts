@@ -19,7 +19,7 @@ export function useGetEndpointSpecificPolicies(
     onError?: (error: ServerApiError) => void;
     page?: number;
     perPage?: number;
-  } = { page: 1, perPage: 1000 }
+  } = { page: 1, perPage: 20 }
 ): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(
