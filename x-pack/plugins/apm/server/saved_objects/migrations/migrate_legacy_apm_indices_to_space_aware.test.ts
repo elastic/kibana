@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from 'src/core/server';
+import type { CoreStart, Logger } from 'src/core/server';
 import {
-  APM_INDICES_SPACE_SAVED_OBJECT_ID,
-  APM_INDICES_SPACE_SAVED_OBJECT_TYPE,
+  APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
+  APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { migrateLegacyAPMIndicesToSpaceAware } from './migrate_legacy_apm_indices_to_space_aware';
+
+const loggerMock = {
+  debug: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+} as unknown as Logger;
 
 describe('migrateLegacyAPMIndicesToSpaceAware', () => {
   describe('when legacy APM indices is not found', () => {
@@ -28,7 +34,10 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
     } as unknown as CoreStart;
 
     it('does not save any new saved object', () => {
-      migrateLegacyAPMIndicesToSpaceAware({ coreStart: core });
+      migrateLegacyAPMIndicesToSpaceAware({
+        coreStart: core,
+        logger: loggerMock,
+      });
       expect(mockFind).not.toHaveBeenCalled();
       expect(mockBulkCreate).not.toHaveBeenCalled();
     });
@@ -87,11 +96,14 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
       },
     } as unknown as CoreStart;
     it('creates new default saved object with space awareness and delete legacy', async () => {
-      await migrateLegacyAPMIndicesToSpaceAware({ coreStart: core });
+      await migrateLegacyAPMIndicesToSpaceAware({
+        coreStart: core,
+        logger: loggerMock,
+      });
       expect(mockBulkCreate).toBeCalledWith([
         {
-          type: APM_INDICES_SPACE_SAVED_OBJECT_TYPE,
-          id: APM_INDICES_SPACE_SAVED_OBJECT_ID,
+          type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+          id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
           initialNamespaces: ['default'],
           attributes: {
             transaction: 'default-apm-*',
@@ -163,12 +175,15 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
       },
     } as unknown as CoreStart;
     it('creates multiple saved objects with space awareness and delete legacies', async () => {
-      await migrateLegacyAPMIndicesToSpaceAware({ coreStart: core });
+      await migrateLegacyAPMIndicesToSpaceAware({
+        coreStart: core,
+        logger: loggerMock,
+      });
       expect(mockBulkCreate).toBeCalledWith(
         savedObjects.map(({ id }) => {
           return {
-            type: APM_INDICES_SPACE_SAVED_OBJECT_TYPE,
-            id: APM_INDICES_SPACE_SAVED_OBJECT_ID,
+            type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+            id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
             initialNamespaces: [id],
             attributes,
           };
