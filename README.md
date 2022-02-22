@@ -29,6 +29,10 @@ After installation you should add an access token to the [global config](https:/
 
 ## Quick start
 
+```
+npm install backport
+```
+
 Add a [project config](https://github.com/sqren/backport/blob/master/docs/configuration.md#project-config-backportrcjson) to the root of your repository:
 
 ```js
@@ -48,10 +52,12 @@ Add a [project config](https://github.com/sqren/backport/blob/master/docs/config
 }
 ```
 
-Install locally:
-
-```
-npm install backport
+Add personal access token to [global config](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson):
+```js
+// ~/.backport/config.json
+{
+  "accessToken": "ghp_very_secret"
+}
 ```
 
 Run:
