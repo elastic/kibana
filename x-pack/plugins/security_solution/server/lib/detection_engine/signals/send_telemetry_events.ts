@@ -11,15 +11,29 @@ import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
 import { Logger } from '../../../../../../../src/core/server';
 
-export interface SearchResultWithSource {
+interface SearchResultWithEventId {
+  _source: {
+    event: {
+      id: string;
+    };
+  };
+}
+
+interface SearchResultSource {
   _source: SignalSource;
 }
 
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+type SearchResultWithSource = SearchResultSource & SearchResultWithEventId;
+
+export function selectEvents(
+  filteredEvents: SignalSearchResponse,
+  signalIdMap: Map<string, string>
+): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
   const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
     obj: SearchResultWithSource
   ): TelemetryEvent {
+    obj._source.signal_id = signalIdMap.get(obj._source.event.id);
     return obj._source;
   });
 
@@ -31,13 +45,20 @@ export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: ITelemetryEventsSender | undefined,
   filteredEvents: SignalSearchResponse,
+  createdEvents: SignalSource[],
   buildRuleMessage: BuildRuleMessage
 ) {
   if (eventsTelemetry === undefined) {
     return;
   }
+  // Create map of ancenstor_id -> alert_id
+  let signalIdMap = new Map<string, string>();
+  createdEvents.map(function (obj: SignalSource) {
+    signalIdMap = signalIdMap.set(String(obj['kibana.alert.original_event.id']), String(obj._id));
+    return null;
+  });
 
-  const sources = selectEvents(filteredEvents);
+  const sources = selectEvents(filteredEvents, signalIdMap);
 
   try {
     eventsTelemetry.queueTelemetryEvents(sources);

@@ -63,8 +63,8 @@ describe('sendAlertTelemetry', () => {
         ],
       },
     };
-
-    const sources = selectEvents(filteredEvents);
+    const joinMap = new Map<string, string>();
+    const sources = selectEvents(filteredEvents, joinMap);
     expect(sources).toStrictEqual([
       {
         '@timestamp': 'x',

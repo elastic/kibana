@@ -45,6 +45,7 @@ export interface ESLicense {
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
+  signal_id?: string;
   data_stream?: {
     [key: string]: SearchTypes;
     dataset?: string;
