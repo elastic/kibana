@@ -82,12 +82,14 @@ const XmattersActionConnectorFields: React.FunctionComponent<
         color="primary"
         idSelected={selectedAuth}
         onChange={(id: string) => {
-          if (id === 'Basic Authentication') {
+          if (id === XmattersAuthenticationType.Basic) {
             setSelectedAuth(XmattersAuthenticationType.Basic);
             editActionConfig('usesBasic', true);
+            editActionSecrets('urlSecrets', '');
           } else {
             setSelectedAuth(XmattersAuthenticationType.URL);
             editActionConfig('usesBasic', false);
+            editActionConfig('urlConfig', '');
           }
         }}
       />
@@ -136,16 +138,8 @@ const XmattersActionConnectorFields: React.FunctionComponent<
               onChange={(e) => {
                 if (selectedAuth === XmattersAuthenticationType.Basic) {
                   editActionConfig('urlConfig', e.target.value);
-                  editActionSecrets('urlSecrets', '');
                 } else {
                   editActionSecrets('urlSecrets', e.target.value);
-                  editActionConfig('urlConfig', '');
-                }
-              }}
-              onBlur={() => {
-                if (!urlConfig || !urlSecrets) {
-                  editActionConfig('urlConfig', '');
-                  editActionSecrets('urlSecrets', '');
                 }
               }}
             />
