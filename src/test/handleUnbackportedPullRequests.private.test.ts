@@ -16,6 +16,7 @@ describe('Handle unbackported pull requests', () => {
     });
 
     const expectedCommit: Commit = {
+      author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
       sourceCommit: {
         committedDate: '2021-12-16T00:03:34Z',
         message: 'Change Barca to Braithwaite (#8)',

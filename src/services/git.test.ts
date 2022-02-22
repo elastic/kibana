@@ -161,7 +161,7 @@ describe('isLocalConfigFileModified', () => {
 });
 
 describe('getRepoInfoFromGitRemotes', () => {
-  it('returns repoName and repoOwner for every remote', async () => {
+  it('returns repoName and repoOwner ssh remotes', async () => {
     const res = {
       stdout:
         'john.doe\tgit@github.com:john.doe/kibana (fetch)\n' +
@@ -180,6 +180,18 @@ describe('getRepoInfoFromGitRemotes', () => {
       { repoName: 'kibana', repoOwner: 'elastic' },
       { repoName: 'kibana', repoOwner: 'peter' },
       { repoName: 'kibana', repoOwner: 'sqren' },
+    ]);
+  });
+
+  it('returns repoName and repoOwner https remotes', async () => {
+    jest.spyOn(childProcess, 'exec').mockResolvedValue({
+      stdout:
+        'origin\thttps://github.com/shay/elasticsearch.git (fetch)\n' +
+        'origin\thttps://github.com/shay/elasticsearch.git (push)\n',
+      stderr: '',
+    });
+    expect(await getRepoInfoFromGitRemotes({ cwd: 'foo/bar' })).toEqual([
+      { repoName: 'elasticsearch', repoOwner: 'shay' },
     ]);
   });
 
@@ -535,6 +547,7 @@ describe('commitChanges', () => {
   } as ValidConfigOptions;
 
   const commit: Commit = {
+    author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
     sourceCommit: {
       message: 'The original commit message',
       committedDate: '2020',

@@ -13,6 +13,7 @@ describe('entrypoint.module', () => {
 
     const expectedCommits: Commit[] = [
       {
+        author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
         sourceCommit: {
           committedDate: '2020-08-15T10:44:04Z',
           message: 'Add family emoji (#2)',

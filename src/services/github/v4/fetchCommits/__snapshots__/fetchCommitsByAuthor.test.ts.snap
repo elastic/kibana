@@ -52,6 +52,10 @@ fragment SourceCommitWithTargetPullRequestFragment on Commit {
   sha: oid
   message
   committedDate
+  author {
+    name
+    email
+  }
   associatedPullRequests(first: 1) {
     edges {
       node {

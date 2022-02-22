@@ -34,6 +34,7 @@ export function getMockSourceCommit({
   const defaultSourceCommitSha = 'DO NOT USE: default-source-commit-sha';
 
   const baseMockCommit: SourceCommitWithTargetPullRequest = {
+    author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
     repository: {
       name: 'kibana',
       owner: { login: 'elastic' },

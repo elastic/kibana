@@ -27,6 +27,7 @@
     "prepare": "husky install",
     "prepublishOnly": "yarn lint && yarn tsc",
     "extractPackageVersion": "node -p \"'export const PACKAGE_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" | prettier > src/utils/packageVersion.ts",
+    "lint-and-test": "yarn tsc && yarn lint && yarn test-all",
     "lint": "echo \"Running lint\" && eslint './**/*.{ts,js}'",
     "start": "ts-node --transpile-only ./src/entrypoint.cli.ts",
     "test-all": "jest --config ./jest.config.all.js",

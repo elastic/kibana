@@ -21,6 +21,10 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '10',
               message: 'First commit (#1)',
@@ -45,6 +49,7 @@ describe('getCommitsWithoutBackports', () => {
       return getCommitsWithoutBackports({
         options: {} as ValidConfigOptions,
         commit: {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: '100',
             message: 'Second commit (#2)',
@@ -134,6 +139,10 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: offendingCommitDate,
               message: 'First commit (#1)',
@@ -165,6 +174,7 @@ describe('getCommitsWithoutBackports', () => {
       return getCommitsWithoutBackports({
         options: {} as ValidConfigOptions,
         commit: {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: currentCommitDate,
             message: 'Second commit (#2)',
@@ -218,6 +228,10 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '10',
               message: 'First commit (#1)',
@@ -251,6 +265,7 @@ describe('getCommitsWithoutBackports', () => {
 
         // commit that is being backported
         commit: {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: '100',
             message: 'Second commit (#2)',
@@ -297,6 +312,10 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '10',
               sha: 'xyz',
@@ -313,6 +332,7 @@ describe('getCommitsWithoutBackports', () => {
       const commitsWithoutBackports = await getCommitsWithoutBackports({
         options: {} as ValidConfigOptions,
         commit: {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: '100',
             message: 'Second commit (#2)',

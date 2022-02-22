@@ -4,6 +4,7 @@ import { getRepoInfoFromGitRemotes } from '../../git';
 import { logger } from '../../logger';
 import { apiRequestV4, GithubV4Exception } from './apiRequestV4';
 
+// This method should be used to get the origin owner (instead of a fork owner)
 export async function getRepoOwnerAndNameFromGitRemotes({
   accessToken,
   githubApiBaseUrlV4,

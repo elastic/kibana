@@ -59,7 +59,7 @@ export async function cherrypickAndCreateTargetPullRequest({
   }
 
   if (options.dryRun) {
-    ora(options.ci).succeed('Dry run');
+    ora(options.ci).succeed('Dry run complete');
     return { url: 'https://localhost/dry-run', didUpdate: false, number: 1337 };
   }
 

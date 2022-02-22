@@ -271,6 +271,5 @@ See [CONTRIBUTING.md](https://github.com/sqren/backport/blob/master/CONTRIBUTING
 [1]: https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt--x
 [2]: https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax
 
-[![Build Status](https://travis-ci.com/sqren/backport.svg?branch=master)](https://app.travis-ci.com/github/sqren/backport)
 [![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
 [![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)

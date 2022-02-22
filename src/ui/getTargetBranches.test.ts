@@ -28,6 +28,7 @@ describe('getTargetBranches', () => {
 
       const commits: Commit[] = [
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: 'aaa',
             message: 'hey',
@@ -137,6 +138,7 @@ describe('getTargetBranches', () => {
 
       const commits: Commit[] = [
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: 'bbb',
             message: '[backport] Bump to 5.1.3 (#62286)',

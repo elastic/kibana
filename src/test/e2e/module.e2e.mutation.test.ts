@@ -5,6 +5,8 @@ import { getDevAccessToken } from '../private/getDevAccessToken';
 import { getSandboxPath, resetSandbox } from '../sandbox';
 
 jest.unmock('find-up');
+jest.unmock('del');
+jest.unmock('make-dir');
 
 jest.setTimeout(15000);
 
@@ -59,6 +61,7 @@ describe('backport e2e', () => {
       expect(res).toEqual({
         commits: [
           {
+            author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
             expectedTargetPullRequests: [],
             sourceBranch: 'master',
             sourceCommit: {
@@ -81,7 +84,7 @@ describe('backport e2e', () => {
           },
         ],
         status: 'success',
-      });
+      } as BackportResponse);
     });
 
     it('pull request: status code', async () => {
@@ -169,6 +172,7 @@ describe('backport e2e', () => {
       expect(res).toEqual({
         commits: [
           {
+            author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
             expectedTargetPullRequests: [],
             sourceBranch: 'master',
             sourceCommit: {
@@ -179,6 +183,7 @@ describe('backport e2e', () => {
             sourcePullRequest: undefined,
           },
           {
+            author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
             expectedTargetPullRequests: [],
             sourceBranch: 'master',
             sourceCommit: {
@@ -201,7 +206,7 @@ describe('backport e2e', () => {
           },
         ],
         status: 'success',
-      });
+      } as BackportResponse);
     });
 
     it('pull request: status code', async () => {
@@ -298,6 +303,7 @@ describe('backport e2e', () => {
       expect(res).toEqual({
         commits: [
           {
+            author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
             expectedTargetPullRequests: [],
             sourceBranch: 'master',
             sourceCommit: {
@@ -320,7 +326,7 @@ describe('backport e2e', () => {
           },
         ],
         status: 'success',
-      });
+      } as BackportResponse);
     });
 
     it('creates a new branch in origin (backport-org/integration-test)', async () => {

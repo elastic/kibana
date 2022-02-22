@@ -58,6 +58,7 @@ describe('fetchCommitByPullNumber', () => {
       };
 
       const expectedCommit: Commit = {
+        author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
         sourceCommit: {
           committedDate: '2020-08-15T12:40:19Z',
           message: 'Add 🍏 emoji (#5)',

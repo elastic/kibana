@@ -8,6 +8,10 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
           edges: [
             {
               node: {
+                author: {
+                  email: 'soren.louv@elastic.co',
+                  name: 'Søren Louv-Jansen',
+                },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -22,6 +26,10 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                author: {
+                  email: 'soren.louv@elastic.co',
+                  name: 'Søren Louv-Jansen',
+                },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -55,6 +63,10 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                author: {
+                  email: 'soren.louv@elastic.co',
+                  name: 'Søren Louv-Jansen',
+                },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -125,6 +137,10 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                author: {
+                  email: 'soren.louv@elastic.co',
+                  name: 'Søren Louv-Jansen',
+                },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -139,6 +155,10 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                author: {
+                  email: 'soren.louv@elastic.co',
+                  name: 'Søren Louv-Jansen',
+                },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },

@@ -1,7 +1,6 @@
 import { access } from 'fs/promises';
 import makeDir from 'make-dir';
 import { ValidConfigOptions } from '../options/options';
-import { mockGqlRequest } from '../test/nockHelpers';
 import { getSandboxPath, resetSandbox } from '../test/sandbox';
 import * as childProcess from './child-process-promisified';
 import {
@@ -9,11 +8,10 @@ import {
   cloneRepo,
   getCommitsInMergeCommit,
   getIsCommitInBranch,
-  getSourceRepoPath,
   getIsMergeCommit,
+  getLocalRepoPath,
 } from './git';
 import { getShortSha } from './github/commitFormatters';
-import { RepoOwnerAndNameResponse } from './github/v4/getRepoOwnerAndNameFromGitRemotes';
 
 jest.unmock('del');
 jest.unmock('make-dir');
@@ -242,57 +240,50 @@ describe('git.integration', () => {
     });
   });
 
-  describe('getSourceRepoPath', () => {
-    let sourceRepo: string;
+  describe('getLocalRepoPath', () => {
+    let sandboxPath: string;
 
     beforeEach(async () => {
-      const sandboxPath = getSandboxPath({
+      sandboxPath = getSandboxPath({
         filename: __filename,
-        specname: 'getSourceRepoPath',
+        specname: 'getLocalRepoPath',
       });
-      sourceRepo = `${sandboxPath}/source-repo`;
-
       await resetSandbox(sandboxPath);
-      await makeDir(sourceRepo);
 
-      const execOpts = { cwd: sourceRepo };
+      const execOpts = { cwd: sandboxPath };
       await childProcess.exec(`git init`, execOpts);
+
       await childProcess.exec(
-        `git remote add origin git@github.com:elastic/kibana.git`,
+        `git remote add sqren git@github.com:sqren/kibana.git`,
         execOpts
       );
 
-      mockRepoOwnerAndName({
-        childRepoOwner: 'sqren',
-        parentRepoOwner: 'elastic',
-        repoName: 'kibana',
-      });
+      await childProcess.exec(
+        `git remote add elastic git@github.com:elastic/kibana.git`,
+        execOpts
+      );
     });
 
     it('returns local source repo, when one remote matches', async () => {
       const options = {
-        accessToken: 'verysecret',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        cwd: sourceRepo,
+        cwd: sandboxPath,
         githubApiBaseUrlV4: 'http://localhost/graphql', // required to mock the response
       } as ValidConfigOptions;
 
-      expect(await getSourceRepoPath(options)).toBe(sourceRepo);
+      expect(await getLocalRepoPath(options)).toBe(sandboxPath);
     });
 
-    it("returns remote source repo when remotes don't match", async () => {
+    it('returns undefined when no remotes match', async () => {
       const options = {
-        accessToken: 'verysecret',
         repoName: 'kibana',
         repoOwner: 'not-a-match',
-        cwd: sourceRepo,
+        cwd: sandboxPath,
         githubApiBaseUrlV4: 'http://localhost/graphql', // required to mock the response
       } as ValidConfigOptions;
 
-      expect(await getSourceRepoPath(options)).toBe(
-        'https://x-access-token:verysecret@github.com/not-a-match/kibana.git'
-      );
+      expect(await getLocalRepoPath(options)).toBe(undefined);
     });
   });
 
@@ -416,38 +407,4 @@ async function getCurrentMessage(execOpts: { cwd: string }) {
     execOpts
   );
   return stdout.trim();
-}
-
-function mockRepoOwnerAndName({
-  repoName,
-  parentRepoOwner,
-  childRepoOwner,
-}: {
-  repoName: string;
-  childRepoOwner: string;
-  parentRepoOwner?: string;
-}) {
-  return mockGqlRequest<RepoOwnerAndNameResponse>({
-    name: 'RepoOwnerAndName',
-    statusCode: 200,
-    body: {
-      data: {
-        // @ts-expect-error
-        repository: {
-          isFork: !!parentRepoOwner,
-          name: repoName,
-          owner: {
-            login: childRepoOwner,
-          },
-          parent: parentRepoOwner
-            ? {
-                owner: {
-                  login: parentRepoOwner,
-                },
-              }
-            : null,
-        },
-      },
-    },
-  });
 }

@@ -200,6 +200,7 @@ describe('parseSourceCommit', () => {
     });
 
     const expectedCommit: Commit = {
+      author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
       sourceCommit: {
         committedDate: '2021-12-22T00:00:00Z',
         message: 'My commit message (#1234)',

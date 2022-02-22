@@ -8,6 +8,10 @@ describe('getPullRequestBody', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 55,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
@@ -49,6 +53,10 @@ describe('getPullRequestBody', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '',
               sha: 'abcdefghijklmw',
@@ -81,6 +89,10 @@ describe('getPullRequestBody', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 55,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
@@ -101,6 +113,10 @@ describe('getPullRequestBody', () => {
           },
 
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '',
               sha: 'qwertyuiop',
@@ -140,6 +156,10 @@ describe('getPullRequestBody', () => {
               sha: 'e8df5eaa4db7b94474b48e2320b02d33a830d9fb',
             },
 
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 1,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/1',
@@ -161,6 +181,10 @@ describe('getPullRequestBody', () => {
               sha: '5411b1c1144093e422220008f23f2c2b909ed113',
             },
 
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 1,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/1',
@@ -201,6 +225,10 @@ describe('getPullRequestBody', () => {
         } as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 55,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
@@ -218,6 +246,10 @@ describe('getPullRequestBody', () => {
             expectedTargetPullRequests: [],
           },
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '',
               sha: 'qwertyuiop',
@@ -245,6 +277,10 @@ describe('getPullRequestBody', () => {
         } as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 55,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
@@ -265,6 +301,10 @@ describe('getPullRequestBody', () => {
           },
 
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '',
               sha: 'qwertyuiop',
@@ -302,6 +342,10 @@ describe('getTitle', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceBranch: 'main',
             sourcePullRequest: {
               number: 55,
@@ -319,6 +363,10 @@ describe('getTitle', () => {
             expectedTargetPullRequests: [],
           },
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 56,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/56',
@@ -349,6 +397,10 @@ describe('getTitle', () => {
         } as ValidConfigOptions,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourcePullRequest: {
               number: 55,
               url: 'https://github.com/backport-org/different-merge-strategies/pull/55',

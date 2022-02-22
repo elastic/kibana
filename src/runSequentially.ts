@@ -4,7 +4,7 @@ import { logger, consoleLog } from './services/logger';
 import { sequentially } from './services/sequentially';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { cherrypickAndCreateTargetPullRequest } from './ui/cherrypickAndCreateTargetPullRequest';
-import { maybeSetupRepo } from './ui/maybeSetupRepo';
+import { setupRepo } from './ui/setupRepo';
 
 export type Result =
   | {
@@ -32,7 +32,7 @@ export async function runSequentially({
   targetBranches: string[];
 }): Promise<Result[]> {
   logger.verbose('Backport options', options);
-  await maybeSetupRepo(options);
+  await setupRepo(options, commits);
   const results = [] as Result[];
   await sequentially(targetBranches, async (targetBranch) => {
     logger.info(`Backporting ${JSON.stringify(commits)} to ${targetBranch}`);

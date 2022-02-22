@@ -43,6 +43,10 @@ fragment SourceCommitWithTargetPullRequestFragment on Commit {
   sha: oid
   message
   committedDate
+  author {
+    name
+    email
+  }
   associatedPullRequests(first: 1) {
     edges {
       node {
@@ -125,6 +129,10 @@ fragment RemoteConfigHistoryFragment on Commit {
 exports[`fetchCommitsByAuthor snapshot request/response returns the correct response 1`] = `
 Array [
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -155,6 +163,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [],
     "sourceBranch": "main",
     "sourceCommit": Object {
@@ -172,6 +184,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -202,6 +218,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -256,6 +276,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -299,6 +323,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -329,6 +357,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -389,6 +421,10 @@ Co-authored-by: Kibana Machine <42973632+kibanamachine@users.noreply.github.com>
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -419,6 +455,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -449,6 +489,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
     },
   },
   Object {
+    "author": Object {
+      "email": "soren.louv@elastic.co",
+      "name": "Søren Louv-Jansen",
+    },
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",

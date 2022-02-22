@@ -290,9 +290,13 @@ describe('getCommentBody', () => {
             error: new HandledError({
               code: 'merge-conflict-exception',
               commitsWithoutBackports: [
-                //@ts-expect-error
                 {
+                  formatted: 'some-formatted-text',
                   commit: {
+                    author: {
+                      email: 'soren.louv@elastic.co',
+                      name: 'Søren Louv-Jansen',
+                    },
                     sourceBranch: 'master',
                     sourcePullRequest: {
                       number: 5,
@@ -310,10 +314,14 @@ describe('getCommentBody', () => {
                     expectedTargetPullRequests: [],
                   },
                 },
-
                 {
-                  //@ts-expect-error
+                  formatted: 'some-formatted-text',
                   commit: {
+                    author: {
+                      email: 'soren.louv@elastic.co',
+                      name: 'Søren Louv-Jansen',
+                    },
+                    sourceBranch: 'master',
                     sourcePullRequest: {
                       number: 44,
                       url: 'url-to-pr-44',
@@ -327,6 +335,7 @@ describe('getCommentBody', () => {
                       sha: '',
                       message: 'Australia commit',
                     },
+                    expectedTargetPullRequests: [],
                   },
                 },
               ],

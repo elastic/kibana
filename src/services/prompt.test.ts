@@ -7,6 +7,7 @@ describe('prompt', () => {
     it('should display status badges via `expectedTargetPullRequests`', () => {
       const commits: Commit[] = [
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceBranch: 'master',
           sourceCommit: {
             committedDate: '1',
@@ -46,6 +47,7 @@ describe('prompt', () => {
     it('should list choices', () => {
       const commits: Commit[] = [
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceBranch: 'master',
           sourceCommit: {
             committedDate: '',
@@ -64,6 +66,7 @@ describe('prompt', () => {
           expectedTargetPullRequests: [],
         },
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceBranch: 'master',
           sourceCommit: {
             committedDate: '',
@@ -83,6 +86,7 @@ describe('prompt', () => {
           expectedTargetPullRequests: [],
         },
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceBranch: 'master',
           sourceCommit: {
             committedDate: '',
@@ -102,6 +106,7 @@ describe('prompt', () => {
           expectedTargetPullRequests: [],
         },
         {
+          author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
           sourceBranch: 'master',
           sourceCommit: {
             committedDate: '',

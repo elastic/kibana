@@ -7,7 +7,6 @@ import { HandledError } from './HandledError';
 import { execAsCallback, exec } from './child-process-promisified';
 import { getRepoPath } from './env';
 import { getShortSha } from './github/commitFormatters';
-import { getRepoOwnerAndNameFromGitRemotes } from './github/v4/getRepoOwnerAndNameFromGitRemotes';
 import { logger } from './logger';
 import { ExpectedTargetPullRequest } from './sourceCommit/getExpectedTargetPullRequests';
 import { Commit } from './sourceCommit/parseSourceCommit';
@@ -116,7 +115,9 @@ export async function getRepoInfoFromGitRemotes({ cwd }: { cwd: string }) {
     const remotes = stdout
       .split('\n')
       .map((line) => {
-        const match = line.match(/.+github.com:(.+?)(.git)? \((fetch|push)\)/);
+        const match = line.match(
+          /github.com[/|:](.+?)(.git)? \((fetch|push)\)/
+        );
         return match?.[1];
       })
       .filter(filterNil);
@@ -130,7 +131,7 @@ export async function getRepoInfoFromGitRemotes({ cwd }: { cwd: string }) {
   }
 }
 
-export async function getGitProjectRoot(dir: string) {
+export async function getGitProjectRootPath(dir: string) {
   try {
     const { stdout } = await exec('git rev-parse --show-toplevel', {
       cwd: dir,
@@ -422,6 +423,38 @@ export async function setCommitAuthor(
   }
 }
 
+export async function getGitConfig({
+  dir,
+  key,
+}: {
+  dir: string;
+  key: 'user.name' | 'user.email';
+}) {
+  try {
+    const res = await exec(`git config ${key}`, { cwd: dir });
+    return res.stdout;
+  } catch (e) {
+    return;
+  }
+}
+
+export async function setGitConfig({
+  dir,
+  key,
+  value,
+}: {
+  dir: string;
+  key: 'user.name' | 'user.email';
+  value: string;
+}) {
+  try {
+    await exec(`git config ${key} ${value}`, { cwd: dir });
+  } catch (e) {
+    logger.error(`Could not set git config: ${key}=${value}`, e);
+    return;
+  }
+}
+
 // How the commit flows:
 // ${sourceBranch} ->   ${backportBranch}   -> ${targetBranch}
 //     master      ->  backport/7.x/pr-1234 ->      7.x
@@ -502,6 +535,7 @@ export async function pushBackportBranch({
       `git push ${repoForkOwner} ${backportBranch}:${backportBranch} --force`,
       { cwd: getRepoPath(options) }
     );
+
     spinner.succeed();
     return res;
   } catch (e) {
@@ -517,16 +551,14 @@ export async function pushBackportBranch({
   }
 }
 
-export async function getSourceRepoPath(options: ValidConfigOptions) {
-  const gitRemote = await getRepoOwnerAndNameFromGitRemotes(options);
+// retrieve path to local repo (cwd) if it matches `repoName` / `repoOwner`
+export async function getLocalRepoPath(options: ValidConfigOptions) {
+  const remotes = await getRepoInfoFromGitRemotes({ cwd: options.cwd });
+  const hasMatchingGitRemote = remotes.some(
+    (remote) =>
+      remote.repoName === options.repoName &&
+      remote.repoOwner === options.repoOwner
+  );
 
-  // where to fetch the repo from (either remotely from Github or from a local path)
-  const remoteUrl = getRemoteUrl(options, options.repoOwner);
-  const sourcePath =
-    options.repoName === gitRemote.repoName &&
-    options.repoOwner === gitRemote.repoOwner
-      ? (await getGitProjectRoot(options.cwd)) ?? remoteUrl
-      : remoteUrl;
-
-  return sourcePath;
+  return hasMatchingGitRemote ? getGitProjectRootPath(options.cwd) : undefined;
 }

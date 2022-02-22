@@ -19,6 +19,10 @@ fragment SourceCommitWithTargetPullRequestFragment on Commit {
   sha: oid
   message
   committedDate
+  author {
+    name
+    email
+  }
   associatedPullRequests(first: 1) {
     edges {
       node {
@@ -100,6 +104,10 @@ fragment RemoteConfigHistoryFragment on Commit {
 
 exports[`fetchCommitBySha snapshot request/response returns the correct response 1`] = `
 Object {
+  "author": Object {
+    "email": "soren.louv@elastic.co",
+    "name": "Søren Louv-Jansen",
+  },
   "expectedTargetPullRequests": Array [
     Object {
       "branch": "8.0",

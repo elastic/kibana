@@ -42,6 +42,7 @@ describe('fetchPullRequestBySearchQuery', () => {
 
       const expectedCommits: Commit[] = [
         {
+          author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: '2020-08-16T21:44:28Z',
             message: 'Add sheep emoji (#9)',
@@ -66,6 +67,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           ],
         },
         {
+          author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
           sourceCommit: {
             committedDate: '2020-08-15T12:40:19Z',
             message: 'Add 🍏 emoji (#5)',

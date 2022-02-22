@@ -64,6 +64,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
       const commits: Commit[] = [
         {
+          author: {
+            email: 'soren.louv@elastic.co',
+            name: 'Søren Louv-Jansen',
+          },
           sourceBranch: '7.x',
           sourceCommit: {
             committedDate: 'fff',
@@ -81,6 +85,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           expectedTargetPullRequests: [],
         },
         {
+          author: {
+            email: 'soren.louv@elastic.co',
+            name: 'Søren Louv-Jansen',
+          },
           sourceBranch: '7.x',
           sourceCommit: {
             committedDate: 'ggg',
@@ -192,6 +200,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
       const commits: Commit[] = [
         {
+          author: {
+            email: 'soren.louv@elastic.co',
+            name: 'Søren Louv-Jansen',
+          },
           sourceCommit: {
             committedDate: 'hhh',
             sha: 'mySha',
@@ -287,6 +299,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         options,
         commits: [
           {
+            author: {
+              email: 'soren.louv@elastic.co',
+              name: 'Søren Louv-Jansen',
+            },
             sourceCommit: {
               committedDate: '2021-08-18T16:11:38Z',
               sha: 'mySha',

@@ -74,6 +74,7 @@ describe('allFetchers', () => {
 
   it('returns correct response for commitByAuthor', async () => {
     const expectedCommit: Commit = {
+      author: { email: 'soren.louv@elastic.co', name: 'Søren Louv-Jansen' },
       sourceCommit: {
         committedDate: '2021-12-20T14:20:16Z',
         message: '[APM] Add note about synthtrace to APM docs (#121633)',

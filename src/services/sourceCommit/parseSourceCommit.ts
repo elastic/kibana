@@ -10,6 +10,7 @@ import {
 } from './getExpectedTargetPullRequests';
 
 export interface Commit {
+  author: SourceCommitWithTargetPullRequest['author'];
   sourceCommit: {
     committedDate: string;
     message: string;
@@ -91,6 +92,11 @@ export type SourceCommitWithTargetPullRequest = {
   sha: string;
   message: string;
   committedDate: string;
+  author: {
+    name: string;
+    email: string;
+  };
+
   associatedPullRequests: {
     edges: { node: SourcePullRequestNode }[] | null;
   };
@@ -110,6 +116,7 @@ export function parseSourceCommit({
     sourceCommit.associatedPullRequests.edges?.[0]?.node;
 
   return {
+    author: sourceCommit.author,
     sourceCommit: {
       committedDate: sourceCommit.committedDate,
       message: sourceCommit.message,
@@ -145,6 +152,11 @@ export const SourceCommitWithTargetPullRequestFragment = gql`
     sha: oid
     message
     committedDate
+
+    author {
+      name
+      email
+    }
 
     # Source pull request: PR where source commit was merged in
     associatedPullRequests(first: 1) {

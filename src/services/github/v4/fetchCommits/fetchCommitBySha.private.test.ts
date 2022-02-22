@@ -49,6 +49,7 @@ describe('fetchCommitBySha', () => {
 
   it('should return single commit with pull request', async () => {
     const expectedCommit: Commit = {
+      author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
       sourceCommit: {
         committedDate: '2020-07-07T20:40:28Z',
         message: '[APM] Add API tests (#70740)',
