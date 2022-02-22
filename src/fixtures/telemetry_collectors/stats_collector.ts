@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CollectorSet } from '../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../core/server/logging/logger.mock';
+import { createUsageCollectionSetupMock } from '../../plugins/usage_collection/server/mocks';
 
-const { makeStatsCollector } = new CollectorSet({
-  logger: loggerMock.create(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+const { makeStatsCollector } = createUsageCollectionSetupMock();
 
 interface Usage {
   some_field: string;

@@ -6,15 +6,17 @@
  */
 
 import type {
+  ExceptionListItemSchema,
   ExportExceptionDetails,
+  FoundExceptionListItemSchema,
   IdOrUndefined,
   ListIdOrUndefined,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 
-import { findExceptionListItem } from './find_exception_list_item';
+import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';
 
 interface ExportExceptionListAndItemsOptions {
@@ -45,20 +47,23 @@ export const exportExceptionListAndItems = async ({
   if (exceptionList == null) {
     return null;
   } else {
-    // TODO: Will need to address this when we switch over to
-    // using PIT, don't want it to get lost
-    // https://github.com/elastic/kibana/issues/103944
-    const listItems = await findExceptionListItem({
+    // Stream the results from the Point In Time (PIT) finder into this array
+    let exceptionItems: ExceptionListItemSchema[] = [];
+    const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+      exceptionItems = [...exceptionItems, ...response.data];
+    };
+
+    await findExceptionListItemPointInTimeFinder({
+      executeFunctionOnStream,
       filter: undefined,
       listId: exceptionList.list_id,
+      maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
       namespaceType: exceptionList.namespace_type,
-      page: 1,
-      perPage: 10000,
+      perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
       savedObjectsClient,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',
     });
-    const exceptionItems = listItems?.data ?? [];
     const { exportData } = getExport([exceptionList, ...exceptionItems]);
 
     // TODO: Add logic for missing lists and items on errors
