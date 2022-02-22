@@ -61,9 +61,7 @@ export async function SecuritySolutionCypressCliTestRunnerCI(
   ciCount: number,
   ciNumber: number
 ) {
-  console.error('>>>>>>> SecuritySolutionCypressCliTestRunnerCI', ciCount, ciNumber);
   const integrations = retrieveIntegrations(ciCount);
-  console.log('TA TA TA', JSON.stringify(integrations, null, 2));
   return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:spec', {
     SPEC_LIST: integrations[ciNumber - 1].join(','),
   });
