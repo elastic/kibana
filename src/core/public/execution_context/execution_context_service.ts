@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { Labels } from 'elastic-apm-node';
 import { isEqual, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { CoreService, KibanaExecutionContext } from '../../types';
+
+// Should be exported from elastic/apm-rum
+export type LabelValue = string | number | boolean;
+
+export interface Labels {
+  [key: string]: LabelValue;
+}
 
 /** @public */
 export interface ExecutionContextSetup {
