@@ -73,6 +73,8 @@ export interface Configuration {
 }
 
 export interface SourceDataItem {
+  name: string;
+  iconName: string;
   serviceType: string;
   externalServiceType?: string; // the service type of the external version of this connector
   configuration: Configuration;

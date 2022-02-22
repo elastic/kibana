@@ -57,6 +57,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.BOX,
     iconName: SOURCE_NAMES.BOX,
     internal: {
+      name: SOURCE_NAMES.BOX,
+      iconName: SOURCE_NAMES.BOX,
       serviceType: 'box',
       addPath: ADD_BOX_PATH,
       editPath: EDIT_BOX_PATH,
@@ -89,6 +91,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.CONFLUENCE,
     iconName: SOURCE_NAMES.CONFLUENCE,
     internal: {
+      name: SOURCE_NAMES.CONFLUENCE,
+      iconName: SOURCE_NAMES.CONFLUENCE,
       serviceType: 'confluence_cloud',
       addPath: ADD_CONFLUENCE_PATH,
       editPath: EDIT_CONFLUENCE_PATH,
@@ -126,6 +130,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
     iconName: SOURCE_NAMES.CONFLUENCE_SERVER,
     internal: {
+      name: SOURCE_NAMES.CONFLUENCE_SERVER,
+      iconName: SOURCE_NAMES.CONFLUENCE_SERVER,
       serviceType: 'confluence_server',
       addPath: ADD_CONFLUENCE_SERVER_PATH,
       editPath: EDIT_CONFLUENCE_SERVER_PATH,
@@ -161,6 +167,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.DROPBOX,
     iconName: SOURCE_NAMES.DROPBOX,
     internal: {
+      name: SOURCE_NAMES.DROPBOX,
+      iconName: SOURCE_NAMES.DROPBOX,
       serviceType: 'dropbox',
       addPath: ADD_DROPBOX_PATH,
       editPath: EDIT_DROPBOX_PATH,
@@ -193,6 +201,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.GITHUB,
     iconName: SOURCE_NAMES.GITHUB,
     internal: {
+      name: SOURCE_NAMES.GITHUB,
+      iconName: SOURCE_NAMES.GITHUB,
       serviceType: 'github',
       addPath: ADD_GITHUB_PATH,
       editPath: EDIT_GITHUB_PATH,
@@ -232,6 +242,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
     iconName: SOURCE_NAMES.GITHUB_ENTERPRISE,
     internal: {
+      name: SOURCE_NAMES.GITHUB_ENTERPRISE,
+      iconName: SOURCE_NAMES.GITHUB_ENTERPRISE,
       serviceType: 'github_enterprise_server',
       addPath: ADD_GITHUB_ENTERPRISE_PATH,
       editPath: EDIT_GITHUB_ENTERPRISE_PATH,
@@ -277,6 +289,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.GMAIL,
     iconName: SOURCE_NAMES.GMAIL,
     internal: {
+      name: SOURCE_NAMES.GMAIL,
+      iconName: SOURCE_NAMES.GMAIL,
       serviceType: 'gmail',
       addPath: ADD_GMAIL_PATH,
       editPath: EDIT_GMAIL_PATH,
@@ -302,6 +316,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.GOOGLE_DRIVE,
     iconName: SOURCE_NAMES.GOOGLE_DRIVE,
     internal: {
+      name: SOURCE_NAMES.GOOGLE_DRIVE,
+      iconName: SOURCE_NAMES.GOOGLE_DRIVE,
       serviceType: 'google_drive',
       addPath: ADD_GOOGLE_DRIVE_PATH,
       editPath: EDIT_GOOGLE_DRIVE_PATH,
@@ -338,6 +354,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.JIRA,
     iconName: SOURCE_NAMES.JIRA,
     internal: {
+      name: SOURCE_NAMES.JIRA,
+      iconName: SOURCE_NAMES.JIRA,
       serviceType: 'jira_cloud',
       addPath: ADD_JIRA_PATH,
       editPath: EDIT_JIRA_PATH,
@@ -377,6 +395,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.JIRA_SERVER,
     iconName: SOURCE_NAMES.JIRA_SERVER,
     internal: {
+      name: SOURCE_NAMES.JIRA_SERVER,
+      iconName: SOURCE_NAMES.JIRA_SERVER,
       serviceType: 'jira_server',
       addPath: ADD_JIRA_SERVER_PATH,
       editPath: EDIT_JIRA_SERVER_PATH,
@@ -415,6 +435,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.ONEDRIVE,
     iconName: SOURCE_NAMES.ONEDRIVE,
     internal: {
+      name: SOURCE_NAMES.ONEDRIVE,
+      iconName: SOURCE_NAMES.ONEDRIVE,
       serviceType: 'one_drive',
       addPath: ADD_ONEDRIVE_PATH,
       editPath: EDIT_ONEDRIVE_PATH,
@@ -447,6 +469,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.SALESFORCE,
     iconName: SOURCE_NAMES.SALESFORCE,
     internal: {
+      name: SOURCE_NAMES.SALESFORCE,
+      iconName: SOURCE_NAMES.SALESFORCE,
       serviceType: 'salesforce',
       addPath: ADD_SALESFORCE_PATH,
       editPath: EDIT_SALESFORCE_PATH,
@@ -486,6 +510,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
     internal: {
+      name: SOURCE_NAMES.SALESFORCE_SANDBOX,
+      iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
       serviceType: 'salesforce_sandbox',
       addPath: ADD_SALESFORCE_SANDBOX_PATH,
       editPath: EDIT_SALESFORCE_SANDBOX_PATH,
@@ -525,6 +551,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.SERVICENOW,
     iconName: SOURCE_NAMES.SERVICENOW,
     internal: {
+      name: SOURCE_NAMES.SERVICENOW,
+      iconName: SOURCE_NAMES.SERVICENOW,
       serviceType: 'service_now',
       addPath: ADD_SERVICENOW_PATH,
       editPath: EDIT_SERVICENOW_PATH,
@@ -561,6 +589,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.SHAREPOINT,
     iconName: SOURCE_NAMES.SHAREPOINT,
     internal: {
+      name: SOURCE_NAMES.SHAREPOINT,
+      iconName: SOURCE_NAMES.SHAREPOINT,
       serviceType: 'share_point',
       addPath: ADD_SHAREPOINT_PATH,
       editPath: EDIT_SHAREPOINT_PATH,
@@ -589,6 +619,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
       accountContextOnly: false,
     },
     external: {
+      name: SOURCE_NAMES.SHAREPOINT,
+      iconName: SOURCE_NAMES.SHAREPOINT,
       serviceType: 'external',
       addPath: ADD_EXTERNAL_PATH,
       editPath: EDIT_EXTERNAL_PATH,
@@ -621,6 +653,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.SLACK,
     iconName: SOURCE_NAMES.SLACK,
     internal: {
+      name: SOURCE_NAMES.SLACK,
+      iconName: SOURCE_NAMES.SLACK,
       serviceType: 'slack',
       addPath: ADD_SLACK_PATH,
       editPath: EDIT_SLACK_PATH,
@@ -650,6 +684,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.ZENDESK,
     iconName: SOURCE_NAMES.ZENDESK,
     internal: {
+      name: SOURCE_NAMES.ZENDESK,
+      iconName: SOURCE_NAMES.ZENDESK,
       serviceType: 'zendesk',
       addPath: ADD_ZENDESK_PATH,
       editPath: EDIT_ZENDESK_PATH,
@@ -682,6 +718,8 @@ export const staticSourceConfig: SourceDataConfig[] = [
     name: SOURCE_NAMES.CUSTOM,
     iconName: SOURCE_NAMES.CUSTOM,
     internal: {
+      name: SOURCE_NAMES.CUSTOM,
+      iconName: SOURCE_NAMES.CUSTOM,
       serviceType: 'custom',
       addPath: ADD_CUSTOM_PATH,
       editPath: EDIT_CUSTOM_PATH,

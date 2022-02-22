@@ -13,8 +13,10 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
+import { i18n } from '@kbn/i18n';
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../../../app_logic', () => ({
@@ -22,13 +24,18 @@ jest.mock('../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../app_logic';
 
+import { SOURCE_NAMES, SOURCE_OBJ_TYPES } from '../../../../constants';
 import {
   ADD_GITHUB_PATH,
   SOURCES_PATH,
   PRIVATE_SOURCES_PATH,
   getSourcesPath,
+  ADD_BOX_PATH,
+  ADD_CUSTOM_PATH,
+  EDIT_BOX_PATH,
+  EDIT_CUSTOM_PATH,
 } from '../../../../routes';
-import { CustomSource } from '../../../../types';
+import { CustomSource, FeatureIds } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -81,8 +88,56 @@ describe('AddSourceLogic', () => {
     serviceType: 'github',
     githubOrganizations: ['foo', 'bar'],
   };
+  const DEFAULT_SERVICE_TYPE = {
+    name: SOURCE_NAMES.BOX,
+    iconName: SOURCE_NAMES.BOX,
+    serviceType: 'box',
+    addPath: ADD_BOX_PATH,
+    editPath: EDIT_BOX_PATH,
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchBox,
+      applicationPortalUrl: 'https://app.box.com/developers/console',
+    },
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+  };
 
-  const CUSTOM_SERVICE_TYPE_INDEX = 17;
+  const CUSTOM_SERVICE_TYPE = {
+    name: SOURCE_NAMES.CUSTOM,
+    iconName: SOURCE_NAMES.CUSTOM,
+    serviceType: 'custom',
+    addPath: ADD_CUSTOM_PATH,
+    editPath: EDIT_CUSTOM_PATH,
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
+        defaultMessage:
+          'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
+      }),
+      documentationUrl: docLinks.workplaceSearchCustomSources,
+      applicationPortalUrl: '',
+    },
+    accountContextOnly: false,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -284,7 +339,7 @@ describe('AddSourceLogic', () => {
 
   describe('listeners', () => {
     it('initializeAddSource', () => {
-      const addSourceProps = { sourceIndex: 1 };
+      const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE };
       const getSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'getSourceConfigData');
       const setAddSourcePropsSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceProps');
       const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
@@ -299,7 +354,7 @@ describe('AddSourceLogic', () => {
     describe('getFirstStep', () => {
       it('sets custom as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceIndex: CUSTOM_SERVICE_TYPE_INDEX };
+        const addSourceProps = { sourceData: CUSTOM_SERVICE_TYPE };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureCustomStep);
@@ -307,7 +362,7 @@ describe('AddSourceLogic', () => {
 
       it('sets connect as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceIndex: 1, connect: true };
+        const addSourceProps = { sourceData: CUSTOM_SERVICE_TYPE, connect: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
@@ -315,7 +370,7 @@ describe('AddSourceLogic', () => {
 
       it('sets configure as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceIndex: 1, configure: true };
+        const addSourceProps = { sourceData: CUSTOM_SERVICE_TYPE, configure: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureOauthStep);
@@ -323,7 +378,7 @@ describe('AddSourceLogic', () => {
 
       it('sets reAuthenticate as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceIndex: 1, reAuthenticate: true };
+        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE, reAuthenticate: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
