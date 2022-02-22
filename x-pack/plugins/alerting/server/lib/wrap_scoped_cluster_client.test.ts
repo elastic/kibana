@@ -21,6 +21,7 @@ const rule = {
   name: 'test-rule',
   alertTypeId: '.test-rule-type',
   id: 'abcdefg',
+  spaceId: 'my-space',
 };
 
 describe('wrapScopedClusterClient', () => {
@@ -144,11 +145,11 @@ describe('wrapScopedClusterClient', () => {
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
     const stats = wrappedSearchClientFactory.getMetrics();
-    expect(stats.numQueries).toEqual(3);
-    expect(stats.totalQueryDurationMs).toEqual(999);
+    expect(stats.numSearches).toEqual(3);
+    expect(stats.esSearchDurationMs).toEqual(999);
 
     expect(logger.debug).toHaveBeenCalledWith(
-      `executing query for rule .test-rule-type:abcdefg - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
     );
   });
 });

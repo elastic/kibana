@@ -24,7 +24,7 @@ import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/serv
 import { ElasticsearchClientWithChild, RuleExecutionMetrics } from '../types';
 import { Alert as Rule } from '../types';
 
-type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'>;
+type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
   rule: RuleInfo;
@@ -40,20 +40,20 @@ type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'>
 };
 
 interface LogSearchMetricsOpts {
-  queryDuration: number;
-  searchDuration: number;
+  esSearchDuration: number;
+  totalSearchDuration: number;
 }
 type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
 
 export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
-  let numQueries: number = 0;
-  let totalQueryDurationMs: number = 0;
+  let numSearches: number = 0;
+  let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;
 
   function logMetrics(metrics: LogSearchMetricsOpts) {
-    numQueries++;
-    totalQueryDurationMs += metrics.queryDuration;
-    totalSearchDurationMs += metrics.searchDuration;
+    numSearches++;
+    esSearchDurationMs += metrics.esSearchDuration;
+    totalSearchDurationMs += metrics.totalSearchDuration;
   }
 
   const wrappedClient = wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics });
@@ -62,9 +62,9 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
     client: () => wrappedClient,
     getMetrics: (): RuleExecutionMetrics => {
       return {
-        totalQueryDurationMs,
+        esSearchDurationMs,
         totalSearchDurationMs,
-        numQueries,
+        numSearches,
       };
     },
   };
@@ -135,9 +135,9 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       const searchOptions = options ?? {};
       const start = Date.now();
       opts.logger.debug(
-        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} - ${JSON.stringify(
-          params
-        )} - with options ${JSON.stringify(searchOptions)}`
+        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
       );
       const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,
@@ -158,7 +158,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
         took = (result as SearchResponse<TDocument, TAggregations>).took;
       }
 
-      opts.logMetricsFn({ queryDuration: took, searchDuration: durationMs });
+      opts.logMetricsFn({ esSearchDuration: took, totalSearchDuration: durationMs });
       return result;
     } catch (e) {
       throw e;

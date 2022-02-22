@@ -175,9 +175,9 @@ describe('Task Runner Cancel', () => {
       .createWrappedScopedClusterClientFactory.mockReturnValue({
         client: () => services.scopedClusterClient,
         getMetrics: () => ({
-          numQueries: 3,
-          totalQueryDurationMs: 23423,
-          totalSearchDurationMs: 33,
+          numSearches: 3,
+          esSearchDurationMs: 33,
+          totalSearchDurationMs: 23423,
         }),
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
@@ -307,10 +307,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
-                number_of_queries: 3,
+                number_of_searches: 3,
                 number_of_triggered_actions: 0,
-                total_query_duration_ms: 23423,
-                total_search_duration_ms: 33,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -488,7 +488,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"metrics":{"numQueries":3,"totalQueryDurationMs":23423,"totalSearchDurationMs":33},"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -573,10 +573,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
-                number_of_queries: 3,
+                number_of_searches: 3,
                 number_of_triggered_actions: 0,
-                total_query_duration_ms: 23423,
-                total_search_duration_ms: 33,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -638,7 +638,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"metrics":{"numQueries":3,"totalQueryDurationMs":23423,"totalSearchDurationMs":33},"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -833,10 +833,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
-                number_of_queries: 3,
+                number_of_searches: 3,
                 number_of_triggered_actions: 1,
-                total_query_duration_ms: 23423,
-                total_search_duration_ms: 33,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },

@@ -23,9 +23,9 @@ export const ruleStateSchema = t.partial({
 });
 
 const ruleExecutionMetricsSchema = t.partial({
-  numQueries: t.number,
+  numSearches: t.number,
   totalSearchDurationMs: t.number,
-  totalQueryDurationMs: t.number,
+  esSearchDurationMs: t.number,
 });
 
 export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;

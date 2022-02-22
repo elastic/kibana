@@ -612,8 +612,8 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (event?.event?.action === 'execute' && status === 'active') {
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_queries).to.be(0);
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_query_duration_ms).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms).to.be(0);
   }
 

@@ -16,7 +16,7 @@ import {
 import { ErrorWithReason } from './error_with_reason';
 
 const MockLogger = loggingSystemMock.create().get();
-const metrics = { numQueries: 1, totalQueryDurationMs: 10, totalSearchDurationMs: 20 };
+const metrics = { numSearches: 1, esSearchDurationMs: 10, totalSearchDurationMs: 20 };
 
 describe('RuleExecutionStatus', () => {
   beforeEach(() => {

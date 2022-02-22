@@ -344,6 +344,7 @@ export class TaskRunner<
         name: rule.name,
         alertTypeId: rule.alertTypeId,
         id: rule.id,
+        spaceId,
       },
       logger: this.logger,
     });
@@ -774,13 +775,13 @@ export class TaskRunner<
     if (executionStatus.metrics) {
       set(
         event,
-        'kibana.alert.rule.execution.metrics.number_of_queries',
-        executionStatus.metrics.numQueries ?? 0
+        'kibana.alert.rule.execution.metrics.number_of_searches',
+        executionStatus.metrics.numSearches ?? 0
       );
       set(
         event,
-        'kibana.alert.rule.execution.metrics.total_query_duration_ms',
-        executionStatus.metrics.totalQueryDurationMs ?? 0
+        'kibana.alert.rule.execution.metrics.es_search_duration_ms',
+        executionStatus.metrics.esSearchDurationMs ?? 0
       );
       set(
         event,
