@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Vis } from '../../../../visualizations/public';
 import OptionsTab, { OptionsTabProps } from './options_tab';

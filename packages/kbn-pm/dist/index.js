@@ -8987,13 +8987,6 @@ const BootstrapCommand = {
     }, {
       prefix: '[vscode]',
       debug: false
-    });
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures'], {
-      cwd: kbn.getAbsolute(),
-      env: process.env
-    }, {
-      prefix: '[ts refs]',
-      debug: false
     }); // send timings
 
     await reporter.timings({
@@ -9049,7 +9042,9 @@ var _ci_stats_config = __webpack_require__(218);
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+/** A ci-stats metric record */
 
+/** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
   /**
    * Create a CiStatsReporter by inspecting the ENV for the necessary config
@@ -9146,7 +9141,7 @@ class CiStatsReporter {
       totalMem: _os.default.totalmem()
     };
     this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
-    return await this.req({
+    return !!(await this.req({
       auth: !!buildId,
       path: '/v1/timings',
       body: {
@@ -9156,7 +9151,7 @@ class CiStatsReporter {
         timings
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`
-    });
+    }));
   }
   /**
    * Report metrics data to the ci-stats service. If running outside of CI this method
@@ -9174,10 +9169,10 @@ class CiStatsReporter {
     const buildId = (_this$config4 = this.config) === null || _this$config4 === void 0 ? void 0 : _this$config4.buildId;
 
     if (!buildId) {
-      throw new Error(`CiStatsReporter can't be authorized without a buildId`);
+      throw new Error(`metrics can't be reported without a buildId`);
     }
 
-    return await this.req({
+    return !!(await this.req({
       auth: true,
       path: '/v1/metrics',
       body: {
@@ -9190,6 +9185,35 @@ class CiStatsReporter {
         id,
         value
       }) => `[${group}/${id}=${value}]`).join(' ')}`
+    }));
+  }
+  /**
+   * Send test reports to ci-stats
+   */
+
+
+  async reportTests({
+    group,
+    testRuns
+  }) {
+    var _this$config5, _this$config6, _this$config7;
+
+    if (!((_this$config5 = this.config) !== null && _this$config5 !== void 0 && _this$config5.buildId) || !((_this$config6 = this.config) !== null && _this$config6 !== void 0 && _this$config6.apiToken)) {
+      throw new Error('unable to report tests unless buildId is configured and auth config available');
+    }
+
+    return await this.req({
+      auth: true,
+      path: '/v1/test_group',
+      query: {
+        buildId: (_this$config7 = this.config) === null || _this$config7 === void 0 ? void 0 : _this$config7.buildId
+      },
+      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
+      body: [JSON.stringify({
+        group
+      }), ...testRuns.map(testRun => JSON.stringify({
+        testRun
+      }))].join('\n')
     });
   }
   /**
@@ -9239,7 +9263,8 @@ class CiStatsReporter {
     auth,
     body,
     bodyDesc,
-    path
+    path,
+    query
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -9250,22 +9275,23 @@ class CiStatsReporter {
         Authorization: `token ${this.config.apiToken}`
       };
     } else if (auth) {
-      throw new Error('this.req() shouldnt be called with auth=true if this.config is defined');
+      throw new Error('this.req() shouldnt be called with auth=true if this.config is not defined');
     }
 
     while (true) {
       attempt += 1;
 
       try {
-        await _axios.default.request({
+        const resp = await _axios.default.request({
           method: 'POST',
           url: path,
           baseURL: BASE_URL,
           headers,
           data: body,
+          params: query,
           adapter: _http.default
         });
-        return true;
+        return resp.data;
       } catch (error) {
         var _error$response;
 
@@ -10387,50 +10413,44 @@ const mimicFn = __webpack_require__(153);
 
 const calledFunctions = new WeakMap();
 
-const oneTime = (fn, options = {}) => {
-	if (typeof fn !== 'function') {
+const onetime = (function_, options = {}) => {
+	if (typeof function_ !== 'function') {
 		throw new TypeError('Expected a function');
 	}
 
-	let ret;
-	let isCalled = false;
+	let returnValue;
 	let callCount = 0;
-	const functionName = fn.displayName || fn.name || '<anonymous>';
+	const functionName = function_.displayName || function_.name || '<anonymous>';
 
-	const onetime = function (...args) {
+	const onetime = function (...arguments_) {
 		calledFunctions.set(onetime, ++callCount);
 
-		if (isCalled) {
-			if (options.throw === true) {
-				throw new Error(`Function \`${functionName}\` can only be called once`);
-			}
-
-			return ret;
+		if (callCount === 1) {
+			returnValue = function_.apply(this, arguments_);
+			function_ = null;
+		} else if (options.throw === true) {
+			throw new Error(`Function \`${functionName}\` can only be called once`);
 		}
 
-		isCalled = true;
-		ret = fn.apply(this, args);
-		fn = null;
-
-		return ret;
+		return returnValue;
 	};
 
-	mimicFn(onetime, fn);
+	mimicFn(onetime, function_);
 	calledFunctions.set(onetime, callCount);
 
 	return onetime;
 };
 
-module.exports = oneTime;
+module.exports = onetime;
 // TODO: Remove this for the next major release
-module.exports.default = oneTime;
+module.exports.default = onetime;
 
-module.exports.callCount = fn => {
-	if (!calledFunctions.has(fn)) {
-		throw new Error(`The given function \`${fn.name}\` is not wrapped by the \`onetime\` package`);
+module.exports.callCount = function_ => {
+	if (!calledFunctions.has(function_)) {
+		throw new Error(`The given function \`${function_.name}\` is not wrapped by the \`onetime\` package`);
 	}
 
-	return calledFunctions.get(fn);
+	return calledFunctions.get(function_);
 };
 
 
@@ -11154,158 +11174,203 @@ module.exports = {
 // Note: since nyc uses this module to output coverage, any lines
 // that are in the direct sync flow of nyc's outputCoverage are
 // ignored, since we can never get coverage for them.
-var assert = __webpack_require__(162)
-var signals = __webpack_require__(163)
+// grab a reference to node's real process object right away
+var process = global.process
 
-var EE = __webpack_require__(164)
+const processOk = function (process) {
+  return process &&
+    typeof process === 'object' &&
+    typeof process.removeListener === 'function' &&
+    typeof process.emit === 'function' &&
+    typeof process.reallyExit === 'function' &&
+    typeof process.listeners === 'function' &&
+    typeof process.kill === 'function' &&
+    typeof process.pid === 'number' &&
+    typeof process.on === 'function'
+}
+
+// some kind of non-node environment, just no-op
 /* istanbul ignore if */
-if (typeof EE !== 'function') {
-  EE = EE.EventEmitter
-}
-
-var emitter
-if (process.__signal_exit_emitter__) {
-  emitter = process.__signal_exit_emitter__
+if (!processOk(process)) {
+  module.exports = function () {
+    return function () {}
+  }
 } else {
-  emitter = process.__signal_exit_emitter__ = new EE()
-  emitter.count = 0
-  emitter.emitted = {}
-}
+  var assert = __webpack_require__(162)
+  var signals = __webpack_require__(163)
+  var isWin = /^win/i.test(process.platform)
 
-// Because this emitter is a global, we have to check to see if a
-// previous version of this library failed to enable infinite listeners.
-// I know what you're about to say.  But literally everything about
-// signal-exit is a compromise with evil.  Get used to it.
-if (!emitter.infinite) {
-  emitter.setMaxListeners(Infinity)
-  emitter.infinite = true
-}
-
-module.exports = function (cb, opts) {
-  assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
-
-  if (loaded === false) {
-    load()
+  var EE = __webpack_require__(164)
+  /* istanbul ignore if */
+  if (typeof EE !== 'function') {
+    EE = EE.EventEmitter
   }
 
-  var ev = 'exit'
-  if (opts && opts.alwaysLast) {
-    ev = 'afterexit'
+  var emitter
+  if (process.__signal_exit_emitter__) {
+    emitter = process.__signal_exit_emitter__
+  } else {
+    emitter = process.__signal_exit_emitter__ = new EE()
+    emitter.count = 0
+    emitter.emitted = {}
   }
 
-  var remove = function () {
-    emitter.removeListener(ev, cb)
-    if (emitter.listeners('exit').length === 0 &&
-        emitter.listeners('afterexit').length === 0) {
-      unload()
+  // Because this emitter is a global, we have to check to see if a
+  // previous version of this library failed to enable infinite listeners.
+  // I know what you're about to say.  But literally everything about
+  // signal-exit is a compromise with evil.  Get used to it.
+  if (!emitter.infinite) {
+    emitter.setMaxListeners(Infinity)
+    emitter.infinite = true
+  }
+
+  module.exports = function (cb, opts) {
+    /* istanbul ignore if */
+    if (!processOk(global.process)) {
+      return function () {}
     }
+    assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
+
+    if (loaded === false) {
+      load()
+    }
+
+    var ev = 'exit'
+    if (opts && opts.alwaysLast) {
+      ev = 'afterexit'
+    }
+
+    var remove = function () {
+      emitter.removeListener(ev, cb)
+      if (emitter.listeners('exit').length === 0 &&
+          emitter.listeners('afterexit').length === 0) {
+        unload()
+      }
+    }
+    emitter.on(ev, cb)
+
+    return remove
   }
-  emitter.on(ev, cb)
 
-  return remove
-}
+  var unload = function unload () {
+    if (!loaded || !processOk(global.process)) {
+      return
+    }
+    loaded = false
 
-module.exports.unload = unload
-function unload () {
-  if (!loaded) {
-    return
+    signals.forEach(function (sig) {
+      try {
+        process.removeListener(sig, sigListeners[sig])
+      } catch (er) {}
+    })
+    process.emit = originalProcessEmit
+    process.reallyExit = originalProcessReallyExit
+    emitter.count -= 1
   }
-  loaded = false
+  module.exports.unload = unload
 
+  var emit = function emit (event, code, signal) {
+    /* istanbul ignore if */
+    if (emitter.emitted[event]) {
+      return
+    }
+    emitter.emitted[event] = true
+    emitter.emit(event, code, signal)
+  }
+
+  // { <signal>: <listener fn>, ... }
+  var sigListeners = {}
   signals.forEach(function (sig) {
-    try {
-      process.removeListener(sig, sigListeners[sig])
-    } catch (er) {}
-  })
-  process.emit = originalProcessEmit
-  process.reallyExit = originalProcessReallyExit
-  emitter.count -= 1
-}
-
-function emit (event, code, signal) {
-  if (emitter.emitted[event]) {
-    return
-  }
-  emitter.emitted[event] = true
-  emitter.emit(event, code, signal)
-}
-
-// { <signal>: <listener fn>, ... }
-var sigListeners = {}
-signals.forEach(function (sig) {
-  sigListeners[sig] = function listener () {
-    // If there are no other listeners, an exit is coming!
-    // Simplest way: remove us and then re-send the signal.
-    // We know that this will kill the process, so we can
-    // safely emit now.
-    var listeners = process.listeners(sig)
-    if (listeners.length === emitter.count) {
-      unload()
-      emit('exit', null, sig)
-      /* istanbul ignore next */
-      emit('afterexit', null, sig)
-      /* istanbul ignore next */
-      process.kill(process.pid, sig)
-    }
-  }
-})
-
-module.exports.signals = function () {
-  return signals
-}
-
-module.exports.load = load
-
-var loaded = false
-
-function load () {
-  if (loaded) {
-    return
-  }
-  loaded = true
-
-  // This is the number of onSignalExit's that are in play.
-  // It's important so that we can count the correct number of
-  // listeners on signals, and don't wait for the other one to
-  // handle it instead of us.
-  emitter.count += 1
-
-  signals = signals.filter(function (sig) {
-    try {
-      process.on(sig, sigListeners[sig])
-      return true
-    } catch (er) {
-      return false
+    sigListeners[sig] = function listener () {
+      /* istanbul ignore if */
+      if (!processOk(global.process)) {
+        return
+      }
+      // If there are no other listeners, an exit is coming!
+      // Simplest way: remove us and then re-send the signal.
+      // We know that this will kill the process, so we can
+      // safely emit now.
+      var listeners = process.listeners(sig)
+      if (listeners.length === emitter.count) {
+        unload()
+        emit('exit', null, sig)
+        /* istanbul ignore next */
+        emit('afterexit', null, sig)
+        /* istanbul ignore next */
+        if (isWin && sig === 'SIGHUP') {
+          // "SIGHUP" throws an `ENOSYS` error on Windows,
+          // so use a supported signal instead
+          sig = 'SIGINT'
+        }
+        /* istanbul ignore next */
+        process.kill(process.pid, sig)
+      }
     }
   })
 
-  process.emit = processEmit
-  process.reallyExit = processReallyExit
-}
+  module.exports.signals = function () {
+    return signals
+  }
 
-var originalProcessReallyExit = process.reallyExit
-function processReallyExit (code) {
-  process.exitCode = code || 0
-  emit('exit', process.exitCode, null)
-  /* istanbul ignore next */
-  emit('afterexit', process.exitCode, null)
-  /* istanbul ignore next */
-  originalProcessReallyExit.call(process, process.exitCode)
-}
+  var loaded = false
 
-var originalProcessEmit = process.emit
-function processEmit (ev, arg) {
-  if (ev === 'exit') {
-    if (arg !== undefined) {
-      process.exitCode = arg
+  var load = function load () {
+    if (loaded || !processOk(global.process)) {
+      return
     }
-    var ret = originalProcessEmit.apply(this, arguments)
+    loaded = true
+
+    // This is the number of onSignalExit's that are in play.
+    // It's important so that we can count the correct number of
+    // listeners on signals, and don't wait for the other one to
+    // handle it instead of us.
+    emitter.count += 1
+
+    signals = signals.filter(function (sig) {
+      try {
+        process.on(sig, sigListeners[sig])
+        return true
+      } catch (er) {
+        return false
+      }
+    })
+
+    process.emit = processEmit
+    process.reallyExit = processReallyExit
+  }
+  module.exports.load = load
+
+  var originalProcessReallyExit = process.reallyExit
+  var processReallyExit = function processReallyExit (code) {
+    /* istanbul ignore if */
+    if (!processOk(global.process)) {
+      return
+    }
+    process.exitCode = code || /* istanbul ignore next */ 0
     emit('exit', process.exitCode, null)
     /* istanbul ignore next */
     emit('afterexit', process.exitCode, null)
-    return ret
-  } else {
-    return originalProcessEmit.apply(this, arguments)
+    /* istanbul ignore next */
+    originalProcessReallyExit.call(process, process.exitCode)
+  }
+
+  var originalProcessEmit = process.emit
+  var processEmit = function processEmit (ev, arg) {
+    if (ev === 'exit' && processOk(global.process)) {
+      /* istanbul ignore else */
+      if (arg !== undefined) {
+        process.exitCode = arg
+      }
+      var ret = originalProcessEmit.apply(this, arguments)
+      /* istanbul ignore next */
+      emit('exit', process.exitCode, null)
+      /* istanbul ignore next */
+      emit('afterexit', process.exitCode, null)
+      /* istanbul ignore next */
+      return ret
+    } else {
+      return originalProcessEmit.apply(this, arguments)
+    }
   }
 }
 
@@ -18488,7 +18553,6 @@ function pauseStreams (streams, options) {
 
 module.exports = glob
 
-var fs = __webpack_require__(132)
 var rp = __webpack_require__(245)
 var minimatch = __webpack_require__(247)
 var Minimatch = minimatch.Minimatch
@@ -18499,8 +18563,6 @@ var assert = __webpack_require__(162)
 var isAbsolute = __webpack_require__(253)
 var globSync = __webpack_require__(254)
 var common = __webpack_require__(255)
-var alphasort = common.alphasort
-var alphasorti = common.alphasorti
 var setopts = common.setopts
 var ownProp = common.ownProp
 var inflight = __webpack_require__(256)
@@ -18951,7 +19013,7 @@ Glob.prototype._readdirInGlobStar = function (abs, cb) {
   var lstatcb = inflight(lstatkey, lstatcb_)
 
   if (lstatcb)
-    fs.lstat(abs, lstatcb)
+    self.fs.lstat(abs, lstatcb)
 
   function lstatcb_ (er, lstat) {
     if (er && er.code === 'ENOENT')
@@ -18992,7 +19054,7 @@ Glob.prototype._readdir = function (abs, inGlobStar, cb) {
   }
 
   var self = this
-  fs.readdir(abs, readdirCb(this, abs, cb))
+  self.fs.readdir(abs, readdirCb(this, abs, cb))
 }
 
 function readdirCb (self, abs, cb) {
@@ -19196,13 +19258,13 @@ Glob.prototype._stat = function (f, cb) {
   var self = this
   var statcb = inflight('stat\0' + abs, lstatcb_)
   if (statcb)
-    fs.lstat(abs, statcb)
+    self.fs.lstat(abs, statcb)
 
   function lstatcb_ (er, lstat) {
     if (lstat && lstat.isSymbolicLink()) {
       // If it's a symlink, then treat it as the target, unless
       // the target does not exist, then treat it as a file.
-      return fs.stat(abs, function (er, stat) {
+      return self.fs.stat(abs, function (er, stat) {
         if (er)
           self._stat2(f, abs, null, lstat, cb)
         else
@@ -20922,7 +20984,6 @@ module.exports.win32 = win32;
 module.exports = globSync
 globSync.GlobSync = GlobSync
 
-var fs = __webpack_require__(132)
 var rp = __webpack_require__(245)
 var minimatch = __webpack_require__(247)
 var Minimatch = minimatch.Minimatch
@@ -20932,8 +20993,6 @@ var path = __webpack_require__(4)
 var assert = __webpack_require__(162)
 var isAbsolute = __webpack_require__(253)
 var common = __webpack_require__(255)
-var alphasort = common.alphasort
-var alphasorti = common.alphasorti
 var setopts = common.setopts
 var ownProp = common.ownProp
 var childrenIgnored = common.childrenIgnored
@@ -21169,7 +21228,7 @@ GlobSync.prototype._readdirInGlobStar = function (abs) {
   var lstat
   var stat
   try {
-    lstat = fs.lstatSync(abs)
+    lstat = this.fs.lstatSync(abs)
   } catch (er) {
     if (er.code === 'ENOENT') {
       // lstat failed, doesn't exist
@@ -21206,7 +21265,7 @@ GlobSync.prototype._readdir = function (abs, inGlobStar) {
   }
 
   try {
-    return this._readdirEntries(abs, fs.readdirSync(abs))
+    return this._readdirEntries(abs, this.fs.readdirSync(abs))
   } catch (er) {
     this._readdirError(abs, er)
     return null
@@ -21365,7 +21424,7 @@ GlobSync.prototype._stat = function (f) {
   if (!stat) {
     var lstat
     try {
-      lstat = fs.lstatSync(abs)
+      lstat = this.fs.lstatSync(abs)
     } catch (er) {
       if (er && (er.code === 'ENOENT' || er.code === 'ENOTDIR')) {
         this.statCache[abs] = false
@@ -21375,7 +21434,7 @@ GlobSync.prototype._stat = function (f) {
 
     if (lstat && lstat.isSymbolicLink()) {
       try {
-        stat = fs.statSync(abs)
+        stat = this.fs.statSync(abs)
       } catch (er) {
         stat = lstat
       }
@@ -21411,8 +21470,6 @@ GlobSync.prototype._makeAbs = function (f) {
 /* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports.alphasort = alphasort
-exports.alphasorti = alphasorti
 exports.setopts = setopts
 exports.ownProp = ownProp
 exports.makeAbs = makeAbs
@@ -21425,17 +21482,14 @@ function ownProp (obj, field) {
   return Object.prototype.hasOwnProperty.call(obj, field)
 }
 
+var fs = __webpack_require__(132)
 var path = __webpack_require__(4)
 var minimatch = __webpack_require__(247)
 var isAbsolute = __webpack_require__(253)
 var Minimatch = minimatch.Minimatch
 
-function alphasorti (a, b) {
-  return a.toLowerCase().localeCompare(b.toLowerCase())
-}
-
 function alphasort (a, b) {
-  return a.localeCompare(b)
+  return a.localeCompare(b, 'en')
 }
 
 function setupIgnores (self, options) {
@@ -21494,6 +21548,7 @@ function setopts (self, pattern, options) {
   self.stat = !!options.stat
   self.noprocess = !!options.noprocess
   self.absolute = !!options.absolute
+  self.fs = options.fs || fs
 
   self.maxLength = options.maxLength || Infinity
   self.cache = options.cache || Object.create(null)
@@ -21563,7 +21618,7 @@ function finish (self) {
     all = Object.keys(all)
 
   if (!self.nosort)
-    all = all.sort(self.nocase ? alphasorti : alphasort)
+    all = all.sort(alphasort)
 
   // at *some* point we statted all of these
   if (self.mark) {
@@ -51477,7 +51532,7 @@ async function sortPackageJson(kbn) {
   await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.writeFile(packageJsonPath, JSON.stringify(sort_package_json__WEBPACK_IMPORTED_MODULE_1___default()(JSON.parse(packageJson), {
     // top level keys in the order they were written when this was implemented
     sortOrder: ['name', 'description', 'keywords', 'private', 'version', 'branch', 'types', 'tsdocMetadata', 'build', 'homepage', 'bugs', 'kibana', 'author', 'scripts', 'repository', 'engines', 'resolutions']
-  }), null, 2));
+  }), null, 2) + '\n');
 }
 
 /***/ }),

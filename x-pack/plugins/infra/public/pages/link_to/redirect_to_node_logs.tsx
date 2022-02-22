@@ -17,7 +17,7 @@ import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter'
 import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { useLogSource } from '../../containers/logs/log_source';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { LinkDescriptor } from '../../hooks/use_link_props';
+import { LinkDescriptor } from '../../../../observability/public';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 

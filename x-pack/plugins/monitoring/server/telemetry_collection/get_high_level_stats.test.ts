@@ -234,7 +234,7 @@ describe('get_high_level_stats', () => {
 
   describe('getHighLevelStats', () => {
     it('returns clusters', async () => {
-      searchMock.returns(Promise.resolve({ body }));
+      searchMock.returns(Promise.resolve(body));
 
       expect(
         await getHighLevelStats(callCluster, clusterUuids, start, end, product, maxBucketSize)
@@ -244,7 +244,7 @@ describe('get_high_level_stats', () => {
 
   describe('fetchHighLevelStats', () => {
     it('searches for clusters', async () => {
-      searchMock.returns(Promise.resolve({ body }));
+      searchMock.returns(Promise.resolve(body));
 
       expect(
         await fetchHighLevelStats(callCluster, clusterUuids, start, end, product, maxBucketSize)

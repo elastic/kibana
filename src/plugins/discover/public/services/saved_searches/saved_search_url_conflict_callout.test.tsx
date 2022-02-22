@@ -9,7 +9,7 @@
 import React from 'react';
 import type { History } from 'history';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
 import type { SavedSearch } from './types';
 

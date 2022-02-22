@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';

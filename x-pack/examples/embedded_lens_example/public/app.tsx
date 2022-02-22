@@ -127,9 +127,6 @@ export const App = (props: {
     to: 'now',
   });
 
-  const [enableExtraAction, setEnableExtraAction] = useState(false);
-  const [enableDefaultAction, setEnableDefaultAction] = useState(false);
-
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
@@ -242,34 +239,10 @@ export const App = (props: {
                   Change time range
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  aria-label="Enable extra action"
-                  data-test-subj="lns-example-extra-action"
-                  isDisabled={!attributes}
-                  onClick={() => {
-                    setEnableExtraAction((prevState) => !prevState);
-                  }}
-                >
-                  {enableExtraAction ? 'Disable extra action' : 'Enable extra action'}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  aria-label="Enable default actions"
-                  data-test-subj="lns-example-default-action"
-                  isDisabled={!attributes}
-                  onClick={() => {
-                    setEnableDefaultAction((prevState) => !prevState);
-                  }}
-                >
-                  {enableDefaultAction ? 'Disable default action' : 'Enable default action'}
-                </EuiButton>
-              </EuiFlexItem>
             </EuiFlexGroup>
             <LensComponent
               id=""
-              withDefaultActions={enableDefaultAction}
+              withDefaultActions
               style={{ height: 500 }}
               timeRange={time}
               attributes={attributes}
@@ -289,27 +262,21 @@ export const App = (props: {
                 // call back event for on table row click event
               }}
               viewMode={ViewMode.VIEW}
-              extraActions={
-                enableExtraAction
-                  ? [
-                      {
-                        id: 'testAction',
-                        type: 'link',
-                        getIconType: () => 'save',
-                        async isCompatible(
-                          context: ActionExecutionContext<object>
-                        ): Promise<boolean> {
-                          return true;
-                        },
-                        execute: async (context: ActionExecutionContext<object>) => {
-                          alert('I am an extra action');
-                          return;
-                        },
-                        getDisplayName: () => 'Extra action',
-                      },
-                    ]
-                  : undefined
-              }
+              extraActions={[
+                {
+                  id: 'testAction',
+                  type: 'link',
+                  getIconType: () => 'save',
+                  async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+                    return true;
+                  },
+                  execute: async (context: ActionExecutionContext<object>) => {
+                    alert('I am an extra action');
+                    return;
+                  },
+                  getDisplayName: () => 'Extra action',
+                },
+              ]}
             />
             {isSaveModalVisible && (
               <LensSaveModalComponent

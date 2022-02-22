@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { UiSettingsType } from '../../../../../../core/public';
 import { themeServiceMock } from '../../../../../../core/public/mocks';
 

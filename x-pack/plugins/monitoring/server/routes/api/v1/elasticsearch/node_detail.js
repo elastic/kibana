@@ -40,19 +40,14 @@ export function esNodeRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const showSystemIndices = req.payload.showSystemIndices;
       const clusterUuid = req.params.clusterUuid;
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const filebeatIndexPattern = prefixIndexPattern(
-        config,
-        config.get('monitoring.ui.logs.index'),
-        '*',
-        true
-      );
+      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;
@@ -61,9 +56,7 @@ export function esNodeRoute(server) {
       } else {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
-        const showCgroupMetricsElasticsearch = config.get(
-          'monitoring.ui.container.elasticsearch.enabled'
-        );
+        const showCgroupMetricsElasticsearch = config.ui.container.elasticsearch.enabled;
         const metricCpu = metricSet.find((m) => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
           metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];

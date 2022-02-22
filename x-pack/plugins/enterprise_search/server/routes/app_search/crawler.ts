@@ -63,6 +63,17 @@ export function registerCrawlerRoutes({
         params: schema.object({
           name: schema.string(),
         }),
+        body: schema.object({
+          overrides: schema.maybe(
+            schema.object({
+              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+              max_crawl_depth: schema.maybe(schema.number()),
+              seed_urls: schema.maybe(schema.arrayOf(schema.string())),
+              sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
+              sitemap_discovery_disabled: schema.maybe(schema.boolean()),
+            })
+          ),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -262,6 +273,20 @@ export function registerCrawlerRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domain_configs',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v1/engines/:name/crawler/domain_configs',
     })
   );
 }

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { TruncateLabelsOption, TruncateLabelsOptionProps } from './truncate_labels';
 import { findTestSubject } from '@elastic/eui/lib/test';

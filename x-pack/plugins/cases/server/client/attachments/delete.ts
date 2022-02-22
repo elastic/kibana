@@ -60,7 +60,6 @@ export async function deleteAll(
 
   try {
     const comments = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
       id: caseID,
     });
 

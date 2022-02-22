@@ -64,6 +64,7 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
     }),
     [globalFullScreen, setGlobalFullScreen]
   );
+
   return memoizedReturn;
 };
 

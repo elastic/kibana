@@ -18,6 +18,6 @@ describe('index tests', () => {
   });
 
   it('should not identify an invalid operation as a write operation', () => {
-    expect(isWriteOperation({ name: 'blah' } as OperationDetails)).toBeFalsy();
+    expect(isWriteOperation({ name: 'blah' } as unknown as OperationDetails)).toBeFalsy();
   });
 });

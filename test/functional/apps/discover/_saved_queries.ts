@@ -36,12 +36,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await queryBar.setQuery('response:200');
   };
 
-  describe('saved queries saved objects', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/124990
+  describe.skip('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nested.json'
+      );
       await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
 
@@ -53,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.common.unsetTime();
@@ -94,7 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved query management component functionality', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/124986
+    describe.skip('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {

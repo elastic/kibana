@@ -9,7 +9,7 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test/jest';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import dedent from 'dedent';
 import {
   PublicUiSettingsParams,

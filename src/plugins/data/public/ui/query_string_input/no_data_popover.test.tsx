@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from '@kbn/test/jest';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { NoDataPopover } from './no_data_popover';
 import { EuiTourStep } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';

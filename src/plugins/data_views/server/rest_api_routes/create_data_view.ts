@@ -45,7 +45,7 @@ export const createDataView = async ({
   return dataViewsService.createAndSave(spec, override, !refreshFields);
 };
 
-const indexPatternSpecSchema = schema.object({
+const dataViewSpecSchema = schema.object({
   title: schema.string(),
   version: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
@@ -91,9 +91,8 @@ const registerCreateDataViewRouteFactory =
           body: schema.object({
             override: schema.maybe(schema.boolean({ defaultValue: false })),
             refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            data_view: serviceKey === SERVICE_KEY ? indexPatternSpecSchema : schema.never(),
-            index_pattern:
-              serviceKey === SERVICE_KEY_LEGACY ? indexPatternSpecSchema : schema.never(),
+            data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
+            index_pattern: serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
           }),
         },
       },

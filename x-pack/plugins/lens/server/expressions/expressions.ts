@@ -7,7 +7,6 @@
 
 import type { CoreSetup } from 'kibana/server';
 import {
-  pie,
   xyChart,
   counterRate,
   metricChart,
@@ -36,7 +35,6 @@ export const setupExpressions = (
   [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
-    pie,
     xyChart,
     counterRate,
     metricChart,

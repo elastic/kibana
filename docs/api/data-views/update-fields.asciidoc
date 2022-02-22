@@ -8,12 +8,14 @@ experimental[] Update fields presentation metadata, such as `count`,
 `customLabel`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
 
+
 [[data-views-fields-api-update-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>/fields`
+`POST <kibana host>:<port>/api/data_views/data_view/<id>/fields`
 
-`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>/fields`
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>/fields`
+
 
 [[data-views-fields-api-update-path-params]]
 ==== Path parameters
@@ -24,11 +26,13 @@ are merged with persisted metadata. To remove existing metadata, specify `null` 
 `id`::
 (Required, string) The ID of the data view fields you want to update.
 
+
 [[data-views-fields-api-update-request-body]]
 ==== Request body
 
 `fields`::
 (Required, object) the field object
+
 
 
 [[data-views-fields-api-update-errors-codes]]
@@ -37,6 +41,7 @@ are merged with persisted metadata. To remove existing metadata, specify `null` 
 `200`::
 Indicates a successful call.
 
+
 [[data-views-fields-api-update-example]]
 ==== Examples
 
@@ -44,7 +49,7 @@ Set popularity `count` for field `foo`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/saved_objects/data-view/my-view/fields
 {
     "fields": {
         "foo": {
@@ -59,7 +64,7 @@ Update multiple metadata fields in one request:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/saved_objects/data-view/my-view/fields
 {
     "fields": {
         "foo": {
@@ -77,7 +82,7 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
 Use `null` value to delete metadata:
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/saved_objects/data-view/my-pattern/fields
 {
     "fields": {
         "foo": {
@@ -93,7 +98,7 @@ The endpoint returns the updated data view object:
 [source,sh]
 --------------------------------------------------
 {
-    "index_pattern": {
+    "data_view": {
 
     }
 }

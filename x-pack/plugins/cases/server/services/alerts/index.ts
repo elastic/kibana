@@ -42,12 +42,13 @@ export class AlertService {
 
       const res = await this.scopedClusterClient.search({
         index: indices,
+        ignore_unavailable: true,
         query: { ids: { values: ids } },
         size: 0,
         aggregations: builtAggs,
       });
 
-      return res.body.aggregations;
+      return res.aggregations;
     } catch (error) {
       const aggregationNames = aggregationBuilders.map((agg) => agg.getName());
 

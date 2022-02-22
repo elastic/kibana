@@ -35,14 +35,13 @@ export function AlertsDisclaimer() {
         <EuiCallOut
           data-test-subj="o11yExperimentalDisclaimer"
           title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-            defaultMessage:
-              'Alert history is currently an experimental feature within Observability',
+            defaultMessage: 'Technical preview',
           })}
           color="warning"
         >
           <FormattedMessage
             id="xpack.observability.alertsDisclaimerText"
-            defaultMessage="This functionality may change or be removed completely in a future release. We value your {feedback} as we work to add new capabilities. "
+            defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Provide {feedback}."
             values={{
               feedback: (
                 <EuiLink href="https://discuss.elastic.co/c/observability/82" target="_blank">

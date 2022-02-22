@@ -70,7 +70,11 @@ export const CreateEditField = withRouter(
     if (spec) {
       return (
         <>
-          <IndexHeader indexPattern={indexPattern} defaultIndex={uiSettings.get('defaultIndex')} />
+          <IndexHeader
+            indexPattern={indexPattern}
+            defaultIndex={uiSettings.get('defaultIndex')}
+            canSave={dataViews.getCanSaveSync()}
+          />
           <EuiSpacer size={'l'} />
           <FieldEditor
             indexPattern={indexPattern}
