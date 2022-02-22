@@ -110,6 +110,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   };
 
+  private isAutoScaleWithColorizingContainer = () => {
+    return this.props.visParams.metric.autoScale && this.props.visParams.metric.colorFullBackground;
+  };
+
   private renderMetric = (metric: MetricOptions, index: number) => {
     const MetricComponent = this.props.visParams.metric.autoScale
       ? AutoScaleMetricVisValue
@@ -118,7 +122,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     return (
       <MetricComponent
         autoScaleParams={
-          this.props.visParams.metric.autoScale && this.props.visParams.metric.colorFullBackground
+          this.isAutoScaleWithColorizingContainer()
             ? {
                 containerStyles: {
                   backgroundColor: metric.bgColor,

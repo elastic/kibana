@@ -15,6 +15,10 @@ interface AutoScaleParams {
   minScale?: number;
   containerStyles: CSSProperties;
 }
+
+interface AutoScaleProps {
+  autoScaleParams?: AutoScaleParams;
+}
 interface ClientDimensionable {
   clientWidth: number;
   clientHeight: number;
@@ -42,12 +46,29 @@ export function computeScale(
   return Math.max(Math.min(MAX_SCALE, Math.min(scaleX, scaleY)), minScale);
 }
 
+function hasAutoscaleProps<T>(props: T): props is T & AutoScaleProps {
+  if ((props as T & AutoScaleProps).autoScaleParams) {
+    return true;
+  }
+  return false;
+}
+
+function getWrappedComponentProps<T>(props: T) {
+  if (hasAutoscaleProps(props)) {
+    const { autoScaleParams, ...rest } = props;
+    return rest;
+  }
+
+  return props;
+}
+
 export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
-  return (props: T & { autoScaleParams?: AutoScaleParams }) => {
+  return (props: T & AutoScaleProps) => {
     // An initial scale of 0 means we always redraw
     // at least once, which is sub-optimal, but it
     // prevents an annoying flicker.
-    const { autoScaleParams, ...restProps } = props;
+    const { autoScaleParams } = props;
+    const restProps = getWrappedComponentProps(props);
     const [scale, setScale] = useState(0);
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
@@ -82,7 +103,7 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
             transform: `scale(${scale || 0})`,
           }}
         >
-          <WrappedComponent {...(restProps as unknown as T)} />
+          <WrappedComponent {...(restProps as T)} />
         </div>
       </div>
     );
