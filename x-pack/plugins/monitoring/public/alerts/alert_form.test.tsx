@@ -135,6 +135,7 @@ describe('alert_form', () => {
           <KibanaReactContext.Provider>
             <AlertForm
               alert={initialAlert}
+              config={{ minimumScheduleInterval: '1m' }}
               dispatch={() => {}}
               errors={{ name: [], 'schedule.interval': [] }}
               operation="create"
