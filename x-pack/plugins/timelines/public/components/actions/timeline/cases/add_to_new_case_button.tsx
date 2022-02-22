@@ -8,6 +8,8 @@
 import React, { memo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { TimelinesStartServices } from '../../../../types';
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
 import { AddToCaseActionProps } from './add_to_case_action';
 import * as i18n from './translations';
@@ -25,7 +27,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
   owner,
   onClose,
 }) => {
-  const { addNewCaseClick, isDisabled, userCanCrud } = useAddToCase({
+  const { isDisabled, userCanCrud, caseAttachments, onCaseSuccess, onCaseCreated } = useAddToCase({
     event,
     useInsertTimeline,
     casePermissions,
@@ -33,6 +35,20 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
     owner,
     onClose,
   });
+  const { cases } = useKibana<TimelinesStartServices>().services;
+  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+    attachments: caseAttachments,
+    afterCaseCreated: onCaseCreated,
+    onSuccess: onCaseSuccess,
+  });
+
+  const handleClick = () => {
+    // close the popover
+    if (onClose) {
+      onClose();
+    }
+    createCaseFlyout.open();
+  };
 
   return (
     <>
@@ -40,7 +56,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="add-new-case-item"
-          onClick={addNewCaseClick}
+          onClick={handleClick}
           // needs forced size="s" since it is lazy loaded and the EuiContextMenuPanel can not initialize the size
           size="s"
           disabled={isDisabled}

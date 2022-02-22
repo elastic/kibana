@@ -16,8 +16,8 @@ import { UsePostComment } from '../../../containers/use_post_comment';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  onClose: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
+  onClose?: () => void;
+  onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CreateCaseAttachment;
 }
 
@@ -66,6 +66,8 @@ const FormWrapper = styled.div`
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   ({ afterCaseCreated, onClose, onSuccess, attachments }) => {
+    const handleCancel = onClose || function () {};
+    const handleOnSuccess = onSuccess || async function () {};
     return (
       <>
         <GlobalStyle />
@@ -85,8 +87,8 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               <CreateCaseForm
                 afterCaseCreated={afterCaseCreated}
                 attachments={attachments}
-                onCancel={onClose}
-                onSuccess={onSuccess}
+                onCancel={handleCancel}
+                onSuccess={handleOnSuccess}
                 withSteps={false}
               />
             </FormWrapper>
