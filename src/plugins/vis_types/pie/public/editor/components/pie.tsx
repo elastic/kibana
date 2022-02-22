@@ -228,6 +228,7 @@ const PieOptions = (props: PieOptionsProps) => {
               data-test-subj="pieLongLegendsOptions"
               truncateLegend={stateParams.truncateLegend ?? true}
               maxLegendLines={stateParams.maxLegendLines ?? 1}
+              legendSize={stateParams.legendSize}
               setValue={setValue}
             />
           </>

@@ -65,6 +65,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     nestedLegend: vis.params?.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
+    legendSize: vis.params.legendSize,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,

@@ -83,6 +83,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
             data-test-subj="heatmapLongLegendsOptions"
             truncateLegend={stateParams.truncateLegend ?? true}
             maxLegendLines={stateParams.maxLegendLines ?? 1}
+            legendSize={stateParams.legendSize}
             setValue={setValue}
           />
         )}

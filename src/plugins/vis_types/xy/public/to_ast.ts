@@ -210,6 +210,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     addTimeMarker: vis.params.addTimeMarker,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
+    legendSize: vis.params.legendSize,
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,

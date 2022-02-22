@@ -57,6 +57,7 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
           data-test-subj="xyLongLegendsOptions"
           truncateLegend={stateParams.truncateLegend ?? true}
           maxLegendLines={stateParams.maxLegendLines ?? 1}
+          legendSize={stateParams.legendSize}
           setValue={setValue}
         />
 
