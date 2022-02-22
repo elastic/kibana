@@ -84,7 +84,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <ExploratoryCharts from={from} to={to} indexNames={indexNames} />
+        <ExploratoryCharts from={from} to={to} />
       </>
     );
   }
@@ -94,30 +94,33 @@ HostsKpiComponent.displayName = 'HostsKpiComponent';
 
 export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <HostsKpiAuthentications
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <HostsKpiUniqueIps
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          <HostsKpiAuthentications
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            narrowDateRange={narrowDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <HostsKpiUniqueIps
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            narrowDateRange={narrowDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <ExploratoryCharts from={from} to={to} showKpiHost={false} />
+    </>
   )
 );
 

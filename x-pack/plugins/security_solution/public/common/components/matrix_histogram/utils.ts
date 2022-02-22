@@ -8,6 +8,7 @@
 import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
+import { Filter } from '@kbn/es-query';
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
 import { MatrixHistogramData } from '../../../../common/search_strategy';
@@ -106,3 +107,27 @@ export const getCustomChartData = (
     return { ...item, color: mapItem?.color ?? defaultLegendColors[idx] };
   });
 };
+
+export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
+  hostName
+    ? [
+        {
+          meta: {
+            index: 'e5bb994d-e8fb-4ddb-a36e-730ad8cc0712',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            params: {
+              query: hostName,
+            },
+          },
+          query: {
+            match_phrase: {
+              'host.name': hostName,
+            },
+          },
+        },
+      ]
+    : [];

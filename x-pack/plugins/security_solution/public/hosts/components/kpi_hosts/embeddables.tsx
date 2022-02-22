@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -28,15 +30,17 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 interface Props {
   from: string;
   to: string;
-  inputsModelId?: InputsModelId;
+  showKpiHost?: boolean;
 }
 
-export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global' }: Props) => {
+export const ExploratoryChartsComponents = ({ from, to, showKpiHost = true }: Props) => {
   return (
     <StyledEuiFlexGroup>
-      <StyledEuiFlexItem grow={1}>
-        <KpiHosts from={from} to={to} />
-      </StyledEuiFlexItem>
+      {showKpiHost && (
+        <StyledEuiFlexItem grow={1}>
+          <KpiHosts from={from} to={to} />
+        </StyledEuiFlexItem>
+      )}
       <StyledEuiFlexItem grow={2}>
         <KpiUserAuthentications from={from} to={to} />
       </StyledEuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { IconType } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -14,6 +14,8 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
+import { SecurityPageName } from '../../../../common/constants';
+import { getHostDetailsPageFilter } from './utils';
 
 export interface SingleMetricOptions {
   alignLnsMetric?: string;
@@ -64,26 +66,36 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { tabName } = useParams<{ tabName: string }>();
-
+  const { detailName, tabName } = useParams<{ detailName: string | undefined; tabName: string }>();
+  const location = useLocation();
   const tabsFilters = useMemo(() => {
     if (tabName === NetworkRouteType.alerts) {
       return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
     }
     return filters;
   }, [tabName, filters]);
-  const customLensAttrs = useMemo(
-    () => {
-      const configs = props.customLensAttrs;
-      return({
-      ...configs,
-      state: {...configs.state, query, filters: [...configs.state.filters, ...tabsFilters]},
-      references: configs.references.map((ref) => ({ ...ref, id: dataViewId })),
-    })},
-    [dataViewId, query, filters]
-  );
 
-  const indexPatterns=patternList?.join(',');
+  const pageFilters = useMemo(() => {
+    if (location.pathname.includes(SecurityPageName.hosts) && detailName != null) {
+      return [...filters, ...getHostDetailsPageFilter(detailName)];
+    }
+    return filters;
+  }, [location.pathname, detailName, filters]);
+
+  const customLensAttrs = useMemo(() => {
+    const cfg = props.customLensAttrs;
+    return {
+      ...cfg,
+      state: {
+        ...cfg.state,
+        query,
+        filters: [...cfg.state.filters, ...pageFilters, ...tabsFilters],
+      },
+      references: cfg.references.map((ref) => ({ ...ref, id: dataViewId })),
+    };
+  }, [props.customLensAttrs, query, pageFilters, tabsFilters, dataViewId]);
+
+  const indexPatterns = patternList?.join(',');
 
   const mergedProps = { ...configs, ...props, indexPatterns, customLensAttrs };
   return <ExploratoryViewEmbeddable {...mergedProps} />;
