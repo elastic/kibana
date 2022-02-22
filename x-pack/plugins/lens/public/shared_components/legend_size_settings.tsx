@@ -29,8 +29,8 @@ export const LegendSizeSettings = ({
     })}
   >
     <TooltipWrapper
-      tooltipContent={i18n.translate('xpack.lens.shared.legendSizeSetting.tooltipWrapper', {
-        defaultMessage: 'Defines exact legend width (vertical) or height (horizontal)',
+      tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+        defaultMessage: 'Requires legend to be shown',
       })}
       condition={isDisabled}
       position="top"
@@ -65,7 +65,7 @@ export const LegendSizeSettings = ({
                 <FormattedMessage
                   id="xpack.lens.shared.legendSizeSetting.tooltip"
                   defaultMessage="Limited to max of 70% of the chart container.
-                  Vertical legends limited to min of 30% of chart width"
+                  Vertical legends limited to min of 30% of chart width."
                 />
               }
             />
