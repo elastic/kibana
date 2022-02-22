@@ -36,7 +36,7 @@ TypeIcon.displayName = 'TypeIcon';
 
 export const Description = styled.span`
   user-select: text;
-  width: 350px;
+  width: 400px;
 `;
 Description.displayName = 'Description';
 
@@ -45,7 +45,7 @@ export const FieldName = React.memo<{
   highlight?: string;
 }>(({ fieldId, highlight = '' }) => (
   <EuiText size="xs">
-    <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+    <EuiHighlight data-test-subj={`field-${fieldId}-name`} search={highlight}>
       {fieldId}
     </EuiHighlight>
   </EuiText>
@@ -56,7 +56,6 @@ export const getFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'name',
     name: i18n.NAME,
-    dataType: 'string',
     render: (name: string, { type }) => {
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -70,7 +69,7 @@ export const getFieldTableColumns = (highlight: string): FieldTableColumns => [
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <FieldName data-test-subj="field-name" fieldId={name} highlight={highlight} />
+            <FieldName fieldId={name} highlight={highlight} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -96,12 +95,11 @@ export const getFieldTableColumns = (highlight: string): FieldTableColumns => [
       </EuiToolTip>
     ),
     sortable: true,
-    width: '350px',
+    width: '400px',
   },
   {
     field: 'isRuntime',
     name: i18n.RUNTIME,
-    dataType: 'boolean',
     render: (isRuntime: boolean) =>
       isRuntime ? <EuiHealth color="success" title={i18n.RUNTIME_FIELD} /> : null,
     sortable: true,
@@ -110,8 +108,9 @@ export const getFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'category',
     name: i18n.CATEGORY,
-    dataType: 'string',
-    render: (category: string) => <EuiBadge>{category}</EuiBadge>,
+    render: (category: string, { name }) => (
+      <EuiBadge data-test-subj={`field-${name}-category`}>{category}</EuiBadge>
+    ),
     sortable: true,
     width: '100px',
   },

@@ -19,7 +19,7 @@ import type { DataView } from '../../../../../../../../src/plugins/data/common';
 import { TimelineId } from '../../../../../common/types';
 
 let mockIndexPatternFieldEditor: Start;
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const runAllPromises = () => new Promise(setImmediate);

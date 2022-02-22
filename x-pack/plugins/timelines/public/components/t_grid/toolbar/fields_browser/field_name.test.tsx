@@ -43,7 +43,7 @@ describe('FieldName', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="field-name-${timestampFieldId}"]`).first().text()
+      wrapper.find(`[data-test-subj="field-${timestampFieldId}-name"]`).first().text()
     ).toEqual(timestampFieldId);
   });
 

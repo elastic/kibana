@@ -174,7 +174,6 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'name',
     name: i18n.NAME,
-    dataType: 'string',
     render: (name: string, { type }) => {
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -188,7 +187,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <FieldName data-test-subj="field-name" fieldId={name} highlight={highlight} />
+            <FieldName fieldId={name} highlight={highlight} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -219,28 +218,25 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'category',
     name: i18n.CATEGORY,
-    dataType: 'string',
-    render: (category: string) => <EuiBadge>{category}</EuiBadge>,
+    render: (category: string, { name }) => (
+      <EuiBadge data-test-subj={`field-${name}-category`}>{category}</EuiBadge>
+    ),
     sortable: true,
     width: '100px',
   },
 ];
-
-export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
-  return !!(column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length;
-};
 
 /**
  * Returns a table column template provided to the `EuiInMemoryTable`'s
  * `columns` prop
  */
 export const getFieldColumns = ({
-  highlight = '',
   onToggleColumn,
+  highlight = '',
   getFieldTableColumns,
 }: {
-  highlight: string;
   onToggleColumn: (id: string) => void;
+  highlight?: string;
   getFieldTableColumns?: GetFieldTableColumns;
 }): FieldTableColumns => [
   {
@@ -265,3 +261,8 @@ export const getFieldColumns = ({
     ? getFieldTableColumns(highlight)
     : getDefaultFieldTableColumns(highlight)),
 ];
+
+/** Returns whether the table column has actions attached to it or not */
+export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
+  return !!(column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length;
+};
