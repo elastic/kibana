@@ -9,10 +9,11 @@
 import React from 'react';
 import { EuiButton, useEuiTheme } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-import cx from 'classnames';
 import './button.scss';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+
+import './button.scss';
 
 export interface Props
   extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide' | 'className'> {
