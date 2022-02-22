@@ -75,7 +75,15 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
       title: toastOrTitle,
     };
   }
-  return toastOrTitle;
+  return Object.entries(toastOrTitle).reduce((obj, [key, value]) => {
+    if (value === undefined) {
+      return obj;
+    }
+    return {
+      ...obj,
+      [key]: value,
+    };
+  }, {} as ToastInputFields);
 };
 
 /**
