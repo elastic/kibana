@@ -23,5 +23,5 @@ echo "--- Run IM tests"
 
 npx test-alert-load-kbn run im-test  -e=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$ELASTIC_HOST -k=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$KIBANA_HOST  -r 'report-im.html' -o 'reports'
 
-buildkite-agent artifact upload ./reports
+buildkite-agent artifact upload './reports'
 
