@@ -124,7 +124,6 @@ export function syncSavedObjectsFactory(
               if (mod === undefined) {
                 results.savedObjectsCreated[type]![modelId] = {
                   success: false,
-
                   error: `trained model ${modelId} not found`,
                 };
                 return;

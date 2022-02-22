@@ -93,7 +93,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         <>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="Some jobs are missing or have incomplete saved objects. "
+            defaultMessage="Some jobs or trained models are missing or have incomplete saved objects. "
           />
           {canCreateJob ? (
             <FormattedMessage

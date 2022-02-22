@@ -23,7 +23,7 @@ const SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT = '1h';
 
 export class SavedObjectsSyncService {
   private core: CoreStart | null = null;
-  private log: { [l: string]: (t: string, e?: Error) => void };
+  private log: { error: (t: string, e?: Error) => void; [l: string]: (t: string) => void };
 
   constructor(logger: Logger) {
     this.log = createLocalLogger(logger, `Task ${SAVED_OBJECTS_SYNC_TASK_ID}: `);
@@ -81,7 +81,7 @@ export class SavedObjectsSyncService {
 
               this.log.info(
                 count
-                  ? `${count} ML saved objects synced`
+                  ? `${count} ML saved object${count > 1 ? 's' : ''} synced`
                   : 'No ML saved objects in need of synchronization'
               );
 
@@ -136,6 +136,6 @@ function createLocalLogger(logger: Logger, preText: string) {
   return {
     info: (text: string) => logger.info(`${preText}${text}`),
     warn: (text: string) => logger.warn(`${preText}${text}`),
-    error: (text: string, e: any) => logger.error(`${preText}${text}`, e),
+    error: (text: string, e?: Error) => logger.error(`${preText}${text} ${e ?? ''}`),
   };
 }

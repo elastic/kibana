@@ -14,13 +14,12 @@ import {
   IScopedClusterClient,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
+import type { JobType, MlSavedObjectType } from '../../common/types/saved_objects';
 import {
-  JobType,
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-  MlSavedObjectType,
 } from '../../common/types/saved_objects';
-import { MLJobNotFound } from '../lib/ml_client';
+import { MLJobNotFound, MLModelNotFound } from '../lib/ml_client';
 import { getSavedObjectClientError } from './util';
 import { authorizationProvider } from './authorization';
 
@@ -208,7 +207,6 @@ export function jobSavedObjectServiceFactory(
     return jobObject;
   }
 
-  // CHANGE!!!!!!!!!! this looks like a dupe of _getJobObjects
   async function getAllJobObjectsForAllSpaces(jobType?: JobType, jobId?: string) {
     await isMlReady();
     const filterObject: JobObjectFilter = {};
@@ -561,7 +559,7 @@ export function jobSavedObjectServiceFactory(
   async function _deleteTrainedModel(modelId: string) {
     const [model] = await _getTrainedModelObjects(modelId);
     if (model === undefined) {
-      throw new MLJobNotFound('job not found');
+      throw new MLModelNotFound('trained model not found');
     }
 
     await savedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, model.id, { force: true });
@@ -663,10 +661,10 @@ export function jobSavedObjectServiceFactory(
 
     const finedResult = await Promise.all(searches);
     return finedResult.reduce((acc, cur) => {
-      const so = cur.saved_objects[0];
-      if (so) {
-        const jobId = so.attributes.job!.job_id;
-        acc[jobId] = so;
+      const savedObject = cur.saved_objects[0];
+      if (savedObject) {
+        const jobId = savedObject.attributes.job!.job_id;
+        acc[jobId] = savedObject;
       }
       return acc;
     }, {} as Record<string, SavedObjectsFindResult<TrainedModelObject>>);

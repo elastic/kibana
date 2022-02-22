@@ -52,7 +52,7 @@ export const mlTrainedModel: SavedObjectsTypeMappingDefinition = {
           },
         },
         create_time: {
-          type: 'long',
+          type: 'date',
         },
       },
     },

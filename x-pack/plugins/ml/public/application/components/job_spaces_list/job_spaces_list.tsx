@@ -22,7 +22,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 interface Props {
   spacesApi: SpacesPluginStart;
   spaceIds: string[];
-  jobId: string;
+  id: string;
   jobType: JobType | TrainedModelType;
   refresh(): void;
 }
@@ -36,7 +36,7 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
-export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, refresh }) => {
+export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, id, jobType, refresh }) => {
   const { displayErrorToast } = useToastNotificationService();
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -51,12 +51,12 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
     if (spacesToAdd.length || spacesToRemove.length) {
       if (jobType === 'trained-model') {
-        const resp = await ml.savedObjects.updateModelsSpaces([jobId], spacesToAdd, spacesToRemove);
+        const resp = await ml.savedObjects.updateModelsSpaces([id], spacesToAdd, spacesToRemove);
         handleApplySpaces(resp);
       } else {
         const resp = await ml.savedObjects.updateJobsSpaces(
           jobType,
-          [jobId],
+          [id],
           spacesToAdd,
           spacesToRemove
         );
@@ -72,11 +72,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
   }
 
   function handleApplySpaces(resp: SavedObjectResult) {
-    Object.entries(resp).forEach(([id, { success, error }]) => {
+    Object.entries(resp).forEach(([errorId, { success, error }]) => {
       if (success === false) {
         const title = i18n.translate('xpack.ml.management.jobsSpacesList.updateSpaces.error', {
           defaultMessage: 'Error updating {id}',
-          values: { id },
+          values: { id: errorId },
         });
         displayErrorToast(error, title);
       }
@@ -91,9 +91,9 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
       type: ML_JOB_SAVED_OBJECT_TYPE,
-      id: jobId,
+      id,
       namespaces: spaceIds,
-      title: jobId,
+      title: id,
       noun: jobType === 'trained-model' ? modelObjectNoun : jobObjectNoun,
     },
     behaviorContext: 'outside-space',

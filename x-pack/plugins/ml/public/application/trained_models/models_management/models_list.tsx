@@ -643,7 +643,7 @@ export const ModelsList: FC<Props> = ({
           <JobSpacesList
             spacesApi={spacesApi}
             spaceIds={spaces ?? []}
-            jobId={id}
+            id={id}
             jobType="trained-model"
             refresh={fetchModelsData}
           />
@@ -819,7 +819,7 @@ export const ModelsList: FC<Props> = ({
   );
 };
 
-export const RefreshModelsListButton: FC<{ refresh: () => void; isLoading: boolean }> = ({
+export const RefreshModelsListButton: FC<{ refresh: () => Promise<void>; isLoading: boolean }> = ({
   refresh,
   isLoading,
 }) => {

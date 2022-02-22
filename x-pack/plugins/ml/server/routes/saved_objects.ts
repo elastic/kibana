@@ -176,7 +176,7 @@ export function savedObjectsRoutes(
    *
    * @api {post} /api/ml/saved_objects/update_jobs_spaces Update what spaces jobs are assigned to
    * @apiName UpdateJobsSpaces
-   * @apiDescription Update a list of jobs to add and/or remove them from given spaces
+   * @apiDescription Update a list of jobs to add and/or remove them from given spaces.
    *
    * @apiSchema (body) updateJobsSpaces
    */
@@ -215,7 +215,7 @@ export function savedObjectsRoutes(
    *
    * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces trained models are assigned to
    * @apiName UpdateTrainedModelsSpaces
-   * @apiDescription Update a list of trained models to add and/or remove them from given spaces
+   * @apiDescription Update a list of trained models to add and/or remove them from given spaces.
    *
    * @apiSchema (body) updateTrainedModelsSpaces
    */
@@ -253,7 +253,7 @@ export function savedObjectsRoutes(
    *
    * @api {post} /api/ml/saved_objects/remove_job_from_current_space Remove jobs from the current space
    * @apiName RemoveJobsFromCurrentSpace
-   * @apiDescription Remove a list of jobs from the current space
+   * @apiDescription Remove a list of jobs from the current space.
    *
    * @apiSchema (body) jobsAndCurrentSpace
    */

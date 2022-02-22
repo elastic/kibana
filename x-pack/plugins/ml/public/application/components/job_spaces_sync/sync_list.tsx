@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -182,9 +182,9 @@ const SyncItem: FC<{ id: string; title: JSX.Element; results: SyncResult }> = ({
     <EuiAccordion id={id} buttonContent={title} paddingSize="l">
       {Object.entries(results).map(([type, items]) => {
         return (
-          <>
+          <Fragment key={type}>
             <EuiText size="s">
-              <div style={{ fontWeight: 'bold' }}>{type}</div>
+              <h4>{type}</h4>
               <ul>
                 {Object.keys(items).map((item) => (
                   <li key={item}>{item}</li>
@@ -192,7 +192,7 @@ const SyncItem: FC<{ id: string; title: JSX.Element; results: SyncResult }> = ({
               </ul>
             </EuiText>
             <EuiSpacer size="s" />
-          </>
+          </Fragment>
         );
       })}
     </EuiAccordion>

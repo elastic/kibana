@@ -74,7 +74,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
       const { successCount, errorCount } = getResponseCounts(resp);
       if (errorCount > 0) {
         const title = i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.error', {
-          defaultMessage: 'Some jobs cannot be synchronized.',
+          defaultMessage: 'Some jobs or trained models cannot be synchronized.',
         });
         displayErrorToast(resp as any, title);
         return;
