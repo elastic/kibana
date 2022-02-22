@@ -23343,7 +23343,6 @@
     "xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle": "実行済み",
     "xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle": "バージョン",
     "xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle": "ステータス",
-    "xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash": "ハッシュのインポート",
     "xpack.securitySolution.eventsViewer.errorFetchingEventsData": "イベントデータをクエリできませんでした",
     "xpack.securitySolution.eventsViewer.eventsLabel": "イベント",
     "xpack.securitySolution.eventsViewer.showingLabel": "表示中",
