@@ -65,7 +65,7 @@ function StylePanel({
         <EuiToolTip
           content={i18n.translate('visTypeGauge.editors.gauge.alignmentNotAvailable', {
             defaultMessage:
-              'Alignment is not yet supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+              'The alignment is not yet supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
           })}
           delay="long"
           position="right"

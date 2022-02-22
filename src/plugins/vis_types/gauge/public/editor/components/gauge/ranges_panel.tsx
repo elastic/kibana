@@ -109,6 +109,15 @@ function RangesPanel({
         paramName="outline"
         value={stateParams.gauge.outline}
         setValue={setGaugeValue}
+        disabled={showElasticChartsOptions}
+        {...(showElasticChartsOptions
+          ? {
+              tooltip: i18n.translate('visTypeGauge.controls.gaugeOptions.showOutline', {
+                defaultMessage:
+                  'The outile is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+              }),
+            }
+          : {})}
       />
 
       <SwitchOption
