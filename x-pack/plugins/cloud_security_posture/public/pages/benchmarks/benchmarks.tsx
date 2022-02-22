@@ -16,7 +16,7 @@ import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 const PAGE_HEADER: EuiPageHeaderProps = {
   pageTitle: BENCHMARK_INTEGRATIONS,
   rightSideItems: [
-    // TODO: Link this to integrations once we have one https://github.com/elastic/security-team/issues/2940
+    // TODO: Link this to integrations once we have one
     <EuiButton fill iconType="plusInCircle">
       {ADD_A_CIS_INTEGRATION}
     </EuiButton>,

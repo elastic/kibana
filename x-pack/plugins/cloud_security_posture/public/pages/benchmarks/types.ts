@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// TODO: Use interface from BE https://github.com/elastic/security-team/issues/2942
+// TODO: Use interface from BE
 export interface CspBenchmarkIntegration {
   integration_name: string;
   benchmark: string;
