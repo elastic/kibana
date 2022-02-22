@@ -28,9 +28,10 @@ export const BundleFleetPackages: Task = {
     // Support the `--use-snapshot-epr` command line argument to fetch from the snapshot registry
     // in development or test environments
     const { buildOptions } = readCliArgs(process.argv);
-    const eprUrl = buildOptions?.useSnapshotEpr
-      ? 'https://epr-snapshot.elastic.co'
-      : 'https://epr.elastic.co';
+    const eprUrl =
+      buildOptions?.eprRegistry === 'snapshot'
+        ? 'https://epr-snapshot.elastic.co'
+        : 'https://epr.elastic.co';
 
     const configFilePath = config.resolveFromRepo('fleet_packages.json');
     const fleetPackages = (await read(configFilePath)) || '[]';
