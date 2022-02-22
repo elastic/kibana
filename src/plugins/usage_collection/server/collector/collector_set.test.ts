@@ -740,6 +740,44 @@ describe('CollectorSet', () => {
       );
     });
 
+    it('calls fetch with execution context for every collector', async () => {
+      ['ready_col_1', 'ready_col_2'].forEach((type) =>
+        collectorSet.registerCollector(
+          collectorSet.makeUsageCollector({
+            type,
+            isReady: () => true,
+            schema: { test: { type: 'long' } },
+            fetch: () => ({ test: 1000 }),
+          })
+        )
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(executionContext.withContext).toHaveBeenCalledTimes(2);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          type: 'usage_collection',
+          name: 'collector.fetch',
+          id: 'ready_col_1',
+          description: `Fetch method in the Collector "ready_col_1"`,
+        },
+        expect.any(Function)
+      );
+
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          type: 'usage_collection',
+          name: 'collector.fetch',
+          id: 'ready_col_2',
+          description: `Fetch method in the Collector "ready_col_2"`,
+        },
+        expect.any(Function)
+      );
+    });
+
     it('adds extra context to collectors with extendFetchContext config', async () => {
       const mockReadyFetch = jest.fn().mockResolvedValue({});
       collectorSet.registerCollector(
