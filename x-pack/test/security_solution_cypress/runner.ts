@@ -7,7 +7,8 @@
 
 import { chunk } from 'lodash';
 import { resolve } from 'path';
-import fs from 'fs';
+import glob from 'glob';
+
 import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-utils';
@@ -16,11 +17,11 @@ import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
 const retrieveIntegrations = (chunksNumber: number) => {
-  const directoryPath = resolve(__dirname, '../../plugins/security_solution/cypress/integration');
-  const folderNames = fs.readdirSync(directoryPath);
-  const integrationsPaths = folderNames.map((f) =>
-    resolve(__dirname, `../../plugins/security_solution/cypress/integration/${f}/*.spec.ts`)
+  const pattern = resolve(
+    __dirname,
+    '../../plugins/security_solution/cypress/integration/**/*.spec.ts'
   );
+  const integrationsPaths = glob.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksNumber);
 
   return chunk(integrationsPaths, chunkSize);
