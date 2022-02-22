@@ -71,6 +71,7 @@ import {
   VisualizationState,
   DatasourceStates,
   AppliedState,
+  selectChangesApplied,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 
@@ -158,18 +159,37 @@ interface ErrorDescription {
   longMessage: React.ReactNode;
 }
 
-const checkMissingIndexPatternsAndUnknownVis = ({
+const checkConfiguration = ({
+  activeVisualization,
+  visualization,
+  activeDatasourceId,
+  datasourceStates,
+  datasourceMap,
+  datasourceLayers,
+}: {
+  activeVisualization: Visualization | null;
+  visualization: VisualizationState;
+  activeDatasourceId: string | null;
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  datasourceLayers: FramePublicAPI['datasourceLayers'];
+}) =>
+  validateDatasourceAndVisualization(
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
+    activeVisualization,
+    visualization.state,
+    { datasourceLayers }
+  );
+
+const checkMissingRefs = ({
   activeDatasourceId,
   datasourceMap,
   datasourceStates,
-  visualization,
-  activeVisualization,
 }: {
   activeDatasourceId: string | null;
-  activeVisualization: Visualization | null;
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
-  visualization: VisualizationState;
 }) => {
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -192,9 +212,14 @@ const checkMissingIndexPatternsAndUnknownVis = ({
       ]
     : [];
 
-  const unknownVisError = visualization.activeId && !activeVisualization;
+  return missingRefsErrors;
+};
 
-  return { missingRefsErrors, unknownVisError };
+const checkUnknownVis = (
+  visualization: VisualizationState,
+  activeVisualization: Visualization | null
+) => {
+  return visualization.activeId && !activeVisualization;
 };
 
 const generateExpression = ({
@@ -255,6 +280,68 @@ const generateExpression = ({
   return { expression, expressionBuildError };
 };
 
+/**
+ * Checks whether the user's unapplied changes are saveable (can generate a valid expression)
+ *
+ * Since state is applied when the user saves the visualization, the save button
+ * should be disabled when the visualization configuration that would actually be saved is invalid
+ */
+const areUnappliedChangesSaveable = ({
+  _visualization,
+  _datasourceStates,
+  _activeDatasourceId,
+  visualizationMap,
+  datasourceMap,
+  framePublicAPI,
+}: {
+  _visualization: VisualizationState;
+  _datasourceStates: DatasourceStates;
+  _activeDatasourceId: string | null;
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
+  framePublicAPI: FramePublicAPI;
+}) => {
+  const unappliedArgs = getBuildExpressionArgs({
+    appliedState: undefined, // get the UNAPPLIED state args
+    visualization: _visualization,
+    datasourceStates: _datasourceStates,
+    activeDatasourceId: _activeDatasourceId,
+    framePublicAPI,
+    visualizationMap,
+  });
+
+  const { activeDatasourceId, datasourceStates, visualization, activeVisualization } =
+    unappliedArgs;
+
+  const configurationValidationError = checkConfiguration({
+    activeVisualization,
+    visualization,
+    activeDatasourceId,
+    datasourceStates,
+    datasourceMap,
+    datasourceLayers: framePublicAPI.datasourceLayers,
+  });
+
+  const missingRefsErrors = checkMissingRefs({
+    activeDatasourceId,
+    datasourceStates,
+    datasourceMap,
+  });
+
+  const unknownVisError = checkUnknownVis(visualization, activeVisualization);
+
+  const { expression: workingExpression } = generateExpression({
+    ...unappliedArgs,
+    datasourceMap,
+    errors: {
+      hasConfigurationValidationError: Boolean(configurationValidationError?.length),
+      hasMissingRefsErrors: Boolean(missingRefsErrors.length),
+      hasUnknownVisError: Boolean(unknownVisError),
+    },
+  });
+  return Boolean(workingExpression);
+};
+
 const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
   visualizationMap,
@@ -269,6 +356,15 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 }) {
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
+
+  // The following variables shouldn't be used for logic in this component
+  // Use the non-underscore versions instead, because they will reflect the applied state
+  // even when the user has unapplied changes
+  const _visualization = useLensSelector(selectVisualization);
+  const _datasourceStates = useLensSelector(selectDatasourceStates);
+  const _activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const _appliedState = useLensSelector(selectAppliedState);
+
   const {
     visualization,
     datasourceStates,
@@ -276,10 +372,10 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     activeVisualization,
   } = getBuildExpressionArgs({
-    visualization: useLensSelector(selectVisualization),
-    datasourceStates: useLensSelector(selectDatasourceStates),
-    activeDatasourceId: useLensSelector(selectActiveDatasourceId),
-    appliedState: useLensSelector(selectAppliedState),
+    visualization: _visualization,
+    datasourceStates: _datasourceStates,
+    activeDatasourceId: _activeDatasourceId,
+    appliedState: _appliedState,
     visualizationMap,
     framePublicAPI,
   });
@@ -294,24 +390,24 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const configurationValidationError = useMemo(
     () =>
-      validateDatasourceAndVisualization(
-        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-        activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
+      checkConfiguration({
         activeVisualization,
-        visualization.state,
-        { datasourceLayers }
-      ),
+        visualization,
+        activeDatasourceId,
+        datasourceStates,
+        datasourceMap,
+        datasourceLayers,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const { missingRefsErrors, unknownVisError } = checkMissingIndexPatternsAndUnknownVis({
+  const missingRefsErrors = checkMissingRefs({
     activeDatasourceId,
     datasourceMap,
     datasourceStates,
-    visualization,
-    activeVisualization,
   });
+  const unknownVisError = checkUnknownVis(visualization, activeVisualization);
 
   const expression = useMemo(() => {
     const { expression: _expression, expressionBuildError } = generateExpression({
@@ -344,9 +440,36 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   const expressionExists = Boolean(expression);
+
+  const changesApplied = useLensSelector(selectChangesApplied);
+
+  const isSaveable = useMemo(() => {
+    if (changesApplied) {
+      return expressionExists;
+    } else {
+      return areUnappliedChangesSaveable({
+        _visualization,
+        _datasourceStates,
+        _activeDatasourceId,
+        visualizationMap,
+        datasourceMap,
+        framePublicAPI,
+      });
+    }
+  }, [
+    _activeDatasourceId,
+    _datasourceStates,
+    _visualization,
+    changesApplied,
+    datasourceMap,
+    expressionExists,
+    framePublicAPI,
+    visualizationMap,
+  ]);
+
   useEffect(() => {
-    dispatchLens(setSaveable(expressionExists));
-  }, [expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(isSaveable));
+  }, [isSaveable, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {

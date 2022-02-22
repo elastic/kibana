@@ -234,7 +234,7 @@ describe('workspace_panel', () => {
 
     instance = mounted.instance;
 
-    expect(toExpression).toHaveBeenCalledTimes(1);
+    expect(toExpression).toHaveBeenCalled();
     const [appliedVisualizationState, appliedDatasourceLayers] = toExpression.mock.calls[0];
     expect((appliedVisualizationState as { applied: boolean }).applied).toBe(true);
     expect(
