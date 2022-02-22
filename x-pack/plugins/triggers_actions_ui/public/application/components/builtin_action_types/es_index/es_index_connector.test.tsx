@@ -301,7 +301,7 @@ describe('IndexActionConnectorFields renders', () => {
       setCallbacks: () => {},
       isEdit: false,
     };
-    const wrapper = mountWithIntl(<IndexActionConnectorFields {...props} />);
+    const wrapper = await setup(props);
 
     const indexComboBox = wrapper
       .find(EuiComboBox)
@@ -309,14 +309,20 @@ describe('IndexActionConnectorFields renders', () => {
 
     // time field switch should show up if index has date type field mapping
     setupGetFieldsResponse(true);
+    indexComboBox.first().simulate('click');
+
     await act(async () => {
-      indexComboBox.prop('onSearchChange')!(mockIndexName);
+      const event = { target: { value: mockIndexName } };
+      indexComboBox.find('input').first().simulate('change', event);
       await nextTick();
       wrapper.update();
     });
-    const thresholdOptions = indexComboBox.prop('options');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     expect(getIndexOptions).toHaveBeenCalledTimes(1);
     expect(getIndexOptions).toHaveBeenCalledWith(expect.anything(), mockIndexName);
-    expect(thresholdOptions).toEqual('dddd');
   });
 });
