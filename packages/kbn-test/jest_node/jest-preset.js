@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-import './mocks.moment-timezone';
-import './mocks.eui';
+const preset = require('../jest-preset');
+
+module.exports = {
+  ...preset,
+  testEnvironment: 'node',
+  snapshotSerializers: [],
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
+};
