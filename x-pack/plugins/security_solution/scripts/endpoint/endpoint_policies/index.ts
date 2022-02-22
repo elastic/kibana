@@ -47,7 +47,7 @@ export const cli = () => {
       log.success(`Done!`);
     },
     {
-      description: 'Load Endpoint Policies into fleet (also creates associated Agent Policies',
+      description: 'Load Endpoint Policies into fleet (also creates associated Agent Policies)',
       flags: {
         string: ['kibana'],
         default: {
