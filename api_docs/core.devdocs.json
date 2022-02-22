@@ -1686,6 +1686,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -3986,6 +3989,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -8576,6 +8582,9 @@
         "description": [
           "\r\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\r\n"
         ],
+        "signature": [
+          "ConfigDeprecationContext"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -8667,6 +8676,9 @@
         "label": "ConfigDeprecationFactory",
         "description": [
           "\r\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\r\nwhen invoking a {@link ConfigDeprecationProvider}.\r\n\r\nSee methods documentation for more detailed examples.\r\n"
+        ],
+        "signature": [
+          "ConfigDeprecationFactory"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -10587,6 +10599,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -13268,9 +13283,12 @@
         "tags": [],
         "label": "Logger",
         "description": [
-          "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
+          "\r\nLogger exposes all the necessary methods to log any type of information and\r\nthis is the interface used by the logging consumers including plugins.\r\n"
         ],
-        "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+        "signature": [
+          "Logger"
+        ],
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13280,28 +13298,16 @@
             "tags": [],
             "label": "trace",
             "description": [
-              "\nLog messages at the most detailed log level\n"
+              "\r\nLog messages at the most detailed log level\r\n"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(message: string, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13316,7 +13322,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13332,7 +13338,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13346,28 +13352,16 @@
             "tags": [],
             "label": "debug",
             "description": [
-              "\nLog messages useful for debugging and interactive investigation"
+              "\r\nLog messages useful for debugging and interactive investigation"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(message: string, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13382,7 +13376,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13398,7 +13392,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13412,28 +13406,16 @@
             "tags": [],
             "label": "info",
             "description": [
-              "\nLogs messages related to general application flow"
+              "\r\nLogs messages related to general application flow"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(message: string, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13448,7 +13430,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13464,7 +13446,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13478,28 +13460,16 @@
             "tags": [],
             "label": "warn",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages"
+              "\r\nLogs abnormal or unexpected errors or messages"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13514,7 +13484,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13530,7 +13500,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13544,28 +13514,16 @@
             "tags": [],
             "label": "error",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\n"
+              "\r\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\r\n"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13580,7 +13538,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13596,7 +13554,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13610,28 +13568,16 @@
             "tags": [],
             "label": "fatal",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\n"
+              "\r\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\r\n"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13646,7 +13592,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13662,7 +13608,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13676,19 +13622,13 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nReturns a new {@link Logger} instance extending the current logger context.\n"
+              "\r\nReturns a new {@link Logger} instance extending the current logger context.\r\n"
             ],
             "signature": [
               "(...childContextPaths: string[]) => ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13701,7 +13641,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -13773,9 +13713,12 @@
         "tags": [],
         "label": "LoggerFactory",
         "description": [
-          "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
+          "\r\nThe single purpose of `LoggerFactory` interface is to define a way to\r\nretrieve a context-based logger instance.\r\n"
         ],
-        "path": "node_modules/@kbn/logging/target_types/logger_factory.d.ts",
+        "signature": [
+          "LoggerFactory"
+        ],
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13785,19 +13728,13 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nReturns a `Logger` instance for the specified context.\n"
+              "\r\nReturns a `Logger` instance for the specified context.\r\n"
             ],
             "signature": [
               "(...contextParts: string[]) => ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger_factory.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13807,12 +13744,12 @@
                 "tags": [],
                 "label": "contextParts",
                 "description": [
-                  "- Parts of the context to return logger for. For example\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
+                  "- Parts of the context to return logger for. For example\r\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
                 ],
                 "signature": [
                   "string[]"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger_factory.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -14470,6 +14407,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -14839,13 +14779,7 @@
               "\n{@link LoggerFactory | logger factory} instance already bound to the plugin's logging context\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
-                "text": "LoggerFactory"
-              }
+              "LoggerFactory"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false
@@ -15140,13 +15074,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
             "deprecated": false
@@ -17374,83 +17302,12 @@
         "tags": [],
         "label": "Ecs",
         "description": [
-          "\nRepresents the full ECS schema.\n"
+          "\r\nRepresents the full ECS schema.\r\n"
         ],
         "signature": [
-          "EcsBase",
-          " & ",
-          "EcsTracing",
-          " & { ecs: EcsField; agent?: ",
-          "EcsAgent",
-          " | undefined; as?: ",
-          "EcsAutonomousSystem",
-          " | undefined; client?: ",
-          "EcsClient",
-          " | undefined; cloud?: ",
-          "EcsCloud",
-          " | undefined; container?: ",
-          "EcsContainer",
-          " | undefined; data_stream?: ",
-          "EcsDataStream",
-          " | undefined; destination?: ",
-          "EcsDestination",
-          " | undefined; dns?: ",
-          "EcsDns",
-          " | undefined; email?: ",
-          "EcsEmail",
-          " | undefined; error?: ",
-          "EcsError",
-          " | undefined; event?: ",
-          "EcsEvent",
-          " | undefined; file?: ",
-          "EcsFile",
-          " | undefined; group?: ",
-          "EcsGroup",
-          " | undefined; host?: ",
-          "EcsHost",
-          " | undefined; http?: ",
-          "EcsHttp",
-          " | undefined; log?: ",
-          "EcsLog",
-          " | undefined; network?: ",
-          "EcsNetwork",
-          " | undefined; observer?: ",
-          "EcsObserver",
-          " | undefined; orchestrator?: ",
-          "EcsOrchestrator",
-          " | undefined; organization?: ",
-          "EcsOrganization",
-          " | undefined; package?: ",
-          "EcsPackage",
-          " | undefined; process?: ",
-          "EcsProcess",
-          " | undefined; registry?: ",
-          "EcsRegistry",
-          " | undefined; related?: ",
-          "EcsRelated",
-          " | undefined; rule?: ",
-          "EcsRule",
-          " | undefined; server?: ",
-          "EcsServer",
-          " | undefined; service?: ",
-          "EcsService",
-          " | undefined; source?: ",
-          "EcsSource",
-          " | undefined; threat?: ",
-          "EcsThreat",
-          " | undefined; tls?: ",
-          "EcsTls",
-          " | undefined; url?: ",
-          "EcsUrl",
-          " | undefined; user?: ",
-          "EcsUser",
-          " | undefined; user_agent?: ",
-          "EcsUserAgent",
-          " | undefined; vulnerability?: ",
-          "EcsVulnerability",
-          " | undefined; }"
+          "EcsBase & EcsTracing & { ecs: EcsField; agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; data_stream?: EcsDataStream | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; email?: EcsEmail | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: EcsLog | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; orchestrator?: EcsOrchestrator | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/index.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17464,7 +17321,7 @@
         "signature": [
           "\"database\" | \"package\" | \"network\" | \"web\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17478,7 +17335,7 @@
         "signature": [
           "\"alert\" | \"metric\" | \"event\" | \"state\" | \"signal\" | \"pipeline_error\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17492,7 +17349,7 @@
         "signature": [
           "\"unknown\" | \"success\" | \"failure\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17506,7 +17363,7 @@
         "signature": [
           "\"start\" | \"user\" | \"error\" | \"end\" | \"info\" | \"group\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -18438,78 +18295,12 @@
         "tags": [],
         "label": "LogMeta",
         "description": [
-          "\nRepresents the ECS schema with the following reserved keys excluded:\n- `ecs`\n- `@timestamp`\n- `message`\n- `log.level`\n- `log.logger`\n"
+          "\r\nRepresents the ECS schema with the following reserved keys excluded:\r\n- `ecs`\r\n- `@timestamp`\r\n- `message`\r\n- `log.level`\r\n- `log.logger`\r\n"
         ],
         "signature": [
-          "Omit<",
-          "EcsBase",
-          ", \"message\" | \"@timestamp\"> & ",
-          "EcsTracing",
-          " & { agent?: ",
-          "EcsAgent",
-          " | undefined; as?: ",
-          "EcsAutonomousSystem",
-          " | undefined; client?: ",
-          "EcsClient",
-          " | undefined; cloud?: ",
-          "EcsCloud",
-          " | undefined; container?: ",
-          "EcsContainer",
-          " | undefined; destination?: ",
-          "EcsDestination",
-          " | undefined; dns?: ",
-          "EcsDns",
-          " | undefined; error?: ",
-          "EcsError",
-          " | undefined; event?: ",
-          "EcsEvent",
-          " | undefined; file?: ",
-          "EcsFile",
-          " | undefined; group?: ",
-          "EcsGroup",
-          " | undefined; host?: ",
-          "EcsHost",
-          " | undefined; http?: ",
-          "EcsHttp",
-          " | undefined; log?: Omit<",
-          "EcsLog",
-          ", \"logger\" | \"level\"> | undefined; network?: ",
-          "EcsNetwork",
-          " | undefined; observer?: ",
-          "EcsObserver",
-          " | undefined; organization?: ",
-          "EcsOrganization",
-          " | undefined; package?: ",
-          "EcsPackage",
-          " | undefined; process?: ",
-          "EcsProcess",
-          " | undefined; registry?: ",
-          "EcsRegistry",
-          " | undefined; related?: ",
-          "EcsRelated",
-          " | undefined; rule?: ",
-          "EcsRule",
-          " | undefined; server?: ",
-          "EcsServer",
-          " | undefined; service?: ",
-          "EcsService",
-          " | undefined; source?: ",
-          "EcsSource",
-          " | undefined; threat?: ",
-          "EcsThreat",
-          " | undefined; tls?: ",
-          "EcsTls",
-          " | undefined; url?: ",
-          "EcsUrl",
-          " | undefined; user?: ",
-          "EcsUser",
-          " | undefined; user_agent?: ",
-          "EcsUserAgent",
-          " | undefined; vulnerability?: ",
-          "EcsVulnerability",
-          " | undefined; }"
+          "Omit<EcsBase, \"message\" | \"@timestamp\"> & EcsTracing & { agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: Omit<EcsLog, \"logger\" | \"level\"> | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
         ],
-        "path": "node_modules/@kbn/logging/target_types/log_meta.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

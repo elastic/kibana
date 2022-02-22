@@ -18,12 +18,10 @@ const paramsSchema = schema.object({
 });
 
 function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, actionId: string) {
-  return dataClient.asCurrentUser.watcher
-    .ackWatch({
-      watch_id: watchId,
-      action_id: actionId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.ackWatch({
+    watch_id: watchId,
+    action_id: actionId,
+  });
 }
 
 export function registerAcknowledgeRoute({

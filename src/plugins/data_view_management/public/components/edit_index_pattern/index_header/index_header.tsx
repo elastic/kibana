@@ -17,6 +17,7 @@ interface IndexHeaderProps {
   setDefault?: () => void;
   editIndexPatternClick?: () => void;
   deleteIndexPatternClick?: () => void;
+  canSave: boolean;
 }
 
 const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {
@@ -50,6 +51,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
   editIndexPatternClick,
   deleteIndexPatternClick,
   children,
+  canSave,
 }) => {
   const [openActions, setOpenActions] = useState<boolean>(false);
 
@@ -81,7 +83,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             direction="column"
             onClick={() => setOpenActions(false)}
           >
-            {defaultIndex !== indexPattern.id && setDefault && (
+            {defaultIndex !== indexPattern.id && setDefault && canSave && (
               <EuiFlexItem>
                 <EuiButtonEmpty
                   color="text"
@@ -96,7 +98,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
-            {editIndexPatternClick && (
+            {canSave && (
               <EuiFlexItem>
                 <EuiButtonEmpty
                   color="text"
@@ -111,7 +113,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
-            {deleteIndexPatternClick && (
+            {canSave && (
               <EuiFlexItem>
                 <EuiButtonEmpty
                   color="text"

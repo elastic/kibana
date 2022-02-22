@@ -66,7 +66,7 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { application, uiSettings, overlays, chrome, dataViews, IndexPatternEditor } =
+    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -162,17 +162,17 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
-    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+    const userEditPermission = dataViews.getCanSaveSync();
 
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          {...(userEditPermission
-            ? { deleteIndexPatternClick: removePattern, editIndexPatternClick: editPattern }
-            : {})}
+          editIndexPatternClick={editPattern}
+          deleteIndexPatternClick={removePattern}
           defaultIndex={defaultIndex}
+          canSave={userEditPermission}
         >
           <EuiHorizontalRule margin="none" />
           {showTagsSection && (

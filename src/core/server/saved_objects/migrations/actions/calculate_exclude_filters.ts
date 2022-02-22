@@ -45,7 +45,11 @@ export const calculateExcludeFilters =
       Object.entries(excludeFromUpgradeFilterHooks).map(([soType, hook]) =>
         withTimeout({
           promise: Promise.resolve(
-            hook({ readonlyEsClient: { search: client.search.bind(client) } })
+            hook({
+              readonlyEsClient: {
+                search: client.search.bind(client) as ElasticsearchClient['search'],
+              },
+            })
           ),
           timeoutMs: hookTimeoutMs,
         })
