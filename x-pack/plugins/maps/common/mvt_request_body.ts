@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { RisonValue } from 'rison-node';
 import rison from 'rison-node';
 
 export function decodeMvtResponseBody(encodedRequestBody: string): object {
-  return rison.decode(decodeURIComponent(encodedRequestBody));
+  return rison.decode(decodeURIComponent(encodedRequestBody)) as object;
 }
 
 export function encodeMvtResponseBody(unencodedRequestBody: object): string {
-  return encodeURIComponent(rison.encode(unencodedRequestBody));
+  return encodeURIComponent(rison.encode(unencodedRequestBody as RisonValue));
 }
