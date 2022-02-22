@@ -13,6 +13,8 @@ export const MAX_ENDPOINT_TELEMETRY_BATCH = 1_000;
 
 export const MAX_DETECTION_RULE_TELEMETRY_BATCH = 1_000;
 
+export const MAX_DETECTION_RULE_ALERT_TELEMETRY_BATCH = 100;
+
 export const TELEMETRY_CHANNEL_LISTS = 'security-lists-v2';
 
 export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
