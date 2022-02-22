@@ -16,7 +16,7 @@ module.exports = {
   ),
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment-timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
   ],
   reporters: [

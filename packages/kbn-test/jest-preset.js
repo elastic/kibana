@@ -73,7 +73,7 @@ module.exports = {
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/setup_test.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment-timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/react_testing_library.js',
   ],
