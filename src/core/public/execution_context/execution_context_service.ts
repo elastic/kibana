@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Labels } from 'elastic-apm-node';
 import { isEqual, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { CoreService, KibanaExecutionContext } from '../../types';
