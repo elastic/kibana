@@ -45,6 +45,10 @@ export class UnknownError extends ReportingError {
   code = 'unknown_error';
 }
 
+export class PdfWorkerOutOfMemoryError extends ReportingError {
+  code = 'pdf_worker_out_of_memory_error';
+}
+
 // TODO: Add ReportingError for Kibana stopping unexpectedly
 // TODO: Add ReportingError for missing Chromium dependencies
 // TODO: Add ReportingError for missing Chromium dependencies
