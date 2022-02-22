@@ -80,7 +80,6 @@ describe('LogEntries search strategy', () => {
               runtime_field: {
                 type: 'keyword',
                 script: {
-                  lang: 'painless',
                   source: 'emit("runtime value")',
                 },
               },
