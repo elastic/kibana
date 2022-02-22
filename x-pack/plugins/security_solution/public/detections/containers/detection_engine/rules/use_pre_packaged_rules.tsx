@@ -16,6 +16,7 @@ import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
 } from '../../../pages/detection_engine/rules/helpers';
+import { useUserInfo } from '../../../components/user_info';
 
 type Func = () => Promise<void>;
 export type CreatePreBuiltRules = () => Promise<boolean>;
@@ -59,14 +60,6 @@ interface ReturnPrePackagedRules {
 export type ReturnPrePackagedRulesAndTimelines = ReturnPrePackagedRules &
   ReturnPrePackagedTimelines;
 
-interface UsePrePackagedRuleProps {
-  canUserCRUD: boolean | null;
-  hasIndexWrite: boolean | null;
-  isAuthenticated: boolean | null;
-  hasEncryptionKey: boolean | null;
-  isSignalIndexExists: boolean | null;
-}
-
 /**
  * Hook for using to get status about pre-packaged Rules from the Detection Engine API
  *
@@ -76,13 +69,7 @@ interface UsePrePackagedRuleProps {
  * @param isSignalIndexExists boolean
  *
  */
-export const usePrePackagedRules = ({
-  canUserCRUD,
-  hasIndexWrite,
-  isAuthenticated,
-  hasEncryptionKey,
-  isSignalIndexExists,
-}: UsePrePackagedRuleProps): ReturnPrePackagedRulesAndTimelines => {
+export const usePrePackagedRules = (): ReturnPrePackagedRulesAndTimelines => {
   const [prepackagedDataStatus, setPrepackagedDataStatus] = useState<
     Pick<
       ReturnPrePackagedRulesAndTimelines,
@@ -111,6 +98,8 @@ export const usePrePackagedRules = ({
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
   const { addError, addSuccess } = useAppToasts();
+
+  const { canSetLoadingCreatePrePackagedRules } = useUserInfo();
 
   const getSuccessToastMessage = (result: {
     rules_installed: number;
@@ -181,13 +170,7 @@ export const usePrePackagedRules = ({
     const createElasticRules = async (): Promise<boolean> => {
       return new Promise(async (resolve) => {
         try {
-          if (
-            canUserCRUD &&
-            hasIndexWrite &&
-            isAuthenticated &&
-            hasEncryptionKey &&
-            isSignalIndexExists
-          ) {
+          if (canSetLoadingCreatePrePackagedRules) {
             setLoadingCreatePrePackagedRules(true);
             const result = await createPrepackagedRules({
               signal: abortCtrl.signal,
@@ -258,15 +241,7 @@ export const usePrePackagedRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [
-    canUserCRUD,
-    hasIndexWrite,
-    isAuthenticated,
-    hasEncryptionKey,
-    isSignalIndexExists,
-    addError,
-    addSuccess,
-  ]);
+  }, [canSetLoadingCreatePrePackagedRules, addError, addSuccess]);
 
   const prePackagedRuleStatus = useMemo(
     () =>

@@ -33,8 +33,8 @@ import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti
 import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
-import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useUserInfo } from '../../detections/components/user_info';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -66,7 +66,7 @@ const OverviewComponent = () => {
   const {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
-  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+  const { hasIndexAndKibanaRead } = useUserInfo();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: allTiDataSourcesLoaded } =
     useAllTiDataSources();
   const tiIntegrationStatus = useTiIntegrations();
@@ -98,7 +98,7 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={3}>
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
-                  {hasIndexRead && hasKibanaREAD && (
+                  {hasIndexAndKibanaRead && (
                     <>
                       <EuiFlexItem grow={false}>
                         <SignalsByCategory filters={filters} query={query} />

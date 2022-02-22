@@ -56,7 +56,7 @@ import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
-import { useUserData } from '../../../../components/user_info';
+import { useUserInfo } from '../../../../components/user_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
@@ -189,19 +189,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from } = useGlobalTime();
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-      hasIndexWrite,
-      hasIndexRead,
-      hasIndexMaintenance,
-      signalIndexName,
-    },
-  ] = useUserData();
+  const {
+    loading: userInfoLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    hasEncryptionKey,
+    canUserCRUD,
+    hasAlertsCrud,
+    hasIndexRead,
+    signalIndexName,
+  } = useUserInfo();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
@@ -780,8 +777,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   filterGroup={filterGroup}
                   timelineId={TimelineId.detectionsRulesDetailsPage}
                   defaultFilters={alertsTableDefaultFilters}
-                  hasIndexWrite={hasIndexWrite ?? false}
-                  hasIndexMaintenance={hasIndexMaintenance ?? false}
+                  hasAlertsCrud={hasAlertsCrud}
                   from={from}
                   loading={loading}
                   showBuildingBlockAlerts={showBuildingBlockAlerts}

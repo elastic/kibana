@@ -35,7 +35,7 @@ import { patchRule } from '../../../../../containers/detection_engine/rules/api'
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
 import { SecurityPageName } from '../../../../../../../common/constants';
-import { useUserData } from '../../../../../components/user_info';
+import { useUserInfo } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import { ExceptionsTableItem } from './types';
@@ -60,7 +60,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 
 export const ExceptionListsTable = React.memo(() => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const { loading: userInfoLoading, canUserCRUD } = useUserInfo();
   const hasPermissions = userHasPermissions(canUserCRUD);
 
   const { loading: listsConfigLoading } = useListsConfig();

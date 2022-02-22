@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
-import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import { useUserInfo } from '../../user_info';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
   alertStatus?: Status;
@@ -31,7 +31,7 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
-  const { hasIndexWrite, hasKibanaCRUD } = useAlertsPrivileges();
+  const { hasIndexAndKibanaWrite } = useUserInfo();
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -66,6 +66,6 @@ export const useAlertsActions = ({
   });
 
   return {
-    actionItems: hasIndexWrite && hasKibanaCRUD ? actionItems : [],
+    actionItems: hasIndexAndKibanaWrite ? actionItems : [],
   };
 };

@@ -39,7 +39,7 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
-import { useUserData } from '../../components/user_info';
+import { useUserInfo } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
@@ -91,7 +91,6 @@ type DetectionEngineComponentProps = PropsFromRedux;
 const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsDeleted,
   clearEventsLoading,
-  clearSelected,
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -115,19 +114,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { to, from } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
-  const [
-    {
-      loading: userInfoLoading,
-      isAuthenticated: isUserAuthenticated,
-      hasEncryptionKey,
-      signalIndexName,
-      hasIndexWrite = false,
-      hasIndexMaintenance = false,
-      canUserCRUD = false,
-      canUserREAD,
-      hasIndexRead,
-    },
-  ] = useUserData();
+  const {
+    loading: userInfoLoading,
+    isAuthenticated: isUserAuthenticated,
+    hasEncryptionKey,
+    signalIndexName,
+    hasAlertsCrud,
+    hasIndexAndKibanaRead,
+  } = useUserInfo();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
@@ -288,17 +282,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   }
   return (
     <>
-      {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
+      {hasEncryptionKey === false && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {!signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
+      {!signalIndexNeedsInit && !hasIndexAndKibanaRead ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
+      ) : !signalIndexNeedsInit && hasIndexAndKibanaRead ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -369,8 +363,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               data-test-subj="alerts-table"
               timelineId={TimelineId.detectionsPage}
               loading={loading}
-              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
-              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
+              hasAlertsCrud={hasAlertsCrud}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -393,7 +386,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
   clearEventsLoading: ({ id }: { id: string }) =>
     dispatch(timelineActions.clearEventsLoading({ id })),
   clearEventsDeleted: ({ id }: { id: string }) =>

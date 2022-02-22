@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { CallOutMessage, CallOutPersistentSwitcher } from '../../../../common/components/callouts';
-import { useUserData } from '../../user_info';
+import { useUserInfo } from '../../user_info';
 
 import * as i18n from './translations';
 
@@ -35,13 +35,7 @@ const needAdminForUpdateRulesMessage: CallOutMessage = {
  * why we do not show it for that condition.
  */
 const NeedAdminForUpdateCallOutComponent = (): JSX.Element | null => {
-  const [{ signalIndexMappingOutdated, hasIndexManage }] = useUserData();
-
-  const signalIndexMappingIsOutdated =
-    signalIndexMappingOutdated != null && signalIndexMappingOutdated;
-
-  const userDoesntHaveIndexManage = hasIndexManage != null && !hasIndexManage;
-  const shouldShowCallout = signalIndexMappingIsOutdated && userDoesntHaveIndexManage;
+  const { shouldShowCallout } = useUserInfo();
 
   // Passing shouldShowCallout to the condition param will end up with an unecessary spacer being rendered
   return shouldShowCallout ? (

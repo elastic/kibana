@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { useUserData } from '../../user_info';
+import { useUserInfo } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 
 interface UseExceptionActionProps {
@@ -21,7 +21,7 @@ export const useExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const { hasIndexAndKibanaWrite, disabledAddException } = useUserInfo();
 
   const handleDetectionExceptionModal = useCallback(() => {
     onAddExceptionTypeClick('detection');
@@ -31,8 +31,7 @@ export const useExceptionActions = ({
     onAddExceptionTypeClick('endpoint');
   }, [onAddExceptionTypeClick]);
 
-  const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
-  const disabledAddException = !canUserCRUD || !hasIndexWrite;
+  const disabledAddEndpointException = !hasIndexAndKibanaWrite || !isEndpointAlert;
 
   const exceptionActionItems = useMemo(
     () =>

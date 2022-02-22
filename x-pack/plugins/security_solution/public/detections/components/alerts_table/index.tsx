@@ -55,8 +55,7 @@ import {
 interface OwnProps {
   defaultFilters?: Filter[];
   from: string;
-  hasIndexMaintenance: boolean;
-  hasIndexWrite: boolean;
+  hasAlertsCrud: boolean;
   loading: boolean;
   onRuleChange?: () => void;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
@@ -76,8 +75,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   from,
   globalFilters,
   globalQuery,
-  hasIndexMaintenance,
-  hasIndexWrite,
+  hasAlertsCrud,
   isSelectAllChecked,
   loading,
   loadingEventIds,
@@ -275,8 +273,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
           currentFilter={filterGroup}
-          hasIndexMaintenance={hasIndexMaintenance}
-          hasIndexWrite={hasIndexWrite}
+          hasAlertsCrud={hasAlertsCrud}
           onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
           selectAll={selectAllOnAllPagesCallback}
@@ -292,8 +289,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [
       clearSelectionCallback,
       filterGroup,
-      hasIndexMaintenance,
-      hasIndexWrite,
+      hasAlertsCrud,
       loadingEventIds.length,
       onShowBuildingBlockAlertsChanged,
       onShowOnlyThreatIndicatorAlertsChanged,
@@ -368,7 +364,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       defaultModel={alertsDefaultModel}
       end={to}
       entityType="events"
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
+      hasAlertsCrud={hasAlertsCrud}
       id={timelineId}
       leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}

@@ -15,7 +15,6 @@ import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
-import { useUserData } from '../../user_info';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -49,16 +48,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     [navigateTo]
   );
 
-  const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
-    useUserData();
-
-  const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules({
-    canUserCRUD,
-    hasIndexWrite,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-  });
+  const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules();
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>

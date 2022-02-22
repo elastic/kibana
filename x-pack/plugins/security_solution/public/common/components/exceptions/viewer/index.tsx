@@ -18,7 +18,7 @@ import type {
 import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
-import { useUserData } from '../../../../../public/detections/components/user_info';
+import { useUserInfo } from '../../../../../public/detections/components/user_info';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
@@ -108,15 +108,15 @@ const ExceptionsViewerComponent = ({
   const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
   const [supportedListTypes, setSupportedListTypes] = useState<ExceptionListTypeEnum[]>([]);
 
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const { hasIndexAndKibanaWrite } = useUserInfo();
 
   useEffect((): void => {
-    if (!canUserCRUD || !hasIndexWrite) {
+    if (!hasIndexAndKibanaWrite) {
       setSupportedListTypes([]);
     } else {
       setSupportedListTypes(availableListTypes);
     }
-  }, [availableListTypes, canUserCRUD, hasIndexWrite]);
+  }, [availableListTypes, hasIndexAndKibanaWrite]);
 
   const setExceptions = useCallback(
     ({
@@ -386,7 +386,7 @@ const ExceptionsViewerComponent = ({
         />
 
         <ExceptionsViewerItems
-          disableActions={!canUserCRUD || !hasIndexWrite}
+          disableActions={!hasIndexAndKibanaWrite}
           showEmpty={showEmpty}
           showNoResults={showNoResults}
           isInitLoading={isInitLoading}
