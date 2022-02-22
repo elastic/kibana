@@ -554,7 +554,7 @@ export const RuleForm = ({
               actionGroup.id === selectedRuleType.recoveryActionGroup.id
                 ? {
                     ...actionGroup,
-                    omitMessageVariables: selectedAlertType.doesSetRecoveryContext
+                    omitMessageVariables: selectedRuleType.doesSetRecoveryContext
                       ? 'keepContext'
                       : 'all',
                     defaultActionMessage: recoveredActionGroupMessage,
