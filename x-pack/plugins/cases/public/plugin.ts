@@ -14,8 +14,11 @@ import {
   getAllCasesSelectorModalLazy,
   getCreateCaseFlyoutLazy,
   canUseCases,
+  getCreateCaseFlyoutLazyNoProvider,
 } from './methods';
 import { CasesUiConfigType } from '../common/ui/types';
+import { getCasesContextLazy } from './methods/get_cases_context';
+import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 /**
  * @public
@@ -35,9 +38,14 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     return {
       canUseCases: canUseCases(core.application.capabilities),
       getCases: getCasesLazy,
+      getCasesContext: getCasesContextLazy,
       getRecentCases: getRecentCasesLazy,
       getCreateCaseFlyout: getCreateCaseFlyoutLazy,
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
+      getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
+      hooks: {
+        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
+      },
     };
   }
 

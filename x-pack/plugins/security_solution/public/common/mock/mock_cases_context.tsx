@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 
-export { PdfMaker } from './pdfmaker';
-export { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
+export const mockCasesContext: React.FC = (props) => {
+  return <>{props?.children ?? null}</>;
+};
+mockCasesContext.displayName = 'CasesContextMock';
