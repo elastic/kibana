@@ -109,14 +109,7 @@ export function generatePdfObservable(
         tracker.end();
       } catch (err) {
         logger.error(`Could not generate the PDF buffer!`);
-        logger.error(err);
-        if (err instanceof PdfWorkerOutOfMemoryError) {
-          warnings.push(
-            'Failed to generate PDF due to low memory. Please consider generating a smaller PDF.'
-          );
-        } else {
-          warnings.push(`Failed to generate PDF due to the following error: ${err.message}`);
-        }
+        throw err;
       }
 
       return {
