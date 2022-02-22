@@ -346,7 +346,7 @@ function getAvailableActionVariables(
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionVariables,
-    actionGroup?.omitOptionalMessageVariables
+    actionGroup?.omitMessageVariables
   );
 
   // partition deprecated items so they show up last
