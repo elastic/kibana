@@ -33,12 +33,12 @@ import {
 } from './preconfiguration';
 import { outputService } from './output';
 import { packagePolicyService } from './package_policy';
-import { getBundledPackages } from './epm/packages/get_bundled_packages';
+import { getBundledPackages } from './epm/packages/bundled_packages';
 import type { InstallPackageParams } from './epm/packages/install';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');
-jest.mock('./epm/packages/get_bundled_packages');
+jest.mock('./epm/packages/bundled_packages');
 jest.mock('./epm/archive');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
@@ -121,7 +121,7 @@ function getPutPreconfiguredPackagesMock() {
 
 jest.mock('./epm/registry', () => ({
   ...jest.requireActual('./epm/registry'),
-  async fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+  async fetchFindLatestPackageOrThrow(packageName: string): Promise<RegistrySearchResult> {
     return {
       name: packageName,
       version: '1.0.0',
@@ -163,12 +163,6 @@ jest.mock('./epm/packages/install', () => ({
 
       // Treat the buffer value passed in tests as the package's name for simplicity
       const pkgName = archiveBuffer.toString('utf8');
-
-      const installedPackage = mockInstalledPackages.get(pkgName);
-
-      if (installedPackage) {
-        return installedPackage;
-      }
 
       // Just install every bundled package at version '1.0.0'
       const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
@@ -283,6 +277,7 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 
 describe('policy preconfiguration', () => {
   beforeEach(() => {
+    mockedPackagePolicyService.getByIDs.mockReset();
     mockedPackagePolicyService.create.mockReset();
     mockInstalledPackages.clear();
     mockInstallPackageErrors.clear();
@@ -466,6 +461,55 @@ describe('policy preconfiguration', () => {
         }),
         expect.anything() // options
       );
+    });
+
+    it('should not try to recreate preconfigure package policy that has been renamed', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      mockedPackagePolicyService.getByIDs.mockResolvedValue([
+        { name: 'Renamed package policy', id: 'test_package1' } as PackagePolicy,
+      ]);
+
+      mockConfiguredPolicies.set('test-id', {
+        name: 'Test policy',
+        description: 'Test policy description',
+        unenroll_timeout: 120,
+        namespace: 'default',
+        id: 'test-id',
+        package_policies: [
+          {
+            name: 'test_package1',
+            id: 'test_package1',
+          },
+        ],
+        is_managed: true,
+      } as PreconfiguredAgentPolicy);
+
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            is_managed: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'test_package1',
+                id: 'test_package1',
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(mockedPackagePolicyService.create).not.toBeCalled();
     });
 
     it('should throw an error when trying to install duplicate packages', async () => {
@@ -693,11 +737,13 @@ describe('policy preconfiguration', () => {
       mockedGetBundledPackages.mockResolvedValue([
         {
           name: 'test_package',
+          version: '1.0.0',
           buffer: Buffer.from('test_package'),
         },
 
         {
           name: 'test_package_2',
+          version: '1.0.0',
           buffer: Buffer.from('test_package_2'),
         },
       ]);
@@ -734,6 +780,7 @@ describe('policy preconfiguration', () => {
           mockedGetBundledPackages.mockResolvedValue([
             {
               name: 'test_package',
+              version: '1.0.0',
               buffer: Buffer.from('test_package'),
             },
           ]);
@@ -773,6 +820,7 @@ describe('policy preconfiguration', () => {
           mockedGetBundledPackages.mockResolvedValue([
             {
               name: 'test_package',
+              version: '1.0.0',
               buffer: Buffer.from('test_package'),
             },
           ]);

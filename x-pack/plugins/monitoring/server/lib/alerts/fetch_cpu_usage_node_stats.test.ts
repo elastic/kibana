@@ -35,9 +35,9 @@ describe('fetchCpuUsageNodeStats', () => {
   const size = 10;
 
   it('fetch normal stats', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: [
@@ -71,7 +71,7 @@ describe('fetchCpuUsageNodeStats', () => {
             ],
           },
         },
-      })
+      }
     );
     const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
@@ -89,9 +89,9 @@ describe('fetchCpuUsageNodeStats', () => {
   });
 
   it('fetch container stats', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: [
@@ -138,7 +138,7 @@ describe('fetchCpuUsageNodeStats', () => {
             ],
           },
         },
-      })
+      }
     );
     const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
@@ -156,9 +156,9 @@ describe('fetchCpuUsageNodeStats', () => {
   });
 
   it('fetch properly return ccs', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: [
@@ -198,7 +198,7 @@ describe('fetchCpuUsageNodeStats', () => {
             ],
           },
         },
-      })
+      }
     );
     const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result[0].ccs).toBe('foo');
@@ -208,9 +208,7 @@ describe('fetchCpuUsageNodeStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        {} as estypes.SearchResponse
-      );
+      return Promise.resolve({} as estypes.SearchResponse);
     });
     const filterQuery =
       '{"bool":{"should":[{"exists":{"field":"cluster_uuid"}}],"minimum_should_match":1}}';
@@ -229,6 +227,7 @@ describe('fetchCpuUsageNodeStats', () => {
                 bool: {
                   should: [
                     { term: { type: 'node_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
                   ],
                   minimum_should_match: 1,

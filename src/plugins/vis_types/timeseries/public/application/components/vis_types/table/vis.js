@@ -88,7 +88,7 @@ class TableVis extends Component {
     }
 
     if (model.drilldown_url) {
-      const url = replaceVars(model.drilldown_url, {}, { key: row.key });
+      const url = replaceVars(model.drilldown_url, {}, { key: row.key }, { noEscape: true });
       const handleDrilldownUrlClick = this.createDrilldownUrlClickHandler(url);
       rowDisplay = (
         <a

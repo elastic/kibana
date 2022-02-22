@@ -46,6 +46,7 @@ import { createEndpointMetadataServiceTestContextMock } from './services/metadat
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
+import { createFeatureUsageServiceMock } from './services/feature_usage';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -157,6 +158,7 @@ export const createMockEndpointAppContextServiceStartContract =
       cases: {
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
+      featureUsageService: createFeatureUsageServiceMock(),
     };
   };
 

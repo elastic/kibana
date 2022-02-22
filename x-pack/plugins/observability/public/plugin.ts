@@ -24,6 +24,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
@@ -60,6 +61,7 @@ export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
 }

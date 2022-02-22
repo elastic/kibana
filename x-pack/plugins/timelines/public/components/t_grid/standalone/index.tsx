@@ -86,6 +86,7 @@ export interface TGridStandaloneProps {
   } | null;
   afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
@@ -121,6 +122,7 @@ export interface TGridStandaloneProps {
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
   showCheckboxes?: boolean;
+  queryFields?: string[];
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
@@ -129,6 +131,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   casesOwner,
   casePermissions,
   columns,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
@@ -155,6 +158,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   data,
   unit,
   showCheckboxes = true,
+  queryFields = [],
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -166,7 +170,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const {
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
-    queryFields,
+    queryFields: queryFieldsFromState,
     sort: sortStore,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
@@ -203,9 +207,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         (acc, c) => (c.linkField != null ? [...acc, c.id, c.linkField] : [...acc, c.id]),
         []
       ),
-      ...(queryFields ?? []),
+      ...(queryFieldsFromState ?? []),
     ],
-    [columnsHeader, queryFields]
+    [columnsHeader, queryFieldsFromState]
   );
 
   const sortField = useMemo(
@@ -222,6 +226,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    dataViewId,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
@@ -335,6 +340,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         sort,
         loadingText,
         unit,
+        queryFields,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

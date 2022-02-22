@@ -49,9 +49,9 @@ export const registerUpdateRoute = ({
 
       // We need to first pause the follower and then resume it by passing the advanced settings
       try {
-        const {
-          body: { follower_indices: followerIndices },
-        } = await client.asCurrentUser.ccr.followInfo({ index: id });
+        const { follower_indices: followerIndices } = await client.asCurrentUser.ccr.followInfo({
+          index: id,
+        });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
@@ -72,7 +72,7 @@ export const registerUpdateRoute = ({
           serializeAdvancedSettings(request.body as FollowerIndexAdvancedSettings)
         );
 
-        const { body: responseBody } = await client.asCurrentUser.ccr.resumeFollow({
+        const responseBody = await client.asCurrentUser.ccr.resumeFollow({
           index: id,
           body,
         });

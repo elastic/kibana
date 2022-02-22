@@ -8,7 +8,7 @@ What pages on your website contain a
 specific word or phrase? What events were logged most recently?
 What processes take longer than 500 milliseconds to respond?
 
-With *Discover*, you can quickly gain insight to your data: search and filter your data, get information
+With *Discover*, you can quickly search and filter your data, get information
 about the structure of the fields, and display your findings in a visualization.
 You can also customize and save your searches and place them on a dashboard.
 
@@ -19,7 +19,7 @@ image::images/discover.png[A view of the Discover app]
 [float]
 === Explore and query your data
 
-This tutorial shows you how to use *Discover* to quickly search large amounts of
+This tutorial shows you how to use *Discover* to search large amounts of
 data and understand what’s going on at any given time.
 
 You’ll learn to:
@@ -58,6 +58,10 @@ To view the ecommerce sample data, make sure the {data-source} is set to **kiban
 +
 [role="screenshot"]
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
++
+To create a data view for your own data,
+click the ellipsis icon (…​), and then click *Create new data view*.
+For details, refer to <<data-views, Create a data view.>>
 
 . Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
 +
@@ -73,8 +77,8 @@ click and drag the mouse over the chart.
 === Explore the fields in your data
 
 **Discover** includes a table that shows all the documents that match your search.
-By default, the table includes columns for the time field and the document `_source`,
-which can be overwhelming. You’ll modify this table to display only your fields of interest.
+By default, the table includes columns for the time field and the document `_source`.
+You’ll modify this table to display your fields of interest.
 
 . Scan through the list of **Available fields** until you find the `manufacturer` field.
 You can also search for the field by name.
@@ -110,7 +114,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Click the ellipsis icon (...), and then click *Add field to data view*.
+. Click the ellipsis icon (...), and then click *Add field*.
 +
 [role="screenshot"]
 image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
@@ -168,17 +172,19 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *equals some value* and *US*, and then click *Update*.
+. Select *:* for equals some value and *US*, and then click *Update*.
 . For a more complex search, try:
 +
-`geoip.country_iso_code : US and products.taxless_price >= 75`
+```ts
+geoip.country_iso_code : US and products.taxless_price >= 75
+```
 
 [float]
 [[filter-in-discover]]
 === Filter your data
 
 Whereas the query defines the set of documents you are interested in,
-filters enable you to zero in on different subsets of those documents.
+filters enable you to zero in on subsets of those documents.
 You can filter results to include or exclude specific fields, filter for a value in a range,
 and more.
 
@@ -224,7 +230,7 @@ You can bookmark this document and share the link.
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query text, filters,
-and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the {data-source}.
+and current view of *Discover*, including the columns selected in the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
@@ -287,4 +293,3 @@ include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
 include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
 
 include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
-
