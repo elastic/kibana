@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useMemo } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useAuthentications } from '../../containers/authentications';
@@ -120,7 +120,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
           isSingleMetric={false}
         />
       </EuiPanel>
-
+      <EuiSpacer data-test-subj="spacer" size="l" />
       <AuthenticationTableManage
         data={authentications}
         deleteQuery={deleteQuery}

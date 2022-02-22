@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import { KpiUniqueIps } from '../common/kpi_unique_ips';
 import { KpiUserAuthentications } from '../common/kpi_user_authentications';
 import { KpiHosts } from '../common/kpi_hosts';

@@ -96,14 +96,10 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
     [selectedStackByOption?.value, setSelectedChartOptionCallback]
   );
 
-  const { patternList, dataViewId } = useSourcererDataView();
-  const customLensAttrs = useMemo(() => {
-    const configs = getExternalAlertConfigs({ stackByField: selectedStackByOption.value });
-    return {
-      ...configs,
-      references: configs.references.map((ref) => ({ ...ref, id: dataViewId })),
-    };
-  }, [dataViewId, selectedStackByOption.value]);
+  const customLensAttrs = useMemo(
+    () => getExternalAlertConfigs({ stackByField: selectedStackByOption.value }),
+    [selectedStackByOption.value]
+  );
 
   return (
     <>

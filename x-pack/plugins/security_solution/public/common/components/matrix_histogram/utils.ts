@@ -131,3 +131,86 @@ export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
         },
       ]
     : [];
+
+export const filterHostExternalAlertData: Filter[] = [
+  {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'host.name',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    meta: {
+      alias: '',
+      disabled: false,
+      key: 'bool',
+      negate: false,
+      type: 'custom',
+      value:
+        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
+    },
+  },
+];
+
+export const filterNetworkExternalAlertData: Filter[] = [
+  {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: 'source.ip',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: 'destination.ip',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    meta: {
+      alias: '',
+      disabled: false,
+      key: 'bool',
+      negate: false,
+      type: 'custom',
+      value:
+        '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field": "source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field": "destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}',
+    },
+  },
+];

@@ -49,25 +49,6 @@ export const getExternalAlertConfigs = ({
       filters: [
         {
           meta: {
-            index: '723c4653-681b-4105-956e-abef287bf025',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'exists',
-            key: 'host.name',
-            value: 'exists',
-          },
-          query: {
-            exists: {
-              field: 'host.name',
-            },
-          },
-          $state: {
-            store: 'appState',
-          },
-        },
-        {
-          meta: {
             index: 'a04472fc-94a3-4b8d-ae05-9d30ea8fbd6a',
             alias: null,
             negate: false,
