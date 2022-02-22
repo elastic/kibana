@@ -58,6 +58,8 @@ describe('TelemetryEventsSender', () => {
             test: 'me',
             another: 'nope',
             Ext: {
+              compressed_bytes: 'data up to 4mb',
+              compressed_bytes_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
@@ -129,6 +131,8 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             Ext: {
+              compressed_bytes: 'data up to 4mb',
+              compressed_bytes_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
