@@ -102,6 +102,7 @@ describe('fetchKibanaVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'kibana_stats' } },
+                    { term: { 'metricset.name': 'stats' } },
                     { term: { 'data_stream.dataset': 'kibana.stats' } },
                   ],
                   minimum_should_match: 1,

@@ -100,16 +100,16 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              3
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              3
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -138,16 +138,16 @@ describe('metric_expression', () => {
             key="last"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              last
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              last
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -175,16 +175,16 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              3
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              3
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -210,6 +210,7 @@ describe('metric_expression', () => {
         >
           <AutoScale
             key="3"
+            minScale={0.05}
           >
             <div
               className="lnsMetricExpression__value"
@@ -293,16 +294,16 @@ describe('metric_expression', () => {
             key="0"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              0
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              0
             </div>
           </AutoScale>
         </VisualizationContainer>
