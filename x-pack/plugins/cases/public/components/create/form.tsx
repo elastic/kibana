@@ -57,6 +57,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 export type SupportedCreateCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CreateCaseAttachment = SupportedCreateCaseAttachment[];
+export type CaseAttachments = SupportedCreateCaseAttachment[];
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
