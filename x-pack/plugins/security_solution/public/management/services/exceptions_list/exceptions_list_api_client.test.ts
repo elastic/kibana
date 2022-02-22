@@ -98,6 +98,41 @@ describe('Exceptions List Api Client', () => {
       expect(exceptionsListApiClientInstanceV2).toBeDefined();
       expect(exceptionsListApiClientInstanceV3).toBeDefined();
     });
+
+    it('Creating an instance fails because the create list call throws', async () => {
+      try {
+        fakeHttpServices.post.mockRejectedValueOnce({
+          response: {
+            status: 500,
+          },
+        });
+        const newFakeListId = 'fakeListIdV3';
+        const failedInstance = new ExceptionsListApiClient(
+          fakeHttpServices,
+          newFakeListId,
+          getFakeListDefinition()
+        );
+        await failedInstance.find(getQueryParams());
+      } catch (err) {
+        expect(err.response.status).toBe(500);
+      }
+    });
+
+    it('Creating an instance when list already exists does not throw', async () => {
+      fakeHttpServices.post.mockRejectedValueOnce({
+        response: {
+          status: 409,
+        },
+      });
+      const newFakeListId = 'fakeListIdV4';
+      const notFailedInstance = new ExceptionsListApiClient(
+        fakeHttpServices,
+        newFakeListId,
+        getFakeListDefinition()
+      );
+      await notFailedInstance.find(getQueryParams());
+      expect(notFailedInstance).toBeDefined();
+    });
   });
 
   describe('Wen using public methods', () => {
@@ -203,6 +238,7 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_URL}/summary`, {
         query: {
           filter: fakeQklFilter,
+          list_id: getFakeListId(),
           namespace_type: 'agnostic',
         },
       });
