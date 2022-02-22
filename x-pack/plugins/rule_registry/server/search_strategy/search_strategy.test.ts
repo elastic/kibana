@@ -8,7 +8,7 @@ import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ruleRegistrySearchStrategyProvider } from './search_strategy';
+import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
@@ -170,5 +170,33 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .toPromise();
     spaces.spacesService.getActiveSpace.mockClear();
     expect(searchRequest?.params?.index).toStrictEqual(['myTestIndex-testSpace*']);
+  });
+
+  it('should return an empty response if no valid indices are found', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    ruleDataService.findIndicesByFeature.mockImplementationOnce(() => {
+      return [];
+    });
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    const result = await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(result).toBe(EMPTY_RESPONSE);
   });
 });

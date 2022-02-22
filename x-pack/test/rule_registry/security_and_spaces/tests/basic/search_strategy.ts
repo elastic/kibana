@@ -139,5 +139,19 @@ export default ({ getService }: FtrProviderContext) => {
         expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
       });
     });
+
+    describe('empty response', () => {
+      it('should return an empty response', async () => {
+        const result = await bsearch.send<RuleRegistrySearchResponse>({
+          supertest,
+          options: {
+            featureIds: [],
+          },
+          strategy: 'ruleRegistrySearchStrategy',
+          space: SPACE1,
+        });
+        expect(result.rawResponse).to.eql({});
+      });
+    });
   });
 };

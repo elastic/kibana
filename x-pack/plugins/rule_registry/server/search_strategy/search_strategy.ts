@@ -24,7 +24,7 @@ import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '../';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
 
-const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
+export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
 
