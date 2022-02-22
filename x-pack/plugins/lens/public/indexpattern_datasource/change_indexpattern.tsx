@@ -87,7 +87,8 @@ export function ChangeIndexPattern({
             singleSelection="always"
             options={indexPatternRefs.map(({ title, id, readableTitle }) => ({
               key: id,
-              label: readableTitle ? readableTitle : title,
+              label: readableTitle ? `${readableTitle} (${title})` : title,
+              searchableLabel: title,
               value: id,
               checked: id === indexPatternId ? 'on' : undefined,
             }))}

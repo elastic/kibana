@@ -104,5 +104,5 @@ export interface IndexPatternPrivateState {
 export interface IndexPatternRef {
   id: string;
   title: string;
-  readableTitle: string;
+  readableTitle?: string;
 }
