@@ -14,7 +14,7 @@ export const rollupDataEnricher = async (indicesList: Index[], client: IScopedCl
   }
 
   try {
-    const { body: rollupJobData } = await client.asCurrentUser.rollup.getRollupIndexCaps({
+    const rollupJobData = await client.asCurrentUser.rollup.getRollupIndexCaps({
       index: '_all',
     });
 
