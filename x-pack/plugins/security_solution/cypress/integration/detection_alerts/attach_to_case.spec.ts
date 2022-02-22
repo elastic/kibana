@@ -23,7 +23,7 @@ const loadDetectionsPage = (role: ROLES) => {
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', () => {
+describe.skip('Alerts timeline', () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();

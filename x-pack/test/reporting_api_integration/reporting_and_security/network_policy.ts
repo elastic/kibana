@@ -35,7 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
       // Retry the download URL until a "failed" response status is returned
       await retry.tryForTime(120000, async () => {
         const { body } = await supertest.get(downloadPath).expect(500);
-        expect(body.message).to.match(/Reporting generation failed: Error:/);
+        expect(body.message).to.match(
+          /Reporting generation failed: ReportingError\(code: unknown_error\) "/
+        );
       });
     });
   });
