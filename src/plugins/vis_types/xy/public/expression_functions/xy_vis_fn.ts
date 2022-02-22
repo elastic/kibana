@@ -73,7 +73,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
     },
     legendSize: {
       types: ['number'],
-      help: i18n.translate('expressionHeatmap.function.args.legendSize.help', {
+      help: i18n.translate('visTypeXy.function.args.args.legendSize.help', {
         defaultMessage: 'Specifies the legend size in pixels.',
       }),
     },
