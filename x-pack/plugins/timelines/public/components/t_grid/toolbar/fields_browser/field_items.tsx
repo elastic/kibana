@@ -22,7 +22,7 @@ import styled from 'styled-components';
 
 import { getEmptyValue } from '../../../empty_value';
 import { getExampleText, getIconFromType } from '../../../utils/helpers';
-import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
+import type { BrowserFields } from '../../../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
   BrowserFieldItem,
@@ -35,7 +35,6 @@ import { TruncatableText } from '../../../truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
 import { getAlertColumnHeader } from './helpers';
-import { arrayIndexToAriaIndex } from '../../../../../common/utils/accessibility';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;
@@ -46,7 +45,7 @@ TypeIcon.displayName = 'TypeIcon';
 
 export const Description = styled.span`
   user-select: text;
-  width: 350px;
+  width: 400px;
 `;
 Description.displayName = 'Description';
 
@@ -72,40 +71,20 @@ export const getFieldItems = ({
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
         fieldItems.push(
-          ...getCategoryFieldItems({
-            browserFields: categoryBrowserFields,
+          ...categoryBrowserFields.map(({ name = '', ...field }) => ({
+            name,
+            type: field.type,
+            description: field.description ?? '',
+            example: field.example?.toString(),
             category: categoryId,
-            selectedFieldIds,
-          })
+            selected: selectedFieldIds.has(name),
+            isRuntime: !!field.runtimeField,
+          }))
         );
       }
       return fieldItems;
     }, [])
   );
-};
-
-/**
- * Returns the fields items of a category
- */
-const getCategoryFieldItems = ({
-  browserFields,
-  category,
-  selectedFieldIds,
-}: {
-  browserFields: Array<Partial<BrowserField>>;
-  category: string;
-  selectedFieldIds: Set<string>;
-}): BrowserFieldItem[] => {
-  return browserFields.map(({ name = '', ...field }, index) => ({
-    name,
-    type: field.type,
-    description: field.description ?? '',
-    example: field.example?.toString(),
-    category,
-    selected: selectedFieldIds.has(name),
-    isRuntime: !!field.runtimeField,
-    ariaRowindex: arrayIndexToAriaIndex(index),
-  }));
 };
 
 /**
@@ -196,14 +175,14 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
     field: 'name',
     name: i18n.NAME,
     dataType: 'string',
-    render: (name: string, item: BrowserFieldItem) => {
+    render: (name: string, { type }) => {
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={item.type}>
+            <EuiToolTip content={type}>
               <TypeIcon
                 data-test-subj={`field-${name}-icon`}
-                type={getIconFromType(item.type ?? null)}
+                type={getIconFromType(type ?? null)}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -220,15 +199,15 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description, item) => (
+    render: (description: string, { name, example }) => (
       <EuiToolTip content={description}>
         <>
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
-            <p>{i18n.DESCRIPTION_FOR_FIELD(item.name ?? '')}</p>
+            <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
           <TruncatableText>
-            <Description data-test-subj={`field-${item.name}-description`}>
-              {`${description ?? getEmptyValue()} ${getExampleText(item.example)}`}
+            <Description data-test-subj={`field-${name}-description`}>
+              {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
             </Description>
           </TruncatableText>
         </>
@@ -248,7 +227,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
 ];
 
 export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
-  return (column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length > 0;
+  return !!(column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length;
 };
 
 /**

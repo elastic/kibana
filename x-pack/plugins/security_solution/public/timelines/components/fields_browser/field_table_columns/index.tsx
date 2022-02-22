@@ -18,8 +18,7 @@ import {
   EuiText,
   EuiHighlight,
 } from '@elastic/eui';
-import type { BrowserFieldItem, FieldTableColumns } from '../../../../../../timelines/common/types';
-
+import type { FieldTableColumns } from '../../../../../../timelines/common/types';
 import * as i18n from './translations';
 import {
   getExampleText,
@@ -58,14 +57,14 @@ export const getFieldTableColumns = (highlight: string): FieldTableColumns => [
     field: 'name',
     name: i18n.NAME,
     dataType: 'string',
-    render: (name: string, item: BrowserFieldItem) => {
+    render: (name: string, { type }) => {
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={item.type}>
+            <EuiToolTip content={type}>
               <TypeIcon
                 data-test-subj={`field-${name}-icon`}
-                type={getIconFromType(item.type ?? null)}
+                type={getIconFromType(type ?? null)}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -82,15 +81,15 @@ export const getFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description, item) => (
+    render: (description, { name, example }) => (
       <EuiToolTip content={description}>
         <>
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
-            <p>{i18n.DESCRIPTION_FOR_FIELD(item.name ?? '')}</p>
+            <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
           <EllipsisText>
-            <Description data-test-subj={`field-${item.name}-description`}>
-              {`${description ?? getEmptyValue()} ${getExampleText(item.example)}`}
+            <Description data-test-subj={`field-${name}-description`}>
+              {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
             </Description>
           </EllipsisText>
         </>

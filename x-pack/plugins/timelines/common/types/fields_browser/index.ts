@@ -21,7 +21,6 @@ export interface BrowserFieldItem {
   selected: boolean;
   isRuntime: boolean;
   highlight?: string;
-  ariaRowindex?: number;
 }
 
 export type OnFieldSelected = (fieldId: string) => void;
@@ -43,13 +42,10 @@ export interface FieldBrowserProps {
   columnHeaders: ColumnHeaderOptions[];
   /** A map of categoryId -> metadata about the fields in that category */
   browserFields: BrowserFields;
-
-  // createFieldComponent?: CreateFieldComponentType;
-
-  options?: FieldBrowserOptions;
-
   /** When true, this Fields Browser is being used as an "events viewer" */
   isEventViewer?: boolean;
+  /** The options to customize the field browser, supporting columns rendering and button to create fields */
+  options?: FieldBrowserOptions;
   /** The width of the field browser */
   width?: number;
 }
