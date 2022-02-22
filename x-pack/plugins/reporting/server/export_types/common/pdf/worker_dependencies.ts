@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { PdfMaker } from './pdfmaker';
-export { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
+import _ from 'lodash';
+import Printer from 'pdfmake';
+
+export { _, Printer };

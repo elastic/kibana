@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { PdfMaker } from './pdfmaker';
-export { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
+export class PdfWorkerOutOfMemoryError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PdfWorkerOutOfMemoryError';
+  }
+}

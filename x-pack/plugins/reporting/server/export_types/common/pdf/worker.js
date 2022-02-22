@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { PdfMaker } from './pdfmaker';
-export { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
+require('../../../../../../../src/setup_node_env');
+require('./worker.ts');
