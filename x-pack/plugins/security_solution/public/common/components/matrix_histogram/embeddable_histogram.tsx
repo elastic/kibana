@@ -13,9 +13,12 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
-import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
 import { SecurityPageName } from '../../../../common/constants';
-import { getHostDetailsPageFilter } from './utils';
+import {
+  filterHostExternalAlertData,
+  filterNetworkExternalAlertData,
+  getHostDetailsPageFilter,
+} from './utils';
 
 export interface SingleMetricOptions {
   alignLnsMetric?: string;
@@ -69,11 +72,23 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   const { detailName, tabName } = useParams<{ detailName: string | undefined; tabName: string }>();
   const location = useLocation();
   const tabsFilters = useMemo(() => {
-    if (tabName === NetworkRouteType.alerts) {
-      return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
+    if (location.pathname.includes(SecurityPageName.hosts) && tabName === 'externalAlerts') {
+      return filters.length > 0
+        ? [...filters, ...filterHostExternalAlertData]
+        : filterHostExternalAlertData;
     }
+
+    if (
+      location.pathname.includes(SecurityPageName.network) &&
+      tabName === NetworkRouteType.alerts
+    ) {
+      return filters.length > 0
+        ? [...filters, ...filterNetworkExternalAlertData]
+        : filterNetworkExternalAlertData;
+    }
+
     return filters;
-  }, [tabName, filters]);
+  }, [tabName, location.pathname, filters]);
 
   const pageFilters = useMemo(() => {
     if (location.pathname.includes(SecurityPageName.hosts) && detailName != null) {
