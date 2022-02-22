@@ -25,7 +25,12 @@ const defaultLabel = i18n.translate('sharedUX.solutionToolbarButton.solutionTool
   defaultMessage: 'Primary Action',
 });
 
-export const SolutionToolbarButton = ({ label= defaultLabel, primary, className, ...rest }: Props) => {
+export const SolutionToolbarButton = ({
+  label = defaultLabel,
+  primary,
+  className,
+  ...rest
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const { colors, border, font } = euiTheme;
   const buttonCSS = css`
