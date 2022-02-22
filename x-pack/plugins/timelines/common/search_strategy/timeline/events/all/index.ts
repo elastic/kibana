@@ -46,4 +46,5 @@ export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsP
   fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
   language: 'eql' | 'kuery' | 'lucene';
   runtimeMappings: MappingRuntimeFields;
+  aggs?: Record<string, any>;
 }

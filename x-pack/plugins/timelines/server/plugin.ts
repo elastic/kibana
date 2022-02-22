@@ -14,7 +14,6 @@ import {
 } from '../../../../src/core/server';
 
 import { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } from './types';
-import { defineRoutes } from './routes';
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
@@ -33,11 +32,6 @@ export class TimelinesPlugin
   public setup(core: CoreSetup<StartPlugins, TimelinesPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('timelines: Setup');
     this.security = plugins.security;
-
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
 
     const IndexFields = indexFieldsProvider(core.getStartServices);
     // Register search strategy

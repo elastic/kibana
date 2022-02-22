@@ -43,6 +43,8 @@ import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
+import { JsonObject } from '@kbn/utility-types';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export type InspectResponse = Inspect & { response: string[] };
 
@@ -91,6 +93,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
+  aggs?: JsonObject;
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -102,7 +105,7 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
 const getAggsResponse = <T extends TimelineFactoryQueryTypes>(
   response: TimelineStrategyResponseType<T>,
   prevResponse?: Record<string, any>
-): Record<string, any> | undefined => (response != null ? [JSON.stringify(response.rawResponse.aggregations, null, 2)] : prevResponse);
+): Record<string, any> | undefined => (response != null ? response.rawResponse.aggregations : prevResponse);
 
 const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
   response: TimelineStrategyResponseType<T>,
@@ -142,6 +145,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
   data,
+  aggs,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
   const refetch = useRef<Refetch>(noop);
@@ -213,9 +217,10 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
+          const aggsq = aggs as (Record<string, AggregationsAggregationContainer> | undefined);
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
-              { ...request, entityType },
+              { ...request, entityType, ...({params: { body: { aggs: aggsq }}}) },
               {
                 strategy:
                   request.language === 'eql'
@@ -282,6 +287,7 @@ export const useTimelineEvents = ({
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
         runtimeMappings: prevRequest?.runtimeMappings ?? {},
+        aggs: prevRequest?.aggs ?? {},
       };
 
       const currentSearchParameters = {
@@ -295,6 +301,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        aggs,
       };
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
@@ -322,6 +329,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        aggs,
       };
 
       if (activePage !== newActivePage) {
@@ -348,6 +356,7 @@ export const useTimelineEvents = ({
     sort,
     fields,
     runtimeMappings,
+    aggs,
   ]);
 
   useEffect(() => {

@@ -33,16 +33,17 @@ import {
   CreateFieldEditorActions,
   useCreateFieldButton,
 } from '../../../timelines/components/create_field_button';
-import { EuiFlexItem, EuiFlexGroup, EuiAccordion, EuiText, EuiPopover, EuiContextMenu, EuiButton } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiText, EuiPopover, EuiContextMenu, EuiButton, EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiBasicTableColumn } from '@elastic/eui';
 import { SummaryViewSelector, ViewSelection } from './selector';
 import { InspectResponse } from '../../../types';
 import { StackByComboBox } from '../../../detections/components/alerts_kpis/common/components';
-import { DEFAULT_STACK_BY_FIELD } from '../../../detections/components/alerts_kpis/common/config';
+import { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
 
-export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
+export const UpdatedFlexGroup = styled(EuiFlexGroup) <{ $view?: ViewSelection }>`
   ${({ $view, theme }) =>
     $view === 'gridView' ? `margin-right: ${theme.eui.paddingSizes.xl};` : ''}
   position: absolute;
@@ -50,7 +51,7 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
   right: 0px;
 `;
 
-export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
+export const UpdatedFlexItem = styled(EuiFlexItem) <{ $show: boolean }>`
   ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
 `;
 
@@ -66,6 +67,54 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   display: flex;
   width: 100%;
 `;
+
+const getAlertsGroupQuery = (
+  selectedGroupByOption: string,
+  after: AggregationsCompositeAggregation['after'],
+  from: string,
+  to: string,
+  additionalFilters: Array<{
+    bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
+  }> = [],
+) => {
+  return {
+    size: 0,
+    aggs: {
+      buckets: {
+        composite: {
+          size: Math.min(10, 10000),
+          sources: [
+            {
+              alertsByGroupingCount: {
+                terms: {
+                  field: selectedGroupByOption,
+                },
+              },
+            },
+          ],
+          after,
+        },
+      },
+    },
+    query: {
+      bool: {
+        filter: [
+          ...additionalFilters,
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+        ],
+      },
+    },
+    //runtime_mappings: runtimeMappings,
+  };
+};
+
 
 export interface OwnProps {
   defaultCellActions?: TGridCellAction[];
@@ -151,7 +200,55 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const [inspectResponse, setInspectResponse] = useState<InspectResponse>();
   const [loading, setLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
-  const [aggs, setAggs] = useState<Record<string, any> | undefined>();
+  const [selectedGroupByOption, setSelectedGroupByOption] = useState<string | null>(null);
+  const [aggsResult, setAggsResult] = useState<{
+    buckets: Array<{
+      docCount: number;
+      key: string
+    }>
+  } | null>(null);
+  const [aggsQuery, setAggsQuery] = useState<Record<string, any> | undefined>();
+  const [selectedGroupFieldValue, setSelectedGroupFieldValue] = useState<string | undefined>();
+  const [groupFilter, setGroupFilter] = useState<Filter[] | undefined>();
+  let buckets = [];
+  let after: AggregationsCompositeAggregation['after'];
+
+  useEffect(() => {
+    if (selectedGroupByOption !== null) {
+      setAggsQuery({
+        buckets: {
+          composite: {
+            size: Math.min(10, 10000 - buckets.length),
+            sources: [
+              {
+                alertsByGroupingCount: {
+                  terms: {
+                    field: selectedGroupByOption,
+                  },
+                },
+              },
+            ],
+            after,
+          },
+        },
+      });
+    }
+  }, [selectedGroupByOption]);
+
+  useEffect(() => {
+    setGroupFilter(selectedGroupByOption && selectedGroupFieldValue ? [{
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: {
+        term: {
+          [selectedGroupByOption]: selectedGroupFieldValue,
+        },
+      }
+    }] : []);
+  }, [selectedGroupFieldValue]);
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -177,7 +274,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
+  const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], 
+  [filters, pageFilters, groupFilter]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
@@ -190,7 +288,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       setInspectResponse(inspect);
       setLoading(loading);
       setTitle(title);
-      setAggs(aggs);
+      if (aggs?.buckets?.after_key) {
+        console.log(aggs.buckets.after_key)
+        after = {
+          alertsByGroupingCount: aggs.buckets.after_key.alertsByGroupingCount,
+        };
+      }
+      if (aggs?.buckets) {
+        setAggsResult({
+          buckets: aggs.buckets.buckets.map((val: any) => ({
+            docCount: val.doc_count,
+            key: val.key.alertsByGroupingCount,
+          }))
+        });
+      }
     },
     [dispatch, id]
   );
@@ -211,9 +322,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
-  const [selectedGroupByOption, setSelectedGroupByOption] = useState<string | null>(null);
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
-  const grid = useMemo(() => timelinesUi.getTGrid<'embedded'>({
+  const grid = timelinesUi.getTGrid<'embedded'>({
     tableView,
     appId: APP_UI_ID,
     browserFields,
@@ -227,7 +340,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     docValueFields,
     end,
     entityType,
-    filters: globalFilters,
+    filters: ([...globalFilters]),
     filterStatus: currentFilter,
     globalFullScreen,
     graphEventId,
@@ -254,91 +367,109 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     type: 'embedded',
     unit,
     createFieldComponent,
-  }),
-  [tableView,
-    browserFields,
-    bulkActions,
-    columns,
-    dataProviders,
-    dataViewId,
-    defaultCellActions,
-    deletedEventIds,
-    docValueFields,
-    end,
-    entityType,
-    globalFilters,
-    currentFilter,
-    globalFullScreen,
-    graphEventId,
-    graphOverlay,
-    hasAlertsCrud,
-    id,
-    selectedPatterns,
-    indexPattern,
-    isLive,
-    isLoadingIndexPattern,
-    itemsPerPage,
-    itemsPerPageOptions,
-    kqlMode,
-    leadingControlColumns,
-    onRuleChange,
-    query,
-    renderCellValue,
-    rowRenderers,
-    runtimeMappings,
-    setQuery,
-    sort,
-    start,
-    trailingControlColumns,
-    unit,
-    createFieldComponent]);
+    aggsQuery,
+  });
+
+  const toggleDetails = async (item: any) => {
+    console.log(selectedGroupFieldValue)
+
+    if(item.key != selectedGroupFieldValue) {
+      setSelectedGroupFieldValue(item.key);
+      setItemIdToExpandedRowMap({[item.key]: grid });
+
+    } else {
+      setSelectedGroupFieldValue(undefined);
+      setItemIdToExpandedRowMap({});
+    }
+    console.log(globalFilters)
+
+  };
+
+  const columns1: EuiBasicTableColumn<{
+    docCount: number;
+    key: string;
+  }>[] = [
+      {
+        name: selectedGroupByOption,
+        isExpander: true,
+        render: (item: {
+          docCount: number;
+          key: string
+        }) => (
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false} >
+              <EuiButtonIcon
+                onClick={toggleDetails.bind(null, item)}
+                isSelected={true}
+                aria-label={
+                  item.key === selectedGroupFieldValue
+                    ? i18n.translate('xpack.timeline.collapseRow', {
+                      defaultMessage: 'Collapse',
+                    })
+                    : i18n.translate('xpack.timeline.expandRow', {
+                      defaultMessage: 'Expand',
+                    })
+                }
+                iconType={item.key === selectedGroupFieldValue ? 'arrowUp' : 'arrowDown'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <p>{item.key}</p>
+              </EuiText>
+              <EuiText size="xs" color='gray'>
+                <p>Alerts: {item.docCount}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+    ];
 
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-        <UpdatedFlexGroup
-                alignItems={alignItems}
-                data-test-subj="updated-flex-group"
-                gutterSize="m"
-                justifyContent="flexEnd"
-                $view={tableView}
-              >
-                {!!inspectResponse ? (
+          <UpdatedFlexGroup
+            alignItems={alignItems}
+            data-test-subj="updated-flex-group"
+            gutterSize="m"
+            justifyContent="flexEnd"
+            $view={tableView}
+          >
+            {!!inspectResponse ? (
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                {timelinesUi.getInspectButton({ inspect: inspectResponse, loading, title: justTitle })}
+              </UpdatedFlexItem>
+            ) : null}
+            <UpdatedFlexItem grow={false} $show={!loading}>
+              {!resolverIsShowing(graphEventId) && additionalFilters}
+            </UpdatedFlexItem>
+            {tGridEventRenderedViewEnabled &&
+              ['detections-page', 'detections-rules-details-page'].includes(id) && (
                 <UpdatedFlexItem grow={false} $show={!loading}>
-                  {timelinesUi.getInspectButton({inspect: inspectResponse, loading, title: justTitle})}
+                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                 </UpdatedFlexItem>
-                ) : null}
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  {!resolverIsShowing(graphEventId) && additionalFilters}
-                </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled &&
-                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                    <UpdatedFlexItem grow={false} $show={!loading}>
-                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                    </UpdatedFlexItem>
-                  )}
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <StackByComboBox onSelect={setSelectedGroupByOption} selected={selectedGroupByOption} title='Group by' placeholder='Select a field to group by' ariaLabel='Group the alerts table by a field value' />
-                </UpdatedFlexItem>
+              )}
+            <UpdatedFlexItem grow={false} $show={true}>
+              <StackByComboBox onSelect={setSelectedGroupByOption} selected={selectedGroupByOption} title='Group by' placeholder='Select a field to group by' ariaLabel='Group the alerts table by a field value' />
+            </UpdatedFlexItem>
           </UpdatedFlexGroup>
-          {selectedGroupByOption !== null ? (
-              <EuiAccordion
-              id="alertGroups"
-              initialIsOpen={false}
-              paddingSize="s"
-              // ref={scheduleRuleRef}
-              // onToggle={(handleAccordionToggle.bind(null, RuleStep.scheduleRule))}
-              buttonContent={
-                <EuiText size="s">
-                  <p>{'test'}</p>
-                </EuiText>
-              }
-            >
-              
-                {grid}
-            </EuiAccordion>
-          ) : grid}
+          {selectedGroupByOption && aggsResult?.buckets && aggsResult?.buckets.length ?
+            (
+              <>
+                <EuiSpacer size="m" />
+                <EuiInMemoryTable
+                  isExpandable={true}
+                  itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                  itemId={'key'}
+                  tableCaption="Demo of EuiInMemoryTable"
+                  items={aggsResult.buckets}
+                  columns={columns1}
+                  pagination={true}
+                />
+              </>)
+            : grid}
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel

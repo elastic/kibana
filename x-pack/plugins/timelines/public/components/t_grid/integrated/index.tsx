@@ -131,6 +131,7 @@ export interface TGridIntegratedProps {
   start: string;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (n: number) => string;
+  aggsQuery?: Record<string, any>;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
@@ -173,6 +174,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   start,
   trailingControlColumns,
   unit,
+  aggsQuery,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -242,6 +244,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
+      aggs: aggsQuery,
     });
 
   const filterQuery = useMemo(

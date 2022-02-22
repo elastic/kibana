@@ -28,6 +28,7 @@ import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggabl
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions } from './components/hover_actions';
 import { InspectButtonProps } from './components/inspect';
+import { useTimelineEvents } from './container';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
@@ -83,6 +84,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;
+      },
+      getUseTimelineEvents: () => {
+        return useTimelineEvents;
       },
       getUseAddToTimelineSensor: () => {
         return useAddToTimelineSensor;

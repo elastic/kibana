@@ -26,6 +26,7 @@ export const buildTimelineEventsAllQuery = ({
   runtimeMappings,
   sort,
   timerange,
+  aggs,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
@@ -73,6 +74,7 @@ export const buildTimelineEventsAllQuery = ({
         producers: {
           terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
         },
+        ...(aggs ?? {}),
       },
       query: {
         bool: {

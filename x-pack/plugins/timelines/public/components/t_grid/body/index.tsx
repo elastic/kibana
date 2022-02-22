@@ -517,7 +517,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           : {
               showColumnSelector: { allowHide: false, allowReorder: true },
               showSortSelector: true,
-              showFullScreenSelector: true,
+              showFullScreenSelector: false,
             }),
         showDisplaySelector: false,
       }),
