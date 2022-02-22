@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { PdfMaker } from './pdfmaker';
-export { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
+(async function execute() {
+  throw new Error('This is a bug');
+})();
