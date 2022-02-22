@@ -67,6 +67,7 @@
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
     "visDefaultEditor": "src/plugins/vis_default_editor",
+    "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
     "visTypeMarkdown": "src/plugins/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_types/metric",
