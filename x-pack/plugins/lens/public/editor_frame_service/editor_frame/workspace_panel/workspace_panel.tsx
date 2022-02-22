@@ -152,6 +152,45 @@ interface ErrorDescription {
   longMessage: React.ReactNode;
 }
 
+const checkMissingIndexPatternsAndUnknownVis = ({
+  activeDatasourceId,
+  datasourceMap,
+  datasourceStates,
+  visualization,
+  activeVisualization,
+}: {
+  activeDatasourceId: string | null;
+  activeVisualization: Visualization | null;
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  visualization: VisualizationState;
+}) => {
+  const missingIndexPatterns = getMissingIndexPattern(
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+  );
+
+  const missingRefsErrors = missingIndexPatterns.length
+    ? [
+        {
+          shortMessage: '',
+          longMessage: i18n.translate('xpack.lens.indexPattern.missingDataView', {
+            defaultMessage:
+              'The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
+            values: {
+              count: missingIndexPatterns.length,
+              indexpatterns: missingIndexPatterns.join(', '),
+            },
+          }),
+        },
+      ]
+    : [];
+
+  const unknownVisError = visualization.activeId && !activeVisualization;
+
+  return { missingRefsErrors, unknownVisError };
+};
+
 const generateExpression = ({
   errors: { hasConfigurationValidationError, hasMissingRefsErrors, hasUnknownVisError },
   activeVisualization,
@@ -242,29 +281,6 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const missingIndexPatterns = getMissingIndexPattern(
-    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
-  );
-
-  const missingRefsErrors = missingIndexPatterns.length
-    ? [
-        {
-          shortMessage: '',
-          longMessage: i18n.translate('xpack.lens.indexPattern.missingDataView', {
-            defaultMessage:
-              'The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
-            values: {
-              count: missingIndexPatterns.length,
-              indexpatterns: missingIndexPatterns.join(', '),
-            },
-          }),
-        },
-      ]
-    : [];
-
-  const unknownVisError = visualization.activeId && !activeVisualization;
-
   // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
   // and to prevent race conditions it is ok to leave them there.
 
@@ -280,6 +296,14 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
+
+  const { missingRefsErrors, unknownVisError } = checkMissingIndexPatternsAndUnknownVis({
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    visualization,
+    activeVisualization,
+  });
 
   const expression = useMemo(() => {
     const { expression: _expression, expressionBuildError } = generateExpression({
