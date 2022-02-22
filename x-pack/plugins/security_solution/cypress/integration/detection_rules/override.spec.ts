@@ -73,7 +73,7 @@ import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe('Detection rules, override', () => {
+describe.skip('Detection rules, override', () => {
   const expectedUrls = getNewOverrideRule().referenceUrls.join('');
   const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples.join('');
   const expectedTags = getNewOverrideRule().tags.join('');
