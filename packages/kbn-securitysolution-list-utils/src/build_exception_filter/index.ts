@@ -141,12 +141,12 @@ export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
   chunkSize,
-  ruleExecutionLogger,
+  logger,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
-  ruleExecutionLogger?: IRuleExecutionLogForExecutors;
+  logger?: (filters: BooleanFilter[] | Filter[]) => Promise<void>;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
@@ -166,12 +166,15 @@ export const buildExceptionFilter = ({
       },
     },
   };
-  // TODO: be logging with ruleExecutionLogger
+
   if (exceptionsWithoutLargeValueLists.length === 0) {
     return undefined;
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
     const clause = createOrClauses(exceptionsWithoutLargeValueLists);
     exceptionFilter.query!.bool!.should = clause;
+    if (logger != null) {
+      logger([exceptionFilter]);
+    }
     return exceptionFilter;
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
@@ -194,7 +197,9 @@ export const buildExceptionFilter = ({
     });
 
     const clauses = filters.map<BooleanFilter>(({ query }) => query);
-
+    if (logger != null) {
+      logger(clauses);
+    }
     return {
       meta: {
         alias: null,

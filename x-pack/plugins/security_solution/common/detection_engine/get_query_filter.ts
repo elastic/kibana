@@ -10,12 +10,13 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
+import { BooleanFilter, buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query';
 
 import { ESBoolQuery } from '../typed_json';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 import { IRuleExecutionLogForExecutors } from '../../server/lib/detection_engine/rule_execution_log';
+import { RuleExecutionStatus } from './schemas/common';
 
 interface GetQueryFilterProps {
   query: Query;
@@ -47,6 +48,16 @@ export const getQueryFilter = ({
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
+
+  const logger = async (filterLogs: BooleanFilter[] | Filter[]) => {
+    if (ruleExecutionLogger != null) {
+      await ruleExecutionLogger.logStatusChange({
+        newStatus: RuleExecutionStatus.running,
+        message: JSON.stringify(filterLogs),
+      });
+    }
+  };
+
   // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
@@ -55,7 +66,7 @@ export const getQueryFilter = ({
     lists,
     excludeExceptions,
     chunkSize: 1024,
-    ruleExecutionLogger,
+    logger,
   });
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
