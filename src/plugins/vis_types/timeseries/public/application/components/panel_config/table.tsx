@@ -80,7 +80,7 @@ export class TablePanelConfig extends Component<
     };
 
     this.props.onChange({
-      pivot_id: selectedOptions,
+      pivot_id: selectedOptions.length === 1 ? selectedOptions[0] : selectedOptions,
       pivot_type: getPivotType(),
     });
   };
