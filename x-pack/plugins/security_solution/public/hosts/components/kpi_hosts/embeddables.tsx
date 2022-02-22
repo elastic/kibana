@@ -18,35 +18,22 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
-import { kpiHostArea } from '../../configs/kpi_host_area';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { kpiUniqueIpsArea } from '../../configs/kpi_unique_ips-area';
-import { kpiUniqueIpsBar } from '../../configs/kpi_unique_ips-bar';
-import { kpiUniqueIpsDestinationMetric } from '../../configs/kpi_unique_ips-destination_metric';
-import { kpiHostMetric } from '../../configs/kpi_host_metric';
-import { kpiUniqueIpsSourceMetric } from '../../configs/kpi_unique_ips-source_metric';
-import { kpiUserAuthenticationsMetricFailure } from '../../configs/kpi_user_authentication_metric_failure';
-import { kpiUserAuthenticationsArea } from '../../configs/kpi_user_authentications_area';
-import { kpiUserAuthenticationsBar } from '../../configs/kpi_user_authentications_bar';
-import { kpiUserAuthenticationsMetricSuccess } from '../../configs/kpi_user_authentications-metric_success';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
-import {
-  SOURCE_UNIT_LABEL,
-  DESTINATION_UNIT_LABEL,
-} from '../../../network/components/kpi_network/unique_private_ips/translations';
-import { UNIQUE_IPS } from './unique_ips/translations';
-import { USER_AUTHENTICATIONS } from './authentications/translations';
-import { HOSTS } from './hosts/translations';
+import { KpiUniqueIps } from '../common/kpi_unique_ips';
+import { KpiUserAuthentications } from '../common/kpi_user_authentications';
+import { KpiHosts } from '../common/kpi_hosts';
 
+const panelHeight = 280;
+const panelMinWidth = 264;
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
+  flex-wrap: 'wrap';
 `;
 
-const panelHeight = '280px';
-const metricHeight = '70px';
-
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  height: ${panelHeight}px;
+  minwidth: ${({ grow = 1 }: { grow: number }) => panelMinWidth * grow}px;
+`;
 
 interface Props {
   from: string;
@@ -55,215 +42,21 @@ interface Props {
 }
 
 export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global' }: Props) => {
-  const timerange = useMemo<TimeRange>(
-    () => ({
-      from: new Date(from).toISOString(),
-      to: new Date(to).toISOString(),
-      mode: 'absolute',
-    }),
-    [from, to]
-  );
-  const dispatch = useDispatch();
-
-
-
-  const onBrushEnd = useCallback(
-    ({ range }: { range: number[] }) => {
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: inputsModelId,
-          from: new Date(range[0]).toISOString(),
-          to: new Date(range[1]).toISOString(),
-        })
-      );
-    },
-    [dispatch, inputsModelId]
-  );
-
-
   return (
-    <EuiFlexGroup style={{ flexWrap: 'wrap' }}>
-      <EuiFlexItem grow={1} style={{ minWidth: '264px' }}>
-        <EuiPanel
-          color="transparent"
-          hasBorder
-          style={{ height: '100%', flexDirection: 'column', display: 'flex' }}
-          paddingSize="m"
-        >
-          <EuiTitle size="xs">
-            <h3>{HOSTS}</h3>
-          </EuiTitle>
-          <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-            <EuiSplitPanel.Inner paddingSize="none" style={{ width: '100%' }}>
-              <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiHostMetric}
-                    customTimeRange={timerange}
-                    isSingleMetric={true}
-                    singleMetricOptions={{
-                      metricIcon: 'storage',
-                      metricIconColor: '#6092c0',
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="xs" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiHostArea}
-                    customTimeRange={timerange}
-                    isSingleMetric={false}
-                  />
-                </EuiFlexItem>
-              </StyledEuiFlexGroup>
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ height: panelHeight, minWidth: '528px' }} grow={2}>
-        <EuiPanel
-          color="transparent"
-          hasBorder
-          style={{ height: '100%', flexDirection: 'column', display: 'flex' }}
-          paddingSize="m"
-        >
-          <EuiTitle size="xs">
-            <h3>{USER_AUTHENTICATIONS}</h3>
-          </EuiTitle>
-          <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-            <StyledInnerPannel paddingSize="none">
-              <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUserAuthenticationsMetricSuccess}
-                    customTimeRange={timerange}
-                    isSingleMetric={true}
-                    singleMetricOptions={{
-                      metricIcon: 'check',
-                      metricIconColor: '#54B399',
-                      metricPostfix: 'success',
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="xs" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUserAuthenticationsBar}
-                    customTimeRange={timerange}
-                    isSingleMetric={false}
-                  />
-                </EuiFlexItem>
-              </StyledEuiFlexGroup>
-            </StyledInnerPannel>
-            <StyledInnerPannel paddingSize="none">
-              <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUserAuthenticationsMetricFailure}
-                    customTimeRange={timerange}
-                    isSingleMetric={true}
-                    singleMetricOptions={{
-                      metricIcon: 'cross',
-                      metricIconColor: '#e7664c',
-                      metricPostfix: 'fail',
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="xs" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUserAuthenticationsArea}
-                    customTimeRange={timerange}
-                    onBrushEnd={onBrushEnd}
-                    isSingleMetric={false}
-                  />
-                </EuiFlexItem>
-              </StyledEuiFlexGroup>
-            </StyledInnerPannel>
-          </EuiSplitPanel.Outer>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ height: panelHeight, minWidth: '528px' }} grow={2}>
-        <EuiPanel
-          color="transparent"
-          hasBorder
-          style={{ height: '100%', flexDirection: 'column', display: 'flex' }}
-          paddingSize="m"
-        >
-          <EuiTitle size="xs">
-            <h3>{UNIQUE_IPS}</h3>
-          </EuiTitle>
-          <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-            <StyledInnerPannel paddingSize="none">
-              <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUniqueIpsSourceMetric}
-                    customTimeRange={timerange}
-                    isSingleMetric={true}
-                    singleMetricOptions={{
-                      metricIcon: 'visMapCoordinate',
-                      metricIconColor: '#d36086',
-                      metricPostfix: SOURCE_UNIT_LABEL,
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="xs" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUniqueIpsBar}
-                    customTimeRange={timerange}
-                    isSingleMetric={false}
-                  />
-                </EuiFlexItem>
-              </StyledEuiFlexGroup>
-            </StyledInnerPannel>
-            <StyledInnerPannel paddingSize="none">
-              <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUniqueIpsDestinationMetric}
-                    customTimeRange={timerange}
-                    isSingleMetric={true}
-                    singleMetricOptions={{
-                      metricIcon: 'visMapCoordinate',
-                      metricIconColor: '#9170b8',
-                      metricPostfix: DESTINATION_UNIT_LABEL,
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="xs" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EmbeddableHistogram
-                    customLensAttrs={kpiUniqueIpsArea}
-                    customTimeRange={timerange}
-                    onBrushEnd={onBrushEnd}
-                    isSingleMetric={false}
-                  />
-                </EuiFlexItem>
-              </StyledEuiFlexGroup>
-            </StyledInnerPannel>
-          </EuiSplitPanel.Outer>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <StyledEuiFlexGroup>
+      <StyledEuiFlexItem grow={1}>
+        <KpiHosts from={from} to={to} />
+      </StyledEuiFlexItem>
+      <StyledEuiFlexItem grow={2}>
+        <KpiUserAuthentications from={from} to={to} />
+      </StyledEuiFlexItem>
+      <StyledEuiFlexItem grow={2}>
+        <KpiUniqueIps from={from} to={to} />
+      </StyledEuiFlexItem>
+    </StyledEuiFlexGroup>
   );
 };
 
 export const ExploratoryCharts = React.memo(ExploratoryChartsComponents);
 
 ExploratoryCharts.displayName = 'ExploratoryCharts';
-
-const StyledInnerPannel = styled(EuiSplitPanel.Inner)`
-  width: 50%;
-`;
