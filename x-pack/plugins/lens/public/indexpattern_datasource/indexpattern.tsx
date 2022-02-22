@@ -49,7 +49,12 @@ import {
 import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
+import {
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  getErrorMessages,
+  insertNewColumn,
+} from './operations';
 import {
   IndexPatternField,
   IndexPatternPrivateState,
@@ -71,6 +76,7 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
+import { isColumnOfType } from './operations/definitions/helpers';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -582,7 +588,13 @@ export function getIndexPatternDatasource({
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
           const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-          return buckets.some((colId) => layer.columns[colId].operationType === 'date_histogram');
+          return buckets.some((colId) => {
+            const column = layer.columns[colId];
+            return (
+              isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+              !column.params.ignoreTimeRange
+            );
+          });
         })
       );
     },
