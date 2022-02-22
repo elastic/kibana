@@ -189,14 +189,14 @@ function ObservabilityActions({
             timelines.getAddToExistingCaseButton({
               event,
               casePermissions,
-              appId: observabilityFeatureId,
+              appId: observabilityAppId,
               owner: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),
             timelines.getAddToNewCaseButton({
               event,
               casePermissions,
-              appId: observabilityFeatureId,
+              appId: observabilityAppId,
               owner: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),

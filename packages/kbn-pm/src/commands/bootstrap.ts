@@ -137,16 +137,6 @@ export const BootstrapCommand: ICommand = {
       { prefix: '[vscode]', debug: false }
     );
 
-    await spawnStreaming(
-      process.execPath,
-      ['scripts/build_ts_refs', '--ignore-type-failures'],
-      {
-        cwd: kbn.getAbsolute(),
-        env: process.env,
-      },
-      { prefix: '[ts refs]', debug: false }
-    );
-
     // send timings
     await reporter.timings({
       upstreamBranch: kbn.kibanaProject.json.branch,
