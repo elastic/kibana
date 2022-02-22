@@ -54,15 +54,25 @@ export function ApmMainTemplate({
     return callApmApi('GET /internal/apm/has_data');
   }, []);
 
+  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
+    location.pathname.includes(path)
+  );
+
+  const { data: fleetApmIntegrations } = useFetcher(
+    (callApmApi) => {
+      if (!data?.hasData && !shouldBypassNoDataScreen) {
+        return callApmApi('GET /internal/apm/fleet/has_data');
+      }
+    },
+    [shouldBypassNoDataScreen, data?.hasData]
+  );
+
   const noDataConfig = getNoDataConfig({
     basePath,
     docsLink: docLinks!.links.observability.guide,
     hasData: data?.hasData,
+    hasApmIntegrations: fleetApmIntegrations?.hasData,
   });
-
-  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
-    location.pathname.includes(path)
-  );
 
   const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
 

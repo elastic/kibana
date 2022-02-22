@@ -12,22 +12,30 @@ export function getNoDataConfig({
   docsLink,
   basePath,
   hasData,
+  hasApmIntegrations,
 }: {
   docsLink: string;
   basePath?: string;
   hasData?: boolean;
+  hasApmIntegrations?: boolean;
 }): KibanaPageTemplateProps['noDataConfig'] {
   // Returns no data config when there is no historical data
   if (hasData === false) {
+    const title = hasApmIntegrations
+      ? i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        })
+      : i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
+          defaultMessage: 'Add the APM integration',
+        });
+
     return {
       solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
       }),
       actions: {
         elasticAgent: {
-          title: i18n.translate('xpack.apm.ux.overview.agent.title', {
-            defaultMessage: 'Add the APM integration',
-          }),
+          title,
           description: i18n.translate(
             'xpack.apm.ux.overview.agent.description',
             {
