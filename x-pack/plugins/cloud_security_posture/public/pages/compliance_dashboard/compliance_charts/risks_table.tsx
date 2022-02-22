@@ -64,15 +64,17 @@ const mockData = [
 
 export interface RisksTableProps {
   data: CloudPostureStats['resourcesTypes'];
+  maxItems: number;
 }
 
-const maxRisks = 5;
-
-export const getTop5Risks = (resourcesTypes: CloudPostureStats['resourcesTypes']) => {
+export const getTopRisks = (
+  resourcesTypes: CloudPostureStats['resourcesTypes'],
+  maxItems: number
+) => {
   const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);
   const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
 
-  return sorted.slice(0, maxRisks);
+  return sorted.slice(0, maxItems);
 };
 
 const getFailedFindingsQuery = (): Query => ({
@@ -85,7 +87,7 @@ const getResourceTypeFailedFindingsQuery = (resourceTypeName: string): Query => 
   query: `resource.type : "${resourceTypeName}" and result.evaluation : "${RULE_FAILED}" `,
 });
 
-export const RisksTable = ({ data: resourcesTypes }: RisksTableProps) => {
+export const RisksTable = ({ data: resourcesTypes, maxItems = 5 }: RisksTableProps) => {
   const { push } = useHistory();
 
   const handleCellClick = useCallback(
@@ -129,14 +131,14 @@ export const RisksTable = ({ data: resourcesTypes }: RisksTableProps) => {
     [handleCellClick]
   );
 
-  const items = useMemo(() => getTop5Risks(resourcesTypes), [resourcesTypes]);
+  const items = useMemo(() => getTopRisks(resourcesTypes, maxItems), [resourcesTypes, maxItems]);
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
       <EuiFlexItem>
         <EuiBasicTable<ResourceType>
           rowHeader="name"
-          items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTop5Risks(mockData) : items}
+          items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTopRisks(mockData, maxItems) : items}
           columns={columns}
         />
       </EuiFlexItem>

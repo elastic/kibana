@@ -131,7 +131,7 @@ export const BenchmarksSection = () => {
                     isLoading={getStats.isLoading}
                     isError={getStats.isError}
                   >
-                    <RisksTable data={cluster.resourcesTypes} />
+                    <RisksTable data={cluster.resourcesTypes} maxItems={3} />
                   </ChartPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>
