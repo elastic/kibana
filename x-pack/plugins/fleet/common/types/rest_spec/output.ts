@@ -37,7 +37,7 @@ export interface PutOutputRequest {
     is_default?: boolean;
     is_default_monitoring?: boolean;
     ssl?: {
-      certificate_authorities?: string;
+      certificate_authorities?: string[];
       certificate?: string;
       key?: string;
     };
@@ -56,7 +56,7 @@ export interface PostOutputRequest {
     is_default_monitoring?: boolean;
     config_yaml?: string;
     ssl?: {
-      certificate_authorities?: string;
+      certificate_authorities?: string[];
       certificate?: string;
       key?: string;
     };

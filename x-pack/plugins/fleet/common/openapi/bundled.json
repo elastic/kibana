@@ -4239,7 +4239,10 @@
                 "type": "string"
               },
               "certificate_authorities": {
-                "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "key": {
                 "type": "string"
