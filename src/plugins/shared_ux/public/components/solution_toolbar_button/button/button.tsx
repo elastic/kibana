@@ -9,7 +9,6 @@
 import React from 'react';
 import { EuiButton, useEuiTheme } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-import './button.scss';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -22,19 +21,20 @@ export interface Props
   isDarkModeEnabled?: boolean;
 }
 
-const label = i18n.translate('sharedUX.solutionToolbarButton.solutionToolbarButtonLabel', {
-  defaultMessage: 'sample label',
+const defaultLabel = i18n.translate('sharedUX.solutionToolbarButton.solutionToolbarButtonLabel', {
+  defaultMessage: 'Primary Action',
 });
 
-export const SolutionToolbarButton = ({ primary, className, ...rest }: Props) => {
+export const SolutionToolbarButton = ({ label= defaultLabel, primary, className, ...rest }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { colors, border, size } = euiTheme;
+  const { colors, border, font } = euiTheme;
   const buttonCSS = css`
-    line-height: ${size.base};
+    line-height: ${font.lineHeightMultiplier};
     background-color: ${colors.primary};
-    border-color: ${border.color};
-    border-width: ${border.width.thin};
-    border-style: ${border.color};
+    & [class*='--text'] {
+      border-width: ${border.width.thin};
+      border-style: ${border.color};    
+    }
     }
   `;
 
