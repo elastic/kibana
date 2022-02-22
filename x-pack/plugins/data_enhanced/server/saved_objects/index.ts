@@ -6,3 +6,4 @@
  */
 
 export * from './search_session';
+export * from './search_request';

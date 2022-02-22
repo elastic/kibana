@@ -8,7 +8,7 @@
 
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
-import { catchError, first, tap } from 'rxjs/operators';
+import { catchError, first, switchMap, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -18,7 +18,7 @@ import type {
   IEsSearchResponse,
   ISearchOptions,
 } from '../../../../common';
-import { pollSearch } from '../../../../common';
+import { isCompleteResponse, pollSearch } from '../../../../common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
@@ -58,7 +58,7 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
+        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), request.params, options)
         : {
             ...(await getDefaultAsyncSubmitParams(
               uiSettingsClient,
@@ -67,6 +67,7 @@ export const enhancedEsSearchStrategyProvider = (
             )),
             ...request.params,
           };
+      console.log(JSON.stringify(params));
       const { body, headers } = id
         ? await client.asyncSearch.get({ ...params, id }, { signal: options.abortSignal })
         : await client.asyncSearch.submit(params, {

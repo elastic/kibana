@@ -10,7 +10,10 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { RunContext, TaskRunCreatorFunction } from '../../../../task_manager/server';
 import { CoreSetup, SavedObjectsClient } from '../../../../../../src/core/server';
-import { SEARCH_SESSION_TYPE } from '../../../../../../src/plugins/data/common';
+import {
+  SEARCH_REQUEST_TYPE,
+  SEARCH_SESSION_TYPE,
+} from '../../../../../../src/plugins/data/common';
 import { DataEnhancedStartDependencies } from '../../type';
 import {
   SearchSessionTaskSetupDeps,
@@ -40,6 +43,7 @@ export function searchSessionTaskRunner(
 
           const internalRepo = coreStart.savedObjects.createInternalRepository([
             SEARCH_SESSION_TYPE,
+            SEARCH_REQUEST_TYPE,
           ]);
           const internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
           await checkFn(

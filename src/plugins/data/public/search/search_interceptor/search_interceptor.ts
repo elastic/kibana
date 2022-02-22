@@ -7,7 +7,16 @@
  */
 
 import { memoize, once } from 'lodash';
-import { BehaviorSubject, EMPTY, from, fromEvent, of, Subscription, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  from,
+  fromEvent,
+  of,
+  Subscription,
+  throwError,
+  interval,
+} from 'rxjs';
 import {
   catchError,
   filter,
@@ -260,6 +269,9 @@ export class SearchInterceptor {
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
         }
+        // interval(30000)
+        //   .pipe(tap(search))
+        //   .subscribe(() => {});
       }),
       // This observable is cached in the responseCache.
       // Using shareReplay makes sure that future subscribers will get the final response

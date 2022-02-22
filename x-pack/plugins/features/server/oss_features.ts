@@ -99,7 +99,7 @@ export const buildOSSFeatures = ({
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: ['search-session'],
+                    all: ['search-session', 'search-request'],
                     read: [],
                   },
                   ui: ['storeSearchSession'],
@@ -275,7 +275,7 @@ export const buildOSSFeatures = ({
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: ['search-session'],
+                    all: ['search-session', 'search-request'],
                     read: [],
                   },
                   ui: ['storeSearchSession'],

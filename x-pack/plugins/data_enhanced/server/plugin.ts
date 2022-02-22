@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerSessionRoutes } from './routes';
-import { searchSessionSavedObjectType } from './saved_objects';
+import { searchSessionSavedObjectType, searchRequestSavedObjectType } from './saved_objects';
 import type {
   DataEnhancedRequestHandlerContext,
   DataEnhancedSetupDependencies as SetupDependencies,
@@ -31,6 +31,7 @@ export class EnhancedDataServerPlugin
 
   public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
     core.savedObjects.registerType(searchSessionSavedObjectType);
+    core.savedObjects.registerType(searchRequestSavedObjectType);
 
     this.sessionService = new SearchSessionService(
       this.logger,

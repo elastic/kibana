@@ -9,6 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { DataEnhancedPluginRouter } from '../type';
+import {
+  SEARCH_REQUEST_TYPE,
+  SearchRequestSavedObjectAttributes,
+  nodeBuilder,
+} from '../../../../../src/plugins/data/common';
+import { first } from 'rxjs/operators';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
 
@@ -44,6 +50,27 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           initialState,
           restoreState,
         });
+
+        const filter = nodeBuilder.is(`${SEARCH_REQUEST_TYPE}.attributes.sessionId`, sessionId);
+        const searchRequests = await context.core.savedObjects
+          .getClient({ includedHiddenTypes: [SEARCH_REQUEST_TYPE] })
+          .find<SearchRequestSavedObjectAttributes>({
+            type: SEARCH_REQUEST_TYPE,
+            perPage: 10000,
+            filter,
+          });
+
+        searchRequests.saved_objects.map(async (obj) => {
+          const { id, strategy } = obj.attributes;
+          const params = { keep_alive: '7d' };
+          const response = await context.search
+            .search({ id, params }, { strategy })
+            .pipe(first())
+            .toPromise();
+          console.log(response);
+        });
+
+        console.log(`${searchRequests.total} search requests associated with session ${sessionId}`);
 
         return res.ok({
           body: response,

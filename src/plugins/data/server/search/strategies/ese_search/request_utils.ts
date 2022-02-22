@@ -9,7 +9,7 @@
 import { IUiSettingsClient } from 'kibana/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchOptions, UI_SETTINGS } from '../../../../common';
+import { ISearchOptions, ISearchRequestParams, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
 
@@ -47,9 +47,6 @@ export async function getDefaultAsyncSubmitParams(
 
   // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
   // This can be cleaned up when we completely stop separating basic and oss
-  const keepAlive = useSearchSessions
-    ? `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`
-    : '1m';
 
   return {
     // TODO: adjust for partial results
@@ -59,7 +56,7 @@ export async function getDefaultAsyncSubmitParams(
     // If search sessions are used, store and get an async ID even for short running requests.
     keep_on_completion: useSearchSessions,
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
-    keep_alive: keepAlive,
+    keep_alive: '1m',
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
     // If search sessions are used, set the initial expiration time.
@@ -71,19 +68,15 @@ export async function getDefaultAsyncSubmitParams(
  */
 export function getDefaultAsyncGetParams(
   searchSessionsConfig: SearchSessionsConfigSchema | null,
+  params: ISearchRequestParams,
   options: ISearchOptions
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
-  const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
+  // We still need to do polling for searches not within the context of a search session or when search session disabled
+  const opts = options.isStored ? {} : { keep_alive: params.keep_alive ?? '1m' };
 
   return {
     // Wait up to 100ms for the response to return
     wait_for_completion_timeout: '100ms',
-    ...(useSearchSessions
-      ? // Don't change the expiration of search requests that are tracked in a search session
-        undefined
-      : {
-          // We still need to do polling for searches not within the context of a search session or when search session disabled
-          keep_alive: '1m',
-        }),
+    ...opts,
   };
 }

@@ -10,6 +10,8 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { SearchSessionStatus } from './status';
 
 export const SEARCH_SESSION_TYPE = 'search-session';
+export const SEARCH_REQUEST_TYPE = 'search-request';
+
 export interface SearchSessionSavedObjectAttributes {
   sessionId: string;
   /**
@@ -57,10 +59,6 @@ export interface SearchSessionSavedObjectAttributes {
    * For example, relative dates are conveted to absolute ones.
    */
   restoreState?: SerializableRecord;
-  /**
-   * Mapping of search request hashes to their corresponsing info (async search id, etc.)
-   */
-  idMapping: Record<string, SearchSessionRequestInfo>;
 
   /**
    * This value is true if the session was actively stored by the user. If it is false, the session may be purged by the system.
@@ -103,4 +101,13 @@ export interface SearchSessionFindOptions {
   sortField?: string;
   sortOrder?: string;
   filter?: string;
+}
+
+export interface SearchRequestSavedObjectAttributes {
+  id: string;
+  sessionId: string;
+  strategy: string;
+  requestHash: string;
+  status: string;
+  isStored: boolean;
 }

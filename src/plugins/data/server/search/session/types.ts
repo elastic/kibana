@@ -14,14 +14,18 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '../../../common/search';
 import { SearchSessionsConfigSchema } from '../../../config';
 
 export interface IScopedSearchSessionsClient<T = unknown> {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
   trackId: (
     request: IKibanaSearchRequest,
-    searchId: string,
+    response: IKibanaSearchResponse,
     options: ISearchOptions
   ) => Promise<void>;
   getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;

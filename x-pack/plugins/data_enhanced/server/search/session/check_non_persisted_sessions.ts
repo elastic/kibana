@@ -7,8 +7,8 @@
 
 import { SavedObjectsFindResult } from 'kibana/server';
 import moment from 'moment';
-import { EMPTY } from 'rxjs';
-import { catchError, concatMap } from 'rxjs/operators';
+import { EMPTY, from } from 'rxjs';
+import { catchError, concatMap, map, switchMap } from 'rxjs/operators';
 import {
   nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
@@ -16,6 +16,9 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   KueryNode,
+  SEARCH_REQUEST_TYPE,
+  fromKueryExpression,
+  toElasticsearchQuery,
 } from '../../../../../../src/plugins/data/common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchStatus } from './types';
@@ -120,16 +123,32 @@ export function checkNonPersistedSessions(
   deps: CheckSearchSessionsDeps,
   config: SearchSessionsConfig
 ) {
-  const { logger } = deps;
+  const { savedObjectsClient } = deps;
+  const filter = fromKueryExpression(
+    `${SEARCH_REQUEST_TYPE}.updated_at < now-5m and ${SEARCH_REQUEST_TYPE}.attributes.isStored: false`
+  );
+  console.log(JSON.stringify(toElasticsearchQuery(filter)));
+  const savedObjectsRequest = savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
+    perPage: 10000,
+    filter,
+    type: SEARCH_REQUEST_TYPE,
+  });
 
-  const filters = nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'false');
-
-  return checkSearchSessionsByPage(checkNonPersistedSessionsPage, deps, config, filters).pipe(
-    catchError((e) => {
-      logger.error(
-        `${SEARCH_SESSIONS_CLEANUP_TASK_TYPE} Error while processing sessions: ${e?.message}`
-      );
+  return from(savedObjectsRequest).pipe(
+    switchMap(({ saved_objects: savedObjects }) => {
+      console.log(`Deleting ${savedObjects.length} search request SOs`);
+      savedObjects.forEach((so) => savedObjectsClient.delete(SEARCH_REQUEST_TYPE, so.id));
       return EMPTY;
     })
   );
+
+  // const filters = nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'false');
+  //
+  // return checkSearchSessionsByPage(checkNonPersistedSessionsPage, deps, config, filters).pipe(
+  //   catchError((e) => {
+  //     logger.error(
+  //       `${SEARCH_SESSIONS_CLEANUP_TASK_TYPE} Error while processing sessions: ${e?.message}`
+  //     );
+  //   })
+  // );
 }
