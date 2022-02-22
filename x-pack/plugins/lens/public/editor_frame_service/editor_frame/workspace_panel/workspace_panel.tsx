@@ -74,6 +74,7 @@ import {
   selectChangesApplied,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
+import { inferTimeField } from '../../../utils';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -479,12 +480,18 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensBrushEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: event.data,
+          data: {
+            ...event.data,
+            timeFieldName: inferTimeField(event.data),
+          },
         });
       }
       if (isLensFilterEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: event.data,
+          data: {
+            ...event.data,
+            timeFieldName: inferTimeField(event.data),
+          },
         });
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
