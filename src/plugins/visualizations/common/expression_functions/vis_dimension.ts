@@ -69,8 +69,8 @@ export const visDimension = (): ExpressionFunctionDefinition<
     const accessor = findAccessorOrFail(args.accessor, input.columns);
     const column = typeof accessor === 'number' ? input.columns[accessor] : accessor;
     const columnFormat = column.meta.params;
-    // if user doesn't specify format and format for column is not specified
-    // that we should use default format id ('string')
+    // if a user hasn't specified the format of the column and its format is not specified at the table columns,
+    // then the default format id ('string') should be used
     const format =
       args.format || args.formatParams || !columnFormat
         ? {
