@@ -41,9 +41,7 @@ export function readCliArgs(argv: string[]) {
       'debug',
       'help',
     ],
-    string: [
-      'epr-registry'
-    ],
+    string: ['epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
@@ -57,7 +55,7 @@ export function readCliArgs(argv: string[]) {
       'docker-push': false,
       'docker-tag-qualifier': null,
       'version-qualifier': '',
-      'epr-registry': 'snapshot'
+      'epr-registry': 'snapshot',
     },
     unknown: (flag) => {
       unknownFlags.push(flag);
@@ -101,12 +99,14 @@ export function readCliArgs(argv: string[]) {
 
   const eprRegistry = flags['epr-registry'];
   if (eprRegistry !== 'snapshot' && eprRegistry !== 'production') {
-    log.error(`Invalid value for --epr-registry, must be 'production' or 'snapshot', got ${eprRegistry}`);
+    log.error(
+      `Invalid value for --epr-registry, must be 'production' or 'snapshot', got ${eprRegistry}`
+    );
     return {
       log,
       showHelp: true,
       unknownFlags: [],
-    }
+    };
   }
 
   const buildOptions: BuildOptions = {
