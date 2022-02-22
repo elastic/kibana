@@ -63,7 +63,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
 else
 ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
-  .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
+  (.. | select(.version? != null).version) = "'$VERSION'"
   ' > /tmp/deploy.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
 fi
