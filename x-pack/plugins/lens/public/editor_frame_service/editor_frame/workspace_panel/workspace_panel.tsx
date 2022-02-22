@@ -38,6 +38,7 @@ import {
   DatasourceMap,
   DatasourceFixAction,
   Suggestion,
+  Visualization,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -146,6 +147,69 @@ const maybeGetAppliedArgs = ({
   };
 };
 
+interface ErrorDescription {
+  shortMessage: string;
+  longMessage: React.ReactNode;
+}
+
+const generateExpression = ({
+  errors: { hasConfigurationValidationError, hasMissingRefsErrors, hasUnknownVisError },
+  activeVisualization,
+  visualization,
+  datasourceMap,
+  datasourceStates,
+  datasourceLayers,
+}: {
+  errors: {
+    hasConfigurationValidationError: boolean;
+    hasMissingRefsErrors: boolean;
+    hasUnknownVisError: boolean;
+  };
+  activeVisualization: Visualization | null;
+  visualization: VisualizationState;
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  datasourceLayers: FramePublicAPI['datasourceLayers'];
+}) => {
+  let expression;
+  let expressionBuildError: ErrorDescription[] | undefined;
+  if (!hasConfigurationValidationError && !hasMissingRefsErrors && !hasUnknownVisError) {
+    try {
+      const ast = buildExpression({
+        visualization: activeVisualization,
+        visualizationState: visualization.state,
+        datasourceMap,
+        datasourceStates,
+        datasourceLayers,
+      });
+
+      if (ast) {
+        // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
+        // turning it into a string will make sure the expression renderer only re-renders if the
+        // expression actually changed.
+        expression = toExpression(ast);
+      } else {
+        expression = null;
+      }
+    } catch (e) {
+      const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
+      const defaultMessage = {
+        shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+          defaultMessage: 'An unexpected error occurred while preparing the chart',
+        }),
+        longMessage: e.toString(),
+      };
+      // Most likely an error in the expression provided by a datasource or visualization
+      expressionBuildError = buildMessages ?? [defaultMessage];
+    }
+  }
+  if (hasUnknownVisError) {
+    expressionBuildError = [getUnknownVisualizationTypeError(visualization.activeId!)];
+  }
+
+  return { expression, expressionBuildError };
+};
+
 const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
   visualizationMap,
@@ -218,55 +282,33 @@ const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 
   const expression = useMemo(() => {
-    if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
-      try {
-        const ast = buildExpression({
-          visualization: activeVisualization,
-          visualizationState: visualization.state,
-          datasourceMap,
-          datasourceStates,
-          datasourceLayers,
-        });
+    const { expression: _expression, expressionBuildError } = generateExpression({
+      errors: {
+        hasConfigurationValidationError: Boolean(configurationValidationError?.length),
+        hasMissingRefsErrors: Boolean(missingRefsErrors?.length),
+        hasUnknownVisError: Boolean(unknownVisError),
+      },
+      activeVisualization,
+      visualization,
+      datasourceMap,
+      datasourceStates,
+      datasourceLayers,
+    });
 
-        if (ast) {
-          // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
-          // turning it into a string will make sure the expression renderer only re-renders if the
-          // expression actually changed.
-          return toExpression(ast);
-        } else {
-          return null;
-        }
-      } catch (e) {
-        const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
-        const defaultMessage = {
-          shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
-            defaultMessage: 'An unexpected error occurred while preparing the chart',
-          }),
-          longMessage: e.toString(),
-        };
-        // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({
-          ...s,
-          expressionBuildError: buildMessages ?? [defaultMessage],
-        }));
-      }
+    if (expressionBuildError) {
+      setLocalState((state) => ({ ...state, expressionBuildError }));
     }
-    if (unknownVisError) {
-      setLocalState((s) => ({
-        ...s,
-        expressionBuildError: [getUnknownVisualizationTypeError(visualization.activeId!)],
-      }));
-    }
+
+    return _expression;
   }, [
+    configurationValidationError?.length,
+    missingRefsErrors?.length,
+    unknownVisError,
     activeVisualization,
-    visualization.state,
+    visualization,
     datasourceMap,
     datasourceStates,
     datasourceLayers,
-    configurationValidationError?.length,
-    missingRefsErrors.length,
-    unknownVisError,
-    visualization.activeId,
   ]);
 
   const expressionExists = Boolean(expression);
