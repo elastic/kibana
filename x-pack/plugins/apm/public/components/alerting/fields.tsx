@@ -32,7 +32,7 @@ export function ServiceField({
 }) {
   return (
     <PopoverExpression
-      value={currentValue || allOption.value}
+      value={currentValue || allOption.label}
       title={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
       })}
@@ -100,7 +100,7 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={currentValue || allOption.value} title={label}>
+    <PopoverExpression value={currentValue || allOption.label} title={label}>
       <SuggestionsSelect
         allOption={allOption}
         customOptionText={i18n.translate(
