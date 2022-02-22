@@ -287,6 +287,15 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           }
         ),
       },
+      {
+        name: 'reason',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description',
+          {
+            defaultMessage: 'A concise description of the reason for the alert',
+          }
+        ),
+      },
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
@@ -432,7 +441,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         statusMessage,
       });
 
-      alert.scheduleActions(MONITOR_STATUS.id);
+      alert.scheduleActions(MONITOR_STATUS.id, {
+        reason: monitorSummary.reason,
+      });
     });
 
     return updateState(state, downMonitorsByLocation.length > 0);
