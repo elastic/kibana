@@ -29,7 +29,12 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
-import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
+import {
+  apmIndices,
+  apmTelemetry,
+  apmServerSettings,
+  apmIndicesSpace,
+} from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -48,6 +53,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
 export class APMPlugin
   implements
@@ -72,6 +78,7 @@ export class APMPlugin
     const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmIndices);
+    core.savedObjects.registerType(apmIndicesSpace);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
 
@@ -247,6 +254,8 @@ export class APMPlugin
       config: this.currentConfig,
       logger: this.logger,
     });
+
+    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core });
   }
 
   public stop() {}

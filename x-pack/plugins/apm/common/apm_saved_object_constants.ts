@@ -8,9 +8,21 @@
 // the types have to match the names of the saved object mappings
 // in /x-pack/plugins/apm/mappings.json
 
-// APM indices
+// APM indices (legacy)
+/**
+ * Should use APM_INDICES_SPACE_SAVED_OBJECT_TYPE instead
+ * @deprecated
+ * */
 export const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
+/**
+ * Should use APM_INDICES_SPACE_SAVED_OBJECT_ID instead
+ * @deprecated
+ * */
 export const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
+
+// APM indices (space aware)
+export const APM_INDICES_SPACE_SAVED_OBJECT_TYPE = 'apm-indices-space';
+export const APM_INDICES_SPACE_SAVED_OBJECT_ID = 'apm-indices-space';
 
 // APM telemetry
 export const APM_TELEMETRY_SAVED_OBJECT_TYPE = 'apm-telemetry';
