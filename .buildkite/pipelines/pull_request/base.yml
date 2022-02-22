@@ -5,13 +5,13 @@ steps:
 
   - wait
 
-  # - command: .buildkite/scripts/steps/build_kibana.sh
-  #   label: Build Kibana Distribution and Plugins
-  #   agents:
-  #     queue: c2-16
-  #   key: build
-  #   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-  #   timeout_in_minutes: 60
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution and Plugins
+    agents:
+      queue: c2-16
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
 
   # - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
   #   label: 'Default CI Group'
@@ -147,30 +147,30 @@ steps:
   #   key: linting
   #   timeout_in_minutes: 90
 
-  # - command: .buildkite/scripts/steps/lint_with_types.sh
-  #   label: 'Linting (with types)'
-  #   agents:
-  #     queue: c2-16
-  #   key: linting_with_types
-  #   timeout_in_minutes: 90
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      queue: c2-16
+    key: linting_with_types
+    timeout_in_minutes: 90
 
-  # - command: .buildkite/scripts/steps/checks.sh
-  #   label: 'Checks'
-  #   agents:
-  #     queue: c2-8
-  #   key: checks
-  #   timeout_in_minutes: 120
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    agents:
+      queue: c2-8
+    key: checks
+    timeout_in_minutes: 120
 
-  # - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-  #   label: 'Build Storybooks'
-  #   agents:
-  #     queue: c2-4
-  #   key: storybooks
-  #   timeout_in_minutes: 60
+  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    label: 'Build Storybooks'
+    agents:
+      queue: c2-4
+    key: storybooks
+    timeout_in_minutes: 60
 
-  # - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
-  #   label: 'Build Webpack Bundle Analyzer reports'
-  #   agents:
-  #     queue: n2-2
-  #   key: webpack_bundle_analyzer
-  #   timeout_in_minutes: 60
+  - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
+    label: 'Build Webpack Bundle Analyzer reports'
+    agents:
+      queue: n2-2
+    key: webpack_bundle_analyzer
+    timeout_in_minutes: 60
