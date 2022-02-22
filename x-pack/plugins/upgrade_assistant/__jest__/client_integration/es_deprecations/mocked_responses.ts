@@ -52,6 +52,19 @@ const MOCK_INDEX_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
   },
 };
 
+const MOCK_CLUSTER_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
+  isCritical: false,
+  resolveDuringUpgrade: false,
+  type: 'cluster_settings',
+  message: 'Setting [cluster.routing.allocation.require._tier] is deprecated',
+  details: 'deprecation details',
+  url: 'doc_url',
+  correctiveAction: {
+    type: 'clusterSetting',
+    deprecatedSettings: ['cluster.routing.allocation.require._tier'],
+  },
+};
+
 const MOCK_DEFAULT_DEPRECATION: EnrichedDeprecationInfo = {
   isCritical: false,
   resolveDuringUpgrade: false,
@@ -69,6 +82,7 @@ export const esDeprecationsMockResponse: ESUpgradeStatus = {
     MOCK_INDEX_SETTING_DEPRECATION,
     MOCK_DEFAULT_DEPRECATION,
     MOCK_REINDEX_DEPRECATION,
+    MOCK_CLUSTER_SETTING_DEPRECATION,
   ],
 };
 

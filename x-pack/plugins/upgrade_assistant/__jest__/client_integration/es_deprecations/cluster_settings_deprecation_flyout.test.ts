@@ -1,0 +1,134 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act } from 'react-dom/test-utils';
+
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
+
+describe('Cluster settings deprecation flyout', () => {
+  let testBed: ElasticsearchTestBed;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const clusterSettingDeprecation = esDeprecationsMockResponse.deprecations[4];
+
+  afterAll(() => {
+    server.restore();
+  });
+
+  beforeEach(async () => {
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+      nodeId: 'my_node',
+      snapshotId: MOCK_SNAPSHOT_ID,
+      jobId: MOCK_JOB_ID,
+      status: 'idle',
+    });
+    httpRequestsMockHelpers.setReindexStatusResponse({
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
+    });
+
+    await act(async () => {
+      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+    });
+
+    const { actions, component } = testBed;
+    component.update();
+    await actions.table.clickDeprecationRowAt('clusterSetting', 0);
+  });
+
+  test('renders a flyout with deprecation details', async () => {
+    const { find, exists } = testBed;
+
+    expect(exists('clusterSettingsDetails')).toBe(true);
+    expect(find('clusterSettingsDetails.flyoutTitle').text()).toContain(
+      clusterSettingDeprecation.message
+    );
+    expect(find('clusterSettingsDetails.documentationLink').props().href).toBe(
+      clusterSettingDeprecation.url
+    );
+    expect(exists('removeClusterSettingsPrompt')).toBe(true);
+  });
+
+  it('removes deprecated cluster settings', async () => {
+    const { find, actions, exists } = testBed;
+
+    httpRequestsMockHelpers.setClusterSettingsResponse({
+      acknowledged: true,
+      persistent: {},
+      transietn: {},
+    });
+
+    expect(exists('clusterSettingsDetails.warningDeprecationBadge')).toBe(true);
+
+    await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
+
+    const request = server.requests[server.requests.length - 1];
+
+    expect(request.method).toBe('POST');
+    expect(request.url).toBe(`/api/upgrade_assistant/cluster_settings`);
+    expect(request.status).toEqual(200);
+
+    // Verify the "Resolution" column of the table is updated
+    expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
+      'Deprecated settings removed'
+    );
+
+    // Reopen the flyout
+    await actions.table.clickDeprecationRowAt('clusterSetting', 0);
+
+    // Verify prompt to remove setting no longer displays
+    expect(find('removeSettingsPrompt').length).toEqual(0);
+    // Verify the action button no longer displays
+    expect(find('clusterSettingsDetails.deleteSettingsButton').length).toEqual(0);
+    // Verify the badge got marked as resolved
+    expect(exists('clusterSettingsDetails.resolvedDeprecationBadge')).toBe(true);
+  });
+
+  it('handles failure', async () => {
+    const { find, actions } = testBed;
+    const error = {
+      statusCode: 500,
+      error: 'Remove cluster settings error',
+      message: 'Remove cluster settings error',
+    };
+
+    httpRequestsMockHelpers.setClusterSettingsResponse(undefined, error);
+
+    await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
+
+    const request = server.requests[server.requests.length - 1];
+
+    expect(request.method).toBe('POST');
+    expect(request.url).toBe(`/api/upgrade_assistant/cluster_settings`);
+    expect(request.status).toEqual(500);
+
+    // Verify the "Resolution" column of the table is updated
+    expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
+      'Settings removal failed'
+    );
+
+    // Reopen the flyout
+    await actions.table.clickDeprecationRowAt('clusterSetting', 0);
+
+    // Verify the flyout shows an error message
+    expect(find('clusterSettingsDetails.deleteClusterSettingsError').text()).toContain(
+      'Error deleting cluster settings'
+    );
+    // Verify the remove settings button text changes
+    expect(find('clusterSettingsDetails.deleteClusterSettingsButton').text()).toEqual(
+      'Retry removing deprecated settings'
+    );
+  });
+});
