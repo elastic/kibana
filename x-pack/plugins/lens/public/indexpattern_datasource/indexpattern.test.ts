@@ -1825,6 +1825,86 @@ describe('IndexPattern Data Source', () => {
           ],
         });
       });
+
+      it('should avoid duplicate filters when formula has a global filter', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['formula'],
+                columns: {
+                  formula: {
+                    label: 'Formula',
+                    dataType: 'number',
+                    operationType: 'formula',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    filter: { language: 'kuery', query: 'bytes > 4000' },
+                    params: {
+                      formula: "count(kql='memory > 5000') + count()",
+                      isFormulaBroken: false,
+                    },
+                    references: ['math'],
+                  } as FormulaIndexPatternColumn,
+                  countX0: {
+                    label: 'countX0',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                    filter: { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
+                  },
+                  countX1: {
+                    label: 'countX1',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                    filter: { language: 'kuery', query: 'bytes > 4000' },
+                  },
+                  math: {
+                    label: 'math',
+                    dataType: 'number',
+                    operationType: 'math',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      tinymathAst: {
+                        type: 'function',
+                        name: 'add',
+                        args: ['countX0', 'countX1'] as unknown as TinymathAST[],
+                        location: {
+                          min: 0,
+                          max: 17,
+                        },
+                        text: "count(kql='memory > 5000') + count()",
+                      },
+                    },
+                    references: ['countX0', 'countX1'],
+                    customLabel: true,
+                  } as MathIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [
+            [
+              { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
+              { language: 'kuery', query: 'bytes > 4000' },
+            ],
+          ],
+          lucene: [],
+        });
+      });
     });
   });
 
