@@ -27,13 +27,9 @@ export const EXPLORER_ACTION = {
   SET_EXPLORER_DATA: 'setExplorerData',
   SET_FILTER_DATA: 'setFilterData',
   SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
-  // SET_SELECTED_CELLS: 'setSelectedCells',
   SET_SWIMLANE_CONTAINER_WIDTH: 'setSwimlaneContainerWidth',
   SET_VIEW_BY_SWIMLANE_FIELD_NAME: 'setViewBySwimlaneFieldName',
   SET_VIEW_BY_SWIMLANE_LOADING: 'setViewBySwimlaneLoading',
-  SET_VIEW_BY_PER_PAGE: 'setViewByPerPage',
-  SET_VIEW_BY_FROM_PAGE: 'setViewByFromPage',
-  SET_SWIM_LANE_SEVERITY: 'setSwimLaneSeverity',
   SET_SHOW_CHARTS: 'setShowCharts',
 };
 

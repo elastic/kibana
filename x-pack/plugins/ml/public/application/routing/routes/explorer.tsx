@@ -21,7 +21,6 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
-// import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
@@ -33,7 +32,6 @@ import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
-import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
@@ -46,7 +44,7 @@ import {
   AnomalyExplorerContext,
   useAnomalyExplorerContextValue,
 } from '../../explorer/anomaly_explorer_context';
-import { AnomalyExplorerSwimLaneUrlState } from '../../../../common/types/locator';
+import type { AnomalyExplorerSwimLaneUrlState } from '../../../../common/types/locator';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -208,23 +206,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
 
-    const { viewByFieldName, viewByFromPage, viewByPerPage, severity } =
-      explorerUrlState?.mlExplorerSwimlane ?? {};
+    const { viewByFieldName } = explorerUrlState?.mlExplorerSwimlane ?? {};
 
     if (viewByFieldName !== undefined) {
       explorerService.setViewBySwimlaneFieldName(viewByFieldName);
-    }
-
-    if (viewByPerPage !== undefined) {
-      explorerService.setViewByPerPage(viewByPerPage);
-    }
-
-    if (viewByFromPage !== undefined) {
-      explorerService.setViewByFromPage(viewByFromPage);
-    }
-
-    if (severity !== undefined) {
-      explorerService.setSwimLaneSeverity(severity);
     }
 
     if (explorerUrlState.mlShowCharts !== undefined) {
@@ -243,19 +228,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  // const [, setSelectedCells] = useSelectedCells(
-  //   explorerUrlState,
-  //   setExplorerUrlState,
-  //   explorerState?.swimlaneBucketInterval?.asSeconds()
-  // );
-
   const selectedCells = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
   );
-
-  useEffect(() => {
-    // explorerService.setSelectedCells(selectedCells);
-  }, [JSON.stringify(selectedCells)]);
 
   const influencersFilterQuery = useObservable(
     anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
@@ -274,9 +249,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           tableSeverity: tableSeverity.val,
           viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
           swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
-          viewByPerPage: explorerState.viewByPerPage,
-          viewByFromPage: explorerState.viewByFromPage,
-          swimLaneSeverity: explorerState.swimLaneSeverity,
         }
       : undefined;
 
@@ -290,24 +262,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   useEffect(() => {
-    /**
-     * For the "View by" swim lane the limit is the cardinality of the influencer values,
-     * which is known after the initial fetch.
-     * When looking up for top influencers for selected range in Overall swim lane
-     * the result is filtered by top influencers values, hence there is no need to set the limit.
-     */
-    const swimlaneLimit =
-      isViewBySwimLaneData(explorerState?.viewBySwimlaneData) && !selectedCells?.showTopFieldValues
-        ? explorerState?.viewBySwimlaneData.cardinality
-        : undefined;
-
     if (explorerState && explorerState.swimlaneContainerWidth > 0) {
-      loadExplorerData({
-        ...loadExplorerDataConfig,
-        swimlaneLimit,
-      });
+      loadExplorerData(loadExplorerDataConfig);
     }
-  }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
+  }, [JSON.stringify(loadExplorerDataConfig)]);
 
   /** Sync URL state with {@link explorerAppState} state */
   useEffect(() => {

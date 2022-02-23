@@ -44,7 +44,7 @@ export class AnomalyExplorerCommonStateService {
     this._selectedJobs$.next(explorerJobs);
   }
 
-  public getSelectedJobs$(): Observable<ExplorerJob[] | undefined> {
+  public getSelectedJobs$(): Observable<ExplorerJob[]> {
     return this._selectedJobs$.pipe(
       skipWhile((v) => !v),
       distinctUntilChanged(isEqual)

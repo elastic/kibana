@@ -133,31 +133,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
-    case EXPLORER_ACTION.SET_VIEW_BY_FROM_PAGE:
-      nextState = {
-        ...state,
-        viewByFromPage: payload,
-      };
-      break;
-
-    case EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE:
-      nextState = {
-        ...state,
-        // reset current page on the page size change
-        viewByFromPage: 1,
-        viewByPerPage: payload,
-      };
-      break;
-
-    case EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY:
-      nextState = {
-        ...state,
-        // reset current page on the page size change
-        viewByFromPage: 1,
-        swimLaneSeverity: payload,
-      };
-      break;
-
     case EXPLORER_ACTION.SET_SHOW_CHARTS:
       nextState = {
         ...state,

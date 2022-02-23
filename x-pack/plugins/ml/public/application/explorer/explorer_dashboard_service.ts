@@ -11,20 +11,14 @@
  */
 
 import { isEqual } from 'lodash';
-
 import { from, isObservable, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, map, scan, shareReplay } from 'rxjs/operators';
-
 import { DeepPartial } from '../../../common/types/common';
-
 import { jobSelectionActionCreator } from './actions';
-import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
+import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { AppStateSelectedCells } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
-import { ExplorerAppState } from '../../../common/types/locator';
-
-export const ALLOW_CELL_RANGE_SELECTION = true;
+import type { ExplorerAppState } from '../../../common/types/locator';
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();
@@ -58,28 +52,8 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
       mlExplorerSwimlane: {},
     };
 
-    if (state.selectedCells !== undefined) {
-      const swimlaneSelectedCells = state.selectedCells;
-      appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
-      appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
-      appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-      appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
-    }
-
     if (state.viewBySwimlaneFieldName !== undefined) {
       appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
-    }
-
-    if (state.viewByFromPage !== undefined) {
-      appState.mlExplorerSwimlane.viewByFromPage = state.viewByFromPage;
-    }
-
-    if (state.viewByPerPage !== undefined) {
-      appState.mlExplorerSwimlane.viewByPerPage = state.viewByPerPage;
-    }
-
-    if (state.swimLaneSeverity !== undefined) {
-      appState.mlExplorerSwimlane.severity = state.swimLaneSeverity;
     }
 
     if (state.showCharts !== undefined) {
@@ -134,12 +108,6 @@ export const explorerService = {
       payload,
     });
   },
-  // setSelectedCells: (payload: AppStateSelectedCells | undefined) => {
-  //   explorerAction$.next({
-  //     type: EXPLORER_ACTION. ,
-  //     payload,
-  //   });
-  // },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));
   },
@@ -160,15 +128,6 @@ export const explorerService = {
   },
   setViewBySwimlaneLoading: (payload: any) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_LOADING, payload });
-  },
-  setViewByFromPage: (payload: number) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_FROM_PAGE, payload });
-  },
-  setViewByPerPage: (payload: number) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
-  },
-  setSwimLaneSeverity: (payload: number) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY, payload });
   },
   setShowCharts: (payload: boolean) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_SHOW_CHARTS, payload });

@@ -118,9 +118,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     useDebounce(
       () => {
         if (severityUpdate === swimLaneSeverity) return;
-
         anomalyTimelineStateService.setSeverity(severityUpdate!);
-        explorerService.setSwimLaneSeverity(severityUpdate!);
       },
       500,
       [severityUpdate, swimLaneSeverity]
@@ -356,13 +354,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               swimlaneLimit={swimlaneLimit}
               onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
                 if (perPageUpdate) {
-                  // explorerService.setViewByPerPage(perPageUpdate);
                   anomalyTimelineStateService.setSwimLanePagination({
                     viewByPerPage: perPageUpdate,
                   });
                 }
                 if (fromPageUpdate) {
-                  // explorerService.setViewByFromPage(fromPageUpdate);
                   anomalyTimelineStateService.setSwimLanePagination({
                     viewByFromPage: fromPageUpdate,
                   });
