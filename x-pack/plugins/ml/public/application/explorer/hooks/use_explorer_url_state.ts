@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { usePageUrlState } from '../../util/url_state';
+import { PageUrlStateService, usePageUrlState } from '../../util/url_state';
 import { ExplorerAppState } from '../../../../common/types/locator';
 import { ML_PAGES } from '../../../../common/constants/locator';
+
+export type AnomalyExplorerUrlStateService = PageUrlStateService<ExplorerAppState>;
 
 export function useExplorerUrlState() {
   /**

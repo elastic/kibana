@@ -146,6 +146,7 @@ export class AnomalyTimelineStateService {
     combineLatest([
       this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this._swimLaneSeverity$,
       this.getContainerWidth$(),
       this.getViewBySwimlaneFieldName$(),
@@ -159,6 +160,7 @@ export class AnomalyTimelineStateService {
           ([
             overallSwimLaneData,
             selectedJobs,
+            influencersFilterQuery,
             severity,
             swimlaneContainerWidth,
             viewBySwimlaneFieldName,
@@ -177,7 +179,7 @@ export class AnomalyTimelineStateService {
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
                 swimlaneContainerWidth,
-                undefined,
+                influencersFilterQuery,
                 undefined,
                 severity
               )

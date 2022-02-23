@@ -19,6 +19,8 @@ import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
@@ -155,7 +157,12 @@ export const UrlStateProvider: FC = ({ children }) => {
   return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
 };
 
-export const useUrlState = (accessor: Accessor) => {
+export const useUrlState = (
+  accessor: Accessor
+): [
+  Record<string, any> | undefined,
+  (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void
+] => {
   const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);
 
   const urlState = useMemo(() => {
@@ -166,7 +173,7 @@ export const useUrlState = (accessor: Accessor) => {
   }, [searchString]);
 
   const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any, replaceState?: boolean) => {
+    (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => {
       setUrlStateContext(accessor, attribute, value, replaceState);
     },
     [accessor, setUrlStateContext]
@@ -184,16 +191,51 @@ export type AppStateKey =
   | LegacyUrlKeys;
 
 /**
+ * Service for managing URL state of particular page.
+ */
+export class PageUrlStateService<T> {
+  private _pageUrlState$ = new BehaviorSubject<T | null>(null);
+  private _pageUrlStateCallback: ((update: Partial<T>, replaceState?: boolean) => void) | null =
+    null;
+
+  /**
+   * Provides updates for the page URL state.
+   */
+  public getPageUrlState$(): Observable<T> {
+    return this._pageUrlState$.pipe(distinctUntilChanged(isEqual));
+  }
+
+  public updateUrlState(update: Partial<T>, replaceState?: boolean): void {
+    if (!this._pageUrlStateCallback) {
+      throw new Error('Callback has not been initialized.');
+    }
+    this._pageUrlStateCallback(update, replaceState);
+  }
+
+  public setCurrentState(currentState: T): void {
+    this._pageUrlState$.next(currentState);
+  }
+
+  public setUpdateCallback(callback: (update: Partial<T>, replaceState?: boolean) => void): void {
+    this._pageUrlStateCallback = callback;
+  }
+}
+
+/**
  * Hook for managing the URL state of the page.
  */
-export const usePageUrlState = <PageUrlState extends {}>(
+export const usePageUrlState = <PageUrlState extends object>(
   pageKey: AppStateKey,
   defaultState?: PageUrlState
-): [PageUrlState, (update: Partial<PageUrlState>, replaceState?: boolean) => void] => {
+): [
+  PageUrlState,
+  (update: Partial<PageUrlState>, replaceState?: boolean) => void,
+  PageUrlStateService<PageUrlState>
+] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
 
-  const setCallback = useRef();
+  const setCallback = useRef<typeof setAppState>();
 
   useEffect(() => {
     setCallback.current = setAppState;
@@ -227,7 +269,11 @@ export const usePageUrlState = <PageUrlState extends {}>(
 
   const onStateUpdate = useCallback(
     (update: Partial<PageUrlState>, replaceState?: boolean) => {
-      setCallback!.current(
+      if (!setCallback?.current) {
+        throw new Error('Callback for URL state update has not been initialized.');
+      }
+
+      setCallback.current(
         pageKey,
         {
           ...resultPageState,
@@ -239,7 +285,17 @@ export const usePageUrlState = <PageUrlState extends {}>(
     [pageKey, resultPageState]
   );
 
+  const pageUrlStateService = useMemo(() => new PageUrlStateService<PageUrlState>(), []);
+
+  useEffect(
+    function updatePageUrlService() {
+      pageUrlStateService.setCurrentState(resultPageState);
+      pageUrlStateService.setUpdateCallback(onStateUpdate);
+    },
+    [pageUrlStateService, onStateUpdate, resultPageState]
+  );
+
   return useMemo(() => {
-    return [resultPageState, onStateUpdate];
-  }, [resultPageState, onStateUpdate]);
+    return [resultPageState, onStateUpdate, pageUrlStateService];
+  }, [resultPageState, onStateUpdate, pageUrlStateService]);
 };

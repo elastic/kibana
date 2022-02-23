@@ -31,7 +31,6 @@ import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
-import { isViewBySwimLaneData } from '../swimlane_container';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
@@ -279,14 +278,14 @@ const loadExplorerDataProvider = (
                 annotations: annotationsData,
                 influencers: filteredTopInfluencers as any,
                 loading: false,
-                viewBySwimlaneDataLoading: false,
+                // viewBySwimlaneDataLoading: false,
                 anomalyChartsDataLoading: false,
                 // overallSwimlaneData: overallState,
                 // viewBySwimlaneData: viewBySwimlaneState as any,
                 tableData,
-                swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
-                  ? viewBySwimlaneState.cardinality
-                  : undefined,
+                // swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
+                //   ? viewBySwimlaneState.cardinality
+                //   : undefined,
               };
             })
           )

@@ -11,6 +11,7 @@ import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_sta
 import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 export type AnomalyExplorerContextValue =
   | {
@@ -42,7 +43,9 @@ export function useAnomalyExplorerContext():
 /**
  * Creates Anomaly Explorer context.
  */
-export function useAnomalyExplorerContextValue(): Exclude<AnomalyExplorerContextValue, undefined> {
+export function useAnomalyExplorerContextValue(
+  anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService
+): Exclude<AnomalyExplorerContextValue, undefined> {
   const timefilter = useTimefilter();
 
   const {
@@ -59,7 +62,9 @@ export function useAnomalyExplorerContextValue(): Exclude<AnomalyExplorerContext
   }, []);
 
   return useMemo(() => {
-    const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService();
+    const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService(
+      anomalyExplorerUrlStateService
+    );
 
     return {
       anomalyExplorerCommonStateService,

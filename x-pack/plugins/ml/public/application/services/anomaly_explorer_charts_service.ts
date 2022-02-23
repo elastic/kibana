@@ -729,6 +729,7 @@ export class AnomalyExplorerChartsService {
       config: SeriesConfigWithMetadata,
       range: ChartRange
     ) {
+      // FIXME performs an API call per chart. should perform 1 call for all charts
       return mlResultsService
         .getScheduledEventsByBucket(
           [config.jobId],

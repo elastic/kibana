@@ -99,9 +99,9 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
-  const anomalyExplorerContext = useAnomalyExplorerContextValue();
+  const [explorerUrlState, setExplorerUrlState, explorerUrlStateService] = useExplorerUrlState();
 
-  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
+  const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
 
   // const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
@@ -257,11 +257,15 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     // explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
 
+  const influencersFilterQuery = useObservable(
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
+  );
+
   const loadExplorerDataConfig =
     explorerState !== undefined
       ? {
           lastRefresh,
-          influencersFilterQuery: explorerState.influencersFilterQuery,
+          influencersFilterQuery,
           noInfluencersConfigured: explorerState.noInfluencersConfigured,
           selectedCells,
           selectedJobs: explorerState.selectedJobs,
