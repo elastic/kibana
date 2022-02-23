@@ -67,14 +67,14 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
