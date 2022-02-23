@@ -7,7 +7,6 @@
 
 import { Page } from '@elastic/synthetics';
 import { byTestId, delay } from '../journeys/utils';
-import { monitorManagementPageProvider } from './monitor_management';
 
 interface AlertType {
   id: string;
@@ -16,8 +15,6 @@ interface AlertType {
 
 export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
   return {
-    ...monitorManagementPageProvider({ page, kibanaUrl }),
-
     async navigateToMonitorDetails(monitorId: string) {
       await page.click(byTestId(`monitor-page-link-${monitorId}`));
     },
