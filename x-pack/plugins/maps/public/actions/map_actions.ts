@@ -374,9 +374,8 @@ export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
       await asyncForEach(geometries, async (geometry) => {
         await (layer as IVectorLayer).addFeature(geometry);
       });
-      await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
-        dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
-      });
+      await dispatch(syncDataForLayerDueToDrawing(layer));
+      dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
@@ -404,9 +403,8 @@ export function deleteFeatureFromIndex(featureId: string) {
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await (layer as IVectorLayer).deleteFeature(featureId);
-      await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
-        dispatch(updateEditShape(DRAW_SHAPE.DELETE));
-      });
+      await dispatch(syncDataForLayerDueToDrawing(layer));
+      dispatch(updateEditShape(DRAW_SHAPE.DELETE));
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
