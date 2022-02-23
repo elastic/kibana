@@ -214,7 +214,7 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo]);
+    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo, missingPolicies]);
 
     return (
       <EndpointDetailsContentStyled>
