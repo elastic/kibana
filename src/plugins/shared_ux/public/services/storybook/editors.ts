@@ -16,7 +16,7 @@ export type SharedUXEditorsServiceFactory = PluginServiceFactory<SharedUXEditors
  * A factory function for creating a storybook implementation of `SharedUXEditorsService`.
  */
 export const editorsServiceFactory: SharedUXEditorsServiceFactory = () => ({
-  openDataViewEditor: action('openEditor') as any as (
+  openDataViewEditor: action('openEditor') as SharedUXEditorsService['openDataViewEditor'] as (
     options: SharedUxDataViewEditorProps
   ) => () => void,
 });
