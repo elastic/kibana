@@ -42,7 +42,9 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
-    .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
+    .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
+    .resources.enterprise_search[0].plan.enterprise_search.version = "'$VERSION'" |
+    .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
   ecctl deployment create --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
@@ -59,11 +61,10 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
 
   retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 else
-  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-    .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
-    .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
-    .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
-    ' > /tmp/deploy.json
+ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+  .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+  (.. | select(.version? != null).version) = "'$VERSION'"
+  ' > /tmp/deploy.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
 fi
 
