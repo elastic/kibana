@@ -23,8 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
-      await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -37,6 +40,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultDataRange();
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async function () {
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
     });
 
     it('should expand the detail row when the toggle arrow is clicked', async function () {

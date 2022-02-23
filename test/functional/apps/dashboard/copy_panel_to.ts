@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard panel copy to', function viewEditModeTests() {
     before(async function () {
-      // await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.savedObjects.clean({
         types: ['search', 'index-pattern', 'visualization', 'dashboard'],
       });
