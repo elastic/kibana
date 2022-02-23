@@ -81,6 +81,11 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
+export { useRulesLink } from './hooks/use_rules_link';
+export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
+export type { LinkDescriptor } from './hooks/use_link_props';
+
+export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';

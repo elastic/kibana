@@ -1337,7 +1337,7 @@ export class RulesClient {
 
         const recoveredAlertInstances = mapValues<Record<string, RawAlert>, Alert>(
           state.alertInstances ?? {},
-          (rawAlertInstance) => new Alert(rawAlertInstance)
+          (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
         );
         const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 

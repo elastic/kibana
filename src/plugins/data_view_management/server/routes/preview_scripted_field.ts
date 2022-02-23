@@ -28,23 +28,27 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       const { index, name, script, query, additionalFields } = request.body;
 
       try {
-        const response = await client.search({
-          index,
-          body: {
-            _source: additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
-            size: 10,
-            timeout: '30s',
-            query: query ?? { match_all: {} },
-            script_fields: {
-              [name]: {
-                script: {
-                  lang: 'painless',
-                  source: script,
+        const response = await client.search(
+          {
+            index,
+            body: {
+              _source:
+                additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
+              size: 10,
+              timeout: '30s',
+              query: query ?? { match_all: {} },
+              script_fields: {
+                [name]: {
+                  script: {
+                    lang: 'painless',
+                    source: script,
+                  },
                 },
               },
             },
           },
-        });
+          { meta: true }
+        );
 
         return res.ok({ body: response });
       } catch (err) {

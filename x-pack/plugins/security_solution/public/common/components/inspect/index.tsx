@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { omit } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { inputsSelectors, State } from '../../store';
@@ -52,10 +52,10 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   compact = false,
   inputId = 'global',
   inspect,
+  inspectIndex = 0,
   isDisabled,
   isInspected,
   loading,
-  inspectIndex = 0,
   multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
   onCloseInspect,
   queryId = '',
@@ -63,7 +63,6 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   setIsInspected,
   title = '',
 }) => {
-  const isShowingModal = !loading && selectedInspectIndex === inspectIndex && isInspected;
   const handleClick = useCallback(() => {
     setIsInspected({
       id: queryId,
@@ -105,6 +104,16 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     }
   }
 
+  const isShowingModal = useMemo(
+    () => !loading && selectedInspectIndex === inspectIndex && isInspected,
+    [inspectIndex, isInspected, loading, selectedInspectIndex]
+  );
+
+  const isButtonDisabled = useMemo(
+    () => loading || isDisabled || request == null || response == null,
+    [isDisabled, loading, request, response]
+  );
+
   return (
     <>
       {inputId === 'timeline' && !compact && (
@@ -115,7 +124,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           color="text"
           iconSide="left"
           iconType="inspect"
-          isDisabled={loading || isDisabled || false}
+          isDisabled={isButtonDisabled}
           isLoading={loading}
           onClick={handleClick}
         >
@@ -129,21 +138,23 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
-          isDisabled={loading || isDisabled || false}
+          isDisabled={isButtonDisabled}
           title={i18n.INSPECT}
           onClick={handleClick}
         />
       )}
-      <ModalInspectQuery
-        closeModal={handleCloseModal}
-        isShowing={isShowingModal}
-        request={request}
-        response={response}
-        additionalRequests={additionalRequests}
-        additionalResponses={additionalResponses}
-        title={title}
-        data-test-subj="inspect-modal"
-      />
+      {isShowingModal && request !== null && response !== null && (
+        <ModalInspectQuery
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
+          closeModal={handleCloseModal}
+          data-test-subj="inspect-modal"
+          inputId={inputId}
+          request={request}
+          response={response}
+          title={title}
+        />
+      )}
     </>
   );
 };

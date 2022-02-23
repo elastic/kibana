@@ -51,7 +51,6 @@ describe('AppContainer', () => {
     appRoute: '/some-route',
     unmountBeforeMounting: false,
     exactRoute: false,
-    deepLinkPaths: {},
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');
@@ -67,7 +66,6 @@ describe('AppContainer', () => {
       appRoute: '/some-route',
       unmountBeforeMounting: false,
       exactRoute: false,
-      deepLinkPaths: {},
       mount: jest.fn().mockImplementation(({ element }) => {
         const container = document.createElement('div');
         container.innerHTML = 'some-content';
@@ -190,7 +188,6 @@ describe('AppContainer', () => {
     const mounter = {
       appBasePath: '/base-path/some-route',
       appRoute: '/some-route',
-      deepLinkPaths: {},
       unmountBeforeMounting: false,
       exactRoute: false,
       mount: async ({ element }: AppMountParameters) => {

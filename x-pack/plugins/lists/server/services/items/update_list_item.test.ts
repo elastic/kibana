@@ -33,9 +33,9 @@ describe('update_list_item', () => {
     (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getUpdateListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.update.mockReturnValue(
+    esClient.update.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+      { _id: 'elastic-id-123' }
     );
     const updatedList = await updateListItem({ ...options, esClient });
     const expected: ListItemSchema = { ...getListItemResponseMock(), id: 'elastic-id-123' };
