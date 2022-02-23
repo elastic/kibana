@@ -23,7 +23,7 @@ Previous versions: {kibana-ref-all}/8.0/whats-new.html[8.0]
 Find interesting fields to visualize and learn more about the shape of your data
 with *Field statistics*.  This view
 is similar to the *Index Data Visualizer* in *{ml-app}*.
-Check out <<show-field-statistics>> for details.
+For details, check out {kibana-ref}/show-field-statistics.html[Explore the fields in your data].
 
 [role="screenshot"]
 image::discover/images/field-statistics-view.png[Filter panel in Canvas]
