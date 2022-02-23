@@ -42,7 +42,7 @@ describe('<Actions />', () => {
     const name = 'sample monitor';
     render(<Actions id={id} name={name} onUpdate={onUpdate} />);
 
-    userEvent.click(screen.getByLabelText(`Delete monitor ${name}`));
+    userEvent.click(screen.getByLabelText('Delete monitor'));
 
     expect(onUpdate).toHaveBeenCalled();
   });
