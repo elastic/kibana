@@ -9,14 +9,14 @@
 import './page_template.scss';
 
 import React, { FunctionComponent } from 'react';
+import classNames from 'classnames';
 
-import { EuiPageTemplateProps } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
 
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav/solution_nav';
 
-import { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from '../no_data';
 import { NoDataPageProps } from './no_data_page';
-import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
+import { withSolutionNavbar } from './with_solution_navbar';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
@@ -40,11 +40,13 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   noDataConfig?: NoDataPageProps;
 };
 
-export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
+export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   className,
   pageHeader,
   children,
+  isEmptyState,
+  restrictWidth = true,
   pageSideBar,
   pageSideBarProps,
   solutionNav,
@@ -52,49 +54,45 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   ...rest
 }) => {
   /**
-   * If passing the custom template of `noDataConfig`
+   * An easy way to create the right content for empty pages
    */
-  if (noDataConfig && solutionNav) {
-    return (
-      <NoDataConfigPageWithSolutionNavBar
-        data-test-subj={rest['data-test-subj']}
-        className={className}
-        noDataConfig={noDataConfig}
-        solutionNav={solutionNav}
+  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
+  if (isEmptyState && pageHeader && !children) {
+    template = template ?? emptyStateDefaultTemplate;
+    const { iconType, pageTitle, description, rightSideItems } = pageHeader;
+    pageHeader = undefined;
+    children = (
+      <EuiEmptyPrompt
+        iconType={iconType}
+        iconColor={''} // This is likely a solution or app logo, so keep it multi-color
+        title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
+        body={description ? <p>{description}</p> : undefined}
+        actions={rightSideItems}
       />
     );
+  } else if (isEmptyState && pageHeader && children) {
+    template = template ?? 'centeredContent';
+  } else if (isEmptyState && !pageHeader) {
+    template = template ?? emptyStateDefaultTemplate;
   }
 
-  if (noDataConfig) {
-    return (
-      <NoDataConfigPage
-        data-test-subj={rest['data-test-subj']}
-        className={className}
-        noDataConfig={noDataConfig}
-      />
-    );
-  }
-
-  if (solutionNav) {
-    return (
-      <KibanaPageTemplateWithSolutionNav
-        template={template}
-        className={className}
-        pageHeader={pageHeader}
-        solutionNav={solutionNav}
-        children={children}
-        {...rest}
-      />
-    );
-  }
+  const classes = classNames(
+    'kbnPageTemplate',
+    { [`kbnPageTemplate--${template}`]: template },
+    className
+  );
 
   return (
-    <KibanaPageTemplateInner
+    <EuiPageTemplate
       template={template}
-      className={className}
+      className={classes}
+      restrictWidth={restrictWidth}
       pageHeader={pageHeader}
-      children={children}
       {...rest}
-    />
+    >
+      {children}
+    </EuiPageTemplate>
   );
 };
+
+export const KibanaPageTemplateWithSolutionNav = withSolutionNavbar(KibanaPageTemplateInner);

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { EmptyStatePage } from './empty_state_page';
+export { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_config_page';

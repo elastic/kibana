@@ -7,25 +7,39 @@
  */
 import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { KibanaPageTemplateProps, NO_DATA_PAGE_TEMPLATE_PROPS, NoDataPage } from '../page_template';
+import classNames from 'classnames';
+import {
+  KibanaPageTemplateProps,
+  NO_DATA_PAGE_TEMPLATE_PROPS,
+  NoDataPage,
+  withSolutionNavbar,
+} from '../page_template';
 
-export const EmptyStatePage = (props: KibanaPageTemplateProps) => {
-  const { template, className, pageSideBar, pageSideBarProps, noDataConfig } = props;
+export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
+  const { className, noDataConfig } = props;
 
   if (!noDataConfig) {
     return null;
   }
 
+  const template = NO_DATA_PAGE_TEMPLATE_PROPS.template;
+
+  const classes = classNames(
+    'kbnPageTemplate',
+    { [`kbnPageTemplate--${template}`]: template },
+    className
+  );
+
   return (
     <EuiPageTemplate
       data-test-subj={props['data-test-subj']}
       template={template}
-      className={className}
-      pageSideBar={pageSideBar}
-      pageSideBarProps={pageSideBarProps}
+      className={classes}
       {...NO_DATA_PAGE_TEMPLATE_PROPS}
     >
       <NoDataPage {...noDataConfig} />
     </EuiPageTemplate>
   );
 };
+
+export const NoDataConfigPageWithSolutionNavBar = withSolutionNavbar(NoDataConfigPage);
