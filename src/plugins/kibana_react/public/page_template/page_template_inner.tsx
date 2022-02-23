@@ -46,17 +46,13 @@ export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps>
   pageHeader,
   children,
   isEmptyState,
-  restrictWidth = true,
-  pageSideBar,
-  pageSideBarProps,
   solutionNav,
-  noDataConfig,
   ...rest
 }) => {
   /**
    * An easy way to create the right content for empty pages
    */
-  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
+  const emptyStateDefaultTemplate = 'centeredBody';
   if (isEmptyState && pageHeader && !children) {
     template = template ?? emptyStateDefaultTemplate;
     const { iconType, pageTitle, description, rightSideItems } = pageHeader;
@@ -83,13 +79,7 @@ export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps>
   );
 
   return (
-    <EuiPageTemplate
-      template={template}
-      className={classes}
-      restrictWidth={restrictWidth}
-      pageHeader={pageHeader}
-      {...rest}
-    >
+    <EuiPageTemplate template={template} className={classes} pageHeader={pageHeader} {...rest}>
       {children}
     </EuiPageTemplate>
   );

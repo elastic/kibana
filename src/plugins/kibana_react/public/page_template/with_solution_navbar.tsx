@@ -9,19 +9,23 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
 import { KibanaPageTemplateSolutionNav } from '../page_template/solution_nav';
 import { KibanaPageTemplateProps } from '../page_template';
 
-export const withSolutionNavbar = <P extends object>(
-  WrappedComponent: React.FunctionComponent<P & KibanaPageTemplateProps>
+export const withSolutionNavbar = (
+  WrappedComponent: React.FunctionComponent<KibanaPageTemplateProps>
 ) => {
   const WithSolutionNavBar = (props: KibanaPageTemplateProps) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
-      JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed'))) ? false : true
+      !JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed')))
     );
-    const { solutionNav, children } = props;
+    const { solutionNav, children, isEmptyState, template } = props;
+    if (!solutionNav) {
+      return <WrappedComponent {...props} />;
+    }
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
       // Have to store it as the opposite of the default we want
@@ -32,6 +36,8 @@ export const withSolutionNavbar = <P extends object>(
       'kbnPageTemplate__pageSideBar--shrink':
         isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
     });
+
+    const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
 
     const pageSideBar = (
       <KibanaPageTemplateSolutionNav
@@ -44,9 +50,14 @@ export const withSolutionNavbar = <P extends object>(
       paddingSize: 'none',
       ...props.pageSideBarProps,
       className: classNames(sideBarClasses, props.pageSideBarProps?.className),
-    };
+    } as EuiPageSideBarProps;
     return (
-      <WrappedComponent {...props} pageSideBar={pageSideBar} pageSideBarProps={pageSideBarProps}>
+      <WrappedComponent
+        {...props}
+        pageSideBar={pageSideBar}
+        pageSideBarProps={pageSideBarProps}
+        template={templateToUse}
+      >
         {children}
       </WrappedComponent>
     );

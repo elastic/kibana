@@ -45,8 +45,6 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   className,
   pageHeader,
   children,
-  pageSideBar,
-  pageSideBarProps,
   solutionNav,
   noDataConfig,
   ...rest
