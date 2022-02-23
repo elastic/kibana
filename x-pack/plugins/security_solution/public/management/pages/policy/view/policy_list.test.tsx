@@ -34,7 +34,7 @@ describe('When on the policy list page', () => {
 
   describe('and data exists', () => {
     beforeEach(async () => {
-      getPackagePolicies.mockImplementation(sendGetEndpointSpecificPackagePoliciesMock);
+      getPackagePolicies.mockImplementation(() => sendGetEndpointSpecificPackagePoliciesMock());
       render();
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
@@ -62,8 +62,12 @@ describe('When on the policy list page', () => {
   describe('pagination', () => {
     beforeEach(async () => {
       getPackagePolicies.mockImplementation(async ({ page, perPage }) => {
-        const response = await sendGetEndpointSpecificPackagePoliciesMock({ page, perPage });
-        response.total = 100; // trigger the UI to show pagination
+        // # policies = 100 to trigger UI to show pagination
+        const response = await sendGetEndpointSpecificPackagePoliciesMock({
+          page,
+          perPage,
+          count: 100,
+        });
         return response;
       });
       render();

@@ -8,16 +8,15 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { GetPolicyListResponse } from '../../pages/policy/types';
 
 export const sendGetEndpointSpecificPackagePoliciesMock = async (
-  {
-    page,
-    perPage,
-  }: {
+  params: {
     page: number;
     perPage: number;
-  } = { page: 1, perPage: 20 }
+    count: number;
+  } = { page: 1, perPage: 20, count: 5 }
 ): Promise<GetPolicyListResponse> => {
+  const { page, perPage, count } = params;
   const generator = new FleetPackagePolicyGenerator();
-  const items = Array.from({ length: 5 }, (_, index) => {
+  const items = Array.from({ length: count }, (_, index) => {
     const policy = generator.generateEndpointPackagePolicy();
     policy.name += ` ${index}`;
     return policy;
@@ -25,7 +24,7 @@ export const sendGetEndpointSpecificPackagePoliciesMock = async (
 
   return {
     items,
-    total: 5,
+    total: count,
     page,
     perPage,
   };
