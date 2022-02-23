@@ -88,8 +88,8 @@ export class AnomalyTimelineStateService {
       )
       .subscribe(this._swimLaneSeverity$);
 
-    this._swimLaneUrlState$
-      .pipe(
+    combineLatest([
+      this._swimLaneUrlState$.pipe(
         map((v) => {
           return {
             viewByFromPage: v?.viewByFromPage ?? 1,
@@ -97,8 +97,15 @@ export class AnomalyTimelineStateService {
           };
         }),
         distinctUntilChanged(isEqual)
-      )
-      .subscribe(this._swimLanePaginations$);
+      ),
+      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+    ]).subscribe(([pagination, influencersFilerQuery]) => {
+      let resultPaginaiton: SwimLanePagination = pagination;
+      if (influencersFilerQuery) {
+        resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
+      }
+      this._swimLanePaginations$.next(resultPaginaiton);
+    });
 
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
