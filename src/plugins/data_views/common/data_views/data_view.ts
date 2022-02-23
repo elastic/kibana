@@ -441,11 +441,9 @@ export class DataView implements IIndexPattern {
   removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
 
-    if (existingField) {
-      if (existingField.isMapped) {
-        // mapped field, remove runtimeField def
-        existingField.runtimeField = undefined;
-      }
+    if (existingField && existingField.isMapped) {
+      // mapped field, remove runtimeField def
+      existingField.runtimeField = undefined;
     } else {
       Object.values(this.getFieldsByRuntimeFieldName(name) || {}).forEach((field) => {
         this.fields.remove(field);
