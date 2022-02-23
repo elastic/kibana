@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export enum EventKind {
+export const enum EventKind {
   event = 'event',
   signal = 'signal',
 }
 
-export enum EventAction {
+export const enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',

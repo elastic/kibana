@@ -15,7 +15,7 @@ interface StylesDeps {
   hasAlerts: boolean;
 }
 
-export enum ButtonType {
+export const enum ButtonType {
   children = 'children',
   alerts = 'alerts',
   output = 'output',
