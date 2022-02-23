@@ -21,9 +21,9 @@ import {
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
+import { WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
 import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
-import { CustomSource, SourceDataItem } from '../../../../types';
+import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -40,8 +40,6 @@ export enum AddSourceSteps {
   ConfigCompletedStep = 'Config Completed',
   ConnectInstanceStep = 'Connect Instance',
   ConfigureOauthStep = 'Configure Oauth',
-  ConfigureCustomStep = 'Configure Custom',
-  SaveCustomStep = 'Save Custom',
   ReauthenticateStep = 'Reauthenticate',
 }
 
@@ -66,12 +64,10 @@ export interface AddSourceActions {
   setClientIdValue(clientIdValue: string): string;
   setClientSecretValue(clientSecretValue: string): string;
   setBaseUrlValue(baseUrlValue: string): string;
-  setCustomSourceNameValue(customSourceNameValue: string): string;
   setSourceLoginValue(loginValue: string): string;
   setSourcePasswordValue(passwordValue: string): string;
   setSourceSubdomainValue(subdomainValue: string): string;
   setSourceIndexPermissionsValue(indexPermissionsValue: boolean): boolean;
-  setCustomSourceData(data: CustomSource): CustomSource;
   setPreContentSourceConfigData(data: PreContentSourceResponse): PreContentSourceResponse;
   setPreContentSourceId(preContentSourceId: string): string;
   setSelectedGithubOrganizations(option: string): string;
@@ -135,7 +131,6 @@ interface AddSourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
-  customSourceNameValue: string;
   clientIdValue: string;
   clientSecretValue: string;
   baseUrlValue: string;
@@ -145,7 +140,6 @@ interface AddSourceValues {
   indexPermissionsValue: boolean;
   sourceConfigData: SourceConfigData;
   sourceConnectData: SourceConnectData;
-  newCustomSource: CustomSource;
   currentServiceType: string;
   githubOrganizations: string[];
   selectedGithubOrganizationsMap: OrganizationsMap;
@@ -183,12 +177,10 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setClientIdValue: (clientIdValue: string) => clientIdValue,
     setClientSecretValue: (clientSecretValue: string) => clientSecretValue,
     setBaseUrlValue: (baseUrlValue: string) => baseUrlValue,
-    setCustomSourceNameValue: (customSourceNameValue: string) => customSourceNameValue,
     setSourceLoginValue: (loginValue: string) => loginValue,
     setSourcePasswordValue: (passwordValue: string) => passwordValue,
     setSourceSubdomainValue: (subdomainValue: string) => subdomainValue,
     setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
-    setCustomSourceData: (data: CustomSource) => data,
     setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
     setPreContentSourceId: (preContentSourceId: string) => preContentSourceId,
     setSelectedGithubOrganizations: (option: string) => option,
@@ -318,20 +310,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       {
         setSourceIndexPermissionsValue: (_, indexPermissionsValue) => indexPermissionsValue,
         resetSourceState: () => false,
-      },
-    ],
-    customSourceNameValue: [
-      '',
-      {
-        setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
-        resetSourceState: () => '',
-      },
-    ],
-    newCustomSource: [
-      {} as CustomSource,
-      {
-        setCustomSourceData: (_, newCustomSource) => newCustomSource,
-        resetSourceState: () => ({} as CustomSource),
       },
     ],
     currentServiceType: [
@@ -562,7 +540,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       const {
         selectedGithubOrganizations: githubOrganizations,
-        customSourceNameValue,
         loginValue,
         passwordValue,
         indexPermissionsValue,
@@ -570,7 +547,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       const params = {
         service_type: serviceType,
-        name: customSourceNameValue || undefined,
         login: loginValue || undefined,
         password: passwordValue || undefined,
         organizations: githubOrganizations.length > 0 ? githubOrganizations : undefined,
@@ -583,10 +559,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
 
       try {
-        const response = await HttpLogic.values.http.post<CustomSource>(route, {
-          body: JSON.stringify({ ...params }),
-        });
-        actions.setCustomSourceData(response);
         successCallback();
       } catch (e) {
         flashAPIErrors(e);
@@ -600,10 +572,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
 // TODO honestly can we base all of these on the route we're on?
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
-  const { sourceData, connect, configure, reAuthenticate } = props;
-  const { serviceType } = sourceData;
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE; // T
-  if (isCustom) return AddSourceSteps.ConfigureCustomStep;
+  const { connect, configure, reAuthenticate } = props;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;

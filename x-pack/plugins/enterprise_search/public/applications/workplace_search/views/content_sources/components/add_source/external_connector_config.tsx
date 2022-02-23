@@ -164,7 +164,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
-      ({header})
+      {header}
       <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} />

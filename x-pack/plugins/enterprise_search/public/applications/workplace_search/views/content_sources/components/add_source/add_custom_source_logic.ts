@@ -1,0 +1,111 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { kea, MakeLogicType } from 'kea';
+
+import { flashAPIErrors, clearFlashMessages } from '../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../shared/http';
+import { AppLogic } from '../../../../app_logic';
+import { CustomSource, SourceDataItem } from '../../../../types';
+
+export interface AddCustomSourceProps {
+  sourceData: SourceDataItem;
+  initialValue: string;
+}
+
+export enum AddCustomSourceSteps {
+  ConfigureCustomStep = 'Configure Custom',
+  SaveCustomStep = 'Save Custom',
+}
+
+export interface AddCustomSourceActions {
+  setButtonNotLoading(): void;
+  setCustomSourceNameValue(customSourceNameValue: string): string;
+  setNewCustomSource(data: CustomSource): CustomSource;
+  createContentSource(): void;
+}
+
+interface AddCustomSourceValues {
+  currentStep: AddCustomSourceSteps;
+  buttonLoading: boolean;
+  customSourceNameValue: string;
+  newCustomSource: CustomSource;
+  sourceData: SourceDataItem;
+}
+
+/**
+ * Workplace Search needs to know the host for the redirect. As of yet, we do not
+ * have access to this in Kibana. We parse it from the browser and pass it as a param.
+ */
+
+export const AddCustomSourceLogic = kea<
+  MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
+>({
+  path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
+  actions: {
+    setCustomSourceNameValue: (customSourceNameValue) => customSourceNameValue,
+    setNewCustomSource: (data) => data,
+    createContentSource: true,
+    setButtonNotLoading: true,
+  },
+  reducers: ({ props }) => ({
+    currentStep: [
+      AddCustomSourceSteps.ConfigureCustomStep,
+      {
+        setNewCustomSource: () => AddCustomSourceSteps.SaveCustomStep,
+      },
+    ],
+    buttonLoading: [
+      false,
+      {
+        setButtonNotLoading: () => false,
+        createContentSource: () => true,
+      },
+    ],
+    customSourceNameValue: [
+      props.initialValue,
+      {
+        setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
+      },
+    ],
+    newCustomSource: [
+      {} as CustomSource,
+      {
+        setNewCustomSource: (_, newCustomSource) => newCustomSource,
+        resetSourceState: () => ({} as CustomSource),
+      },
+    ],
+    sourceData: [props.sourceData],
+  }),
+  listeners: ({ actions, values }) => ({
+    createContentSource: async () => {
+      clearFlashMessages();
+      const { isOrganization } = AppLogic.values;
+      const route = isOrganization
+        ? '/internal/workplace_search/org/create_source'
+        : '/internal/workplace_search/account/create_source';
+
+      const { customSourceNameValue } = values;
+
+      const params = {
+        service_type: 'custom',
+        name: customSourceNameValue,
+      };
+
+      try {
+        const response = await HttpLogic.values.http.post<CustomSource>(route, {
+          body: JSON.stringify({ ...params }),
+        });
+        actions.setNewCustomSource(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.setButtonNotLoading();
+      }
+    },
+  }),
+});

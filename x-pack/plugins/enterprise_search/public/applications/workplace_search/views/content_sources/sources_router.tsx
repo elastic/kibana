@@ -29,8 +29,8 @@ import {
 import { hasMultipleConnectorOptions } from '../../utils';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
+import { AddCustomSource } from './components/add_source/add_custom_source';
 import { ConfigurationChoice } from './components/add_source/configuration_choice';
-import { ConfigureCustom } from './components/add_source/configure_custom';
 import { ExternalConnectorConfig } from './components/add_source/external_connector_config';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
@@ -100,11 +100,13 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         );
       })}
+      <Route exact path={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
+        <AddCustomSource sourceData={staticCustomSourceData} />
+      </Route>
       {sources
         .filter((sourceData) => sourceData.internalConnectorAvailable)
         .map((sourceData, i) => {
           const { serviceType, accountContextOnly } = sourceData;
-
           return (
             <Route
               key={i}
@@ -142,7 +144,6 @@ export const SourcesRouter: React.FC = () => {
         .filter((sourceData) => sourceData.customConnectorAvailable)
         .map((sourceData, i) => {
           const { serviceType, accountContextOnly } = sourceData;
-          const configuration = { helpText: 'HELP FILL ME' };
           return (
             <Route
               key={i}
@@ -152,18 +153,11 @@ export const SourcesRouter: React.FC = () => {
               {!hasPlatinumLicense && accountContextOnly ? (
                 <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
               ) : (
-                <ConfigureCustom
-                  helpText={configuration.helpText ?? ''}
-                  advanceStep={() => true}
-                  header={null}
-                />
+                <AddCustomSource sourceData={sourceData} initialValue={sourceData.name} />
               )}
             </Route>
           );
         })}
-      <Route exact path={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
-        <AddSource sourceData={staticCustomSourceData} />
-      </Route>
       {sources.map((sourceData, i) => (
         <Route
           key={i}

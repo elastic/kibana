@@ -24,34 +24,32 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { SOURCE_NAME_LABEL } from '../../constants';
 
-import { AddSourceLogic } from './add_source_logic';
+import { AddCustomSourceLogic } from './add_custom_source_logic';
+import { AddSourceHeader } from './add_source_header';
 import { CONFIG_CUSTOM_BUTTON, CONFIG_CUSTOM_LINK_TEXT } from './constants';
 
-interface ConfigureCustomProps {
-  header: React.ReactNode;
-  helpText: string;
-  advanceStep(): void;
-}
-
-export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
-  helpText,
-  advanceStep,
-  header,
-}) => {
-  const { setCustomSourceNameValue } = useActions(AddSourceLogic);
-  const { customSourceNameValue, buttonLoading } = useValues(AddSourceLogic);
+export const ConfigureCustom: React.FC = () => {
+  const { setCustomSourceNameValue, createContentSource } = useActions(AddCustomSourceLogic);
+  const { customSourceNameValue, buttonLoading, sourceData } = useValues(AddCustomSourceLogic);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
-    advanceStep();
+    createContentSource();
   };
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setCustomSourceNameValue(e.target.value);
 
+  const {
+    serviceType,
+    configuration: { helpText },
+    name,
+    categories = [],
+  } = sourceData;
+
   return (
     <>
-      {header}
+      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer />
       <form onSubmit={handleFormSubmit}>
         <EuiForm>

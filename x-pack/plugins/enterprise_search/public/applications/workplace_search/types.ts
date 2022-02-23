@@ -72,10 +72,10 @@ export interface Configuration {
   applicationLinkTitle?: string;
 }
 
-// TODO combine serviceType and internalConnectorAvailable into internalConnectorServiceType
 export interface SourceDataItem {
   name: string;
   iconName: string;
+  categories?: string[];
   serviceType: string;
   configuration: Configuration;
   configured?: boolean;

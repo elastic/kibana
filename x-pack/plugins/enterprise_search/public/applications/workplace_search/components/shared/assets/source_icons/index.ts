@@ -19,6 +19,7 @@ import oneDrive from './onedrive.svg';
 import salesforce from './salesforce.svg';
 import serviceNow from './servicenow.svg';
 import sharePoint from './sharepoint.svg';
+import sharePointServer from './sharepoint_server.svg';
 import slack from './slack.svg';
 import zendesk from './zendesk.svg';
 
@@ -46,6 +47,7 @@ export const images = {
   salesforceSandbox: salesforce,
   serviceNow,
   sharePoint,
+  sharePointServer,
   slack,
   zendesk,
 } as { [key: string]: string };

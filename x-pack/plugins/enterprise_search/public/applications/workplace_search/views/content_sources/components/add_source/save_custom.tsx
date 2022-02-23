@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { AppLogic } from '../../../../app_logic';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import {
   SOURCES_PATH,
@@ -34,11 +35,12 @@ import {
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
-import { CustomSource } from '../../../../types';
 import { LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
 
 import { SourceIdentifier } from '../source_identifier';
 
+import { AddCustomSourceLogic } from './add_custom_source_logic';
+import { AddSourceHeader } from './add_source_header';
 import {
   SAVE_CUSTOM_BODY1,
   SAVE_CUSTOM_BODY2,
@@ -51,23 +53,20 @@ import {
   SAVE_CUSTOM_DOC_PERMISSIONS_LINK,
 } from './constants';
 
-interface SaveCustomProps {
-  documentationUrl: string;
-  newCustomSource: CustomSource;
-  isOrganization: boolean;
-  header: React.ReactNode;
-}
-
-export const SaveCustom: React.FC<SaveCustomProps> = ({
-  documentationUrl,
-  newCustomSource: { id, name },
-  isOrganization,
-  header,
-}) => {
+export const SaveCustom: React.FC = () => {
+  const { newCustomSource, sourceData } = useValues(AddCustomSourceLogic);
+  const { isOrganization } = useValues(AppLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const {
+    serviceType,
+    configuration: { documentationUrl },
+    name,
+    categories = [],
+  } = sourceData;
+
   return (
     <>
-      {header}
+      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer />
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={2}>
@@ -84,7 +83,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                         'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.heading',
                         {
                           defaultMessage: '{name} Created',
-                          values: { name },
+                          values: { name: newCustomSource.name },
                         }
                       )}
                     </h1>
@@ -105,7 +104,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
             </EuiFlexGroup>
             <EuiHorizontalRule />
             <EuiSpacer size="s" />
-            <SourceIdentifier id={id} />
+            <SourceIdentifier id={newCustomSource.id} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -149,7 +148,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                           <EuiLinkTo
                             to={getContentSourcePath(
                               SOURCE_DISPLAY_SETTINGS_PATH,
-                              id,
+                              newCustomSource.id,
                               isOrganization
                             )}
                           >

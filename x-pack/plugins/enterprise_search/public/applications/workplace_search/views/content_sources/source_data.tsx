@@ -537,7 +537,8 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
     iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
-    serviceType: 'sharepoint_server', // this doesn't exist on the BE, but it will exist for stuff like routes
+    categories: ['File Sharing', 'Storage', 'Cloud', 'Microsoft', 'Office 365'], // TODO i18n
+    serviceType: 'share_point_server', // this doesn't exist on the BE
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
@@ -545,7 +546,8 @@ export const staticSourceData: SourceDataItem[] = [
       helpText: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.sources.helpText.sharepointServer',
         {
-          defaultMessage: "Let's make a sharepoint server connector",
+          defaultMessage:
+            "We've got some starter code for you that can help you make a custom api source to import sharepoint stuff. Here's a link to learn more",
         }
       ),
       documentationUrl: docLinks.workplaceSearchCustomSources, // TODO update this
@@ -612,7 +614,8 @@ export const staticSourceData: SourceDataItem[] = [
 export const staticCustomSourceData: SourceDataItem = {
   name: SOURCE_NAMES.CUSTOM,
   iconName: SOURCE_NAMES.CUSTOM,
-  serviceType: 'custom', // TODO make this option and remove it
+  categories: ['API', 'Custom'],
+  serviceType: 'custom',
   configuration: {
     isPublicKey: false,
     hasOauthRedirect: false,

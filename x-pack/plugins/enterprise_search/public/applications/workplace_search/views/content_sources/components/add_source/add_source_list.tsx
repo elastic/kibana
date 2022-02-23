@@ -138,36 +138,6 @@ export const AddSourceList: React.FC = () => {
             />
           )}
           {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
-
-          <EuiTitle size="s">
-            <h2>{"Dont see what you're looking for?"}</h2>
-          </EuiTitle>
-          <EuiText>
-            <p>Build and deploy your own generic connector</p>
-          </EuiText>
-          <EuiFlexGrid columns={2} direction="column" gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="center" alignItems="stretch">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
-                    <EuiFlexItem grow={false}>
-                      <SourceIcon serviceType={'custom'} name="Custom API Source" size="l" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="m">Custom API Source</EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmptyTo to={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
-                        Connect
-                      </EuiButtonEmptyTo>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-                  <EuiHorizontalRule size="full" margin="none" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGrid>
         </ContentSection>
       ) : (
         <ContentSection>

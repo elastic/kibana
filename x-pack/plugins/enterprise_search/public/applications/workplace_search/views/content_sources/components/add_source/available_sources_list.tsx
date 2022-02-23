@@ -27,6 +27,8 @@ import { SourceIcon } from '../../../../components/shared/source_icon';
 import { ADD_CUSTOM_PATH, getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
+import { staticCustomSourceData } from '../../source_data';
+
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
   AVAILABLE_SOURCE_TITLE,
@@ -106,6 +108,15 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiFlexGroup>
           </EuiFlexItem>
         ))}
+        <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="stretch"
+            data-test-subj="AvailableSourceCard"
+          >
+            <EuiFlexItem>{getSourceCard(staticCustomSourceData)}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGrid>
     </>
   );
