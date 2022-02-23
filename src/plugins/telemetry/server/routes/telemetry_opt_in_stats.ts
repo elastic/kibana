@@ -75,7 +75,6 @@ export function registerTelemetryOptInStatsRoutes(
 
         const statsGetterConfig: StatsGetterConfig = {
           unencrypted,
-          request: req,
         };
 
         const optInStatus = await telemetryCollectionManager.getOptInStats(

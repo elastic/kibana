@@ -220,7 +220,6 @@ describe('Telemetry Collection Manager', () => {
         const mockRequest = httpServerMock.createKibanaRequest();
         const config: StatsGetterConfig = {
           unencrypted: true,
-          request: mockRequest,
         };
 
         describe('getStats', () => {

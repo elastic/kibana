@@ -8,7 +8,7 @@
 
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import type { RequestHandlerContext, IRouter } from 'kibana/server';
+import type { RequestHandlerContext, IRouter } from 'src/core/server';
 import { telemetryCollectionManagerPluginMock } from '../../../telemetry_collection_manager/server/mocks';
 
 async function runRequest(
@@ -35,13 +35,18 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   };
   const telemetryCollectionManager = telemetryCollectionManagerPluginMock.createSetupContract();
   const mockCoreSetup = coreMock.createSetup();
-  const mockRouter = mockCoreSetup.http.createRouter();
   const mockStats = [{ clusterUuid: 'text', stats: 'enc_str' }];
   telemetryCollectionManager.getStats.mockResolvedValue(mockStats);
+  const getSecurity = jest.fn();
+
+  let mockRouter: IRouter;
+  beforeEach(() => {
+    mockRouter = mockCoreSetup.http.createRouter();
+  });
 
   describe('clusters/_stats POST route', () => {
     it('registers _stats POST route and accepts body configs', () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true);
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
       expect(mockRouter.post).toBeCalledTimes(1);
       const [routeConfig, handler] = (mockRouter.post as jest.Mock).mock.calls[0];
       expect(routeConfig.path).toMatchInlineSnapshot(`"/api/telemetry/v2/clusters/_stats"`);
@@ -50,11 +55,10 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('responds with encrypted stats with no cache refresh by default', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true);
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
 
-      const { mockRequest, mockResponse } = await runRequest(mockRouter);
+      const { mockResponse } = await runRequest(mockRouter);
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
-        request: mockRequest,
         unencrypted: undefined,
         refreshCache: undefined,
       });
@@ -63,37 +67,55 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('when unencrypted is set getStats is called with unencrypted and refreshCache', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true);
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
 
-      const { mockRequest } = await runRequest(mockRouter, { unencrypted: true });
+      await runRequest(mockRouter, { unencrypted: true });
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
-        request: mockRequest,
         unencrypted: true,
         refreshCache: true,
       });
     });
 
     it('calls getStats with refreshCache when set in body', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true);
-      const { mockRequest } = await runRequest(mockRouter, { refreshCache: true });
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      await runRequest(mockRouter, { refreshCache: true });
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
-        request: mockRequest,
         unencrypted: undefined,
         refreshCache: true,
       });
     });
 
     it('calls getStats with refreshCache:true even if set to false in body when unencrypted is set to true', async () => {
-      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true);
-      const { mockRequest } = await runRequest(mockRouter, {
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      await runRequest(mockRouter, {
         refreshCache: false,
         unencrypted: true,
       });
       expect(telemetryCollectionManager.getStats).toBeCalledWith({
-        request: mockRequest,
         unencrypted: true,
         refreshCache: true,
       });
+    });
+
+    it('returns 403 when the user does not have enough permissions', async () => {
+      const getSecurityMock = jest.fn().mockReturnValue({
+        authz: {
+          checkPrivilegesWithRequest: () => ({
+            globally: () => ({ hasAllRequested: false }),
+          }),
+        },
+      });
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurityMock
+      );
+      const { mockResponse } = await runRequest(mockRouter, {
+        refreshCache: false,
+        unencrypted: true,
+      });
+      expect(mockResponse.forbidden).toBeCalled();
     });
 
     it.todo('always returns an empty array on errors on encrypted payload');
