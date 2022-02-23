@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
 import { SessionViewServices } from '../../types';
+import { PROCESS_EVENTS_INDEX } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   ColumnHeaderOptions,
@@ -87,7 +88,7 @@ startDate.setDate(new Date().getDate() - 7);
 const DEFAULT_END_DATE = new Date().toISOString();
 const DEFAULT_START_DATE = startDate.toISOString();
 
-const DEFAULT_INDEX_NAMES = ['logs-endpoint.events.process-default*'];
+const DEFAULT_INDEX_NAMES = [PROCESS_EVENTS_INDEX];
 
 const DEFAULT_ITEMS_PER_PAGE = [10, 25, 50];
 

@@ -31,7 +31,7 @@ export class SessionViewPlugin implements Plugin {
     const router = core.http.createRouter();
 
     // Register server routes
-    registerRoutes(router, this.logger);
+    registerRoutes(router);
   }
 
   public start(core: CoreStart, plugins: SessionViewStartPlugins) {

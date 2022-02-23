@@ -10,24 +10,20 @@ import { mockEvents } from '../../common/mocks/constants/session_view_process.mo
 
 const getEmptyResponse = async () => {
   return {
-    body: {
-      hits: {
-        total: { value: 0, relation: 'eq' },
-        hits: [],
-      },
+    hits: {
+      total: { value: 0, relation: 'eq' },
+      hits: [],
     },
   };
 };
 
 const getResponse = async () => {
   return {
-    body: {
-      hits: {
-        total: { value: mockEvents.length, relation: 'eq' },
-        hits: mockEvents.map((event) => {
-          return { _source: event };
-        }),
-      },
+    hits: {
+      total: { value: mockEvents.length, relation: 'eq' },
+      hits: mockEvents.map((event) => {
+        return { _source: event };
+      }),
     },
   };
 };

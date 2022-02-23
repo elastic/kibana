@@ -5,12 +5,18 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import { IRouter } from '../../../../../src/core/server';
-import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../common/constants';
+import {
+  PROCESS_EVENTS_ROUTE,
+  PROCESS_EVENTS_PER_PAGE,
+  PROCESS_EVENTS_INDEX,
+  ALERTS_INDEX,
+  ENTRY_SESSION_ENTITY_ID_PROPERTY,
+} from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
-export const registerProcessEventsRoute = (router: IRouter, logger: Logger) => {
+export const registerProcessEventsRoute = (router: IRouter) => {
   router.get(
     {
       path: PROCESS_EVENTS_ROUTE,
@@ -38,43 +44,20 @@ export const doSearch = async (
   cursor: string | undefined,
   forward = true
 ) => {
-  // Temporary hack. Updates .siem-signals-default index to include a mapping for process.entry_leader.entity_id
-  // TODO: find out how to do proper index mapping migrations...
-  let siemSignalsExists = true;
-
-  try {
-    await client.indices.putMapping({
-      index: '.siem-signals-default',
-      body: {
-        properties: {
-          'process.entry_leader.entity_id': {
-            type: 'keyword',
-          },
-        },
-      },
-    });
-  } catch (err) {
-    siemSignalsExists = false;
-  }
-
-  const indices = ['logs-endpoint.events.process-default'];
-
-  if (siemSignalsExists) {
-    indices.push('.siem-signals-default');
-  }
-
   const search = await client.search({
-    index: indices,
+    // TODO: move alerts into it's own route with it's own pagination.
+    index: [PROCESS_EVENTS_INDEX, ALERTS_INDEX],
+    ignore_unavailable: true,
     body: {
       query: {
         match: {
-          'process.entry_leader.entity_id': sessionEntityId,
+          [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
         },
       },
       // This runtime_mappings is a temporary fix, so we are able to Query these ECS fields while they are not available
       // TODO: Remove the runtime_mappings once process.entry_leader.entity_id is implemented to ECS
       runtime_mappings: {
-        'process.entry_leader.entity_id': {
+        [ENTRY_SESSION_ENTITY_ID_PROPERTY]: {
           type: 'keyword',
         },
       },
@@ -85,6 +68,7 @@ export const doSearch = async (
   });
 
   const events = search.hits.hits.map((hit: any) => {
+    // TODO: re-eval if this is needed after moving alerts to it's own route.
     // the .siem-signals-default index flattens many properties. this util unflattens them.
     hit._source = expandDottedObject(hit._source);
 

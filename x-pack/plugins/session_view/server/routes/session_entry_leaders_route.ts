@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../src/core/server';
-import { SESSION_ENTRY_LEADERS_ROUTE } from '../../common/constants';
+import { SESSION_ENTRY_LEADERS_ROUTE, PROCESS_EVENTS_INDEX } from '../../common/constants';
 
 export const sessionEntryLeadersRoute = (router: IRouter) => {
   router.get(
@@ -23,7 +23,7 @@ export const sessionEntryLeadersRoute = (router: IRouter) => {
       const { id } = request.query;
 
       const result = await client.get({
-        index: 'logs-endpoint.events.process-default',
+        index: PROCESS_EVENTS_INDEX,
         id,
       });
 

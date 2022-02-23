@@ -5,6 +5,7 @@
  * 2.0.
  */
 import _ from 'lodash';
+import memoizeOne from 'memoize-one';
 import { useState, useEffect } from 'react';
 import {
   EventAction,
@@ -66,12 +67,11 @@ export class ProcessImpl implements Process {
   }
 
   hasOutput() {
-    // TODO: schema undecided
-    return !!this.events.find(({ event }) => event.action === EventAction.output);
+    return !!this.findEventByAction(this.events, EventAction.output);
   }
 
   hasAlerts() {
-    return !!this.events.find(({ event }) => event.kind === EventKind.signal);
+    return !!this.findEventByKind(this.events, EventKind.signal);
   }
 
   getAlerts() {
@@ -79,15 +79,48 @@ export class ProcessImpl implements Process {
   }
 
   hasExec() {
-    return !!this.events.find(({ event }) => event.action === EventAction.exec);
+    return !!this.findEventByAction(this.events, EventAction.exec);
   }
 
   hasExited() {
-    return !!this.events.find(({ event }) => event.action === EventAction.end);
+    return !!this.findEventByAction(this.events, EventAction.end);
   }
 
   getDetails() {
-    const eventsPartition = this.events.reduce(
+    return this.getDetailsMemo(this.events);
+  }
+
+  getOutput() {
+    // not implemented, output ECS schema not defined (for a future release)
+    return '';
+  }
+
+  isUserEntered() {
+    const event = this.getDetails();
+    const { tty } = event.process;
+
+    return !!tty && process.pid !== event.process.group_leader.pid;
+  }
+
+  getMaxAlertLevel() {
+    // TODO: as part of alerts details work + tie in with the new alert flyout
+    return null;
+  }
+
+  findEventByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
+    return events.find(({ event }) => event.action === action);
+  });
+
+  findEventByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
+    return events.find(({ event }) => event.kind === kind);
+  });
+
+  filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
+    return events.filter(({ event }) => event.action === action);
+  });
+
+  getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
+    const eventsPartition = events.reduce(
       (currEventsParition, processEvent) => {
         currEventsParition[processEvent.event.action]?.push(processEvent);
         return currEventsParition;
@@ -107,29 +140,7 @@ export class ProcessImpl implements Process {
     }
 
     return this.events[this.events.length - 1] || ({} as ProcessEvent);
-  }
-
-  getOutput() {
-    return this.events.reduce((output, event) => {
-      if (event.event.action === EventAction.output) {
-        output += ''; // TODO: schema unknown
-      }
-
-      return output;
-    }, '');
-  }
-
-  isUserEntered() {
-    const event = this.getDetails();
-    const { tty } = event.process;
-
-    return !!tty && process.pid !== event.process.group_leader.pid;
-  }
-
-  getMaxAlertLevel() {
-    // TODO:
-    return null;
-  }
+  });
 }
 
 export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProcessTreeDeps) => {

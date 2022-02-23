@@ -11,7 +11,7 @@
  *2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
+import React, { useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
 import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
@@ -46,20 +46,9 @@ export function ProcessTreeNode({
     setChildrenExpanded(isSessionLeader || process.autoExpand);
   }, [isSessionLeader, process.autoExpand]);
 
-  const processDetails = useMemo(() => {
-    return process.getDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [process.events.length]);
-
-  const hasExec = useMemo(() => {
-    return process.hasExec();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [process.events.length]);
-
-  const alerts = useMemo(() => {
-    return process.getAlerts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [process.events.length]);
+  const processDetails = process.getDetails();
+  const hasExec = process.hasExec();
+  const alerts = process.getAlerts();
 
   const styles = useStyles({ depth, hasAlerts: !!alerts.length });
 
@@ -114,6 +103,8 @@ export function ProcessTreeNode({
     return expanded ? 'arrowUp' : 'arrowDown';
   };
 
+  const onShowGroupLeaderOnlyClick = () => setShowGroupLeadersOnly(!showGroupLeadersOnly);
+
   const renderButtons = () => {
     const buttons = [];
     const childCount = process.getChildren().length;
@@ -137,9 +128,9 @@ export function ProcessTreeNode({
             }
           >
             <EuiButton
-              key="child-processes-button"
+              key="group-leaders-only-button"
               css={styles.getButtonStyle(ButtonType.children)}
-              onClick={() => setShowGroupLeadersOnly(!showGroupLeadersOnly)}
+              onClick={onShowGroupLeaderOnlyClick}
               data-test-subj="processTreeNodeChildProcessesButton"
             >
               <FormattedMessage
