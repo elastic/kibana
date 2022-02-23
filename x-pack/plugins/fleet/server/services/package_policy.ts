@@ -115,7 +115,7 @@ class PackagePolicyService {
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
         throw new IngestManagerError(
-          `There is already an integration policy with the same name: ${packagePolicy.name}`
+          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
         );
       }
     }
@@ -389,7 +389,9 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already an integration policy with the same name');
+      throw new IngestManagerError(
+        `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+      );
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -1321,14 +1323,11 @@ export function preconfigurePackageInputs(
       continue;
     }
 
-    // For flags like this, we only want to override the original value if it was set
-    // as `undefined` in the original object. An explicit true/false value should be
-    // persisted from the original object to the result after the override process is complete.
-    if (originalInput.enabled === undefined && preconfiguredInput.enabled !== undefined) {
+    if (preconfiguredInput.enabled !== undefined) {
       originalInput.enabled = preconfiguredInput.enabled;
     }
 
-    if (originalInput.keep_enabled === undefined && preconfiguredInput.keep_enabled !== undefined) {
+    if (preconfiguredInput.keep_enabled !== undefined) {
       originalInput.keep_enabled = preconfiguredInput.keep_enabled;
     }
 
@@ -1351,7 +1350,7 @@ export function preconfigurePackageInputs(
           continue;
         }
 
-        if (originalStream?.enabled === undefined) {
+        if (stream.enabled !== undefined) {
           originalStream.enabled = stream.enabled;
         }
 
