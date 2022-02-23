@@ -55,7 +55,7 @@ export function RulesPage() {
     try {
       const response = await loadRules({
         http,
-        page: { index: 0, size: 10 },
+        page: { index: 0, size: DEFAULT_SEARCH_PAGE_SIZE },
         typesFilter: [
           'xpack.uptime.alerts.monitorStatus',
           'xpack.uptime.alerts.tls',
@@ -222,10 +222,11 @@ export function RulesPage() {
             pagination={{
               pageIndex: page.index,
               pageSize: page.size,
-              /* Don't display alert count until we have the alert types initialized */
               totalItemCount: rules.totalItemsCount,
             }}
-            onChange={() => {}}
+            onChange={({ page: changedPage }: { page: Pagination }) => {
+              setPage(changedPage);
+            }}
             selection={{
               selectable: () => true,
               onSelectionChange: (selectedItems) => {
