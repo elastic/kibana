@@ -28,7 +28,7 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
   });
   const triggerLabel = state.indexPatternRefs.reduce(
     (title, indexPatt) =>
-      indexPatt.title === indexPattern.title && indexPatt.readableTitle
+      indexPatt.title === indexPattern?.title && indexPatt.readableTitle
         ? indexPatt.readableTitle
         : title,
     indexPattern?.title || notFoundTitleLabel
