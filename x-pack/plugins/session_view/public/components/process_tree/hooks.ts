@@ -43,6 +43,12 @@ export class ProcessImpl implements Process {
     this.searchMatched = null;
   }
 
+  addEvent(event: ProcessEvent) {
+    // rather than push new events on the array, we return a new one
+    // this helps the below memoizeOne functions to behave correctly.
+    this.events = this.events.concat(event);
+  }
+
   // hideSameGroup will filter out any processes which have the same pgid as this process
   getChildren(hideSameGroup: boolean = false) {
     let children = this.children;
@@ -75,7 +81,7 @@ export class ProcessImpl implements Process {
   }
 
   getAlerts() {
-    return this.events.filter(({ event }) => event.kind === EventKind.signal);
+    return this.filterEventsByKind(this.events, EventKind.signal);
   }
 
   hasExec() {
@@ -99,7 +105,7 @@ export class ProcessImpl implements Process {
     const event = this.getDetails();
     const { tty } = event.process;
 
-    return !!tty && process.pid !== event.process.group_leader.pid;
+    return !!tty && process.pid === event.process.group_leader.pid;
   }
 
   getMaxAlertLevel() {
@@ -117,6 +123,10 @@ export class ProcessImpl implements Process {
 
   filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
     return events.filter(({ event }) => event.action === action);
+  });
+
+  filterEventsByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
+    return events.filter(({ event }) => event.kind === kind);
   });
 
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {

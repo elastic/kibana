@@ -152,6 +152,7 @@ export interface Process {
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
+  addEvent(event: ProcessEvent): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
   getAlerts(): ProcessEvent[];

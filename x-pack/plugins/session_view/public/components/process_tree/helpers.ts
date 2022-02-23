@@ -17,7 +17,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
       processMap[id] = process;
     }
 
-    process.events.push(event);
+    process.addEvent(event);
   });
 
   return processMap;

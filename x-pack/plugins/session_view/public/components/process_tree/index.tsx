@@ -148,7 +148,7 @@ export const ProcessTree = ({
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
     return (
-      <EuiButton fullWidth onClick={() => func()} isLoading={isFetching}>
+      <EuiButton fullWidth onClick={func} isLoading={isFetching}>
         {text}
       </EuiButton>
     );
