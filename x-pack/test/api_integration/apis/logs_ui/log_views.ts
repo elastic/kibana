@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('falls back to the static infra source default', async () => {
       const logView = await logViewsService.getLogView('NONEXISTENT_LOG_VIEW');
-      console.log(logView);
       expect(logView.data.origin).to.eql('infra-source-fallback');
     });
 
@@ -51,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
         ),
       });
       const logView = await logViewsService.getLogView('default');
-      console.log(logView);
       expect(logView.data.origin).to.eql('infra-source-stored');
       expect(logView.data.attributes.name).to.eql('Test Infra Source');
       expect(logView.data.attributes.logIndices).to.eql({

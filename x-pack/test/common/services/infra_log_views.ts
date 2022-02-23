@@ -28,36 +28,9 @@ export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext)
     log.debug(`Fetching log view "${logViewId}"...`);
 
     const response = await createGetLogViewAgent(logViewId);
-    console.log(response);
 
     return decodeOrThrow(getLogViewResponsePayloadRT)(response.body);
   };
-
-  // const createUpdateLogSourceConfigurationAgent = (
-  //   sourceId: string,
-  //   sourceProperties: PatchLogSourceConfigurationRequestBody['data']
-  // ) =>
-  //   supertest
-  //     .patch(getLogSourceConfigurationPath(sourceId))
-  //     .set({
-  //       'kbn-xsrf': 'some-xsrf-token',
-  //     })
-  //     .send(patchLogSourceConfigurationRequestBodyRT.encode({ data: sourceProperties }));
-
-  // const updateLogSourceConfiguration = async (
-  //   sourceId: string,
-  //   sourceProperties: PatchLogSourceConfigurationRequestBody['data']
-  // ) => {
-  //   log.debug(
-  //     `Updating Logs UI source configuration "${sourceId}" with properties ${JSON.stringify(
-  //       sourceProperties
-  //     )}`
-  //   );
-
-  //   const response = await createUpdateLogSourceConfigurationAgent(sourceId, sourceProperties);
-
-  //   return decodeOrThrow(patchLogSourceConfigurationResponsePayloadRT)(response.body);
-  // };
 
   return {
     getLogView,
