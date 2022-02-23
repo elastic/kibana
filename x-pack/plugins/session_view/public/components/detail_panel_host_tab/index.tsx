@@ -12,7 +12,7 @@ import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
-import { useStyles } from './styles';
+import { useStyles } from '../detail_panel_process_tab/styles';
 
 interface DetailPanelHostTabDeps {
   processHost: ProcessEventHost;

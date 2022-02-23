@@ -6,13 +6,16 @@
  */
 
 import { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
   const cached = useMemo(() => {
     const copyButton: CSSObject = {
       position: 'absolute',
-      right: '8px',
+      right: euiTheme.size.s,
       top: 0,
       bottom: 0,
       margin: 'auto',
@@ -21,7 +24,7 @@ export const useStyles = () => {
     return {
       copyButton,
     };
-  }, []);
+  }, [euiTheme]);
 
   return cached;
 };

@@ -9,18 +9,14 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
-
 interface StylesDeps {
   height: number | undefined;
 }
 
 export const useStyles = ({ height = 500 }: StylesDeps) => {
-
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    // const { colors, border, font, size } = euiTheme;
-  
     const processTree: CSSObject = {
       height: `${height}px`,
       paddingTop: euiTheme.size.s,
@@ -34,7 +30,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       processTree,
       detailPanel,
     };
-  }, [height]);
+  }, [height, euiTheme]);
 
   return cached;
 };

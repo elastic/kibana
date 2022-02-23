@@ -7,17 +7,20 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
   const cached = useMemo(() => {
     const descriptionList: CSSObject = {
-      padding: '8px',
+      padding: euiTheme.size.s,
     };
 
     return {
       descriptionList,
     };
-  }, []);
+  }, [euiTheme]);
 
   return cached;
 };

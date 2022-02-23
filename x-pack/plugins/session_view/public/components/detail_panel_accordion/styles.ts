@@ -6,24 +6,27 @@
  */
 
 import { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
   const cached = useMemo(() => {
     const tabSection: CSSObject = {
-      padding: '16px',
+      padding: euiTheme.size.base,
     };
 
     const accordion: CSSObject = {
-      borderTop: '1px solid #D4DAE5',
+      borderTop: euiTheme.border.thin,
       '&:last-child': {
-        borderBottom: '1px solid #D4DAE5',
+        borderBottom: euiTheme.border.thin,
       },
     };
 
     const accordionButton: CSSObject = {
-      padding: '16px',
-      fontWeight: 700,
+      padding: euiTheme.size.base,
+      fontWeight: euiTheme.font.weight.bold,
     };
 
     return {
@@ -31,7 +34,7 @@ export const useStyles = () => {
       accordionButton,
       tabSection,
     };
-  }, []);
+  }, [euiTheme]);
 
   return cached;
 };

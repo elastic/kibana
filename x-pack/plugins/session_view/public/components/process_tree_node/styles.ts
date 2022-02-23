@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, transparentize } from '@elastic/eui';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { CSSObject } from '@emotion/react';
-
-const TREE_INDENT = 32;
 
 interface StylesDeps {
   depth: number;
@@ -29,31 +28,33 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
   const cached = useMemo(() => {
     const { colors, border, font, size } = euiTheme;
 
+    const TREE_INDENT = euiTheme.base * 2;
+
     const darkText: CSSObject = {
       color: colors.text,
     };
 
     const searchHighlight = `
-      background-color: yellow;
-      color: black;
+      background-color: ${colors.highlight};
+      color: ${colors.fullShade};
       border-radius: ${border.radius.medium};
     `;
 
     const children: CSSObject = {
       color: colors.ghost,
-      marginLeft: '16px',
-      paddingLeft: '8px',
-      borderLeft: `3px dotted ${colors.lightShade}`,
-      marginTop: '8px',
+      marginLeft: size.s,
+      paddingLeft: size.s,
+      borderLeft: border.editable,
+      marginTop: size.s,
       '&:after': {
         position: 'absolute',
         content: `''`,
         bottom: 0,
-        left: '-5px',
+        left: size.xs,
         backgroundColor: colors.lightShade,
-        width: '7px',
-        height: '3px',
-        borderRadius: '2px',
+        width: size.s,
+        height: size.xxs,
+        borderRadius: size.xxs,
       },
     };
 
@@ -73,18 +74,18 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
     };
 
     const getButtonStyle = (type: string): CSSObject => {
-      let background = 'rgba(170, 101, 86, 0.04)';
-      let borderStyle = '1px solid rgba(170, 101, 86, 0.48)';
+      let background = transparentize(theme.euiColorVis6, 0.04);
+      let borderStyle = `${border.width.thin} solid ${transparentize(theme.euiColorVis6, 0.48)}`;
 
       switch (type) {
         case ButtonType.alerts:
-          background = 'rgba(189, 39, 30, 0.04)';
-          borderStyle = '1px solid rgba(189, 39, 30, 0.48)';
+          background = transparentize(colors.dangerText, 0.04);
+          borderStyle = `${border.width.thin} solid ${transparentize(colors.dangerText, 0.48)}`;
           break;
         case ButtonType.userChanged:
         case ButtonType.output:
-          background = 'rgba(0, 119, 204, 0.04)';
-          borderStyle = '1px solid rgba(0, 119, 204, 0.48)';
+          background = transparentize(theme.euiColorVis1, 0.04);
+          borderStyle = `${border.width.thin} solid ${transparentize(theme.euiColorVis1, 0.48)}`;
           break;
       }
 
@@ -100,13 +101,13 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
      */
     const getHighlightColors = () => {
       let bgColor = 'none';
-      const hoverColor = '#6B5FC6';
+      const hoverColor = transparentize(colors.primary, 0.04);
       let borderColor = 'transparent';
 
       // TODO: alerts highlight colors
       if (hasAlerts) {
-        bgColor = 'rgba(189, 39, 30, 0.04)';
-        borderColor = 'rgba(189, 39, 30, 0.48)';
+        bgColor = transparentize(colors.danger, 0.04);
+        borderColor = transparentize(colors.danger, 0.48);
       }
 
       return { bgColor, borderColor, hoverColor };
@@ -122,7 +123,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
         marginTop: size.s,
       },
       '&:hover:before': {
-        opacity: 0.24,
         backgroundColor: hoverColor,
       },
       '&:before': {
@@ -131,7 +131,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
         pointerEvents: 'none',
         content: `''`,
         marginLeft: `-${depth * TREE_INDENT}px`,
-        borderLeft: `4px solid ${borderColor}`,
+        borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
         width: `calc(100% + ${depth * TREE_INDENT}px)`,
       },
@@ -143,8 +143,8 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       verticalAlign: 'middle',
       color: colors.mediumShade,
       wordBreak: 'break-all',
-      minHeight: '24px',
-      lineHeight: '24px',
+      minHeight: size.l,
+      lineHeight: size.l,
     };
 
     const workingDir: CSSObject = {
@@ -156,12 +156,12 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       width: '9px',
       height: '9px',
       marginLeft: '-11px',
-      marginTop: '8px',
+      marginTop: size.s,
     };
 
     const alertDetails: CSSObject = {
       padding: size.s,
-      border: `3px dotted ${colors.lightShade}`,
+      border: border.editable,
       borderRadius: border.radius.medium,
     };
 

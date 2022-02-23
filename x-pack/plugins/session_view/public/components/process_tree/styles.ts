@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
@@ -34,9 +34,14 @@ export const useStyles = () => {
       opacity: 0.1,
     };
 
+    const defaultSelected = transparentize(euiTheme.colors.primary, 0.008);
+    const alertSelected = transparentize(euiTheme.colors.danger, 0.008);
+
     return {
       scroller,
       selectionArea,
+      defaultSelected,
+      alertSelected,
     };
   }, [euiTheme]);
 
