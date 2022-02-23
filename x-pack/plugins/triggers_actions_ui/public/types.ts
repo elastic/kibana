@@ -205,7 +205,8 @@ type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
 };
 export const REQUIRED_ACTION_VARIABLES = ['params'] as const;
-export const OPTIONAL_ACTION_VARIABLES = ['state', 'context'] as const;
+export const CONTEXT_ACTION_VARIABLES = ['context'] as const;
+export const OPTIONAL_ACTION_VARIABLES = [...CONTEXT_ACTION_VARIABLES, 'state'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
@@ -224,6 +225,7 @@ export interface RuleType<
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'minimumScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
