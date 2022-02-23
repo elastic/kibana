@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { camelCase, snakeCase } from 'lodash';
-import { AlertTypeParams, MappedParams } from '../../types';
+import { snakeCase } from 'lodash';
+import { AlertTypeParams, MappedParams, MappedParamsProperties } from '../../types';
 import { SavedObjectAttribute } from '../../../../../../src/core/server';
 
-const FILTER_PARAMS_PREFIX = 'alert.attributes';
-
-export const MAPPED_PARAMS_PROPERTIES = ['risk_score', 'severity'];
+export const MAPPED_PARAMS_PROPERTIES: Array<keyof MappedParamsProperties> = [
+  'risk_score',
+  'severity',
+];
 
 /**
  * Returns the mapped_params object when given a params object.
@@ -22,7 +23,7 @@ export const getMappedParams = (params: AlertTypeParams) => {
   return Object.keys(params).reduce<MappedParams>((result, key) => {
     const snakeCaseKey = snakeCase(key);
 
-    if (MAPPED_PARAMS_PROPERTIES.includes(snakeCaseKey)) {
+    if (MAPPED_PARAMS_PROPERTIES.includes(snakeCaseKey as keyof MappedParamsProperties)) {
       result[snakeCaseKey] = params[key] as SavedObjectAttribute;
     }
 
@@ -37,20 +38,8 @@ export const getMappedParams = (params: AlertTypeParams) => {
  *
  * i.e.: 'alerts.attributes.params.riskScore' -> 'alerts.attributes.mapped_params.risk_score'
  */
-export const getModifiedFilter = (filter: string | undefined) => {
-  if (!filter) {
-    return filter;
-  }
-
-  return MAPPED_PARAMS_PROPERTIES.reduce((result, key) => {
-    const camelCaseParamsFilter = `${FILTER_PARAMS_PREFIX}.params.${snakeCase(key)}`;
-    const snakeCaseParamsFilter = `${FILTER_PARAMS_PREFIX}.params.${camelCase(key)}`;
-    const mappedParamsFilter = `${FILTER_PARAMS_PREFIX}.mapped_params.${key}`;
-
-    result = result.replace(camelCaseParamsFilter, mappedParamsFilter);
-    result = result.replace(snakeCaseParamsFilter, mappedParamsFilter);
-    return result;
-  }, filter);
+export const getModifiedFilter = (filter: string) => {
+  return filter.replace('.params.', '.mapped_params.');
 };
 
 /**
@@ -65,7 +54,7 @@ export const getModifiedField = (field: string | undefined) => {
 
   const sortFieldToReplace = `${snakeCase(field.replace('params.', ''))}`;
 
-  if (MAPPED_PARAMS_PROPERTIES.includes(sortFieldToReplace)) {
+  if (MAPPED_PARAMS_PROPERTIES.includes(sortFieldToReplace as keyof MappedParamsProperties)) {
     return `mapped_params.${sortFieldToReplace}`;
   }
 

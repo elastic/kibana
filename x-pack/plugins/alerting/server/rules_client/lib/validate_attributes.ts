@@ -9,6 +9,7 @@ import { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
 
 import mappings from '../../saved_objects/mappings.json';
+import { MAPPED_PARAMS_PROPERTIES, getModifiedFilter } from './mapped_params_utils';
 
 const astFunctionType = ['is', 'range', 'nested'];
 
@@ -98,6 +99,19 @@ export const validateFilterKueryNode = ({
       const firstAttribute = fieldNameSplit.length > 0 ? fieldNameSplit[0] : '';
       if (excludedFieldNames.includes(firstAttribute)) {
         throw new Error(`Filter is not supported on this field ${fieldName}`);
+      }
+
+      if (firstAttribute === 'params') {
+        const paramsFieldNameSplit = fieldName
+          .split('.')
+          .filter((fn: string) => !['alert', 'attributes', 'params'].includes(fn));
+
+        const paramsFirstAttribute = paramsFieldNameSplit[0] || '';
+        if (!MAPPED_PARAMS_PROPERTIES.includes(paramsFirstAttribute)) {
+          throw new Error(`Params filter is not support on this field ${fieldName}`);
+        }
+
+        ast.value = getModifiedFilter(ast.value);
       }
     }
   });

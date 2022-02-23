@@ -63,10 +63,12 @@ export interface AlertAggregations {
   ruleMutedStatus: { muted: number; unmuted: number };
 }
 
-export interface MappedParams extends SavedObjectAttributes {
+export interface MappedParamsProperties {
   risk_score?: number;
   severity?: string; // TODO: translate severity to number so it can sortable (20, 40, 60, 80)
 }
+
+export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
 export interface Alert<Params extends AlertTypeParams = never> {
   id: string;

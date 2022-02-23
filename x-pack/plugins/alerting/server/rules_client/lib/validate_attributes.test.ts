@@ -86,6 +86,27 @@ describe('Validate attributes', () => {
       ).not.toThrow();
     });
 
+    test('should NOT throw an error, when filter contains params with validate properties', () => {
+      expect(() =>
+        validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.risk_score > 50'
+          ),
+          excludedFieldNames,
+        })
+      ).not.toThrow();
+    });
+
+    test('should modify the filter when valid mapped params are used', () => {
+      const astFilter = esKuery.fromKueryExpression('alert.attributes.params.risk_score > 50');
+
+      expect(astFilter.arguments[0].value).toEqual('alert.attributes.params.risk_score');
+
+      validateFilterKueryNode({ astFilter, excludedFieldNames });
+
+      expect(astFilter.arguments[0].value).toEqual('alert.attributes.mapped_params.risk_score');
+    });
+
     test('should throw an error, when filter contains the field to exclude', () => {
       expect(() =>
         validateFilterKueryNode({
@@ -109,6 +130,19 @@ describe('Validate attributes', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Filter is not supported on this field alert.attributes.actions"`
+      );
+    });
+
+    test('should throw an error, when the filter contains a params property that is not validate', () => {
+      expect(() =>
+        validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.invalid > 50'
+          ),
+          excludedFieldNames,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Params filter is not support on this field alert.attributes.params.invalid"`
       );
     });
   });

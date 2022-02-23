@@ -80,7 +80,6 @@ import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_r
 import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 import {
   getMappedParams,
-  getModifiedFilter,
   getModifiedField,
   getModifiedSearchFields,
 } from './lib/mapped_params_utils';
@@ -649,7 +648,6 @@ export class RulesClient {
 
     options = {
       ...options,
-      filter: getModifiedFilter(options.filter),
       sortField: getModifiedField(options.sortField),
       searchFields: getModifiedSearchFields(options.searchFields),
     };

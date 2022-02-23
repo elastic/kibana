@@ -42,23 +42,9 @@ describe('getModifiedParams', () => {
 describe('getModifiedFilter', () => {
   it('converts params filters to mapped params filters', () => {
     // Make sure it works for both camel and snake case params
-    const filter = `
-        (alert.attributes.params.riskScore: 45
-        OR alert.attributes.params.risk_score: 45
-        OR alert.attributes.params.severity: medium
-        OR alert.attributes.params.invalid: blah)
-        AND alert.attributes.tags: "__internal_immutable:true"
-      `;
+    const filter = 'alert.attributes.params.risk_score: 45';
 
-    expect(getModifiedFilter(filter)).toEqual(
-      `
-        (alert.attributes.mapped_params.risk_score: 45
-        OR alert.attributes.mapped_params.risk_score: 45
-        OR alert.attributes.mapped_params.severity: medium
-        OR alert.attributes.params.invalid: blah)
-        AND alert.attributes.tags: "__internal_immutable:true"
-      `
-    );
+    expect(getModifiedFilter(filter)).toEqual('alert.attributes.mapped_params.risk_score: 45');
   });
 });
 
