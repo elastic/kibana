@@ -28,6 +28,7 @@ export type DynamicPage =
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
+  | 'integration_policy_upgrade'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'

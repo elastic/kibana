@@ -714,7 +714,7 @@ const IntegrationsBreadcrumb = memo<{
   policyName: string;
   pkgkey: string;
 }>(({ pkgTitle, policyName, pkgkey }) => {
-  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  useIntegrationsBreadcrumbs('integration_policy_upgrade', { policyName, pkgTitle, pkgkey });
   return null;
 });
 
