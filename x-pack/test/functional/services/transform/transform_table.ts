@@ -16,6 +16,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const ml = getService('ml');
 
   return new (class TransformTable {
     public async parseTransformTable() {
@@ -60,50 +61,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       }
 
       return rows;
-    }
-
-    async parseEuiDataGrid(tableSubj: string) {
-      const table = await testSubjects.find(`~${tableSubj}`);
-      const $ = await table.parseDomContent();
-      const rows = [];
-
-      // For each row, get the content of each cell and
-      // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
-        rows.push(
-          $(tr)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text().trim())
-        );
-      }
-
-      return rows;
-    }
-
-    async assertEuiDataGridColumnValues(
-      tableSubj: string,
-      column: number,
-      expectedColumnValues: string[]
-    ) {
-      await retry.tryForTime(2000, async () => {
-        // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.sort();
-
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Expected '${tableSubj}' column values to be '${expectedColumnValues}' (got '${uniqueColumnValues}')`
-        );
-      });
     }
 
     public async waitForRefreshButtonLoaded() {
@@ -384,7 +341,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
-      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformPivotPreview',
+        column,
+        values
+      );
     }
 
     public async assertTransformDeleteModalExists() {

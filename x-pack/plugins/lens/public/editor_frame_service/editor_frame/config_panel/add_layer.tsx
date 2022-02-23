@@ -107,9 +107,9 @@ export function AddLayerButton({
             title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
               defaultMessage: 'Select layer type',
             }),
-            items: supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
+            items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
               return {
-                tooltipContent,
+                toolTipContent,
                 disabled,
                 name: label,
                 icon: icon && <EuiIcon size="m" type={icon} />,
