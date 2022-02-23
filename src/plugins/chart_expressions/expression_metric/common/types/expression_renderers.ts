@@ -36,6 +36,7 @@ export interface MetricVisParam {
   palette?: CustomPaletteState;
   labels: LabelsConfig;
   style: MetricStyle;
+  colorFullBackground: boolean;
   autoScale?: boolean;
 }
 
