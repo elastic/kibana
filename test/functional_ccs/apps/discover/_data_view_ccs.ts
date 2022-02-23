@@ -16,9 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
-  // const defaultSettings = {
-  //   defaultIndex: 'logstash-*',
-  // };
 
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
@@ -36,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      // await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
