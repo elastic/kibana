@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiEmptyPromptProps } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
+
+import { DataViewIllustration } from '../assets';
 import { DocumentationLink } from './documentation_link';
 
-const Illustration = lazy(() => import('../assets/data_view_illustration'));
-
-interface Props {
+export interface Props {
   canCreateNewDataView: boolean;
   onClickCreate?: () => void;
   dataViewsDocLink?: string;
@@ -26,15 +27,15 @@ const createDataViewText = i18n.translate('sharedUX.noDataViewsPage.addDataViewT
   defaultMessage: 'Create Data View',
 });
 
-export const NoDataViewsComponent = ({
+// Using raw value because it is content dependent
+const MAX_WIDTH = 830;
+
+export const NoDataViews = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
   emptyPromptColor = 'plain',
 }: Props) => {
-  // Using raw value because it is content dependent
-  const maxWidth = '830px';
-
   const createNewButton = canCreateNewDataView && (
     <EuiButton
       onClick={onClickCreate}
@@ -51,14 +52,10 @@ export const NoDataViewsComponent = ({
       data-test-subj="noDataViewsPrompt"
       layout="horizontal"
       css={css`
-        max-width: ${maxWidth} !important;
+        max-width: ${MAX_WIDTH}px !important;
       `}
       color={emptyPromptColor}
-      icon={
-        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-          <Illustration />
-        </Suspense>
-      }
+      icon={<DataViewIllustration />}
       title={
         <h2>
           <FormattedMessage
@@ -76,14 +73,15 @@ export const NoDataViewsComponent = ({
         <p>
           <FormattedMessage
             id="sharedUX.noDataViews.dataViewExplanation"
-            defaultMessage="Kibana requires a data view to identify which data streams, indices, and index aliases you want to explore. A
-      data view can point to a specific index, for example, your log data from
-      yesterday, or all indices that contain your log data."
+            defaultMessage="Kibana requires a data view to identify which data streams,
+            indices, and index aliases you want to explore. A data view can point to a
+            specific index, for example, your log data from yesterday, or all indices
+            that contain your log data."
           />
         </p>
       }
       actions={createNewButton}
-      footer={dataViewsDocLink && <DocumentationLink documentationUrl={dataViewsDocLink} />}
+      footer={dataViewsDocLink && <DocumentationLink href={dataViewsDocLink} />}
     />
   );
 };

@@ -17,6 +17,7 @@ export const DataViewIllustration = () => {
   const dataViewIllustrationVerticalStripes = css`
     fill: ${colors.fullShade};
   `;
+
   const dataViewIllustrationDots = css`
     fill: ${colors.lightShade};
   `;
@@ -549,6 +550,3 @@ export const DataViewIllustration = () => {
     </svg>
   );
 };
-
-/* eslint-disable import/no-default-export */
-export default DataViewIllustration;

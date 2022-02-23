@@ -1,177 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<DocumentationLink /> is rendered correctly 1`] = `
-<DocumentationLink
-  documentationUrl="dummy"
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
->
-  <dl>
-    <EuiTitle
-      size="xxs"
-    >
-      <dt
-        className="euiTitle euiTitle--xxsmall eui-displayInline"
-      >
-        <FormattedMessage
-          defaultMessage="Want to learn more?"
-          id="sharedUX.noDataViews.learnMore"
-          values={Object {}}
-        >
-          Want to learn more?
-        </FormattedMessage>
-      </dt>
-    </EuiTitle>
-     
-    <dd
+<dl>
+  <EuiTitle
+    size="xxs"
+  >
+    <dt
       className="eui-displayInline"
     >
-      <EuiLink
-        external={true}
-        href="dummy"
-        target="_blank"
-      >
-        <a
-          className="euiLink euiLink--primary"
-          href="dummy"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <FormattedMessage
-            defaultMessage="Read documentation"
-            id="sharedUX.noDataViews.readDocumentation"
-            values={Object {}}
-          >
-            Read documentation
-          </FormattedMessage>
-          <EuiIcon
-            aria-label="External link"
-            className="euiLink__externalIcon"
-            size="s"
-            type="popout"
-          >
-            <span
-              aria-label="External link"
-              className="euiLink__externalIcon"
-              data-euiicon-type="popout"
-              size="s"
-            />
-          </EuiIcon>
-          <EuiScreenReaderOnly>
-            <span
-              className="euiScreenReaderOnly"
-            >
-              <EuiI18n
-                default="(opens in a new tab or window)"
-                token="euiLink.newTarget.screenReaderOnlyText"
-              >
-                (opens in a new tab or window)
-              </EuiI18n>
-            </span>
-          </EuiScreenReaderOnly>
-        </a>
-      </EuiLink>
-    </dd>
-  </dl>
-</DocumentationLink>
+      <FormattedMessage
+        defaultMessage="Want to learn more?"
+        id="sharedUX.noDataViews.learnMore"
+        values={Object {}}
+      />
+    </dt>
+  </EuiTitle>
+   
+  <dd
+    className="eui-displayInline"
+  >
+    <EuiLink
+      external={true}
+      href="dummy"
+      target="_blank"
+    >
+      <FormattedMessage
+        defaultMessage="Read documentation"
+        id="sharedUX.noDataViews.readDocumentation"
+        values={Object {}}
+      />
+    </EuiLink>
+  </dd>
+</dl>
 `;

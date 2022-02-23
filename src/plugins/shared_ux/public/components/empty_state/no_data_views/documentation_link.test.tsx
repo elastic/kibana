@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiLink, EuiTitle } from '@elastic/eui';
-import { DocumentationLink } from './documentation_link';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import { EuiLink, EuiTitle } from '@elastic/eui';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+
+import { DocumentationLink } from './documentation_link';
 
 describe('<DocumentationLink />', () => {
   test('is rendered correctly', () => {
-    const component = mountWithIntl(<DocumentationLink documentationUrl={'dummy'} />);
+    const component = shallowWithIntl(<DocumentationLink href={'dummy'} />);
     expect(component).toMatchSnapshot();
 
     expect(component.find('dl').length).toBe(1);
