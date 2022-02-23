@@ -21,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+
 import { useKibana } from '../../utils/kibana_react';
 
 import { loadAlerts as loadRules } from '../../../../triggers_actions_ui/public';
@@ -97,6 +99,15 @@ export function RulesPage() {
     loadObservabilityRules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+  ]);
+
   const rulesTableColumns = [
     {
       field: 'name',
