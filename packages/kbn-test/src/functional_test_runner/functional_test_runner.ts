@@ -78,12 +78,14 @@ export class FunctionalTestRunner {
 
       let reporter;
       let reporterOptions;
-      if (config.get('mochaOpts.dryRun', false)) {
+      if (config.get('mochaOpts.dryRun')) {
         // override default reporter for dryRun results
+        const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
         reporter = 'json';
         reporterOptions = {
-          output: Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json'),
+          output: targetFile,
         };
+        this.log.info(`Dry run results will be stored in ${targetFile}`);
       }
 
       const mocha = await setupMocha(
