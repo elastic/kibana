@@ -29,14 +29,12 @@ export const AnomalyJobSelectorEmptyState: FC<Props> = ({ jobsManagementPath, ca
       </h2>
     }
     body={
-      <>
-        <p>
-          <FormattedMessage
-            id="xpack.ml.mapsAnomaliesLayerEmptyPrompt.emptyPromptText"
-            defaultMessage="Anomaly detection enables you to find unusual behaviour in your geographic data. Create a job that uses the lat_long function, which is necessary for the maps anomaly layer."
-          />
-        </p>
-      </>
+      <p>
+        <FormattedMessage
+          id="xpack.ml.mapsAnomaliesLayerEmptyPrompt.emptyPromptText"
+          defaultMessage="Anomaly detection enables you to find unusual behaviour in your geographic data. Create a job that uses the lat_long function, which is necessary for the maps anomaly layer."
+        />
+      </p>
     }
     actions={
       <EuiButton
