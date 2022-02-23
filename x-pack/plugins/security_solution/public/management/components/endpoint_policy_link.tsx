@@ -19,7 +19,7 @@ import { useAppUrl } from '../../common/lib/kibana/hooks';
 export const EndpointPolicyLink = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
-    missingPolicies: Record<string, boolean>;
+    missingPolicies?: Record<string, boolean>;
   }
 >(({ policyId, children, onClick, missingPolicies = {}, ...otherProps }) => {
   const { getAppUrl } = useAppUrl();
