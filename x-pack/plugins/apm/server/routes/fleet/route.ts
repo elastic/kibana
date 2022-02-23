@@ -27,18 +27,18 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
 const hasFleetDataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/has_data',
+  endpoint: 'GET /internal/apm/fleet/has_apm_policies',
   options: { tags: [] },
-  handler: async ({ core, plugins }): Promise<{ hasData: boolean }> => {
+  handler: async ({ core, plugins }): Promise<{ hasApmPolicies: boolean }> => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
-      return { hasData: false };
+      return { hasApmPolicies: false };
     }
     const packagePolicies = await getApmPackgePolicies({
       core,
       fleetPluginStart,
     });
-    return { hasData: packagePolicies.total > 0 };
+    return { hasApmPolicies: packagePolicies.total > 0 };
   },
 });
 
