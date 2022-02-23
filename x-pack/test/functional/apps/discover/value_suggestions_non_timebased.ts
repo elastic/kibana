@@ -9,15 +9,20 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'settings', 'context', 'header']);
-  const kibanaServer = getService('kibanaServer');
 
   describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+      );
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,
       });
@@ -27,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 
