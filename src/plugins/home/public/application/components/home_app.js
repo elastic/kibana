@@ -26,7 +26,6 @@ export function HomeApp({ directories, solutions }) {
     getBasePath,
     addBasePath,
     environmentService,
-    telemetry,
     dataViewsService,
   } = getServices();
   const environment = environmentService.getEnvironment();
@@ -75,7 +74,6 @@ export function HomeApp({ directories, solutions }) {
               solutions={solutions}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
-              telemetry={telemetry}
               hasUserDataView={() => dataViewsService.hasUserDataView()}
             />
           </Route>

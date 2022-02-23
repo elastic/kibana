@@ -15,7 +15,6 @@
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../telemetry/tsconfig.json" }
+    { "path": "../usage_collection/tsconfig.json" }
   ]
 }

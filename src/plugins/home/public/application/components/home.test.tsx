@@ -12,7 +12,6 @@ import type { HomeProps } from './home';
 import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../services';
-import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
 import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
@@ -57,7 +56,6 @@ describe('home', () => {
         setItem: jest.fn(),
       },
       urlBasePath: 'goober',
-      telemetry: telemetryPluginMock.createStartContract(),
       addBasePath(url) {
         return `base_path/${url}`;
       },

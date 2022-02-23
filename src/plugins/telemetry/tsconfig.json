@@ -17,6 +17,7 @@
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
+    { "path": "../../plugins/home/tsconfig.json" },
     { "path": "../../plugins/kibana_react/tsconfig.json" },
     { "path": "../../plugins/kibana_utils/tsconfig.json" },
     { "path": "../../plugins/screenshot_mode/tsconfig.json" },
