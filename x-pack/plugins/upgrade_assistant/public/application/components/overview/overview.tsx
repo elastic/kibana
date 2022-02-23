@@ -115,8 +115,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             getFixIssuesStep({
               isComplete: isStepComplete('fix_issues'),
               setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
-              // TODO remove associated code
-              navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
             }),
             getLogsStep({
               isComplete: isStepComplete('logs'),
