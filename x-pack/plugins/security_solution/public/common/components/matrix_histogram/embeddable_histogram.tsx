@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 
 import { IconType } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -67,7 +67,7 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const { tabName } = useParams<{ tabName: string }>();
-
+  const location = useLocation();
   const tabsFilters = useMemo(() => {
     if (location.pathname.includes(SecurityPageName.hosts) && tabName === 'externalAlerts') {
       return filters.length > 0
@@ -85,7 +85,7 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
     }
 
     return filters;
-  }, [tabName, filters]);
+  }, [location.pathname, tabName, filters]);
 
   const customLensAttrs = useMemo(() => {
     const cfg = props.customLensAttrs;
