@@ -44,15 +44,15 @@ export const setupPublicBaseUrlConfigWarning = ({
   }
 
   const toast = notifications.toasts.addWarning({
-    title: i18n.translate('core.ui.publicBaseUrlWarning.configMissingTitle', {
-      defaultMessage: 'Configuration missing',
+    title: i18n.translate('core.ui.publicBaseUrlWarning.configRecommendedTitle', {
+      defaultMessage: 'Configuration recommended',
     }),
     text: mountReactNode(
       <>
         <p>
           <FormattedMessage
-            id="core.ui.publicBaseUrlWarning.configMissingDescription"
-            defaultMessage="{configKey} is missing and should be configured when running in a production environment. Some features may not behave correctly."
+            id="core.ui.publicBaseUrlWarning.configRecommendedDescription"
+            defaultMessage="In a production environment, it is recommended that you configure {configKey}."
             values={{
               configKey: <code>server.publicBaseUrl</code>,
             }}
@@ -60,7 +60,7 @@ export const setupPublicBaseUrlConfigWarning = ({
           <a href={`${docLinks.links.settings}#server-publicBaseUrl`} target="_blank">
             <FormattedMessage
               id="core.ui.publicBaseUrlWarning.seeDocumentationLinkLabel"
-              defaultMessage="See the documentation."
+              defaultMessage="Refer to the documentation."
             />
           </a>
         </p>
