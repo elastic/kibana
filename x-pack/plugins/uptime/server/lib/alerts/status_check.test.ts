@@ -779,20 +779,33 @@ describe('status check alert', () => {
       `);
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(4);
       expect(alertInstanceMock.scheduleActions.mock.calls).toMatchInlineSnapshot(`
+      Array [
         Array [
-          Array [
-            "xpack.uptime.alerts.actionGroups.monitorStatus",
-          ],
-          Array [
-            "xpack.uptime.alerts.actionGroups.monitorStatus",
-          ],
-          Array [
-            "xpack.uptime.alerts.actionGroups.monitorStatus",
-          ],
-          Array [
-            "xpack.uptime.alerts.actionGroups.monitorStatus",
-          ],
-        ]
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
+          Object {
+            "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
+          },
+        ],
+        Array [
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
+          Object {
+            "reason": "Foo from fairbanks 35 days availability is 98.03%. Alert when < 99.34%.",
+          },
+        ],
+        Array [
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
+          Object {
+            "reason": "Unreliable from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
+          },
+        ],
+        Array [
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
+          Object {
+            "reason": "no-name from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
+          },
+        ],
+      ]
+
       `);
       expect(mockGetter).not.toHaveBeenCalled();
       expect(mockAvailability).toHaveBeenCalledTimes(1);
