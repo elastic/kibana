@@ -8,7 +8,6 @@
 import React, { ReactElement } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
@@ -26,6 +25,7 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
+import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -447,9 +447,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
-    const dsl = searchSource.getSearchRequestBody();
-
-    const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
@@ -462,7 +459,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
-&requestBody=${risonDsl}\
+&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &requestType=${requestType}\
 &token=${refreshToken}`;
   }
