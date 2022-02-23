@@ -12,7 +12,7 @@ import '../../common/mock/match_media';
 import { Title } from './title';
 
 describe('Title', () => {
-  it('does not renders the badge if the release is ga', () => {
+  it('does not render the badge if the release is ga', () => {
     render(<Title title="Test title" releasePhase="ga" />);
 
     expect(screen.getByText('Test title')).toBeInTheDocument();
@@ -20,14 +20,14 @@ describe('Title', () => {
     expect(screen.queryByText('Technical preview')).toBeFalsy();
   });
 
-  it('does renders the beta badge', () => {
+  it('does render the beta badge', () => {
     render(<Title title="Test title" releasePhase="beta" />);
 
     expect(screen.getByText('Test title')).toBeInTheDocument();
     expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 
-  it('does renders the experimental badge', () => {
+  it('does render the experimental badge', () => {
     render(<Title title="Test title" releasePhase="experimental" />);
 
     expect(screen.getByText('Test title')).toBeInTheDocument();

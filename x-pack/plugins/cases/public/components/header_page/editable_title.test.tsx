@@ -192,7 +192,7 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 
-  it('does not submits the title when the length is longer than 64 characters', () => {
+  it('does not submit the title when the length is longer than 64 characters', () => {
     const longTitle =
       'This is a title that should not be saved as it is longer than 64 characters.';
 
@@ -228,7 +228,7 @@ describe('EditableTitle', () => {
       appMock = createAppMockRenderer();
     });
 
-    it('does not renders the badge if the release is ga', () => {
+    it('does not render the badge if the release is ga', () => {
       const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
 
       expect(renderResult.getByText('Test title')).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe('EditableTitle', () => {
       expect(renderResult.queryByText('Technical preview')).toBeFalsy();
     });
 
-    it('does renders the beta badge', () => {
+    it('does render the beta badge', () => {
       appMock = createAppMockRenderer({ releasePhase: 'beta' });
       const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
 
@@ -244,7 +244,7 @@ describe('EditableTitle', () => {
       expect(renderResult.getByText('Beta')).toBeInTheDocument();
     });
 
-    it('does renders the experimental badge', () => {
+    it('does render the experimental badge', () => {
       appMock = createAppMockRenderer({ releasePhase: 'experimental' });
       const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
 

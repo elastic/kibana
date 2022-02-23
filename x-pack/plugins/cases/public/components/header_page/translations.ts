@@ -38,5 +38,5 @@ export const BETA_LABEL = i18n.translate('xpack.cases.header.badge.betaLabel', {
 
 export const BETA_DESC = i18n.translate('xpack.cases.header.badge.betaDesc', {
   defaultMessage:
-    'his feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+    'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
 });

@@ -146,7 +146,7 @@ describe('HeaderPage', () => {
       appMock = createAppMockRenderer();
     });
 
-    it('does not renders the badge if the release is ga', () => {
+    it('does not render the badge if the release is ga', () => {
       const renderResult = appMock.render(<HeaderPage title="Test title" />);
 
       expect(renderResult.getByText('Test title')).toBeInTheDocument();
@@ -154,7 +154,7 @@ describe('HeaderPage', () => {
       expect(renderResult.queryByText('Technical preview')).toBeFalsy();
     });
 
-    it('does renders the beta badge', () => {
+    it('does render the beta badge', () => {
       appMock = createAppMockRenderer({ releasePhase: 'beta' });
       const renderResult = appMock.render(<HeaderPage title="Test title" />);
 
@@ -162,7 +162,7 @@ describe('HeaderPage', () => {
       expect(renderResult.getByText('Beta')).toBeInTheDocument();
     });
 
-    it('does renders the experimental badge', () => {
+    it('does render the experimental badge', () => {
       appMock = createAppMockRenderer({ releasePhase: 'experimental' });
       const renderResult = appMock.render(<HeaderPage title="Test title" />);
 
