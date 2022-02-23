@@ -10,25 +10,13 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
-
-export interface Props
-  extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType'> {
+export interface Props extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType'> {
   label: string;
 }
-// public/components/toolbar/solution_toolbar/button/primary.tsx
 
-export const SolutionToolbarButton = ({
-  label,
-  ...rest
-}: Props) => {
-
+export const SolutionToolbarButton = ({ label, ...rest }: Props) => {
   return (
-    <EuiButton
-      size="m"
-      color="primary"
-      fill={true}
-      {...rest}
-    >
+    <EuiButton size="m" color="primary" fill={true} {...rest}>
       {label}
     </EuiButton>
   );

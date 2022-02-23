@@ -21,5 +21,5 @@ export default {
 };
 
 export const Component = () => {
-  return <SolutionToolbarButton label={'Primary Action'} iconType="apps"/>;
+  return <SolutionToolbarButton label={'Primary Action'} iconType="apps" />;
 };
