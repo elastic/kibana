@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { Logger, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { LogIndexReference as LogSourceLogIndexReference } from '../../../common/log_sources';
 import { LogIndexReference, LogView, LogViewAttributes } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { InfraSource, InfraSources } from '../../lib/sources';
 import {
+  extractLogViewSavedObjectReferences,
   logViewSavedObjectName,
   resolveLogViewSavedObjectRefences,
 } from '../../saved_objects/log_view';
@@ -44,22 +45,29 @@ export class LogViewsClient implements ILogViewsClient {
       );
   }
 
+  public async putLogView(
+    logViewId: string,
+    logViewAttributes: LogViewAttributes
+  ): Promise<LogView> {
+    this.logger.debug(`Trying to store log view "${logViewId}"...`);
+
+    const { attributes, references } = extractLogViewSavedObjectReferences(logViewAttributes);
+
+    const savedObject = await this.savedObjectsClient.create(logViewSavedObjectName, attributes, {
+      id: logViewId,
+      overwrite: true,
+      references,
+    });
+
+    return getLogViewFromSavedObject(savedObject);
+  }
+
   private async getSavedLogView(logViewId: string): Promise<LogView> {
     this.logger.debug(`Trying to load stored log view "${logViewId}"...`);
 
     const savedObject = await this.savedObjectsClient.get(logViewSavedObjectName, logViewId);
-    const logViewSavedObject = decodeOrThrow(logViewSavedObjectRT)(savedObject);
 
-    return {
-      id: logViewSavedObject.id,
-      version: logViewSavedObject.version,
-      updatedAt: logViewSavedObject.updated_at,
-      origin: 'stored',
-      attributes: resolveLogViewSavedObjectRefences(
-        logViewSavedObject.attributes,
-        savedObject.references
-      ),
-    };
+    return getLogViewFromSavedObject(savedObject);
   }
 
   private async getInternalLogView(logViewId: string): Promise<LogView> {
@@ -93,6 +101,21 @@ export class LogViewsClient implements ILogViewsClient {
     };
   }
 }
+
+const getLogViewFromSavedObject = (savedObject: SavedObject<unknown>): LogView => {
+  const logViewSavedObject = decodeOrThrow(logViewSavedObjectRT)(savedObject);
+
+  return {
+    id: logViewSavedObject.id,
+    version: logViewSavedObject.version,
+    updatedAt: logViewSavedObject.updated_at,
+    origin: 'stored',
+    attributes: resolveLogViewSavedObjectRefences(
+      logViewSavedObject.attributes,
+      savedObject.references
+    ),
+  };
+};
 
 export const getAttributesFromSourceConfiguration = ({
   configuration: { name, description, logIndices, logColumns },

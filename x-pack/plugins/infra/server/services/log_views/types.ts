@@ -28,4 +28,5 @@ export interface LogViewsServiceStart {
 
 export interface ILogViewsClient {
   getLogView(logViewId: string): Promise<LogView>;
+  putLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<LogView>;
 }

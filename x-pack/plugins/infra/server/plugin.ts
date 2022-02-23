@@ -36,7 +36,7 @@ import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import { initGetLogViewRoute } from './routes/log_views';
+import { initLogViewRoutes } from './routes/log_views';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
@@ -188,7 +188,7 @@ export class InfraServerPlugin
     ]);
 
     initInfraServer(this.libs);
-    initGetLogViewRoute({
+    initLogViewRoutes({
       framework,
       getLogViewsService: async () => (await core.getStartServices())[2].logViews,
     });
