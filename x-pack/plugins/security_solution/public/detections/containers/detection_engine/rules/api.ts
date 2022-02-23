@@ -24,7 +24,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 import {
   RulesSchema,
-  GetRuleExecutionEventsResponse,
+  GetAggregateRuleExecutionEventsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
 
 import {
@@ -374,20 +374,30 @@ export const exportRules = async ({
  * Fetch rule execution events (e.g. status changes) from Event Log.
  *
  * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param start string Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
+ * @param end string End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
+ * @param filters string Filters to apply to the search in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.total_alerts_detected > 100`)
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
  */
 export const fetchRuleExecutionEvents = async ({
   ruleId,
+  start,
+  end,
+  filters,
   signal,
 }: {
   ruleId: string;
+  start: string;
+  end: string;
+  filters?: string;
   signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
+}): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
-  return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
+  return KibanaServices.get().http.fetch<GetAggregateRuleExecutionEventsResponse>(url, {
     method: 'GET',
+    query: { start, end, filters },
     signal,
   });
 };

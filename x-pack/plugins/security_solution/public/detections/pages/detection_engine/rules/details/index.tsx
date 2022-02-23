@@ -104,10 +104,10 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../components/rules/rule_execution_status';
-import { FailureHistory } from './failure_history';
 
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
+import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -133,7 +133,7 @@ const StyledFullHeightContainer = styled.div`
 
 enum RuleDetailTabs {
   alerts = 'alerts',
-  failures = 'failures',
+  executionLogs = 'executionLogs',
   exceptions = 'exceptions',
 }
 
@@ -151,10 +151,10 @@ const ruleDetailTabs = [
     dataTestSubj: 'exceptionsTab',
   },
   {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
+    id: RuleDetailTabs.executionLogs,
+    name: i18n.RULE_EXECUTION_LOGS,
     disabled: false,
-    dataTestSubj: 'failureHistoryTab',
+    dataTestSubj: 'executionLogsTab',
   },
 ];
 
@@ -804,7 +804,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               onRuleChange={refreshRule}
             />
           )}
-          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory ruleId={ruleId} />}
+          {ruleDetailTab === RuleDetailTabs.executionLogs && <ExecutionLogTable ruleId={ruleId} />}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
 

@@ -12,7 +12,6 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 import { useRuleExecutionEvents } from './use_rule_execution_events';
 
 import * as api from './api';
@@ -45,9 +44,18 @@ describe('useRuleExecutionEvents', () => {
   };
 
   const render = () =>
-    renderHook(() => useRuleExecutionEvents(SOME_RULE_ID), {
-      wrapper: createReactQueryWrapper(),
-    });
+    renderHook(
+      () =>
+        useRuleExecutionEvents({
+          ruleId: SOME_RULE_ID,
+          start: 'now-30',
+          end: 'now',
+          filters: '',
+        }),
+      {
+        wrapper: createReactQueryWrapper(),
+      }
+    );
 
   it('calls the API via fetchRuleExecutionEvents', async () => {
     const fetchRuleExecutionEvents = jest.spyOn(api, 'fetchRuleExecutionEvents');
@@ -77,13 +85,36 @@ describe('useRuleExecutionEvents', () => {
     expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(true);
     expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual([
-      {
-        date: '2021-12-29T10:42:59.996Z',
-        status: RuleExecutionStatus.succeeded,
-        message: 'Rule executed successfully',
-      },
-    ]);
+    expect(result.current.data).toEqual({
+      events: [
+        {
+          kibana: {
+            task: {
+              schedule_delay: 13980000000,
+            },
+            alert: {
+              rule: {
+                execution: {
+                  metrics: {
+                    total_alerts_created: 0,
+                    total_alerts_detected: 0,
+                    total_indexing_duration_ms: 0,
+                    total_search_duration_ms: 9,
+                  },
+                  status: 'succeeded',
+                },
+              },
+            },
+          },
+          event: {
+            duration: 2065000000,
+          },
+          message: 'succeeded',
+          '@timestamp': '2022-02-01T05:51:27.143Z',
+        },
+      ],
+      maxEvents: 1,
+    });
   });
 
   it('handles exceptions from the API', async () => {

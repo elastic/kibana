@@ -13,6 +13,14 @@ export const GetRuleExecutionEventsRequestParams = t.exact(
   })
 );
 
+export const GetRuleExecutionEventsQueryParams = t.exact(
+  t.type({
+    start: t.string,
+    end: t.string,
+    filters: t.union([t.string, t.undefined]),
+  })
+);
+
 export type GetRuleExecutionEventsRequestParams = t.TypeOf<
   typeof GetRuleExecutionEventsRequestParams
 >;
