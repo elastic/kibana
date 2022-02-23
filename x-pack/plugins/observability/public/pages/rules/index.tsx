@@ -199,7 +199,13 @@ export function RulesPage() {
           <>{i18n.translate('xpack.observability.rulesTitle', { defaultMessage: 'Rules' })} </>
         ),
         rightSideItems: [
-          <EuiButton key="create-alert" data-test-subj="createAlertButton" fill onClick={() => {}}>
+          <EuiButton
+            iconType="plusInCircle"
+            key="create-alert"
+            data-test-subj="createRuleButton"
+            fill
+            onClick={() => {}}
+          >
             <FormattedMessage
               id="xpack.observability.rules.addRuleButtonLabel"
               defaultMessage="Create rule"
