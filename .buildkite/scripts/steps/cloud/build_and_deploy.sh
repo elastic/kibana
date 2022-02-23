@@ -65,9 +65,6 @@ else
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
     ' > /tmp/deploy.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
-  echo '--- Get cloud deployment info'
-  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
 fi
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
@@ -87,6 +84,4 @@ EOF
 
 buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_KIBANA_URL" ${CLOUD_DEPLOYMENT_KIBANA_URL}
 buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_ELASTICSEARCH_URL" ${CLOUD_DEPLOYMENT_ELASTICSEARCH_URL}
-buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_USERNAME" ${CLOUD_DEPLOYMENT_USERNAME}
-buildkite-agent meta-data set "META_CLOUD_DEPLOYMENT_PASSWORD" ${CLOUD_DEPLOYMENT_PASSWORD}
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"

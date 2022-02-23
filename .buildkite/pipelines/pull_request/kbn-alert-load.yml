@@ -4,5 +4,5 @@ steps:
     agents:
       queue: n2-2
     # depends_on: build
-    depends_on: deploy_cloud
+    # depends_on: deploy_cloud
     timeout_in_minutes: 60
