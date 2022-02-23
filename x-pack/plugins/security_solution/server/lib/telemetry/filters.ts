@@ -44,6 +44,7 @@ const allowlistProcessFields: AllowlistFields = {
 
 // Allow list for event-related fields, which can also be nested under events[]
 const allowlistBaseEventFields: AllowlistFields = {
+  signal_id: true,
   dll: {
     name: true,
     path: true,
