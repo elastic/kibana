@@ -11977,7 +11977,7 @@
     "xpack.fleet.breadcrumbs.integrationsAppTitle": "集成",
     "xpack.fleet.breadcrumbs.policiesPageTitle": "代理策略",
     "xpack.fleet.breadcrumbs.settingsPageTitle": "设置",
-    "xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle": "升级集成 ",
+    "xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle": "升级集成 ",
     "xpack.fleet.config.invalidPackageVersionError": "必须是有效的 semver 或关键字 `latest`",
     "xpack.fleet.copyAgentPolicy.confirmModal.cancelButtonLabel": "取消",
     "xpack.fleet.copyAgentPolicy.confirmModal.confirmButtonLabel": "复制策略",

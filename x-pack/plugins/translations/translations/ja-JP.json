@@ -11955,7 +11955,7 @@
     "xpack.fleet.breadcrumbs.integrationsAppTitle": "統合",
     "xpack.fleet.breadcrumbs.policiesPageTitle": "エージェントポリシー",
     "xpack.fleet.breadcrumbs.settingsPageTitle": "設定",
-    "xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle": "統合のアップグレード ",
+    "xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle": "統合のアップグレード ",
     "xpack.fleet.config.invalidPackageVersionError": "有効なサーバーまたはキーワード「latest」でなければなりません",
     "xpack.fleet.copyAgentPolicy.confirmModal.cancelButtonLabel": "キャンセル",
     "xpack.fleet.copyAgentPolicy.confirmModal.confirmButtonLabel": "ポリシーの複製",
