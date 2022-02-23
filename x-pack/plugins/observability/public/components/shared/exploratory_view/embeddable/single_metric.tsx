@@ -21,7 +21,7 @@ export interface SingleMetricOptions {
 }
 
 type SingleMetricProps = SingleMetricOptions & {
-  children: JSX.Element;
+  children?: JSX.Element;
 };
 
 export function SingleMetric({
@@ -41,6 +41,7 @@ export function SingleMetric({
 
   return (
     <LensWrapper
+      data-test-subj="single-metric-wrapper"
       gutterSize="none"
       $alignLnsMetric={alignLnsMetric}
       $disableBorder={disableBorder}
@@ -48,10 +49,19 @@ export function SingleMetric({
     >
       {metricIcon && (
         <EuiFlexItem style={{ justifyContent: 'space-evenly', paddingTop: '24px' }} grow={false}>
-          <EuiIcon type={metricIcon} size="l" color={metricIconColor} />
+          <EuiIcon
+            type={metricIcon}
+            size="l"
+            color={metricIconColor}
+            data-test-subj="single-metric-icon"
+          />
         </EuiFlexItem>
       )}
-      <EuiFlexItem style={{ maxWidth: `calc(${metricMaxWidth})` }} grow={1}>
+      <EuiFlexItem
+        style={{ maxWidth: `calc(${metricMaxWidth})` }}
+        grow={1}
+        data-test-subj="single-metric"
+      >
         {children}
       </EuiFlexItem>
       {metricPostfix && (
@@ -63,6 +73,7 @@ export function SingleMetric({
             minWidth: 0,
           }}
           grow={false}
+          data-test-subj="single-metric-postfix"
         >
           <StyledTitle size="m">
             <h3>{metricPostfix}</h3>

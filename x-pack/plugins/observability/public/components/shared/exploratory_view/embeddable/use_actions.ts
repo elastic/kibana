@@ -29,14 +29,14 @@ export function useActions({
   timeRange,
   withActions,
 }: {
-  appId?: 'security' | 'observability';
+  appId?: 'securitySolutionUI' | 'observability';
   attributes: AllSeries;
+  lensAttributes: any;
   reportType: ReportViewType;
   setAddToCaseOpen: (val: boolean) => void;
   setIsSaveOpen: (val: boolean) => void;
-  withActions?: boolean | ActionTypes[];
   timeRange: { from: string; to: string };
-  lensAttributes: any;
+  withActions?: boolean | ActionTypes[];
 }) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 

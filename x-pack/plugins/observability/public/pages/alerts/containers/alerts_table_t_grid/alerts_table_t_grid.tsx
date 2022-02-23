@@ -72,7 +72,7 @@ interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
-  kuery: string;
+  kuery?: string;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -189,14 +189,14 @@ function ObservabilityActions({
             timelines.getAddToExistingCaseButton({
               event,
               casePermissions,
-              appId: observabilityFeatureId,
+              appId: observabilityAppId,
               owner: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),
             timelines.getAddToNewCaseButton({
               event,
               casePermissions,
-              appId: observabilityFeatureId,
+              appId: observabilityAppId,
               owner: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),
@@ -385,7 +385,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
-        query: kuery,
+        query: kuery ?? '',
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),

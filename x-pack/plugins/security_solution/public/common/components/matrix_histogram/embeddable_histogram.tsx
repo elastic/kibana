@@ -13,10 +13,11 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
-import { SecurityPageName } from '../../../../common/constants';
+import { APP_ID, SecurityPageName } from '../../../../common/constants';
 import { filterHostExternalAlertData, filterNetworkExternalAlertData } from './utils';
 import { StartServices } from '../../../types';
 import { TypedLensByValueInput } from '../../../../../lens/public';
+import { ActionTypes, ReportViewType, SeriesUrl } from '../../../../../observability/public';
 
 export interface SingleMetricOptions {
   alignLnsMetric?: string;
@@ -34,13 +35,14 @@ type AppId = 'securitySolutionUI' | 'observability';
 const configs = {
   alignLnsMetric: 'flex-start',
   appId: 'securitySolutionUI' as AppId,
+  attributes: [{ dataType: 'security' }] as unknown as SeriesUrl[],
   disableBorder: true,
   disableShadow: true,
   customHeight: '100%',
   isSingleMetric: true,
-  owner: 'securitySolution',
-  reportType: 'kpi-over-time',
-  withActions: ['save', 'addToCase', 'openInLens'],
+  owner: APP_ID,
+  reportType: 'kpi-over-time' as ReportViewType,
+  withActions: ['save', 'addToCase', 'openInLens'] as ActionTypes[],
 };
 
 interface EmbeddableHistogramProps {
@@ -56,7 +58,7 @@ interface EmbeddableHistogramProps {
 export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   const { observability } = useKibana<StartServices>().services;
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
-  const { patternList, dataViewId } = useSourcererDataView();
+  const { dataViewId, selectedPatterns } = useSourcererDataView();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -94,9 +96,12 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
     };
   }, [props.customLensAttrs, query, tabsFilters, dataViewId]);
 
-  const indexPatterns = patternList?.join(',');
-
-  const mergedProps = { ...configs, ...props, indexPatterns, customLensAttrs };
+  const mergedProps = {
+    ...configs,
+    ...props,
+    indexPatterns: selectedPatterns.join(','),
+    customLensAttrs,
+  };
   return <ExploratoryViewEmbeddable {...mergedProps} />;
 };
 
