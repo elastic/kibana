@@ -1335,13 +1335,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.exists('lensToggleAutoApply');
     },
 
-    async disableAutoApply() {
-      return testSubjects.click('lensToggleAutoApply');
+    enableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'check');
     },
 
-    async getAutoApplyEnabled() {
-      const toggleSwitch = await testSubjects.find('lensToggleAutoApply');
-      return (await toggleSwitch.getAttribute('aria-checked')) === 'true';
+    disableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'uncheck');
+    },
+
+    getAutoApplyEnabled() {
+      return testSubjects.isEuiSwitchChecked('lensToggleAutoApply');
+    },
+
+    async applyChanges() {
+      const applyButtonSelector = 'lensApplyChanges';
+      await testSubjects.waitForEnabled(applyButtonSelector);
+      await testSubjects.click(applyButtonSelector);
     },
   });
 }
