@@ -178,7 +178,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           >
             <FormattedMessage
               id="xpack.ingestPipelines.createFromCSV.docsButtonLabel"
-              defaultMessage="Create pipeline from CSV docs"
+              defaultMessage="CSV to pipeline docs"
             />
           </EuiButtonEmpty>,
         ]}
