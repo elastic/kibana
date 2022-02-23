@@ -12,10 +12,13 @@ import React, { FunctionComponent } from 'react';
 
 import { EuiPageTemplateProps } from '@elastic/eui';
 
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav/solution_nav';
+import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
-import { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from '../no_data';
-import { NoDataPageProps } from './no_data_page';
+import {
+  NoDataPageProps,
+  NoDataConfigPage,
+  NoDataConfigPageWithSolutionNavBar,
+} from './no_data_page';
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
 /**
