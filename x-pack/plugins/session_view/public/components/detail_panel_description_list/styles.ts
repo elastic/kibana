@@ -17,8 +17,22 @@ export const useStyles = () => {
       padding: euiTheme.size.s,
     };
 
+    const tabListTitle = {
+      width: '40%',
+      display: 'flex',
+      alignItems: 'center',
+    };
+
+    const tabListDescription = {
+      width: '60%',
+      display: 'flex',
+      alignItems: 'center',
+    };
+
     return {
       descriptionList,
+      tabListTitle,
+      tabListDescription,
     };
   }, [euiTheme]);
 
