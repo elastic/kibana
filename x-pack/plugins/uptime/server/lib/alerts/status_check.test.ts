@@ -311,9 +311,6 @@ describe('status check alert', () => {
       expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
-          Object {
-            "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
-          },
         ]
       `);
     });
