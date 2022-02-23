@@ -24,6 +24,8 @@ import {
 import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import './field_search.scss';
+
 export interface Props {
   onSearchChange: (value: string) => void;
   searchValue?: string;
@@ -86,7 +88,7 @@ export function FieldSearch({
       <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
         <EuiFilterGroup>
           <EuiPopover
-            panelClassName="euiFilterGroup__popoverPanel"
+            panelClassName="euiFilterGroup__popoverPanel presFilterByType__panel"
             panelPaddingSize="none"
             display="block"
             isOpen={isPopoverOpen}
