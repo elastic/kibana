@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { findAccessorOrFail } from '../../../../visualizations/common/utils';
 import type { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import type { DatatableColumn } from '../../../../expressions';
+import { validateOptions } from '../../../../charts/common';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -56,16 +57,6 @@ const validateAccessor = (
 ) => {
   if (accessor && typeof accessor === 'string') {
     findAccessorOrFail(accessor, columns);
-  }
-};
-
-const validateOptions = (
-  value: string,
-  availableOptions: Record<string, string>,
-  getErrorMessage: () => string
-) => {
-  if (!Object.values(availableOptions).includes(value)) {
-    throw new Error(getErrorMessage());
   }
 };
 

@@ -20,6 +20,7 @@ import {
 import { getFormatService } from '../format_service';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { TagcloudRendererConfig } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 
 import './tag_cloud.scss';
 
@@ -60,15 +61,15 @@ const getColor = (
 };
 
 const ORIENTATIONS = {
-  single: {
+  [Orientation.SINGLE]: {
     endAngle: 0,
     angleCount: 360,
   },
-  'right angled': {
+  [Orientation.RIGHT_ANGLED]: {
     endAngle: 90,
     angleCount: 2,
   },
-  multiple: {
+  [Orientation.MULTIPLE]: {
     endAngle: -90,
     angleCount: 12,
   },
@@ -210,7 +211,7 @@ export const TagCloudChart = ({
               maxFontSize={visParams.maxFontSize}
               spiral="archimedean"
               data={tagCloudData}
-              weightFn={scale === 'square root' ? 'squareRoot' : scale}
+              weightFn={scale === ScaleOptions.SQUARE_ROOT ? 'squareRoot' : scale}
               outOfRoomCallback={() => {
                 setWarning(true);
               }}

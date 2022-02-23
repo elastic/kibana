@@ -10,3 +10,15 @@ export const PLUGIN_ID = 'expressionTagcloud';
 export const PLUGIN_NAME = 'expressionTagcloud';
 
 export const EXPRESSION_NAME = 'tagcloud';
+
+export const ScaleOptions = {
+  LINEAR: 'linear',
+  LOG: 'log',
+  SQUARE_ROOT: 'square root',
+} as const;
+
+export const Orientation = {
+  SINGLE: 'single',
+  RIGHT_ANGLED: 'right angled',
+  MULTIPLE: 'multiple',
+} as const;
