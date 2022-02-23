@@ -76,7 +76,7 @@ export const OptionsListEditor = ({
   const { dataView, fieldName } = state;
   return (
     <>
-      <EuiFormRow fullWidth label={OptionsListStrings.editor.getDataViewTitle()}>
+      <EuiFormRow label={OptionsListStrings.editor.getDataViewTitle()}>
         <DataViewPicker
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
@@ -91,7 +91,7 @@ export const OptionsListEditor = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth label={OptionsListStrings.editor.getFieldTitle()}>
+      <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) =>
             (field.aggregatable && field.type === 'string') || field.type === 'boolean'
@@ -105,7 +105,7 @@ export const OptionsListEditor = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth>
+      <EuiFormRow>
         <EuiSwitch
           label={OptionsListStrings.editor.getAllowMultiselectTitle()}
           checked={!state.singleSelect}
