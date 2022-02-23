@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { services as kibanaCommonServices } from '../../../../test/common/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
-
+import { services as kibanaCommonServices } from '../../../../test/common/services';
+import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 
 export const services = {
   ...kibanaCommonServices,
-  supertest: kibanaApiIntegrationServices.supertest,
-
+  infraLogViews: InfraLogViewsServiceProvider,
   spaces: SpacesServiceProvider,
+  supertest: kibanaApiIntegrationServices.supertest,
 };

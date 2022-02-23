@@ -236,7 +236,7 @@ export class InfraSources {
   }
 }
 
-const mergeSourceConfiguration = (
+export const mergeSourceConfiguration = (
   first: InfraSourceConfiguration,
   ...others: InfraStaticSourceConfiguration[]
 ) =>
