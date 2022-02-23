@@ -67,8 +67,6 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
 
   editField: (fieldName?: string) => void;
 
-  createNewDataView: () => void;
-
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -89,7 +87,6 @@ export function DiscoverSidebarComponent({
   fieldCounts,
   fieldFilter,
   documents,
-  indexPatternList,
   onAddField,
   onAddFilter,
   onRemoveField,
@@ -97,14 +94,11 @@ export function DiscoverSidebarComponent({
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
-  useFlyout = false,
   onEditRuntimeField,
-  onChangeIndexPattern,
   setFieldEditorRef,
   closeFlyout,
   editField,
   viewMode,
-  createNewDataView,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);

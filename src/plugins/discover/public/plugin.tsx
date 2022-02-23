@@ -55,7 +55,6 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { DataViewPickerStart } from '../../../plugins/data_view_picker/public';
 import { useDiscoverServices } from './utils/use_discover_services';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from './constants';
@@ -161,7 +160,6 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
-  dataViewEditor: DataViewEditorStart;
   dataViewPicker: DataViewPickerStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;

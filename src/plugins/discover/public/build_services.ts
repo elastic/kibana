@@ -40,7 +40,6 @@ import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DataViewPickerStart } from '../../data_view_picker/public';
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
-import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 
 export interface HistoryLocationState {
   referrer: string;
@@ -69,7 +68,6 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
-  dataViewEditor: DataViewEditorStart;
   DataViewPickerComponent: DataViewPickerStart['DataViewPickerComponent'];
   http: HttpStart;
   storage: Storage;
@@ -112,7 +110,6 @@ export const buildServices = memoize(function (
     dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
-    dataViewEditor: plugins.dataViewEditor,
     DataViewPickerComponent: plugins.dataViewPicker.DataViewPickerComponent,
   };
 });
