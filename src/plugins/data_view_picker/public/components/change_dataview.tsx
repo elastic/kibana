@@ -14,27 +14,15 @@ import {
   EuiSelectable,
   EuiSelectableProps,
   EuiButton,
-  EuiButtonProps,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPanel,
 } from '@elastic/eui';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView, DataViewListItem } from 'src/plugins/data_views/public';
 import { useKibana } from '../shared_imports';
-import type { DataViewPickerContext } from '../types';
-
-export type ChangeDataViewTriggerProps = EuiButtonProps & {
-  label: string;
-  title?: string;
-};
-
-interface IndexPatternRef {
-  id: string;
-  title: string;
-}
+import type { DataViewPickerContext, ChangeDataViewTriggerProps } from '../types';
 
 export function ChangeDataView({
-  indexPatternRefs,
   isMissingCurrent,
   indexPatternId,
   onChangeDataView,
@@ -44,7 +32,6 @@ export function ChangeDataView({
   selectableProps,
 }: {
   trigger: ChangeDataViewTriggerProps;
-  indexPatternRefs: IndexPatternRef[];
   isMissingCurrent?: boolean;
   onChangeDataView: (newId: string) => void;
   onAddField?: () => void;
@@ -53,11 +40,20 @@ export function ChangeDataView({
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const kibana = useKibana<DataViewPickerContext>();
   const { application, dataViewFieldEditor, dataViews, dataViewEditor } = kibana.services;
   const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataViews.getIdsWithTitle();
+      setDataViewsList(dataViewsRefs);
+    };
+    fetchDataViews();
+  }, [dataViews]);
 
   useEffect(() => {
     return () => {
@@ -192,7 +188,7 @@ export function ChangeDataView({
             {...selectableProps}
             searchable
             singleSelection="always"
-            options={indexPatternRefs.map(({ title, id }) => ({
+            options={dataViewsList?.map(({ title, id }) => ({
               key: id,
               label: title,
               value: id,

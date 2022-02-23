@@ -15,7 +15,6 @@ export interface DataViewPickerPropsWithServices extends DataViewPickerProps {
 }
 
 export const DataViewPicker = ({
-  indexPatternRefs,
   isMissingCurrent,
   indexPatternId,
   onChangeDataView,
@@ -31,7 +30,6 @@ export const DataViewPicker = ({
   return (
     <KibanaReactContextProvider>
       <ChangeDataView
-        indexPatternRefs={indexPatternRefs}
         isMissingCurrent={isMissingCurrent}
         indexPatternId={indexPatternId}
         onChangeDataView={onChangeDataView}

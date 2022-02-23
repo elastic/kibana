@@ -18,11 +18,7 @@ import {
 import type { StateSetter } from '../types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import {
-  tableHasFormulas,
-  DataViewListItem,
-  DataView,
-} from '../../../../../src/plugins/data/common';
+import { tableHasFormulas, DataView } from '../../../../../src/plugins/data/common';
 import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -206,7 +202,6 @@ export const LensTopNavMenu = ({
   );
 
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
-  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
@@ -266,14 +261,6 @@ export const LensTopNavMenu = ({
     indexPatterns,
     data.indexPatterns,
   ]);
-
-  useEffect(() => {
-    const fetchDataViews = async () => {
-      const dataViews = await data.dataViews.getIdsWithTitle();
-      setDataViewsList(dataViews);
-    };
-    fetchDataViews();
-  }, [data.dataViews]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -537,7 +524,6 @@ export const LensTopNavMenu = ({
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
     },
-    indexPatternRefs: dataViewsList,
     indexPatternId: currentIndexPattern?.id,
     onAddField: refreshFieldList,
     onDataViewCreated: (dataView: DataView) => {

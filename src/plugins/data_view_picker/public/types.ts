@@ -29,15 +29,9 @@ export type ChangeDataViewTriggerProps = EuiButtonProps & {
   title?: string;
 };
 
-interface IndexPatternRef {
-  id: string;
-  title: string;
-}
-
 /** @public */
 export interface DataViewPickerProps {
   trigger: ChangeDataViewTriggerProps;
-  indexPatternRefs: IndexPatternRef[];
   isMissingCurrent?: boolean;
   onChangeDataView: (newId: string) => void;
   indexPatternId?: string;
