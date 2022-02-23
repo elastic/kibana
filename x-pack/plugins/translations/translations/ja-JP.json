@@ -7963,7 +7963,6 @@
     "xpack.apm.ux.median": "中間",
     "xpack.apm.ux.metrics": "メトリック",
     "xpack.apm.ux.overview.agent.description": "APMエージェントを使用して、APMデータを収集します。多数の一般的な言語では、エージェントを使用することで処理が簡単になっています。",
-    "xpack.apm.ux.overview.agent.title": "APM統合を追加",
     "xpack.apm.ux.overview.beatsCard.description": "APMエージェントでRUMを有効にして、ユーザーエクスペリエンスデータを収集します。",
     "xpack.apm.ux.overview.beatsCard.title": "APM統合を追加",
     "xpack.apm.ux.overview.heading": "ダッシュボード",
