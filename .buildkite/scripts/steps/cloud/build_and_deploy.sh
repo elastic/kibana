@@ -53,6 +53,13 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$JSON_FILE")
   CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
 
+  # Enable stack monitoring
+  jq '
+    .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
+    .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
+    ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json &> "$JSON_FILE"
+
   # Refresh vault token
   VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
   VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
