@@ -18,6 +18,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -225,6 +226,21 @@ export function RulesPage() {
         ],
       }}
     >
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
+            <FormattedMessage
+              id="xpack.observability.rules.totalItemsCountDescription"
+              defaultMessage="Showing: {pageSize} of {totalItemCount} Rules"
+              values={{
+                totalItemCount: rules.totalItemsCount,
+                pageSize: rules.data.length,
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiBasicTable
