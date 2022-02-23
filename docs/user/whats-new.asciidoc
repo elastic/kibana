@@ -32,7 +32,7 @@ image::discover/images/field-statistics-view.png[Filter panel in Canvas]
 ==== New $ field syntax for Painless scripts
 Creating runtime fields is now easier and more reliable. Use our new shortcut
 for the field method when a script context supports the scripting fields API.
-This shortcut replaces field('fieldname').get(defaultValue) with $('fieldname', defaultValue).
+This shortcut replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
 
 *Before*
 
@@ -53,11 +53,11 @@ $('myfield', 'unavailable')
 
 [float]
 ==== Synchronized ML anomaly visualizations
-*{ml-app}* visualizations will now synchronize cursor position with visualization panels
+*{ml-app}* visualizations now synchronize cursor position with visualization panels
 from Lens, TSVB, Timelion, and aggregation-based visualizations.
-This can be useful to highlight an anomaly in time and see a visual indication
-of this time on other panels to help you identify interesting relationships in your data.
-The reverse is true as well&mdash;hovering in another editor will highlight the same point-in-time in *{ml-app}* panels.
+Highlight an anomaly in time and see a visual indication
+of this time on other panels.
+The reverse is true as well&mdash;hovering in another editor highlights the same point-in-time in *{ml-app}* panels.
 
 [float]
 === Canvas
@@ -71,7 +71,7 @@ and visual controls.
 [float]
 ==== New filter panel
 Use the new filter panel on any object to see which objects are filtering it.
-This can help you author your workpad with the right behavior.
+This helps you author your workpad with the right behavior.
 
 [role="screenshot"]
 image::images/highlights-canvas-filter.png[Filter panel in Canvas]
@@ -91,10 +91,10 @@ image::images/highlights-lens-combine.gif[Drag to combin in Lens]
 [float]
 ==== Top values by rarity
 
-When looking for root cause it can be useful to find rare values in your data.
-You can now do this in Lens by seeing top values by rarity.
+When looking for root cause, it is often useful to find rare values in your data.
+Do this in Lens by seeing top values by rarity.
 This takes advantage of the {es} rare terms aggregation and makes it easy to ask
-the “What’s not normal here?”
+“What’s not normal here?”
 
 [role="screenshot"]
 image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, width=50%]
@@ -102,12 +102,12 @@ image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, w
 [float]
 ==== Horizontal and vertical gauges
 
-The gauge visualization type adds extra context to your metrics:
-show minimum and maximum values dynamically (via quick function or custom formula)
-or set using a static value for known metric ranges. Include a goal value to see
-if a metric is above or below the goal. Set color bands to show ranges visually–similar
-to reference lines in Bar/Line/Area visualizations. This new gauge visualization is i
-n technical preview in 8.1.
+The gauge visualization adds extra context to your metrics.
+Show minimum and maximum values dynamically by using a quick function or custom formula,
+or set a static value for known metric ranges. Include a goal value to see
+if a metric is above or below the goal. Set color bands to show ranges visually&mdash;imilar
+to reference lines in bar, line, and area visualizations. This new gauge visualization is
+in technical preview in 8.1.
 
 [role="screenshot"]
 image::images/highlights-lens-guage.png[Example horizontal gauge with target value in Lens, width=50%]
@@ -115,7 +115,7 @@ image::images/highlights-lens-guage.png[Example horizontal gauge with target val
 [float]
 ==== Mosaic visualization
 
-he mosaic (also known as marimekko / mekko) visualization allows for side-by-side
+The mosaic visualization, also known as marimekko or mekko, allows for side-by-side
 comparison of two dimensions against a single metric. Treemaps and two-layered
 pies do this as well, but the mosaic can be more effective for visual comparisons
 by aligning the colors for the term side by side. Try this on low cardinality
@@ -127,11 +127,11 @@ image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
 [float]
 ==== Waffle visualization
 
-The waffle visualization is an effective proportion visualization that makes
-more efficient use of space when compared to pies.
-Simply put, waffles are designed for square spaces which aligns well with how
-most dashboards are authored. Waffles are stronger for low cardinality breakdowns
-but are not recommended if you have very small partitions as they only can show
+The waffle visualization is a proportion visualization that makes
+more efficient use of space than pie charts.
+Waffles are designed for square spaces, which aligns well with how
+most dashboards are authored. Waffles are stronger for low cardinality breakdowns,
+but are not recommended for very small partitions because they only can show
 data in 1% blocks. You might be surprised how small you can make a waffle
 visualization and maintain readability. This new waffle visualization is in technical preview in 8.1.
 
@@ -141,7 +141,7 @@ image::images/highlights-lens-waffle.png[Example waffle visualization in Lens, w
 [float]
 ==== Color by value in metrics
 
-Color the metric’s text or the background of the entire visualization’s background
+Color the metric text or the background of the entire visualization
 based on the value of the metric. Set up color stops for multiple colors similar
 to what you can do in Lens tables, heatmaps, and the new gauge.
 
@@ -150,19 +150,19 @@ image::images/highlights-lens-metric.png[Metric color options in Lens, width=75%
 
 [float]
 ==== Table sort on dashboard view
-Allow dashboard viewers to quickly change a table’s sort on the fly like the editors can.
+Allow dashboard viewers to quickly change a table’s sort on the fly, like the editors can.
 
 [float]
 ==== Filter formulas globally
 
 This brings the familiar “Filter by” option for metrics defined by a formula.
 With this feature it’s easy to filter all the parts of your formula with KQL
-without having to copy/paste the KQL to all the aggregations used in the formula. Easy!
+without having to copy or paste the KQL to all the aggregations used in the formula.
 
 [float]
 ==== Configurable donut visualizations
-In this release, we’ve made the inner area size (or “donut hole”) in the donut
-visualization configurable&mdash;keeping the default as a smaller size to maximize space for
+The inner area size (or “donut hole”) in the donut
+visualization is now configurable&mdash;keeping the default as a smaller size to maximize space for
 labels but allowing you to change the option in Lens.
 
 [role="screenshot"]
@@ -171,7 +171,7 @@ image::images/highlights-lens-donut.png[Inner area size setting in Lens donuts,w
 [float]
 ==== Collapsable suggestions panel
 
-Get back some vertical space in the Lens and save on the query cost of
+Get back some vertical space in Lens and save on the query cost of
 suggestions by collapsing the suggestions panel. {kib} will remember if you close
 your suggestions the next time you use the editor with the same browser.
 
@@ -193,16 +193,16 @@ image::images/highlights-lens-color.png[Color editing in Lens, width=50%]
 [float]
 ==== Shapefile upload
 Effortlessly load shapefiles into Elastic with this simple but powerful uploader built
-right into the Maps application. Easily load local open data and boundaries for analysis and comparison.
+right into the *Maps* application. Easily load local open data and boundaries for analysis and comparison.
 
 [role="screenshot"]
 image::images/highlights-maps-shapefile.png[Shapefile upload in Maps]
 
 [float]
 ==== Vector tiles now the default
-All new polygon layers enable *Use vector tiles* by default.
+All new polygon layers now enable *Use vector tiles* by default.
 Vector tiles offer the best performance and smooth
-zooming over the alternative methods. You can always change the scaling options
+zooming over the alternative methods. You can change the scaling options
 in layer settings if you prefer the previous approach.
 
 // end::notable-highlights[]
