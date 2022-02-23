@@ -164,6 +164,10 @@ describe('When using the ArtifactListPage component', () => {
 
         it.todo('should pass error along to the Form component and reset disabled back to `false`');
       });
+
+      describe('and a custom Submit handler is used', () => {
+        it.todo('should use custom submit handler when submit button is used');
+      });
     });
 
     describe('and in Edit mode with invalid item id in url', () => {
