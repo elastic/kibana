@@ -36,19 +36,12 @@ const errors = {
         'Invalid label position is specified. Supported label positions: {labelPosition}',
       values: { labelPosition: Object.values(LabelPosition).join(', ') },
     }),
-  severalRowsAndColorFullBackgroundSpecifiedError: () =>
-    i18n.translate(
-      'expressionMetricVis.function.errors.severalRowsAndColorFullBackgroundSpecified',
-      {
-        defaultMessage: 'Colorize full container can be applied only for one metric.',
-      }
-    ),
   severalMetricsAndColorFullBackgroundSpecifiedError: () =>
     i18n.translate(
       'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
       {
         defaultMessage:
-          'A several metrics and colorize full container are specified. Expression is supporting only one of them at once.',
+          'Full background coloring cannot be applied to a visualization with multiple metrics.',
       }
     ),
   splitByBucketAndColorFullBackgroundSpecifiedError: () =>
@@ -56,7 +49,7 @@ const errors = {
       'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
       {
         defaultMessage:
-          'A bucket and colorize full container are specified. Expression is supporting only one of them at once.',
+          'Full background coloring cannot be applied to visualizations that have a bucket specified.',
       }
     ),
 };
@@ -88,8 +81,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['boolean'],
       default: false,
       help: i18n.translate('expressionMetricVis.function.colorFullBackground.help', {
-        defaultMessage:
-          'Applies the selected background color to the full visualization container',
+        defaultMessage: 'Applies the selected background color to the full visualization container',
       }),
     },
     palette: {
@@ -160,12 +152,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         throw new Error(errors.splitByBucketAndColorFullBackgroundSpecifiedError());
       }
 
-      if (args.metric.length > 1) {
+      if (args.metric.length > 1 || input.rows.length > 1) {
         throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
-      }
-
-      if (input.rows.length > 1) {
-        throw new Error(errors.severalRowsAndColorFullBackgroundSpecifiedError());
       }
     }
 
