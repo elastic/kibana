@@ -304,9 +304,9 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ) => {
   const combined = [] as CombinedDataItem[];
-  serverData.forEach((serverItem) => {
-    const type = serverItem.serviceType;
-    const staticItem = staticData.find(({ serviceType }) => serviceType === type);
+  staticData.forEach((staticItem) => {
+    const type = staticItem.serviceType;
+    const serverItem = serverData.find(({ serviceType }) => serviceType === type);
     const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
     combined.push({
       ...serverItem,

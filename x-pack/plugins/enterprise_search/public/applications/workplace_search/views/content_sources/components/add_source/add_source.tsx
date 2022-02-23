@@ -19,7 +19,13 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath, ADD_EXTERNAL_PATH } from '../../../../routes';
+import {
+  SOURCES_PATH,
+  getSourcesPath,
+  ADD_EXTERNAL_PATH,
+  getAddPath,
+  ADD_CUSTOM_PATH,
+} from '../../../../routes';
 
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
@@ -45,21 +51,12 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     createContentSource,
     resetSourceState,
   } = useActions(AddSourceLogic);
-  const {
-    addSourceCurrentStep,
-    sourceConfigData: {
-      name,
-      categories,
-      needsPermissions,
-      accountContextOnly,
-      privateSourcesEnabled,
-    },
-    dataLoading,
-    newCustomSource,
-  } = useValues(AddSourceLogic);
-
-  const { serviceType, configuration, features, objTypes, addPath } = props.sourceData;
-
+  const { addSourceCurrentStep, sourceConfigData, dataLoading, newCustomSource } =
+    useValues(AddSourceLogic);
+  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
+    sourceConfigData;
+  const { serviceType, configuration, features, objTypes } = props.sourceData;
+  const addPath = getAddPath(serviceType);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
@@ -72,6 +69,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   // TODO: Fix this once we have more than just Sharepoint here
   const goToExternalConfig = () =>
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(ADD_EXTERNAL_PATH, isOrganization)}/`);
+  const goToCustomConfig = () =>
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}/`);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
@@ -103,10 +102,10 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigChoiceStep && (
         <ConfigurationExternalChoice
-          name={name}
-          serviceType={serviceType}
+          sourceData={props.sourceData}
           advanceStepInternal={goToFirstStep}
           advanceStepExternal={goToExternalConfig}
+          advanceStepCustom={goToCustomConfig}
           header={header}
         />
       )}

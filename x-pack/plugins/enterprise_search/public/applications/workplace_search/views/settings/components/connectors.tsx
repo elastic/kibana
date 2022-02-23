@@ -33,8 +33,7 @@ import {
   PRIVATE_SOURCE,
   UPDATE_BUTTON,
 } from '../../../constants';
-import { getSourcesPath } from '../../../routes';
-import { staticSourceData, staticSourceConfig } from '../../content_sources/source_data';
+import { getAddPath, getEditPath, getSourcesPath } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {
@@ -51,38 +50,32 @@ export const Connectors: React.FC = () => {
   );
 
   const getRowActions = (configured: boolean, serviceType: string, supportedByLicense: boolean) => {
-    // TODO: make this dynamic once SharePoint is not the only option for external
-    const sourceData =
-      serviceType === 'external'
-        ? staticSourceConfig.find((s) => s.internal?.serviceType === 'share_point')?.external
-        : staticSourceData.find((s) => s.serviceType === serviceType);
-    if (sourceData) {
-      const { addPath, editPath } = sourceData;
-      const configurePath = getSourcesPath(addPath, true);
+    const addPath = getAddPath(serviceType);
+    const editPath = getEditPath(serviceType);
 
-      const updateButtons = (
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmptyTo to={editPath as string} data-test-subj="UpdateButton">
-              {UPDATE_BUTTON}
-            </EuiButtonEmptyTo>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+    const configurePath = getSourcesPath(addPath, true);
 
-      const configureButton = supportedByLicense ? (
-        <EuiButtonEmptyTo to={configurePath} data-test-subj="ConfigureButton">
-          {CONFIGURE_BUTTON}
-        </EuiButtonEmptyTo>
-      ) : (
-        <EuiButtonEmpty data-test-subj="ConfigureButton" disabled>
-          {CONFIGURE_BUTTON}
-        </EuiButtonEmpty>
-      );
+    const updateButtons = (
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmptyTo to={editPath as string} data-test-subj="UpdateButton">
+            {UPDATE_BUTTON}
+          </EuiButtonEmptyTo>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
 
-      return configured ? updateButtons : configureButton;
-    }
-    return null;
+    const configureButton = supportedByLicense ? (
+      <EuiButtonEmptyTo to={configurePath} data-test-subj="ConfigureButton">
+        {CONFIGURE_BUTTON}
+      </EuiButtonEmptyTo>
+    ) : (
+      <EuiButtonEmpty data-test-subj="ConfigureButton" disabled>
+        {CONFIGURE_BUTTON}
+      </EuiButtonEmpty>
+    );
+
+    return configured ? updateButtons : configureButton;
   };
 
   const platinumLicenseCallout = <LicenseCallout message={PRIVATE_PLATINUM_LICENSE_CALLOUT} />;

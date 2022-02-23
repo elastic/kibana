@@ -41,6 +41,7 @@ import {
   SAVE_CHANGES_BUTTON,
   REMOVE_BUTTON,
 } from '../../../constants';
+import { getEditPath } from '../../../routes';
 import { SourceDataItem } from '../../../types';
 import { handlePrivateKeyUpload } from '../../../utils';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
@@ -96,7 +97,7 @@ export const SourceSettings: React.FC = () => {
 
   const editPath = isGithubApp
     ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
-    : staticSourceData.find((source) => source.serviceType === serviceType)?.editPath;
+    : getEditPath(serviceType);
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);

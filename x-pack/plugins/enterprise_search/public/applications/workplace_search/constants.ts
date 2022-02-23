@@ -192,6 +192,10 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePoint',
     { defaultMessage: 'SharePoint Online' }
   ),
+  SHAREPOINT_SERVER: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePointServer',
+    { defaultMessage: 'SharePoint Server' }
+  ),
   SLACK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.slack', {
     defaultMessage: 'Slack',
   }),

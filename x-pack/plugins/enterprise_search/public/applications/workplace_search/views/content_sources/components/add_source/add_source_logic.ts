@@ -26,12 +26,7 @@ import {
   EXTERNAL_SERVICE_TYPE,
   WORKPLACE_SEARCH_URL_PREFIX,
 } from '../../../../constants';
-import {
-  SOURCES_PATH,
-  ADD_GITHUB_PATH,
-  PRIVATE_SOURCES_PATH,
-  getSourcesPath,
-} from '../../../../routes';
+import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 import { CustomSource, SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
@@ -420,10 +415,19 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   }),
   listeners: ({ actions, values }) => ({
     initializeAddSource: ({ addSourceProps }) => {
-      const { serviceType } = addSourceProps.sourceData;
+      const {
+        serviceType,
+        externalConnectorAvailable,
+        internalConnectorAvailable,
+        customConnectorAvailable,
+      } = addSourceProps.sourceData;
       actions.setAddSourceProps({ addSourceProps });
-      if (serviceType === 'share_point') {
-        // TODO: Fix this for external content sources
+      if (
+        [externalConnectorAvailable, internalConnectorAvailable, customConnectorAvailable].filter(
+          (available) => !!available
+        ).length > 1
+      ) {
+        // TODO move this to its own view and out of this state machine entirely
         actions.setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
       } else {
         actions.setAddSourceStep(getFirstStep(addSourceProps));
@@ -615,7 +619,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
         if (hasConfigureStep && !values.oauthConfigCompleted) {
           actions.setPreContentSourceId(preContentSourceId);
-          navigateToUrl(getSourcesPath(`${ADD_GITHUB_PATH}/configure${search}`, isOrganization));
+          navigateToUrl(
+            getSourcesPath(`${getAddPath('github')}/configure${search}`, isOrganization)
+          );
         } else {
           setAddedSource(serviceName, indexPermissions, serviceType);
           navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
@@ -670,11 +676,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   }),
 });
 
+// TODO honestly can we base all of these on the route we're on?
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   const { sourceData, connect, configure, reAuthenticate } = props;
   const { serviceType } = sourceData;
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
-  const isExternal = serviceType === EXTERNAL_SERVICE_TYPE;
+  const isCustom = serviceType === CUSTOM_SERVICE_TYPE; // TODO base it on route
+  const isExternal = serviceType === EXTERNAL_SERVICE_TYPE; // TODO base it on route
 
   if (isCustom) return AddSourceSteps.ConfigureCustomStep;
   if (connect) return AddSourceSteps.ConnectInstanceStep;

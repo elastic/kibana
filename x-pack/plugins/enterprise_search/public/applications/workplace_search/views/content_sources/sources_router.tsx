@@ -14,20 +14,23 @@ import { useActions, useValues } from 'kea';
 import { LicensingLogic } from '../../../shared/licensing';
 import { AppLogic } from '../../app_logic';
 import {
-  ADD_GITHUB_VIA_APP_PATH,
-  ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH,
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+} from '../../constants';
+import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
   PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
+  getAddPath,
+  ADD_CUSTOM_PATH,
 } from '../../routes';
-import { SourceDataItem } from '../../types';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticSourceConfig } from './source_data';
+import { staticCustomSourceData, staticSourceData as sources } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -61,15 +64,6 @@ export const SourcesRouter: React.FC = () => {
     return null;
   }
 
-  // TODO: currently just flattening everything, but should create hierarchical routes once Connectors 2.0 is more mature
-  const sources = staticSourceConfig.reduce(
-    (prev, curr) => [
-      ...prev,
-      ...([curr.internal, curr.external, curr.custom].filter((val) => !!val) as SourceDataItem[]),
-    ],
-    [] as SourceDataItem[]
-  );
-
   return (
     <Switch>
       <Route exact path={PRIVATE_SOURCES_PATH}>
@@ -78,16 +72,17 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={SOURCES_PATH}>
         <OrganizationSources />
       </Route>
-      <Route exact path={ADD_GITHUB_VIA_APP_PATH}>
+      <Route exact path={getAddPath(GITHUB_VIA_APP_SERVICE_TYPE)}>
         <GitHubViaApp isGithubEnterpriseServer={false} />
       </Route>
-      <Route exact path={ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH}>
+      <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
         <GitHubViaApp isGithubEnterpriseServer />
       </Route>
       {sources.map((sourceData, i) => {
-        const { addPath, accountContextOnly } = sourceData;
+        const { serviceType, accountContextOnly } = sourceData;
+
         return (
-          <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
+          <Route key={i} exact path={getSourcesPath(getAddPath(serviceType), isOrganization)}>
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
             ) : (
@@ -96,8 +91,15 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         );
       })}
+      <Route exact path={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
+        <AddSource sourceData={staticCustomSourceData} />
+      </Route>
       {sources.map((sourceData, i) => (
-        <Route key={i} exact path={`${getSourcesPath(sourceData.addPath, isOrganization)}/connect`}>
+        <Route
+          key={i}
+          exact
+          path={`${getSourcesPath(getAddPath(sourceData.serviceType), isOrganization)}/connect`}
+        >
           <AddSource connect sourceData={sourceData} />
         </Route>
       ))}
@@ -105,7 +107,10 @@ export const SourcesRouter: React.FC = () => {
         <Route
           key={i}
           exact
-          path={`${getSourcesPath(sourceData.addPath, isOrganization)}/reauthenticate`}
+          path={`${getSourcesPath(
+            getAddPath(sourceData.serviceType),
+            isOrganization
+          )}/reauthenticate`}
         >
           <AddSource reAuthenticate sourceData={sourceData} />
         </Route>
@@ -116,7 +121,10 @@ export const SourcesRouter: React.FC = () => {
             <Route
               key={i}
               exact
-              path={`${getSourcesPath(sourceData.addPath, isOrganization)}/configure`}
+              path={`${getSourcesPath(
+                getAddPath(sourceData.serviceType),
+                isOrganization
+              )}/configure`}
             >
               <AddSource configure sourceData={sourceData} />
             </Route>

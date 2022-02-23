@@ -17,16 +17,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SourceDataItem } from '../../../../types';
+
 interface ConfigurationIntroProps {
   header: React.ReactNode;
-  name: string;
-  serviceType: string;
+  sourceData: SourceDataItem;
+  advanceStepCustom(): void;
   advanceStepInternal(): void;
   advanceStepExternal(): void;
 }
 
 export const ConfigurationExternalChoice: React.FC<ConfigurationIntroProps> = ({
-  name,
+  sourceData: {
+    name,
+    externalConnectorAvailable,
+    internalConnectorAvailable,
+    customConnectorAvailable,
+  },
+  advanceStepCustom,
   advanceStepExternal,
   advanceStepInternal,
   header,
@@ -40,117 +48,179 @@ export const ConfigurationExternalChoice: React.FC<ConfigurationIntroProps> = ({
       direction="row"
       responsive={false}
     >
-      <EuiFlexItem grow>
-        <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
-          <EuiSplitPanel.Inner>
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              direction="column"
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <h4>{name}</h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <h3>
+      {internalConnectorAvailable && (
+        <EuiFlexItem grow>
+          <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
+            <EuiSplitPanel.Inner>
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                direction="column"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h4>{name}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
+                        {
+                          defaultMessage: 'Default connector',
+                        }
+                      )}
+                    </h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.description',
                       {
-                        defaultMessage: 'Default connector',
+                        defaultMessage: 'Use our out-of-the-box connector to get started quickly.',
                       }
                     )}
-                  </h3>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.description',
-                    {
-                      defaultMessage: 'Use our out-of-the-box connector to get started quickly.',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill onClick={advanceStepInternal}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.button',
-                    {
-                      defaultMessage: 'Connect',
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
-          <EuiSplitPanel.Inner>
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              direction="column"
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <h4>{name}</h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <h3>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="primary" fill onClick={advanceStepInternal}>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.button',
                       {
-                        defaultMessage: 'Custom connector',
+                        defaultMessage: 'Connect',
                       }
                     )}
-                  </h3>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.description',
-                    {
-                      defaultMessage:
-                        'Set up a custom connector for more configurability and control.',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill onClick={advanceStepExternal}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.button',
-                    {
-                      defaultMessage: 'Instructions',
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
-      </EuiFlexItem>
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiFlexItem>
+      )}
+      {externalConnectorAvailable && (
+        <EuiFlexItem grow>
+          <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
+            <EuiSplitPanel.Inner>
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                direction="column"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h4>{name}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
+                        {
+                          defaultMessage: 'Custom connector',
+                        }
+                      )}
+                    </h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.description',
+                      {
+                        defaultMessage:
+                          'Set up a custom connector for more configurability and control.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="primary" fill onClick={advanceStepExternal}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.button',
+                      {
+                        defaultMessage: 'Instructions',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiFlexItem>
+      )}
+      {customConnectorAvailable && (
+        <EuiFlexItem grow>
+          <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
+            <EuiSplitPanel.Inner>
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                direction="column"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h4>{name}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.title',
+                        {
+                          defaultMessage: 'Custom connector',
+                        }
+                      )}
+                    </h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.description',
+                      {
+                        defaultMessage:
+                          'Set up a custom connector for more configurability and control.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="primary" fill onClick={advanceStepCustom}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.button',
+                      {
+                        defaultMessage: 'Instructions',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   </>
 );

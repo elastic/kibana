@@ -22,7 +22,7 @@ import {
 
 import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { getSourcesPath } from '../../../../routes';
+import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
 import {
@@ -68,7 +68,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
 
   const visibleSources = (
     <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
-      {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
+      {sources.map(({ name, serviceType, connected, accountContextOnly }, i) => (
         <React.Fragment key={i}>
           <EuiFlexItem
             grow
@@ -102,7 +102,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                 {((!isOrganization || (isOrganization && !accountContextOnly)) && (
                   <EuiButtonEmptyTo
                     className="eui-fullWidth"
-                    to={`${getSourcesPath(addPath, isOrganization)}/connect`}
+                    to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/connect`}
                   >
                     {CONFIGURED_SOURCES_CONNECT_BUTTON}
                   </EuiButtonEmptyTo>

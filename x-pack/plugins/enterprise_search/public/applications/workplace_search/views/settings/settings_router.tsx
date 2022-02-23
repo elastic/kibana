@@ -14,6 +14,7 @@ import {
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
+  getEditPath,
 } from '../../routes';
 import { staticSourceData } from '../content_sources/source_data';
 
@@ -42,7 +43,7 @@ export const SettingsRouter: React.FC = () => {
         <OauthApplication />
       </Route>
       {staticSourceData.map((sourceData, i) => (
-        <Route key={i} exact path={sourceData.editPath}>
+        <Route key={i} exact path={getEditPath(sourceData.serviceType)}>
           <SourceConfig sourceData={sourceData} />
         </Route>
       ))}

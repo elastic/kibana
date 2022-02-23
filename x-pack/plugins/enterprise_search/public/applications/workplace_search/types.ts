@@ -72,27 +72,21 @@ export interface Configuration {
   applicationLinkTitle?: string;
 }
 
+// TODO combine serviceType and internalConnectorAvailable into internalConnectorServiceType
 export interface SourceDataItem {
   name: string;
   iconName: string;
   serviceType: string;
-  externalServiceType?: string; // the service type of the external version of this connector
   configuration: Configuration;
   configured?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
-  addPath: string;
-  editPath?: string; // undefined for GitHub apps, as they are configured on a source level, and don't use a connector where you can edit the configuration
   accountContextOnly: boolean;
-}
-
-export interface SourceDataConfig {
-  name: string;
-  iconName: string;
-  internal?: SourceDataItem;
-  external?: SourceDataItem;
-  custom?: SourceDataItem;
+  internalConnectorAvailable?: true;
+  externalConnectorAvailable?: true;
+  customConnectorAvailable?: true;
+  // internalConnectorServiceType?: string
 }
 
 export interface ContentSource {

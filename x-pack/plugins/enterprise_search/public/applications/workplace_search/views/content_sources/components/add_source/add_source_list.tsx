@@ -17,7 +17,13 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiEmptyPrompt,
+  EuiFlexGrid,
+  EuiHorizontalRule,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+
+import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 
 import { AppLogic } from '../../../../app_logic';
 import noOrgSourcesIcon from '../../../../assets/share_circle.svg';
@@ -26,8 +32,10 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { ContentSection } from '../../../../components/shared/content_section';
+import { SourceIcon } from '../../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { getSourcesPath, ADD_CUSTOM_PATH } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -91,10 +99,9 @@ export const AddSourceList: React.FC = () => {
     filterSources(source, configuredSources);
 
   const visibleAvailableSources = availableSources.filter(filterAvailableSources);
-  const visibleConfiguredSources = configuredSources
-    .filter(filterConfiguredSources)
-    // TODO: Handle this better once Connectors 2.0 is more mature
-    .filter((source) => source.serviceType !== 'external');
+  const visibleConfiguredSources = configuredSources.filter(filterConfiguredSources);
+  // TODO: Handle this better once Connectors 2.0 is more mature
+  // .filter((source) => !source.externalConnectorAvailable);
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
@@ -131,6 +138,36 @@ export const AddSourceList: React.FC = () => {
             />
           )}
           {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
+
+          <EuiTitle size="s">
+            <h2>{"Dont see what you're looking for?"}</h2>
+          </EuiTitle>
+          <EuiText>
+            <p>Build and deploy your own generic connector</p>
+          </EuiText>
+          <EuiFlexGrid columns={2} direction="column" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="center" alignItems="stretch">
+                <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
+                    <EuiFlexItem grow={false}>
+                      <SourceIcon serviceType={'custom'} name="Custom API Source" size="l" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="m">Custom API Source</EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmptyTo to={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
+                        Connect
+                      </EuiButtonEmptyTo>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
+                  <EuiHorizontalRule size="full" margin="none" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGrid>
         </ContentSection>
       ) : (
         <ContentSection>
