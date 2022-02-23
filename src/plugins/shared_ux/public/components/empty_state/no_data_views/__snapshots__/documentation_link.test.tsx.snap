@@ -138,11 +138,11 @@ exports[`<DocumentationLink /> is rendered correctly 1`] = `
           target="_blank"
         >
           <FormattedMessage
-            defaultMessage="Read documentation"
+            defaultMessage="Read the docs"
             id="sharedUX.noDataViews.readDocumentation"
             values={Object {}}
           >
-            Read documentation
+            Read the docs
           </FormattedMessage>
           <EuiIcon
             aria-label="External link"

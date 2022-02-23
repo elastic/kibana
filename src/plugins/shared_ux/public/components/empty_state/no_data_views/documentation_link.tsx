@@ -31,7 +31,7 @@ export function DocumentationLink({ documentationUrl }: Props) {
         <EuiLink href={documentationUrl} target="_blank" external>
           <FormattedMessage
             id="sharedUX.noDataViews.readDocumentation"
-            defaultMessage="Read documentation"
+            defaultMessage="Read the docs"
           />
         </EuiLink>
       </dd>
