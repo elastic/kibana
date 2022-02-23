@@ -4,7 +4,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["dataViews", "dataViewFieldEditor", "dataViewEditor"],
-  "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["kibanaReact"],
   "owner": {
     "name": "App Services",
