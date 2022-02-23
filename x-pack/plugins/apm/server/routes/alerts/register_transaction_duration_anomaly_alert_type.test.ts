@@ -179,7 +179,11 @@ describe('Transaction duration anomaly alert', () => {
         ml,
       });
 
-      const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
+      const params = {
+        anomalySeverityType: ANOMALY_SEVERITY.MINOR,
+        windowSize: 5,
+        windowUnit: 'm',
+      };
 
       await executor({ params });
 
@@ -195,6 +199,8 @@ describe('Transaction duration anomaly alert', () => {
         environment: 'development',
         threshold: 'minor',
         triggerValue: 'critical',
+        reason:
+          'critical anomaly with a score of 80 was detected in the last 5 mins for foo.',
       });
     });
   });
