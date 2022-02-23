@@ -20,23 +20,23 @@ import { ObservabilityAppServices } from '../../../../application/types';
 export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 
 export function useActions({
-  appId = 'observability',
-  attributes,
-  lensAttributes,
-  reportType,
-  setAddToCaseOpen,
-  setIsSaveOpen,
-  timeRange,
   withActions,
+  attributes,
+  reportType,
+  setIsSaveOpen,
+  setAddToCaseOpen,
+  appId = 'observability',
+  timeRange,
+  lensAttributes,
 }: {
-  appId?: 'securitySolutionUI' | 'observability';
-  attributes: AllSeries;
-  lensAttributes: any;
-  reportType: ReportViewType;
-  setAddToCaseOpen: (val: boolean) => void;
-  setIsSaveOpen: (val: boolean) => void;
-  timeRange: { from: string; to: string };
   withActions?: boolean | ActionTypes[];
+  reportType: ReportViewType;
+  attributes: AllSeries;
+  appId?: 'securitySolutionUI' | 'observability';
+  setIsSaveOpen: (val: boolean) => void;
+  setAddToCaseOpen: (val: boolean) => void;
+  timeRange: { from: string; to: string };
+  lensAttributes: any;
 }) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
