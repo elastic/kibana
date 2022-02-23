@@ -52,7 +52,7 @@ and becomes a new instance in the monitoring data.
 --
 . Copy the files from the `config` directory from your old installation to your
   new installation. Make sure you remove or update any configurations that are
-  indicated in the <<breaking-changes-8.0.0,breaking changes>> documentation
+  indicated in the <<breaking-changes-8.1.0,breaking changes>> documentation
   otherwise {kib} will fail to start.
 . Copy the files from the `data` directory from your old installation to your
   new installation.
