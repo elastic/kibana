@@ -12,6 +12,7 @@ export type {
   FeatureCatalogueSetup,
   EnvironmentSetup,
   TutorialSetup,
+  WelcomeSetup,
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from './plugin';

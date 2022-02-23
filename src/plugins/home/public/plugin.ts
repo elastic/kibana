@@ -25,6 +25,8 @@ import {
   TutorialServiceSetup,
   AddDataService,
   AddDataServiceSetup,
+  WelcomeService,
+  WelcomeServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
 import { setServices } from './application/kibana_services';
@@ -34,8 +36,6 @@ import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/pub
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { SharePluginSetup } from '../../share/public';
-import type { WelcomeServiceSetup } from './services/welcome';
-import { WelcomeService } from './services/welcome';
 
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
