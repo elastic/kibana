@@ -18,7 +18,8 @@ import type {
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 import {
-  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   MAPPINGS_TEMPLATE_SUFFIX,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
@@ -84,10 +85,12 @@ export function getTemplate({
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
 
+  const fleetTemplatesToAdd = [FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME];
+
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    // Add fleet global assets
-    template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
+    fleetTemplatesToAdd.push(FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME);
   }
+  template.composed_of = [...(template.composed_of || []), ...fleetTemplatesToAdd];
 
   return template;
 }
@@ -388,12 +391,10 @@ function getBaseTemplate(
   templatePriority: number,
   hidden?: boolean
 ): IndexTemplate {
-  // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = getESAssetMetadata({ packageName });
 
   return {
     priority: templatePriority,
-    // To be completed with the correct index patterns
     index_patterns: [templateIndexPattern],
     template: {
       settings: {

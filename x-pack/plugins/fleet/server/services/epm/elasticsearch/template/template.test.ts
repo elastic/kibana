@@ -26,7 +26,7 @@ import {
   updateCurrentWriteIndices,
 } from './template';
 
-const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-2';
+const FLEET_COMPONENT_TEMPLATES = ['.fleet_globals-1', '.fleet_agent_id_verification-1'];
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -65,7 +65,10 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual([...composedOfTemplates, FLEET_COMPONENT_TEMPLATE]);
+    expect(template.composed_of).toStrictEqual([
+      ...composedOfTemplates,
+      ...FLEET_COMPONENT_TEMPLATES,
+    ]);
   });
 
   it('adds empty composed_of correctly', () => {
@@ -77,7 +80,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual([FLEET_COMPONENT_TEMPLATE]);
+    expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES);
   });
 
   it('adds hidden field correctly', () => {

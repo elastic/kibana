@@ -28,7 +28,7 @@ import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
+import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
@@ -145,11 +145,11 @@ export async function ensureFleetGlobalEsAssets(
   // Ensure Global Fleet ES assets are installed
   logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplate(esClient, logger),
+    ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
   ]);
-
-  if (globalAssetsRes.some((asset) => asset.isCreated)) {
+  const assetResults = globalAssetsRes.flat();
+  if (assetResults.some((asset) => asset.isCreated)) {
     // Update existing index template
     const packages = await getInstallations(soClient);
 

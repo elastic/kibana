@@ -28,8 +28,7 @@ import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
 import {
-  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
-  FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+  FLEET_COMPONENT_TEMPLATES,
   MAPPINGS_TEMPLATE_SUFFIX,
   SETTINGS_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
@@ -48,6 +47,8 @@ import {
   getTemplatePriority,
 } from './template';
 import { buildDefaultSettings } from './default_settings';
+
+const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
 export const installTemplates = async (
   installablePackage: InstallablePackage,
@@ -353,15 +354,28 @@ async function installDataStreamComponentTemplates(params: {
   return { componentTemplateNames: Object.keys(componentTemplates), componentTemplates };
 }
 
-export async function ensureDefaultComponentTemplate(
+export async function ensureDefaultComponentTemplates(
   esClient: ElasticsearchClient,
   logger: Logger
+) {
+  return Promise.all(
+    FLEET_COMPONENT_TEMPLATES.map(({ name, body }) =>
+      ensureComponentTemplate(esClient, logger, name, body)
+    )
+  );
+}
+
+export async function ensureComponentTemplate(
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  name: string,
+  body: TemplateMapEntry
 ) {
   const getTemplateRes = await retryTransientEsErrors(
     () =>
       esClient.cluster.getComponentTemplate(
         {
-          name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+          name,
         },
         {
           ignore: [404],
@@ -373,8 +387,8 @@ export async function ensureDefaultComponentTemplate(
   const existingTemplate = getTemplateRes?.component_templates?.[0];
   if (!existingTemplate) {
     await putComponentTemplate(esClient, logger, {
-      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
-      body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+      name,
+      body,
     }).clusterPromise;
   }
 
@@ -504,7 +518,9 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
     ];
     const componentTemplates = installedTemplate.indexTemplate.composed_of
       // Filter global component template shared between integrations
-      .filter((componentTemplateId) => componentTemplateId !== FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME)
+      .filter(
+        (componentTemplateId) => !FLEET_COMPONENT_TEMPLATE_NAMES.includes(componentTemplateId)
+      )
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
