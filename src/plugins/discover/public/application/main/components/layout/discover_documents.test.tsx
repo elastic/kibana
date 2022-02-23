@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -43,7 +43,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
   };
 

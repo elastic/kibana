@@ -19,11 +19,7 @@ import type {
   InstallSource,
 } from '../../../../common';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
-import {
-  IngestManagerError,
-  PackageOperationNotSupportedError,
-  PackageOutdatedError,
-} from '../../../errors';
+import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../../';
@@ -48,6 +44,7 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
+import { getBundledPackages } from './bundled_packages';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -92,7 +89,7 @@ export async function ensureInstalledPackage(options: {
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackage(pkgName);
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -209,6 +206,7 @@ interface InstallRegistryPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
+  ignoreConstraints?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -237,6 +235,7 @@ async function installPackageFromRegistry({
   esClient,
   spaceId,
   force = false,
+  ignoreConstraints = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -253,7 +252,9 @@ async function installPackageFromRegistry({
     installType = getInstallType({ pkgVersion, installedPkg });
 
     // get latest package version
-    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+    const latestPackage = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
+      ignoreConstraints,
+    });
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -402,12 +403,6 @@ async function installPackageByUpload({
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
-    if (installType !== 'install') {
-      throw new PackageOperationNotSupportedError(
-        `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
-      );
-    }
-
     const installSource = 'upload';
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
@@ -463,7 +458,9 @@ async function installPackageByUpload({
   }
 }
 
-export type InstallPackageParams = { spaceId: string } & (
+export type InstallPackageParams = {
+  spaceId: string;
+} & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
 );
@@ -472,11 +469,35 @@ export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
+
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
+  const bundledPackages = await getBundledPackages();
+
   if (args.installSource === 'registry') {
-    const { pkgkey, force, spaceId } = args;
+    const { pkgkey, force, ignoreConstraints, spaceId } = args;
+
+    const matchingBundledPackage = bundledPackages.find(
+      (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
+    );
+
+    if (matchingBundledPackage) {
+      logger.debug(
+        `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
+      );
+
+      const response = installPackageByUpload({
+        savedObjectsClient,
+        esClient,
+        archiveBuffer: matchingBundledPackage.buffer,
+        contentType: 'application/zip',
+        spaceId,
+      });
+
+      return response;
+    }
+
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
       savedObjectsClient,
@@ -484,11 +505,11 @@ export async function installPackage(args: InstallPackageParams) {
       esClient,
       spaceId,
       force,
+      ignoreConstraints,
     });
     return response;
   } else if (args.installSource === 'upload') {
     const { archiveBuffer, contentType, spaceId } = args;
-    logger.debug(`kicking off install of uploaded package`);
     const response = installPackageByUpload({
       savedObjectsClient,
       esClient,

@@ -91,20 +91,6 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
-      // reporting specific fields
-      reporting: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          jobType: {
-            type: 'keyword',
-          },
-          byteSize: {
-            type: 'long',
-          },
-        },
-      },
       // array of saved object references, for "linking" via search
       saved_objects: {
         type: 'nested',

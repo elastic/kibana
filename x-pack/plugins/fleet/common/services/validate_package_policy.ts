@@ -143,7 +143,7 @@ export const validatePackagePolicy = (
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[inputKey][name],
+              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
               name,
               safeLoadYaml
             )
@@ -210,6 +210,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef === undefined) {
+    // TODO return validation error here once https://github.com/elastic/kibana/issues/125655 is fixed
     // eslint-disable-next-line no-console
     console.debug(`No variable definition for ${varName} found`);
 

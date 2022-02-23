@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
 import { createMockBrowserDriverFactory } from './browsers/mock';
 import { createMockScreenshots } from './screenshots/mock';
 import type { ScreenshottingStart } from '.';
@@ -17,6 +16,6 @@ export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart
 
   return {
     diagnose,
-    getScreenshots: jest.fn((options) => getScreenshots(driver, {} as Logger, options)),
+    getScreenshots: jest.fn((options) => getScreenshots(options)),
   };
 }

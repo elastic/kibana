@@ -7,7 +7,7 @@
 
 jest.mock('../../routes/security');
 
-import type { MockedLogger } from '@kbn/logging/target_types/mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type {
   ElasticsearchClient,
@@ -91,7 +91,7 @@ function getTest(
       test = {
         method: mocks.packageClient.fetchFindLatestPackage.bind(mocks.packageClient),
         args: ['package name'],
-        spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackage'),
+        spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
         spyArgs: ['package name'],
         spyResponse: { name: 'fetchFindLatestPackage test' },
       };

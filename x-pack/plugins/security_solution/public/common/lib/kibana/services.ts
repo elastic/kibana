@@ -8,7 +8,8 @@
 import { CoreStart } from '../../../../../../../src/core/public';
 import { StartPlugins } from '../../../types';
 
-type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings'> & Pick<StartPlugins, 'data'>;
+type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings' | 'notifications'> &
+  Pick<StartPlugins, 'data'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
@@ -19,8 +20,9 @@ export class KibanaServices {
     data,
     kibanaVersion,
     uiSettings,
+    notifications,
   }: GlobalServices & { kibanaVersion: string }) {
-    this.services = { data, http, uiSettings };
+    this.services = { data, http, uiSettings, notifications };
     this.kibanaVersion = kibanaVersion;
   }
 

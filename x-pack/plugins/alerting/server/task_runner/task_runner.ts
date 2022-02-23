@@ -15,7 +15,7 @@ import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
-import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
+import { Alert as CreatedAlert, createAlertFactory } from '../alert';
 import {
   validateRuleTypeParams,
   executionStatusFromState,
@@ -66,6 +66,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
+import { getRecoveredAlerts } from '../lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -285,7 +286,7 @@ export class TaskRunner<
 
   async executeAlert(
     alertId: string,
-    alert: AlertInstance<InstanceState, InstanceContext>,
+    alert: CreatedAlert<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
   ) {
     const {
@@ -333,8 +334,12 @@ export class TaskRunner<
 
     const alerts = mapValues<
       Record<string, RawAlertInstance>,
-      AlertInstance<InstanceState, InstanceContext>
-    >(alertRawInstances, (rawAlert) => new AlertInstance<InstanceState, InstanceContext>(rawAlert));
+      CreatedAlert<InstanceState, InstanceContext>
+    >(
+      alertRawInstances,
+      (rawAlert, alertId) => new CreatedAlert<InstanceState, InstanceContext>(alertId, rawAlert)
+    );
+
     const originalAlerts = cloneDeep(alerts);
     const originalAlertIds = new Set(Object.keys(originalAlerts));
 
@@ -358,11 +363,15 @@ export class TaskRunner<
           executionId: this.executionId,
           services: {
             ...services,
-            alertInstanceFactory: createAlertInstanceFactory<
+            alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >(alerts),
+            >({
+              alerts,
+              logger: this.logger,
+              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+            }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
             search: createAbortableEsClientFactory({
@@ -420,19 +429,17 @@ export class TaskRunner<
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
       alerts,
-      (alert: AlertInstance<InstanceState, InstanceContext>) => alert.hasScheduledActions()
+      (alert: CreatedAlert<InstanceState, InstanceContext>) => alert.hasScheduledActions()
     );
-    const recoveredAlerts = pickBy(
-      alerts,
-      (alert: AlertInstance<InstanceState, InstanceContext>, id) =>
-        !alert.hasScheduledActions() && originalAlertIds.has(id)
-    );
+
+    const recoveredAlerts = getRecoveredAlerts(alerts, originalAlertIds);
 
     logActiveAndRecoveredAlerts({
       logger: this.logger,
       activeAlerts: alertsWithScheduledActions,
       recoveredAlerts,
       ruleLabel,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
 
     trackAlertDurations({
@@ -475,38 +482,36 @@ export class TaskRunner<
 
       triggeredActions = concat(triggeredActions, scheduledActionsForRecoveredAlerts);
 
-      const alertsToExecute =
-        notifyWhen === 'onActionGroupChange'
-          ? Object.entries(alertsWithScheduledActions).filter(
-              ([alertName, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) => {
-                const shouldExecuteAction = alert.scheduledActionGroupOrSubgroupHasChanged();
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: alert is active but action group has not changed`
-                  );
-                }
-                return shouldExecuteAction;
-              }
-            )
-          : Object.entries(alertsWithScheduledActions).filter(
-              ([alertName, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) => {
-                const throttled = alert.isThrottled(throttle);
-                const muted = mutedAlertIdsSet.has(alertName);
-                const shouldExecuteAction = !throttled && !muted;
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${
-                      muted ? 'muted' : 'throttled'
-                    }`
-                  );
-                }
-                return shouldExecuteAction;
-              }
+      const alertsToExecute = Object.entries(alertsWithScheduledActions).filter(
+        ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
+          const throttled = alert.isThrottled(throttle);
+          const muted = mutedAlertIdsSet.has(alertName);
+          let shouldExecuteAction = true;
+
+          if (throttled || muted) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${
+                muted ? 'muted' : 'throttled'
+              }`
             );
+          } else if (
+            notifyWhen === 'onActionGroupChange' &&
+            !alert.scheduledActionGroupOrSubgroupHasChanged()
+          ) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: alert is active but action group has not changed`
+            );
+          }
+
+          return shouldExecuteAction;
+        }
+      );
 
       const allTriggeredActions = await Promise.all(
         alertsToExecute.map(
-          ([alertId, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) =>
+          ([alertId, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) =>
             this.executeAlert(alertId, alert, executionHandler)
         )
       );
@@ -533,7 +538,7 @@ export class TaskRunner<
       triggeredActions,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
-        Record<string, AlertInstance<InstanceState, InstanceContext>>,
+        Record<string, CreatedAlert<InstanceState, InstanceContext>>,
         RawAlertInstance
       >(alertsWithScheduledActions, (alert) => alert.toRaw()),
     };
@@ -910,9 +915,9 @@ interface TrackAlertDurationsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 > {
-  originalAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
 }
 
 function trackAlertDurations<
@@ -967,9 +972,9 @@ interface GenerateNewAndRecoveredAlertEventsParams<
 > {
   eventLogger: IEventLogger;
   executionId: string;
-  originalAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
   ruleId: string;
   ruleLabel: string;
   namespace: string | undefined;
@@ -1117,7 +1122,7 @@ interface ScheduleActionsForRecoveredAlertsParams<
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
@@ -1155,7 +1160,7 @@ async function scheduleActionsForRecoveredAlerts<
       alert.unscheduleActions();
       const triggeredActionsForRecoveredAlert = await executionHandler({
         actionGroup: recoveryActionGroup.id,
-        context: {},
+        context: alert.getContext(),
         state: {},
         alertId: id,
       });
@@ -1173,9 +1178,10 @@ interface LogActiveAndRecoveredAlertsParams<
   RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  activeAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   ruleLabel: string;
+  canSetRecoveryContext: boolean;
 }
 
 function logActiveAndRecoveredAlerts<
@@ -1191,7 +1197,7 @@ function logActiveAndRecoveredAlerts<
     RecoveryActionGroupId
   >
 ) {
-  const { logger, activeAlerts, recoveredAlerts, ruleLabel } = params;
+  const { logger, activeAlerts, recoveredAlerts, ruleLabel, canSetRecoveryContext } = params;
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
 
@@ -1218,6 +1224,16 @@ function logActiveAndRecoveredAlerts<
         recoveredAlertIds
       )}`
     );
+
+    if (canSetRecoveryContext) {
+      for (const id of recoveredAlertIds) {
+        if (!recoveredAlerts[id].hasContext()) {
+          logger.debug(
+            `rule ${ruleLabel} has no recovery context specified for recovered alert ${id}`
+          );
+        }
+      }
+    }
   }
 }
 

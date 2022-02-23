@@ -14,9 +14,7 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { fromQuery, toQuery } from '../links/url_helpers';
-import { useUxUrlParams } from '../../../context/url_params_context/use_ux_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { Environment } from '../../../../common/environment_rt';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
@@ -70,26 +68,6 @@ export function ApmEnvironmentFilter() {
       status={status}
       environment={environment}
       environments={environments}
-    />
-  );
-}
-
-export function UxEnvironmentFilter() {
-  const {
-    urlParams: { start, end, environment, serviceName },
-  } = useUxUrlParams();
-
-  const { environments, status } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
-  });
-
-  return (
-    <EnvironmentFilter
-      environment={(environment || ENVIRONMENT_ALL.value) as Environment}
-      status={status}
-      environments={environments as Environment[]}
     />
   );
 }

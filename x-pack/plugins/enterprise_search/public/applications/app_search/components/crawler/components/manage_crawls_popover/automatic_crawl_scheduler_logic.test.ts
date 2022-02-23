@@ -20,7 +20,7 @@ jest.mock('./manage_crawls_popover_logic', () => ({
   },
 }));
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { CrawlUnits } from '../../types';
 

@@ -7,13 +7,14 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
+import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
 
 export interface SetValueOptions {
   clearWithKeyboard?: boolean;
+  enforceDataTestSubj?: boolean;
   typeCharByChar?: boolean;
 }
 
@@ -39,24 +40,46 @@ export function MachineLearningCommonUIProvider({
       options: SetValueOptions = {}
     ): Promise<void> {
       return await retry.try(async () => {
-        const { clearWithKeyboard = false, typeCharByChar = false } = options;
+        const {
+          clearWithKeyboard = false,
+          enforceDataTestSubj = false,
+          typeCharByChar = false,
+        } = options;
         log.debug(`TestSubjects.setValueWithChecks(${selector}, ${text})`);
         await testSubjects.click(selector);
+
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
-        const input = await find.activeElement();
+        let input: WebElementWrapper;
+        if (enforceDataTestSubj) {
+          await retry.tryForTime(5000, async () => {
+            await testSubjects.click(selector);
+            input = await find.activeElement();
+            const currentDataTestSubj = await input.getAttribute('data-test-subj');
+            if (currentDataTestSubj === selector) {
+              return true;
+            } else {
+              throw new Error(
+                `Expected input data-test-subj to be ${selector}, but got value '${currentDataTestSubj}'`
+              );
+            }
+          });
+        } else {
+          await testSubjects.click(selector);
+          input = await find.activeElement();
+        }
 
         // make sure that clearing the element's value works
         await retry.tryForTime(5000, async () => {
-          let currentValue = await input.getAttribute('value');
+          let currentValue = await testSubjects.getAttribute(selector, 'value');
           if (currentValue !== '') {
             if (clearWithKeyboard === true) {
               await input.clearValueWithKeyboard();
             } else {
               await input.clearValue();
             }
-            currentValue = await input.getAttribute('value');
+            currentValue = await testSubjects.getAttribute(selector, 'value');
           }
 
           if (currentValue === '') {
@@ -69,11 +92,11 @@ export function MachineLearningCommonUIProvider({
         // make sure that typing a character really adds that character to the input value
         for (const chr of text) {
           await retry.tryForTime(5000, async () => {
-            const oldValue = await input.getAttribute('value');
+            const oldValue = await testSubjects.getAttribute(selector, 'value');
             await input.type(chr, { charByChar: typeCharByChar });
 
             await retry.tryForTime(1000, async () => {
-              const newValue = await input.getAttribute('value');
+              const newValue = await testSubjects.getAttribute(selector, 'value');
               if (newValue === `${oldValue}${chr}`) {
                 return true;
               } else {
@@ -88,7 +111,7 @@ export function MachineLearningCommonUIProvider({
         // make sure that finally the complete text is entered
         // this is needed because sometimes the field value is reset while typing
         // and the above character checking might not catch it due to bad timing
-        const currentValue = await input.getAttribute('value');
+        const currentValue = await testSubjects.getAttribute(selector, 'value');
         if (currentValue !== text) {
           throw new Error(
             `Expected input '${selector}' to have the value '${text}' (got ${currentValue})`
@@ -308,6 +331,14 @@ export function MachineLearningCommonUIProvider({
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
       await PageObjects.spaceSelector.expectHomePage(spaceId);
+    },
+
+    async waitForDatePickerIndicatorLoaded() {
+      await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
+    },
+
+    async waitForRefreshButtonEnabled() {
+      await testSubjects.waitForEnabled('~mlRefreshPageButton');
     },
   };
 }

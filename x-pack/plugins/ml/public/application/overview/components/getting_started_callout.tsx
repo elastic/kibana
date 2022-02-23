@@ -31,6 +31,7 @@ export const GettingStartedCallout: FC = () => {
   return (
     <>
       <EuiCallOut
+        data-test-subj={'mlGettingStartedCallout'}
         title={
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionTitle"
@@ -72,7 +73,11 @@ export const GettingStartedCallout: FC = () => {
           />
         </p>
         <p>
-          <EuiButton color="primary" onClick={setIsCalloutDismissed.bind(null, true)}>
+          <EuiButton
+            color="primary"
+            onClick={setIsCalloutDismissed.bind(null, true)}
+            data-test-subj={'mlDismissGettingStartedCallout'}
+          >
             <FormattedMessage
               id="xpack.ml.overview.gettingStartedSectionDismiss"
               defaultMessage="Dismiss"

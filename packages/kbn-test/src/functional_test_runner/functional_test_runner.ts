@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
+import Path from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
   LifecyclePhase,
-  FailureMetadata,
+  TestMetadata,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
@@ -24,10 +25,11 @@ import {
   SuiteTracker,
   EsVersion,
 } from './lib';
+import { createEsClientForFtrConfig } from '../es';
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
-  public readonly failureMetadata = new FailureMetadata(this.lifecycle);
+  public readonly testMetadata = new TestMetadata(this.lifecycle);
   private closed = false;
 
   private readonly esVersion: EsVersion;
@@ -61,27 +63,9 @@ export class FunctionalTestRunner {
         ...readProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
-      // validate es version
       if (providers.hasService('es')) {
-        const es = (await providers.getService('es')) as unknown as EsClient;
-        let esInfo;
-        try {
-          esInfo = await es.info();
-        } catch (error) {
-          throw new Error(
-            `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
-          );
-        }
-
-        if (!this.esVersion.eql(esInfo.version.number)) {
-          throw new Error(
-            `ES reports a version number "${
-              esInfo.version.number
-            }" which doesn't match supplied es version "${this.esVersion.toString()}"`
-          );
-        }
+        await this.validateEsVersion(config);
       }
-
       await providers.loadAll();
 
       const customTestRunner = config.get('testRunner');
@@ -92,12 +76,60 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
+      let reporter;
+      let reporterOptions;
+      if (config.get('mochaOpts.dryRun')) {
+        // override default reporter for dryRun results
+        const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
+        reporter = 'json';
+        reporterOptions = {
+          output: targetFile,
+        };
+        this.log.info(`Dry run results will be stored in ${targetFile}`);
+      }
+
+      const mocha = await setupMocha(
+        this.lifecycle,
+        this.log,
+        config,
+        providers,
+        this.esVersion,
+        reporter,
+        reporterOptions
+      );
+
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
     });
+  }
+
+  private async validateEsVersion(config: Config) {
+    const es = createEsClientForFtrConfig(config);
+
+    let esInfo;
+    try {
+      esInfo = await es.info();
+    } catch (error) {
+      throw new Error(
+        `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
+      );
+    } finally {
+      try {
+        await es.close();
+      } catch {
+        // noop
+      }
+    }
+
+    if (!this.esVersion.eql(esInfo.version.number)) {
+      throw new Error(
+        `ES reports a version number "${
+          esInfo.version.number
+        }" which doesn't match supplied es version "${this.esVersion.toString()}"`
+      );
+    }
   }
 
   async getTestStats() {
@@ -182,7 +214,7 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
-        failureMetadata: () => this.failureMetadata,
+        testMetadata: () => this.testMetadata,
         config: () => config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,

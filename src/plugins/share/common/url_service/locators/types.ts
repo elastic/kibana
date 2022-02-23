@@ -23,7 +23,7 @@ export interface ILocatorClient extends PersistableStateService<LocatorData> {
   /**
    * Create and register a new locator.
    *
-   * @param urlGenerator Definition of the new locator.
+   * @param locatorDefinition Definition of the new locator.
    */
   create<P extends SerializableRecord>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
 
@@ -70,9 +70,10 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
   /**
    * Returns a URL as a string.
    *
-   * @deprecated Use `getRedirectUrl` instead. `getRedirectUrl` will preserve
-   * the location state, whereas the `getUrl` just return the URL without
-   * the location state.
+   * You may want to use `getRedirectUrl` instead. `getRedirectUrl` will
+   * preserve the location state, whereas the `getUrl` just returns the URL
+   * without the location state. Use this method if you know you don't need
+   * remember the location state and version of the URL locator.
    *
    * @param params URL locator parameters.
    * @param getUrlParams URL construction parameters.

@@ -5,9 +5,7 @@
   "description": "Detects attempts to exploit a privilege escalation vulnerability (CVE-2020-1030) related to the print spooler service. Exploitation involves chaining multiple primitives to load an arbitrary DLL into the print spooler process running as SYSTEM.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -46,5 +44,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

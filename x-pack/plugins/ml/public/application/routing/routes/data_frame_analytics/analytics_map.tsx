@@ -22,6 +22,9 @@ export const analyticsMapRouteFactory = (
 ): MlRoute => ({
   path: '/data_frame_analytics/map',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.analyticsMap.docTitle', {
+    defaultMessage: 'Analytics Map',
+  }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),

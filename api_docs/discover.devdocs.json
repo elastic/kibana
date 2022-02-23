@@ -486,11 +486,31 @@
         "parentPluginId": "discover",
         "id": "def-public.DiscoverUrlGeneratorState",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "DiscoverUrlGeneratorState",
         "description": [],
         "path": "src/plugins/discover/public/url_generator.ts",
-        "deprecated": false,
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "discover",
@@ -1151,6 +1171,19 @@
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/services/saved_searches/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1262,6 +1295,19 @@
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchInput.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1271,16 +1317,50 @@
     "misc": [
       {
         "parentPluginId": "discover",
-        "id": "def-public.DISCOVER_APP_URL_GENERATOR",
+        "id": "def-public.DISCOVER_APP_LOCATOR",
         "type": "string",
         "tags": [],
+        "label": "DISCOVER_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DISCOVER_APP_LOCATOR\""
+        ],
+        "path": "src/plugins/discover/public/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.DISCOVER_APP_URL_GENERATOR",
+        "type": "string",
+        "tags": [
+          "deprecated"
+        ],
         "label": "DISCOVER_APP_URL_GENERATOR",
         "description": [],
         "signature": [
           "\"DISCOVER_APP_URL_GENERATOR\""
         ],
         "path": "src/plugins/discover/public/url_generator.ts",
-        "deprecated": false,
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1589,6 +1669,20 @@
         "description": [],
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.ROW_HEIGHT_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ROW_HEIGHT_OPTION",
+        "description": [],
+        "signature": [
+          "\"discover:rowHeightOption\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

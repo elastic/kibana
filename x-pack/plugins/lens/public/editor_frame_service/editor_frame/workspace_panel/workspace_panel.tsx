@@ -37,16 +37,20 @@ import {
   VisualizationMap,
   DatasourceMap,
   DatasourceFixAction,
+  Suggestion,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
-import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
+import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { getOriginalRequestErrorMessages } from '../../error_helper';
+import {
+  getOriginalRequestErrorMessages,
+  getUnknownVisualizationTypeError,
+} from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
@@ -64,6 +68,7 @@ import {
   selectSearchSessionId,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
+import { inferTimeField } from '../../../utils';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -163,6 +168,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       ]
     : [];
 
+  const unknownVisError = visualization.activeId && !activeVisualization;
+
   // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
   // and to prevent race conditions it is ok to leave them there.
 
@@ -180,7 +187,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 
   const expression = useMemo(() => {
-    if (!configurationValidationError?.length && !missingRefsErrors.length) {
+    if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -213,6 +220,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }));
       }
     }
+    if (unknownVisError) {
+      setLocalState((s) => ({
+        ...s,
+        expressionBuildError: [getUnknownVisualizationTypeError(visualization.activeId!)],
+      }));
+    }
   }, [
     activeVisualization,
     visualization.state,
@@ -221,6 +234,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
+    unknownVisError,
+    visualization.activeId,
   ]);
 
   const expressionExists = Boolean(expression);
@@ -236,12 +251,18 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensBrushEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: event.data,
+          data: {
+            ...event.data,
+            timeFieldName: inferTimeField(event.data),
+          },
         });
       }
       if (isLensFilterEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: event.data,
+          data: {
+            ...event.data,
+            timeFieldName: inferTimeField(event.data),
+          },
         });
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
@@ -415,6 +436,7 @@ export const VisualizationWrapper = ({
       fixAction?: DatasourceFixAction<unknown>;
     }>;
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
+    unknownVisError?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;

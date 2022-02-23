@@ -78,7 +78,6 @@ export type {
   IFieldType,
   IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
   AggregationRestrictions,
@@ -293,7 +292,7 @@ export type {
 
 export type { AggsStart } from './search/aggs';
 
-export { getTime, getKbnTypeNames } from '../common';
+export { getTime } from '../common';
 
 export { isTimeRange, isQuery } from '../common';
 

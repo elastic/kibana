@@ -92,6 +92,6 @@ export class EventsQuery {
       this.buildSearch(parsedFilters)
     );
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.body.hits.hits.map((hit) => hit._source);
+    return response.hits.hits.map((hit) => hit._source);
   }
 }

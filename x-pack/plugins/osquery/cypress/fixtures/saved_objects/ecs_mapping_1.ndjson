@@ -1,0 +1,19 @@
+{
+  "attributes": {
+    "created_at": "2022-02-03T07:43:10.311Z",
+    "created_by": "elastic",
+    "description": "fdsfsd",
+    "ecs_mapping": [],
+    "id": "NOMAPPING",
+    "interval": 3600,
+    "query": "select * from uptime;",
+    "updated_at": "2022-02-03T08:22:01.662Z",
+    "updated_by": "elastic"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "ef31d680-84c4-11ec-991b-07bb2d53cda5",
+  "references": [],
+  "type": "osquery-saved-query",
+  "updated_at": "2022-02-03T08:22:01.668Z",
+  "version": "WzE3ODk5LDFd"
+}

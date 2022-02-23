@@ -15,7 +15,7 @@ import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetic
 import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
 
 export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
-const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
+export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
 
 export const syntheticsServiceApiKey: SavedObjectsType = {
   name: syntheticsApiKeyObjectType,

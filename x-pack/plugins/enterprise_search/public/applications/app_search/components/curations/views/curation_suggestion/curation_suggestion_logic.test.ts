@@ -14,7 +14,7 @@ import {
 
 import '../../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { HydratedCurationSuggestion } from '../../types';

@@ -28,9 +28,7 @@ import { policyHasFleetServer } from '../../applications/fleet/sections/agents/s
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
-import type { BaseProps } from './types';
-
-type Props = BaseProps;
+import type { InstructionProps } from './types';
 
 const DefaultMissingRequirements = () => {
   const { getHref } = useLink();
@@ -59,7 +57,7 @@ const FleetServerMissingRequirements = () => {
   return <FleetServerRequirementPage />;
 };
 
-export const ManagedInstructions = React.memo<Props>(
+export const ManagedInstructions = React.memo<InstructionProps>(
   ({
     agentPolicy,
     agentPolicies,
@@ -67,6 +65,8 @@ export const ManagedInstructions = React.memo<Props>(
     setSelectedPolicyId,
     isFleetServerPolicySelected,
     settings,
+    refreshAgentPolicies,
+    isLoadingAgentPolicies,
   }) => {
     const fleetStatus = useFleetStatus();
 
@@ -82,7 +82,7 @@ export const ManagedInstructions = React.memo<Props>(
     });
 
     const fleetServers = useMemo(() => {
-      const fleetServerAgentPolicies: string[] = (agentPolicies ?? [])
+      const fleetServerAgentPolicies: string[] = agentPolicies
         .filter((pol) => policyHasFleetServer(pol))
         .map((pol) => pol.id);
       return (agents?.items ?? []).filter((agent) =>
@@ -121,6 +121,7 @@ export const ManagedInstructions = React.memo<Props>(
               setSelectedAPIKeyId,
               setSelectedPolicyId,
               excludeFleetServer: true,
+              refreshAgentPolicies,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
         DownloadStep(isFleetServerPolicySelected || false),
@@ -149,6 +150,7 @@ export const ManagedInstructions = React.memo<Props>(
       setSelectedPolicyId,
       setSelectedAPIKeyId,
       agentPolicies,
+      refreshAgentPolicies,
       apiKey.data,
       fleetServerSteps,
       isFleetServerPolicySelected,
@@ -160,7 +162,10 @@ export const ManagedInstructions = React.memo<Props>(
       return null;
     }
 
-    if (fleetStatus.isReady && (isLoadingAgents || fleetServers.length > 0)) {
+    if (
+      fleetStatus.isReady &&
+      (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0)
+    ) {
       return (
         <>
           <EuiText>

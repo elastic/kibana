@@ -114,7 +114,7 @@ function useServicesFetcher() {
   );
 
   useEffect(() => {
-    if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
+    if (!hasDisplayedToast) {
       hasDisplayedToast = true;
 
       core.notifications.toasts.addWarning({
@@ -141,11 +141,7 @@ function useServicesFetcher() {
         ),
       });
     }
-  }, [
-    mainStatisticsData.hasLegacyData,
-    upgradeAssistantHref,
-    core.notifications.toasts,
-  ]);
+  }, [upgradeAssistantHref, core.notifications.toasts]);
 
   return {
     mainStatisticsData,
