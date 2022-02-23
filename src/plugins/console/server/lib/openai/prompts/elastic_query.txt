@@ -1,0 +1,34 @@
+# This is an Elasticsearch Query
+
+# Search the index my-index for either new york city or big apple
+GET my-index/_search
+{
+  "query": {
+    "query_string": {
+      "query": "(new york city) OR (big apple)",
+      "default_field": "content"
+    }
+  }
+}
+
+# Search the index my-index-2 for either new york city or big apple
+GET my-index-2/_search
+{
+  "query": {
+    "query_string" : {
+      "fields" : ["content", "name.*^5"],
+      "query" : "this AND that OR thus"
+    }
+  }
+}
+
+# Search the index my-index-3 for the terms kimichy or elkbee within the field user.id
+GET my-index-3/_search
+{
+  "query": {
+    "terms": {
+      "user.id": [ "kimchy", "elkbee" ]
+    }
+  }
+}
+

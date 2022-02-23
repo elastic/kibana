@@ -37,10 +37,10 @@ export class DiagnosticsAdapter {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
 
-      if (model.getModeId() === ID) {
+      if (model.getLanguageId() === ID) {
         model.onDidChangeContent(() => {
           // Do not validate if the language ID has changed
-          if (model.getModeId() !== ID) {
+          if (model.getLanguageId() !== ID) {
             return;
           }
 

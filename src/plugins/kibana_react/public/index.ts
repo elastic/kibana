@@ -17,6 +17,8 @@ export {
   CodeEditorField,
 } from './code_editor';
 
+export { HJson } from './code_editor/languages';
+
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
 

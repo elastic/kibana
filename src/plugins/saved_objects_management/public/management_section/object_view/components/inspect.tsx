@@ -70,7 +70,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
-            renderIndentGuides: false,
+            // renderIndentGuides: false,
           }}
         />
       </EuiFlexItem>

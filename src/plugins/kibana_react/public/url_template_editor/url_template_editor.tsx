@@ -134,7 +134,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         placeholder={placeholder}
         options={{
           fontSize: 14,
-          highlightActiveIndentGuide: false,
+          // highlightActiveIndentGuide: false,
           renderLineHighlight: 'none',
           lineNumbers: 'off',
           glyphMargin: false,
