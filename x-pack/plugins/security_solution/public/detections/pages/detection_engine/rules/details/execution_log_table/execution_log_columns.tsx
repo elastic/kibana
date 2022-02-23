@@ -59,22 +59,6 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
     width: '5%',
   },
   {
-    field: 'kibana.alert.rule.execution.metrics.total_alerts_created',
-    name: i18n.COLUMN_TOTAL_ALERTS_CREATED,
-    render: (value: number) => getOrEmptyTagFromValue(value),
-    sortable: true,
-    truncateText: false,
-    width: '5%',
-  },
-  {
-    field: 'kibana.alert.rule.execution.metrics.total_alerts_detected',
-    name: i18n.COLUMN_TOTAL_ALERTS_DETECTED,
-    render: (value: number) => getOrEmptyTagFromValue(value),
-    sortable: true,
-    truncateText: false,
-    width: '5%',
-  },
-  {
     field: 'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
     name: i18n.COLUMN_GAP_DURATION,
     render: (value: number) => getOrEmptyTagFromValue(value),

@@ -31,12 +31,6 @@ export const EXECUTION_LOG_SEARCH_SCHEMA = {
     message: {
       type: 'string',
     },
-    'kibana.alert.rule.execution.metrics.total_alerts_created': {
-      type: 'number',
-    },
-    'kibana.alert.rule.execution.metrics.total_alerts_detected': {
-      type: 'number',
-    },
     'kibana.alert.rule.execution.metrics.execution_gap_duration_s': {
       type: 'number',
     },

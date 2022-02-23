@@ -90,8 +90,6 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       const executeStartFields = ['@timestamp'];
       const executeFields = ['kibana.task.schedule_delay', 'event.duration'];
       const metricsFields = [
-        'kibana.alert.rule.execution.metrics.total_alerts_created',
-        'kibana.alert.rule.execution.metrics.total_alerts_detected',
         'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
         'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
         'kibana.alert.rule.execution.metrics.total_search_duration_ms',

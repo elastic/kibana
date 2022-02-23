@@ -376,7 +376,7 @@ export const exportRules = async ({
  * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
  * @param start string Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
  * @param end string End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
- * @param filters string Filters to apply to the search in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.total_alerts_detected > 100`)
+ * @param filters string Filters to apply to the search in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK

@@ -83,8 +83,6 @@ export const fetchRuleExecutionEvents = async ({
             rule: {
               execution: {
                 metrics: {
-                  total_alerts_created: 0,
-                  total_alerts_detected: 0,
                   total_indexing_duration_ms: 0,
                   total_search_duration_ms: 9,
                 },

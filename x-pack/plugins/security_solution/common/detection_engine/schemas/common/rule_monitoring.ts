@@ -111,8 +111,6 @@ export type RuleExecutionEvent = t.TypeOf<typeof ruleExecutionEvent>;
 // Aggregate Rule execution events
 
 const metrics = t.type({
-  total_alerts_created: t.number,
-  total_alerts_detected: t.number,
   total_indexing_duration_ms: t.number,
   total_search_duration_ms: t.number,
 });

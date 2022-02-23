@@ -97,19 +97,6 @@ export const COLUMN_MESSAGE = i18n.translate(
     defaultMessage: 'Message',
   }
 );
-
-export const COLUMN_TOTAL_ALERTS_CREATED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.totalAlertsCreatedColumn',
-  {
-    defaultMessage: 'Total Alerts Created',
-  }
-);
-export const COLUMN_TOTAL_ALERTS_DETECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.totalAlertsDetectedColumn',
-  {
-    defaultMessage: 'Total Alerts Detected',
-  }
-);
 export const COLUMN_GAP_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumn',
   {
