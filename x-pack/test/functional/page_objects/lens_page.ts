@@ -1330,5 +1330,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     hasEmptySizeRatioButtonGroup() {
       return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
+
+    getAutoApplyToggleExists() {
+      return testSubjects.exists('lensToggleAutoApply');
+    },
+
+    async disableAutoApply() {
+      return testSubjects.click('lensToggleAutoApply');
+    },
+
+    async getAutoApplyEnabled() {
+      const toggleSwitch = await testSubjects.find('lensToggleAutoApply');
+      return (await toggleSwitch.getAttribute('aria-checked')) === 'true';
+    },
   });
 }
