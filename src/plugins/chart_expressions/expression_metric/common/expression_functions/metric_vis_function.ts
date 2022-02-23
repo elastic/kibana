@@ -89,7 +89,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       default: false,
       help: i18n.translate('expressionMetricVis.function.colorFullBackground.help', {
         defaultMessage:
-          'Colorize full container with provided color from palette if color mode is background',
+          'Applies the selected background color to the full visualization container',
       }),
     },
     palette: {
