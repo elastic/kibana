@@ -17,6 +17,7 @@ export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
+export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/fixtures/plugins

@@ -22,6 +22,7 @@ import {
   caseConnectorMappingsSavedObjectType,
   createCaseSavedObjectType,
   caseUserActionSavedObjectType,
+  casesTelemetrySavedObjectType,
 } from './saved_object_types';
 
 import { CasesClient } from './client';
@@ -88,6 +89,7 @@ export class CasePlugin {
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(createCaseSavedObjectType(core, this.log));
     core.savedObjects.registerType(caseUserActionSavedObjectType);
+    core.savedObjects.registerType(casesTelemetrySavedObjectType);
 
     this.log.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
