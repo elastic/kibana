@@ -12,11 +12,15 @@ import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from 'src/plugins/telemetry_collection_manager/server';
+import type { SecurityPluginStart } from '../../../../../x-pack/plugins/security/server';
+
+export type SecurityGetter = () => SecurityPluginStart | undefined;
 
 export function registerTelemetryUsageStatsRoutes(
   router: IRouter,
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
-  isDev: boolean
+  isDev: boolean,
+  getSecurity: SecurityGetter
 ) {
   router.post(
     {
@@ -31,9 +35,18 @@ export function registerTelemetryUsageStatsRoutes(
     async (context, req, res) => {
       const { unencrypted, refreshCache } = req.body;
 
+      const security = getSecurity();
+      if (security) {
+        const hasEnoughPrivileges = await security.authz
+          .checkPrivilegesWithRequest(req)
+          .globally({ kibana: 'decryptedTelemetry' });
+        if (!hasEnoughPrivileges) {
+          return res.forbidden();
+        }
+      }
+
       try {
         const statsConfig: StatsGetterConfig = {
-          request: req,
           unencrypted,
           refreshCache: unencrypted || refreshCache,
         };

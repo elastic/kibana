@@ -126,11 +126,10 @@ export class TelemetryCollectionManagerPlugin
     const esClient = this.getElasticsearchClient(config);
     const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
-    const kibanaRequest = config.unencrypted ? config.request : void 0;
     const refreshCache = config.unencrypted ? true : !!config.refreshCache;
 
     if (esClient && soClient) {
-      return { usageCollection, esClient, soClient, kibanaRequest, refreshCache };
+      return { usageCollection, esClient, soClient, refreshCache };
     }
   }
 
@@ -142,9 +141,7 @@ export class TelemetryCollectionManagerPlugin
    * @private
    */
   private getElasticsearchClient(config: StatsGetterConfig): ElasticsearchClient | undefined {
-    return config.unencrypted
-      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
-      : this.elasticsearchClient?.asInternalUser;
+    return this.elasticsearchClient?.asInternalUser;
   }
 
   /**
@@ -155,11 +152,7 @@ export class TelemetryCollectionManagerPlugin
    * @private
    */
   private getSavedObjectsClient(config: StatsGetterConfig): SavedObjectsClientContract | undefined {
-    if (config.unencrypted) {
-      // Intentionally using the scoped client here to make use of all the security wrappers.
-      // It also returns spaces-scoped telemetry.
-      return this.savedObjectsService?.getScopedClient(config.request);
-    } else if (this.savedObjectsService) {
+    if (this.savedObjectsService) {
       // Wrapping the internalRepository with the `TelemetrySavedObjectsClient`
       // to ensure some best practices when collecting "all the telemetry"
       // (i.e.: `.find` requests should query all spaces)
