@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Handlebars, { HelperDelegate, ExtendedCompileOptions } from './';
+import Handlebars from '.';
+import { expectTemplate } from './__jest__/test_bench';
 
 test('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
@@ -44,22 +45,6 @@ describe('Handlebars.compileAST', () => {
   });
 });
 
-describe('builtin helpers', () => {
-  describe('#lookup', () => {
-    it('should lookup arbitrary content', () => {
-      expectTemplate('{{#each goodbyes}}{{lookup ../data .}}{{/each}}')
-        .withInput({ goodbyes: [0, 1], data: ['foo', 'bar'] })
-        .toCompileTo('foobar');
-    });
-
-    it('should not fail on undefined value', () => {
-      expectTemplate('{{#each goodbyes}}{{lookup ../bar .}}{{/each}}')
-        .withInput({ goodbyes: [0, 1], data: ['foo', 'bar'] })
-        .toCompileTo('');
-    });
-  });
-});
-
 test('Handlebars.registerHelpers', () => {
   expectTemplate(
     'https://elastic.co/{{lookup (split value ",") 0 }}&{{lookup (split value ",") 1 }}'
@@ -73,69 +58,3 @@ test('Handlebars.registerHelpers', () => {
     .withInput({ value: '47.766201,-122.257057' })
     .toCompileTo('https://elastic.co/47.766201&-122.257057');
 });
-
-class HandlebarsTestBench {
-  private template: string;
-  private compileOptions?: ExtendedCompileOptions;
-  private helpers: { [key: string]: HelperDelegate } = {};
-  private input: object = {};
-
-  constructor(template: string) {
-    this.template = template;
-  }
-
-  withCompileOptions(compileOptions: ExtendedCompileOptions) {
-    this.compileOptions = compileOptions;
-    return this;
-  }
-
-  withInput(input: object) {
-    this.input = input;
-    return this;
-  }
-
-  withHelper(name: string, helper: HelperDelegate) {
-    this.helpers[name] = helper;
-    return this;
-  }
-
-  toCompileTo(outputExpected: string) {
-    const { outputEval, outputAST } = this.compileAndExecute();
-    expect(outputAST).toEqual(outputExpected);
-    expect(outputAST).toEqual(outputEval);
-  }
-
-  toThrowErrorMatchingSnapshot() {
-    const { renderEval, renderAST } = this.compile();
-    expect(() => renderEval(this.input)).toThrowErrorMatchingSnapshot();
-    expect(() => renderAST(this.input)).toThrowErrorMatchingSnapshot();
-  }
-
-  private compileAndExecute() {
-    const { renderEval, renderAST } = this.compile();
-    return {
-      outputEval: renderEval(this.input),
-      outputAST: renderAST(this.input),
-    };
-  }
-
-  private compile() {
-    const hasCustomHelpers = Object.keys(this.helpers).length > 0;
-    const hbar = hasCustomHelpers ? Handlebars.create() : Handlebars;
-
-    if (hasCustomHelpers) {
-      for (const [name, helper] of Object.entries(this.helpers)) {
-        hbar.registerHelper(name, helper);
-      }
-    }
-
-    return {
-      renderEval: hbar.compile(this.template, this.compileOptions),
-      renderAST: hbar.compileAST(this.template, this.compileOptions),
-    };
-  }
-}
-
-function expectTemplate(template: string) {
-  return new HandlebarsTestBench(template);
-}
