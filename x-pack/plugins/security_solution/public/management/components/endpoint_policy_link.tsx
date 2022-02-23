@@ -7,11 +7,9 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { useEndpointSelector } from '../hooks';
-import { nonExistingPolicies } from '../../store/selectors';
-import { getPolicyDetailPath } from '../../../../common/routing';
-import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
+import { getPolicyDetailPath } from '../common/routing';
+import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../common/lib/kibana/hooks';
 
 /**
  * A policy link (to details) that first checks to see if the policy id exists against
@@ -21,9 +19,9 @@ import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 export const EndpointPolicyLink = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
+    missingPolicies?: Record<string, boolean>;
   }
->(({ policyId, children, onClick, ...otherProps }) => {
-  const missingPolicies = useEndpointSelector(nonExistingPolicies);
+>(({ policyId, children, onClick, missingPolicies = {}, ...otherProps }) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
     const path = getPolicyDetailPath(policyId);
