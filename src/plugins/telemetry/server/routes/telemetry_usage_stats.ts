@@ -37,10 +37,10 @@ export function registerTelemetryUsageStatsRoutes(
 
       const security = getSecurity();
       if (security) {
-        const hasEnoughPrivileges = await security.authz
+        const { hasAllRequested } = await security.authz
           .checkPrivilegesWithRequest(req)
           .globally({ kibana: 'decryptedTelemetry' });
-        if (!hasEnoughPrivileges) {
+        if (!hasAllRequested) {
           return res.forbidden();
         }
       }
