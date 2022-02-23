@@ -363,7 +363,10 @@ export interface DatasourcePublicAPI {
   /**
    * Collect all defined filters from all the operations in the layer
    */
-  getFilters: () => { kuery: Query[][]; lucene: Query[][] };
+  getFilters: (activeData?: FramePublicAPI['activeData']) => {
+    kuery: Query[][];
+    lucene: Query[][];
+  };
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {

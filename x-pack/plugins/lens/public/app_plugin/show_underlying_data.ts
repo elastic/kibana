@@ -122,7 +122,7 @@ export function getLayerMetaInfo(
     meta: {
       id: datasourceAPI.getSourceId()!,
       columns: uniqueFields,
-      filters: datasourceAPI.getFilters(),
+      filters: datasourceAPI.getFilters(activeData),
     },
     error: undefined,
     isVisible,

@@ -22,6 +22,7 @@ import type {
   PublicAPIProps,
   InitializationOptions,
   OperationDescriptor,
+  FramePublicAPI,
 } from '../types';
 import {
   loadInitialState,
@@ -496,7 +497,8 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => layer.indexPatternId,
-        getFilters: () => getFiltersInLayer(layer, visibleColumnIds),
+        getFilters: (activeData: FramePublicAPI['activeData']) =>
+          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },

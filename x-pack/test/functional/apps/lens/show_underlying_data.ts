@@ -88,7 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the query
-      expect(await queryBar.getQueryString()).be.eql('( ip: * )');
+      expect(await queryBar.getQueryString()).be.eql(
+        '( ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 152.56.56.106 ) OR ( ip: 152.56.56.106 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) )'
+      );
       const filterPills = await filterBar.getFiltersLabel();
       expect(filterPills.length).to.be(1);
       expect(filterPills[0]).to.be('Lens context (lucene)');
@@ -123,7 +125,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['ip', '@timestamp', 'bytes', 'memory']);
       // check the query
-      expect(await queryBar.getQueryString()).be.eql('( ( bytes > 6000 ) AND ( ip: * ) )');
+      expect(await queryBar.getQueryString()).be.eql(
+        '( ( bytes > 6000 ) AND ( ( ip: 97.220.3.248 ) OR ( ip: 169.228.188.120 ) OR ( ip: 78.83.247.30 ) ) )'
+      );
     });
 
     it('should extract a filter from a formula global filter', async () => {
@@ -152,7 +156,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
 
       // check the query
-      expect(await queryBar.getQueryString()).be.eql('( ( bytes > 4000 ) AND ( ip: * ) )');
+      expect(await queryBar.getQueryString()).be.eql(
+        '( ( bytes > 4000 ) AND ( ( ip: 97.220.3.248 ) OR ( ip: 169.228.188.120 ) OR ( ip: 78.83.247.30 ) ) )'
+      );
     });
   });
 }

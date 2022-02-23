@@ -242,7 +242,11 @@ export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
   );
 }
 
-export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[]) {
+export function getFiltersInLayer(
+  layer: IndexPatternLayer,
+  columnIds: string[],
+  layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined
+) {
   // extract filters from filtered metrics
   // consider all the columns, included referenced ones to cover also the formula case
   const filteredMetrics = Object.keys(layer.columns)
@@ -314,15 +318,37 @@ export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[])
         isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
-        // TODO: return field -> terms?
-        // TODO: support multi-terms?
+        // Fallback in case of no data: just return the field existence
+        if (!layerData) {
+          return {
+            kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
+              column.params.secondaryFields?.map((field) => ({
+                query: `${field}: *`,
+                language: 'kuery',
+              })) || []
+            ),
+          };
+        }
+        const fields = [column.sourceField]
+          .concat(column.params.secondaryFields || [])
+          .filter(Boolean) as string[];
+        // extract the filters from the columns of the activeData
+        const queryWithTerms = layerData.rows
+          .map(({ [colId]: value }) => {
+            if (typeof value !== 'string' && Array.isArray(value.keys)) {
+              return {
+                query: value.keys
+                  .map((term: string, index: number) => `${fields[index]}: ${term || "''"}`)
+                  .join(' AND '),
+                language: 'kuery',
+              };
+            }
+            return { query: `${column.sourceField}: ${value}`, language: 'kuery' };
+          })
+          .filter(Boolean) as Query[];
+
         return {
-          kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
-            column.params.secondaryFields?.map((field) => ({
-              query: `${field}: *`,
-              language: 'kuery',
-            })) || []
-          ),
+          kuery: queryWithTerms,
         };
       }
     })

@@ -1475,7 +1475,7 @@ describe('IndexPattern Data Source', () => {
         });
         expect(publicAPI.getFilters()).toEqual({ kuery: [], lucene: [] });
       });
-      it('shuold collect top values fields as kuery existence filters', () => {
+      it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
             ...enrichBaseState(baseState),
@@ -1521,6 +1521,134 @@ describe('IndexPattern Data Source', () => {
             [
               { language: 'kuery', query: 'geo.dest: *' },
               { language: 'kuery', query: 'myField: *' },
+            ],
+          ],
+          lucene: [],
+        });
+      });
+      it('shuold collect top values fields and terms as kuery filters if data is provided', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.dest',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        const data = {
+          first: {
+            type: 'datatable' as const,
+            columns: [],
+            rows: [
+              { col1: 'US', col2: { keys: ['IT', 'MyValue'] } },
+              { col1: 'IN', col2: { keys: ['DE', 'MyOtherValue'] } },
+            ],
+          },
+        };
+        expect(publicAPI.getFilters(data)).toEqual({
+          kuery: [
+            [
+              { language: 'kuery', query: 'geo.src: US' },
+              { language: 'kuery', query: 'geo.src: IN' },
+            ],
+            [
+              { language: 'kuery', query: 'geo.dest: IT AND myField: MyValue' },
+              { language: 'kuery', query: 'geo.dest: DE AND myField: MyOtherValue' },
+            ],
+          ],
+          lucene: [],
+        });
+      });
+      it('shuold collect top values fields and terms and carefully handle empty string values', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.dest',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        const data = {
+          first: {
+            type: 'datatable' as const,
+            columns: [],
+            rows: [
+              { col1: 'US', col2: { keys: ['IT', ''] } },
+              { col1: 'IN', col2: { keys: ['DE', 'MyOtherValue'] } },
+            ],
+          },
+        };
+        expect(publicAPI.getFilters(data)).toEqual({
+          kuery: [
+            [
+              { language: 'kuery', query: 'geo.src: US' },
+              { language: 'kuery', query: 'geo.src: IN' },
+            ],
+            [
+              { language: 'kuery', query: "geo.dest: IT AND myField: ''" },
+              { language: 'kuery', query: 'geo.dest: DE AND myField: MyOtherValue' },
             ],
           ],
           lucene: [],
