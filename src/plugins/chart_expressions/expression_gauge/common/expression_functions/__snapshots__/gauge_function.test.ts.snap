@@ -14,7 +14,7 @@ Object {
     Object {
       "id": "col-1-2",
       "meta": Object {
-        "dimensionName": "Metric",
+        "dimensionName": "Min",
         "type": "string",
       },
       "name": "Dest",
