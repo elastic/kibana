@@ -30,7 +30,7 @@ image::discover/images/field-statistics-view.png[Filter panel in Canvas]
 
 [float]
 ==== New $ field syntax for Painless scripts
-Creating runtime fields is now easier and more reliable. Use our new shortcut
+Creating runtime fields is now easier and more reliable. When a script context supports the scripting fields API, use the new shortcut for the field method, which replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
 for the field method when a script context supports the scripting fields API.
 This shortcut replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
 
@@ -53,8 +53,8 @@ $('myfield', 'unavailable')
 
 [float]
 ==== Synchronized ML anomaly visualizations
-*{ml-app}* visualizations now synchronize cursor position with visualization panels
-from Lens, TSVB, Timelion, and aggregation-based visualizations.
+*{ml-app}* visualizations now synchronize your cursor position with the visualization panels you create with
+from *Lens*, *TSVB*, *Timelion*, and *Aggregation-based* editors.
 Highlight an anomaly in time and see a visual indication
 of this time on other panels.
 The reverse is true as well&mdash;hovering in another editor highlights the same point-in-time in *{ml-app}* panels.
@@ -63,27 +63,25 @@ The reverse is true as well&mdash;hovering in another editor highlights the same
 === Canvas
 
 [float]
-==== Native heatmap
-Create heatmaps in Canvas and natively use Canvas-only functionality, such as ES SQL,
-to fetch data. Fully configure your heatmap with flexible legend, axis,
+==== Add heatmap elements to workpads
+Create heatmaps in workpads using *Canvas*-only functionality to fetch data, such as {es} SQL.
+Configure your heatmap with flexible legend, axis,
 and visual controls.
 
 [float]
-==== New filter panel
-Use the new filter panel on any object to see which objects are filtering it.
-This helps you author your workpad with the right behavior.
+==== New filter capabilities
+To help you create workpads with exactly the right behavior, use the new *Filters* on any element or object to view the applied object filters. 
 
 [role="screenshot"]
 image::images/highlights-canvas-filter.png[Filter panel in Canvas]
 
 [float]
-=== Visualizations
+=== Lens & visualizations
 
 [float]
 ==== Combine fields with drag and drop
 
-Combine multiple fields with drag and drop to see top combinations in Lens.
-Use this feature to determine which combinations contribute to your metrics’ performance.
+To view the top combinations in *Lens*, combine multiple fields with drag and drop, which helps you to determine the combinations that contribute to your metric performance.
 
 [role="screenshot"]
 image::images/highlights-lens-combine.gif[Drag to combin in Lens]
@@ -92,9 +90,7 @@ image::images/highlights-lens-combine.gif[Drag to combin in Lens]
 ==== Top values by rarity
 
 When looking for root cause, it is often useful to find rare values in your data.
-Do this in Lens by seeing top values by rarity.
-This takes advantage of the {es} rare terms aggregation and makes it easy to ask
-“What’s not normal here?”
+You can now take advantage of the {es} rare terms aggregations in *Lens* by viewing the top values by rarity, making it easy to ask "What's not normal here?"
 
 [role="screenshot"]
 image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, width=50%]
@@ -105,8 +101,8 @@ image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, w
 The gauge visualization adds extra context to your metrics.
 Show minimum and maximum values dynamically by using a quick function or custom formula,
 or set a static value for known metric ranges. Include a goal value to see
-if a metric is above or below the goal. Set color bands to show ranges visually&mdash;imilar
-to reference lines in bar, line, and area visualizations. This new gauge visualization is
+if a metric is above or below the goal. Set color bands to show ranges visually&mdash;similar
+to reference lines in bar, line, and area visualizations. The gauge visualization is
 in technical preview in 8.1.
 
 [role="screenshot"]
@@ -118,8 +114,8 @@ image::images/highlights-lens-guage.png[Example horizontal gauge with target val
 The mosaic visualization, also known as marimekko or mekko, allows for side-by-side
 comparison of two dimensions against a single metric. Treemaps and two-layered
 pies do this as well, but the mosaic can be more effective for visual comparisons
-by aligning the colors for the term side by side. Try this on low cardinality
-dimensions to see its strengths. This new mosaic visualization is in technical preview in 8.1.
+by aligning the colors for the terms side-by-side. For the best mosaic visualizations, create with low cardinality dimensions. 
+The mosaic visualization is in technical preview in 8.1.
 
 [role="screenshot"]
 image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
@@ -127,13 +123,12 @@ image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
 [float]
 ==== Waffle visualization
 
-The waffle visualization is a proportion visualization that makes
+Create proportional waffle visualizations that make
 more efficient use of space than pie charts.
 Waffles are designed for square spaces, which aligns well with how
-most dashboards are authored. Waffles are stronger for low cardinality breakdowns,
-but are not recommended for very small partitions because they only can show
-data in 1% blocks. You might be surprised how small you can make a waffle
-visualization and maintain readability. This new waffle visualization is in technical preview in 8.1.
+most dashboards are created. Since waffles display the data in 1% blocks, they are best for low cardinality breakdowns, and are not recommended for small partitions. 
+You might be surprised how small you can make a waffle
+visualization and maintain readability. The waffle visualization is in technical preview in 8.1.
 
 [role="screenshot"]
 image::images/highlights-lens-waffle.png[Example waffle visualization in Lens, width=50%]
@@ -141,48 +136,48 @@ image::images/highlights-lens-waffle.png[Example waffle visualization in Lens, w
 [float]
 ==== Color by value in metrics
 
-Color the metric text or the background of the entire visualization
-based on the value of the metric. Set up color stops for multiple colors similar
-to what you can do in Lens tables, heatmaps, and the new gauge.
+Apply color to the text and background of metric visualizations 
+based on the value of the metric. Set up color stops for multiple colors, similar
+to what you can do in *Lens* tables, heatmaps, and gauge.
 
 [role="screenshot"]
 image::images/highlights-lens-metric.png[Metric color options in Lens, width=75%]
 
 [float]
-==== Table sort on dashboard view
-Allow dashboard viewers to quickly change a table’s sort on the fly, like the editors can.
+==== Sort tables in dashboard view mode
+You can now enable users with view-only dashboard privileges to sort data tables on the fly, similar to the existing visualization editor behavior.
 
 [float]
 ==== Filter formulas globally
 
-This brings the familiar “Filter by” option for metrics defined by a formula.
-With this feature it’s easy to filter all the parts of your formula with KQL
-without having to copy or paste the KQL to all the aggregations used in the formula.
+Bring the familiar *Filter by* option for metrics defined by a formula.
+Filter each part of your formula with KQL
+without copying or pasting to all the aggregations in the formula.
 
 [float]
 ==== Configurable donut visualizations
-The inner area size (or “donut hole”) in the donut
+The inner area size (or donut hole) in the donut
 visualization is now configurable&mdash;keeping the default as a smaller size to maximize space for
-labels but allowing you to change the option in Lens.
+labels, but allowing you to change the option in *Lens*.
 
 [role="screenshot"]
 image::images/highlights-lens-donut.png[Inner area size setting in Lens donuts,width=75%]
 
 [float]
-==== Collapsable suggestions panel
+==== Collapsable Suggestions panel
 
-Get back some vertical space in Lens and save on the query cost of
-suggestions by collapsing the suggestions panel. {kib} will remember if you close
+Get back some vertical space in *Lens* and save on the query cost of
+suggestions by collapsing the *Suggestions* panel. {kib} remembers when you collapse
 your suggestions the next time you use the editor with the same browser.
 
 [float]
 ==== Improved color controls
 
-Revised color stop editing experience offers a more streamlined way to specify
+The revised color stop editing experience offers a more streamlined way to specify
 what happens outside of the defined ranges (above and below the minimum and maximum).
 These revised controls also add the ability to easily distribute color stops
-evenly in one click. Look for this in Lens tables, heatmaps, metrics (new this release),
-and gauges (new this release).
+evenly in one click. Look for the new functionality in *Lens* tables, heatmaps, metrics,
+and gauges.
 
 [role="screenshot"]
 image::images/highlights-lens-color.png[Color editing in Lens, width=50%]
