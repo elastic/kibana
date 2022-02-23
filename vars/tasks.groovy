@@ -154,7 +154,6 @@ def functionalXpack(Map params = [:]) {
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
-        task(kibanaPipeline.functionalTestProcess('xpack-APMSynthetics', './test/scripts/jenkins_apm_synthetics.sh'))
       }
     }
 
