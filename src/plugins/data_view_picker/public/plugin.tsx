@@ -9,13 +9,11 @@
 import React from 'react';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewPickerProps } from './types';
+import { PluginStart, StartPlugins, DataViewPickerProps } from './types';
 import { DataViewPicker } from './components/data_view_picker';
 
-export class DataViewPickerPlugin
-  implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
-{
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
+export class DataViewPickerPlugin implements Plugin<void, PluginStart> {
+  public setup(core: CoreSetup) {
     return {};
   }
 
@@ -25,8 +23,8 @@ export class DataViewPickerPlugin
 
     return {
       /**
-       * Data view editor flyout via react component
-       * @param DataViewPickerProps - data view editor config
+       * Data view picker component via react component
+       * @param DataViewPickerProps - data view picker config
        * @returns JSX.Element
        */
       DataViewPickerComponent: (props: DataViewPickerProps) => (

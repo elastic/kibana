@@ -105,13 +105,12 @@ export const DiscoverTopNav = ({
   }, []);
 
   const dataViewPickerProps = {
-    'data-test-subj': 'discover-dataView-switcher',
     trigger: {
       label: indexPattern?.title || '',
       'data-test-subj': 'discover-dataView-switch-link',
       title: indexPattern?.title || '',
     },
-    indexPatternId: indexPattern?.id,
+    currentDataViewId: indexPattern?.id,
     onAddField: onEditRuntimeField,
     onDataViewCreated: (dataView: DataView) => {
       if (dataView.id) {

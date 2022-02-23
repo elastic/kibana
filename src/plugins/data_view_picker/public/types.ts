@@ -7,12 +7,10 @@
  */
 
 import { FC } from 'react';
-import { ApplicationStart, IUiSettingsClient, HttpSetup } from 'src/core/public';
-import { IndexPatternFieldEditorStart } from 'src/plugins/data_view_field_editor/public';
-import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
-
-import { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-
+import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
+import type { ApplicationStart, IUiSettingsClient, HttpSetup } from 'src/core/public';
+import type { IndexPatternFieldEditorStart } from 'src/plugins/data_view_field_editor/public';
+import type { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
 import type { DataViewsPublicPluginStart, DataView } from 'src/plugins/data_views/public';
 
 export interface DataViewPickerContext {
@@ -34,21 +32,15 @@ export interface DataViewPickerProps {
   trigger: ChangeDataViewTriggerProps;
   isMissingCurrent?: boolean;
   onChangeDataView: (newId: string) => void;
-  indexPatternId?: string;
+  currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   onAddField?: () => void;
   onDataViewCreated?: (dataView: DataView) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
-
 export interface PluginStart {
   DataViewPickerComponent: FC<DataViewPickerProps>;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupPlugins {}
 
 export interface StartPlugins {
   dataViews: DataViewsPublicPluginStart;

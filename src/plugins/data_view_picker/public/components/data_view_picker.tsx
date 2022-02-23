@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
+import { createKibanaReactContext } from '../../../kibana_react/public';
 import { DataViewPickerContext, DataViewPickerProps } from '../types';
-import { createKibanaReactContext } from '../shared_imports';
 import { ChangeDataView } from './change_dataview';
 export interface DataViewPickerPropsWithServices extends DataViewPickerProps {
   services: DataViewPickerContext;
@@ -16,7 +16,7 @@ export interface DataViewPickerPropsWithServices extends DataViewPickerProps {
 
 export const DataViewPicker = ({
   isMissingCurrent,
-  indexPatternId,
+  currentDataViewId,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -31,7 +31,7 @@ export const DataViewPicker = ({
     <KibanaReactContextProvider>
       <ChangeDataView
         isMissingCurrent={isMissingCurrent}
-        indexPatternId={indexPatternId}
+        currentDataViewId={currentDataViewId}
         onChangeDataView={onChangeDataView}
         onAddField={onAddField}
         onDataViewCreated={onDataViewCreated}

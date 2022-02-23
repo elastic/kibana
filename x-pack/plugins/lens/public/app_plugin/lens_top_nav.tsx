@@ -518,13 +518,12 @@ export const LensTopNavMenu = ({
   ]);
 
   const dataViewPickerProps = {
-    'data-test-subj': 'lns-dataView-switcher',
     trigger: {
       label: currentIndexPattern?.title || '',
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
     },
-    indexPatternId: currentIndexPattern?.id,
+    currentDataViewId: currentIndexPattern?.id,
     onAddField: refreshFieldList,
     onDataViewCreated: (dataView: DataView) => {
       if (dataView.id) {
