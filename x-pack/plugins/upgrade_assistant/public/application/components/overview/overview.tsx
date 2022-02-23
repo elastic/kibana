@@ -28,8 +28,9 @@ import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
+import { getLogsStep } from './logs_step';
 
-type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues';
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
@@ -114,6 +115,12 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             getFixIssuesStep({
               isComplete: isStepComplete('fix_issues'),
               setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+              // TODO remove associated code
+              navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
+            }),
+            getLogsStep({
+              isComplete: isStepComplete('logs'),
+              setIsComplete: setCompletedStep.bind(null, 'logs'),
               navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
             }),
             getUpgradeStep(),
