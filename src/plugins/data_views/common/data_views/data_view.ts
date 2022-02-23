@@ -373,26 +373,7 @@ export class DataView implements IIndexPattern {
     };
 
     if (type === 'composite') {
-      const subFields = Object.entries(fields!).reduce<RuntimeField['fields']>(
-        (acc, [subFieldName, subField]) => {
-          const fieldFullName = `${name}.${subFieldName}`;
-          const dataViewField = this.getFieldByName(fieldFullName);
-          if (!dataViewField) {
-            // We should never enter here as all composite runtime subfield
-            // are converted to data view fields.
-            return acc;
-          }
-          return {
-            ...acc,
-            [subFieldName]: {
-              type: subField.type,
-            },
-          };
-        },
-        {}
-      );
-
-      runtimeField.fields = subFields;
+      runtimeField.fields = fields;
     }
 
     return runtimeField;
@@ -406,6 +387,35 @@ export class DataView implements IIndexPattern {
       }),
       {}
     );
+  }
+
+  getFieldsByRuntimeFieldName(name: string): Record<string, DataViewField> | undefined {
+    const runtimeField = this.getRuntimeField(name);
+    if (!runtimeField) {
+      return;
+    }
+
+    if (runtimeField.type === 'composite') {
+      return Object.entries(runtimeField.fields!).reduce<Record<string, DataViewField>>(
+        (acc, [subFieldName, subField]) => {
+          const fieldFullName = `${name}.${subFieldName}`;
+          const dataViewField = this.getFieldByName(fieldFullName);
+
+          if (!dataViewField) {
+            // We should never enter here as all composite runtime subfield
+            // are converted to data view fields.
+            return acc;
+          }
+          acc[subFieldName] = dataViewField;
+          return acc;
+        },
+        {}
+      );
+    }
+
+    const primitveRuntimeField = this.getFieldByName(name);
+
+    return primitveRuntimeField && { [name]: primitveRuntimeField };
   }
 
   /**
@@ -435,22 +445,11 @@ export class DataView implements IIndexPattern {
       if (existingField.isMapped) {
         // mapped field, remove runtimeField def
         existingField.runtimeField = undefined;
-      } else {
-        this.fields.remove(existingField);
       }
     } else {
-      const runtimeFieldSpec = this.runtimeFieldMap[name];
-
-      if (runtimeFieldSpec?.type === 'composite') {
-        // If we remove a "composite" runtime field we loop through each of its
-        // subFields and remove them from the field list
-        Object.keys(runtimeFieldSpec.fields!).forEach((subFieldName) => {
-          const subField = this.getFieldByName(`${name}.${subFieldName}`);
-          if (subField) {
-            this.fields.remove(subField);
-          }
-        });
-      }
+      Object.values(this.getFieldsByRuntimeFieldName(name) || {}).forEach((field) => {
+        this.fields.remove(field);
+      });
     }
     delete this.runtimeFieldMap[name];
   }
