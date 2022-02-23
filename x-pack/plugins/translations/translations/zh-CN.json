@@ -7881,7 +7881,6 @@
     "xpack.apm.unitLabel": "选择单位",
     "xpack.apm.unsavedChanges": "{unsavedChangesCount, plural, =0{0 个未保存更改} one {1 个未保存更改} other {# 个未保存更改}} ",
     "xpack.apm.ux.overview.agent.description": "使用 APM 代理来收集 APM 数据。我们的代理支持许多流行语言，可以轻松使用。",
-    "xpack.apm.ux.overview.agent.title": "添加 APM 集成",
     "xpack.apm.views.dependencies.title": "依赖项",
     "xpack.apm.views.dependenciesInventory.title": "依赖项",
     "xpack.apm.views.errors.title": "错误",
