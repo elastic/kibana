@@ -33,12 +33,14 @@ import { PluginStartContract as FeaturesPluginStart } from '../../features/serve
 import { LensServerPluginSetup } from '../../lens/server';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
+import { TaskManagerSetupContract } from '../../task_manager/server';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
-  usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  taskManager?: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginsStart {
