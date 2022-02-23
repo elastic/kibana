@@ -23805,8 +23805,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.interProcessCommunicationDescription": "Inter-Process Communication (T1559)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.lateralToolTransferDescription": "Lateral Tool Transfer (T1570)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.lcMainHijackingDescription": "LC_MAIN Hijacking (T1149)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.manInTheBrowserDescription": "Man in the Browser (T1185)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.manInTheMiddleDescription": "Man-in-the-Middle (T1557)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.masqueradingDescription": "Masquerading (T1036)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyAuthenticationProcessDescription": "Modify Authentication Process (T1556)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyCloudComputeInfrastructureDescription": "Modify Cloud Compute Infrastructure (T1578)",

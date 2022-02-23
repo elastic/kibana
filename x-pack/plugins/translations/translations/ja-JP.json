@@ -23437,8 +23437,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.interProcessCommunicationDescription": "プロセス間通信（T1559）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.lateralToolTransferDescription": "Lateral Tool Transfer（T1570）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.lcMainHijackingDescription": "LC_MAIN Hijacking（T1149）",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.manInTheBrowserDescription": "Man in the Browser（T1185）",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.manInTheMiddleDescription": "中間者攻撃（T1557）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.masqueradingDescription": "マスカレード（T1036）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyAuthenticationProcessDescription": "認証プロセスの修正（T1556）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyCloudComputeInfrastructureDescription": "クラウドコンピューティングインフラストラクチャの修正（T1578）",
