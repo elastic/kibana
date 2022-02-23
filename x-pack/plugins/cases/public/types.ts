@@ -15,6 +15,7 @@ import type { SecurityPluginSetup } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
 import { CommentRequestAlertType, CommentRequestUserType } from '../common/api';
+import { AddAlertToNewCaseButtonProps } from './components/actions/add_alert_to_new_case_button';
 import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { CreateCaseFlyoutProps } from './components/create/flyout';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
@@ -99,6 +100,11 @@ export interface CasesUiStart {
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+  };
+  timelineActions: {
+    AddAlertToNewCaseButton: (
+      props: AddAlertToNewCaseButtonProps
+    ) => ReactElement<AddAlertToNewCaseButtonProps>;
   };
 }
 

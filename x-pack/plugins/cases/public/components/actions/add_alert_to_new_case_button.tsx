@@ -70,3 +70,4 @@ export const AddAlertToNewCaseButton = ({
   ) : null;
 };
 AddAlertToNewCaseButton.displayName = 'AddToNewCaseButton';
+export type AddAlertToNewCaseButtonProps = React.ComponentProps<typeof AddAlertToNewCaseButton>;
