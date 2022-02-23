@@ -44,11 +44,22 @@ export default function ({ getService, getPageObjects }) {
 
   describe('edit visualizations from dashboard', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
     });
 
     it('save button returns to dashboard after editing visualization with changes saved', async () => {

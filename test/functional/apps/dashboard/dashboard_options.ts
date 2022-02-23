@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
+  // const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
@@ -20,7 +20,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let originalTitles: string[] = [];
 
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -29,6 +34,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
       originalTitles = await PageObjects.dashboard.getPanelTitles();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
     });
 
     it('should be able to hide all panel titles', async () => {

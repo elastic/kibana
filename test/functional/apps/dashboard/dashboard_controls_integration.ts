@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const filterBar = getService('filterBar');
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -30,7 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard controls integration', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -42,6 +46,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
     });
 
     it('shows the empty control callout on a new dashboard', async () => {
