@@ -501,9 +501,46 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   // TODO should move out, public only for unit tests
   public async getUpgradePackagePolicyInfo(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    packagePolicy?: PackagePolicy,
+    pkgVersion?: string
   ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }> {
-    const packagePolicy = await this.get(soClient, id);
+    if (!packagePolicy) {
+      packagePolicy = (await this.get(soClient, id)) ?? undefined;
+    }
+    if (!pkgVersion && packagePolicy) {
+      const installedPackage = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package!.name,
+      });
+      if (!installedPackage) {
+        throw new IngestManagerError(
+          i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
+            defaultMessage: 'Package {name} is not installed',
+            values: {
+              name: packagePolicy.package!.name,
+            },
+          })
+        );
+      }
+      pkgVersion = installedPackage.version;
+    }
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy!.package!.name,
+      pkgVersion: pkgVersion ?? '',
+    });
+
+    this.validateUpgradePackagePolicy(id, packageInfo, packagePolicy);
+
+    return { packagePolicy: packagePolicy!, packageInfo };
+  }
+
+  private validateUpgradePackagePolicy(
+    id: string,
+    packageInfo: PackageInfo,
+    packagePolicy?: PackagePolicy
+  ) {
     if (!packagePolicy) {
       throw new IngestManagerError(
         i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
@@ -521,28 +558,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         })
       );
     }
-
-    const installedPackage = await getInstallation({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy.package.name,
-    });
-
-    if (!installedPackage) {
-      throw new IngestManagerError(
-        i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
-          defaultMessage: 'Package {name} is not installed',
-          values: {
-            name: packagePolicy.package.name,
-          },
-        })
-      );
-    }
-
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy.package.name,
-      pkgVersion: installedPackage?.version ?? '',
-    });
 
     const isInstalledVersionLessThanPolicyVersion = semverLt(
       packageInfo?.version ?? '',
@@ -562,11 +577,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         })
       );
     }
-
-    return {
-      packagePolicy: packagePolicy as Required<PackagePolicy>,
-      packageInfo,
-    };
   }
 
   public async upgrade(
@@ -581,18 +591,15 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     for (const id of ids) {
       try {
-        let packageInfo: PackageInfo | undefined;
-        if (!packagePolicy) {
-          ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
-        } else if (!packageInfo) {
-          packageInfo = await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package!.name,
-            pkgVersion: pkgVersion ?? '',
-          });
-        }
+        let packageInfo: PackageInfo;
+        ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
+          soClient,
+          id,
+          packagePolicy,
+          pkgVersion
+        ));
 
-        await this.doUpgrade(soClient, esClient, id, packagePolicy, result, packageInfo, options);
+        await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
       } catch (error) {
         result.push({
           id,
@@ -655,16 +662,13 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      let packageInfo: PackageInfo | undefined;
-      if (!packagePolicy) {
-        ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id));
-      } else if (!packageInfo) {
-        packageInfo = await getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package!.name,
-          pkgVersion: pkgVersion ?? '',
-        });
-      }
+      let packageInfo: PackageInfo;
+      ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
+        soClient,
+        id,
+        packagePolicy,
+        pkgVersion
+      ));
 
       return this.calculateDiff(packagePolicy, packageInfo);
     } catch (error) {
