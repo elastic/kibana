@@ -104,7 +104,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('uptimeAlertAddFilter.monitor.type');
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
     },
-    async clicksaveRuleButton() {
+    async clickSaveRuleButton() {
       await testSubjects.click('saveRuleButton');
     },
     async clickSaveAlertsConfirmButton() {

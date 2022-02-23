@@ -108,7 +108,6 @@ function AlertsPage() {
       const response = await loadRuleAggregations({
         http,
       });
-      // Note that the API uses the semantics of 'alerts' instead of 'rules'
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
       if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
         const total = Object.values(ruleExecutionStatus).reduce((acc, value) => acc + value, 0);

@@ -12,7 +12,7 @@ import { ActionConnector } from '../alerts/alerts';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import type { ActionType, AsApiContract, Rule } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { Alert, AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions, RuleAction } from './alert_actions';
@@ -131,20 +131,16 @@ export const fetchAlertRecords = async ({
     sort_field: 'name.keyword',
     sort_order: 'asc',
   };
-  const rawRules = await apiService.get<{ data: Array<Alert<NewAlertParams>> }>(
-    API_URLS.RULES_FIND,
-    data
-  );
+  const rawRules = await apiService.get<{
+    data: Array<Rule<NewAlertParams> & { rule_type_id: string }>;
+  }>(API_URLS.RULES_FIND, data);
   const monitorRule = rawRules.data.find(
     (rule) => rule.params.monitorId === monitorId
-  ) as Alert<NewAlertParams>;
-  if (monitorRule) {
-    return {
-      ...monitorRule,
-      ruleTypeId: monitorRule.alertTypeId,
-    };
-  }
-  return monitorRule as Rule<NewAlertParams>;
+  ) as Rule<NewAlertParams> & { rule_type_id: string };
+  return {
+    ...monitorRule,
+    ruleTypeId: monitorRule.rule_type_id,
+  };
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

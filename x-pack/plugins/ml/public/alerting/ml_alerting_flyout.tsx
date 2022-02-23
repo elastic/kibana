@@ -7,6 +7,8 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+
+import { Rule } from '../../../triggers_actions_ui/public';
 import { JobId } from '../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
@@ -14,7 +16,7 @@ import { PLUGIN_ID } from '../../common/constants/app';
 import { MlAnomalyDetectionAlertRule } from '../../common/types/alerts';
 
 interface MlAnomalyAlertFlyoutProps {
-  initialAlert?: MlAnomalyDetectionAlertRule;
+  initialAlert?: MlAnomalyDetectionAlertRule & Rule;
   jobIds?: JobId[];
   onSave?: () => void;
   onCloseFlyout: () => void;
@@ -57,7 +59,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
         ...commonProps,
         initialRule: {
           ...initialAlert,
-          ruleTypeId: initialAlert.alertTypeId,
+          ruleTypeId: initialAlert.ruleTypeId ?? initialAlert.alertTypeId,
         },
       });
     }
@@ -127,7 +129,7 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
 };
 
 interface EditRuleFlyoutProps {
-  initialAlert: MlAnomalyDetectionAlertRule;
+  initialAlert: MlAnomalyDetectionAlertRule & Rule;
   onSave: () => void;
 }
 
