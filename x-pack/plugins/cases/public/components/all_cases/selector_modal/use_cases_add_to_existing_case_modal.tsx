@@ -11,15 +11,15 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
 export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps) => {
-  const context = useCasesContext();
+  const { dispatch } = useCasesContext();
   const closeModal = useCallback(() => {
-    context.dispatch({
+    dispatch({
       type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL,
     });
-  }, [context.dispatch]);
+  }, [dispatch]);
 
   const openModal = useCallback(() => {
-    context.dispatch({
+    dispatch({
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
       payload: {
         ...props,
@@ -37,7 +37,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         },
       },
     });
-  }, [closeModal, context.dispatch, props]);
+  }, [closeModal, dispatch, props]);
   return {
     open: openModal,
     close: closeModal,
