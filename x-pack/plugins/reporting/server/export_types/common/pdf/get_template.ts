@@ -12,30 +12,29 @@ import {
   DynamicContent,
   StyleDictionary,
   TDocumentDefinitions,
+  PredefinedPageSize,
 } from 'pdfmake/interfaces';
-import type { Layout } from '../../../../../screenshotting/server';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
+import { TemplateLayout } from './types';
+import {
+  headingFontSize,
+  headingMarginBottom,
+  headingMarginTop,
+  pageMarginBottom,
+  pageMarginTop,
+  pageMarginWidth,
+  subheadingFontSize,
+  subheadingMarginBottom,
+} from './constants';
 
 export function getTemplate(
-  layout: Layout,
+  layout: TemplateLayout,
   logo: string | undefined,
   title: string,
   tableBorderWidth: number,
   assetPath: string
 ): Partial<TDocumentDefinitions> {
-  const pageMarginTop = 40;
-  const pageMarginBottom = 80;
-  const pageMarginWidth = 40;
-  const headingFontSize = 14;
-  const headingMarginTop = 10;
-  const headingMarginBottom = 5;
-  const headingHeight = headingFontSize * 1.5 + headingMarginTop + headingMarginBottom;
-  const subheadingFontSize = 12;
-  const subheadingMarginTop = 0;
-  const subheadingMarginBottom = 5;
-  const subheadingHeight = subheadingFontSize * 1.5 + subheadingMarginTop + subheadingMarginBottom;
-
   const getStyle = (): StyleDictionary => ({
     heading: {
       alignment: 'left',
@@ -111,15 +110,8 @@ export function getTemplate(
 
   return {
     // define page size
-    pageOrientation: layout.getPdfPageOrientation(),
-    pageSize: layout.getPdfPageSize({
-      pageMarginTop,
-      pageMarginBottom,
-      pageMarginWidth,
-      tableBorderWidth,
-      headingHeight,
-      subheadingHeight,
-    }),
+    pageOrientation: layout.orientation,
+    pageSize: layout.pageSize as PredefinedPageSize,
     pageMargins: layout.useReportingBranding
       ? [pageMarginWidth, pageMarginTop, pageMarginWidth, pageMarginBottom]
       : [0, 0, 0, 0],
