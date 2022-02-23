@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import {
   Collector,
-  createCollectorFetchContextWithKibanaMock,
+  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from 'src/plugins/usage_collection/server/mocks';
 import { HealthStatus } from '../monitoring';
@@ -26,7 +26,7 @@ describe('registerTaskManagerUsageCollector', () => {
   it('should report telemetry on the ephemeral queue', async () => {
     const monitoringStats$ = new Subject<MonitoredHealth>();
     const usageCollectionMock = createUsageCollectionSetupMock();
-    const fetchContext = createCollectorFetchContextWithKibanaMock();
+    const fetchContext = createCollectorFetchContextMock();
     usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);
@@ -53,7 +53,7 @@ describe('registerTaskManagerUsageCollector', () => {
   it('should report telemetry on the excluded task types', async () => {
     const monitoringStats$ = new Subject<MonitoredHealth>();
     const usageCollectionMock = createUsageCollectionSetupMock();
-    const fetchContext = createCollectorFetchContextWithKibanaMock();
+    const fetchContext = createCollectorFetchContextMock();
     usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);

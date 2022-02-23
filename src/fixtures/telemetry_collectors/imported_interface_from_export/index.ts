@@ -11,7 +11,7 @@ import { createUsageCollectionSetupMock } from '../../../plugins/usage_collectio
 
 const { makeUsageCollector } = createUsageCollectionSetupMock();
 
-export const myCollector = makeUsageCollector<Usage, false>({
+export const myCollector = makeUsageCollector<Usage>({
   type: 'importing_from_export_collector',
   isReady: () => true,
   fetch() {

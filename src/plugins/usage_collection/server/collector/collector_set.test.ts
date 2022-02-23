@@ -15,7 +15,6 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-  httpServerMock,
   executionContextServiceMock,
 } from '../../../../core/server/mocks';
 import type { ExecutionContextSetup, Logger } from 'src/core/server';
@@ -39,7 +38,6 @@ describe('CollectorSet', () => {
     });
     const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const mockSoClient = savedObjectsClientMock.create();
-    const req = void 0; // No need to instantiate any KibanaRequest in these tests
 
     it('should throw an error if non-Collector type of object is registered', () => {
       const collectors = new CollectorSet(collectorSetConfig);
@@ -88,7 +86,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient);
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenCalledWith('Getting ready collectors');
       expect(logger.debug).toHaveBeenCalledWith('Fetching data from MY_TEST_COLLECTOR collector');
@@ -121,7 +119,7 @@ describe('CollectorSet', () => {
 
       let result;
       try {
-        result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
+        result = await collectors.bulkFetch(mockEsClient, mockSoClient);
       } catch (err) {
         // Do nothing
       }
@@ -150,7 +148,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -178,7 +176,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -269,50 +267,6 @@ describe('CollectorSet', () => {
       collectorSet = new CollectorSet(collectorSetConfig);
     });
 
-    test('TS should hide kibanaRequest when not opted-in', () => {
-      collectorSet.makeStatsCollector({
-        type: 'MY_TEST_COLLECTOR',
-        isReady: () => true,
-        schema: { test: { type: 'long' } },
-        fetch: (ctx) => {
-          // @ts-expect-error
-          const { kibanaRequest } = ctx;
-          return { test: kibanaRequest ? 1 : 0 };
-        },
-      });
-    });
-
-    test('TS should hide kibanaRequest when not opted-in (explicit false)', () => {
-      collectorSet.makeStatsCollector({
-        type: 'MY_TEST_COLLECTOR',
-        isReady: () => true,
-        schema: { test: { type: 'long' } },
-        fetch: (ctx) => {
-          // @ts-expect-error
-          const { kibanaRequest } = ctx;
-          return { test: kibanaRequest ? 1 : 0 };
-        },
-        extendFetchContext: {
-          kibanaRequest: false,
-        },
-      });
-    });
-
-    test('TS should allow using kibanaRequest when opted-in (explicit true)', () => {
-      collectorSet.makeStatsCollector({
-        type: 'MY_TEST_COLLECTOR',
-        isReady: () => true,
-        schema: { test: { type: 'long' } },
-        fetch: (ctx) => {
-          const { kibanaRequest } = ctx;
-          return { test: kibanaRequest ? 1 : 0 };
-        },
-        extendFetchContext: {
-          kibanaRequest: true,
-        },
-      });
-    });
-
     test('fetch can use the logger (TS allows it)', () => {
       const collector = collectorSet.makeStatsCollector({
         type: 'MY_TEST_COLLECTOR',
@@ -337,188 +291,6 @@ describe('CollectorSet', () => {
 
     beforeEach(() => {
       collectorSet = new CollectorSet(collectorSetConfig);
-    });
-
-    describe('TS validations', () => {
-      describe('when types are inferred', () => {
-        test('TS should hide kibanaRequest when not opted-in', () => {
-          collectorSet.makeUsageCollector({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-          });
-        });
-
-        test('TS should hide kibanaRequest when not opted-in (explicit false)', () => {
-          collectorSet.makeUsageCollector({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              kibanaRequest: false,
-            },
-          });
-        });
-
-        test('TS should allow using kibanaRequest when opted-in (explicit true)', () => {
-          collectorSet.makeUsageCollector({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              kibanaRequest: true,
-            },
-          });
-        });
-      });
-
-      describe('when types are explicit', () => {
-        test('TS should hide `kibanaRequest` from ctx when undefined or false', () => {
-          collectorSet.makeUsageCollector<{ test: number }>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-          });
-          collectorSet.makeUsageCollector<{ test: number }, false>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              kibanaRequest: false,
-            },
-          });
-          collectorSet.makeUsageCollector<{ test: number }, false>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-          });
-        });
-        test('TS should not allow `true` when types declare false', () => {
-          // false is the default when at least 1 type is specified
-          collectorSet.makeUsageCollector<{ test: number }>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              // @ts-expect-error
-              kibanaRequest: true,
-            },
-          });
-          collectorSet.makeUsageCollector<{ test: number }, false>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              // @ts-expect-error
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              // @ts-expect-error
-              kibanaRequest: true,
-            },
-          });
-        });
-
-        test('TS should allow `true` when types explicitly declare `true` and do not allow `false` or undefined', () => {
-          // false is the default when at least 1 type is specified
-          collectorSet.makeUsageCollector<{ test: number }, true>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              kibanaRequest: true,
-            },
-          });
-          collectorSet.makeUsageCollector<{ test: number }, true>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              // @ts-expect-error
-              kibanaRequest: false,
-            },
-          });
-          collectorSet.makeUsageCollector<{ test: number }, true>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            extendFetchContext: {
-              // @ts-expect-error
-              kibanaRequest: undefined,
-            },
-          });
-          collectorSet.makeUsageCollector<{ test: number }, true>({
-            type: 'MY_TEST_COLLECTOR',
-            isReady: () => true,
-            schema: { test: { type: 'long' } },
-            fetch: (ctx) => {
-              const { kibanaRequest } = ctx;
-              return { test: kibanaRequest ? 1 : 0 };
-            },
-            // @ts-expect-error
-            extendFetchContext: {},
-          });
-          collectorSet.makeUsageCollector<{ test: number }, true>(
-            // @ts-expect-error
-            {
-              type: 'MY_TEST_COLLECTOR',
-              isReady: () => true,
-              schema: { test: { type: 'long' } },
-              fetch: (ctx) => {
-                const { kibanaRequest } = ctx;
-                return { test: kibanaRequest ? 1 : 0 };
-              },
-            }
-          );
-        });
-      });
     });
 
     test('fetch can use the logger (TS allows it)', () => {
@@ -776,32 +548,6 @@ describe('CollectorSet', () => {
         },
         expect.any(Function)
       );
-    });
-
-    it('adds extra context to collectors with extendFetchContext config', async () => {
-      const mockReadyFetch = jest.fn().mockResolvedValue({});
-      collectorSet.registerCollector(
-        collectorSet.makeUsageCollector({
-          type: 'ready_col',
-          isReady: () => true,
-          schema: {},
-          fetch: mockReadyFetch,
-          extendFetchContext: { kibanaRequest: true },
-        })
-      );
-
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const mockSoClient = savedObjectsClientMock.create();
-      const request = httpServerMock.createKibanaRequest();
-      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, request);
-
-      expect(mockReadyFetch).toBeCalledTimes(1);
-      expect(mockReadyFetch).toBeCalledWith({
-        esClient: mockEsClient,
-        soClient: mockSoClient,
-        kibanaRequest: request,
-      });
-      expect(results).toHaveLength(2);
     });
   });
 });
