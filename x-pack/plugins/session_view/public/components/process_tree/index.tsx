@@ -83,11 +83,7 @@ export const ProcessTree = ({
    */
   const selectProcess = useCallback(
     (process: Process) => {
-      if (!selectionAreaRef || !scrollerRef) {
-        return;
-      }
-
-      if (!selectionAreaRef.current || !scrollerRef.current) {
+      if (!selectionAreaRef?.current || !scrollerRef?.current) {
         return;
       }
 
