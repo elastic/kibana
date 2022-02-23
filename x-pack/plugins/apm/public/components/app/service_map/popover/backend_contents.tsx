@@ -19,6 +19,7 @@ import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../../common/elasticsearch_fieldnames';
 
 type BackendReturn = APIReturnType<'GET /internal/apm/service-map/backend'>;
 
@@ -75,6 +76,9 @@ export function BackendContents({
     ? apmRouter.link('/backends/overview', {
         query: {
           ...query,
+          resourceIdentifierFields: JSON.stringify({
+            [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName,
+          }),
           displayName: backendName,
         } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
       })

@@ -149,6 +149,9 @@ export const getDestinationMap = ({
                 ...filter,
                 ...excludeRumExitSpansQuery(),
               ],
+              must_not: {
+                exists: { field: SPAN_SERVICE_TARGET_TYPE },
+              },
             },
           },
           aggs: {
@@ -282,9 +285,9 @@ export const getDestinationMap = ({
     const nodesByBackendName = new Map<string, Node>();
 
     destinationsBySpanId.forEach((destination) => {
-      const destinationIdentifierHash = objectHash(
-        destination.resourceIdentifierFields
-      );
+      const destinationIdentifierHash = objectHash({
+        displayName: destination.displayName,
+      });
       const existingDestination =
         nodesByBackendName.get(destinationIdentifierHash) ?? {};
 

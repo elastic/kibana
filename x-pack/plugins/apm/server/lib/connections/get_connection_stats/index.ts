@@ -54,9 +54,9 @@ export function getConnectionStats({
 
     const statsWithLocationIds = allMetrics.map((statsItem) => {
       const { from, timeseries, value } = statsItem;
-      const destinationIdentifierHash = objectHash(
-        statsItem.to.resourceIdentifierFields
-      );
+      const destinationIdentifierHash = objectHash({
+        displayName: statsItem.to.displayName,
+      });
 
       const to = destinationMap.get(destinationIdentifierHash) ?? statsItem.to;
 

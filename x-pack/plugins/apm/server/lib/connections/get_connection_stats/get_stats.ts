@@ -207,6 +207,9 @@ export const getStats = async ({
               ...rangeQuery(startWithOffset, endWithOffset),
               ...excludeRumExitSpansQuery(),
             ],
+            must_not: {
+              exists: { field: SPAN_SERVICE_TARGET_TYPE },
+            },
           },
         },
         aggs: {

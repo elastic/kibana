@@ -282,7 +282,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           throughput: roundNumber(postgres?.currentStats.throughput.value),
           errorRate: roundNumber(postgres?.currentStats.errorRate.value),
           impact: postgres?.currentStats.impact,
-          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'backendName', 'type'),
+          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'displayName', 'type'),
         };
 
         const count = 1;
@@ -292,7 +292,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(values).to.eql({
           spanType: 'external',
           spanSubtype: 'http',
-          backendName: 'postgres',
+          displayName: 'postgres',
           type: 'backend',
           errorRate: roundNumber(errors / count),
           latency: roundNumber(sum / count),

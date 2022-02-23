@@ -26,18 +26,36 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
           .service('opbeans-go', 'production', 'go')
           .instance('go-instance1');
 
-        const successfulTraceEvents = successfulTimestamps.flatMap((timestamp) =>
+        const successfulTraceEventsGoServiceElasticsearch = successfulTimestamps.flatMap(
+          (timestamp) =>
+            goServiceInstance
+              .transaction('Transaction with elasticsearch')
+              .timestamp(timestamp)
+              .duration(500)
+              .success()
+              .children(
+                goServiceInstance
+                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .duration(500)
+                  .success()
+                  .destination('elasticsearch')
+                  .timestamp(timestamp)
+              )
+              .serialize()
+        );
+
+        const successfulTraceEventsGoServiceMysql = successfulTimestamps.flatMap((timestamp) =>
           goServiceInstance
-            .transaction('Transaction with elasticsearch')
+            .transaction('Transaction with mysql go service')
             .timestamp(timestamp)
-            .duration(1000)
+            .duration(500)
             .success()
             .children(
               goServiceInstance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
-                .duration(1000)
+                .span('SELECT FROM USERS', 'db', 'mysql')
+                .duration(500)
                 .success()
-                .destination('elasticsearch')
+                .destination('mysql/users')
                 .timestamp(timestamp)
             )
             .serialize()
@@ -49,7 +67,7 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
 
         const successfulTraceEventsWithServiceTarget = successfulTimestamps.flatMap((timestamp) =>
           nodeServiceInstance
-            .transaction('Transaction with postgres')
+            .transaction('Transaction with mysql nodejs service')
             .timestamp(timestamp)
             .duration(1000)
             .success()
@@ -58,13 +76,18 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
                 .span('SELECT FROM USERS', 'db', 'mysql')
                 .duration(1000)
                 .success()
+                .destination('mysql/users')
                 .destinationWithServiceTarget('mysql', 'users')
                 .timestamp(timestamp)
             )
             .serialize()
         );
 
-        return [...successfulTraceEvents, ...successfulTraceEventsWithServiceTarget];
+        return [
+          ...successfulTraceEventsGoServiceElasticsearch,
+          ...successfulTraceEventsGoServiceMysql,
+          ...successfulTraceEventsWithServiceTarget,
+        ];
       });
 
       return logger.perf('apm_events_to_es_output', () =>
