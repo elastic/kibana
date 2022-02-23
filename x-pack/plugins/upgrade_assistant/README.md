@@ -35,8 +35,7 @@ Elasticsearch deprecations can be handled in a number of ways:
     * Create an index alias pointing from the original index name to the prefixed index name.
     * Reindex from the original index into the prefixed index.
     * Delete the old index and rename the prefixed index.
-* **Updating index settings.** Some index settings will need to be updated, which doesn't require a
-reindex. An example of this is the "Remove deprecated settings" button, which is shown when [deprecated translog settings](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html#index-modules-translog-retention) are detected ([#93293](https://github.com/elastic/kibana/pull/93293)).
+* **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. 
 * **Upgrading or deleting snapshots**. This is specific to Machine Learning. If a user has old Machine Learning job model snapshots, they will need to be upgraded or deleted. The Upgrade Assistant provides a way to resolve this automatically for the user ([#100066](https://github.com/elastic/kibana/pull/100066)).
 * **Following the docs.** The Deprecation Info API provides links to the deprecation docs. Users
 will follow these docs to address the problem and make these warnings or errors disappear in the
@@ -107,17 +106,30 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   yarn es snapshot --license trial -E path.data=./path_to_6.x_ml_snapshots
   ```
 
-**3. Removing deprecated index settings**
+**3. Removing deprecated settings**
 
-  The Upgrade Assistant currently only supports fixing deprecated translog index settings. However [the code](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/common/constants.ts#L22) is written in a way to add support for more if necessary. Run the following Console command to trigger the deprecation warning:
+  The Upgrade Assistant supports removing deprecated index and cluster settings. This is determined based on the `actions` array returned from the deprecation info API. It currently does not support removing affix settings. See https://github.com/elastic/elasticsearch/pull/84246 for more details. 
+  
+  Run the following Console commands to trigger deprecation issues for cluster and index settings:
+
+```
+PUT /_cluster/settings
+{
+   "persistent": {
+     "discovery.zen.commit_timeout": "10s"
+  },
+  "transient": {
+    "discovery.zen.publish_timeout": "10s"
+  }
+}
+```
 
   ```
   PUT deprecated_settings
   {
     "settings": {
-      "translog.retention.size": "1b",
-      "translog.retention.age": "5m",
-      "index.soft_deletes.enabled": true,
+      "index.routing.allocation.include._tier": "data_warm",
+      "index.routing.allocation.exclude._tier": "data_cold"
     }
   }
   ```

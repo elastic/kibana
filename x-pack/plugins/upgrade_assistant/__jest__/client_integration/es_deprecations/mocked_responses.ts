@@ -42,13 +42,13 @@ const MOCK_INDEX_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
   isCritical: false,
   resolveDuringUpgrade: false,
   type: 'index_settings',
-  message: 'Translog retention settings are deprecated',
+  message: 'Setting [index.routing.allocation.include._tier] is deprecated',
   details: 'deprecation details',
   url: 'doc_url',
   index: 'my_index',
   correctiveAction: {
     type: 'indexSetting',
-    deprecatedSettings: ['translog.retention.size', 'translog.retention.age'],
+    deprecatedSettings: ['index.routing.allocation.include._tier'],
   },
 };
 
