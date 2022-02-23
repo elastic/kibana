@@ -76,6 +76,8 @@ export async function addEventFilters(
   exception: ExceptionListItemSchema | CreateExceptionListItemSchema
 ) {
   await ensureEventFiltersListExists(http);
+  // Clean meta data before create event flter as the API throws an error with it
+  delete exception.meta;
   return http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
     body: JSON.stringify(exception),
   });
@@ -136,12 +138,11 @@ export function cleanEventFilterToUpdate(
   [
     'created_at',
     'created_by',
-    'created_at',
-    'created_by',
     'list_id',
     'tie_breaker_id',
     'updated_at',
     'updated_by',
+    'meta',
   ].forEach((field) => {
     delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
   });

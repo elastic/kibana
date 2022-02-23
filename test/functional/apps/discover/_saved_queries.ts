@@ -36,7 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await queryBar.setQuery('response:200');
   };
 
-  describe('saved queries saved objects', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/124990
+  describe.skip('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });

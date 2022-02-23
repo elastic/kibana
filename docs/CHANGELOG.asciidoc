@@ -8,20 +8,98 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.0.0 releases.
+Review important information about the {kib} 8.x releases.
 
-* <<release-notes-8.0.0>>
-* <<release-notes-8.0.0-rc2>>
-* <<release-notes-8.0.0-rc1>>
-* <<release-notes-8.0.0-beta1>>
-* <<release-notes-8.0.0-alpha2>>
-* <<release-notes-8.0.0-alpha1>>
+* <<release-notes-8.1.0>>
+//* <<release-notes-8.0.1>>
+//* <<release-notes-8.0.0>>
+//* <<release-notes-8.0.0-rc2>>
+//* <<release-notes-8.0.0-rc1>>
+//* <<release-notes-8.0.0-beta1>>
+//* <<release-notes-8.0.0-alpha2>>
+//* <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.1.0]]
+== {kib} 8.1.0
+
+coming::[8.1.0]
+
+[float]
+[[breaking-changes-8.1.0]]
+=== Breaking changes
+
+/////
+[[release-notes-8.0.1]]
+== {kib} 8.0.1
+
+The 8.0.1 release includes the following enhancement and bug fixes.
+
+[float]
+[[breaking-changes-8.0.1]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+
+There are no breaking changes in the 8.0.1 release. 
+
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+<<breaking-changes-8.0.0,8.0.0>> | <<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+
+[float]
+[[enhancement-v8.0.1]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 8.0.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.0.1]]
+=== Bug fixes
+Alerting::
+Fixes an issue where the *Cases* rule link was displayed as `Unknown rule`, even when the correct rule name was retrieved {kibana-pull}123883[#123883]
+
+Dashboard::
+Transfer state when drilldown is opened in a new tab {kibana-pull}124770[#124770]
+
+Elastic Security::
+For the Elastic Security 8.0.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Avoid breaking setup when compatible package is unavailable in registry {kibana-pull}125525[#125525]
+* Tell users when assets are installed in a different space {kibana-pull}125278[#125278]
+
+Machine Learning::
+Only fetch field statistics for available fields {kibana-pull}123003[#123003]
+
+Management::
+Registering a snapshot repository is now possible in Snapshot and Restore {kibana-pull}125656[#125656]
+
+Maps::
+* Fixes an issue where dashboards with by-value maps are broken when copied to new space {kibana-pull}125599[#125599]
+* Fixes an issue where styles were unable to be applied to vector tiles {kibana-pull}124289[#124289]
+
+Metrics::
+Allow single values for ip and mac node metadata {kibana-pull}124384[#124384]
+
+Monitoring::
+Update rules queries to support Metricbeat 8.0.0 {kibana-pull}125748[#125748]
+
+Platform::
+Adds origin conflict checks when resolving import errors {kibana-pull}125241[#125241]
+
+Security::
+Adds 8.0.1 rules updates {kibana-pull}125316[#125316]
+
+Uptime::
+Update mobile data view to account for metrics events {kibana-pull}125916[#125916]
+
 [[release-notes-8.0.0]]
 == {kib} 8.0.0
-
-coming::[8.0.0]
 
 Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] to complete the upgrade.
 
@@ -31,8 +109,6 @@ Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assis
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.0.0, review the breaking change, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-123754]]
@@ -45,9 +121,6 @@ The `console.ssl` setting has been removed. For more information, refer to {kiba
 *Impact* +
 Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 ====
-
-// end::notable-breaking-changes[]
-
 
 To review the breaking changes in previous versions, refer to the following: 
 
@@ -1443,3 +1516,4 @@ The 8.0.0-alpha1 release includes the following bug fix.
 
 Operations::
 * Moves systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
+/////

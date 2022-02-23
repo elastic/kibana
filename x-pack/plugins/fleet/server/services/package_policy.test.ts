@@ -10,7 +10,7 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-
+import { produce } from 'immer';
 import type {
   SavedObjectsClient,
   SavedObjectsClientContract,
@@ -25,6 +25,7 @@ import type {
   PostPackagePolicyDeleteCallback,
   RegistryDataStream,
   PackagePolicyInputStream,
+  PackagePolicy,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -949,6 +950,55 @@ describe('Package policy service', () => {
 
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
     });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        // this mimics the way that OSQuery plugin create immutable objects
+        produce<PackagePolicy>(
+          { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+          (draft) => draft
+        )
+      );
+
+      expect(result.name).toEqual('test');
+    });
   });
 
   describe('runDeleteExternalCallbacks', () => {
@@ -1654,8 +1704,8 @@ describe('Package policy service', () => {
       });
     });
 
-    describe('when an input or stream is disabled on the original policy object', () => {
-      it('remains disabled on the resulting policy object', () => {
+    describe('when an input or stream is disabled by default in the package', () => {
+      it('allow preconfiguration to enable it', () => {
         const basePackagePolicy: NewPackagePolicy = {
           name: 'base-package-policy',
           description: 'Base Package Policy',
@@ -1864,13 +1914,13 @@ describe('Package policy service', () => {
         expect(template2Inputs).toHaveLength(1);
 
         const logsInput = template1Inputs?.find((input) => input.type === 'logs');
-        expect(logsInput?.enabled).toBe(false);
+        expect(logsInput?.enabled).toBe(true);
 
         const logfileStream = logsInput?.streams.find(
           (stream) => stream.data_stream.type === 'logfile'
         );
 
-        expect(logfileStream?.enabled).toBe(false);
+        expect(logfileStream?.enabled).toBe(true);
       });
     });
 

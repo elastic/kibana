@@ -172,6 +172,7 @@ describe('fetchNodesFromClusterStats', () => {
                 bool: {
                   should: [
                     { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -188,7 +189,9 @@ describe('fetchNodesFromClusterStats', () => {
               top: {
                 top_hits: {
                   sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                  _source: { includes: ['cluster_state.nodes_hash', 'cluster_state.nodes'] },
+                  _source: {
+                    includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
+                  },
                   size: 2,
                 },
               },

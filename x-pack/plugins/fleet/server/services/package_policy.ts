@@ -103,6 +103,8 @@ class PackagePolicyService {
       overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
+    // trailing whitespace causes issues creating API keys
+    packagePolicy.name = packagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       const existingPoliciesWithName = await this.list(soClient, {
         perPage: 1,
@@ -361,10 +363,11 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    packagePolicy: UpdatePackagePolicy,
+    packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser },
     currentVersion?: string
   ): Promise<PackagePolicy> {
+    const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
@@ -1302,14 +1305,11 @@ export function preconfigurePackageInputs(
       continue;
     }
 
-    // For flags like this, we only want to override the original value if it was set
-    // as `undefined` in the original object. An explicit true/false value should be
-    // persisted from the original object to the result after the override process is complete.
-    if (originalInput.enabled === undefined && preconfiguredInput.enabled !== undefined) {
+    if (preconfiguredInput.enabled !== undefined) {
       originalInput.enabled = preconfiguredInput.enabled;
     }
 
-    if (originalInput.keep_enabled === undefined && preconfiguredInput.keep_enabled !== undefined) {
+    if (preconfiguredInput.keep_enabled !== undefined) {
       originalInput.keep_enabled = preconfiguredInput.keep_enabled;
     }
 
@@ -1332,7 +1332,7 @@ export function preconfigurePackageInputs(
           continue;
         }
 
-        if (originalStream?.enabled === undefined) {
+        if (stream.enabled !== undefined) {
           originalStream.enabled = stream.enabled;
         }
 
