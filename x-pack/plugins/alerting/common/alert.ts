@@ -80,7 +80,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Params;
-  mapped_params: MappedParams;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
