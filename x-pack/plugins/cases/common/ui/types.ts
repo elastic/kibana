@@ -84,6 +84,7 @@ export interface ResolvedCase {
   case: Case;
   outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
   aliasTargetId?: string;
+  suppressRedirectToast?: boolean;
 }
 
 export interface QueryParams {

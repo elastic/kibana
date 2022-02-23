@@ -28,18 +28,20 @@ export const useSavedSearchAliasMatchRedirect = ({
   useEffect(() => {
     async function aliasMatchRedirect() {
       if (savedSearch) {
-        const { aliasTargetId, outcome } = savedSearch.sharingSavedObjectProps ?? {};
+        const sharingSavedObjectProps = savedSearch.sharingSavedObjectProps ?? {};
+        const { aliasTargetId, outcome } = sharingSavedObjectProps;
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
-          await spaces.ui.redirectLegacyUrl(
-            `${getSavedSearchUrl(aliasTargetId)}${history().location.search}`,
-            i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
+          await spaces.ui.redirectLegacyUrl({
+            path: `${getSavedSearchUrl(aliasTargetId)}${history().location.search}`,
+            suppressRedirectToast: !!sharingSavedObjectProps.suppressRedirectToast,
+            objectNoun: i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: '{savedSearch} search',
               values: {
                 savedSearch: savedSearch.title,
               },
-            })
-          );
+            }),
+          });
         }
       }
     }

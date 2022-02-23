@@ -44,3 +44,23 @@ export interface EmbeddableLegacyUrlConflictProps {
    */
   sourceId: string;
 }
+
+/**
+ * Parameters for the redirectLegacyUrl function.
+ */
+export interface RedirectLegacyUrlParams {
+  /**
+   * The path to use for the new URL, optionally including `search` and/or `hash` URL components.
+   */
+  path: string;
+  /**
+   * Whether or not to suppress the toast that tells the user "We redirected you to a new URL". This should be defined by the
+   * `suppressRedirectToast` attribute of the legacy URL alias.
+   */
+  suppressRedirectToast: boolean;
+  /**
+   * The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new location_.
+   * Default value is 'object'.
+   */
+  objectNoun?: string;
+}

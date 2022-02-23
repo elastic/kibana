@@ -36,6 +36,9 @@ export function initializeResolveWorkpadRoute(deps: RouteInitializerDeps) {
           },
           outcome: resolved.outcome,
           aliasId: resolved.alias_target_id,
+          ...(resolved.suppress_redirect_toast !== undefined && {
+            suppressRedirectToast: resolved.suppress_redirect_toast,
+          }),
         },
       });
     })

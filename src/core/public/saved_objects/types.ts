@@ -34,4 +34,9 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
    * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
    */
   alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
+  /**
+   * Whether the client should suppress the toast message upon redirecting to the new URL. This is only defined when the outcome is
+   * `'aliasMatch'`.
+   */
+  suppress_redirect_toast?: boolean;
 }

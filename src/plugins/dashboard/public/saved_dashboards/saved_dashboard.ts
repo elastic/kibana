@@ -38,6 +38,7 @@ export interface DashboardSavedObject extends SavedObject {
   getFullEditPath: (editMode?: boolean) => string;
   outcome?: string;
   aliasId?: string;
+  suppressRedirectToast?: boolean;
 
   controlGroupInput?: { controlStyle?: ControlStyle; panelsJSON?: string };
 }
@@ -104,6 +105,7 @@ export function createSavedDashboardClass(
 
     public outcome?: string;
     public aliasId?: string;
+    public suppressRedirectToast?: boolean;
 
     constructor(arg: { id: string; useResolve: boolean } | string) {
       super({
@@ -154,6 +156,7 @@ export function createSavedDashboardClass(
           const {
             outcome,
             alias_target_id: aliasId,
+            suppress_redirect_toast: suppressRedirectToast,
             saved_object: resp,
           } = await savedObjectsClient.resolve(esType, id);
 
@@ -167,6 +170,7 @@ export function createSavedDashboardClass(
 
           this.outcome = outcome;
           this.aliasId = aliasId;
+          this.suppressRedirectToast = suppressRedirectToast;
           await this.applyESResp(respMapped);
 
           return this;

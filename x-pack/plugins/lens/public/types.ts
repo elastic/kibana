@@ -960,6 +960,7 @@ export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
   sourceId?: string;
+  suppressRedirectToast?: boolean;
 }
 
 /**

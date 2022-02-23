@@ -132,6 +132,7 @@ describe('getSavedSearch', () => {
           "aliasTargetId": undefined,
           "errorJSON": undefined,
           "outcome": "exactMatch",
+          "suppressRedirectToast": undefined,
         },
         "sort": Array [
           Array [

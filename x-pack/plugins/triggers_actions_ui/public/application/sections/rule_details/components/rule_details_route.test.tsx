@@ -60,10 +60,11 @@ describe('rule_details_route', () => {
       wrapper.update();
     });
     expect(resolveRule).toHaveBeenCalledWith(rule.id);
-    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      `insightsAndAlerting/triggersActions/rule/new_id`,
-      `rule`
-    );
+    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: 'insightsAndAlerting/triggersActions/rule/new_id',
+      suppressRedirectToast: false,
+      objectNoun: 'rule',
+    });
   });
 
   it('shows warning callout if fetched rule is a conflict', async () => {

@@ -84,13 +84,12 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
       };
     },
     resolve: async (id: string) => {
-      const { workpad, outcome, aliasId } = await coreStart.http.get<ResolveWorkpadResponse>(
+      const { workpad, ...resolveProps } = await coreStart.http.get<ResolveWorkpadResponse>(
         `${getApiPath()}/resolve/${id}`
       );
 
       return {
-        outcome,
-        aliasId,
+        ...resolveProps,
         workpad: {
           // @ts-ignore: Shimming legacy workpads that might not have CSS
           css: DEFAULT_WORKPAD_CSS,

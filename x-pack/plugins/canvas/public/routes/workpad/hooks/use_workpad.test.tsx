@@ -118,7 +118,11 @@ describe('useWorkpad', () => {
     const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
     try {
       await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
-      expect(mockRedirectLegacyUrl).toBeCalledWith(`#${aliasId}`, 'Workpad');
+      expect(mockRedirectLegacyUrl).toBeCalledWith({
+        path: `#${aliasId}`,
+        suppressRedirectToast: false,
+        objectNoun: 'Workpad',
+      });
     } catch (e) {
       throw e;
     } finally {

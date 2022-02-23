@@ -16,6 +16,7 @@ interface CaseState {
   data: Case | null;
   resolveOutcome: ResolvedCase['outcome'] | null;
   resolveAliasId?: string;
+  resolveSuppressRedirectToast?: boolean;
   isLoading: boolean;
   isError: boolean;
 }
@@ -45,6 +46,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         data: action.payload.case,
         resolveOutcome: action.payload.outcome,
         resolveAliasId: action.payload.aliasTargetId,
+        resolveSuppressRedirectToast: action.payload.suppressRedirectToast,
       };
     case 'FETCH_FAILURE':
       return {

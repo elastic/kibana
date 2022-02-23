@@ -374,6 +374,7 @@ export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes
   }),
   runtimeTypes.partial({
     alias_target_id: runtimeTypes.string,
+    suppress_redirect_toast: runtimeTypes.boolean,
   }),
 ]);
 

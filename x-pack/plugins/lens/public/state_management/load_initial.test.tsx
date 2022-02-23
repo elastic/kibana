@@ -301,10 +301,11 @@ describe('Initializing the store', () => {
       expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
-      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-        '#/edit/id2?search',
-        'Lens visualization'
-      );
+      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: '#/edit/id2?search',
+        suppressRedirectToast: false,
+        objectNoun: 'Lens visualization',
+      });
     });
 
     it('adds to the recently accessed list on load', async () => {

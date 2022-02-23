@@ -210,7 +210,11 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+        path: 'rules/id/myfakeruleid',
+        suppressRedirectToast: false,
+        objectNoun: 'rule',
+      });
     });
   });
 
@@ -232,7 +236,11 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+        path: 'rules/id/myfakeruleid',
+        suppressRedirectToast: false,
+        objectNoun: 'rule',
+      });
       expect(mockGetLegacyUrlConflict).toHaveBeenCalledWith({
         currentObjectId: 'myfakeruleid',
         objectNoun: 'rule',

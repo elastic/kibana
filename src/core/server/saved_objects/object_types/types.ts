@@ -52,4 +52,8 @@ export interface LegacyUrlAlias {
    * `SavedObjectsClient.collectMultiNamespaceReferences()`.
    */
   disabled?: boolean;
+  /**
+   * Whether or not a toast should be shown when a user is redirected from a legacy URL.
+   */
+  suppressRedirectToast?: boolean;
 }

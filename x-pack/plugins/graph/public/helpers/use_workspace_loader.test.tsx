@@ -78,9 +78,10 @@ describe('use_workspace_loader', () => {
         props as RenderHookOptions<UseWorkspaceLoaderProps>
       );
     });
-    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/workspace/aliasTargetId?query={}',
-      'Graph'
-    );
+    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/workspace/aliasTargetId?query={}',
+      suppressRedirectToast: false,
+      objectNoun: 'Graph',
+    });
   });
 });

@@ -226,10 +226,11 @@ describe('CaseView', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
       expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith(
-        `/cases/${resolveAliasId}`,
-        'case'
-      );
+      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: `/cases/${resolveAliasId}`,
+        suppressRedirectToast: false,
+        objectNoun: 'case',
+      });
     });
   });
 

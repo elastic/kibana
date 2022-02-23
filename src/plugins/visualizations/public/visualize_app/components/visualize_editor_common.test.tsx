@@ -111,10 +111,11 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-      '#/edit/alias_id?_g=test',
-      'TSVB visualization'
-    );
+    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/edit/alias_id?_g=test',
+      suppressRedirectToast: false,
+      objectNoun: 'TSVB visualization',
+    });
   });
 
   it('should display a warning callout for new heatmap implementation with split aggs', async () => {

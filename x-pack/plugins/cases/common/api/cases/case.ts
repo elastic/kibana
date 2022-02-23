@@ -216,6 +216,7 @@ export const CaseResolveResponseRt = rt.intersection([
   }),
   rt.partial({
     alias_target_id: rt.string,
+    suppress_redirect_toast: rt.boolean,
   }),
 ]);
 

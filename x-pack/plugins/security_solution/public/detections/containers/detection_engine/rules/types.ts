@@ -117,6 +117,7 @@ export const RuleSchema = t.intersection([
   t.partial({
     outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
     alias_target_id: t.string,
+    suppress_redirect_toast: t.boolean,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),

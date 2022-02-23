@@ -46,6 +46,7 @@ export interface SavedSearch {
   sharingSavedObjectProps?: {
     outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
     aliasTargetId?: string;
+    suppressRedirectToast?: boolean;
     errorJSON?: string;
   };
   viewMode?: VIEW_MODE;

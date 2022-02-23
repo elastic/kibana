@@ -19,6 +19,7 @@ export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
   sourceId?: string;
+  suppressRedirectToast?: boolean;
 }
 
 type MapDoc = MapSavedObjectAttributes & {
@@ -84,6 +85,7 @@ export function getMapAttributeService(): MapAttributeService {
         saved_object: savedObject,
         outcome,
         alias_target_id: aliasTargetId,
+        suppress_redirect_toast: suppressRedirectToast,
       } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
@@ -104,6 +106,7 @@ export function getMapAttributeService(): MapAttributeService {
             aliasTargetId,
             outcome,
             sourceId: savedObjectId,
+            suppressRedirectToast,
           },
         },
       };

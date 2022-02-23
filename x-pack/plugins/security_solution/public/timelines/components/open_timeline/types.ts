@@ -198,6 +198,7 @@ export interface OpenTimelineProps {
 export interface ResolveTimelineConfig {
   alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
   outcome: SingleTimelineResolveResponse['data']['outcome'];
+  suppress_redirect_toast: SingleTimelineResolveResponse['data']['suppress_redirect_toast'];
 }
 export interface UpdateTimeline {
   duplicate: boolean;

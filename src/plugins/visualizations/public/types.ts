@@ -40,6 +40,7 @@ export interface ISavedVis {
   sharingSavedObjectProps?: {
     outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
     aliasTargetId?: string;
+    suppressRedirectToast?: boolean;
     errorJSON?: string;
   };
 }

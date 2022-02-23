@@ -62,6 +62,7 @@ const findSavedSearch = async (
     {
       outcome: so.outcome,
       aliasTargetId: so.alias_target_id,
+      suppressRedirectToast: so.suppress_redirect_toast,
       errorJSON:
         so.outcome === 'conflict' && spaces
           ? JSON.stringify({

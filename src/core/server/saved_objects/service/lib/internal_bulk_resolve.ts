@@ -80,6 +80,11 @@ export interface InternalBulkResolveError {
   error: DecoratedError;
 }
 
+interface AliasInfo {
+  targetId: string;
+  suppressRedirectToast?: boolean;
+}
+
 export async function internalBulkResolve<T>(
   params: InternalBulkResolveParams
 ): Promise<InternalSavedObjectsBulkResolveResponse<T>> {
@@ -112,7 +117,7 @@ export async function internalBulkResolve<T>(
   );
 
   const docsToBulkGet: Array<{ _id: string; _index: string }> = [];
-  const aliasTargetIds: Array<string | undefined> = [];
+  const aliasInfoArray: Array<AliasInfo | undefined> = [];
   validObjects.forEach(({ value: { type, id } }, i) => {
     const objectIndex = getIndexForType(type);
     docsToBulkGet.push({
@@ -129,11 +134,12 @@ export async function internalBulkResolve<T>(
           _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
           _index: objectIndex,
         });
-        aliasTargetIds.push(legacyUrlAlias.targetId);
+        const { targetId, suppressRedirectToast } = legacyUrlAlias;
+        aliasInfoArray.push({ targetId, suppressRedirectToast });
         return;
       }
     }
-    aliasTargetIds.push(undefined);
+    aliasInfoArray.push(undefined);
   });
 
   const bulkGetResponse = docsToBulkGet.length
@@ -154,7 +160,7 @@ export async function internalBulkResolve<T>(
   }
 
   let getResponseIndex = 0;
-  let aliasTargetIndex = 0;
+  let aliasInfoIndex = 0;
   const resolveCounter = new ResolveCounter();
   const resolvedObjects = allObjects.map<SavedObjectsResolveResponse<T> | InternalBulkResolveError>(
     (either) => {
@@ -163,8 +169,8 @@ export async function internalBulkResolve<T>(
       }
       const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
       let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
-      const aliasTargetId = aliasTargetIds[aliasTargetIndex++];
-      if (aliasTargetId !== undefined) {
+      const aliasInfo = aliasInfoArray[aliasInfoIndex++];
+      if (aliasInfo !== undefined) {
         aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
       }
       const foundExactMatch =
@@ -181,7 +187,7 @@ export async function internalBulkResolve<T>(
           // @ts-expect-error MultiGetHit._source is optional
           saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
           outcome: 'conflict',
-          alias_target_id: aliasTargetId!,
+          alias_target_id: aliasInfo!.targetId!,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
       } else if (foundExactMatch) {
@@ -193,10 +199,16 @@ export async function internalBulkResolve<T>(
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
       } else if (foundAliasMatch) {
         result = {
-          // @ts-expect-error MultiGetHit._source is optional
-          saved_object: getSavedObjectFromSource(registry, type, aliasTargetId!, aliasMatchDoc),
+          saved_object: getSavedObjectFromSource(
+            registry,
+            type,
+            aliasInfo!.targetId,
+            // @ts-expect-error MultiGetHit._source is optional
+            aliasMatchDoc!
+          ),
           outcome: 'aliasMatch',
-          alias_target_id: aliasTargetId,
+          alias_target_id: aliasInfo!.targetId,
+          suppress_redirect_toast: aliasInfo!.suppressRedirectToast,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }
