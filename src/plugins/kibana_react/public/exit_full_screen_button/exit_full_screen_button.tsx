@@ -101,4 +101,5 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   }
 }
 
+/** @deprecated Use `ExitFullScreenButton` from `src/plugins/shared_ux/public`. */
 export const ExitFullScreenButton = ExitFullScreenButtonUi;
