@@ -10413,44 +10413,50 @@ const mimicFn = __webpack_require__(153);
 
 const calledFunctions = new WeakMap();
 
-const onetime = (function_, options = {}) => {
-	if (typeof function_ !== 'function') {
+const oneTime = (fn, options = {}) => {
+	if (typeof fn !== 'function') {
 		throw new TypeError('Expected a function');
 	}
 
-	let returnValue;
+	let ret;
+	let isCalled = false;
 	let callCount = 0;
-	const functionName = function_.displayName || function_.name || '<anonymous>';
+	const functionName = fn.displayName || fn.name || '<anonymous>';
 
-	const onetime = function (...arguments_) {
+	const onetime = function (...args) {
 		calledFunctions.set(onetime, ++callCount);
 
-		if (callCount === 1) {
-			returnValue = function_.apply(this, arguments_);
-			function_ = null;
-		} else if (options.throw === true) {
-			throw new Error(`Function \`${functionName}\` can only be called once`);
+		if (isCalled) {
+			if (options.throw === true) {
+				throw new Error(`Function \`${functionName}\` can only be called once`);
+			}
+
+			return ret;
 		}
 
-		return returnValue;
+		isCalled = true;
+		ret = fn.apply(this, args);
+		fn = null;
+
+		return ret;
 	};
 
-	mimicFn(onetime, function_);
+	mimicFn(onetime, fn);
 	calledFunctions.set(onetime, callCount);
 
 	return onetime;
 };
 
-module.exports = onetime;
+module.exports = oneTime;
 // TODO: Remove this for the next major release
-module.exports.default = onetime;
+module.exports.default = oneTime;
 
-module.exports.callCount = function_ => {
-	if (!calledFunctions.has(function_)) {
-		throw new Error(`The given function \`${function_.name}\` is not wrapped by the \`onetime\` package`);
+module.exports.callCount = fn => {
+	if (!calledFunctions.has(fn)) {
+		throw new Error(`The given function \`${fn.name}\` is not wrapped by the \`onetime\` package`);
 	}
 
-	return calledFunctions.get(function_);
+	return calledFunctions.get(fn);
 };
 
 
@@ -11174,203 +11180,158 @@ module.exports = {
 // Note: since nyc uses this module to output coverage, any lines
 // that are in the direct sync flow of nyc's outputCoverage are
 // ignored, since we can never get coverage for them.
-// grab a reference to node's real process object right away
-var process = global.process
+var assert = __webpack_require__(162)
+var signals = __webpack_require__(163)
 
-const processOk = function (process) {
-  return process &&
-    typeof process === 'object' &&
-    typeof process.removeListener === 'function' &&
-    typeof process.emit === 'function' &&
-    typeof process.reallyExit === 'function' &&
-    typeof process.listeners === 'function' &&
-    typeof process.kill === 'function' &&
-    typeof process.pid === 'number' &&
-    typeof process.on === 'function'
+var EE = __webpack_require__(164)
+/* istanbul ignore if */
+if (typeof EE !== 'function') {
+  EE = EE.EventEmitter
 }
 
-// some kind of non-node environment, just no-op
-/* istanbul ignore if */
-if (!processOk(process)) {
-  module.exports = function () {
-    return function () {}
-  }
+var emitter
+if (process.__signal_exit_emitter__) {
+  emitter = process.__signal_exit_emitter__
 } else {
-  var assert = __webpack_require__(162)
-  var signals = __webpack_require__(163)
-  var isWin = /^win/i.test(process.platform)
+  emitter = process.__signal_exit_emitter__ = new EE()
+  emitter.count = 0
+  emitter.emitted = {}
+}
 
-  var EE = __webpack_require__(164)
-  /* istanbul ignore if */
-  if (typeof EE !== 'function') {
-    EE = EE.EventEmitter
+// Because this emitter is a global, we have to check to see if a
+// previous version of this library failed to enable infinite listeners.
+// I know what you're about to say.  But literally everything about
+// signal-exit is a compromise with evil.  Get used to it.
+if (!emitter.infinite) {
+  emitter.setMaxListeners(Infinity)
+  emitter.infinite = true
+}
+
+module.exports = function (cb, opts) {
+  assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
+
+  if (loaded === false) {
+    load()
   }
 
-  var emitter
-  if (process.__signal_exit_emitter__) {
-    emitter = process.__signal_exit_emitter__
-  } else {
-    emitter = process.__signal_exit_emitter__ = new EE()
-    emitter.count = 0
-    emitter.emitted = {}
+  var ev = 'exit'
+  if (opts && opts.alwaysLast) {
+    ev = 'afterexit'
   }
 
-  // Because this emitter is a global, we have to check to see if a
-  // previous version of this library failed to enable infinite listeners.
-  // I know what you're about to say.  But literally everything about
-  // signal-exit is a compromise with evil.  Get used to it.
-  if (!emitter.infinite) {
-    emitter.setMaxListeners(Infinity)
-    emitter.infinite = true
+  var remove = function () {
+    emitter.removeListener(ev, cb)
+    if (emitter.listeners('exit').length === 0 &&
+        emitter.listeners('afterexit').length === 0) {
+      unload()
+    }
   }
+  emitter.on(ev, cb)
 
-  module.exports = function (cb, opts) {
-    /* istanbul ignore if */
-    if (!processOk(global.process)) {
-      return function () {}
-    }
-    assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
+  return remove
+}
 
-    if (loaded === false) {
-      load()
-    }
-
-    var ev = 'exit'
-    if (opts && opts.alwaysLast) {
-      ev = 'afterexit'
-    }
-
-    var remove = function () {
-      emitter.removeListener(ev, cb)
-      if (emitter.listeners('exit').length === 0 &&
-          emitter.listeners('afterexit').length === 0) {
-        unload()
-      }
-    }
-    emitter.on(ev, cb)
-
-    return remove
+module.exports.unload = unload
+function unload () {
+  if (!loaded) {
+    return
   }
+  loaded = false
 
-  var unload = function unload () {
-    if (!loaded || !processOk(global.process)) {
-      return
-    }
-    loaded = false
-
-    signals.forEach(function (sig) {
-      try {
-        process.removeListener(sig, sigListeners[sig])
-      } catch (er) {}
-    })
-    process.emit = originalProcessEmit
-    process.reallyExit = originalProcessReallyExit
-    emitter.count -= 1
-  }
-  module.exports.unload = unload
-
-  var emit = function emit (event, code, signal) {
-    /* istanbul ignore if */
-    if (emitter.emitted[event]) {
-      return
-    }
-    emitter.emitted[event] = true
-    emitter.emit(event, code, signal)
-  }
-
-  // { <signal>: <listener fn>, ... }
-  var sigListeners = {}
   signals.forEach(function (sig) {
-    sigListeners[sig] = function listener () {
-      /* istanbul ignore if */
-      if (!processOk(global.process)) {
-        return
-      }
-      // If there are no other listeners, an exit is coming!
-      // Simplest way: remove us and then re-send the signal.
-      // We know that this will kill the process, so we can
-      // safely emit now.
-      var listeners = process.listeners(sig)
-      if (listeners.length === emitter.count) {
-        unload()
-        emit('exit', null, sig)
-        /* istanbul ignore next */
-        emit('afterexit', null, sig)
-        /* istanbul ignore next */
-        if (isWin && sig === 'SIGHUP') {
-          // "SIGHUP" throws an `ENOSYS` error on Windows,
-          // so use a supported signal instead
-          sig = 'SIGINT'
-        }
-        /* istanbul ignore next */
-        process.kill(process.pid, sig)
-      }
+    try {
+      process.removeListener(sig, sigListeners[sig])
+    } catch (er) {}
+  })
+  process.emit = originalProcessEmit
+  process.reallyExit = originalProcessReallyExit
+  emitter.count -= 1
+}
+
+function emit (event, code, signal) {
+  if (emitter.emitted[event]) {
+    return
+  }
+  emitter.emitted[event] = true
+  emitter.emit(event, code, signal)
+}
+
+// { <signal>: <listener fn>, ... }
+var sigListeners = {}
+signals.forEach(function (sig) {
+  sigListeners[sig] = function listener () {
+    // If there are no other listeners, an exit is coming!
+    // Simplest way: remove us and then re-send the signal.
+    // We know that this will kill the process, so we can
+    // safely emit now.
+    var listeners = process.listeners(sig)
+    if (listeners.length === emitter.count) {
+      unload()
+      emit('exit', null, sig)
+      /* istanbul ignore next */
+      emit('afterexit', null, sig)
+      /* istanbul ignore next */
+      process.kill(process.pid, sig)
+    }
+  }
+})
+
+module.exports.signals = function () {
+  return signals
+}
+
+module.exports.load = load
+
+var loaded = false
+
+function load () {
+  if (loaded) {
+    return
+  }
+  loaded = true
+
+  // This is the number of onSignalExit's that are in play.
+  // It's important so that we can count the correct number of
+  // listeners on signals, and don't wait for the other one to
+  // handle it instead of us.
+  emitter.count += 1
+
+  signals = signals.filter(function (sig) {
+    try {
+      process.on(sig, sigListeners[sig])
+      return true
+    } catch (er) {
+      return false
     }
   })
 
-  module.exports.signals = function () {
-    return signals
-  }
+  process.emit = processEmit
+  process.reallyExit = processReallyExit
+}
 
-  var loaded = false
+var originalProcessReallyExit = process.reallyExit
+function processReallyExit (code) {
+  process.exitCode = code || 0
+  emit('exit', process.exitCode, null)
+  /* istanbul ignore next */
+  emit('afterexit', process.exitCode, null)
+  /* istanbul ignore next */
+  originalProcessReallyExit.call(process, process.exitCode)
+}
 
-  var load = function load () {
-    if (loaded || !processOk(global.process)) {
-      return
+var originalProcessEmit = process.emit
+function processEmit (ev, arg) {
+  if (ev === 'exit') {
+    if (arg !== undefined) {
+      process.exitCode = arg
     }
-    loaded = true
-
-    // This is the number of onSignalExit's that are in play.
-    // It's important so that we can count the correct number of
-    // listeners on signals, and don't wait for the other one to
-    // handle it instead of us.
-    emitter.count += 1
-
-    signals = signals.filter(function (sig) {
-      try {
-        process.on(sig, sigListeners[sig])
-        return true
-      } catch (er) {
-        return false
-      }
-    })
-
-    process.emit = processEmit
-    process.reallyExit = processReallyExit
-  }
-  module.exports.load = load
-
-  var originalProcessReallyExit = process.reallyExit
-  var processReallyExit = function processReallyExit (code) {
-    /* istanbul ignore if */
-    if (!processOk(global.process)) {
-      return
-    }
-    process.exitCode = code || /* istanbul ignore next */ 0
+    var ret = originalProcessEmit.apply(this, arguments)
     emit('exit', process.exitCode, null)
     /* istanbul ignore next */
     emit('afterexit', process.exitCode, null)
-    /* istanbul ignore next */
-    originalProcessReallyExit.call(process, process.exitCode)
-  }
-
-  var originalProcessEmit = process.emit
-  var processEmit = function processEmit (ev, arg) {
-    if (ev === 'exit' && processOk(global.process)) {
-      /* istanbul ignore else */
-      if (arg !== undefined) {
-        process.exitCode = arg
-      }
-      var ret = originalProcessEmit.apply(this, arguments)
-      /* istanbul ignore next */
-      emit('exit', process.exitCode, null)
-      /* istanbul ignore next */
-      emit('afterexit', process.exitCode, null)
-      /* istanbul ignore next */
-      return ret
-    } else {
-      return originalProcessEmit.apply(this, arguments)
-    }
+    return ret
+  } else {
+    return originalProcessEmit.apply(this, arguments)
   }
 }
 
