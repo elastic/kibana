@@ -9,7 +9,7 @@ import React, { useRef, useCallback, useMemo, useEffect, useState } from 'react'
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
-import type { Filter } from '@kbn/es-query';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -39,6 +39,10 @@ import { InspectResponse } from '../../../types';
 import { StackByComboBox } from '../../../detections/components/alerts_kpis/common/components';
 import { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
+import { isEmpty } from 'lodash';
+import { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
@@ -67,6 +71,23 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   display: flex;
   width: 100%;
 `;
+
+interface AlertsCountAggregation {
+  alertsByGroupingCount: {
+    buckets: Array<{docCount: number;
+    key: string}>;
+  };
+}
+
+interface ReturnQueryAlertGroups<Hit, Aggs> {
+  loading: boolean;
+  data: AlertSearchResponse<Hit, Aggs> | null;
+  // setQuery: React.Dispatch<SetStateAction<object>>;
+  response: string;
+  request: string;
+  refetch: (() => Promise<void>) | null;
+
+}
 
 const getAlertsGroupQuery = (
   selectedGroupByOption: string,
@@ -111,7 +132,6 @@ const getAlertsGroupQuery = (
         ],
       },
     },
-    //runtime_mappings: runtimeMappings,
   };
 };
 
@@ -201,39 +221,85 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
   const [selectedGroupByOption, setSelectedGroupByOption] = useState<string | null>(null);
-  const [aggsResult, setAggsResult] = useState<{
-    buckets: Array<{
-      docCount: number;
-      key: string
-    }>
-  } | null>(null);
-  const [aggsQuery, setAggsQuery] = useState<Record<string, any> | undefined>();
+  
   const [selectedGroupFieldValue, setSelectedGroupFieldValue] = useState<string | undefined>();
   const [groupFilter, setGroupFilter] = useState<Filter[] | undefined>();
   let buckets = [];
   let after: AggregationsCompositeAggregation['after'];
 
-  useEffect(() => {
-    if (selectedGroupByOption !== null) {
-      setAggsQuery({
-        buckets: {
-          composite: {
-            size: Math.min(10, 10000 - buckets.length),
-            sources: [
-              {
-                alertsByGroupingCount: {
-                  terms: {
-                    field: selectedGroupByOption,
-                  },
-                },
-              },
-            ],
-            after,
-          },
-        },
-      });
+  const additionalGroupingFilters = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          undefined,
+          query != null ? [query] : [],
+          filters?.filter((f) => f.meta.disabled === false) ?? []
+        ),
+      ];
+    } catch (e) {
+      return [];
     }
-  }, [selectedGroupByOption]);
+  }, [query, filters]);
+
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [alerts, setAlerts] = useState<
+    Pick<ReturnQueryAlertGroups<{}, AlertsCountAggregation>, 'data' | 'response' | 'request' | 'refetch'>
+  >({
+    data: null,
+    response: '',
+    request: '',
+    refetch: null,
+  });
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+    const alertsGroupQuery = selectedGroupByOption ? getAlertsGroupQuery(selectedGroupByOption, after, start, end) : undefined;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+
+        const alertResponse = await fetchQueryAlerts<{}, AlertsCountAggregation>({
+          query: alertsGroupQuery!,
+          signal: abortCtrl.signal,
+        });
+
+        if (isSubscribed) {
+          setAlerts({
+            data: alertResponse,
+            response: JSON.stringify(alertResponse, null, 2),
+            request: JSON.stringify({ index: [signalIndexName] ?? [''], body: alertsGroupQuery }, null, 2),
+            refetch: fetchData,
+          });
+
+          console.log(alertResponse);
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          setAlerts({
+            data: null,
+            response: '',
+            request: '',
+            refetch: fetchData,
+          });
+        }
+      }
+      if (isSubscribed) {
+        setLoading(false);
+      }
+    };
+
+    if (!isEmpty(alertsGroupQuery)) {
+      fetchData();
+    }
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
+  }, [selectedGroupByOption, signalIndexName]);
+
 
   useEffect(() => {
     setGroupFilter(selectedGroupByOption && selectedGroupFieldValue ? [{
@@ -275,7 +341,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], 
-  [filters, pageFilters, groupFilter]);
+  [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
@@ -283,25 +349,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [graphEventId, id]
   );
   const setQuery = useCallback(
-    (inspect, loading, refetch, title, aggs) => {
+    (inspect, loading, refetch, title) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
       setInspectResponse(inspect);
       setLoading(loading);
       setTitle(title);
-      if (aggs?.buckets?.after_key) {
-        console.log(aggs.buckets.after_key)
-        after = {
-          alertsByGroupingCount: aggs.buckets.after_key.alertsByGroupingCount,
-        };
-      }
-      if (aggs?.buckets) {
-        setAggsResult({
-          buckets: aggs.buckets.buckets.map((val: any) => ({
-            docCount: val.doc_count,
-            key: val.key.alertsByGroupingCount,
-          }))
-        });
-      }
     },
     [dispatch, id]
   );
@@ -367,7 +419,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     type: 'embedded',
     unit,
     createFieldComponent,
-    aggsQuery,
   });
 
   const toggleDetails = async (item: any) => {
@@ -455,7 +506,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               <StackByComboBox onSelect={setSelectedGroupByOption} selected={selectedGroupByOption} title='Group by' placeholder='Select a field to group by' ariaLabel='Group the alerts table by a field value' />
             </UpdatedFlexItem>
           </UpdatedFlexGroup>
-          {selectedGroupByOption && aggsResult?.buckets && aggsResult?.buckets.length ?
+          {selectedGroupByOption && alerts.data?.aggregations?.alertsByGroupingCount && alerts.data?.aggregations?.alertsByGroupingCount.buckets.length ?
             (
               <>
                 <EuiSpacer size="m" />
@@ -464,7 +515,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                   itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                   itemId={'key'}
                   tableCaption="Demo of EuiInMemoryTable"
-                  items={aggsResult.buckets}
+                  items={alerts.data?.aggregations?.alertsByGroupingCount.buckets}
                   columns={columns1}
                   pagination={true}
                 />
