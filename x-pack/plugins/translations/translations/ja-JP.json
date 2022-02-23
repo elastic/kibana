@@ -7808,7 +7808,6 @@
     "xpack.apm.tutorial.windowsServerInstructions.textPre": "1.[ダウンロードページ]（{downloadPageLink}）から APM Server Windows zip ファイルをダウンロードします。\n2.zip ファイルの内容を {zipFileExtractFolder} に抽出します。\n3.「{apmServerDirectory} ディレクトリの名前を「APM-Server」に変更します。\n4.管理者としてPowerShellプロンプトを開きます（PowerShellアイコンを右クリックして「管理者として実行」を選択します）。Windows XPをご使用の場合、PowerShellのダウンロードとインストールが必要な場合があります。\n5.PowerShell プロンプトで次のコマンドを実行し、APM Server を Windows サービスとしてインストールします。",
     "xpack.apm.unitLabel": "単位を選択",
     "xpack.apm.ux.overview.agent.description": "APMエージェントを使用して、APMデータを収集します。多数の一般的な言語では、エージェントを使用することで処理が簡単になっています。",
-    "xpack.apm.ux.overview.agent.title": "APM統合を追加",
     "xpack.apm.views.dependencies.title": "依存関係",
     "xpack.apm.views.dependenciesInventory.title": "依存関係",
     "xpack.apm.views.errors.title": "エラー",
