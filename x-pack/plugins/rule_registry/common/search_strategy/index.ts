@@ -13,4 +13,7 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
   query?: { bool: estypes.QueryDslBoolQuery };
 };
-export type RuleRegistrySearchResponse = IEsSearchResponse<Ecs>;
+type FieldsResponse = {
+  [Property in keyof Ecs]: any[];
+};
+export type RuleRegistrySearchResponse = IEsSearchResponse<FieldsResponse>;

@@ -100,6 +100,8 @@ export const ruleRegistrySearchStrategyProvider = (
           const params = {
             index: indices,
             body: {
+              _source: false,
+              fields: ['*'],
               size: MAX_ALERT_SEARCH_SIZE,
               query,
             },

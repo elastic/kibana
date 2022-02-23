@@ -47,9 +47,9 @@ export default ({ getService }: FtrProviderContext) => {
           strategy: 'ruleRegistrySearchStrategy',
         });
         expect(result.rawResponse.hits.total).to.eql(5);
-        const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit._source?.['kibana.alert.rule.consumer']
-        );
+        const consumers = result.rawResponse.hits.hits.map((hit) => {
+          return hit.fields?.['kibana.alert.rule.consumer'];
+        });
         expect(consumers.every((consumer) => consumer === AlertConsumers.LOGS));
       });
     });
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(result.rawResponse.hits.total).to.eql(2);
         const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit._source?.['kibana.alert.rule.consumer']
+          (hit) => hit.fields?.['kibana.alert.rule.consumer']
         );
         expect(consumers.every((consumer) => consumer === AlertConsumers.SIEM));
       });
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(result.rawResponse.hits.total).to.eql(2);
         const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit._source?.['kibana.alert.rule.consumer']
+          (hit) => hit.fields?.['kibana.alert.rule.consumer']
         );
         expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
       });
