@@ -212,7 +212,15 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             }
           }
 
-          const { cpu, memory, uptime } = endpoint.endpoint_metrics.Endpoint.metrics;
+          const {
+            cpu,
+            memory,
+            uptime,
+            documents_volume: documentsVolume,
+            malicious_behavior_rules: maliciousBehaviorRules,
+            system_impact: systemImpact,
+            threads,
+          } = endpoint.endpoint_metrics.Endpoint.metrics;
           const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
 
           return {
@@ -227,6 +235,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               cpu: cpu.endpoint,
               memory: memory.endpoint.private,
               uptime,
+              documentsVolume,
+              maliciousBehaviorRules,
+              systemImpact,
+              threads,
             },
             endpoint_meta: {
               os: endpoint.endpoint_metrics.host.os,
@@ -242,6 +254,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
                     actions: failedPolicy._source.Endpoint.policy.applied.actions
                       .map((action) => (action.status !== 'success' ? action : null))
                       .filter((action) => action !== null),
+                    configuration: failedPolicy._source.Endpoint.configuration,
+                    state: failedPolicy._source.Endpoint.state,
                   }
                 : {},
             telemetry_meta: {
