@@ -1,12 +1,208 @@
 [[whats-new]]
-== What's new in 8.0
+== What's new in {minor-version}
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes-8.0.0>>. 
+coming::[8.1.0]
+
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check the <<release-notes, release notes>>.
+
+Previous versions: {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+=== Discover
+
+[float]
+==== Field statistics on by default
+
+Find interesting fields to visualize and learn more about the shape of your data
+with *Field statistics*.  This view
+is similar to the *Index Data Visualizer* in *{ml-app}*.
+Check out <<show-field-statistics>> for details.
+
+[role="screenshot"]
+image::discover/images/field-statistics-view.png[Filter panel in Canvas]
+
+[float]
+==== New $ field syntax for Painless scripts
+Creating runtime fields is now easier and more reliable. Use our new shortcut
+for the field method when a script context supports the scripting fields API.
+This shortcut replaces field('fieldname').get(defaultValue) with $('fieldname', defaultValue).
+
+*Before*
+
+[source,js]
+----------------------------------
+if (!doc.containsKey('myfield') || doc['myfield'].empty) { return "unavailable" } else { return doc['myfield'].value }
+----------------------------------
+
+*After*
+
+[source,js]
+----------------------------------
+$('myfield', 'unavailable')
+----------------------------------
+
+[float]
+=== Dashboard
+
+[float]
+==== Synchronized ML anomaly visualizations
+*{ml-app}* visualizations will now synchronize cursor position with visualization panels
+from Lens, TSVB, Timelion, and aggregation-based visualizations.
+This can be useful to highlight an anomaly in time and see a visual indication
+of this time on other panels to help you identify interesting relationships in your data.
+The reverse is true as well&mdash;hovering in another editor will highlight the same point-in-time in *{ml-app}* panels.
+
+[float]
+=== Canvas
+
+[float]
+==== Native heatmap
+Create heatmaps in Canvas and natively use Canvas-only functionality, such as ES SQL,
+to fetch data. Fully configure your heatmap with flexible legend, axis,
+and visual controls.
+
+[float]
+==== New filter panel
+Use the new filter panel on any object to see which objects are filtering it.
+This can help you author your workpad with the right behavior.
+
+[role="screenshot"]
+image::images/highlights-canvas-filter.png[Filter panel in Canvas]
+
+[float]
+=== Visualizations
+
+[float]
+==== Combine fields with drag and drop
+
+Combine multiple fields with drag and drop to see top combinations in Lens.
+Use this feature to determine which combinations contribute to your metrics’ performance.
+
+[role="screenshot"]
+image::images/highlights-lens-combine.gif[Drag to combin in Lens]
+
+[float]
+==== Top values by rarity
+
+When looking for root cause it can be useful to find rare values in your data.
+You can now do this in Lens by seeing top values by rarity.
+This takes advantage of the {es} rare terms aggregation and makes it easy to ask
+the “What’s not normal here?”
+
+[role="screenshot"]
+image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, width=50%]
+
+[float]
+==== Horizontal and vertical gauges
+
+The gauge visualization type adds extra context to your metrics:
+show minimum and maximum values dynamically (via quick function or custom formula)
+or set using a static value for known metric ranges. Include a goal value to see
+if a metric is above or below the goal. Set color bands to show ranges visually–similar
+to reference lines in Bar/Line/Area visualizations. This new gauge visualization is i
+n technical preview in 8.1.
+
+[role="screenshot"]
+image::images/highlights-lens-guage.png[Example horizontal gauge with target value in Lens, width=50%]
+
+[float]
+==== Mosaic visualization
+
+he mosaic (also known as marimekko / mekko) visualization allows for side-by-side
+comparison of two dimensions against a single metric. Treemaps and two-layered
+pies do this as well, but the mosaic can be more effective for visual comparisons
+by aligning the colors for the term side by side. Try this on low cardinality
+dimensions to see its strengths. This new mosaic visualization is in technical preview in 8.1.
+
+[role="screenshot"]
+image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
+
+[float]
+==== Waffle visualization
+
+The waffle visualization is an effective proportion visualization that makes
+more efficient use of space when compared to pies.
+Simply put, waffles are designed for square spaces which aligns well with how
+most dashboards are authored. Waffles are stronger for low cardinality breakdowns
+but are not recommended if you have very small partitions as they only can show
+data in 1% blocks. You might be surprised how small you can make a waffle
+visualization and maintain readability. This new waffle visualization is in technical preview in 8.1.
+
+[role="screenshot"]
+image::images/highlights-lens-waffle.png[Example waffle visualization in Lens, width=50%]
+
+[float]
+==== Color by value in metrics
+
+Color the metric’s text or the background of the entire visualization’s background
+based on the value of the metric. Set up color stops for multiple colors similar
+to what you can do in Lens tables, heatmaps, and the new gauge.
+
+[role="screenshot"]
+image::images/highlights-lens-metric.png[Metric color options in Lens, width=75%]
+
+[float]
+==== Table sort on dashboard view
+Allow dashboard viewers to quickly change a table’s sort on the fly like the editors can.
+
+[float]
+==== Filter formulas globally
+
+This brings the familiar “Filter by” option for metrics defined by a formula.
+With this feature it’s easy to filter all the parts of your formula with KQL
+without having to copy/paste the KQL to all the aggregations used in the formula. Easy!
+
+[float]
+==== Configurable donut visualizations
+In this release, we’ve made the inner area size (or “donut hole”) in the donut
+visualization configurable&mdash;keeping the default as a smaller size to maximize space for
+labels but allowing you to change the option in Lens.
+
+[role="screenshot"]
+image::images/highlights-lens-donut.png[Inner area size setting in Lens donuts,width=75%]
+
+[float]
+==== Collapsable suggestions panel
+
+Get back some vertical space in the Lens and save on the query cost of
+suggestions by collapsing the suggestions panel. {kib} will remember if you close
+your suggestions the next time you use the editor with the same browser.
+
+[float]
+==== Improved color controls
+
+Revised color stop editing experience offers a more streamlined way to specify
+what happens outside of the defined ranges (above and below the minimum and maximum).
+These revised controls also add the ability to easily distribute color stops
+evenly in one click. Look for this in Lens tables, heatmaps, metrics (new this release),
+and gauges (new this release).
+
+[role="screenshot"]
+image::images/highlights-lens-color.png[Color editing in Lens, width=50%]
+
+[float]
+=== Maps
+
+[float]
+==== Shapefile upload
+Effortlessly load shapefiles into Elastic with this simple but powerful uploader built
+right into the Maps application. Easily load local open data and boundaries for analysis and comparison.
+
+[role="screenshot"]
+image::images/highlights-maps-shapefile.png[Shapefile upload in Maps]
+
+[float]
+==== Vector tiles now the default
+All new polygon layers enable *Use vector tiles* by default.
+Vector tiles offer the best performance and smooth
+zooming over the alternative methods. You can always change the scaling options
+in layer settings if you prefer the previous approach.
 
 // end::notable-highlights[]
