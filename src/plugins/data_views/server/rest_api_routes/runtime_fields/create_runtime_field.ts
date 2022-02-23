@@ -10,7 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSpecSchema } from '../util/schemas';
+import { runtimeFieldSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
@@ -87,7 +87,7 @@ const runtimeCreateFieldRouteFactory =
               minLength: 1,
               maxLength: 1_000,
             }),
-            runtimeField: runtimeFieldSpecSchema,
+            runtimeField: runtimeFieldSchema,
           }),
         },
       },

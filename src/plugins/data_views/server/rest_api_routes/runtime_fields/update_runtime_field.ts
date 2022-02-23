@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSpec, runtimeFieldSpecTypeSchema } from '../util/schemas';
+import { runtimeFieldSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
@@ -88,12 +88,7 @@ const updateRuntimeFieldRouteFactory =
           }),
           body: schema.object({
             name: schema.never(),
-            runtimeField: schema.object({
-              ...runtimeFieldSpec,
-              // We need to overwrite the below fields on top of `runtimeFieldSpec`,
-              // because some fields would be optional
-              type: schema.maybe(runtimeFieldSpecTypeSchema),
-            }),
+            runtimeField: runtimeFieldSchema,
           }),
         },
       },
