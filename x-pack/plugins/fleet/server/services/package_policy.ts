@@ -41,6 +41,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
+  InstallablePackage,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -55,7 +56,6 @@ import type {
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
-  RegistryPackage,
   DryRunPackagePolicy,
 } from '../types';
 import type { ExternalCallback } from '..';
@@ -71,6 +71,7 @@ import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
+import { getArchivePackage } from './epm/archive';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -114,7 +115,7 @@ class PackagePolicyService {
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
         throw new IngestManagerError(
-          `There is already an integration policy with the same name: ${packagePolicy.name}`
+          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
         );
       }
     }
@@ -134,7 +135,8 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
-      let pkgInfo;
+      let pkgInfo: PackageInfo;
+
       if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
       else {
         const [, packageInfo] = await Promise.all([
@@ -162,16 +164,21 @@ class PackagePolicyService {
       }
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      let installablePackage: InstallablePackage | undefined =
+        getArchivePackage(pkgInfo)?.packageInfo;
+
+      if (!installablePackage) {
+        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      }
 
       inputs = await this._compilePackagePolicyInputs(
-        registryPkgInfo,
+        installablePackage,
         pkgInfo,
         packagePolicy.vars || {},
         inputs
       );
 
-      elasticsearch = registryPkgInfo.elasticsearch;
+      elasticsearch = installablePackage.elasticsearch;
     }
 
     const isoDate = new Date().toISOString();
@@ -382,7 +389,9 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already an integration policy with the same name');
+      throw new IngestManagerError(
+        `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+      );
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -400,14 +409,20 @@ class PackagePolicyService {
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      let installablePackage: InstallablePackage | undefined =
+        getArchivePackage(pkgInfo)?.packageInfo;
+
+      if (!installablePackage) {
+        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      }
+
       inputs = await this._compilePackagePolicyInputs(
-        registryPkgInfo,
+        installablePackage,
         pkgInfo,
         packagePolicy.vars || {},
         inputs
       );
-      elasticsearch = registryPkgInfo.elasticsearch;
+      elasticsearch = installablePackage.elasticsearch;
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -799,14 +814,19 @@ class PackagePolicyService {
   }
 
   public async _compilePackagePolicyInputs(
-    registryPkgInfo: RegistryPackage,
+    installablePackage: InstallablePackage,
     pkgInfo: PackageInfo,
     vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
-      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);
+      const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input);
+      const compiledStreams = await _compilePackageStreams(
+        installablePackage,
+        pkgInfo,
+        vars,
+        input
+      );
       return {
         ...input,
         compiled_input: compiledInput,
@@ -917,7 +937,6 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
 }
 
 async function _compilePackagePolicyInput(
-  registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
@@ -942,7 +961,7 @@ async function _compilePackagePolicyInput(
     return undefined;
   }
 
-  const [pkgInputTemplate] = await getAssetsData(registryPkgInfo, (path: string) =>
+  const [pkgInputTemplate] = await getAssetsData(pkgInfo, (path: string) =>
     path.endsWith(`/agent/input/${packageInput.template_path!}`)
   );
 
@@ -958,13 +977,13 @@ async function _compilePackagePolicyInput(
 }
 
 async function _compilePackageStreams(
-  registryPkgInfo: RegistryPackage,
+  installablePackage: InstallablePackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
+    _compilePackageStream(pkgInfo, vars, input, stream)
   );
 
   return await Promise.all(streamsPromises);
@@ -1007,7 +1026,6 @@ export function _applyIndexPrivileges(
 }
 
 async function _compilePackageStream(
-  registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
@@ -1050,7 +1068,7 @@ async function _compilePackageStream(
   const datasetPath = packageDataStream.path;
 
   const [pkgStreamTemplate] = await getAssetsData(
-    registryPkgInfo,
+    pkgInfo,
     (path: string) => path.endsWith(streamFromPkg.template_path),
     datasetPath
   );

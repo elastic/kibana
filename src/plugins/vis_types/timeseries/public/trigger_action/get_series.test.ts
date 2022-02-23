@@ -84,6 +84,32 @@ describe('getSeries', () => {
     ]);
   });
 
+  test('should return the correct formula config for a positive only function', () => {
+    const metric = [
+      {
+        field: 'day_of_week_i',
+        id: '123456',
+        type: 'max',
+      },
+      {
+        id: '891011',
+        type: 'positive_only',
+        field: '123456',
+      },
+    ] as Metric[];
+    const config = getSeries(metric);
+    expect(config).toStrictEqual([
+      {
+        agg: 'formula',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          formula: 'clamp(max(day_of_week_i), 0, max(day_of_week_i))',
+        },
+      },
+    ]);
+  });
+
   test('should return the correct config for the cumulative sum on count', () => {
     const metric = [
       {
@@ -297,6 +323,42 @@ describe('getSeries', () => {
         },
       },
     ]);
+  });
+
+  test('should return the correct formula config for a top_hit size 1 aggregation', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'top_hit',
+        field: 'day_of_week_i',
+        size: 1,
+        order_by: 'timestamp',
+      },
+    ] as Metric[];
+    const config = getSeries(metric);
+    expect(config).toStrictEqual([
+      {
+        agg: 'last_value',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: {
+          sortField: 'timestamp',
+        },
+      },
+    ]);
+  });
+
+  test('should return null for a top_hit size >1 aggregation', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'top_hit',
+        field: 'day_of_week_i',
+        size: 2,
+      },
+    ] as Metric[];
+    const config = getSeries(metric);
+    expect(config).toBeNull();
   });
 
   test('should return the correct formula for the math aggregation with percentiles as variables', () => {

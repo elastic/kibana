@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Volume Shadow Copy Deleted or Resized via VssAdmin",
-  "query": "process where event.type in (\"start\", \"process_started\") and event.action == \"start\" \n  and (process.name : \"vssadmin.exe\" or process.pe.original_file_name == \"VSSADMIN.EXE\") and\n  process.args in (\"delete\", \"resize\") and process.args : \"shadows*\"\n",
+  "query": "process where event.type in (\"start\", \"process_started\")\n  and (process.name : \"vssadmin.exe\" or process.pe.original_file_name == \"VSSADMIN.EXE\") and\n  process.args in (\"delete\", \"resize\") and process.args : \"shadows*\"\n",
   "risk_score": 73,
   "rule_id": "b5ea4bfe-a1b2-421f-9d47-22a75a6f2921",
   "severity": "high",
@@ -42,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 10
+  "version": 11
 }

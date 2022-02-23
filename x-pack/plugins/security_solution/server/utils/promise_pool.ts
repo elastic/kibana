@@ -5,11 +5,28 @@
  * 2.0.
  */
 
+import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
+
 interface PromisePoolArgs<Item, Result> {
   concurrency?: number;
   items: Item[];
   executor: (item: Item) => Promise<Result>;
   abortSignal?: AbortSignal;
+}
+
+export interface PromisePoolError<Item, Error = unknown> {
+  item: Item;
+  error: Error;
+}
+
+export interface PromisePoolResult<Item, Result> {
+  item: Item;
+  result: Result;
+}
+
+export interface PromisePoolOutcome<Item, Result, Error = unknown> {
+  results: Array<PromisePoolResult<Item, Result>>;
+  errors: Array<PromisePoolError<Item, Error | AbortError>>;
 }
 
 /**
@@ -24,15 +41,14 @@ interface PromisePoolArgs<Item, Result> {
  * @returns Struct holding results or errors of async tasks, aborted executions count if applicable
  */
 
-export const initPromisePool = async <Item, Result>({
+export const initPromisePool = async <Item, Result, Error = unknown>({
   concurrency = 1,
   items,
   executor,
   abortSignal,
-}: PromisePoolArgs<Item, Result>) => {
+}: PromisePoolArgs<Item, Result>): Promise<PromisePoolOutcome<Item, Result, Error>> => {
   const tasks: Array<Promise<void>> = [];
-  const results: Result[] = [];
-  const errors: unknown[] = [];
+  const outcome: PromisePoolOutcome<Item, Result, Error> = { results: [], errors: [] };
 
   for (const item of items) {
     // Check if the pool is full
@@ -41,17 +57,20 @@ export const initPromisePool = async <Item, Result>({
       await Promise.race(tasks);
     }
 
-    // if abort signal was sent stop processing tasks further
-    if (abortSignal?.aborted === true) {
-      break;
-    }
+    const executeItem = async () => {
+      // if abort signal was sent stop processing tasks further
+      if (abortSignal?.aborted === true) {
+        throw new AbortError();
+      }
+      return executor(item);
+    };
 
-    const task: Promise<void> = executor(item)
+    const task: Promise<void> = executeItem()
       .then((result) => {
-        results.push(result);
+        outcome.results.push({ item, result });
       })
       .catch(async (error) => {
-        errors.push(error);
+        outcome.errors.push({ item, error });
       })
       .finally(() => {
         tasks.splice(tasks.indexOf(task), 1);
@@ -63,10 +82,5 @@ export const initPromisePool = async <Item, Result>({
   // Wait for all remaining tasks to finish
   await Promise.all(tasks);
 
-  const aborted =
-    abortSignal?.aborted === true
-      ? { abortedExecutionsCount: items.length - results.length - errors.length }
-      : undefined;
-
-  return { results, errors, ...aborted };
+  return outcome;
 };
