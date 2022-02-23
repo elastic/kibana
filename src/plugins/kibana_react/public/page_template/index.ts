@@ -8,6 +8,6 @@
 
 export type { KibanaPageTemplateProps } from './page_template';
 export { KibanaPageTemplate } from './page_template';
-export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav';
+export { KibanaPageTemplateSolutionNavAvatar, KibanaPageTemplateSolutionNav } from './solution_nav';
 export * from './no_data_page';
 export { withSolutionNavbar } from './with_solution_navbar';

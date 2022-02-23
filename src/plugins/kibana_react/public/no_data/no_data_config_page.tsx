@@ -8,12 +8,8 @@
 import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import classNames from 'classnames';
-import {
-  KibanaPageTemplateProps,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
-  NoDataPage,
-  withSolutionNavbar,
-} from '../page_template';
+import { KibanaPageTemplateProps, NO_DATA_PAGE_TEMPLATE_PROPS, NoDataPage } from '../page_template';
+import { withSolutionNavbar } from './with_solution_navbar';
 
 export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
   const { className, noDataConfig } = props;
