@@ -51,7 +51,6 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
-  observability: ObservabilityPublicStart;
 }
 
 export interface StartPlugins {
@@ -69,6 +68,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
+  observability: ObservabilityPublicStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
 }

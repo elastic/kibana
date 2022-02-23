@@ -15,6 +15,8 @@ import { inputsSelectors } from '../../store';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { filterHostExternalAlertData, filterNetworkExternalAlertData } from './utils';
+import { StartServices } from '../../../types';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export interface SingleMetricOptions {
   alignLnsMetric?: string;
@@ -27,26 +29,23 @@ export interface SingleMetricOptions {
   metricPostfixWidth?: string;
 }
 
+type AppId = 'securitySolutionUI' | 'observability';
+
 const configs = {
   alignLnsMetric: 'flex-start',
-  appId: 'securitySolutionUI',
-  attributes: [
-    {
-      dataType: 'security',
-    },
-  ],
+  appId: 'securitySolutionUI' as AppId,
   disableBorder: true,
   disableShadow: true,
   customHeight: '100%',
   isSingleMetric: true,
   owner: 'securitySolution',
-  reportType: 'singleMetric',
+  reportType: 'kpi-over-time',
   withActions: ['save', 'addToCase', 'openInLens'],
 };
 
 interface EmbeddableHistogramProps {
   appendTitle?: JSX.Element;
-  customLensAttrs: {};
+  customLensAttrs: TypedLensByValueInput['attributes'];
   customTimeRange: { from: string; to: string };
   isSingleMetric: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
