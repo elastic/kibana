@@ -6,7 +6,6 @@
  */
 
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events_route';
-export const RECENT_SESSION_ROUTE = '/internal/session_view/recent_session_route';
 export const SESSION_ENTRY_LEADERS_ROUTE = '/internal/session_view/session_entry_leaders_route';
 export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-default';
 export const ALERTS_INDEX = '.siem-signals-default';
