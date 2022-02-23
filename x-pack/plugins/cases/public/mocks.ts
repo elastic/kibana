@@ -19,9 +19,10 @@ const createStartContract = (): jest.Mocked<CasesUiStart> => ({
   hooks: {
     getUseCasesAddToNewCaseFlyout: jest.fn(),
     getUseCasesAddToExistingCaseModal: jest.fn(),
+    useCasesToast: jest.fn(),
   },
-  timelineActions: {
-    AddAlertToNewCaseButton: jest.fn(),
+  helpers: {
+    getRuleIdFromEvent: jest.fn(),
   },
 });
 

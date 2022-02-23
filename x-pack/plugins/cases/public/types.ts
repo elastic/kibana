@@ -15,7 +15,6 @@ import type { SecurityPluginSetup } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
 import { CommentRequestAlertType, CommentRequestUserType } from '../common/api';
-import { AddAlertToNewCaseButtonProps } from './components/actions/add_alert_to_new_case_button';
 import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { CreateCaseFlyoutProps } from './components/create/flyout';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
@@ -27,6 +26,8 @@ import type {
   GetRecentCasesProps,
 } from './methods';
 import { GetCasesContextProps } from './methods/get_cases_context';
+import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
+import { useCasesToast } from './methods/use_cases_toast';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -100,11 +101,11 @@ export interface CasesUiStart {
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+    useCasesToast: typeof useCasesToast;
   };
-  timelineActions: {
-    AddAlertToNewCaseButton: (
-      props: AddAlertToNewCaseButtonProps
-    ) => ReactElement<AddAlertToNewCaseButtonProps>;
+  helpers: {
+    // TODO use a proper type guard
+    getRuleIdFromEvent: typeof getRuleIdFromEvent;
   };
 }
 
