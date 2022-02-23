@@ -263,7 +263,8 @@ export const EditConnector = React.memo(
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"
                 aria-label={i18n.EDIT_CONNECTOR_ARIA}
-                iconType={'pencil'}
+                iconType="gear"
+                color="text"
                 onClick={onEditClick}
               />
             </EuiFlexItem>

@@ -99,5 +99,5 @@ export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
 });
 
 export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
-  defaultMessage: 'Change status',
+  defaultMessage: 'Change case status',
 });

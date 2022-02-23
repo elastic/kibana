@@ -55,7 +55,8 @@ export const PUSH_LOCKED_DESC = i18n.translate('xpack.cases.caseView.lockedIncid
 export const CONFIGURE_CONNECTOR = i18n.translate(
   'xpack.cases.caseView.pushToService.configureConnector',
   {
-    defaultMessage: 'To create and update a case in an external system, select a connector.',
+    defaultMessage:
+      'Cases can be synced against external services like Jira, Service Now and Swimlane.',
   }
 );
 

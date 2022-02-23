@@ -16,13 +16,18 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiForm,
   EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 import { Title } from './title';
-
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`
     margin-left: ${theme.eui.euiSize};
@@ -79,42 +84,35 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
   const hasErrors = errors.length > 0;
 
   return editMode ? (
-    <EuiFormRow isInvalid={hasErrors} error={errors} fullWidth>
-      <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFieldText
-            onChange={handleOnChange}
-            value={`${newTitle}`}
-            data-test-subj="editable-title-input-field"
-          />
-        </EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="success"
-              data-test-subj="editable-title-submit-btn"
-              fill
-              iconType="save"
-              onClick={onClickSubmit}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="editable-title-cancel-btn"
-              iconType="cross"
-              onClick={onCancel}
-              size="s"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem />
-      </EuiFlexGroup>
-    </EuiFormRow>
+    <>
+      <Title title={title} />
+      <EuiModal onClose={() => setEditMode(false)}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <h2>Change case name</h2>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiForm isInvalid={hasErrors} error={errors}>
+            <EuiFormRow label="Case name">
+              <EuiFieldText
+                onChange={handleOnChange}
+                value={`${newTitle}`}
+                data-test-subj="editable-title-input-field"
+              />
+            </EuiFormRow>
+          </EuiForm>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="editable-title-cancel-btn" onClick={onCancel}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+          <EuiButton data-test-subj="editable-title-submit-btn" fill onClick={onClickSubmit}>
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    </>
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>

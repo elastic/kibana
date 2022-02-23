@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../translations';
 
 export const ADD_CONNECTOR = i18n.translate('xpack.cases.addConnector.title', {
-  defaultMessage: 'Add connector',
+  defaultMessage: 'Add service connection',
 });
 
 export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
@@ -21,6 +21,6 @@ export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
 export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
   'xpack.cases.caseView.errorsPushServiceCallOutTitle',
   {
-    defaultMessage: 'Select an external connector',
+    defaultMessage: 'Not connected to an external service',
   }
 );

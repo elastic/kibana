@@ -72,7 +72,7 @@ export const TagList = React.memo(
     );
     return (
       <div>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxxs">
               <h4>{i18n.TAGS}</h4>
@@ -87,7 +87,8 @@ export const TagList = React.memo(
                     <EuiButtonIcon
                       data-test-subj="tag-list-edit-button"
                       aria-label={i18n.EDIT_TAGS_ARIA}
-                      iconType={'pencil'}
+                      iconType="gear"
+                      color="text"
                       size="s"
                       onClick={setIsEditTags.bind(null, true)}
                     />
@@ -142,7 +143,6 @@ export const TagList = React.memo(
                         <EuiFlexItem grow={false}>
                           <EuiButtonEmpty
                             data-test-subj="edit-tags-cancel"
-                            iconType="cross"
                             onClick={setIsEditTags.bind(null, false)}
                             size="s"
                           >

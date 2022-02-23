@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
+import { EuiButton, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo } from 'react';
 
@@ -42,30 +42,33 @@ const CallOutComponent = ({
   );
 
   return !isEmpty(messages) ? (
-    <EuiCallOut
-      title={
-        isCaseClosed
-          ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE
-          : hasLicenseError
-          ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
-          : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
-      }
-      color={type}
-      data-test-subj={`case-callout-${id}`}
-      size="s"
-    >
-      <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
-      {!isCaseClosed && !hasLicenseError && (
-        <EuiButton
-          data-test-subj={`callout-onclick-${id}`}
-          color={type === 'success' ? 'success' : type}
-          onClick={handleCallOut}
-          size="s"
-        >
-          {i18n.ADD_CONNECTOR}
-        </EuiButton>
-      )}
-    </EuiCallOut>
+    <div>
+      <EuiCallOut
+        data-test-subj={`case-callout-${id}`}
+        size="s"
+        title={
+          isCaseClosed
+            ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE
+            : hasLicenseError
+            ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
+            : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
+        }
+      >
+        <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
+        {!isCaseClosed && !hasLicenseError && (
+          <>
+            <EuiButton
+              data-test-subj={`callout-onclick-${id}`}
+              color={type === 'success' ? 'success' : type}
+              onClick={handleCallOut}
+              size="s"
+            >
+              {i18n.ADD_CONNECTOR}
+            </EuiButton>
+          </>
+        )}
+      </EuiCallOut>
+    </div>
   ) : null;
 };
 CallOutComponent.displayName = 'CallOut';

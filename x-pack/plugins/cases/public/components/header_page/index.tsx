@@ -45,7 +45,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
         pageTitle={titleNode || <Title title={title} badgeOptions={badgeOptions} />}
         {...rest}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
       {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
       {children && <div data-test-subj="header-page-supplements">{children}</div>}

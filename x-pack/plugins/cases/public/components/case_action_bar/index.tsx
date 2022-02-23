@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiPopover,
-  EuiButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { Case } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
@@ -68,7 +68,22 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center">
+        <EuiText size="s">
+          <p>
+            {CASE_OPENED_BY} <strong>{caseData.createdBy.username}</strong>
+          </p>
+        </EuiText>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedRelativePreferenceDate
+              data-test-subj={'case-action-bar-status-date'}
+              value={date}
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <StatusContextMenu
               currentStatus={caseData.status}
@@ -76,62 +91,52 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
               onStatusChanged={onStatusChanged}
             />
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <p>
-                {CASE_OPENED_BY} <strong>{caseData.createdBy.username}</strong>
-              </p>
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedRelativePreferenceDate
-                  data-test-subj={'case-action-bar-status-date'}
-                  value={date}
+            <EuiPopover
+              isOpen={isActionPopoverOpen}
+              closePopover={() => setIsActionPopoverOpen(false)}
+              onClick={() => setIsActionPopoverOpen(!isActionPopoverOpen)}
+              button={
+                <EuiButtonIcon
+                  display="base"
+                  size="s"
+                  iconType="boxesHorizontal"
+                  aria-label="More actions"
                 />
-              </p>
-            </EuiText>
+              }
+            >
+              <>
+                {userCanCrud && isSyncAlertsEnabled && (
+                  <>
+                    <span>{i18n.SYNC_ALERTS}</span>
+                    <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
+                    <SyncAlertsSwitch
+                      disabled={isLoading}
+                      isSynced={caseData.settings.syncAlerts}
+                      onSwitchChange={onSyncAlertsChanged}
+                    />
+                  </>
+                )}
+                <EuiButtonEmpty
+                  data-test-subj="case-refresh"
+                  flush="left"
+                  iconType="refresh"
+                  onClick={onRefresh}
+                >
+                  {i18n.CASE_REFRESH}
+                </EuiButtonEmpty>
+                {userCanCrud && (
+                  <span data-test-subj="case-view-actions">
+                    <Actions
+                      caseData={caseData}
+                      currentExternalIncident={currentExternalIncident}
+                    />
+                  </span>
+                )}
+              </>
+            </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          isOpen={isActionPopoverOpen}
-          closePopover={() => setIsActionPopoverOpen(false)}
-          onClick={() => setIsActionPopoverOpen(!isActionPopoverOpen)}
-          button={
-            <EuiButton iconType="arrowDown" iconSide="right">
-              Actions
-            </EuiButton>
-          }
-        >
-          <>
-            {userCanCrud && isSyncAlertsEnabled && (
-              <>
-                <span>{i18n.SYNC_ALERTS}</span>
-                <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
-                <SyncAlertsSwitch
-                  disabled={isLoading}
-                  isSynced={caseData.settings.syncAlerts}
-                  onSwitchChange={onSyncAlertsChanged}
-                />
-              </>
-            )}
-            <EuiButtonEmpty
-              data-test-subj="case-refresh"
-              flush="left"
-              iconType="refresh"
-              onClick={onRefresh}
-            >
-              {i18n.CASE_REFRESH}
-            </EuiButtonEmpty>
-            {userCanCrud && (
-              <span data-test-subj="case-view-actions">
-                <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
-              </span>
-            )}
-          </>
-        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

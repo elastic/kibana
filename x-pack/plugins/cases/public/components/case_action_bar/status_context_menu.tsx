@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButton } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiButton, EuiSpacer } from '@elastic/eui';
 import { caseStatuses, CaseStatuses } from '../../../common/api';
 import { statuses } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
@@ -34,7 +34,6 @@ const StatusContextMenuComponent: React.FC<Props> = ({
         onClick={openPopover}
         iconType="arrowDown"
         minWidth={50}
-        fill
         color={statuses[currentStatus].color}
         iconSide="right"
       >
@@ -58,18 +57,20 @@ const StatusContextMenuComponent: React.FC<Props> = ({
 
   const panelItems = useMemo(
     () =>
-      selectableStatuses.map((status: CaseStatuses) => {
+      selectableStatuses.map((status: CaseStatuses, i, row) => {
         return (
-          <EuiButton
-            data-test-subj={`case-view-status-dropdown-${status}`}
-            size="s"
-            color={statuses[status].color}
-            fullWidth
-            fill
-            onClick={() => onContextMenuItemClick(status)}
-          >
-            {statuses[status].label}
-          </EuiButton>
+          <>
+            <EuiButton
+              data-test-subj={`case-view-status-dropdown-${status}`}
+              size="s"
+              color={statuses[status].color}
+              fullWidth
+              onClick={() => onContextMenuItemClick(status)}
+            >
+              {statuses[status].label}
+            </EuiButton>
+            {i + 1 !== row.length && <EuiSpacer size="s" />}
+          </>
         );
       }),
     [onContextMenuItemClick, selectableStatuses]
@@ -77,7 +78,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
 
   return (
     <EuiPopover
-      anchorPosition="downLeft"
+      anchorPosition="downRight"
       button={popOverButton}
       closePopover={closePopover}
       data-test-subj="case-view-status-dropdown"

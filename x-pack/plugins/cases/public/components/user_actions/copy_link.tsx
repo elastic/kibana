@@ -31,6 +31,7 @@ const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps)
         data-test-subj={`copy-link-${commentId}`}
         onClick={handleAnchorLink}
         iconType="link"
+        color="text"
         id={`${commentId}-permLink`}
       />
     </EuiToolTip>
