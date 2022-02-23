@@ -8,10 +8,6 @@ CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 # KIBANA_URL="$(buildkite-agent meta-data get 'META_CLOUD_DEPLOYMENT_KIBANA_URL')"
 # ELASTIC_URL="$(buildkite-agent meta-data get 'META_CLOUD_DEPLOYMENT_ELASTICSEARCH_URL')"
 
-VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-retry 5 30 vault login -no-print "$VAULT_TOKEN"
 
 DEPLOYMENT_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME)"
 DEPLOYMENT_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME)"
@@ -38,7 +34,7 @@ yarn add test-alert-load-kbn
 
 echo "--- Run IM tests"
 
-npx test-alert-load-kbn run im-test  -r 'report-im.html' -o 'reports'
+# npx test-alert-load-kbn run im-test  -r 'report-im.html' -o 'reports'
 
-buildkite-agent artifact upload './reports'
+# buildkite-agent artifact upload './reports'
 
