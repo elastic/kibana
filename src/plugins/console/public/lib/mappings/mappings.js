@@ -17,6 +17,7 @@ let perAliasIndexes = [];
 let legacyTemplates = [];
 let indexTemplates = [];
 let componentTemplates = [];
+let dataStreams = [];
 
 const mappingObj = {};
 
@@ -58,6 +59,10 @@ export function getIndexTemplates() {
 
 export function getComponentTemplates() {
   return [...componentTemplates];
+}
+
+export function getDataStreams() {
+  return [...dataStreams];
 }
 
 export function getFields(indices, types) {
@@ -128,7 +133,9 @@ export function getTypes(indices) {
 export function getIndices(includeAliases) {
   const ret = [];
   $.each(perIndexTypes, function (index) {
-    ret.push(index);
+    if (!index.startsWith('.ds')) {
+      ret.push(index);
+    }
   });
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
     $.each(perAliasIndexes, function (alias) {
@@ -204,6 +211,10 @@ export function loadComponentTemplates(data) {
   componentTemplates = (data.component_templates ?? []).map(({ name }) => name);
 }
 
+export function loadDataStreams(data) {
+  dataStreams = (data.data_streams ?? []).map(({ name }) => name);
+}
+
 export function loadMappings(mappings) {
   perIndexTypes = {};
 
@@ -265,6 +276,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
     legacyTemplates: '_template',
     indexTemplates: '_index_template',
     componentTemplates: '_component_template',
+    dataStreams: '_data_stream',
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
@@ -326,14 +338,16 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
     'componentTemplates',
     templatesSettingToRetrieve
   );
+  const dataStreamsPromise = retrieveSettings('dataStreams', settingsToRetrieve);
 
   $.when(
     mappingPromise,
     aliasesPromise,
     legacyTemplatesPromise,
     indexTemplatesPromise,
-    componentTemplatesPromise
-  ).done((mappings, aliases, legacyTemplates, indexTemplates, componentTemplates) => {
+    componentTemplatesPromise,
+    dataStreamsPromise
+  ).done((mappings, aliases, legacyTemplates, indexTemplates, componentTemplates, dataStreams) => {
     let mappingsResponse;
     try {
       if (mappings && mappings.length) {
@@ -363,6 +377,10 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
 
       if (componentTemplates) {
         loadComponentTemplates(JSON.parse(componentTemplates[0]));
+      }
+
+      if (dataStreams) {
+        loadDataStreams(JSON.parse(dataStreams[0]));
       }
 
       if (mappings && aliases) {
