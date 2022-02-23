@@ -13,7 +13,10 @@ import { DetailPanelListItem } from './index';
 const TEST_STRING = 'item title';
 const TEST_CHILD = <span>{TEST_STRING}</span>;
 const TEST_COPY_STRING = 'test copy button';
-const TEST_COPY = <button data-test-subj="test-copy-button">{TEST_COPY_STRING}</button>;
+const BUTTON_TEST_ID = 'test-copy-button';
+const TEST_COPY = <button data-test-subj={BUTTON_TEST_ID}>{TEST_COPY_STRING}</button>;
+const LIST_ITEM_TEST_ID = 'sessionViewer:detail-panel-list-item';
+const WAIT_TIMEOUT = 500;
 
 describe('DetailPanelListItem component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -28,7 +31,7 @@ describe('DetailPanelListItem component', () => {
     it('renders DetailPanelListItem correctly', async () => {
       renderResult = mockedContext.render(<DetailPanelListItem>{TEST_CHILD}</DetailPanelListItem>);
 
-      expect(renderResult.queryByTestId('sessionViewer:detail-panel-list-item')).toBeVisible();
+      expect(renderResult.queryByTestId(LIST_ITEM_TEST_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_STRING)).toBeVisible();
     });
 
@@ -37,10 +40,22 @@ describe('DetailPanelListItem component', () => {
         <DetailPanelListItem copy={TEST_COPY}>{TEST_CHILD}</DetailPanelListItem>
       );
 
-      expect(renderResult.queryByTestId('test-copy-button')).toBeNull();
-      fireEvent.mouseEnter(renderResult.getByTestId('sessionViewer:detail-panel-list-item'));
-      await waitFor(() => screen.queryByTestId('test-copy-button'));
-      expect(renderResult.queryByTestId('test-copy-button')).toBeVisible();
+      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
+      fireEvent.mouseEnter(renderResult.getByTestId(LIST_ITEM_TEST_ID));
+      await waitFor(() => screen.queryByTestId(BUTTON_TEST_ID));
+      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeVisible();
+
+      fireEvent.mouseLeave(renderResult.getByTestId(LIST_ITEM_TEST_ID));
+      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
+    });
+
+    it('does not have mouse events when copy prop is not present', async () => {
+      renderResult = mockedContext.render(<DetailPanelListItem>{TEST_CHILD}</DetailPanelListItem>);
+
+      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
+      fireEvent.mouseEnter(renderResult.getByTestId(LIST_ITEM_TEST_ID));
+      await waitFor(() => screen.queryByTestId(BUTTON_TEST_ID), { timeout: WAIT_TIMEOUT });
+      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
     });
   });
 });
