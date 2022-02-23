@@ -32,4 +32,10 @@ describe('<SolutionToolbarButton />', () => {
 
     expect(component).toMatchSnapshot();
   });
+  test('it can be passed a functional onClick handler', () => {
+    const mockHandler = jest.fn();
+    const component = mount(<SolutionToolbarButton label="withOnClick" onClick={mockHandler} />);
+    component.simulate('click');
+    expect(mockHandler).toHaveBeenCalled();
+  });
 });
