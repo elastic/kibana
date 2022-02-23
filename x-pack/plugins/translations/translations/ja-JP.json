@@ -6686,7 +6686,6 @@
     "xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError": "ルールタイプ[id=\"{id}\"]を登録できません。アクショングループ [{actionGroup}] は、復元とアクティブなアクショングループの両方として使用できません。",
     "xpack.alerting.ruleTypeRegistry.register.duplicateRuleTypeError": "ルールタイプ\"{id}\"はすでに登録されています。",
     "xpack.alerting.ruleTypeRegistry.register.invalidDefaultTimeoutRuleTypeError": "ルールタイプ\"{id}\"のデフォルト間隔が無効です：{errorMessage}。",
-    "xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError": "ルールタイプ\"{id}\"の最低間隔が無効です：{errorMessage}。",
     "xpack.alerting.ruleTypeRegistry.register.invalidTimeoutRuleTypeError": "ルールタイプ\"{id}\"のタイムアウトが無効です：{errorMessage}。",
     "xpack.alerting.savedObjects.goToRulesButtonText": "ルールに移動",
     "xpack.alerting.serverSideErrors.expirerdLicenseErrorMessage": "{licenseType}ライセンスの期限が切れたため、ルールタイプ{ruleTypeId}は無効です。",

@@ -6742,7 +6742,6 @@
     "xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError": "无法注册规则类型 [id=\"{id}\"]。操作组 [{actionGroup}] 无法同时用作恢复和活动操作组。",
     "xpack.alerting.ruleTypeRegistry.register.duplicateRuleTypeError": "已注册规则类型“{id}”。",
     "xpack.alerting.ruleTypeRegistry.register.invalidDefaultTimeoutRuleTypeError": "规则类型“{id}”的默认时间间隔无效：{errorMessage}。",
-    "xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError": "规则类型“{id}”的最小时间间隔无效：{errorMessage}。",
     "xpack.alerting.ruleTypeRegistry.register.invalidTimeoutRuleTypeError": "规则类型“{id}”的超时无效：{errorMessage}。",
     "xpack.alerting.ruleTypeRegistry.register.reservedActionGroupUsageError": "无法注册规则类型 [id=\"{id}\"]。操作组 [{actionGroups}] 由框架保留。",
     "xpack.alerting.savedObjects.goToRulesButtonText": "前往规则",
