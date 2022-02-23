@@ -8036,7 +8036,6 @@
     "xpack.apm.ux.median": "中值",
     "xpack.apm.ux.metrics": "指标",
     "xpack.apm.ux.overview.agent.description": "使用 APM 代理来收集 APM 数据。我们的代理支持许多流行语言，可以轻松使用。",
-    "xpack.apm.ux.overview.agent.title": "添加 APM 集成",
     "xpack.apm.ux.overview.beatsCard.description": "通过 APM 代理启用 RUM，以收集用户体验数据。",
     "xpack.apm.ux.overview.beatsCard.title": "添加 APM 集成",
     "xpack.apm.ux.overview.heading": "仪表板",
