@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
+import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useUrlParams } from './use_url_params';
 
 // Page is not index-based, it is 1-based
@@ -27,19 +27,21 @@ type UrlPaginationParams = Partial<Pagination>;
 
 const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => {
   const pagination: Pagination = {
-    pageSize: 20,
+    pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
     page: 1,
   };
 
   // Search params can appear multiple times in the URL, in which case the value for them,
   // once parsed, would be an array. In these case, we take the last value defined
   pagination.page = Number(
-    (Array.isArray(urlParams.page) ? urlParams.page.pop() : urlParams.page) ?? pagination.page
+    (Array.isArray(urlParams.page) ? urlParams.page[urlParams.page.length - 1] : urlParams.page) ??
+      pagination.page
   );
   pagination.pageSize =
     Number(
-      (Array.isArray(urlParams.pageSize) ? urlParams.pageSize.pop() : urlParams.pageSize) ??
-        pagination.pageSize
+      (Array.isArray(urlParams.pageSize)
+        ? urlParams.pageSize[urlParams.pageSize.length - 1]
+        : urlParams.pageSize) ?? pagination.pageSize
     ) ?? pagination.pageSize;
 
   // If Current Page is not a valid positive integer, set it to 1
@@ -47,9 +49,9 @@ const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => 
     pagination.page = 1;
   }
 
-  // if pageSize is not one of the expected page sizes, reset it to 20 (default)
+  // if pageSize is not one of the expected page sizes, reset it to 10 (default)
   if (!MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pagination.pageSize)) {
-    pagination.pageSize = 20;
+    pagination.pageSize = MANAGEMENT_DEFAULT_PAGE_SIZE;
   }
 
   return pagination;
