@@ -16,6 +16,15 @@ export interface Props {
   dataViewsDocLink: string;
 }
 
+/**
+ * A service-enabled component that provides Kibana-specific functionality to the `NoDataViews`
+ * component.
+ *
+ * Use of this component requires both the `EuiTheme` context as well as either a configured Shared UX
+ * `ServicesProvider` or the `ServicesContext` provided by the Shared UX public plugin contract.
+ *
+ * See shared-ux/public/services for information.
+ */
 export const NoDataViewsPage = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
   const closeDataViewEditor = useRef<() => void | undefined>();
 

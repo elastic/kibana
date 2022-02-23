@@ -26,6 +26,9 @@ const createDataViewText = i18n.translate('sharedUX.noDataViewsPage.addDataViewT
   defaultMessage: 'Create Data View',
 });
 
+/**
+ * A presentational component that is shown in cases when there are no data views created yet.
+ */
 export const NoDataViewsComponent = ({
   onClickCreate,
   canCreateNewDataView,
