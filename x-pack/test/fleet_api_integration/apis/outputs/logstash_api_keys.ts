@@ -13,7 +13,6 @@ import { testUsers } from '../test_users';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet_output_logstash_api_keys', async function () {
