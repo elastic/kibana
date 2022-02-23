@@ -69,6 +69,10 @@ describe('EphemeralTaskLifecycle', () => {
         unsafe: {
           exclude_task_types: [],
         },
+        event_loop_delay: {
+          monitor: true,
+          warn_on_delay: 5000,
+        },
         ...config,
       },
       elasticsearchAndSOAvailability$,
