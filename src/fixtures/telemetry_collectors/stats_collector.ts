@@ -19,7 +19,7 @@ interface Usage {
  * We should collect them when the schema is defined.
  */
 
-export const myCollectorWithSchema = makeStatsCollector<Usage, false>({
+export const myCollectorWithSchema = makeStatsCollector<Usage>({
   type: 'my_stats_collector_with_schema',
   isReady: () => true,
   fetch() {
