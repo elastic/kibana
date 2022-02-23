@@ -132,9 +132,6 @@ describe('operator', () => {
       {
         label: 'matches',
       },
-      {
-        label: 'not match',
-      },
     ]);
   });
 
@@ -223,7 +220,6 @@ describe('operator', () => {
       { label: 'is one of' },
       { label: 'is not one of' },
       { label: 'matches' },
-      { label: 'not match' },
     ]);
   });
 

@@ -19,7 +19,6 @@ import {
   isOneOfOperator,
   isOperator,
   matchesOperator,
-  notMatchOperator,
 } from '@kbn/securitysolution-list-utils';
 import { validateFilePathInput } from '@kbn/securitysolution-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
@@ -746,8 +745,6 @@ describe('BuilderEntryItem', () => {
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
-    const operator =
-      parseInt((Math.random() * 2).toString(), 10) % 2 === 0 ? matchesOperator : notMatchOperator;
 
     (validateFilePathInput as jest.Mock).mockReturnValue('some warning message');
     wrapper = mount(
@@ -759,7 +756,7 @@ describe('BuilderEntryItem', () => {
           field: getField('nestedField.nestedChild.doublyNestedChild'),
           id: '123',
           nested: undefined,
-          operator,
+          operator: matchesOperator,
           parent: undefined,
           value: '',
         }}
@@ -797,8 +794,6 @@ describe('BuilderEntryItem', () => {
 
   test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
-    const operator =
-      parseInt((Math.random() * 2).toString(), 10) % 2 === 0 ? matchesOperator : notMatchOperator;
 
     (validateFilePathInput as jest.Mock).mockReturnValue(undefined);
     wrapper = mount(
@@ -810,7 +805,7 @@ describe('BuilderEntryItem', () => {
           field: getField('nestedField.nestedChild.doublyNestedChild'),
           id: '123',
           nested: undefined,
-          operator,
+          operator: matchesOperator,
           parent: undefined,
           value: '',
         }}

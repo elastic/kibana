@@ -90,15 +90,15 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
           entries: [
             {
               field: 'file.path.text',
-              operator: 'excluded',
+              operator: 'included',
               type: 'wildcard',
-              value: os === 'windows' ? 'C:\\Fol*\\file.exe' : '/usr/*/app.dmg',
+              value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
             },
             {
               field: 'file.path.text',
               operator: 'included',
               type: 'wildcard',
-              value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
+              value: os === 'windows' ? 'D:\\Read*\\*\\file.exe' : '/sys/*/*/file.dmg',
             },
           ],
         };

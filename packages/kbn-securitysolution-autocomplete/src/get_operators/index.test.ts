@@ -41,7 +41,7 @@ describe('#getOperators', () => {
     expect(operator).toEqual([isOperator]);
   });
 
-  test('it returns "matches" and "not match" operators when field is "file.path.text"', () => {
+  test('it includes a "matches" operator when field is "file.path.text"', () => {
     const operator = getOperators({
       name: 'file.path.text',
       type: 'simple',
