@@ -21,10 +21,14 @@ import { TimeseriesUIRestrictions } from '../../../../../common/ui_restrictions'
 import { getIndexPatternKey } from '../../../../../common/index_patterns_utils';
 import { MultiFieldSelect } from './multi_field_select';
 import {
+  addNewItem,
+  deleteItem,
+  swapItems,
   getGroupedOptions,
   findInGroupedOptions,
   INVALID_FIELD_ID,
   MAX_MULTI_FIELDS_ITEMS,
+  updateItem,
 } from './field_select_utils';
 
 interface FieldSelectProps {
@@ -38,8 +42,9 @@ interface FieldSelectProps {
   onChange: (selectedValues: Array<string | null>) => void;
   disabled?: boolean;
   placeholder?: string;
-  'data-test-subj'?: string;
   allowMultiSelect?: boolean;
+  'data-test-subj'?: string;
+  fullWidth?: boolean;
 }
 
 const getPreselectedFields = (
@@ -49,6 +54,7 @@ const getPreselectedFields = (
 
 export function FieldSelect({
   label,
+  fullWidth,
   type,
   value,
   fields,
@@ -98,35 +104,25 @@ export function FieldSelect({
 
   const onFieldSelectItemChange = useCallback(
     (index: number = 0, [selectedItem]) => {
-      const arr = [...selectedIds];
-      arr[index] = selectedItem?.value ?? null;
-      onChange(arr);
+      onChange(updateItem(selectedIds, selectedItem?.value, index));
     },
     [selectedIds, onChange]
   );
 
   const onNewItemAdd = useCallback(
-    (index: number = 0) => {
-      const arr = [...selectedIds];
-      arr.splice(index + 1, 0, null);
-      onChange(arr);
-    },
+    (index?: number) => onChange(addNewItem(selectedIds, index)),
     [selectedIds, onChange]
   );
 
   const onDeleteItem = useCallback(
-    (index: number = 0) => {
-      onChange(selectedIds.filter((item, i) => i !== index));
-    },
+    (index?: number) => onChange(deleteItem(selectedIds, index)),
     [onChange, selectedIds]
   );
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
     ({ source, destination }) => {
       if (destination && source.index !== destination?.index) {
-        const arr = [...selectedIds];
-        arr.splice(destination.index, 0, arr.splice(source.index, 1)[0]);
-        onChange(arr);
+        onChange(swapItems(selectedIds, source.index, destination.index));
       }
     },
     [onChange, selectedIds]
@@ -162,15 +158,16 @@ export function FieldSelect({
 
   return (
     <EuiFormRow
-      id={htmlId('timeField')}
+      id={htmlId('fieldSelect')}
       label={label}
       error={i18n.translate('visTypeTimeseries.fieldSelect.fieldIsNotValid', {
         defaultMessage:
-          'The "{fieldParameter}" field is not valid for use with the current index. Please select a new field.',
+          'The "{fieldParameter}" selection is not valid for use with the current index.',
         values: {
           fieldParameter: invalidSelectedOptions.join(', '),
         },
       })}
+      fullWidth={fullWidth}
       isInvalid={Boolean(invalidSelectedOptions.length)}
       data-test-subj={dataTestSubj ?? 'metricsIndexPatternFieldsSelect'}
     >

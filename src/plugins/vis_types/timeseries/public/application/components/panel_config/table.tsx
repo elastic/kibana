@@ -140,6 +140,7 @@ export class TablePanelConfig extends Component<
                     uiRestrictions={this.context.uiRestrictions}
                     type={BUCKET_TYPES.TERMS}
                     allowMultiSelect={true}
+                    fullWidth={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>

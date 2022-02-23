@@ -5201,7 +5201,6 @@
     "visTypeTimeseries.externalUrlErrorModal.closeButtonLabel": "关闭",
     "visTypeTimeseries.externalUrlErrorModal.headerTitle": "尚未启用对此外部 URL 的访问权限",
     "visTypeTimeseries.fetchFields.loadIndexPatternFieldsErrorMessage": "无法加载 index_pattern 字段",
-    "visTypeTimeseries.fieldSelect.fieldIsNotValid": "“{fieldParameter}”字段无效，无法用于当前索引。请选择新字段。",
     "visTypeTimeseries.fieldSelect.selectFieldPlaceholder": "选择字段......",
     "visTypeTimeseries.filterRatio.aggregationLabel": "聚合",
     "visTypeTimeseries.filterRatio.denominatorLabel": "分母",

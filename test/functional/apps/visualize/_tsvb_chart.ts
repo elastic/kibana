@@ -559,7 +559,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display title field formatted labels with byte field formatted values by default', async () => {
         const expectedLegendItems = [
           'win 8: 4.968KB',
-          'win Xp: 4.23KB',
+          'win xp: 4.23KB',
           'win 7: 6.181KB',
           'ios: 5.84KB',
           'osx: 5.928KB',
@@ -572,7 +572,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display title field formatted labels with raw values', async () => {
         const expectedLegendItems = [
           'win 8: 5,087.5',
-          'win Xp: 4,332',
+          'win xp: 4,332',
           'win 7: 6,328.938',
           'ios: 5,980',
           'osx: 6,070',
@@ -587,7 +587,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display title field formatted labels with TSVB formatted values', async () => {
         const expectedLegendItems = [
           'win 8: 5,087.5 format',
-          'win Xp: 4,332 format',
+          'win xp: 4,332 format',
           'win 7: 6,328.938 format',
           'ios: 5,980 format',
           'osx: 6,070 format',

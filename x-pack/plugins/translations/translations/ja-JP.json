@@ -5401,7 +5401,6 @@
     "visTypeTimeseries.externalUrlErrorModal.closeButtonLabel": "閉じる",
     "visTypeTimeseries.externalUrlErrorModal.headerTitle": "この外部URLへのアクセスはまだ有効ではありません",
     "visTypeTimeseries.fetchFields.loadIndexPatternFieldsErrorMessage": "index_pattern フィールドを読み込めません",
-    "visTypeTimeseries.fieldSelect.fieldIsNotValid": "\"{fieldParameter}\"フィールドは無効であり、現在のインデックスで使用できません。新しいフィールドを選択してください。",
     "visTypeTimeseries.fieldSelect.selectFieldPlaceholder": "フィールドを選択してください...",
     "visTypeTimeseries.filterRatio.aggregationLabel": "アグリゲーション",
     "visTypeTimeseries.filterRatio.denominatorLabel": "分母",

@@ -78,3 +78,32 @@ export const findInGroupedOptions = (
     .map((i) => i.options)
     .flat()
     .find((i) => i?.value === fieldName);
+
+export const updateItem = (
+  existingItems: Array<string | null>,
+  value: string | null = null,
+  index: number = 0
+) => {
+  const arr = [...existingItems];
+  arr[index] = value;
+  return arr;
+};
+
+export const addNewItem = (existingItems: Array<string | null>, insertAfter: number = 0) => {
+  const arr = [...existingItems];
+  arr.splice(insertAfter + 1, 0, null);
+  return arr;
+};
+
+export const deleteItem = (existingItems: Array<string | null>, index: number = 0) =>
+  existingItems.filter((item, i) => i !== index);
+
+export const swapItems = (
+  existingItems: Array<string | null>,
+  source: number = 0,
+  destination: number = 0
+) => {
+  const arr = [...existingItems];
+  arr.splice(destination, 0, arr.splice(source, 1)[0]);
+  return arr;
+};

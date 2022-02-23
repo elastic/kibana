@@ -9,6 +9,7 @@
 import { calculateLabel } from './calculate_label';
 import type { Metric } from './types';
 import { SanitizedFieldType } from './types';
+import { KBN_FIELD_TYPES } from '../../../data/common';
 
 describe('calculateLabel(metric, metrics)', () => {
   test('returns the metric.alias if set', () => {
@@ -90,7 +91,7 @@ describe('calculateLabel(metric, metrics)', () => {
       { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
       metric,
     ] as unknown as Metric[];
-    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: 'field' }];
+    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: KBN_FIELD_TYPES.DATE }];
 
     expect(() => calculateLabel(metric, metrics, fields)).toThrowError('Field "3" not found');
   });
@@ -101,7 +102,7 @@ describe('calculateLabel(metric, metrics)', () => {
       { id: 1, type: 'max', field: 'network.out.bytes', alias: 'Outbound Traffic' },
       metric,
     ] as unknown as Metric[];
-    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: 'field' }];
+    const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: KBN_FIELD_TYPES.DATE }];
 
     expect(calculateLabel(metric, metrics, fields, false)).toBe('Max of 3');
   });

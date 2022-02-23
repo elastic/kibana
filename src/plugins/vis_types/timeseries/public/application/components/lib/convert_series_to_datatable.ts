@@ -155,7 +155,7 @@ export const convertSeriesToDataTable = async (
         const row: DatatableRow = [rowData[0], rowData[1]];
         // If the layer is split by terms aggregation, the data array should also contain the split value.
         if (isGroupedByTerms || filtersColumn) {
-          row.push(seriesPerLayer[j].label);
+          row.push([seriesPerLayer[j].label].flat()[0]);
         }
         return row;
       });

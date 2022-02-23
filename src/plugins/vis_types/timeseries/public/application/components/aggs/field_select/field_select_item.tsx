@@ -59,6 +59,7 @@ export function FieldSelectItem({
           onChange={onChange}
           singleSelection={{ asPlainText: true }}
           isInvalid={isInvalid}
+          fullWidth={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
