@@ -19,7 +19,7 @@ export function useUrlParams<T = Record<string, string | number | null | undefin
     const urlParams = parse(search) as unknown as T;
     return {
       urlParams,
-      toUrlParams: (params: T = urlParams) => stringify(params),
+      toUrlParams: (params: T = urlParams) => stringify(params as unknown as object),
     };
   }, [search]);
 }
