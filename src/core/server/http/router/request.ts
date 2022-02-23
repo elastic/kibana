@@ -123,10 +123,11 @@ export class KibanaRequest<
     body: B;
   } {
     const params = routeValidator.getParams(req.params, 'request params');
-    const query = routeValidator.getQuery(req.query, 'request query');
+    const query = routeValidator.getQuery(undefinedIfEmpty(req.query), 'request query');
     const body = routeValidator.getBody(req.payload, 'request body');
     return { query, params, body };
   }
+
   /**
    * A identifier to identify this request.
    *
@@ -331,3 +332,10 @@ function isRequest(request: any): request is Request {
 export function isRealRequest(request: unknown): request is KibanaRequest | Request {
   return isKibanaRequest(request) || isRequest(request);
 }
+
+const undefinedIfEmpty = <T>(obj: T): T | undefined => {
+  if (obj && Object.keys(obj).length === 0) {
+    return undefined;
+  }
+  return obj;
+};
