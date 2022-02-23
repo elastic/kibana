@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { Sort, AlertsTable } from './alerts_table';
+import { Sort, AlertsTable } from '../alerts_table';
+import { mockAlertData } from './alerts_page.mock.data';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
 
 const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(false);
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [showCheckboxes] = useState(false);
+  const [alerts, setAlerts] = useState({});
 
   const onColumnsChange = (columns: EuiDataGridControlColumn[]) => {};
   const onPageChange = (pageNumber: number, limit: number) => {};
@@ -23,7 +25,7 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
   const useFetchAlertData = () => {
     return {
       activePage: 0,
-      alerts: {},
+      alerts,
       isInitializing,
       isLoading,
       getInspectQuery: () => {
@@ -33,9 +35,21 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
       onPageChange,
       onSortChange,
       refresh: () => {},
-      alertCount: 0,
+      alertCount: 1,
     };
   };
+
+  async function search() {
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    setAlerts(mockAlertData.rawResponse.fields);
+    setIsLoading(false);
+    setIsInitializing(false);
+  }
+
+  useEffect(() => {
+    search();
+  }, []);
 
   const tableProps = {
     consumers: [AlertConsumers.OBSERVABILITY],
@@ -62,5 +76,4 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
   return <AlertsTable {...tableProps} />;
 };
 
-// eslint-disable-next-line import/no-default-export
-export { AlertsPage as default, AlertsPage };
+export { AlertsPage };

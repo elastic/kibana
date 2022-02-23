@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiDataGridColumn,
   EuiDataGridControlColumn,
@@ -85,8 +85,6 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
     application: { capabilities },
     kibanaFeatures,
   } = useKibana().services;
-  // const [alerts, setAlerts] = useState<ParsedTechnicalFields[]>([]);
-  // const [alertsTotal, setAlertsTotal] = useState<number>(0);
   const { sortingColumns, onSort } = useSorting();
   const { pagination, onChangeItemsPerPage, onChangePage } = usePagination();
 
@@ -112,8 +110,11 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
   const RenderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const row = alerts[rowIndex];
-    return get(row, columnId) ?? 'N/A';
+    const column = get(alerts, columnId);
+    if (Array.isArray(column)) {
+      return column[rowIndex];
+    }
+    return 'N/A';
   };
 
   return (
