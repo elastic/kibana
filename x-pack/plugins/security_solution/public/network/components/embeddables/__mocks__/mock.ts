@@ -7,6 +7,7 @@
 
 import { IndexPatternMapping } from '../types';
 import { IndexPatternSavedObject } from '../../../../common/hooks/types';
+import { LAYER_TYPE } from '../../../../../../maps/common';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -68,7 +69,7 @@ export const mockSourceLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
   joins: [],
 };
@@ -125,7 +126,7 @@ export const mockDestinationLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 };
 
@@ -180,7 +181,7 @@ export const mockClientLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
   joins: [],
 };
@@ -242,7 +243,7 @@ export const mockServerLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 };
 
@@ -311,7 +312,7 @@ export const mockLineLayer = {
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 };
 
@@ -375,7 +376,7 @@ export const mockClientServerLineLayer = {
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 };
 const mockApmDataStreamClientServerLineLayer = {
@@ -393,7 +394,7 @@ export const mockLayerList = [
     alpha: 1,
     visible: true,
     style: null,
-    type: 'VECTOR_TILE',
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
   },
   mockLineLayer,
   mockDestinationLayer,
@@ -410,7 +411,7 @@ export const mockLayerListDouble = [
     alpha: 1,
     visible: true,
     style: null,
-    type: 'VECTOR_TILE',
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
   },
   mockLineLayer,
   mockDestinationLayer,
@@ -430,7 +431,7 @@ export const mockLayerListMixed = [
     alpha: 1,
     visible: true,
     style: null,
-    type: 'VECTOR_TILE',
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
   },
   mockLineLayer,
   mockDestinationLayer,

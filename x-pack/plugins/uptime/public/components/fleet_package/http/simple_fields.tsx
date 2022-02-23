@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { ConfigKey, Validation } from '../types';
@@ -20,9 +20,12 @@ interface Props {
 
 export const HTTPSimpleFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useHTTPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
 
   return (
     <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
@@ -54,14 +57,14 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >

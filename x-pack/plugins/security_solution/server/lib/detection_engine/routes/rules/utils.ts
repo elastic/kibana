@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import { countBy } from 'lodash/fp';
+import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
 import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
 import { SavedObjectsClientContract } from 'kibana/server';
 import pMap from 'p-map';
 
+import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import {
-  RuleAlertType,
-  isAlertType,
-  isRuleStatusSavedObjectAttributes,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
+import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -96,26 +92,16 @@ export const transformTags = (tags: string[]): string[] => {
   return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
-// Transforms the data but will remove any null or undefined it encounters and not include
-// those on the export
-export const transformAlertToRule = (
-  alert: SanitizedAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
-  legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleStatus, legacyRuleActions);
-};
-
 export const transformAlertsToRules = (
-  alerts: RuleAlertType[],
+  rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
 ): Array<Partial<RulesSchema>> => {
-  return alerts.map((alert) => transformAlertToRule(alert, undefined, legacyRuleActions[alert.id]));
+  return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
 };
 
 export const transformFindAlerts = (
-  findResults: FindResult<RuleParams>,
-  currentStatusesByRuleId: { [key: string]: IRuleStatusSOAttributes | undefined },
+  ruleFindResults: FindResult<RuleParams>,
+  ruleExecutionSummariesByRuleId: RuleExecutionSummariesByRuleId,
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
@@ -124,28 +110,24 @@ export const transformFindAlerts = (
   data: Array<Partial<RulesSchema>>;
 } | null => {
   return {
-    page: findResults.page,
-    perPage: findResults.perPage,
-    total: findResults.total,
-    data: findResults.data.map((alert) => {
-      const status = currentStatusesByRuleId[alert.id];
-      return internalRuleToAPIResponse(alert, status, legacyRuleActions[alert.id]);
+    page: ruleFindResults.page,
+    perPage: ruleFindResults.perPage,
+    total: ruleFindResults.total,
+    data: ruleFindResults.data.map((rule) => {
+      const executionSummary = ruleExecutionSummariesByRuleId[rule.id];
+      return internalRuleToAPIResponse(rule, executionSummary, legacyRuleActions[rule.id]);
     }),
   };
 };
 
 export const transform = (
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
+  rule: PartialAlert<RuleParams>,
+  ruleExecutionSummary?: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
-    return transformAlertToRule(
-      alert,
-      isRuleStatusSavedObjectAttributes(ruleStatus) ? ruleStatus : undefined,
-      legacyRuleActions
-    );
+  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
+    return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }
 
   return null;
@@ -229,10 +211,10 @@ export const swapActionIds = async (
         `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details`
       );
     }
-  } catch (exc) {
     return action;
+  } catch (exc) {
+    return exc;
   }
-  return action;
 };
 
 /**
@@ -271,7 +253,7 @@ export const migrateLegacyActionsIds = async (
 ): Promise<PromiseFromStreams[]> => {
   const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
 
-  return pMap(
+  const toReturn = await pMap(
     rules,
     async (rule) => {
       if (isImportRule(rule)) {
@@ -284,33 +266,32 @@ export const migrateLegacyActionsIds = async (
         );
 
         // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const actionMigrationErrors = newActions.filter(
-          (action): action is Error => action instanceof Error
-        );
-
-        const newlyMigratedActions: Action[] = newActions.filter(
-          (action): action is Action => !(action instanceof Error)
-        );
+        const [actionMigrationErrors, newlyMigratedActions] = partition<Action | Error, Error>(
+          (item): item is Error => item instanceof Error
+        )(newActions);
 
         if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
           return { ...rule, actions: newlyMigratedActions };
         }
-        // return an Error object with the rule_id and the error messages
-        // for the actions associated with that rule.
-        return new Error(
-          JSON.stringify(
-            createBulkErrorObject({
-              ruleId: rule.rule_id,
-              statusCode: 409,
-              message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
-            })
-          )
-        );
+
+        return [
+          { ...rule, actions: newlyMigratedActions },
+          new Error(
+            JSON.stringify(
+              createBulkErrorObject({
+                ruleId: rule.rule_id,
+                statusCode: 409,
+                message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
+              })
+            )
+          ),
+        ];
       }
       return rule;
     },
     { concurrency: MAX_CONCURRENT_SEARCHES }
   );
+  return toReturn.flat();
 };
 
 /**

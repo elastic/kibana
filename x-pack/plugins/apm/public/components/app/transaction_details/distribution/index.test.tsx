@@ -21,7 +21,7 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcherModule from '../../../../hooks/use_fetcher';
-import { fromQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery } from '../../../shared/links/url_helpers';
 
 import { getFormattedSelection, TransactionDistribution } from './index';
 

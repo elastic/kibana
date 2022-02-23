@@ -69,6 +69,12 @@ function options(y: Argv) {
       describe: 'Target to index',
       string: true,
     })
+    .option('scenarioOpts', {
+      describe: 'Options specific to the scenario',
+      coerce: (arg) => {
+        return arg as Record<string, any> | undefined;
+      },
+    })
     .conflicts('to', 'live');
 }
 

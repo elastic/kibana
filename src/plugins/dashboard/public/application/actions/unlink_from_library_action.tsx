@@ -79,9 +79,6 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
       type: embeddable.type,
       explicitInput: { ...newInput, title: embeddable.getTitle() },
     };
-    // since by value visualizations should not have default titles, unlinking a visualization should remove
-    // the library title from the attributes.
-    _.unset(newPanel, 'explicitInput.attributes.title');
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = dashboardUnlinkFromLibraryAction.getSuccessMessage(

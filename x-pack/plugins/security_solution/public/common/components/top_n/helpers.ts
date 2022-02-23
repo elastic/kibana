@@ -158,7 +158,6 @@ export const IGNORED_ALERT_FILTERS = [
   ALERT_RULE_RULE_ID, // filters alerts to a single rule on the Security > Rules > details pages
   ALERT_RULE_RULE_NAME_OVERRIDE,
   ALERT_RULE_TAGS,
-  'kibana.alert.rule.threat_mapping', // an "Additional filters" option on the alerts table
   ALERT_RULE_TO,
   ALERT_RULE_TYPE,
   ALERT_RULE_TYPE_ID,

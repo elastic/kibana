@@ -64,7 +64,6 @@ import {
   editingTrustedApp,
   getListItems,
   getCurrentLocationIncludedPolicies,
-  getCurrentLocationExcludedPolicies,
 } from './selectors';
 import { parsePoliciesToKQL, parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
@@ -98,7 +97,6 @@ const refreshListIfNeeded = async (
       const pageSize = getCurrentLocationPageSize(store.getState());
       const filter = getCurrentLocationFilter(store.getState());
       const includedPolicies = getCurrentLocationIncludedPolicies(store.getState());
-      const excludedPolicies = getCurrentLocationExcludedPolicies(store.getState());
 
       const kuery = [];
 
@@ -106,10 +104,7 @@ const refreshListIfNeeded = async (
       if (filterKuery) kuery.push(filterKuery);
 
       const policiesKuery =
-        parsePoliciesToKQL(
-          includedPolicies ? includedPolicies.split(',') : [],
-          excludedPolicies ? excludedPolicies.split(',') : []
-        ) || undefined;
+        parsePoliciesToKQL(includedPolicies ? includedPolicies.split(',') : []) || undefined;
       if (policiesKuery) kuery.push(policiesKuery);
 
       const response = await trustedAppsService.getTrustedAppsList({
@@ -129,7 +124,6 @@ const refreshListIfNeeded = async (
             timestamp: Date.now(),
             filter,
             includedPolicies,
-            excludedPolicies,
           },
         })
       );

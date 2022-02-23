@@ -51,11 +51,7 @@ export const legacyRulesNotificationAlertType = ({
   },
   minimumLicenseRequired: 'basic',
   isExportable: false,
-  async executor({ startedAt, previousStartedAt, alertId, services, params }) {
-    // TODO: Change this to be a link to documentation on how to migrate: https://github.com/elastic/kibana/issues/113055
-    logger.warn(
-      'Security Solution notification (Legacy) system detected still running. Please see documentation on how to migrate to the new notification system.'
-    );
+  async executor({ startedAt, previousStartedAt, alertId, services, params, spaceId }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
@@ -63,17 +59,26 @@ export const legacyRulesNotificationAlertType = ({
 
     if (!ruleAlertSavedObject.attributes.params) {
       logger.error(
-        `Security Solution notification (Legacy) saved object for alert ${params.ruleAlertId} was not found`
+        [
+          `Security Solution notification (Legacy) saved object for alert ${params.ruleAlertId} was not found with`,
+          `id: "${alertId}".`,
+          `space id: "${spaceId}"`,
+          'This indicates a dangling (Legacy) notification alert.',
+          'You should delete this rule through "Kibana UI -> Stack Management -> Rules and Connectors" to remove this error message.',
+        ].join(' ')
       );
       return;
     }
+
     logger.warn(
       [
         'Security Solution notification (Legacy) system still active for alert with',
         `name: "${ruleAlertSavedObject.attributes.name}"`,
         `description: "${ruleAlertSavedObject.attributes.params.description}"`,
         `id: "${ruleAlertSavedObject.id}".`,
-        `Please see documentation on how to migrate to the new notification system.`,
+        `space id: "${spaceId}"`,
+        'Editing or updating this rule through "Kibana UI -> Security -> Alerts -> Manage Rules"',
+        'will auto-migrate the rule to the new notification system and remove this warning message.',
       ].join(' ')
     );
 
@@ -114,7 +119,7 @@ export const legacyRulesNotificationAlertType = ({
     );
 
     if (signalsCount !== 0) {
-      const alertInstance = services.alertInstanceFactory(alertId);
+      const alertInstance = services.alertFactory.create(alertId);
       scheduleNotificationActions({
         alertInstance,
         signalsCount,

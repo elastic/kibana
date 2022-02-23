@@ -85,6 +85,7 @@ import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
+import { ExplorerNoJobsSelected } from '../explorer/components';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -974,7 +975,11 @@ export class TimeSeriesExplorer extends React.Component {
     const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
-      return <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef} />;
+      return (
+        <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+          <ExplorerNoJobsSelected />
+        </TimeSeriesExplorerPage>
+      );
     }
 
     const selectedJob = mlJobService.getJob(selectedJobId);

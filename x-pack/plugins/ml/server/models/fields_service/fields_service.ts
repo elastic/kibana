@@ -45,7 +45,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     fieldNames: string[],
     datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const { body } = await asCurrentUser.fieldCaps({
+    const body = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
@@ -180,9 +180,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       ...runtimeMappings,
     };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       body,
       ...(datafeedConfig?.indices_options ?? {}),
@@ -224,9 +222,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       size: 0,
       body: {
@@ -401,9 +397,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       },
     };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       body,
       ...(datafeedConfig?.indices_options ?? {}),

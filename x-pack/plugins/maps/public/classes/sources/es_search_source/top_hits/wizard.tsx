@@ -16,6 +16,7 @@ import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types
 import { ESSearchSource } from '../es_search_source';
 
 export const esTopHitsLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.topHitsDescription', {
     defaultMessage:

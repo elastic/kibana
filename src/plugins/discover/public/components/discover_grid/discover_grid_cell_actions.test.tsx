@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { FilterInBtn, FilterOutBtn, buildCellActions } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';

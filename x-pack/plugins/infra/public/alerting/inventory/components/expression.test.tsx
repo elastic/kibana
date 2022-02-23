@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
-import React from 'react';
-import { Expressions, AlertContextMeta, ExpressionRow, defaultExpression } from './expression';
-import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
+import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({

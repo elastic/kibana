@@ -64,3 +64,4 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
     </ButtonFlexGroup>
   );
 };
+NavButtons.displayName = 'NavButtons';

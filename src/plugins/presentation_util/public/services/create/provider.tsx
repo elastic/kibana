@@ -17,7 +17,25 @@ import { PluginServiceFactory } from './factory';
  * start the service.
  */
 export type PluginServiceProviders<Services, StartParameters = {}> = {
-  [K in keyof Services]: PluginServiceProvider<Services[K], StartParameters>;
+  [K in keyof Services]: PluginServiceProvider<
+    Services[K],
+    StartParameters,
+    Services,
+    Array<keyof Services>
+  >;
+};
+
+type ElementOfArray<ArrayType extends readonly unknown[]> = ArrayType extends Array<
+  infer ElementType
+>
+  ? ElementType
+  : never;
+
+export type PluginServiceRequiredServices<
+  RequiredServices extends Array<keyof AvailableServices>,
+  AvailableServices
+> = {
+  [K in ElementOfArray<RequiredServices>]: AvailableServices[K];
 };
 
 /**
@@ -27,16 +45,34 @@ export type PluginServiceProviders<Services, StartParameters = {}> = {
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export class PluginServiceProvider<Service extends {}, StartParameters = {}> {
-  private factory: PluginServiceFactory<Service, StartParameters>;
+export class PluginServiceProvider<
+  Service extends {},
+  StartParameters = {},
+  Services = {},
+  RequiredServices extends Array<keyof Services> = []
+> {
+  private factory: PluginServiceFactory<
+    Service,
+    StartParameters,
+    PluginServiceRequiredServices<RequiredServices, Services>
+  >;
+  private _requiredServices?: RequiredServices;
   private context = createContext<Service | null>(null);
   private pluginService: Service | null = null;
   public readonly Provider: React.FC = ({ children }) => {
     return <this.context.Provider value={this.getService()}>{children}</this.context.Provider>;
   };
 
-  constructor(factory: PluginServiceFactory<Service, StartParameters>) {
+  constructor(
+    factory: PluginServiceFactory<
+      Service,
+      StartParameters,
+      PluginServiceRequiredServices<RequiredServices, Services>
+    >,
+    requiredServices?: RequiredServices
+  ) {
     this.factory = factory;
+    this._requiredServices = requiredServices;
     this.context.displayName = 'PluginServiceContext';
   }
 
@@ -55,8 +91,11 @@ export class PluginServiceProvider<Service extends {}, StartParameters = {}> {
    *
    * @param params Parameters used to start the service.
    */
-  start(params: StartParameters) {
-    this.pluginService = this.factory(params);
+  start(
+    params: StartParameters,
+    requiredServices: PluginServiceRequiredServices<RequiredServices, Services>
+  ) {
+    this.pluginService = this.factory(params, requiredServices);
   }
 
   /**
@@ -79,5 +118,9 @@ export class PluginServiceProvider<Service extends {}, StartParameters = {}> {
    */
   stop() {
     this.pluginService = null;
+  }
+
+  public get requiredServices() {
+    return this._requiredServices ?? [];
   }
 }

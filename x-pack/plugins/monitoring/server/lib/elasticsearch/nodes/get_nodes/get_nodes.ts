@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { checkParam } from '../../../error_missing_required';
 import { createQuery } from '../../../create_query';
 import { calculateAuto } from '../../../calculate_auto';
 import { ElasticsearchMetric } from '../../../metrics';
@@ -15,6 +14,8 @@ import { handleResponse } from './handle_response';
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
 import { LegacyRequest } from '../../../../types';
 import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import { getNewIndexPatterns } from '../../../cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
  * range for all the active nodes.  Every option is a key to a configuration
@@ -35,26 +36,23 @@ import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
  */
 export async function getNodes(
   req: LegacyRequest,
-  esIndexPattern: string,
   pageOfNodes: Array<{ uuid: string }>,
   clusterStats: ElasticsearchModifiedSource,
   nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } }
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in getNodes');
-
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const orgStart = start;
   const end = moment.utc(req.payload.timeRange.max).valueOf();
   const max = end;
   const duration = moment.duration(max - orgStart, 'ms');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
   const min = start;
 
   const bucketSize = Math.max(
-    parseInt(config.get('monitoring.ui.min_interval_seconds') as string, 10),
+    config.ui.min_interval_seconds,
     calculateAuto(100, duration).asSeconds()
   );
 
@@ -67,13 +65,26 @@ export async function getNodes(
     },
   ];
 
+  const dataset = 'node_stats';
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
+  const maxBucketSize = config.ui.max_bucket_size;
+
   const params = {
-    index: esIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    index: indexPatterns,
+    size: maxBucketSize,
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        type: 'node_stats',
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -88,7 +99,7 @@ export async function getNodes(
           terms: {
             field: `source_node.uuid`,
             include: uuidsToInclude,
-            size: config.get('monitoring.ui.max_bucket_size'),
+            size: maxBucketSize,
           },
           aggs: {
             by_date: {
@@ -112,7 +123,6 @@ export async function getNodes(
       ...LISTING_METRICS_PATHS,
     ],
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 

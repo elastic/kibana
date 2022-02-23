@@ -22,7 +22,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from './state_sync_state_storage';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
 

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { LegendDisplay } from '../../../chart_expressions/expression_partition_vis/common';
+
 export const samplePieVis = {
   type: {
     name: 'pie',
@@ -24,7 +26,7 @@ export const samplePieVis = {
       defaults: {
         type: 'pie',
         addTooltip: true,
-        addLegend: true,
+        legendDisplay: LegendDisplay.SHOW,
         legendPosition: 'right',
         isDonut: true,
         nestedLegend: true,
@@ -93,6 +95,7 @@ export const samplePieVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
               '!significant_text',
             ],
@@ -112,6 +115,7 @@ export const samplePieVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
               '!significant_text',
             ],
@@ -136,7 +140,7 @@ export const samplePieVis = {
   params: {
     type: 'pie',
     addTooltip: true,
-    addLegend: true,
+    legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     isDonut: true,
     labels: {

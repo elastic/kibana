@@ -120,7 +120,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       ...DEFAULT_INITIAL_APP_DATA,
-      errorConnectingMessage: undefined,
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,

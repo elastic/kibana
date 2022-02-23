@@ -5,72 +5,67 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
-import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiFormRow,
+  EuiHealth,
+  EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiFormRow,
-  EuiButtonEmpty,
-  EuiFieldSearch,
-  EuiCheckbox,
   EuiToolTip,
-  EuiIcon,
-  EuiHealth,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce, omit } from 'lodash';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
-  ThresholdExpression,
   ForLastExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
-import {
   IErrorObject,
   RuleTypeParamsExpressionProps,
+  ThresholdExpression,
 } from '../../../../../triggers_actions_ui/public';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
-import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
-import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
-import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
-import { rdsMetricTypes } from '../../../../common/inventory_models/aws_rds/toolbar_items';
-import { hostMetricTypes } from '../../../../common/inventory_models/host/toolbar_items';
-import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
-import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
+import {
+  Comparator,
+  FilterQuery,
+  InventoryMetricConditions,
+  QUERY_INVALID,
+} from '../../../../common/alerting/metrics';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api/snapshot_api';
 import { findInventoryModel } from '../../../../common/inventory_models';
+import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
+import { rdsMetricTypes } from '../../../../common/inventory_models/aws_rds/toolbar_items';
+import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
+import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
+import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
+import { hostMetricTypes } from '../../../../common/inventory_models/host/toolbar_items';
+import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
 import {
   InventoryItemType,
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '../../../../common/inventory_models/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-import {
-  SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../common/http_api/snapshot_api';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
-
-import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -85,7 +80,7 @@ type Props = Omit<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string | symbol;
+      filterQuery?: FilterQuery;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
@@ -118,7 +113,7 @@ export const Expressions: React.FC<Props> = (props) => {
     toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
@@ -201,7 +196,7 @@ export const Expressions: React.FC<Props> = (props) => {
         ...c,
         timeUnit: tu,
       }));
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as Criteria);
     },
     [ruleParams.criteria, setRuleParams]

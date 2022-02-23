@@ -84,6 +84,7 @@ const previouslyRegisteredTypes = [
   'security-solution-signals-migration',
   'server',
   'siem-detection-engine-rule-actions',
+  'siem-detection-engine-rule-execution-info',
   'siem-detection-engine-rule-status',
   'siem-ui-timeline',
   'siem-ui-timeline-note',

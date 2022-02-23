@@ -16,7 +16,7 @@ import { commonStateTranslations, tlsTranslations } from './translations';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 
 import { AlertInstanceContext } from '../../../../alerting/common';
-import { AlertInstance } from '../../../../alerting/server';
+import { Alert } from '../../../../alerting/server';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { createUptimeESClient } from '../lib';
@@ -28,7 +28,7 @@ import {
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
 
-type TLSAlertInstance = AlertInstance<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
+type TLSAlertInstance = Alert<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
 
 interface TlsAlertState {
   count: number;
@@ -113,10 +113,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
-  async executor({
-    services: { alertInstanceFactory, scopedClusterClient, savedObjectsClient },
-    state,
-  }) {
+  async executor({ services: { alertFactory, scopedClusterClient, savedObjectsClient }, state }) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
     const uptimeEsClient = createUptimeESClient({
@@ -156,7 +153,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
           'd'
         )
         .valueOf();
-      const alertInstance: TLSAlertInstance = alertInstanceFactory(TLS_LEGACY.id);
+      const alertInstance: TLSAlertInstance = alertFactory.create(TLS_LEGACY.id);
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
       alertInstance.replaceState({
         ...updateState(state, foundCerts),

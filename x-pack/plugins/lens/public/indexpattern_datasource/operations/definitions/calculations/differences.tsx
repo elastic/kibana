@@ -18,7 +18,8 @@ import {
 } from './utils';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
+import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 const OPERATION_NAME = 'differences';
 
@@ -74,6 +75,8 @@ export const derivativeOperation: OperationDefinition<
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
+    const differencesColumnParams = columnParams as DerivativeIndexPatternColumn;
+    const timeScale = differencesColumnParams?.timeScale ?? previousColumn?.timeScale;
     return {
       label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
@@ -81,7 +84,7 @@ export const derivativeOperation: OperationDefinition<
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
-      timeScale: previousColumn?.timeScale,
+      timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
@@ -92,13 +95,16 @@ export const derivativeOperation: OperationDefinition<
   },
   onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return getErrorsForDateReference(
-      layer,
-      columnId,
-      i18n.translate('xpack.lens.indexPattern.derivative', {
-        defaultMessage: 'Differences',
-      })
-    );
+    return combineErrorMessages([
+      getErrorsForDateReference(
+        layer,
+        columnId,
+        i18n.translate('xpack.lens.indexPattern.derivative', {
+          defaultMessage: 'Differences',
+        })
+      ),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]);
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.derivative', {

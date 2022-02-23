@@ -21,9 +21,12 @@ interface Props {
 
 export const BrowserSimpleFields = memo<Props>(({ validate }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
   const onChangeSourceField = useCallback(
     ({
       zipUrl,
@@ -64,14 +67,14 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >

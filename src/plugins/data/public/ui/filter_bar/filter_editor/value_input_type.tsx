@@ -11,10 +11,11 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
+import { IFieldType } from '../../../../../data_views/common';
 
 interface Props {
   value?: string | number;
-  type: string;
+  field: IFieldType;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
@@ -27,8 +28,9 @@ interface Props {
 class ValueInputTypeUI extends Component<Props> {
   public render() {
     const value = this.props.value;
+    const type = this.props.field.type;
     let inputElement: React.ReactNode;
-    switch (this.props.type) {
+    switch (type) {
       case 'string':
         inputElement = (
           <EuiFieldText
@@ -36,6 +38,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
+            isInvalid={!validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -63,7 +66,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -77,7 +80,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />

@@ -30,7 +30,11 @@ interface OsqueryActionProps {
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const agentId = metadata?.info?.agent?.id ?? undefined;
-  const { data: agentData, isFetched: agentFetched } = useAgentDetails({
+  const {
+    data: agentData,
+    isFetched: agentFetched,
+    isLoading,
+  } = useAgentDetails({
     agentId,
     silent: true,
     skip: !agentId,
@@ -72,7 +76,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  if (!agentFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 

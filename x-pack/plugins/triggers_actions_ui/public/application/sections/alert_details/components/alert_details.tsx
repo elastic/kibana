@@ -50,6 +50,7 @@ export type AlertDetailsProps = {
   alertType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
+  refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
@@ -61,6 +62,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   unmuteAlert,
   muteAlert,
   requestRefresh,
+  refreshToken,
 }) => {
   const history = useHistory();
   const {
@@ -443,6 +445,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             {alert.enabled ? (
               <AlertsRouteWithApi
                 requestRefresh={requestRefresh}
+                refreshToken={refreshToken}
                 rule={alert}
                 ruleType={alertType}
                 readOnly={!canSaveAlert}

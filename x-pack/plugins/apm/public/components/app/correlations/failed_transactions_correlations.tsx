@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiIcon,
   EuiTitle,
-  EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
   EuiSwitch,
@@ -34,12 +33,12 @@ import { FailedTransactionsCorrelation } from '../../../../common/correlations/f
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 
-import { ImpactBar } from '../../shared/ImpactBar';
-import { push } from '../../shared/Links/url_helpers';
+import { ImpactBar } from '../../shared/impact_bar';
+import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
@@ -451,31 +450,6 @@ export function FailedTransactionsCorrelations({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
-              {
-                defaultMessage: 'Beta',
-              }
-            )}
-            title={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
-              {
-                defaultMessage: 'Failed transaction correlations',
-              }
-            )}
-            tooltipContent={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
-              {
-                defaultMessage:
-                  'Failed transaction correlations is not GA. Please help us by reporting any bugs.',
-              }
-            )}
-          />
-        </EuiFlexItem>
-
         <EuiFlexItem>
           <ChartTitleToolTip />
         </EuiFlexItem>

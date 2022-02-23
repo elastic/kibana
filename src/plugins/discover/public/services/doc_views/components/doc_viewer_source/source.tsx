@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
-import { getServices } from '../../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
 import { DataView } from '../../../../../../data_views/common';
@@ -36,7 +36,8 @@ export const DocViewerSource = ({
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const { uiSettings } = useDiscoverServices();
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,

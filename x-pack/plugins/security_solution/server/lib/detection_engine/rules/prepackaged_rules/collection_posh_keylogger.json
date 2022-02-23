@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Detects the use of Win32 API Functions that can be used to capture user Keystrokes in PowerShell Scripts. Attackers use this technique to capture user input, looking for credentials and/or other valuable data.",
+  "description": "Detects the use of Win32 API Functions that can be used to capture user keystrokes in PowerShell scripts. Attackers use this technique to capture user input, looking for credentials and/or other valuable data.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -11,6 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "PowerShell Keylogging Script",
+  "note": "## Triage and analysis.\n\n### Investigating PowerShell Keylogging Script\n\nPowerShell is one of the main tools used by system administrators for automation, report routines, and other tasks.\n\nAttackers can abuse PowerShell capabilities to capture user keystrokes with the goal of stealing credentials and other\nvaluable information as credit card data and confidential conversations.\n\n#### Possible investigation steps:\n\n- Examine script content that triggered the detection. \n- Investigate script execution chain (parent process tree).\n- Inspect any file or network events from the suspicious PowerShell host process instance.\n- If the action is suspicious for the user, check for any other activities done by the user in the last 48 hours.\n\n### False Positive Analysis\n\n- Verify whether the script content is malicious/harmful.\n\n### Related Rules\n\n- PowerShell PSReflect Script - 56f2e9b5-4803-4e44-a0a4-a52dc79d57fe\n\n### Response and Remediation\n\n- Immediate response should be taken to validate, investigate, and potentially contain the activity to prevent further\npost-compromise behavior.\n\n## Config\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
   "query": "event.category:process and \n  ( \n   powershell.file.script_block_text : (GetAsyncKeyState or NtUserGetAsyncKeyState or GetKeyboardState or Get-Keystrokes) or \n   powershell.file.script_block_text : ((SetWindowsHookA or SetWindowsHookW or SetWindowsHookEx or SetWindowsHookExA or NtUserSetWindowsHookEx) and (GetForegroundWindow or GetWindowTextA or GetWindowTextW or WM_KEYBOARD_LL))\n   )\n",
   "references": [
     "https://github.com/EmpireProject/Empire/blob/master/data/module_source/collection/Get-Keystrokes.ps1",
@@ -74,5 +75,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

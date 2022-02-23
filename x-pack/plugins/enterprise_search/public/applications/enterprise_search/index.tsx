@@ -26,12 +26,11 @@ export const EnterpriseSearch: React.FC<InitialAppData> = ({
   workplaceSearch,
   enterpriseSearchVersion,
   kibanaVersion,
-  errorConnectingMessage,
 }) => {
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);
 
-  const showErrorConnecting = !!(config.host && errorConnecting);
+  const showErrorConnecting = !!(config.host && errorConnectingMessage);
   const incompatibleVersions = !!(
     config.host && isVersionMismatch(enterpriseSearchVersion, kibanaVersion)
   );
@@ -46,7 +45,7 @@ export const EnterpriseSearch: React.FC<InitialAppData> = ({
         />
       );
     } else if (showErrorConnecting) {
-      return <ErrorConnecting errorConnectingMessage={errorConnectingMessage} />;
+      return <ErrorConnecting />;
     }
 
     return <ProductSelector isWorkplaceSearchAdmin={isWorkplaceSearchAdmin} access={access} />;

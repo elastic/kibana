@@ -24,6 +24,7 @@ import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoin
 import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
 import {
   usePolicyDetailsSelector,
@@ -40,6 +41,7 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
   ({ policyItem }) => {
     const { getAppUrl } = useAppUrl();
     const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
+    const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
     const { data: allAssigned, isLoading: isLoadingAllAssigned } = useGetAllAssignedEventFilters(
@@ -55,6 +57,25 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
     const handleOnCloseFlyout = useCallback(() => {
       navigateCallback({ show: undefined });
     }, [navigateCallback]);
+
+    const assignToPolicyButton = useMemo(
+      () => (
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          data-test-subj="eventFilters-assign-button"
+          onClick={handleOnClickAssignButton}
+        >
+          {i18n.translate(
+            'xpack.securitySolution.endpoint.policy.eventFilters.layout.assignToPolicy',
+            {
+              defaultMessage: 'Assign event filters to policy',
+            }
+          )}
+        </EuiButton>
+      ),
+      [handleOnClickAssignButton]
+    );
 
     const aboutInfo = useMemo(() => {
       const link = (
@@ -93,10 +114,23 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
     }
 
     if (isEmptyState) {
-      return allEventFilters && allEventFilters.total !== 0 ? (
-        <PolicyEventFiltersEmptyUnassigned policyId={policyItem.id} policyName={policyItem.name} />
-      ) : (
-        <PolicyEventFiltersEmptyUnexisting policyId={policyItem.id} policyName={policyItem.name} />
+      return (
+        <>
+          {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
+            <PolicyEventFiltersFlyout policyItem={policyItem} onClose={handleOnCloseFlyout} />
+          )}
+          {allEventFilters && allEventFilters.total !== 0 ? (
+            <PolicyEventFiltersEmptyUnassigned
+              policyId={policyItem.id}
+              policyName={policyItem.name}
+            />
+          ) : (
+            <PolicyEventFiltersEmptyUnexisting
+              policyId={policyItem.id}
+              policyName={policyItem.name}
+            />
+          )}
+        </>
       );
     }
 
@@ -122,22 +156,10 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
             </EuiText>
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              data-test-subj="eventFilters-assign-button"
-              onClick={handleOnClickAssignButton}
-            >
-              {i18n.translate(
-                'xpack.securitySolution.endpoint.policy.eventFilters.layout.assignToPolicy',
-                {
-                  defaultMessage: 'Assign event filters to policy',
-                }
-              )}
-            </EuiButton>
+            {canCreateArtifactsByPolicy && assignToPolicyButton}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {urlParams.show === 'list' && (
+        {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
           <PolicyEventFiltersFlyout policyItem={policyItem} onClose={handleOnCloseFlyout} />
         )}
         <EuiSpacer size="l" />

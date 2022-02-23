@@ -134,7 +134,7 @@ export const MapToolTipComponent = ({
         try {
           const featureGeo = loadFeatureGeometry({ layerId, featureId });
           const [featureProperties, layerNameString] = await Promise.all([
-            loadFeatureProperties({ layerId, featureId, mbProperties: {} }),
+            loadFeatureProperties({ layerId, properties: features[featureIndex].mbProperties }),
             getLayerName(layerId),
           ]);
 

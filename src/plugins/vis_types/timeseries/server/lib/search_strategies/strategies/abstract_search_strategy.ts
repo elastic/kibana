@@ -6,40 +6,67 @@
  * Side Public License, v 1.
  */
 
+import { tap } from 'rxjs/operators';
+import { omit } from 'lodash';
 import { IndexPatternsService } from '../../../../../../data/server';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
-import type { FetchedIndexPattern } from '../../../../common/types';
+import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 
+export interface EsSearchRequest {
+  body: Record<string, any>;
+  index?: string;
+  trackingEsSearchMeta?: {
+    requestId: string;
+    requestLabel?: string;
+  };
+}
+
 export abstract class AbstractSearchStrategy {
   async search(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesVisDataRequest,
-    bodies: any[],
+    esRequests: EsSearchRequest[],
+    trackedEsSearches?: TrackedEsSearches,
     indexType?: string
   ) {
     const requests: any[] = [];
 
-    bodies.forEach((body) => {
+    esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
+      const startTime = Date.now();
       requests.push(
         requestContext.search
           .search(
             {
               indexType,
               params: {
-                ...body,
+                body,
+                index,
               },
             },
             req.body.searchSession
           )
+          .pipe(
+            tap((data) => {
+              if (trackingEsSearchMeta?.requestId && trackedEsSearches) {
+                trackedEsSearches[trackingEsSearchMeta.requestId] = {
+                  body,
+                  time: Date.now() - startTime,
+                  label: trackingEsSearchMeta.requestLabel,
+                  response: omit(data.rawResponse, 'aggregations'),
+                };
+              }
+            })
+          )
           .toPromise()
       );
     });
+
     return Promise.all(requests);
   }
 

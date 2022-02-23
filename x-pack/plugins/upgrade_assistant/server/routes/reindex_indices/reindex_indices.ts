@@ -9,8 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
 import { API_BASE_PATH } from '../../../common/constants';
+import type { ReindexStatusResponse } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
-import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
+import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../../lib/reindexing';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
@@ -114,12 +115,21 @@ export function registerReindexIndicesRoutes(
             ? await reindexService.detectReindexWarnings(indexName)
             : [];
 
-          return response.ok({
-            body: {
-              reindexOp: reindexOp ? reindexOp.attributes : null,
-              warnings,
-              hasRequiredPrivileges,
+          const indexAliases = await reindexService.getIndexAliases(indexName);
+
+          const body: ReindexStatusResponse = {
+            reindexOp: reindexOp ? reindexOp.attributes : undefined,
+            warnings,
+            hasRequiredPrivileges,
+            meta: {
+              indexName,
+              reindexName: generateNewIndexName(indexName),
+              aliases: Object.keys(indexAliases),
             },
+          };
+
+          return response.ok({
+            body,
           });
         } catch (error) {
           if (error instanceof errors.ResponseError) {

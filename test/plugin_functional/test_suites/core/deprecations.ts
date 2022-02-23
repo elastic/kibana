@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     {
       configPath: 'corePluginDeprecations.oldProperty',
       title: 'Setting "corePluginDeprecations.oldProperty" is deprecated',
-      level: 'critical',
+      level: 'warning',
       message:
         'Setting "corePluginDeprecations.oldProperty" has been replaced by "corePluginDeprecations.newProperty"',
       correctiveActions: {
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     {
       configPath: 'corePluginDeprecations.noLongerUsed',
       title: 'Setting "corePluginDeprecations.noLongerUsed" is deprecated',
-      level: 'critical',
+      level: 'warning',
       message: 'You no longer need to configure "corePluginDeprecations.noLongerUsed".',
       correctiveActions: {
         manualSteps: [

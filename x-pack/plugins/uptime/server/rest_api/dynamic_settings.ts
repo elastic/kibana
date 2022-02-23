@@ -55,6 +55,13 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMS
       certAgeThreshold: schema.number(),
       certExpirationThreshold: schema.number(),
       defaultConnectors: schema.arrayOf(schema.string()),
+      defaultEmail: schema.maybe(
+        schema.object({
+          to: schema.arrayOf(schema.string()),
+          cc: schema.maybe(schema.arrayOf(schema.string())),
+          bcc: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
     }),
   },
   writeAccess: true,

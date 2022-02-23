@@ -9,25 +9,21 @@ import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { Case, SubCase } from '../../../cases/common';
+import { Case, CommentType } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
 import { TimelineItem } from '../../common/search_strategy';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
 import { AddToCaseActionProps } from '../components/actions';
-import { CasesDeepLinkId, generateCaseViewPath } from '../../../cases/public';
+import { CaseAttachments, CasesDeepLinkId, generateCaseViewPath } from '../../../cases/public';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
   addExistingCaseClick: () => void;
-  onCaseClicked: (theCase?: Case | SubCase) => void;
+  onCaseClicked: (theCase?: Case) => void;
   onCaseSuccess: (theCase: Case) => Promise<void>;
-  attachAlertToCase: (
-    theCase: Case,
-    postComment?: ((arg: PostCommentArg) => Promise<void>) | undefined,
-    updateCase?: ((newCase: Case) => void) | undefined
-  ) => Promise<void>;
+  onCaseCreated: () => Promise<void>;
   isAllCaseModalOpen: boolean;
   isDisabled: boolean;
   userCanCrud: boolean;
@@ -36,30 +32,17 @@ interface UseAddToCase {
   closePopover: () => void;
   isPopoverOpen: boolean;
   isCreateCaseFlyoutOpen: boolean;
-}
-
-interface PostCommentArg {
-  caseId: string;
-  data: {
-    type: 'alert';
-    alertId: string | string[];
-    index: string | string[];
-    rule: { id: string | null; name: string | null };
-    owner: string;
-  };
-  updateCase?: (newCase: Case) => void;
-  subCaseId?: string;
+  caseAttachments?: CaseAttachments;
 }
 
 export const useAddToCase = ({
   event,
   casePermissions,
   appId,
-  owner,
   onClose,
+  owner,
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
-  const eventIndex = event?.ecs._index ?? '';
   const dispatch = useDispatch();
   // TODO: use correct value in standalone or integrated.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,33 +100,10 @@ export const useAddToCase = ({
     [navigateToApp, appId]
   );
 
-  const attachAlertToCase = useCallback(
-    async (
-      theCase: Case,
-      postComment?: (arg: PostCommentArg) => Promise<void>,
-      updateCase?: (newCase: Case) => void
-    ) => {
-      dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
-      const { ruleId, ruleName } = normalizedEventFields(event);
-      if (postComment) {
-        await postComment({
-          caseId: theCase.id,
-          data: {
-            type: 'alert',
-            alertId: eventId,
-            index: eventIndex ?? '',
-            rule: {
-              id: ruleId,
-              name: ruleName,
-            },
-            owner,
-          },
-          updateCase,
-        });
-      }
-    },
-    [eventId, eventIndex, owner, dispatch, event]
-  );
+  const onCaseCreated = useCallback(async () => {
+    dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
+  }, [eventId, dispatch]);
+
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
       dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false }));
@@ -151,9 +111,26 @@ export const useAddToCase = ({
     },
     [onViewCaseClick, toasts, dispatch, eventId]
   );
+  const caseAttachments: CaseAttachments = useMemo(() => {
+    const eventIndex = event?.ecs._index ?? '';
+    const { ruleId, ruleName } = normalizedEventFields(event);
+    const attachments = [
+      {
+        alertId: eventId,
+        index: eventIndex ?? '',
+        rule: {
+          id: ruleId,
+          name: ruleName,
+        },
+        owner,
+        type: CommentType.alert as const,
+      },
+    ];
+    return attachments;
+  }, [event, eventId, owner]);
 
   const onCaseClicked = useCallback(
-    (theCase?: Case | SubCase) => {
+    (theCase?: Case) => {
       /**
        * No cases listed on the table.
        * The user pressed the add new case table's button.
@@ -182,11 +159,12 @@ export const useAddToCase = ({
     }
   }, [onClose, closePopover, dispatch, eventId]);
   return {
+    caseAttachments,
     addNewCaseClick,
     addExistingCaseClick,
     onCaseClicked,
     onCaseSuccess,
-    attachAlertToCase,
+    onCaseCreated,
     isAllCaseModalOpen,
     isDisabled,
     userCanCrud,

@@ -13,6 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { IQueryPayload } from './types';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
@@ -32,7 +33,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   return useMutation(
     // @ts-expect-error update types
     ({ id, ...payload }) =>
-      http.put<any>(`/internal/osquery/packs/${id}`, {
+      http.put<IQueryPayload>(`/internal/osquery/packs/${id}`, {
         body: JSON.stringify(payload),
       }),
     {

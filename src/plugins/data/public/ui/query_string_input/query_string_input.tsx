@@ -40,6 +40,7 @@ import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
 import { onRaf } from '../utils';
+import { getTheme } from '../../services';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -487,7 +488,8 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </div>
+            </div>,
+            { theme$: getTheme().theme$ }
           ),
         });
       }

@@ -23,6 +23,7 @@ const mockReindexService = {
   processNextStep: jest.fn(),
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
+  getIndexAliases: jest.fn().mockResolvedValue({}),
 };
 jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
@@ -31,6 +32,7 @@ jest.mock('../../lib/es_version_precheck', () => ({
 jest.mock('../../lib/reindexing', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
+    generateNewIndexName: () => 'reindexed-foo',
   };
 });
 
@@ -159,7 +161,7 @@ describe('reindex API', () => {
 
       expect(resp.status).toEqual(200);
       const data = resp.payload;
-      expect(data.reindexOp).toBeNull();
+      expect(data.reindexOp).toBeUndefined();
       expect(data.warnings).toBeNull();
     });
   });

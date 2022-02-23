@@ -83,7 +83,7 @@ describe('Search exceptions', () => {
     });
 
     expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
+    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '');
   });
 
   it('should dispatch search action when click on button', () => {
@@ -96,7 +96,7 @@ describe('Search exceptions', () => {
     });
 
     expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
+    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '');
   });
 
   it('should hide refresh button', () => {

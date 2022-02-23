@@ -9,6 +9,7 @@
 import { last } from 'lodash';
 
 import { calculateLabel } from '../../../../../common/calculate_label';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 // @ts-expect-error no typed yet
 import { SeriesAgg } from './_series_agg';
@@ -26,7 +27,7 @@ export const seriesAgg: TableResponseProcessorsFunction =
       // Filter out the seires with the matching metric and store them
       // in targetSeries
       results = results.filter((s) => {
-        if (s.id && s.id.split(/:/)[0] === series.id) {
+        if (s.id && s.id.split(SERIES_SEPARATOR)[0] === series.id) {
           targetSeries.push(s.data!);
           return false;
         }

@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { map, truncate } from 'lodash';
+import { truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { Logger } from 'src/core/server';
-import type { Layout } from 'src/plugins/screenshot_mode/common';
+import { Headers, Logger } from 'src/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '../../../../../../src/plugins/screenshot_mode/server';
-import { Context, SCREENSHOTTING_CONTEXT_KEY } from '../../../common/context';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
+import { stripUnsafeHeaders } from './strip_unsafe_headers';
 
-export interface ConditionalHeadersConditions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-}
-
-export interface ConditionalHeaders {
-  headers: Record<string, string>;
-  conditions: ConditionalHeadersConditions;
-}
+export type Context = Record<string, unknown>;
 
 export interface ElementPosition {
   boundingClientRect: {
@@ -53,11 +41,10 @@ export interface Viewport {
 }
 
 interface OpenOptions {
-  conditionalHeaders: ConditionalHeaders;
   context?: Context;
+  headers: Headers;
   waitForSelector: string;
   timeout: number;
-  layout?: Layout;
 }
 
 interface WaitForSelectorOpts {
@@ -92,10 +79,7 @@ const WAIT_FOR_DELAY_MS: number = 100;
 
 function getDisallowedOutgoingUrlError(interceptedUrl: string) {
   return new Error(
-    i18n.translate('xpack.screenshotting.chromiumDriver.disallowedOutgoingUrl', {
-      defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
-      values: { interceptedUrl },
-    })
+    `Received disallowed outgoing URL: "${interceptedUrl}". Failing the request and closing the browser.`
   );
 }
 
@@ -109,6 +93,7 @@ export class HeadlessChromiumDriver {
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
     private config: ConfigType,
+    private basePath: string,
     private readonly page: Page
   ) {}
 
@@ -128,13 +113,7 @@ export class HeadlessChromiumDriver {
    */
   async open(
     url: string,
-    {
-      conditionalHeaders,
-      context,
-      layout,
-      waitForSelector: pageLoadSelector,
-      timeout,
-    }: OpenOptions,
+    { headers, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
@@ -148,27 +127,12 @@ export class HeadlessChromiumDriver {
      */
     await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotModeEnabled);
 
-    if (context) {
-      await this.page.evaluateOnNewDocument(
-        (key: string, value: unknown) => {
-          Object.defineProperty(window, key, {
-            configurable: false,
-            writable: true,
-            enumerable: true,
-            value,
-          });
-        },
-        SCREENSHOTTING_CONTEXT_KEY,
-        context
-      );
-    }
-
-    if (layout) {
-      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotLayout, layout);
+    for (const [key, value] of Object.entries(context ?? {})) {
+      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotContext, key, value);
     }
 
     await this.page.setRequestInterception(true);
-    this.registerListeners(conditionalHeaders, logger);
+    this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
     if (this.config.browser.chromium.inspect) {
@@ -269,14 +233,13 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: Logger) {
+  private registerListeners(url: string, customHeaders: Headers, logger: Logger) {
     if (this.listenersAttached) {
       return;
     }
 
-    // @ts-ignore
     // FIXME: retrieve the client in open() and  pass in the client
-    const client = this.page._client;
+    const client = this.page.client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -303,19 +266,17 @@ export class HeadlessChromiumDriver {
         return;
       }
 
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+      if (this._shouldUseCustomHeaders(url, interceptedUrl)) {
         logger.trace(`Using custom headers for ${interceptedUrl}`);
-        const headers = map(
-          {
-            ...interceptedRequest.request.headers,
-            ...conditionalHeaders.headers,
-            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
-          },
-          (value, name) => ({
-            name,
-            value,
-          })
-        );
+        const headers = Object.entries({
+          ...interceptedRequest.request.headers,
+          ...stripUnsafeHeaders(customHeaders),
+          [KBN_SCREENSHOT_MODE_HEADER]: 'true',
+        }).flatMap(([name, rawValue]) => {
+          const values = Array.isArray(rawValue) ? rawValue : [rawValue ?? ''];
+
+          return values.map((value) => ({ name, value }));
+        });
 
         try {
           await client.send('Fetch.continueRequest', {
@@ -323,15 +284,7 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(
-            i18n.translate(
-              'xpack.screenshotting.chromiumDriver.failedToCompleteRequestUsingHeaders',
-              {
-                defaultMessage: 'Failed to complete a request using headers: {error}',
-                values: { error: err },
-              }
-            )
-          );
+          logger.error(`Failed to complete a request using headers: ${err.message}`);
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -339,28 +292,21 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(
-            i18n.translate('xpack.screenshotting.chromiumDriver.failedToCompleteRequest', {
-              defaultMessage: 'Failed to complete a request: {error}',
-              values: { error: err },
-            })
-          );
+          logger.error(`Failed to complete a request: ${err.message}`);
         }
       }
 
       this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
-    // Even though 3xx redirects go through our request
-    // handler, we should probably inspect responses just to
-    // avoid being bamboozled by some malicious request
     this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
+      const status = interceptedResponse.status();
 
-      if (!interceptedResponse.ok()) {
+      if (status >= 400 && !interceptedResponse.ok()) {
         logger.warn(
-          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+          `Chromium received a non-OK response (${status}) for request ${interceptedUrl}`
         );
       }
 
@@ -394,13 +340,27 @@ export class HeadlessChromiumDriver {
     );
   }
 
-  private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
-    const { hostname, protocol, port, pathname } = parseUrl(url);
+  private _shouldUseCustomHeaders(sourceUrl: string, targetUrl: string) {
+    const {
+      hostname: sourceHostname,
+      protocol: sourceProtocol,
+      port: sourcePort,
+    } = parseUrl(sourceUrl);
+    const {
+      hostname: targetHostname,
+      protocol: targetProtocol,
+      port: targetPort,
+      pathname: targetPathname,
+    } = parseUrl(targetUrl);
+
+    if (targetPathname === null) {
+      throw new Error(`URL missing pathname: ${targetUrl}`);
+    }
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
     // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
-    const derivedPort = (() => {
+    const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;
       }
@@ -413,36 +373,15 @@ export class HeadlessChromiumDriver {
         return '443';
       }
 
-      return null;
-    })();
-
-    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
-    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
+      throw new Error(`URL missing port: ${url}`);
+    };
 
     return (
-      hostname === conditions.hostname &&
-      protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
-      pathname.startsWith(`${conditions.basePath}/`)
+      sourceHostname === targetHostname &&
+      sourceProtocol === targetProtocol &&
+      derivedPort(sourceProtocol, sourcePort, sourceUrl) ===
+        derivedPort(targetProtocol, targetPort, targetUrl) &&
+      targetPathname.startsWith(`${this.basePath}/`)
     );
-  }
-
-  private _shouldUseCustomHeadersForPort(
-    conditions: ConditionalHeadersConditions,
-    port: string | undefined
-  ) {
-    if (conditions.protocol === 'http' && conditions.port === 80) {
-      return (
-        port === undefined || port === null || port === '' || port === conditions.port.toString()
-      );
-    }
-
-    if (conditions.protocol === 'https' && conditions.port === 443) {
-      return (
-        port === undefined || port === null || port === '' || port === conditions.port.toString()
-      );
-    }
-
-    return port === conditions.port.toString();
   }
 }

@@ -10,6 +10,12 @@
   },
   "description": "Example integration code for applications to feature reports.",
   "optionalPlugins": [],
-  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode", "share"],
-  "requiredBundles": ["screenshotting"]
+  "requiredPlugins": [
+    "reporting",
+    "developerExamples",
+    "kibanaReact",
+    "navigation",
+    "screenshotMode",
+    "share"
+  ]
 }

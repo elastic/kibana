@@ -556,7 +556,9 @@ export const AlertForm = ({
               actionGroup.id === selectedAlertType.recoveryActionGroup.id
                 ? {
                     ...actionGroup,
-                    omitOptionalMessageVariables: true,
+                    omitMessageVariables: selectedAlertType.doesSetRecoveryContext
+                      ? 'keepContext'
+                      : 'all',
                     defaultActionMessage: recoveredActionGroupMessage,
                   }
                 : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
@@ -585,7 +587,8 @@ export const AlertForm = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'Define how often to evaluate the condition.',
+          defaultMessage:
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
         })}
       />
     </>

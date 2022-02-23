@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import type {
@@ -15,6 +15,8 @@ import type {
   TaskRunCreatorFunction,
 } from '../../../task_manager/server';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
+import type { AuditLogger } from '../audit';
+import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
@@ -24,10 +26,23 @@ import {
   SessionManagementService,
 } from './session_management_service';
 
+const mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initialize');
+mockSessionIndexInitialize.mockResolvedValue();
+
+const mockSessionIndexCleanUp = jest.spyOn(SessionIndex.prototype, 'cleanUp');
+mockSessionIndexCleanUp.mockResolvedValue();
+
 describe('SessionManagementService', () => {
   let service: SessionManagementService;
+  let auditLogger: AuditLogger;
   beforeEach(() => {
     service = new SessionManagementService(loggingSystemMock.createLogger());
+    auditLogger = auditLoggerMock.create();
+  });
+
+  afterEach(() => {
+    mockSessionIndexInitialize.mockReset();
+    mockSessionIndexCleanUp.mockReset();
   });
 
   describe('setup()', () => {
@@ -56,12 +71,9 @@ describe('SessionManagementService', () => {
   });
 
   describe('start()', () => {
-    let mockSessionIndexInitialize: jest.SpyInstance;
     let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
     let sessionCleanupTaskRunCreator: TaskRunCreatorFunction;
     beforeEach(() => {
-      mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initialize');
-
       mockTaskManager = taskManagerMock.createStart();
       mockTaskManager.ensureScheduled.mockResolvedValue(undefined as any);
 
@@ -84,14 +96,11 @@ describe('SessionManagementService', () => {
       sessionCleanupTaskRunCreator = createTaskRunner;
     });
 
-    afterEach(() => {
-      mockSessionIndexInitialize.mockReset();
-    });
-
     it('exposes proper contract', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       expect(
         service.start({
+          auditLogger,
           elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
           kibanaIndexName: '.kibana',
           online$: mockStatusSubject.asObservable(),
@@ -100,10 +109,10 @@ describe('SessionManagementService', () => {
       ).toEqual({ session: expect.any(Session) });
     });
 
-    it('registers proper session index cleanup task runner', () => {
-      const mockSessionIndexCleanUp = jest.spyOn(SessionIndex.prototype, 'cleanUp');
+    it('registers proper session index cleanup task runner', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -113,16 +122,17 @@ describe('SessionManagementService', () => {
       expect(mockSessionIndexCleanUp).not.toHaveBeenCalled();
 
       const runner = sessionCleanupTaskRunCreator({} as any);
-      runner.run();
+      await runner.run();
       expect(mockSessionIndexCleanUp).toHaveBeenCalledTimes(1);
 
-      runner.run();
+      await runner.run();
       expect(mockSessionIndexCleanUp).toHaveBeenCalledTimes(2);
     });
 
     it('initializes session index and schedules session index cleanup task when Elasticsearch goes online', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -160,6 +170,7 @@ describe('SessionManagementService', () => {
     it('removes old cleanup task if cleanup interval changes', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -195,6 +206,7 @@ describe('SessionManagementService', () => {
     it('does not remove old cleanup task if cleanup interval does not change', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -221,6 +233,7 @@ describe('SessionManagementService', () => {
     it('schedules retry if index initialization fails', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -257,6 +270,7 @@ describe('SessionManagementService', () => {
     it('schedules retry if cleanup task registration fails', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -291,11 +305,8 @@ describe('SessionManagementService', () => {
   });
 
   describe('stop()', () => {
-    let mockSessionIndexInitialize: jest.SpyInstance;
     let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
     beforeEach(() => {
-      mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initialize');
-
       mockTaskManager = taskManagerMock.createStart();
       mockTaskManager.ensureScheduled.mockResolvedValue(undefined as any);
 
@@ -309,13 +320,10 @@ describe('SessionManagementService', () => {
       });
     });
 
-    afterEach(() => {
-      mockSessionIndexInitialize.mockReset();
-    });
-
     it('properly unsubscribes from status updates', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
+        auditLogger,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),

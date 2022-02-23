@@ -9,11 +9,12 @@ import {
   ConfigKey,
   DataStream,
   HTTPFields,
+  BrowserFields,
   MonitorFields,
   ScheduleUnit,
   ServiceLocations,
 } from '../../../common/runtime_types';
-import { validate } from './validation';
+import { validate, validateCommon } from './validation';
 
 describe('[Monitor Management] validation', () => {
   const commonPropsValid: Partial<MonitorFields> = {
@@ -27,7 +28,28 @@ describe('[Monitor Management] validation', () => {
         label: 'EU West',
       },
     ] as ServiceLocations,
+    [ConfigKey.NAME]: 'test-name',
+    [ConfigKey.NAMESPACE]: 'namespace',
   };
+
+  describe('Common monitor fields', () => {
+    it('should return false for all valid props', () => {
+      const result = Object.values(validateCommon).map((validator) => {
+        return validator ? validator(commonPropsValid) : true;
+      });
+
+      expect(result.reduce((previous, current) => previous || current)).toBeFalsy();
+    });
+
+    it('should invalidate on invalid namespace', () => {
+      const validatorFn = validateCommon[ConfigKey.NAMESPACE];
+      const result = [undefined, null, '', '*/&<>:', 'A', 'a'.repeat(101)].map((testValue) =>
+        validatorFn?.({ [ConfigKey.NAMESPACE]: testValue } as Partial<MonitorFields>)
+      );
+
+      expect(result.reduce((previous, current) => previous && current)).toBeTruthy();
+    });
+  });
 
   describe('HTTP', () => {
     const httpPropsValid: Partial<HTTPFields> = {
@@ -59,6 +81,38 @@ describe('[Monitor Management] validation', () => {
 
     it('should invalidate when locations is empty', () => {
       const validators = validate[DataStream.HTTP];
+      const validatorFn = validators[ConfigKey.LOCATIONS];
+      const result = [undefined, null, []].map(
+        (testValue) =>
+          validatorFn?.({ [ConfigKey.LOCATIONS]: testValue } as Partial<MonitorFields>) ?? false
+      );
+
+      expect(result).toEqual([true, true, true]);
+    });
+  });
+
+  describe.each([
+    [ConfigKey.SOURCE_INLINE, 'step(() => {});'],
+    [ConfigKey.SOURCE_ZIP_URL, 'https://test.zip'],
+  ])('Browser', (configKey, value) => {
+    const browserProps: Partial<BrowserFields> = {
+      ...commonPropsValid,
+      [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+      [ConfigKey.TIMEOUT]: undefined,
+      [configKey]: value,
+    };
+
+    it('should return false for all valid props', () => {
+      const validators = validate[DataStream.BROWSER];
+      const keysToValidate = [ConfigKey.SCHEDULE, ConfigKey.TIMEOUT, configKey];
+      const validatorFns = keysToValidate.map((key) => validators[key]);
+      const result = validatorFns.map((fn) => fn?.(browserProps) ?? true);
+
+      expect(result).not.toEqual(expect.arrayContaining([true]));
+    });
+
+    it('should invalidate when locations is empty', () => {
+      const validators = validate[DataStream.BROWSER];
       const validatorFn = validators[ConfigKey.LOCATIONS];
       const result = [undefined, null, []].map(
         (testValue) =>

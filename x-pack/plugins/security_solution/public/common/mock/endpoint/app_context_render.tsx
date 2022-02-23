@@ -62,7 +62,7 @@ export interface AppContextTestRender {
   render: UiRender;
 
   /**
-   * Set experimental features on/off. Calling this method updates the Store with the new values
+   * Set technical preview features on/off. Calling this method updates the Store with the new values
    * for the given feature flags
    * @param flags
    */
@@ -70,7 +70,7 @@ export interface AppContextTestRender {
 }
 
 // Defined a private custom reducer that reacts to an action that enables us to updat the
-// store with new values for experimental features/flags. Because the `action.type` is a `Symbol`,
+// store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
 // and its not exported the action can only be `dispatch`'d from this module
 const UpdateExperimentalFeaturesTestActionType = Symbol('updateExperimentalFeaturesTestAction');
 

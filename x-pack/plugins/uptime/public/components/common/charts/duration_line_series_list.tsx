@@ -31,6 +31,7 @@ export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
         yAccessors={[1]}
         yScaleType={ScaleType.Linear}
         fit={Fit.Linear}
+        timeZone="local"
         tickFormat={(d) =>
           monitorType === 'browser'
             ? `${microToSec(d)} ${SEC_LABEL}`

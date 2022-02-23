@@ -17,7 +17,6 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
@@ -29,7 +28,7 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats'> &
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats' | 'maps'> &
   MlStartDependencies;
 
 interface AppProps {
@@ -68,6 +67,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   const pageDeps = {
     history: appMountParams.history,
+    setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
@@ -87,6 +87,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     dataVisualizer: deps.dataVisualizer,
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
+    dashboard: deps.dashboard,
+    charts: deps.charts,
     ...coreStart,
   };
 
@@ -95,24 +97,20 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   return (
-    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
-     * avoiding full page reload **/
-    <RedirectAppLinks application={coreStart.application}>
-      <ApplicationUsageTrackingProvider>
-        <I18nContext>
-          <KibanaThemeProvider theme$={appMountParams.theme$}>
-            <KibanaContextProvider
-              services={{
-                ...services,
-                mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-              }}
-            >
-              <MlRouter pageDeps={pageDeps} />
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nContext>
-      </ApplicationUsageTrackingProvider>
-    </RedirectAppLinks>
+    <ApplicationUsageTrackingProvider>
+      <I18nContext>
+        <KibanaThemeProvider theme$={appMountParams.theme$}>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+            }}
+          >
+            <MlRouter pageDeps={pageDeps} />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </I18nContext>
+    </ApplicationUsageTrackingProvider>
   );
 };
 
@@ -137,7 +135,7 @@ export const renderApp = (
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    urlGenerators: deps.share.urlGenerators,
+    dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,

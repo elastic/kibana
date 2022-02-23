@@ -29,7 +29,7 @@ export * from './helpers';
 
 export const createTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.post(

@@ -22,8 +22,8 @@ jest.mock('./fs', () => ({
   writeFile: jest.fn(() => Promise.resolve('')),
 }));
 
-const DEFAULT_FILE_UUID = 'FILE_UUID';
-const DEFAULT_CONFIG_UUID = 'CONFIG_UUID';
+const DEFAULT_FILE_UUID = 'ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee';
+const DEFAULT_CONFIG_UUID = 'cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee';
 const fileNotFoundError = { code: 'ENOENT' };
 const permissionError = { code: 'EACCES' };
 const isDirectoryError = { code: 'EISDIR' };
@@ -91,7 +91,7 @@ describe('resolveInstanceUuid', () => {
         expect(logger.debug).toHaveBeenCalledTimes(1);
         expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
+            "Updating Kibana instance UUID to: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee (was: ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee)",
           ]
         `);
       });
@@ -106,7 +106,7 @@ describe('resolveInstanceUuid', () => {
         expect(logger.debug).toHaveBeenCalledTimes(1);
         expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Kibana instance UUID: CONFIG_UUID",
+            "Kibana instance UUID: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee",
           ]
         `);
       });
@@ -126,24 +126,44 @@ describe('resolveInstanceUuid', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Setting new Kibana instance UUID: CONFIG_UUID",
+          "Setting new Kibana instance UUID: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee",
         ]
       `);
     });
   });
 
   describe('when file is present and config property is not set', () => {
-    it('does not write to file and returns the file uuid', async () => {
+    beforeEach(() => {
       serverConfig = createServerConfig(undefined);
+    });
+
+    it('does not write to file and returns the file uuid', async () => {
       const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
       expect(uuid).toEqual(DEFAULT_FILE_UUID);
       expect(writeFile).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Resuming persistent Kibana instance UUID: FILE_UUID",
+          "Resuming persistent Kibana instance UUID: ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee",
         ]
       `);
+    });
+
+    describe('when file contains an invalid uuid', () => {
+      it('throws an explicit error for uuid formatting', async () => {
+        mockReadFile({ uuid: 'invalid uuid in data file' });
+        await expect(
+          resolveInstanceUuid({ pathConfig, serverConfig, logger })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"data-folder/uuid contains an invalid UUID"`);
+      });
+    });
+
+    describe('when file contains a trailing new line', () => {
+      it('returns the trimmed file uuid', async () => {
+        mockReadFile({ uuid: DEFAULT_FILE_UUID + '\n' });
+        const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
+        expect(uuid).toEqual(DEFAULT_FILE_UUID);
+      });
     });
   });
 
@@ -193,7 +213,7 @@ describe('resolveInstanceUuid', () => {
               "UUID from 7.6.0 bug detected, ignoring file UUID",
             ],
             Array [
-              "Setting new Kibana instance UUID: CONFIG_UUID",
+              "Setting new Kibana instance UUID: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee",
             ],
           ]
         `);

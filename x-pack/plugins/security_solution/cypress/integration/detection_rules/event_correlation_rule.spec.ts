@@ -26,7 +26,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -43,17 +42,11 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { getDetails } from '../../tasks/rule_details';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -68,9 +61,9 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
-describe('Detection rules, EQL', () => {
+describe.skip('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
   const expectedFalsePositives = getEqlRule().falsePositivesExamples.join('');
   const expectedTags = getEqlRule().tags.join('');
@@ -92,12 +85,7 @@ describe('Detection rules, EQL', () => {
   });
 
   it('Creates and activates a new EQL rule', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
@@ -165,11 +153,13 @@ describe('Detection rules, EQL', () => {
       .invoke('text')
       .then((text) => {
         expect(text).contains(this.rule.name);
+        expect(text).contains(this.rule.severity.toLowerCase());
+        expect(text).contains(this.rule.riskScore);
       });
   });
 });
 
-describe('Detection rules, sequence EQL', () => {
+describe.skip('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = '1 alert';
 
@@ -187,12 +177,7 @@ describe('Detection rules, sequence EQL', () => {
   });
 
   it('Creates and activates a new EQL rule with a sequence', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);

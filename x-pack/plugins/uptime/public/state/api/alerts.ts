@@ -17,6 +17,7 @@ import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions, RuleAction } from './alert_actions';
 import { Ping } from '../../../common/runtime_types/ping';
+import { DefaultEmail } from '../../../common/runtime_types';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
@@ -44,6 +45,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
 export interface NewAlertParams extends AlertTypeParams {
   selectedMonitor: Ping;
   defaultActions: ActionConnector[];
+  defaultEmail?: DefaultEmail;
 }
 
 type NewMonitorStatusAlert = Omit<
@@ -71,10 +73,12 @@ export const createAlert = async ({
   defaultActions,
   monitorId,
   selectedMonitor,
+  defaultEmail,
 }: NewAlertParams): Promise<Alert> => {
   const actions: RuleAction[] = populateAlertActions({
     defaultActions,
     selectedMonitor,
+    defaultEmail,
   });
 
   const data: NewMonitorStatusAlert = {

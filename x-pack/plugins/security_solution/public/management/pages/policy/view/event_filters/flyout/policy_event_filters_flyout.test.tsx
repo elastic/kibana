@@ -25,7 +25,7 @@ import {
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EventFiltersHttpService } from '../../../../event_filters/service';
+import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
 
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   path: '/api/exception_lists/items/_find',
@@ -56,7 +56,7 @@ const getCleanedExceptionWithNewTags = (
     tags: [...testTags, `policy:${policy.id}`],
   };
 
-  return EventFiltersHttpService.cleanEventFilterToUpdate(exceptionToUpdateWithNewTags);
+  return cleanEventFilterToUpdate(exceptionToUpdateWithNewTags);
 };
 
 describe('Policy details event filters flyout', () => {

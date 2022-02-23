@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from 'kibana/public';
-import { DataView, DataViewsService } from '../../../data/common';
+import { DataView, DataViewsContract } from '../../../data_views/public';
 import { popularizeField } from './popularize_field';
 
 const capabilities = {
@@ -20,7 +20,7 @@ describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
     const indexPattern = {} as unknown as DataView;
     const fieldName = '@timestamp';
-    const dataViewsService = {} as unknown as DataViewsService;
+    const dataViewsService = {} as unknown as DataViewsContract;
     const result = await popularizeField(indexPattern, fieldName, dataViewsService, capabilities);
     expect(result).toBeUndefined();
   });
@@ -32,7 +32,7 @@ describe('Popularize field', () => {
       },
     } as unknown as DataView;
     const fieldName = '@timestamp';
-    const dataViewsService = {} as unknown as DataViewsService;
+    const dataViewsService = {} as unknown as DataViewsContract;
     const result = await popularizeField(indexPattern, fieldName, dataViewsService, capabilities);
     expect(result).toBeUndefined();
   });
@@ -50,7 +50,7 @@ describe('Popularize field', () => {
     const fieldName = '@timestamp';
     const dataViewsService = {
       updateSavedObject: async () => {},
-    } as unknown as DataViewsService;
+    } as unknown as DataViewsContract;
     const result = await popularizeField(indexPattern, fieldName, dataViewsService, capabilities);
     expect(result).toBeUndefined();
     expect(field.count).toEqual(1);
@@ -71,7 +71,7 @@ describe('Popularize field', () => {
       updateSavedObject: async () => {
         throw new Error('unknown error');
       },
-    } as unknown as DataViewsService;
+    } as unknown as DataViewsContract;
     const result = await popularizeField(indexPattern, fieldName, dataViewsService, capabilities);
     expect(result).toBeUndefined();
   });
@@ -89,7 +89,7 @@ describe('Popularize field', () => {
     const fieldName = '@timestamp';
     const dataViewsService = {
       updateSavedObject: jest.fn(),
-    } as unknown as DataViewsService;
+    } as unknown as DataViewsContract;
     const result = await popularizeField(indexPattern, fieldName, dataViewsService, {
       indexPatterns: { save: false },
     } as unknown as Capabilities);

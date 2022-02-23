@@ -81,7 +81,8 @@ export const createExtendActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />
+        <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
+        { theme$: core.theme.theme$ }
       )
     );
     await ref.onClose;

@@ -8,6 +8,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
+/** @public */
 export type UnauthorizedError = errors.ResponseError & {
   statusCode: 401;
 };

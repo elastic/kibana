@@ -44,13 +44,14 @@ import {
   kibanaFilterFunction,
   phraseFilterFunction,
   esRawResponse,
+  eqlRawResponse,
 } from '../../common/search';
 import { AggsService, AggsStartDependencies } from './aggs';
-import { IndexPatternsContract } from '..';
+import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { getEsaggs, getEsdsl } from './expressions';
+import { getEsaggs, getEsdsl, getEql } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
@@ -88,7 +89,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    { http, getStartServices, notifications, uiSettings }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings, theme }: CoreSetup,
     { bfetch, expressions, usageCollection, nowProvider }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -112,6 +113,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
       session: this.sessionService,
+      theme,
     });
 
     expressions.registerFunction(
@@ -151,7 +153,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(
+      getEql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
     expressions.registerType(esRawResponse);
+    expressions.registerType(eqlRawResponse);
 
     const aggs = this.aggsService.setup({
       registerFunction: expressions.registerFunction,
@@ -173,7 +181,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, uiSettings }: CoreStart,
+    { http, theme, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
@@ -186,7 +194,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: handleResponse,
+      onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
+        handleResponse(request, response, theme),
     };
 
     return {

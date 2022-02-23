@@ -9,19 +9,25 @@ import { useCallback } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+import { SavedObject } from 'kibana/public';
 import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
 import { useNotifyService } from '../../../services';
 import { getId } from '../../../lib/get_id';
-
-import { useCreateWorkpad } from './use_create_workpad';
+import { useImportWorkpad as useImportWorkpadHook } from './use_import_workpad';
 import type { CanvasWorkpad } from '../../../../types';
+
+const isInvalidWorkpad = (workpad: CanvasWorkpad) =>
+  !Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets;
 
 export const useImportWorkpad = () => {
   const notifyService = useNotifyService();
-  const createWorkpad = useCreateWorkpad();
+  const importWorkpad = useImportWorkpadHook();
 
   return useCallback(
-    (file?: File, onComplete: (workpad?: CanvasWorkpad) => void = () => {}) => {
+    (
+      file?: File,
+      onComplete: (workpad?: CanvasWorkpad | SavedObject<CanvasWorkpad>) => void = () => {}
+    ) => {
       if (!file) {
         onComplete();
         return;
@@ -42,16 +48,17 @@ export const useImportWorkpad = () => {
       // handle reading the uploaded file
       reader.onload = async () => {
         try {
-          const workpad = JSON.parse(reader.result as string); // Type-casting because we catch below.
+          const workpad: CanvasWorkpad = JSON.parse(reader.result as string); // Type-casting because we catch below.
+
           workpad.id = getId('workpad');
 
           // sanity check for workpad object
-          if (!Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets) {
+          if (isInvalidWorkpad(workpad)) {
             onComplete();
             throw new Error(errors.getMissingPropertiesErrorMessage());
           }
 
-          await createWorkpad(workpad);
+          await importWorkpad(workpad);
           onComplete(workpad);
         } catch (e) {
           notifyService.error(e, {
@@ -66,7 +73,7 @@ export const useImportWorkpad = () => {
       // read the uploaded file
       reader.readAsText(file);
     },
-    [notifyService, createWorkpad]
+    [notifyService, importWorkpad]
   );
 };
 

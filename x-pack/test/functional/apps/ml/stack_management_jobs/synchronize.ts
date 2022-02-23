@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.api.deleteDataFrameAnalyticsJobES(dfaJobId);
       }
       await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('should have nothing to sync initially', async () => {

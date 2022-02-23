@@ -21,7 +21,6 @@ export const defaultHandlers: RendererHandlers = {
   onEmbeddableInputChange: action('onEmbeddableInputChange'),
   onResize: action('onResize'),
   resize: action('resize'),
-  setFilter: action('setFilter'),
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),

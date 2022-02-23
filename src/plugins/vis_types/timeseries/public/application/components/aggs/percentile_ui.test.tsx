@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 // @ts-ignore not-typed yet
 import { Percentiles } from './percentile_ui';
 import { ColorPicker } from '../color_picker';

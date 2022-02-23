@@ -50,7 +50,7 @@ describe('getAPIKeyTest', function () {
             cluster: ['monitor', 'read_ilm', 'read_pipeline'],
             index: [
               {
-                names: ['synthetics-*', 'heartbeat-*'],
+                names: ['synthetics-*'],
                 privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
               },
             ],

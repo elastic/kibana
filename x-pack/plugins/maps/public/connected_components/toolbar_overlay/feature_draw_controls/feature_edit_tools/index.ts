@@ -30,7 +30,7 @@ function mapDispatchToProps(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
 ): ReduxDispatchProps {
   return {
-    setDrawShape: (shapeToDraw: DRAW_SHAPE) => {
+    setDrawShape: (shapeToDraw: DRAW_SHAPE | null) => {
       dispatch(updateEditShape(shapeToDraw));
     },
   };

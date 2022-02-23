@@ -127,5 +127,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     </Header>
   );
 };
+HeaderPageComponent.displayName = 'HeaderPage';
 
 export const HeaderPage = React.memo(HeaderPageComponent);

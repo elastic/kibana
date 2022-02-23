@@ -12,6 +12,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 export type Event = Exclude<IEvent, undefined>;
 
 interface CreateAlertEventLogRecordParams {
+  executionId?: string;
   ruleId: string;
   ruleType: UntypedNormalizedRuleType;
   action: string;
@@ -36,7 +37,18 @@ interface CreateAlertEventLogRecordParams {
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
-  const { ruleType, action, state, message, task, ruleId, group, subgroup, namespace } = params;
+  const {
+    executionId,
+    ruleType,
+    action,
+    state,
+    message,
+    task,
+    ruleId,
+    group,
+    subgroup,
+    namespace,
+  } = params;
   const alerting =
     params.instanceId || group || subgroup
       ? {
@@ -59,6 +71,17 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     },
     kibana: {
       ...(alerting ? alerting : {}),
+      ...(executionId
+        ? {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: executionId,
+                },
+              },
+            },
+          }
+        : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,

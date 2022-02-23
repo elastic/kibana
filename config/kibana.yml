@@ -62,6 +62,10 @@
 # must be a positive integer.
 #elasticsearch.requestTimeout: 30000
 
+# Specifies whether Kibana should use compression for communications with elasticsearch
+# Defaults to `false`.
+#elasticsearch.compression: false
+
 # List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
 #elasticsearch.requestHeadersWhitelist: [ authorization ]

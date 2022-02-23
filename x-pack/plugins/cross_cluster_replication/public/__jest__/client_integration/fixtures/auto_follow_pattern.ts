@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRandomString } from '@kbn/test/jest';
+import { getRandomString } from '@kbn/test-jest-helpers';
 import { AutoFollowPattern } from '../../../../common/types';
 
 export const getAutoFollowPatternMock = ({

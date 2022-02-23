@@ -19,7 +19,6 @@ import type { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -39,7 +38,6 @@ interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
   startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
-  license$: LicensingPluginSetup['license$'];
   usesUiCapabilities: boolean;
 }
 
@@ -52,27 +50,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   private notifications: NotificationsSetup;
   private apiClient: ReportingAPIClient;
   private startServices$: Params['startServices$'];
+  private usesUiCapabilities: any;
 
-  constructor({ core, startServices$, license$, usesUiCapabilities, apiClient }: Params) {
+  constructor({ core, apiClient, startServices$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
 
     this.notifications = core.notifications;
     this.apiClient = apiClient;
+
     this.startServices$ = startServices$;
-
-    license$.subscribe((license) => {
-      const results = license.check('reporting', 'basic');
-      const { showLinks } = checkLicense(results);
-      this.licenseHasDownloadCsv = showLinks;
-    });
-
-    if (usesUiCapabilities) {
-      this.startServices$.subscribe(([{ application }]) => {
-        this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
-      });
-    } else {
-      this.capabilityHasDownloadCsv = true; // deprecated
-    }
+    this.usesUiCapabilities = usesUiCapabilities;
   }
 
   public getIconType() {
@@ -85,23 +72,36 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+  public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
     const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(
-      savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
-      { uiSettings, data }
-    );
+    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
   public isCompatible = async (context: ActionContext) => {
+    await new Promise<void>((resolve) => {
+      this.startServices$.subscribe(([{ application }, { licensing }]) => {
+        licensing.license$.subscribe((license) => {
+          const results = license.check('reporting', 'basic');
+          const { showLinks } = checkLicense(results);
+          this.licenseHasDownloadCsv = showLinks;
+        });
+
+        if (this.usesUiCapabilities) {
+          this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
+        } else {
+          this.capabilityHasDownloadCsv = true; // deprecated
+        }
+
+        resolve();
+      });
+    });
+
     if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
       return false;
     }
 
     const { embeddable } = context;
-
     return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
@@ -140,11 +140,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
     await this.apiClient
       .createImmediateReport(immediateJobParams)
-      .then((rawResponse) => {
+      .then(({ body, response }) => {
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([body as BlobPart], {
+          type: response?.headers.get('content-type') || undefined,
+        });
 
         // Hack for IE11 Support
         // @ts-expect-error
@@ -166,7 +168,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       .catch(this.onGenerationFail.bind(this));
   };
 
-  private onGenerationFail(error: Error) {
+  private onGenerationFail(_error: Error) {
     this.isDownloading = false;
     this.notifications.toasts.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {

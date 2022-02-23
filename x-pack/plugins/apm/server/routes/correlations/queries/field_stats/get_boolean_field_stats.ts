@@ -72,7 +72,7 @@ export const fetchBooleanFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search<unknown, FieldStatsAggs>(request);
+  const body = await esClient.search<unknown, FieldStatsAggs>(request);
   const aggregations = body.aggregations;
   const stats: BooleanFieldStats = {
     fieldName: field.fieldName,

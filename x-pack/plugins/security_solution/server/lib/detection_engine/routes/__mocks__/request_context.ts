@@ -22,7 +22,7 @@ import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks'
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogClientMock } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -56,7 +56,7 @@ export const createMockClients = () => {
 
     config: createMockConfig(),
     appClient: siemMock.createClient(),
-    ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
+    ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
   };
 };
 
@@ -113,7 +113,7 @@ const createSecuritySolutionRequestContextMock = (
     getAppClient: jest.fn(() => clients.appClient),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
-    getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
+    getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
   };
 };

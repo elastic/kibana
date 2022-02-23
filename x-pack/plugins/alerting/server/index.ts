@@ -32,13 +32,14 @@ export type {
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 export type { FindResult } from './rules_client';
-export type { PublicAlertInstance as AlertInstance } from './alert_instance';
+export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export type {
   IAbortableEsClient,
   IAbortableClusterClient,
 } from './lib/create_abortable_es_client_factory';
+export { createAbortableEsClientFactory } from './lib/create_abortable_es_client_factory';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,

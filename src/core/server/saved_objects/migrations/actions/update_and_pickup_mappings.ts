@@ -51,7 +51,7 @@ export const updateAndPickupMappings = ({
         timeout: DEFAULT_TIMEOUT,
         body: mappings,
       })
-      .then((res) => {
+      .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts
         // the new cluster state update but not all nodes have applied the
         // update within the timeout `acknowledged` will be false. However,

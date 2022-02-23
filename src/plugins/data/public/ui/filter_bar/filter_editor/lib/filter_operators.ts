@@ -8,12 +8,24 @@
 
 import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { IFieldType } from '../../../../../../data_views/common';
 
 export interface Operator {
   message: string;
   type: FILTERS;
   negate: boolean;
+
+  /**
+   * KbnFieldTypes applicable for operator
+   */
   fieldTypes?: string[];
+
+  /**
+   * A filter predicate for a field,
+   * takes precedence over {@link fieldTypes}
+   */
+  field?: (field: IFieldType) => boolean;
 }
 
 export const isOperator = {
@@ -56,7 +68,14 @@ export const isBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: false,
-  fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+  field: (field: IFieldType) => {
+    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
+      return true;
+
+    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
+
+    return false;
+  },
 };
 
 export const isNotBetweenOperator = {
@@ -65,7 +84,14 @@ export const isNotBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: true,
-  fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+  field: (field: IFieldType) => {
+    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
+      return true;
+
+    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
+
+    return false;
+  },
 };
 
 export const existsOperator = {

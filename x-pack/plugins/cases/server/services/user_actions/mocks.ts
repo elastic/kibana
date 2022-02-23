@@ -9,6 +9,7 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
+import { transformSavedObjectToExternalModel } from '../cases/transform';
 
 export const casePayload = {
   title: 'Case SIR',
@@ -46,7 +47,7 @@ export const externalService = {
 export const originalCases = [
   { ...createCaseSavedObjectResponse(), id: '1' },
   { ...createCaseSavedObjectResponse(), id: '2' },
-];
+].map((so) => transformSavedObjectToExternalModel(so));
 
 export const updatedCases = [
   {

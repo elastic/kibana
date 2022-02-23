@@ -17,7 +17,6 @@ import {
 import * as i18n from './translations';
 import { AllCases, Case, DeleteCase, FilterOptions } from '../../../common/ui/types';
 import { getBulkItems } from '../bulk_actions';
-import { isSelectedCasesIncludeCollections } from './helpers';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
@@ -83,10 +82,9 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     (cases: Case[]) => {
       handleToggleModal();
 
-      const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title, type }) => ({
+      const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title }) => ({
         id,
         title,
-        type,
       }));
       setDeleteCases(convertToDeleteCases);
     },
@@ -109,7 +107,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
           deleteCasesAction: toggleBulkDeleteModal,
           selectedCases,
           updateCaseStatus: handleUpdateCaseStatus,
-          includeCollections: isSelectedCasesIncludeCollections(selectedCases),
         })}
       />
     ),
@@ -161,3 +158,4 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     </UtilityBar>
   );
 };
+CasesTableUtilityBar.displayName = 'CasesTableUtilityBar';

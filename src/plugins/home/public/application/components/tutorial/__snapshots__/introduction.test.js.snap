@@ -1,5 +1,93 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`props Beats badge should not show 1`] = `
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+      </React.Fragment>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+        <React.Fragment>
+           
+          <EuiBetaBadge
+            label="Beta"
+          />
+        </React.Fragment>
+      </React.Fragment>
+    }
+  />
+</Fragment>
+`;
+
+exports[`props Beats badge should show 1`] = `
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+      </React.Fragment>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+        <React.Fragment>
+           
+          <EuiBetaBadge
+            label="Beta"
+          />
+        </React.Fragment>
+        <React.Fragment>
+           
+          <EuiBadge>
+            <FormattedMessage
+              defaultMessage="Beats"
+              id="home.tutorial.introduction.beatsBadgeLabel"
+              values={Object {}}
+            />
+          </EuiBadge>
+        </React.Fragment>
+      </React.Fragment>
+    }
+  />
+</Fragment>
+`;
+
 exports[`props exportedFieldsUrl 1`] = `
 <Fragment>
   <div>

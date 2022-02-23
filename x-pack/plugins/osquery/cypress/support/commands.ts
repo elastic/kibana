@@ -30,3 +30,7 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('getBySel', (selector, ...args) =>
+  cy.get(`[data-test-subj=${selector}]`, ...args)
+);

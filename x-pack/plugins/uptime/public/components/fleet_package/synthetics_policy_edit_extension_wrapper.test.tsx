@@ -539,7 +539,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     const urlError = getByText('URL is required');
-    const monitorIntervalError = getByText('Monitor interval is required');
+    const monitorIntervalError = getByText('Monitor frequency is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
     const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
@@ -566,7 +566,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     // expect onChange to be called with isValid true
     await waitFor(() => {
       expect(queryByText('URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -643,21 +643,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(zipUrl, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Zip URL is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText('Timeout must be greater than or equal to 0');
+      const monitorIntervalError = getByText('Monitor frequency is required');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: false,
@@ -668,12 +664,10 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     await waitFor(() => {
       fireEvent.change(zipUrl, { target: { value: 'http://github.com/tests.zip' } });
       fireEvent.change(monitorIntervalNumber, { target: { value: '2' } });
-      fireEvent.change(timeout, { target: { value: '1' } });
       expect(zipUrl.value).toEqual('http://github.com/tests.zip');
       expect(monitorIntervalNumber.value).toEqual('2');
-      expect(timeout.value).toEqual('1');
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -722,7 +716,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host and port are required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
@@ -742,7 +736,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -788,7 +782,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
       const waitError = getByText('Wait must be 0 or greater');
 
@@ -811,7 +805,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -1088,7 +1082,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(zipUrl).toBeInTheDocument();
     expect(zipUrl.value).toEqual(defaultBrowserConfig[ConfigKey.SOURCE_ZIP_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
@@ -1097,8 +1090,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(monitorIntervalUnit.value).toEqual(defaultBrowserConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
     expect(apmServiceName.value).toEqual(defaultBrowserConfig[ConfigKey.APM_SERVICE_NAME]);
-    expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultBrowserConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();

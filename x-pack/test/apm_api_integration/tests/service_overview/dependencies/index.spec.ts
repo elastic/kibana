@@ -14,7 +14,7 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../plugins/apm/common/environment_filter_values';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';

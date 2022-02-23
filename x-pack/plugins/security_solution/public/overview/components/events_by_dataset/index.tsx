@@ -7,6 +7,7 @@
 
 import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
@@ -44,6 +45,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   headerChildren?: React.ReactNode;
   indexPattern: DataViewBase;
   indexNames: string[];
+  runtimeMappings?: MappingRuntimeFields;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -67,6 +69,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   headerChildren,
   indexPattern,
   indexNames,
+  runtimeMappings,
   onlyField,
   paddingSize,
   query,
@@ -176,6 +179,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       headerChildren={headerContent}
       id={uniqueQueryId}
       indexNames={indexNames}
+      runtimeMappings={runtimeMappings}
       onError={toggleTopN}
       paddingSize={paddingSize}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}

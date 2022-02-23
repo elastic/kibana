@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -20,24 +19,24 @@ import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
-import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
-import { Stacktrace } from '../../../shared/Stacktrace';
-import { Summary } from '../../../shared/Summary';
-import { HttpInfoSummaryItem } from '../../../shared/Summary/http_info_summary_item';
-import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
+import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
+import { Stacktrace } from '../../../shared/stacktrace';
+import { Summary } from '../../../shared/summary';
+import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
+import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import {
   ErrorTab,
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
-} from './ErrorTabs';
+} from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`
@@ -100,16 +99,14 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
           </h3>
         </EuiTitle>
         <DiscoverErrorLink error={error} kuery={kuery}>
-          <EuiButtonEmpty iconType="discoverApp">
-            {i18n.translate(
-              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
-              {
-                defaultMessage:
-                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
-                values: { occurrencesCount },
-              }
-            )}
-          </EuiButtonEmpty>
+          {i18n.translate(
+            'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+            {
+              defaultMessage:
+                'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
+              values: { occurrencesCount },
+            }
+          )}
         </DiscoverErrorLink>
       </HeaderContainer>
 

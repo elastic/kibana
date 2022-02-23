@@ -19,6 +19,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
       },
       "delete": [MockFunction],
       "externalUrl": Object {
+        "isInternalUrl": [MockFunction],
         "validateUrl": [MockFunction],
       },
       "fetch": [MockFunction],
@@ -343,6 +344,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       },
       "delete": [MockFunction],
       "externalUrl": Object {
+        "isInternalUrl": [MockFunction],
         "validateUrl": [MockFunction],
       },
       "fetch": [MockFunction],
@@ -706,6 +708,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
       },
       "delete": [MockFunction],
       "externalUrl": Object {
+        "isInternalUrl": [MockFunction],
         "validateUrl": [MockFunction],
       },
       "fetch": [MockFunction],

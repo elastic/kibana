@@ -57,6 +57,13 @@ export const NAVIGATION_ALERTS_TITLE = i18n.translate(
   }
 );
 
+export const NAVIGATION_HOST_RISK_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.hostRisk',
+  {
+    defaultMessage: 'Hosts by risk',
+  }
+);
+
 export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
   'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
   {
@@ -76,3 +83,10 @@ export const EVENTS_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });
+
+export const VIEW_DASHBOARD_BUTTON = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel',
+  {
+    defaultMessage: 'View source dashboard',
+  }
+);

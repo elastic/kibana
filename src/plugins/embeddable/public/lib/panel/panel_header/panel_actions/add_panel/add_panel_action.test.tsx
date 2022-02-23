@@ -16,7 +16,7 @@ import {
 } from '../../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
-import { coreMock } from '../../../../../../../../core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
@@ -25,6 +25,7 @@ import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers'
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 const getFactory = doStart().getEmbeddableFactory;
+const theme = themeServiceMock.createStartContract();
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
@@ -37,7 +38,8 @@ beforeEach(async () => {
     () => [] as any,
     start.overlays,
     start.notifications,
-    () => null
+    () => null,
+    theme
   );
 
   const derivedFilter: MockFilter = {
@@ -72,7 +74,8 @@ test('Is not compatible when container is in view mode', async () => {
     () => [] as any,
     start.overlays,
     start.notifications,
-    () => null
+    () => null,
+    theme
   );
   container.updateInput({ viewMode: ViewMode.VIEW });
   expect(

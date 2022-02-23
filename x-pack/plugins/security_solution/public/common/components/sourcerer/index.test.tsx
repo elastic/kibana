@@ -21,10 +21,12 @@ import { createStore } from '../../store';
 import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 
 const mockDispatch = jest.fn();
 
 jest.mock('../../containers/sourcerer');
+jest.mock('../../containers/sourcerer/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
 jest.mock('./use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,
@@ -81,10 +83,12 @@ const sourcererDataView = {
 
 describe('Sourcerer component', () => {
   const { storage } = createSecuritySolutionStorageMock();
-
+  const pollForSignalIndexMock = jest.fn();
   beforeEach(() => {
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
+    (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
+
     jest.clearAllMocks();
   });
 
@@ -569,6 +573,63 @@ describe('Sourcerer component', () => {
         .first()
         .exists()
     ).toBeFalsy();
+  });
+
+  it('does not poll for signals index if pollForSignalIndex is not defined', () => {
+    (useSignalHelpers as jest.Mock).mockReturnValue({
+      signalIndexNeedsInit: false,
+    });
+
+    mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+
+    expect(pollForSignalIndexMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('does not poll for signals index if it does not exist and scope is default', () => {
+    (useSignalHelpers as jest.Mock).mockReturnValue({
+      pollForSignalIndex: pollForSignalIndexMock,
+      signalIndexNeedsInit: false,
+    });
+
+    mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.default} />
+      </TestProviders>
+    );
+
+    expect(pollForSignalIndexMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('polls for signals index if it does not exist and scope is timeline', () => {
+    (useSignalHelpers as jest.Mock).mockReturnValue({
+      pollForSignalIndex: pollForSignalIndexMock,
+      signalIndexNeedsInit: false,
+    });
+
+    mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+    expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('polls for signals index if it does not exist and scope is detections', () => {
+    (useSignalHelpers as jest.Mock).mockReturnValue({
+      pollForSignalIndex: pollForSignalIndexMock,
+      signalIndexNeedsInit: false,
+    });
+
+    mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+      </TestProviders>
+    );
+    expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
   });
 });
 

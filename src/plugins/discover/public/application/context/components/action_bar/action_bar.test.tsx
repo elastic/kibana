@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ActionBar, ActionBarProps } from './action_bar';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';

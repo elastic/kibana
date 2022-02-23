@@ -112,7 +112,7 @@ export const installTransform = async (
   return installedTransforms;
 };
 
-const isTransform = (path: string) => {
+export const isTransform = (path: string) => {
   const pathParts = getPathParts(path);
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };

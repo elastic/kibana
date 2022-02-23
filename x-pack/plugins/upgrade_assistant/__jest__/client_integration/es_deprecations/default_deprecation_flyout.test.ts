@@ -27,6 +27,16 @@ describe('Default deprecation flyout', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
+    httpRequestsMockHelpers.setReindexStatusResponse({
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
+    });
 
     await act(async () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });

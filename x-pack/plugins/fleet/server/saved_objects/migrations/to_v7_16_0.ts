@@ -8,7 +8,12 @@
 import type { SavedObjectMigrationFn } from 'kibana/server';
 
 import type { Installation, PackagePolicy } from '../../../common';
-import { DEFAULT_PACKAGES } from '../../../common';
+import {
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+  FLEET_SYSTEM_PACKAGE,
+} from '../../../common';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 
 import { migratePackagePolicyToV7160 as SecSolMigratePackagePolicyToV7160 } from './security_solution';
 
@@ -17,6 +22,15 @@ export const migrateInstallationToV7160: SavedObjectMigrationFn<Installation, In
   migrationContext
 ) => {
   const updatedInstallationDoc = installationDoc;
+
+  const DEFAULT_PACKAGES = [
+    FLEET_SYSTEM_PACKAGE,
+    FLEET_ELASTIC_AGENT_PACKAGE,
+    FLEET_SERVER_PACKAGE,
+  ].map((name) => ({
+    name,
+    version: PRECONFIGURATION_LATEST_KEYWORD,
+  }));
 
   if (DEFAULT_PACKAGES.some((pkg) => pkg.name === updatedInstallationDoc.attributes.name)) {
     updatedInstallationDoc.attributes.keep_policies_up_to_date = true;

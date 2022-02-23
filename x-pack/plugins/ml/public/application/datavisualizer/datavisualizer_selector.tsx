@@ -11,21 +11,19 @@ import {
   EuiButton,
   EuiCard,
   EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
-import { NavigationMenu } from '../components/navigation_menu';
 import { HelpMenu } from '../components/help_menu';
+import { MlPageHeader } from '../components/page_header';
 
 function startTrialDescription() {
   return (
@@ -75,133 +73,122 @@ export const DatavisualizerSelector: FC = () => {
   const maxFileSize = dataVisualizer.getMaxBytesFormatted();
 
   return (
-    <Fragment>
-      <NavigationMenu tabId="datavisualizer" />
-      <EuiPage restrictWidth={1000} data-test-subj="mlPageDataVisualizerSelector">
-        <EuiPageBody>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
-                    defaultMessage="Data Visualizer"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xl" />
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
-                  defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data,
+    <>
+      <div data-test-subj="mlPageDataVisualizerSelector">
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
+            defaultMessage="Data Visualizer"
+          />
+        </MlPageHeader>
+
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
+                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data,
                   by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+        <EuiFlexGrid gutterSize="xl" columns={2} style={{ maxWidth: '1000px' }}>
+          <EuiFlexItem>
+            <EuiCard
+              hasBorder
+              icon={<EuiIcon size="xxl" type="addDataApp" />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.importDataTitle"
+                  defaultMessage="Visualize data from a file"
                 />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xl" />
-          <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="addDataApp" />}
-                title={
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.importDataDescription"
+                  defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
+                  values={{ maxFileSize }}
+                />
+              }
+              footer={
+                <EuiButton
+                  target="_self"
+                  onClick={() => navigateToPath('/filedatavisualizer')}
+                  data-test-subj="mlDataVisualizerUploadFileButton"
+                >
                   <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.importDataTitle"
-                    defaultMessage="Import data"
+                    id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
+                    defaultMessage="Select file"
                   />
-                }
-                description={
+                </EuiButton>
+              }
+              data-test-subj="mlDataVisualizerCardImportData"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              hasBorder
+              icon={<EuiIcon size="xxl" type="dataVisualizer" />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.selectDataViewTitle"
+                  defaultMessage="Visualize data from a data view"
+                />
+              }
+              description={''}
+              footer={
+                <EuiButton
+                  target="_self"
+                  onClick={() => navigateToPath('/datavisualizer_index_select')}
+                  data-test-subj="mlDataVisualizerSelectIndexButton"
+                >
                   <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.importDataDescription"
-                    defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
-                    values={{ maxFileSize }}
+                    id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                    defaultMessage="Select data view"
                   />
-                }
-                footer={
-                  <EuiButton
-                    target="_self"
-                    onClick={() => navigateToPath('/filedatavisualizer')}
-                    data-test-subj="mlDataVisualizerUploadFileButton"
-                  >
+                </EuiButton>
+              }
+              data-test-subj="mlDataVisualizerCardIndexData"
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+        {startTrialVisible === true && (
+          <Fragment>
+            <EuiSpacer size="xxl" />
+            <EuiSpacer size="xxl" />
+            <EuiFlexGrid gutterSize="xl" columns={2} style={{ maxWidth: '1000px' }}>
+              <EuiFlexItem>
+                <EuiCard
+                  hasBorder
+                  title={
                     <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
-                      defaultMessage="Select file"
+                      id="xpack.ml.datavisualizer.selector.startTrialTitle"
+                      defaultMessage="Start trial"
                     />
-                  </EuiButton>
-                }
-                data-test-subj="mlDataVisualizerCardImportData"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type="dataVisualizer" />}
-                title={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectDataViewTitle"
-                    defaultMessage="Select a data view"
-                  />
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectDataViewDescription"
-                    defaultMessage="Visualize the data in an existing Elasticsearch index."
-                  />
-                }
-                footer={
-                  <EuiButton
-                    target="_self"
-                    onClick={() => navigateToPath('/datavisualizer_index_select')}
-                    data-test-subj="mlDataVisualizerSelectIndexButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
-                      defaultMessage="Select data view"
-                    />
-                  </EuiButton>
-                }
-                data-test-subj="mlDataVisualizerCardIndexData"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {startTrialVisible === true && (
-            <Fragment>
-              <EuiSpacer size="xxl" />
-              <EuiSpacer size="xxl" />
-              <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
-                <EuiFlexItem grow={false} style={{ width: '600px' }}>
-                  <EuiCard
-                    title={
+                  }
+                  description={startTrialDescription()}
+                  footer={
+                    <EuiButton
+                      target="_blank"
+                      href={`${basePath.get()}/app/management/stack/license_management/home`}
+                      data-test-subj="mlDataVisualizerStartTrialButton"
+                    >
                       <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.startTrialTitle"
+                        id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                         defaultMessage="Start trial"
                       />
-                    }
-                    description={startTrialDescription()}
-                    footer={
-                      <EuiButton
-                        target="_blank"
-                        href={`${basePath.get()}/app/management/stack/license_management/home`}
-                        data-test-subj="mlDataVisualizerStartTrialButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
-                          defaultMessage="Start trial"
-                        />
-                      </EuiButton>
-                    }
-                    data-test-subj="mlDataVisualizerCardStartTrial"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Fragment>
-          )}
-        </EuiPageBody>
-      </EuiPage>
+                    </EuiButton>
+                  }
+                  data-test-subj="mlDataVisualizerCardStartTrial"
+                />
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          </Fragment>
+        )}
+      </div>
       <HelpMenu docLink={helpLink} />
-    </Fragment>
+    </>
   );
 };

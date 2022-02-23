@@ -13,9 +13,11 @@ import {
   GenericOperationDefinition,
   OperationType,
   renameOperationsMapping,
+  BaseIndexPatternColumn,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
+import { hasField } from '../pure_utils';
 
 export { operationDefinitionMap } from './definitions';
 /**
@@ -59,6 +61,37 @@ export function getSortScoreByPriority(
   b: GenericOperationDefinition
 ) {
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
+}
+
+export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColumn) {
+  if (!hasField(targetColumn)) {
+    return [];
+  }
+  return (
+    operationDefinitionMap[targetColumn.operationType]?.getCurrentFields?.(targetColumn) ?? [
+      targetColumn.sourceField,
+    ]
+  );
+}
+
+export function getOperationHelperForMultipleFields(operationType: string) {
+  return operationDefinitionMap[operationType]?.getParamsForMultipleFields;
+}
+
+export function hasOperationSupportForMultipleFields(
+  indexPattern: IndexPattern,
+  targetColumn: BaseIndexPatternColumn,
+  sourceColumn?: BaseIndexPatternColumn,
+  field?: IndexPatternField
+) {
+  return Boolean(
+    operationDefinitionMap[targetColumn.operationType]?.canAddNewField?.({
+      targetColumn,
+      sourceColumn,
+      field,
+      indexPattern,
+    })
+  );
 }
 
 /**

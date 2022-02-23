@@ -132,43 +132,45 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
           onAddFilter={onAddFilter}
         />
       )}
-      {distribution && (
-        <ExpandedRowPanel
-          dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
-          className="dvPanel__wrapper"
-          grow={false}
-        >
-          <EuiFlexItem grow={false}>
-            <ExpandedRowFieldHeader>
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.distributionTitle"
-                defaultMessage="Distribution"
-              />
-            </ExpandedRowFieldHeader>
-          </EuiFlexItem>
+      {distribution &&
+        stats.distribution?.percentiles.length !== undefined &&
+        stats.distribution?.percentiles.length > 2 && (
+          <ExpandedRowPanel
+            dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
+            className="dvPanel__wrapper"
+            grow={false}
+          >
+            <EuiFlexItem grow={false}>
+              <ExpandedRowFieldHeader>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.distributionTitle"
+                  defaultMessage="Distribution"
+                />
+              </ExpandedRowFieldHeader>
+            </EuiFlexItem>
 
-          <EuiFlexItem className={'metricDistributionChartContainer'}>
-            <MetricDistributionChart
-              width={METRIC_DISTRIBUTION_CHART_WIDTH}
-              height={METRIC_DISTRIBUTION_CHART_HEIGHT}
-              chartData={distributionChartData}
-              fieldFormat={fieldFormat}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" textAlign={'center'}>
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
-                defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
-                values={{
-                  minPercent: numberAsOrdinal(distribution.minPercentile),
-                  maxPercent: numberAsOrdinal(distribution.maxPercentile),
-                }}
+            <EuiFlexItem className={'metricDistributionChartContainer'}>
+              <MetricDistributionChart
+                width={METRIC_DISTRIBUTION_CHART_WIDTH}
+                height={METRIC_DISTRIBUTION_CHART_HEIGHT}
+                chartData={distributionChartData}
+                fieldFormat={fieldFormat}
               />
-            </EuiText>
-          </EuiFlexItem>
-        </ExpandedRowPanel>
-      )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" textAlign={'center'}>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
+                  defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
+                  values={{
+                    minPercent: numberAsOrdinal(distribution.minPercentile),
+                    maxPercent: numberAsOrdinal(distribution.maxPercentile),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </ExpandedRowPanel>
+        )}
     </ExpandedRowContent>
   );
 };

@@ -11,9 +11,11 @@ import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { getDataHandler } from '../../../../data_handler';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
+import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
+import { getApmDataViewTitle } from '../utils/utils';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -43,7 +45,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   const [hasAppData, setHasAppData] = useState<HasAppDataState>({} as HasAppDataState);
 
   const {
-    services: { data },
+    services: { dataViews },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const { indexPatterns: indexPatternsList } = useExploratoryView();
@@ -74,29 +76,32 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
               break;
             case 'apm':
             case 'mobile':
-              const resultApm = await getDataHandler('apm')?.hasData();
+              const resultApm = await getDataHandler('apm')!.hasData();
               hasDataT = Boolean(resultApm?.hasData);
-              indices = resultApm?.indices.transaction;
+              indices = getApmDataViewTitle(resultApm?.indices);
               break;
           }
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT && indices) {
-            const obsvIndexP = new ObservabilityIndexPatterns(data);
-            const indPattern = await obsvIndexP.getIndexPattern(dataType, indices);
+            const obsvIndexP = new ObservabilityDataViews(dataViews);
+            const indPattern = await obsvIndexP.getDataView(dataType, indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
-          if ((e as HttpFetchError).body.error === 'Forbidden') {
+          if (
+            e instanceof DataViewInsufficientAccessError ||
+            (e as HttpFetchError).body === 'Forbidden'
+          ) {
             setIndexPatternErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         }
       }
     },
-    [data, hasAppData, indexPatternsList, loading]
+    [dataViews, hasAppData, indexPatternsList, loading]
   );
 
   return (

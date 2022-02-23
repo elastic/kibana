@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import * as labels from '../translations';
+import { useIndexPattern } from '../../../../contexts/uptime_index_pattern_context';
 
 interface Props {
   newFilters: string[];
@@ -19,6 +20,8 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
   const [isPopoverOpen, setPopover] = useState(false);
 
   const getSelectedItems = (fieldName: string) => alertFilters?.[fieldName] ?? [];
+
+  const indexPattern = useIndexPattern();
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -62,6 +65,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
       onClick={onButtonClick}
       size="s"
       flush="left"
+      isLoading={!indexPattern}
     >
       {labels.ADD_FILTER}
     </EuiButtonEmpty>

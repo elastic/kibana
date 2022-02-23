@@ -431,6 +431,7 @@ export class TaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }

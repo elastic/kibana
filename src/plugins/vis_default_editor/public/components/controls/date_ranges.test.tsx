@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DateRangesParamEditor } from './date_ranges';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { docLinksServiceMock } from '../../../../../core/public/mocks';

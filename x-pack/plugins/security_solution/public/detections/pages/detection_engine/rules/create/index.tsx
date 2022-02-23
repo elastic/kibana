@@ -34,7 +34,6 @@ import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import {
   redirectToDetections,
@@ -49,6 +48,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -288,7 +288,7 @@ const CreateRulePageComponent: React.FC = () => {
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
                 path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,

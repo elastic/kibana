@@ -12,6 +12,8 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
+  KibanaExecutionContext,
+  ExecutionContextSetup,
 } from 'src/core/server';
 import { Collector } from './collector';
 import type { ICollector, CollectorOptions } from './types';
@@ -26,21 +28,34 @@ interface CollectorWithStatus {
   collector: AnyCollector;
 }
 
-interface CollectorSetConfig {
+export interface CollectorSetConfig {
   logger: Logger;
+  executionContext: ExecutionContextSetup;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
 }
+
+// Schema manually added in src/plugins/telemetry/schema/oss_root.json under `stack_stats.kibana.plugins.usage_collector_stats`
+interface CollectorStats {
+  not_ready: { count: number; names: string[] };
+  not_ready_timeout: { count: number; names: string[] };
+  succeeded: { count: number; names: string[] };
+  failed: { count: number; names: string[] };
+}
+
 export class CollectorSet {
   private readonly logger: Logger;
+  private readonly executionContext: ExecutionContextSetup;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private readonly collectors: Map<string, AnyCollector>;
   constructor({
     logger,
+    executionContext,
     maximumWaitTimeForAllCollectorsInS = DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
     collectors = [],
   }: CollectorSetConfig) {
     this.logger = logger;
+    this.executionContext = executionContext;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS;
   }
@@ -101,7 +116,11 @@ export class CollectorSet {
 
   private getReadyCollectors = async (
     collectors: Map<string, AnyCollector> = this.collectors
-  ): Promise<AnyCollector[]> => {
+  ): Promise<{
+    readyCollectors: AnyCollector[];
+    nonReadyCollectorTypes: string[];
+    timedOutCollectorsTypes: string[];
+  }> => {
     if (!(collectors instanceof Map)) {
       throw new Error(
         `getReadyCollectors method given bad Map of collectors: ` + typeof collectors
@@ -162,7 +181,11 @@ export class CollectorSet {
       .filter(({ isReadyWithTimeout }) => isReadyWithTimeout.value === true)
       .map(({ collector }) => collector);
 
-    return readyCollectors;
+    return {
+      readyCollectors,
+      nonReadyCollectorTypes: collectorsTypesNotReady,
+      timedOutCollectorsTypes,
+    };
   };
 
   public bulkFetch = async (
@@ -172,7 +195,16 @@ export class CollectorSet {
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
     this.logger.debug(`Getting ready collectors`);
-    const readyCollectors = await this.getReadyCollectors(collectors);
+    const { readyCollectors, nonReadyCollectorTypes, timedOutCollectorsTypes } =
+      await this.getReadyCollectors(collectors);
+
+    const collectorStats: CollectorStats = {
+      not_ready: { count: nonReadyCollectorTypes.length, names: nonReadyCollectorTypes },
+      not_ready_timeout: { count: timedOutCollectorsTypes.length, names: timedOutCollectorsTypes },
+      succeeded: { count: 0, names: [] },
+      failed: { count: 0, names: [] },
+    };
+
     const responses = await Promise.all(
       readyCollectors.map(async (collector) => {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
@@ -182,16 +214,30 @@ export class CollectorSet {
             soClient,
             ...(collector.extendFetchContext.kibanaRequest && { kibanaRequest }),
           };
-          return {
-            type: collector.type,
-            result: await collector.fetch(context),
+          const executionContext: KibanaExecutionContext = {
+            type: 'usage_collection',
+            name: 'collector.fetch',
+            id: collector.type,
+            description: `Fetch method in the Collector "${collector.type}"`,
           };
+          const result = await this.executionContext.withContext(executionContext, () =>
+            collector.fetch(context)
+          );
+          collectorStats.succeeded.names.push(collector.type);
+          return { type: collector.type, result };
         } catch (err) {
           this.logger.warn(err);
           this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
+          collectorStats.failed.names.push(collector.type);
         }
       })
     );
+
+    collectorStats.succeeded.count = collectorStats.succeeded.names.length;
+    collectorStats.failed.count = collectorStats.failed.names.length;
+
+    // Treat it as just another "collector"
+    responses.push({ type: 'usage_collector_stats', result: collectorStats });
 
     return responses.filter(
       (response): response is { type: string; result: unknown } => typeof response !== 'undefined'
@@ -265,6 +311,7 @@ export class CollectorSet {
   private makeCollectorSetFromArray = (collectors: AnyCollector[]) => {
     return new CollectorSet({
       logger: this.logger,
+      executionContext: this.executionContext,
       maximumWaitTimeForAllCollectorsInS: this.maximumWaitTimeForAllCollectorsInS,
       collectors,
     });

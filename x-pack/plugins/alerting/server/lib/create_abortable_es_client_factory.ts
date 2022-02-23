@@ -24,6 +24,7 @@ export interface IAbortableClusterClient {
   readonly asInternalUser: IAbortableEsClient;
   readonly asCurrentUser: IAbortableEsClient;
 }
+
 export interface CreateAbortableEsClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
   abortController: AbortController;
@@ -42,6 +43,7 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
           return await scopedClusterClient.asInternalUser.search<TDocument, TAggregations>(query, {
             ...searchOptions,
             signal: abortController.signal,
+            meta: true,
           });
         } catch (e) {
           if (abortController.signal.aborted) {
@@ -61,6 +63,7 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
           return await scopedClusterClient.asCurrentUser.search<TDocument, TAggregations>(query, {
             ...searchOptions,
             signal: abortController.signal,
+            meta: true,
           });
         } catch (e) {
           if (abortController.signal.aborted) {

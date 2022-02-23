@@ -22,6 +22,7 @@ import {
 } from '../utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isManagedJob } from '../../../jobs_utils';
 
 class MultiJobActionsMenuUI extends Component {
   constructor(props) {
@@ -97,7 +98,12 @@ class MultiJobActionsMenuUI extends Component {
           icon="cross"
           disabled={this.canCloseJob === false}
           onClick={() => {
-            closeJobs(this.props.jobs);
+            if (this.props.jobs.some((j) => isManagedJob(j))) {
+              this.props.showCloseJobsConfirmModal(this.props.jobs);
+            } else {
+              closeJobs(this.props.jobs);
+            }
+
             this.closePopover();
           }}
           data-test-subj="mlADJobListMultiSelectCloseJobActionButton"
@@ -139,7 +145,11 @@ class MultiJobActionsMenuUI extends Component {
           icon="stop"
           disabled={this.canStartStopDatafeed === false}
           onClick={() => {
-            stopDatafeeds(this.props.jobs, this.props.refreshJobs);
+            if (this.props.jobs.some((j) => isManagedJob(j))) {
+              this.props.showStopDatafeedsConfirmModal(this.props.jobs);
+            } else {
+              stopDatafeeds(this.props.jobs, this.props.refreshJobs);
+            }
             this.closePopover();
           }}
           data-test-subj="mlADJobListMultiSelectStopDatafeedActionButton"
@@ -211,6 +221,7 @@ MultiJobActionsMenuUI.propTypes = {
   jobs: PropTypes.array.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
+  showStopDatafeedsConfirmModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   showCreateAlertFlyout: PropTypes.func.isRequired,
 };

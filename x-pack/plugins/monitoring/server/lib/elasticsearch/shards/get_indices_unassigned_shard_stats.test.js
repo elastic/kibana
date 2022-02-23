@@ -7,6 +7,18 @@
 
 import { getIndicesUnassignedShardStats } from './get_indices_unassigned_shard_stats';
 
+jest.mock('../../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('getIndicesUnassignedShardStats', () => {
   it('should return the unassigned shard stats for indices', async () => {
     const indices = {
@@ -16,10 +28,9 @@ describe('getIndicesUnassignedShardStats', () => {
     };
 
     const req = {
+      payload: {},
       server: {
-        config: () => ({
-          get: () => {},
-        }),
+        config: { ui: { max_bucket_size: 10000 } },
         plugins: {
           elasticsearch: {
             getCluster: () => ({
@@ -52,9 +63,8 @@ describe('getIndicesUnassignedShardStats', () => {
         },
       },
     };
-    const esIndexPattern = '*';
     const cluster = {};
-    const stats = await getIndicesUnassignedShardStats(req, esIndexPattern, cluster);
+    const stats = await getIndicesUnassignedShardStats(req, cluster);
     expect(stats.indices).toEqual(indices);
   });
 });

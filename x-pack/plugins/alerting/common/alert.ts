@@ -36,6 +36,7 @@ export enum AlertExecutionStatusErrorReasons {
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
@@ -82,6 +83,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
@@ -134,4 +136,22 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+}
+
+export interface RuleMonitoringHistory extends SavedObjectAttributes {
+  success: boolean;
+  timestamp: number;
+  duration?: number;
+}
+
+export interface RuleMonitoring extends SavedObjectAttributes {
+  execution: {
+    history: RuleMonitoringHistory[];
+    calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
+      success_ratio: number;
+    };
+  };
 }

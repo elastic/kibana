@@ -6,14 +6,11 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 import type { LensPublicStart } from '../../lens/public';
 import type { SecurityPluginSetup } from '../../security/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
-  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
-} from '../../triggers_actions_ui/public';
+import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -26,10 +23,12 @@ import type {
   GetRecentCasesProps,
   CasesOwners,
 } from './methods';
+import { GetCasesContextProps } from './methods/get_cases_context';
+import { CreateCaseFlyoutProps } from './components/create/flyout';
+import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
-  triggersActionsUi: TriggersActionsSetup;
 }
 
 export interface StartPlugins {
@@ -68,6 +67,9 @@ export interface CasesUiStart {
    * @return {ReactElement<GetCasesProps>}
    */
   getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
+  getCasesContext: () => (
+    props: GetCasesContextProps & { children: ReactNode }
+  ) => ReactElement<GetCasesContextProps>;
   /**
    * Modal to select a case in a list of all owner cases
    * @param props GetAllCasesSelectorModalProps
@@ -82,10 +84,16 @@ export interface CasesUiStart {
    * @returns A react component that is a flyout for creating a case
    */
   getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
+  getCreateCaseFlyoutNoProvider: (
+    props: CreateCaseFlyoutProps
+  ) => ReactElement<CreateCaseFlyoutProps>;
   /**
    * Get the recent cases component
    * @param props GetRecentCasesProps
    * @returns A react component for showing recent cases
    */
   getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
+  hooks: {
+    getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+  };
 }

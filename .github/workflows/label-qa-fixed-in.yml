@@ -1,0 +1,80 @@
+name: Add QA labels to Fleet issues
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  fetch_issues_to_label:
+    runs-on: ubuntu-latest
+    # Only run on PRs that were merged for the Fleet team
+    if: |
+      github.event.pull_request.merged_at &&
+      contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
+    outputs:
+      matrix: ${{ steps.issues_to_label.outputs.value }}
+      label_ids: ${{ steps.label_ids.outputs.value }}
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: closing_issues
+        with:
+          query: |
+            query closingIssueNumbersQuery($prnumber: Int!) {
+              repository(owner: "elastic", name: "kibana") {
+                pullRequest(number: $prnumber) {
+                  closingIssuesReferences(first: 10) {
+                    nodes {
+                      id
+                      labels(first: 20) {
+                        nodes {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          prnumber: ${{ github.event.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
+      - uses: sergeysova/jq-action@v2
+        id: issues_to_label
+        with:
+          # Map to the issues' node id
+          cmd: echo $CLOSING_ISSUES | jq -c '.repository.pullRequest.closingIssuesReferences.nodes | map(.id)'
+          multiline: true
+        env:
+          CLOSING_ISSUES: ${{ steps.closing_issues.outputs.data }}
+      - uses: sergeysova/jq-action@v2
+        id: label_ids
+        with:
+          # Get list of version labels on pull request and map to label's node id, append 'QA:Ready For Testing' id ("MDU6TGFiZWwyNTQ1NjcwOTI4")
+          cmd: echo $PR_LABELS | jq -c 'map(select(.name | test("v[0-9]+\\.[0-9]+\\.[0-9]+")) | .node_id) + ["MDU6TGFiZWwyNTQ1NjcwOTI4"]'
+          multiline: true
+        env:
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels) }}
+
+  label_issues:
+    needs: fetch_issues_to_label
+    runs-on: ubuntu-latest
+    # For each issue closed by the PR run this job
+    strategy:
+      matrix:
+        issueNodeId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.matrix) }}
+    name: Label issue ${{ matrix.issueNodeId }}
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: add_labels_to_closed_issue
+        with:
+          query: |
+            mutation add_label($issueid:String!, $labelids:[String!]!) {
+              addLabelsToLabelable(input: {labelableId: $issueid, labelIds: $labelids}) {
+                clientMutationId
+              }
+            }
+          issueid: ${{ matrix.issueNodeId }}
+          labelids: ${{ needs.fetch_issues_to_label.outputs.label_ids }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}

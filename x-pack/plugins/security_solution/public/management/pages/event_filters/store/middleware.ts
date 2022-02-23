@@ -136,11 +136,6 @@ const eventFiltersUpdate = async (
       getNewComment(store.getState())
     ) as UpdateExceptionListItemSchema;
 
-    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map((comment) => ({
-      comment: comment.comment,
-      id: comment.id,
-    }));
-
     const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
     store.dispatch({
       type: 'eventFiltersUpdateSuccess',

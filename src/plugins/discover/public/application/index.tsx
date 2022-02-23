@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../kibana_services';
 import { discoverRouter } from './discover_router';
 import { toMountPoint, wrapWithTheme } from '../../../kibana_react/public';
+import { DiscoverServices } from '../build_services';
 
-export const renderApp = (element: HTMLElement) => {
-  const services = getServices();
+export const renderApp = (element: HTMLElement, services: DiscoverServices) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();

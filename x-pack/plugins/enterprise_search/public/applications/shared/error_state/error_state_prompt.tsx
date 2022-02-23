@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
@@ -15,16 +15,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CloudSetup } from '../../../../../cloud/public';
 
+import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { EuiButtonTo, EuiLinkTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
 
-export const ErrorStatePrompt: React.FC<{ errorConnectingMessage?: string }> = ({
-  errorConnectingMessage,
-}) => {
-  const { config, cloud } = useValues(KibanaLogic);
+/**
+ * Personal dashboard urls begin with /p/
+ * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
+ */
+const WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH = '/p/';
+
+export const ErrorStatePrompt: React.FC = () => {
+  const { errorConnectingMessage } = useValues(HttpLogic);
+  const { config, cloud, setChromeIsVisible, history } = useValues(KibanaLogic);
   const isCloudEnabled = cloud.isCloudEnabled;
+  const isWorkplaceSearchPersonalDashboardRoute = history.location.pathname.includes(
+    WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH
+  );
+
+  useEffect(() => {
+    // We hide the Kibana chrome for Workplace Search for Personal Dashboard routes. It is reenabled when the user enters the
+    // Workplace Search organization admin section of the product. If the Enterprise Search API is not working, we never show
+    // the chrome and this can have adverse effects when the user leaves thispage and returns to Kibana. To get around this,
+    // we always show the chrome when the error state is shown, unless the user is visiting the Personal Dashboard.
+    setChromeIsVisible(!isWorkplaceSearchPersonalDashboardRoute);
+  }, []);
 
   return (
     <EuiEmptyPrompt

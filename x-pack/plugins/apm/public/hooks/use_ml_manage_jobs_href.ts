@@ -7,7 +7,7 @@
 
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { ML_PAGES, useMlHref } from '../../../ml/public';
-import { TimePickerRefreshInterval } from '../components/shared/DatePicker/typings';
+import { TimePickerRefreshInterval } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 

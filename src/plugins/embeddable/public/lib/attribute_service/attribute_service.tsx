@@ -15,8 +15,6 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  IEmbeddable,
-  Container,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
 } from '../index';
@@ -134,20 +132,19 @@ export class AttributeService<
     return isSavedObjectEmbeddableInput(input);
   };
 
-  public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return ((embeddable.getRoot() as Container).getInput()?.panels?.[embeddable.id]
-      ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
-  }
-
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
     if (!this.inputIsRefType(input)) {
       return input as ValType;
     }
     const { attributes } = await this.unwrapAttributes(input);
+    const libraryTitle = attributes.title;
     const { savedObjectId, ...originalInputToPropagate } = input;
+
     return {
       ...originalInputToPropagate,
-      attributes,
+      // by value visualizations should not have default titles and/or descriptions
+      ...{ attributes: omit(attributes, ['title', 'description']) },
+      title: libraryTitle,
     } as unknown as ValType;
   };
 

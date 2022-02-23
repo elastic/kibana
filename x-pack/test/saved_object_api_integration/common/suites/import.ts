@@ -8,23 +8,34 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
+import type { SavedObjectReference } from 'src/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface ImportTestDefinition extends TestDefinition {
-  request: Array<{ type: string; id: string; originId?: string }>;
+  request: Array<{
+    type: string;
+    id: string;
+    originId?: string;
+    references?: SavedObjectReference[];
+  }>;
   overwrite: boolean;
   createNewCopies: boolean;
 }
 export type ImportTestSuite = TestSuite<ImportTestDefinition>;
-export interface ImportTestCase extends TestCase {
+export type FailureType =
+  | 'unsupported_type'
+  | 'conflict'
+  | 'ambiguous_conflict'
+  | 'missing_references';
+export interface ImportTestCase extends Omit<TestCase, 'failure'> {
   originId?: string;
   expectedNewId?: string;
+  references?: SavedObjectReference[];
   successParam?: string;
-  failure?: 400 | 409; // only used for permitted response case
-  fail409Param?: string;
+  failureType?: FailureType; // only used for permitted response case
 }
 
 const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, for simplicity's sake
@@ -37,33 +48,60 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 //  * id: conflict_3
 //  * id: conflict_4a, originId: conflict_4
 // using the seven conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
-const CID = 'conflict_';
+const { HIDDEN, ...REMAINING_CASES } = CASES;
 export const TEST_CASES: Record<string, ImportTestCase> = Object.freeze({
-  ...CASES,
-  CONFLICT_1_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1` }),
-  CONFLICT_1A_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1a`, originId: `${CID}1` }),
-  CONFLICT_1B_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1b`, originId: `${CID}1` }),
-  CONFLICT_2C_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}2c`, originId: `${CID}2` }),
-  CONFLICT_2D_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}2d`, originId: `${CID}2` }),
+  ...REMAINING_CASES,
+  CONFLICT_1_OBJ: Object.freeze({ type: 'sharedtype', id: `conflict_1` }),
+  CONFLICT_1A_OBJ: Object.freeze({ type: 'sharedtype', id: `conflict_1a`, originId: `conflict_1` }),
+  CONFLICT_1B_OBJ: Object.freeze({ type: 'sharedtype', id: `conflict_1b`, originId: `conflict_1` }),
+  CONFLICT_2A_OBJ: Object.freeze({ type: 'sharedtype', id: `conflict_2a`, originId: `conflict_2` }),
+  CONFLICT_2C_OBJ: Object.freeze({ type: 'sharedtype', id: `conflict_2c`, originId: `conflict_2` }),
+  CONFLICT_2D_OBJ: Object.freeze({ type: 'sharedtype', id: `conflict_2d`, originId: `conflict_2` }),
   CONFLICT_3A_OBJ: Object.freeze({
     type: 'sharedtype',
-    id: `${CID}3a`,
-    originId: `${CID}3`,
-    expectedNewId: `${CID}3`,
+    id: `conflict_3a`,
+    originId: `conflict_3`,
+    expectedNewId: `conflict_3`,
   }),
-  CONFLICT_4_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}4`, expectedNewId: `${CID}4a` }),
+  CONFLICT_4_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: `conflict_4`,
+    expectedNewId: `conflict_4a`,
+  }),
   NEW_SINGLE_NAMESPACE_OBJ: Object.freeze({ type: 'isolatedtype', id: 'new-isolatedtype-id' }),
   NEW_MULTI_NAMESPACE_OBJ: Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' }),
   NEW_NAMESPACE_AGNOSTIC_OBJ: Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' }),
+});
+export const SPECIAL_TEST_CASES: Record<string, ImportTestCase> = Object.freeze({
+  HIDDEN,
+  OUTBOUND_REFERENCE_ORIGIN_MATCH_1_OBJ: Object.freeze({
+    // This object does not already exist, but it has a reference to the originId of an index pattern that does exist.
+    // We use index patterns because they are one of the few reference types that are validated, so the import will fail if the reference
+    // is broken.
+    // This import is designed to succeed because there is exactly one origin match for its reference, and that reference will be changed to
+    // match the index pattern's new ID.
+    type: 'sharedtype',
+    id: 'outbound-reference-origin-match-1',
+    references: [{ name: '1', type: 'index-pattern', id: 'inbound-reference-origin-match-1' }],
+  }),
+  OUTBOUND_REFERENCE_ORIGIN_MATCH_2_OBJ: Object.freeze({
+    // This object does not already exist, but it has a reference to the originId of two index patterns that do exist.
+    // This import is designed to fail because there are two origin matches for its reference, and we can't currently handle ambiguous
+    // destinations for reference origin matches.
+    type: 'sharedtype',
+    id: 'outbound-reference-origin-match-2',
+    references: [{ name: '1', type: 'index-pattern', id: 'inbound-reference-origin-match-2' }],
+  }),
 });
 
 /**
  * Test cases have additional properties that we don't want to send in HTTP Requests
  */
-const createRequest = ({ type, id, originId }: ImportTestCase) => ({
+const createRequest = ({ type, id, originId, references }: ImportTestCase) => ({
   type,
   id,
   ...(originId && { originId }),
+  ...(references && { references }),
 });
 
 const getConflictDest = (id: string) => ({
@@ -72,8 +110,20 @@ const getConflictDest = (id: string) => ({
   updatedAt: '2017-09-21T18:59:16.270Z',
 });
 
+export const importTestCaseFailures = {
+  failUnsupportedType: (condition?: boolean): { failureType?: 'unsupported_type' } =>
+    condition !== false ? { failureType: 'unsupported_type' } : {},
+  failConflict: (condition?: boolean): { failureType?: 'conflict' } =>
+    condition !== false ? { failureType: 'conflict' } : {},
+  failAmbiguousConflict: (condition?: boolean): { failureType?: 'ambiguous_conflict' } =>
+    condition !== false ? { failureType: 'ambiguous_conflict' } : {},
+  failMissingReferences: (condition?: boolean): { failureType?: 'missing_references' } =>
+    condition !== false ? { failureType: 'missing_references' } : {},
+};
+
 export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
-  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
+  const expectSavedObjectForbidden = (action: string, typeOrTypes: string | string[]) =>
+    expectResponses.forbiddenTypes(action)(typeOrTypes);
   const expectResponseBody =
     (
       testCases: ImportTestCase | ImportTestCase[],
@@ -87,12 +137,12 @@ export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: S
       const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
       if (statusCode === 403) {
         const types = testCaseArray.map((x) => x.type);
-        await expectSavedObjectForbidden(types)(response);
+        await expectSavedObjectForbidden('bulk_create', types)(response);
       } else {
         // permitted
         const { success, successCount, successResults, errors } = response.body;
-        const expectedSuccesses = testCaseArray.filter((x) => !x.failure);
-        const expectedFailures = testCaseArray.filter((x) => x.failure);
+        const expectedSuccesses = testCaseArray.filter((x) => !x.failureType);
+        const expectedFailures = testCaseArray.filter((x) => x.failureType);
         expect(success).to.eql(expectedFailures.length === 0);
         expect(successCount).to.eql(expectedSuccesses.length);
         if (expectedFailures.length) {
@@ -147,30 +197,37 @@ export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: S
           }
         }
         for (let i = 0; i < expectedFailures.length; i++) {
-          const { type, id, failure, fail409Param, expectedNewId } = expectedFailures[i];
+          const { type, id, failureType, expectedNewId } = expectedFailures[i];
           // we don't know the order of the returned errors; search for each one
           const object = (errors as Array<Record<string, unknown>>).find(
             (x) => x.type === type && x.id === id
           );
           expect(object).not.to.be(undefined);
-          if (failure === 400) {
-            expect(object!.error).to.eql({ type: 'unsupported_type' });
-          } else {
-            // 409
-            let error: Record<string, unknown> = {
-              type: 'conflict',
-              ...(expectedNewId && { destinationId: expectedNewId }),
-            };
-            if (fail409Param === 'ambiguous_conflict_2c') {
-              // "ambiguous destination" conflict
-              error = {
-                type: 'ambiguous_conflict',
-                // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
-                destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
-              };
-            }
-            expect(object!.error).to.eql(error);
+          const expectedError: Record<string, unknown> = { type: failureType };
+          switch (failureType!) {
+            case 'unsupported_type':
+              break;
+            case 'conflict':
+              if (expectedNewId) {
+                expectedError.destinationId = expectedNewId;
+              }
+              break;
+            case 'ambiguous_conflict':
+              // We only have one test case for ambiguous conflicts, so these destination IDs are hardcoded below for simplicity.
+              // Response destinations should be sorted by updatedAt in descending order, then ID in ascending order.
+              expectedError.destinations = [
+                getConflictDest(`conflict_2a`),
+                getConflictDest(`conflict_2b`),
+              ];
+              break;
+            case 'missing_references':
+              // We only have one test case for missing references, so this reference is hardcoded below for simplicity.
+              expectedError.references = [
+                { type: 'index-pattern', id: 'inbound-reference-origin-match-2' },
+              ];
+              break;
           }
+          expect(object!.error).to.eql(expectedError);
         }
       }
     };

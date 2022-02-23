@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiAccordion,
-  EuiCheckbox,
-  EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCheckbox, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { useTCPAdvancedFieldsContext } from '../contexts';
 
@@ -22,7 +16,12 @@ import { ConfigKey } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 
-export const TCPAdvancedFields = () => {
+interface Props {
+  children?: React.ReactNode;
+  minColumnWidth?: string;
+}
+
+export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth }) => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -39,7 +38,8 @@ export const TCPAdvancedFields = () => {
       data-test-subj="syntheticsTCPAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -130,8 +130,9 @@ export const TCPAdvancedFields = () => {
             data-test-subj="syntheticsTCPRequestSendCheck"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
+      </DescribedFormGroupWithWrap>
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -175,7 +176,8 @@ export const TCPAdvancedFields = () => {
             data-test-subj="syntheticsTCPResponseReceiveCheck"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
+      {children}
     </EuiAccordion>
   );
-};
+});

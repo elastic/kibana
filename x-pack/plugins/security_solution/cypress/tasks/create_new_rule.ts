@@ -517,6 +517,7 @@ export const selectIndicatorMatchType = () => {
 };
 
 export const selectMachineLearningRuleType = () => {
+  cy.get(MACHINE_LEARNING_TYPE).contains('Select');
   cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
 };
 

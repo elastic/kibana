@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { initPromisePool } from './promise_pool';
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));
@@ -50,7 +51,11 @@ describe('initPromisePool', () => {
       executor: async (x) => x,
     });
 
-    expect(results).toEqual([1, 2, 3]);
+    expect(results).toEqual([
+      { item: 1, result: 1 },
+      { item: 2, result: 2 },
+      { item: 3, result: 3 },
+    ]);
     expect(errors).toEqual([]);
   });
 
@@ -65,9 +70,9 @@ describe('initPromisePool', () => {
 
     expect(results).toEqual([]);
     expect(errors).toEqual([
-      new Error(`Error processing 1`),
-      new Error(`Error processing 2`),
-      new Error(`Error processing 3`),
+      { item: 1, error: new Error(`Error processing 1`) },
+      { item: 2, error: new Error(`Error processing 2`) },
+      { item: 3, error: new Error(`Error processing 3`) },
     ]);
   });
 
@@ -104,7 +109,7 @@ describe('initPromisePool', () => {
     asyncTasks[3].resolve();
     await nextTick();
 
-    // Check that all taks have been settled
+    // Check that all tasks have been settled
     expect(asyncTasks).toEqual({
       1: expect.objectContaining({ status: 'resolved' }),
       2: expect.objectContaining({ status: 'rejected' }),
@@ -114,8 +119,11 @@ describe('initPromisePool', () => {
     const { results, errors } = await promisePool;
 
     // Check final results
-    expect(results).toEqual([1, 3]);
-    expect(errors).toEqual([new Error(`Error processing 2`)]);
+    expect(results).toEqual([
+      { item: 1, result: 1 },
+      { item: 3, result: 3 },
+    ]);
+    expect(errors).toEqual([{ item: 2, error: new Error(`Error processing 2`) }]);
   });
 
   it('should be possible to configure concurrency', async () => {
@@ -157,7 +165,7 @@ describe('initPromisePool', () => {
     asyncTasks[5].resolve();
     await nextTick();
 
-    // Check that all taks have been settled
+    // Check that all tasks have been settled
     expect(asyncTasks).toEqual({
       1: expect.objectContaining({ status: 'resolved' }),
       2: expect.objectContaining({ status: 'rejected' }),
@@ -169,8 +177,15 @@ describe('initPromisePool', () => {
     const { results, errors } = await promisePool;
 
     // Check final results
-    expect(results).toEqual([1, 4, 5]);
-    expect(errors).toEqual([new Error(`Error processing 2`), new Error(`Error processing 3`)]);
+    expect(results).toEqual([
+      { item: 1, result: 1 },
+      { item: 4, result: 4 },
+      { item: 5, result: 5 },
+    ]);
+    expect(errors).toEqual([
+      { item: 2, error: new Error(`Error processing 2`) },
+      { item: 3, error: new Error(`Error processing 3`) },
+    ]);
   });
 
   it('should not execute tasks if abortSignal is aborted', async () => {
@@ -183,12 +198,17 @@ describe('initPromisePool', () => {
       abortSignal as AbortSignal
     );
 
-    const { results, errors, abortedExecutionsCount } = await promisePool;
+    const { results, errors } = await promisePool;
 
     // Check final results
     expect(results).toEqual([]);
-    expect(errors).toEqual([]);
-    expect(abortedExecutionsCount).toEqual(5);
+    expect(errors).toEqual([
+      { item: 1, error: new AbortError() },
+      { item: 2, error: new AbortError() },
+      { item: 3, error: new AbortError() },
+      { item: 4, error: new AbortError() },
+      { item: 5, error: new AbortError() },
+    ]);
   });
 
   it('should abort executions of tasks if abortSignal was set to aborted during execution', async () => {
@@ -209,11 +229,13 @@ describe('initPromisePool', () => {
 
     abortSignal.aborted = true;
 
-    const { results, errors, abortedExecutionsCount } = await promisePool;
+    const { results, errors } = await promisePool;
 
     // Check final results
-    expect(results).toEqual([1]);
-    expect(errors).toEqual([]);
-    expect(abortedExecutionsCount).toEqual(2);
+    expect(results).toEqual([{ item: 1, result: 1 }]);
+    expect(errors).toEqual([
+      { item: 2, error: new AbortError() },
+      { item: 3, error: new AbortError() },
+    ]);
   });
 });

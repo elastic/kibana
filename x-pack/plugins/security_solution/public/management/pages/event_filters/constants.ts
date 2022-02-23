@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ExceptionListType, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  CreateExceptionListSchema,
+  ExceptionListType,
+  ExceptionListTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
@@ -15,7 +19,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 
 export const EVENT_FILTER_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_EVENTS;
-export const EVENT_FILTER_LIST = {
+export const EVENT_FILTER_LIST_DEFINITION: CreateExceptionListSchema = {
   name: ENDPOINT_EVENT_FILTERS_LIST_NAME,
   namespace_type: 'agnostic',
   description: ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
@@ -25,6 +29,7 @@ export const EVENT_FILTER_LIST = {
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `name`,
+  `description`,
   `entries.value`,
   `entries.entries.value`,
   `comments.comment`,

@@ -11,6 +11,7 @@ import { QUERY } from '../../../common/constants';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { getHistogramInterval } from '../../../common/lib/get_histogram_interval';
+import { EXCLUDE_RUN_ONCE_FILTER } from '../../../common/constants/client_defaults';
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
@@ -47,6 +48,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
                 field: 'summary',
               },
             },
+            EXCLUDE_RUN_ONCE_FILTER,
           ],
           ...(query
             ? {

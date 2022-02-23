@@ -23,7 +23,7 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field?: IFieldType;
+  field: IFieldType;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
@@ -32,7 +32,6 @@ interface Props {
 
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
-  const type = props.field ? props.field.type : 'string';
   const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
 
   const formatDateChange = (value: string | number | boolean) => {
@@ -69,7 +68,7 @@ function RangeValueInputUI(props: Props) {
         startControl={
           <ValueInputType
             controlOnly
-            type={type}
+            field={props.field}
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
             onBlur={(value) => {
@@ -84,7 +83,7 @@ function RangeValueInputUI(props: Props) {
         endControl={
           <ValueInputType
             controlOnly
-            type={type}
+            field={props.field}
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}
             onBlur={(value) => {

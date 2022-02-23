@@ -64,6 +64,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   const flyoutContents = showWarningsStep ? (
     <WarningsFlyoutStep
       warnings={reindexState.reindexWarnings ?? []}
+      meta={reindexState.meta}
       hideWarningsStep={() => setShowWarningsStep(false)}
       continueReindex={() => {
         setShowWarningsStep(false);

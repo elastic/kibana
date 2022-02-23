@@ -52,7 +52,6 @@ beforeEach(async () => {
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
   const mockReportingConfig = createMockConfigSchema({
-    index: '.reporting-2018.10.10',
     encryptionKey: mockEncryptionKey,
     queue: {
       indexInterval: 'daily',
@@ -95,10 +94,7 @@ test(`passes browserTimezone to generatePng`, async () => {
         ],
       ],
       browserTimezone: 'UTC',
-      conditionalHeaders: expect.objectContaining({
-        conditions: expect.any(Object),
-        headers: {},
-      }),
+      headers: {},
     })
   );
 });
