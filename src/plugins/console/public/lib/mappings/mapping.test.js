@@ -266,4 +266,13 @@ describe('Mappings', () => {
     expect(mappings.getIndexTemplates()).toEqual(expectedResult);
     expect(mappings.getComponentTemplates()).toEqual(expectedResult);
   });
+
+  test('Data streams', function () {
+    mappings.loadDataStreams({
+      data_streams: [{ name: 'test_index1' }, { name: 'test_index2' }, { name: 'test_index3' }],
+    });
+
+    const expectedResult = ['test_index1', 'test_index2', 'test_index3'];
+    expect(mappings.getDataStreams()).toEqual(expectedResult);
+  });
 });
