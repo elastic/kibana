@@ -10,6 +10,8 @@ $="$(buildkite-agent meta-data get 'META_CLOUD_DEPLOYMENT_PASSWORD')"
 
 KIBANA_HOST=$(echo "KIBANA_URL" | awk -F/ '{print $3}')
 ELASTIC_HOST=$(echo "ELASTIC_URL" | awk -F/ '{print $3}')
+TEST_ALERT_LOAD_KBN_ES=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$ELASTIC_HOST
+TEST_ALERT_LOAD_KBN_KB=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$KIBANA_HOST
 
 echo "meta CLOUD_DEPLOYMENT_KIBANA_URL"
 echo $URL
@@ -21,7 +23,7 @@ yarn add test-alert-load-kbn
 
 echo "--- Run IM tests"
 
-npx test-alert-load-kbn run im-test  -e=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$ELASTIC_HOST -k=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$KIBANA_HOST  -r 'report-im.html' -o 'reports'
+npx test-alert-load-kbn run im-test  -r 'report-im.html' -o 'reports'
 
 buildkite-agent artifact upload './reports'
 
