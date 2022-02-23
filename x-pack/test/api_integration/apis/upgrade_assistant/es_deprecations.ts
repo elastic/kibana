@@ -10,7 +10,6 @@ import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/cons
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  // const supertest = getService('supertest');
   const security = getService('security');
 
   describe('Elasticsearch deprecations', () => {
