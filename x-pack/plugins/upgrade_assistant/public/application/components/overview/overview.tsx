@@ -53,6 +53,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     backup: false,
     migrate_system_indices: false,
     fix_issues: false,
+    logs: false,
   });
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
