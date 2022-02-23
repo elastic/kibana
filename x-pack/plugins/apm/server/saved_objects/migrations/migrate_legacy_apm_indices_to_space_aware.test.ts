@@ -20,6 +20,7 @@ const loggerMock = {
 describe('migrateLegacyAPMIndicesToSpaceAware', () => {
   describe('when legacy APM indices is not found', () => {
     const mockBulkCreate = jest.fn();
+    const mockCreate = jest.fn();
     const mockFind = jest.fn();
     const core = {
       savedObjects: {
@@ -29,6 +30,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
           },
           find: mockFind,
           bulkCreate: mockBulkCreate,
+          create: mockCreate,
         }),
       },
     } as unknown as CoreStart;
@@ -40,11 +42,13 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
       });
       expect(mockFind).not.toHaveBeenCalled();
       expect(mockBulkCreate).not.toHaveBeenCalled();
+      expect(mockCreate).not.toHaveBeenCalled();
     });
   });
 
   describe('when only default space is available', () => {
     const mockBulkCreate = jest.fn();
+    const mockCreate = jest.fn();
     const mockSpaceFind = jest.fn().mockReturnValue({
       page: 1,
       per_page: 10000,
@@ -92,6 +96,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
           }),
           find: mockSpaceFind,
           bulkCreate: mockBulkCreate,
+          create: mockCreate,
         }),
       },
     } as unknown as CoreStart;
@@ -100,27 +105,29 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
         coreStart: core,
         logger: loggerMock,
       });
-      expect(mockBulkCreate).toBeCalledWith([
+      expect(mockCreate).toBeCalledWith(
+        APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
         {
-          type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-          id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
-          initialNamespaces: ['default'],
-          attributes: {
-            transaction: 'default-apm-*',
-            span: 'default-apm-*',
-            error: 'default-apm-*',
-            metric: 'default-apm-*',
-            sourcemap: 'default-apm-*',
-            onboarding: 'default-apm-*',
-          },
+          transaction: 'default-apm-*',
+          span: 'default-apm-*',
+          error: 'default-apm-*',
+          metric: 'default-apm-*',
+          sourcemap: 'default-apm-*',
+          onboarding: 'default-apm-*',
+          isSpaceAware: true,
         },
-      ]);
+        {
+          id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
+          overwrite: true,
+        }
+      );
     });
   });
 
   describe('when multiple spaces are found', () => {
     const mockBulkCreate = jest.fn();
-    const mockDelete = jest.fn();
+    const mockCreate = jest.fn();
+
     const savedObjects = [
       { id: 'default', name: 'Default' },
       { id: 'space-a', name: 'Space A' },
@@ -170,7 +177,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
           }),
           find: mockSpaceFind,
           bulkCreate: mockBulkCreate,
-          delete: mockDelete,
+          create: mockCreate,
         }),
       },
     } as unknown as CoreStart;
@@ -179,17 +186,19 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
         coreStart: core,
         logger: loggerMock,
       });
+      expect(mockCreate).toBeCalled();
       expect(mockBulkCreate).toBeCalledWith(
-        savedObjects.map(({ id }) => {
-          return {
-            type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-            id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
-            initialNamespaces: [id],
-            attributes,
-          };
-        })
+        savedObjects
+          .filter(({ id }) => id !== 'default')
+          .map(({ id }) => {
+            return {
+              type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+              id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
+              initialNamespaces: [id],
+              attributes: { ...attributes, isSpaceAware: true },
+            };
+          })
       );
-      expect(mockDelete).toHaveBeenCalled();
     });
   });
 });
