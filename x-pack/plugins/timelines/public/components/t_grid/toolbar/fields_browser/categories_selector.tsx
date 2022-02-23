@@ -39,23 +39,25 @@ interface CategoriesSelectorProps {
 }
 
 interface CategoryOption {
-  categoryId: string;
   label: string;
   count: number;
   checked?: FilterChecked;
 }
 
 const renderOption = (option: CategoryOption, searchValue: string) => {
-  const { categoryId, label, count, checked } = option;
+  const { label, count, checked } = option;
   return (
     <EuiFlexGroup
-      data-test-subj={`categories-selector-option-id-${categoryId}`}
+      data-test-subj={`categories-selector-option-${label}`}
       alignItems="center"
       gutterSize="none"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <CategoryName data-test-subj="categories-selector-option-name" bold={checked === 'on'}>
+        <CategoryName
+          data-test-subj={`categories-selector-option-name-${label}`}
+          bold={checked === 'on'}
+        >
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
         </CategoryName>
       </EuiFlexItem>
@@ -91,13 +93,11 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
     ).sort();
     return [
       ...selectedCategoryIds.map((categoryId) => ({
-        categoryId,
         label: categoryId,
         count: getFieldCount(filteredBrowserFields[categoryId]),
         checked: 'on',
       })),
       ...unselectedCategoryIds.map((categoryId) => ({
-        categoryId,
         label: categoryId,
         count: getFieldCount(filteredBrowserFields[categoryId]),
       })),
@@ -107,7 +107,7 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
   const onCategoriesChange = useCallback(
     (options: CategoryOption[]) => {
       setSelectedCategoryIds(
-        options.filter(({ checked }) => checked === 'on').map(({ categoryId }) => categoryId)
+        options.filter(({ checked }) => checked === 'on').map(({ label }) => label)
       );
     },
     [setSelectedCategoryIds]
@@ -121,11 +121,11 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
   }, []);
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj="categories-selector">
       <EuiPopover
         button={
           <EuiFilterButton
-            data-test-subj={`categories-filter-button`}
+            data-test-subj="categories-filter-button"
             hasActiveFilters={selectedCategoryIds.length > 0}
             iconType="arrowDown"
             isSelected={isPopoverOpen}

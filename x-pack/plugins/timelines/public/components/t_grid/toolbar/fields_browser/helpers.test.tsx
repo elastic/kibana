@@ -10,45 +10,12 @@ import { mockBrowserFields } from '../../../../mock';
 import {
   categoryHasFields,
   createVirtualCategory,
-  getCategoryPaneCategoryClassName,
-  getFieldBrowserCategoryTitleClassName,
-  getFieldBrowserSearchInputClassName,
   getFieldCount,
   filterBrowserFieldsByFieldName,
 } from './helpers';
 import { BrowserFields } from '../../../../../common/search_strategy';
 
-const timelineId = 'test';
-
 describe('helpers', () => {
-  describe('getCategoryPaneCategoryClassName', () => {
-    test('it returns the expected class name', () => {
-      const categoryId = 'auditd';
-
-      expect(getCategoryPaneCategoryClassName({ categoryId, timelineId })).toEqual(
-        'field-browser-category-pane-auditd-test'
-      );
-    });
-  });
-
-  describe('getFieldBrowserCategoryTitleClassName', () => {
-    test('it returns the expected class name', () => {
-      const categoryId = 'auditd';
-
-      expect(getFieldBrowserCategoryTitleClassName({ categoryId, timelineId })).toEqual(
-        'field-browser-category-title-auditd-test'
-      );
-    });
-  });
-
-  describe('getFieldBrowserSearchInputClassName', () => {
-    test('it returns the expected class name', () => {
-      expect(getFieldBrowserSearchInputClassName(timelineId)).toEqual(
-        'field-browser-search-input-test'
-      );
-    });
-  });
-
   describe('categoryHasFields', () => {
     test('it returns false if the category fields property is undefined', () => {
       expect(categoryHasFields({})).toBe(false);

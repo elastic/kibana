@@ -21,11 +21,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../../common/search_strategy';
-import type {
-  FieldBrowserProps,
-  ColumnHeaderOptions,
-  FieldBrowserOptions,
-} from '../../../../../common/types';
+import type { FieldBrowserProps, ColumnHeaderOptions } from '../../../../../common/types';
 import { Search } from './search';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
@@ -37,7 +33,7 @@ import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
 
-type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> & {
+type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width' | 'options'> & {
   /**
    * The current timeline column headers
    */
@@ -68,10 +64,6 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
    * Hides the field browser when invoked
    */
   onHide: () => void;
-  /**
-   * field browser customization options
-   */
-  options?: FieldBrowserOptions;
   /**
    * Invoked when the user types in the search input
    */
@@ -164,7 +156,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <CategoriesSelector
-                data-test-subj="categories-selector"
                 filteredBrowserFields={filteredBrowserFields}
                 setSelectedCategoryIds={setSelectedCategoryIds}
                 selectedCategoryIds={selectedCategoryIds}
@@ -185,7 +176,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
           <EuiSpacer size="l" />
 
           <FieldTable
-            data-test-subj="field-table"
             timelineId={timelineId}
             columnHeaders={columnHeaders}
             filteredBrowserFields={filteredBrowserFields}

@@ -23,32 +23,7 @@ export const LoadingSpinner = styled(EuiLoadingSpinner)`
 LoadingSpinner.displayName = 'LoadingSpinner';
 
 export const FIELD_BROWSER_WIDTH = 925;
-export const FIELDS_PANE_WIDTH = 670;
-export const HEADER_HEIGHT = 40;
 export const TABLE_HEIGHT = 260;
-
-/**
- * Returns the CSS class name for the title of a category shown in the left
- * side field browser
- */
-export const getCategoryFilterClassName = ({ timelineId }: { timelineId: string }): string =>
-  `categories-filter-button-${timelineId}`;
-
-/**
- * Returns the CSS class name for the title of a category shown in the right
- * side of field browser
- */
-export const getFieldBrowserCategoryTitleClassName = ({
-  categoryId,
-  timelineId,
-}: {
-  categoryId: string;
-  timelineId: string;
-}): string => `field-browser-category-title-${categoryId}-${timelineId}`;
-
-/** Returns the class name for a field browser search input */
-export const getFieldBrowserSearchInputClassName = (timelineId: string): string =>
-  `field-browser-search-input-${timelineId}`;
 
 /** Returns true if the specified category has at least one field */
 export const categoryHasFields = (category: Partial<BrowserField>): boolean =>

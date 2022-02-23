@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
-import { getFieldBrowserSearchInputClassName } from './helpers';
 import * as i18n from './translations';
 interface Props {
   isSearching: boolean;
@@ -21,7 +20,6 @@ const inputRef = (node: HTMLInputElement | null) => node?.focus();
 export const Search = React.memo<Props>(
   ({ isSearching, onSearchInputChange, searchInput, timelineId }) => (
     <EuiFieldSearch
-      className={getFieldBrowserSearchInputClassName(timelineId)}
       data-test-subj="field-search"
       inputRef={inputRef}
       isLoading={isSearching}

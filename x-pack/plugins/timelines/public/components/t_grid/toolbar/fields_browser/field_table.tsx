@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
@@ -46,10 +46,10 @@ const TableContainer = styled.div<{ height: number }>`
 `;
 TableContainer.displayName = 'TableContainer';
 
-const Counts = styled.span`
+const Count = styled.span`
   font-weight: bold;
 `;
-Counts.displayName = 'Counts';
+Count.displayName = 'Count';
 
 const FieldTableComponent: React.FC<FieldTableProps> = ({
   columnHeaders,
@@ -60,7 +60,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   timelineId,
 }) => {
   const dispatch = useDispatch();
-  const containerElement = useRef<HTMLDivElement | null>(null);
 
   const fieldItems = useMemo(
     () =>
@@ -102,19 +101,15 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
 
   return (
     <>
-      <EuiText data-test-subj="fields-count" size="xs">
+      <EuiText data-test-subj="fields-showing" size="xs">
         {i18n.FIELDS_SHOWING}
-        <Counts> {fieldItems.length} </Counts>
+        <Count data-test-subj="fields-count"> {fieldItems.length} </Count>
         {i18n.FIELDS_COUNT(fieldItems.length)}
       </EuiText>
 
-      <TableContainer
-        className="euiTable--compressed"
-        data-test-subj="category-table-container"
-        height={TABLE_HEIGHT}
-        ref={containerElement}
-      >
+      <TableContainer className="euiTable--compressed" height={TABLE_HEIGHT}>
         <EuiInMemoryTable
+          data-test-subj="field-table"
           className={`${CATEGORY_TABLE_CLASS_NAME} eui-yScroll`}
           items={fieldItems}
           itemId="name"

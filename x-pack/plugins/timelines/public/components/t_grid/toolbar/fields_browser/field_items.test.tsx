@@ -33,8 +33,9 @@ const columnHeaders: ColumnHeaderOptions[] = [
 
 describe('field_items', () => {
   describe('getFieldItems', () => {
+    const timestampField = mockBrowserFields.base.fields![timestampFieldId];
+
     it('should return browser field item format', () => {
-      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
@@ -53,7 +54,6 @@ describe('field_items', () => {
     });
 
     it('should return selected item', () => {
-      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
@@ -66,7 +66,6 @@ describe('field_items', () => {
     });
 
     it('should return isRuntime field', () => {
-      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: {

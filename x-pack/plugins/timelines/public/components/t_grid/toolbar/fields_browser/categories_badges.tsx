@@ -34,15 +34,16 @@ const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
   );
 
   return (
-    <CategoriesBadgesGroup gutterSize="xs" wrap>
+    <CategoriesBadgesGroup data-test-subj="category-badges" gutterSize="xs" wrap>
       {selectedCategoryIds.map((categoryId) => (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} key={categoryId}>
           <EuiBadge
             iconType="cross"
             iconSide="right"
             iconOnClick={() => onUnselectCategory(categoryId)}
             iconOnClickAriaLabel="unselect category"
-            data-test-sub={`category-badge-${categoryId}`}
+            data-test-subj={`category-badge-${categoryId}`}
+            closeButtonProps={{ 'data-test-subj': `category-badge-unselect-${categoryId}` }}
           >
             {categoryId}
           </EuiBadge>
