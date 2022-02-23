@@ -29,14 +29,14 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
         const successfulTraceEventsGoServiceElasticsearch = successfulTimestamps.flatMap(
           (timestamp) =>
             goServiceInstance
-              .transaction('Transaction with elasticsearch')
+              .transaction('go service / elasticsearch')
               .timestamp(timestamp)
-              .duration(500)
+              .duration(700)
               .success()
               .children(
                 goServiceInstance
                   .span('GET apm-*/_search', 'db', 'elasticsearch')
-                  .duration(500)
+                  .duration(700)
                   .success()
                   .destination('elasticsearch')
                   .timestamp(timestamp)
@@ -46,7 +46,7 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
 
         const successfulTraceEventsGoServiceMysql = successfulTimestamps.flatMap((timestamp) =>
           goServiceInstance
-            .transaction('Transaction with mysql go service')
+            .transaction('go service / mysql')
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -65,28 +65,49 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
           .service('opbeans-node', 'production', 'nodejs')
           .instance('nodejs-instance1');
 
-        const successfulTraceEventsWithServiceTarget = successfulTimestamps.flatMap((timestamp) =>
-          nodeServiceInstance
-            .transaction('Transaction with mysql nodejs service')
-            .timestamp(timestamp)
-            .duration(1000)
-            .success()
-            .children(
-              nodeServiceInstance
-                .span('SELECT FROM USERS', 'db', 'mysql')
-                .duration(1000)
-                .success()
-                .destination('mysql/users')
-                .destinationWithServiceTarget('mysql', 'users')
-                .timestamp(timestamp)
-            )
-            .serialize()
+        const successfulTraceEventsWithServiceTargetMysql = successfulTimestamps.flatMap(
+          (timestamp) =>
+            nodeServiceInstance
+              .transaction('nodejs service / mysql')
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+              .children(
+                nodeServiceInstance
+                  .span('SELECT FROM USERS', 'db', 'mysql')
+                  .duration(1000)
+                  .success()
+                  .destination('mysql/users')
+                  .destinationWithServiceTarget('mysql', 'users')
+                  .timestamp(timestamp)
+              )
+              .serialize()
+        );
+
+        const successfulTraceEventsWithServiceTargetPostgresql = successfulTimestamps.flatMap(
+          (timestamp) =>
+            nodeServiceInstance
+              .transaction('nodejs service / postgresql')
+              .timestamp(timestamp)
+              .duration(800)
+              .success()
+              .children(
+                nodeServiceInstance
+                  .span('SELECT FROM CUSTOMERS', 'db', 'postgresql')
+                  .duration(800)
+                  .success()
+                  .destination('postgresql')
+                  .destinationWithServiceTarget('postgresql')
+                  .timestamp(timestamp)
+              )
+              .serialize()
         );
 
         return [
           ...successfulTraceEventsGoServiceElasticsearch,
           ...successfulTraceEventsGoServiceMysql,
-          ...successfulTraceEventsWithServiceTarget,
+          ...successfulTraceEventsWithServiceTargetMysql,
+          ...successfulTraceEventsWithServiceTargetPostgresql,
         ];
       });
 
