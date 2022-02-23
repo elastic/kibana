@@ -23,6 +23,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
+    loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_discover_histogram'));
     loadTestFile(require.resolve('./_doc_table'));
@@ -53,6 +54,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_search_on_page_load'));
     loadTestFile(require.resolve('./_chart_hidden'));
     loadTestFile(require.resolve('./_context_encoded_url_param'));
+    loadTestFile(require.resolve('./_data_view_editor'));
     loadTestFile(require.resolve('./_empty_state'));
   });
 }
