@@ -694,13 +694,17 @@ const Breadcrumb = memo<{
 }>(({ agentPolicyName, from, packagePolicyName, pkgkey, pkgTitle, policyId }) => {
   let breadcrumb = <PoliciesBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
 
-  if (
-    from === 'package' ||
-    from === 'package-edit' ||
-    from === 'upgrade-from-integrations-policy-list'
-  ) {
+  if (from === 'package' || from === 'package-edit') {
     breadcrumb = (
       <IntegrationsBreadcrumb pkgkey={pkgkey} pkgTitle={pkgTitle} policyName={packagePolicyName} />
+    );
+  } else if (from === 'upgrade-from-integrations-policy-list') {
+    breadcrumb = (
+      <IntegrationsUpgradeBreadcrumb
+        pkgkey={pkgkey}
+        pkgTitle={pkgTitle}
+        policyName={packagePolicyName}
+      />
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
@@ -714,7 +718,7 @@ const IntegrationsBreadcrumb = memo<{
   policyName: string;
   pkgkey: string;
 }>(({ pkgTitle, policyName, pkgkey }) => {
-  useIntegrationsBreadcrumbs('integration_policy_upgrade', { policyName, pkgTitle, pkgkey });
+  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
   return null;
 });
 
@@ -725,6 +729,15 @@ const PoliciesBreadcrumb: React.FunctionComponent<{
   useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
 };
+
+const IntegrationsUpgradeBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useIntegrationsBreadcrumbs('integration_policy_upgrade', { policyName, pkgTitle, pkgkey });
+  return null;
+});
 
 const UpgradeBreadcrumb: React.FunctionComponent<{
   policyName: string;
