@@ -10,7 +10,7 @@ import { URL } from 'url';
 import uuid from 'uuid';
 import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
-import { shareReplay, first, takeUntil, filter } from 'rxjs/operators';
+import { shareReplay, first, takeUntil, filter, share } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 
@@ -216,19 +216,17 @@ export class KibanaRequest<
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
+    const closed$ = fromEvent<void>(request.raw.res, 'close').pipe(share());
+
     // the response is completed
-    const finished$ = fromEvent<void>(request.raw.res, 'close').pipe(
-      filter(() => {
-        return isCompleted(request);
-      }),
+    const finished$ = closed$.pipe(
+      filter(() => isCompleted(request)),
       first()
     );
 
     // the response's underlying connection was terminated prematurely
-    const aborted$ = fromEvent<void>(request.raw.res, 'close').pipe(
-      filter(() => {
-        return !isCompleted(request);
-      }),
+    const aborted$ = closed$.pipe(
+      filter(() => !isCompleted(request)),
       first(),
       takeUntil(finished$)
     );
