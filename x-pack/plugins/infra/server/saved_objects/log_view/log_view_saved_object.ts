@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from 'src/core/server';
 
-export const logViewSavedObjectName = 'log-view';
+export const logViewSavedObjectName = 'infrastructure-monitoring-log-view';
 
 export const logViewSavedObjectType: SavedObjectsType = {
   name: logViewSavedObjectName,
