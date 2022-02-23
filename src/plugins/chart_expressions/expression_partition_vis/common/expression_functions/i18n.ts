@@ -135,7 +135,7 @@ export const errors = {
       values: { legendDisplayModes: Object.values(LegendDisplay).join(', ') },
     }),
   invalidLegendPositionError: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendDisplayError', {
+    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendPositionError', {
       defaultMessage: `Invalid legend position is specified. Supported ticks legend positions: {positions}`,
       values: { positions: Object.values(Position).join(', ') },
     }),
