@@ -14,7 +14,7 @@ export class StyleMeta {
   }
 
   getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
-    return this._descriptor.fieldMeta[fieldName]
+    return this._descriptor.fieldMeta[fieldName] && this._descriptor.fieldMeta[fieldName].range
       ? this._descriptor.fieldMeta[fieldName].range!
       : null;
   }
