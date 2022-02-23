@@ -33,6 +33,9 @@ describe('sendAlertTelemetry', () => {
               data_stream: {
                 dataset: 'endpoint.events',
               },
+              event: {
+                id: 'foo',
+              },
             },
           },
           {
@@ -47,6 +50,9 @@ describe('sendAlertTelemetry', () => {
                 dataset: 'endpoint.alerts',
                 other: 'x',
               },
+              event: {
+                id: 'bar',
+              },
             },
           },
           {
@@ -58,12 +64,19 @@ describe('sendAlertTelemetry', () => {
               '@timestamp': 'x',
               key3: 'hello',
               data_stream: {},
+              event: {
+                id: 'baz',
+              },
             },
           },
         ],
       },
     };
-    const joinMap = new Map<string, string>();
+    const joinMap = new Map<string, string>([
+      ['foo', '1234'],
+      ['bar', 'abcd'],
+      ['baz', '4567'],
+    ]);
     const sources = selectEvents(filteredEvents, joinMap);
     expect(sources).toStrictEqual([
       {
@@ -73,6 +86,10 @@ describe('sendAlertTelemetry', () => {
           dataset: 'endpoint.alerts',
           other: 'x',
         },
+        event: {
+          id: 'bar',
+        },
+        signal_id: 'abcd',
       },
     ]);
   });
