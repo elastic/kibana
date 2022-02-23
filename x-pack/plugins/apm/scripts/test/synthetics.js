@@ -31,7 +31,7 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .option('grep', {
     alias: 'spec',
-    default: false,
+    default: undefined,
     type: 'string',
     description:
       'Specify the spec files to run (use doublequotes for glob matching)',
