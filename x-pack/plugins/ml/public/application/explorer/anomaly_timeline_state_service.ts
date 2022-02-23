@@ -79,25 +79,7 @@ export class AnomalyTimelineStateService {
    * @private
    */
   private _init() {
-    combineLatest([
-      this._swimLaneUrlState$.pipe(
-        map((v) => v?.viewByFieldName),
-        distinctUntilChanged()
-      ),
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this._selectedCells$,
-    ]).subscribe(([currentlySelected, selectedJobs, selectedCells]) => {
-      const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
-        currentlySelected,
-        false,
-        [],
-        false,
-        selectedCells,
-        selectedJobs
-      );
-      this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
-      this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
-    });
+    this._initViewByData();
 
     this._swimLaneUrlState$
       .pipe(
@@ -173,8 +155,8 @@ export class AnomalyTimelineStateService {
                   earliest: overallSwimLaneData!.earliest,
                   latest: overallSwimLaneData!.latest,
                 },
-                selectedJobs!,
-                viewBySwimlaneFieldName!,
+                selectedJobs,
+                viewBySwimlaneFieldName,
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
@@ -203,9 +185,13 @@ export class AnomalyTimelineStateService {
         .asSeconds();
     });
 
-    combineLatest([this._swimLaneUrlState$, this.timefilter.getTimeUpdate$().pipe(startWith(null))])
+    combineLatest([
+      this._viewBySwimlaneFieldName$,
+      this._swimLaneUrlState$,
+      this.timefilter.getTimeUpdate$().pipe(startWith(null)),
+    ])
       .pipe(
-        map(([swimLaneUrlState]) => {
+        map(([viewByFieldName, swimLaneUrlState]) => {
           if (!swimLaneUrlState?.selectedType) {
             return;
           }
@@ -233,12 +219,34 @@ export class AnomalyTimelineStateService {
             lanes,
             times,
             showTopFieldValues: swimLaneUrlState.showTopFieldValues,
-            viewByFieldName: swimLaneUrlState.viewByFieldName,
+            viewByFieldName,
           } as AppStateSelectedCells;
         }),
         distinctUntilChanged(isEqual)
       )
       .subscribe(this._selectedCells$);
+  }
+
+  private _initViewByData(): void {
+    combineLatest([
+      this._swimLaneUrlState$.pipe(
+        map((v) => v?.viewByFieldName),
+        distinctUntilChanged()
+      ),
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this._selectedCells$,
+    ]).subscribe(([currentlySelected, selectedJobs, selectedCells]) => {
+      const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
+        currentlySelected,
+        false,
+        [],
+        false,
+        selectedCells,
+        selectedJobs
+      );
+      this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
+      this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
+    });
   }
 
   /**
@@ -554,10 +562,8 @@ export class AnomalyTimelineStateService {
     this._explorerURLStateCallback!(
       {
         viewByFromPage: 1,
+        viewByPerPage: this._swimLanePaginations$.getValue().viewByPerPage,
         viewByFieldName: fieldName,
-        selectedLanes: undefined,
-        selectedTimes: undefined,
-        selectedType: undefined,
       },
       true
     );
