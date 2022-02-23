@@ -105,16 +105,27 @@ const updateRuntimeFieldRouteFactory =
         const name = req.params.name;
         const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const { dataView, fields } = await updateRuntimeField({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-          id,
-          name,
-          runtimeField,
-        });
+        try {
+          const { dataView, fields } = await updateRuntimeField({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            id,
+            name,
+            runtimeField,
+          });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
+          return res.ok(responseFormatter({ serviceKey, dataView, fields }));
+        } catch (e) {
+          if (e instanceof ErrorIndexPatternFieldNotFound) {
+            return res.notFound({
+              body: {
+                message: e.message,
+              },
+            });
+          }
+          throw e;
+        }
       })
     );
   };
