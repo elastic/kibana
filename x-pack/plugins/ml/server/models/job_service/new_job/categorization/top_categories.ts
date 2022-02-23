@@ -34,7 +34,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
           },
         },
       },
-      []
+      [jobId]
     );
     return typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
   }
@@ -75,7 +75,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
           },
         },
       },
-      []
+      [jobId]
     );
 
     const catCounts: Array<{
@@ -123,7 +123,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
           },
         },
       },
-      []
+      [jobId]
     );
 
     // @ts-expect-error incorrect search response type

@@ -340,6 +340,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -504,6 +506,7 @@ export const EditPackagePolicyForm = memo<{
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
+              isUpdate={true}
             />
           )}
 
@@ -708,6 +711,12 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   return null;
 };
 
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
+
 const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
 }> = ({ dryRunData }) => {
@@ -720,12 +729,6 @@ const UpgradeStatusCallout: React.FunctionComponent<{
   const isReadyForUpgrade = !dryRunData[0].hasErrors;
 
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
-
-  const FlyoutBody = styled(EuiFlyoutBody)`
-    .euiFlyoutBody__overflowContent {
-      padding: 0;
-    }
-  `;
 
   return (
     <>

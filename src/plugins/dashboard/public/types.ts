@@ -66,6 +66,7 @@ export interface DashboardState {
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
+  timeRange?: TimeRange;
 
   controlGroupInput?: DashboardControlGroupInput;
 }
@@ -83,6 +84,7 @@ export interface DashboardContainerInput extends ContainerInput {
   isFullScreenMode: boolean;
   expandedPanelId?: string;
   timeRange: TimeRange;
+  timeRestore: boolean;
   description?: string;
   useMargins: boolean;
   syncColors?: boolean;

@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
           Boolean(
             // exclude part with taskId
             record.http?.request?.id?.includes(
-              `kibana:task manager:run alerting:test.executionContext:`
+              `kibana:task%20manager:run%20alerting%3Atest.executionContext:`
             )
           ),
         retry,
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           'alerting execution context propagates to Elasticsearch via "x-opaque-id" header',
         predicate: (record) =>
           Boolean(
-            record.http?.request?.id?.includes(`alert:execute test.executionContext:${alertId}`)
+            record.http?.request?.id?.includes(`alert:execute%20test.executionContext:${alertId}`)
           ),
         retry,
       });
@@ -93,17 +93,17 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
           isExecutionContextLog(record?.message, {
-            parent: {
-              type: 'task manager',
-              name: 'run alerting:test.executionContext',
-              // @ts-expect-error. it accepts strings only
-              id: ANY,
-              description: 'run task',
+            type: 'task manager',
+            name: 'run alerting:test.executionContext',
+            // @ts-expect-error. it accepts strings only
+            id: ANY,
+            description: 'run task',
+            child: {
+              type: 'alert',
+              name: 'execute test.executionContext',
+              id: alertId,
+              description: 'execute [test.executionContext] with name [abc] in [default] namespace',
             },
-            type: 'alert',
-            name: 'execute test.executionContext',
-            id: alertId,
-            description: 'execute [test.executionContext] with name [abc] in [default] namespace',
           }),
         retry,
       });

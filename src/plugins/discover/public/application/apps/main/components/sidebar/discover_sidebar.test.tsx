@@ -23,6 +23,9 @@ import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../view_mode_toggle';
+import { BehaviorSubject } from 'rxjs';
+import { AvailableFields$ } from '../../services/use_saved_search';
+import { FetchStatus } from '../../../../types';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
@@ -49,6 +52,11 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
+
   return {
     columns: ['extension'],
     fieldCounts,
@@ -67,6 +75,8 @@ function getCompProps(): DiscoverSidebarProps {
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
+    availableFields$,
   };
 }
 

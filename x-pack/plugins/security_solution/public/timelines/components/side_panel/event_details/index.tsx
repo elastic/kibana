@@ -82,7 +82,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, detailsEcsData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -209,6 +209,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
       <EventDetailsFooter
         detailsData={detailsData}
+        detailsEcsData={detailsEcsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}

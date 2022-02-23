@@ -24,9 +24,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
-import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { useFetchAlertData } from './helpers';
-import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
@@ -64,17 +62,6 @@ const TimelineDetailsPanel = () => {
       isFlyoutView
       runtimeMappings={runtimeMappings}
       timelineId={TimelineId.casePage}
-    />
-  );
-};
-
-const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
-  return (
-    <InvestigateInTimelineAction
-      ariaLabel={SEND_ALERT_TO_TIMELINE}
-      alertIds={alertIds}
-      key="investigate-in-timeline"
-      ecsRowData={null}
     />
   );
 };
@@ -227,7 +214,6 @@ export const CaseView = React.memo(
               useInsertTimeline,
             },
             ui: {
-              renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
               renderTimelineDetailsPanel: TimelineDetailsPanel,
             },
           },

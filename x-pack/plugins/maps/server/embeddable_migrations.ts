@@ -9,6 +9,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { moveAttribution } from '../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../common/migrations/set_ems_tms_default_modes';
+import { extractReferences } from '../common/migrations/references';
 
 /*
  * Embeddables such as Maps, Lens, and Visualize can be embedded by value or by reference on a dashboard.
@@ -39,6 +40,19 @@ export const embeddableMigrations = {
     } catch (e) {
       // Do not fail migration for invalid layerListJSON
       // Maps application can display invalid layerListJSON error when saved object is viewed
+      return state;
+    }
+  },
+  '8.0.1': (state: SerializableRecord) => {
+    try {
+      const { attributes } = extractReferences(state as { attributes: MapSavedObjectAttributes });
+      return {
+        ...state,
+        attributes,
+      } as SerializableRecord;
+    } catch (e) {
+      // Do not fail migration
+      // Maps application can display error when viewed
       return state;
     }
   },

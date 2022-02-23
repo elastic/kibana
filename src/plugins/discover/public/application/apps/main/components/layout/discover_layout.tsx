@@ -44,7 +44,7 @@ import {
   useSavedSearchAliasMatchRedirect,
 } from '../../../../../saved_searches';
 import { VIEW_MODE } from '../view_mode_toggle';
-import { DataViewType } from '../../../../../../../data_views/common';
+import { DataViewType, DataView } from '../../../../../../../data_views/common';
 import {
   DOCUMENTS_VIEW_CLICK,
   FIELD_STATISTICS_VIEW_CLICK,
@@ -204,6 +204,14 @@ export function DiscoverLayout({
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  const onDataViewCreated = useCallback(
+    (ip: DataView) => {
+      if (ip.id) {
+        onChangeIndexPattern(ip.id);
+      }
+    },
+    [onChangeIndexPattern]
+  );
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
@@ -247,6 +255,8 @@ export function DiscoverLayout({
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
               viewMode={viewMode}
+              onDataViewCreated={onDataViewCreated}
+              availableFields$={savedSearchData$.availableFields$}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -305,7 +315,6 @@ export function DiscoverLayout({
                 >
                   <EuiFlexItem grow={false}>
                     <DiscoverChartMemoized
-                      state={state}
                       resetSavedSearch={resetSavedSearch}
                       savedSearch={savedSearch}
                       savedSearchDataChart$={charts$}
@@ -315,6 +324,8 @@ export function DiscoverLayout({
                       isTimeBased={isTimeBased}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
+                      hideChart={state.hideChart}
+                      interval={state.interval}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
@@ -333,6 +344,7 @@ export function DiscoverLayout({
                     />
                   ) : (
                     <FieldStatisticsTableMemoized
+                      availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}

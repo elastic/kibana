@@ -334,7 +334,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
-          (packagePolicy) => packagePolicy.name === installablePackagePolicy.name
+          (packagePolicy) =>
+            (packagePolicy.id !== undefined && packagePolicy.id === installablePackagePolicy.id) ||
+            packagePolicy.name === installablePackagePolicy.name
         );
       });
 
@@ -344,7 +346,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         policy!,
         packagePoliciesToAdd!,
         defaultOutput,
-        !created
+        true
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors

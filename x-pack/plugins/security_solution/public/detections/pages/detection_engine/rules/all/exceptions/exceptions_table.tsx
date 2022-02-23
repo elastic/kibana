@@ -14,6 +14,8 @@ import {
   EuiProgress,
   EuiSearchBarProps,
   EuiSpacer,
+  EuiPageHeader,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -23,8 +25,6 @@ import { AutoDownload } from '../../../../../../common/components/auto_download/
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { Loader } from '../../../../../../common/components/loader';
-
-import { DetectionEngineHeaderPage } from '../../../../../components/detection_engine_header_page';
 
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
@@ -341,13 +341,14 @@ export const ExceptionListsTable = React.memo(() => {
 
   return (
     <>
-      <DetectionEngineHeaderPage
-        title={i18n.ALL_EXCEPTIONS}
-        border
-        subtitle={i18n.ALL_EXCEPTIONS_DESCRIPTION}
-        subtitle2={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
+      <EuiPageHeader
+        pageTitle={i18n.ALL_EXCEPTIONS}
+        description={i18n.ALL_EXCEPTIONS_DESCRIPTION}
+        rightSideItems={[
+          <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>,
+        ]}
       />
-
+      <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
         {loadingTableInfo && (
           <EuiProgress

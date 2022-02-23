@@ -18,7 +18,7 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -260,9 +260,10 @@ exports.Cluster = class Cluster {
 
       // Include default keystore settings only if keystore isn't configured.
       if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
-        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
         esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-        esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+        // We are explicitly using ES_NOPASSWORD_P12_PATH instead of ES_P12_PATH + ES_P12_PASSWORD. The reasoning for this is that setting
+        // the keystore password using environment variables causes Elasticsearch to emit deprecation warnings.
       }
     }
 

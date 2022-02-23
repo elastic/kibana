@@ -21,6 +21,7 @@ import { indexPatternWithTimefieldMock } from '../../../../../__mocks__/index_pa
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
+  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
@@ -73,6 +74,11 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     fetchStatus: FetchStatus.COMPLETE,
     result: esHits as ElasticSearchHit[],
   }) as DataDocuments$;
+
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -133,6 +139,7 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     documents$,
     totalHits$,
     charts$,
+    availableFields$,
   };
 
   return {

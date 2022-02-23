@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchDiskUsageNodeStats(
   esClient: ElasticsearchClient,
@@ -31,11 +32,7 @@ export async function fetchDiskUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {

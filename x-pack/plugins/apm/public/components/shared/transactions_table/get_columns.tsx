@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -25,6 +20,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { ImpactBar } from '../ImpactBar';
 import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
+import { ITableColumn } from '../managed_table';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 
@@ -51,7 +47,7 @@ export function getColumns({
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
   comparisonType?: TimeRangeComparisonType;
-}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
+}): Array<ITableColumn<ServiceTransactionGroupItem>> {
   return [
     {
       field: 'name',

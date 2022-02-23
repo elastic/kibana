@@ -24,6 +24,7 @@ export {
   getInstallation,
   getInstallations,
   getPackageInfo,
+  getPackageInfoFromRegistry,
   getPackages,
   getLimitedPackages,
 } from './get';

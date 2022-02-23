@@ -24,6 +24,7 @@ import {
   getDataFromSourceHits,
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
+import { buildEcsObjects } from '../all/helpers';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
@@ -69,10 +70,12 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     const data = unionBy('field', fieldsData, sourceData);
 
     const rawEventData = response.rawResponse.hits.hits[0];
+    const ecs = buildEcsObjects(rawEventData as EventHit);
 
     return {
       ...response,
       data,
+      ecs,
       inspect,
       rawEventData,
     };

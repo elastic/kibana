@@ -9051,7 +9051,9 @@ var _ci_stats_config = __webpack_require__(218);
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+/** A ci-stats metric record */
 
+/** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
   /**
    * Create a CiStatsReporter by inspecting the ENV for the necessary config
@@ -9148,7 +9150,7 @@ class CiStatsReporter {
       totalMem: _os.default.totalmem()
     };
     this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
-    return await this.req({
+    return !!(await this.req({
       auth: !!buildId,
       path: '/v1/timings',
       body: {
@@ -9158,7 +9160,7 @@ class CiStatsReporter {
         timings
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`
-    });
+    }));
   }
   /**
    * Report metrics data to the ci-stats service. If running outside of CI this method
@@ -9176,10 +9178,10 @@ class CiStatsReporter {
     const buildId = (_this$config4 = this.config) === null || _this$config4 === void 0 ? void 0 : _this$config4.buildId;
 
     if (!buildId) {
-      throw new Error(`CiStatsReporter can't be authorized without a buildId`);
+      throw new Error(`metrics can't be reported without a buildId`);
     }
 
-    return await this.req({
+    return !!(await this.req({
       auth: true,
       path: '/v1/metrics',
       body: {
@@ -9192,6 +9194,35 @@ class CiStatsReporter {
         id,
         value
       }) => `[${group}/${id}=${value}]`).join(' ')}`
+    }));
+  }
+  /**
+   * Send test reports to ci-stats
+   */
+
+
+  async reportTests({
+    group,
+    testRuns
+  }) {
+    var _this$config5, _this$config6, _this$config7;
+
+    if (!((_this$config5 = this.config) !== null && _this$config5 !== void 0 && _this$config5.buildId) || !((_this$config6 = this.config) !== null && _this$config6 !== void 0 && _this$config6.apiToken)) {
+      throw new Error('unable to report tests unless buildId is configured and auth config available');
+    }
+
+    return await this.req({
+      auth: true,
+      path: '/v1/test_group',
+      query: {
+        buildId: (_this$config7 = this.config) === null || _this$config7 === void 0 ? void 0 : _this$config7.buildId
+      },
+      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
+      body: [JSON.stringify({
+        group
+      }), ...testRuns.map(testRun => JSON.stringify({
+        testRun
+      }))].join('\n')
     });
   }
   /**
@@ -9241,7 +9272,8 @@ class CiStatsReporter {
     auth,
     body,
     bodyDesc,
-    path
+    path,
+    query
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -9252,22 +9284,23 @@ class CiStatsReporter {
         Authorization: `token ${this.config.apiToken}`
       };
     } else if (auth) {
-      throw new Error('this.req() shouldnt be called with auth=true if this.config is defined');
+      throw new Error('this.req() shouldnt be called with auth=true if this.config is not defined');
     }
 
     while (true) {
       attempt += 1;
 
       try {
-        await _axios.default.request({
+        const resp = await _axios.default.request({
           method: 'POST',
           url: path,
           baseURL: BASE_URL,
           headers,
           data: body,
+          params: query,
           adapter: _http.default
         });
-        return true;
+        return resp.data;
       } catch (error) {
         var _error$response;
 
@@ -13897,8 +13930,9 @@ var assert = __webpack_require__(162);
 var debug = __webpack_require__(204);
 
 // Create handlers that pass events from native requests
+var events = ["abort", "aborted", "connect", "error", "socket", "timeout"];
 var eventHandlers = Object.create(null);
-["abort", "aborted", "connect", "error", "socket", "timeout"].forEach(function (event) {
+events.forEach(function (event) {
   eventHandlers[event] = function (arg1, arg2, arg3) {
     this._redirectable.emit(event, arg1, arg2, arg3);
   };
@@ -13907,7 +13941,7 @@ var eventHandlers = Object.create(null);
 // Error types with codes
 var RedirectionError = createErrorType(
   "ERR_FR_REDIRECTION_FAILURE",
-  ""
+  "Redirected request failed"
 );
 var TooManyRedirectsError = createErrorType(
   "ERR_FR_TOO_MANY_REDIRECTS",
@@ -13950,6 +13984,11 @@ function RedirectableRequest(options, responseCallback) {
   this._performRequest();
 }
 RedirectableRequest.prototype = Object.create(Writable.prototype);
+
+RedirectableRequest.prototype.abort = function () {
+  abortRequest(this._currentRequest);
+  this.emit("abort");
+};
 
 // Writes buffered data to the current native request
 RedirectableRequest.prototype.write = function (data, encoding, callback) {
@@ -14030,40 +14069,72 @@ RedirectableRequest.prototype.removeHeader = function (name) {
 
 // Global timeout for all underlying requests
 RedirectableRequest.prototype.setTimeout = function (msecs, callback) {
-  if (callback) {
-    this.once("timeout", callback);
+  var self = this;
+
+  // Destroys the socket on timeout
+  function destroyOnTimeout(socket) {
+    socket.setTimeout(msecs);
+    socket.removeListener("timeout", socket.destroy);
+    socket.addListener("timeout", socket.destroy);
   }
 
+  // Sets up a timer to trigger a timeout event
+  function startTimer(socket) {
+    if (self._timeout) {
+      clearTimeout(self._timeout);
+    }
+    self._timeout = setTimeout(function () {
+      self.emit("timeout");
+      clearTimer();
+    }, msecs);
+    destroyOnTimeout(socket);
+  }
+
+  // Stops a timeout from triggering
+  function clearTimer() {
+    // Clear the timeout
+    if (self._timeout) {
+      clearTimeout(self._timeout);
+      self._timeout = null;
+    }
+
+    // Clean up all attached listeners
+    self.removeListener("abort", clearTimer);
+    self.removeListener("error", clearTimer);
+    self.removeListener("response", clearTimer);
+    if (callback) {
+      self.removeListener("timeout", callback);
+    }
+    if (!self.socket) {
+      self._currentRequest.removeListener("socket", startTimer);
+    }
+  }
+
+  // Attach callback if passed
+  if (callback) {
+    this.on("timeout", callback);
+  }
+
+  // Start the timer if or when the socket is opened
   if (this.socket) {
-    startTimer(this, msecs);
+    startTimer(this.socket);
   }
   else {
-    var self = this;
-    this._currentRequest.once("socket", function () {
-      startTimer(self, msecs);
-    });
+    this._currentRequest.once("socket", startTimer);
   }
 
-  this.once("response", clearTimer);
-  this.once("error", clearTimer);
+  // Clean up on events
+  this.on("socket", destroyOnTimeout);
+  this.on("abort", clearTimer);
+  this.on("error", clearTimer);
+  this.on("response", clearTimer);
 
   return this;
 };
 
-function startTimer(request, msecs) {
-  clearTimeout(request._timeout);
-  request._timeout = setTimeout(function () {
-    request.emit("timeout");
-  }, msecs);
-}
-
-function clearTimer() {
-  clearTimeout(this._timeout);
-}
-
 // Proxy all other public ClientRequest methods
 [
-  "abort", "flushHeaders", "getHeader",
+  "flushHeaders", "getHeader",
   "setNoDelay", "setSocketKeepAlive",
 ].forEach(function (method) {
   RedirectableRequest.prototype[method] = function (a, b) {
@@ -14133,11 +14204,8 @@ RedirectableRequest.prototype._performRequest = function () {
 
   // Set up event handlers
   request._redirectable = this;
-  for (var event in eventHandlers) {
-    /* istanbul ignore else */
-    if (event) {
-      request.on(event, eventHandlers[event]);
-    }
+  for (var e = 0; e < events.length; e++) {
+    request.on(events[e], eventHandlers[events[e]]);
   }
 
   // End a redirected request
@@ -14191,86 +14259,101 @@ RedirectableRequest.prototype._processResponse = function (response) {
   // the user agent MAY automatically redirect its request to the URI
   // referenced by the Location field value,
   // even if the specific status code is not understood.
+
+  // If the response is not a redirect; return it as-is
   var location = response.headers.location;
-  if (location && this._options.followRedirects !== false &&
-      statusCode >= 300 && statusCode < 400) {
-    // Abort the current request
-    this._currentRequest.removeAllListeners();
-    this._currentRequest.on("error", noop);
-    this._currentRequest.abort();
-    // Discard the remainder of the response to avoid waiting for data
-    response.destroy();
-
-    // RFC7231§6.4: A client SHOULD detect and intervene
-    // in cyclical redirections (i.e., "infinite" redirection loops).
-    if (++this._redirectCount > this._options.maxRedirects) {
-      this.emit("error", new TooManyRedirectsError());
-      return;
-    }
-
-    // RFC7231§6.4: Automatic redirection needs to done with
-    // care for methods not known to be safe, […]
-    // RFC7231§6.4.2–3: For historical reasons, a user agent MAY change
-    // the request method from POST to GET for the subsequent request.
-    if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" ||
-        // RFC7231§6.4.4: The 303 (See Other) status code indicates that
-        // the server is redirecting the user agent to a different resource […]
-        // A user agent can perform a retrieval request targeting that URI
-        // (a GET or HEAD request if using HTTP) […]
-        (statusCode === 303) && !/^(?:GET|HEAD)$/.test(this._options.method)) {
-      this._options.method = "GET";
-      // Drop a possible entity and headers related to it
-      this._requestBodyBuffers = [];
-      removeMatchingHeaders(/^content-/i, this._options.headers);
-    }
-
-    // Drop the Host header, as the redirect might lead to a different host
-    var previousHostName = removeMatchingHeaders(/^host$/i, this._options.headers) ||
-      url.parse(this._currentUrl).hostname;
-
-    // Create the redirected request
-    var redirectUrl = url.resolve(this._currentUrl, location);
-    debug("redirecting to", redirectUrl);
-    this._isRedirect = true;
-    var redirectUrlParts = url.parse(redirectUrl);
-    Object.assign(this._options, redirectUrlParts);
-
-    // Drop the Authorization header if redirecting to another host
-    if (redirectUrlParts.hostname !== previousHostName) {
-      removeMatchingHeaders(/^authorization$/i, this._options.headers);
-    }
-
-    // Evaluate the beforeRedirect callback
-    if (typeof this._options.beforeRedirect === "function") {
-      var responseDetails = { headers: response.headers };
-      try {
-        this._options.beforeRedirect.call(null, this._options, responseDetails);
-      }
-      catch (err) {
-        this.emit("error", err);
-        return;
-      }
-      this._sanitizeOptions(this._options);
-    }
-
-    // Perform the redirected request
-    try {
-      this._performRequest();
-    }
-    catch (cause) {
-      var error = new RedirectionError("Redirected request failed: " + cause.message);
-      error.cause = cause;
-      this.emit("error", error);
-    }
-  }
-  else {
-    // The response is not a redirect; return it as-is
+  if (!location || this._options.followRedirects === false ||
+      statusCode < 300 || statusCode >= 400) {
     response.responseUrl = this._currentUrl;
     response.redirects = this._redirects;
     this.emit("response", response);
 
     // Clean up
     this._requestBodyBuffers = [];
+    return;
+  }
+
+  // The response is a redirect, so abort the current request
+  abortRequest(this._currentRequest);
+  // Discard the remainder of the response to avoid waiting for data
+  response.destroy();
+
+  // RFC7231§6.4: A client SHOULD detect and intervene
+  // in cyclical redirections (i.e., "infinite" redirection loops).
+  if (++this._redirectCount > this._options.maxRedirects) {
+    this.emit("error", new TooManyRedirectsError());
+    return;
+  }
+
+  // RFC7231§6.4: Automatic redirection needs to done with
+  // care for methods not known to be safe, […]
+  // RFC7231§6.4.2–3: For historical reasons, a user agent MAY change
+  // the request method from POST to GET for the subsequent request.
+  if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" ||
+      // RFC7231§6.4.4: The 303 (See Other) status code indicates that
+      // the server is redirecting the user agent to a different resource […]
+      // A user agent can perform a retrieval request targeting that URI
+      // (a GET or HEAD request if using HTTP) […]
+      (statusCode === 303) && !/^(?:GET|HEAD)$/.test(this._options.method)) {
+    this._options.method = "GET";
+    // Drop a possible entity and headers related to it
+    this._requestBodyBuffers = [];
+    removeMatchingHeaders(/^content-/i, this._options.headers);
+  }
+
+  // Drop the Host header, as the redirect might lead to a different host
+  var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
+
+  // If the redirect is relative, carry over the host of the last request
+  var currentUrlParts = url.parse(this._currentUrl);
+  var currentHost = currentHostHeader || currentUrlParts.host;
+  var currentUrl = /^\w+:/.test(location) ? this._currentUrl :
+    url.format(Object.assign(currentUrlParts, { host: currentHost }));
+
+  // Determine the URL of the redirection
+  var redirectUrl;
+  try {
+    redirectUrl = url.resolve(currentUrl, location);
+  }
+  catch (cause) {
+    this.emit("error", new RedirectionError(cause));
+    return;
+  }
+
+  // Create the redirected request
+  debug("redirecting to", redirectUrl);
+  this._isRedirect = true;
+  var redirectUrlParts = url.parse(redirectUrl);
+  Object.assign(this._options, redirectUrlParts);
+
+  // Drop confidential headers when redirecting to a less secure protocol
+  // or to a different domain that is not a superdomain
+  if (redirectUrlParts.protocol !== currentUrlParts.protocol &&
+     redirectUrlParts.protocol !== "https:" ||
+     redirectUrlParts.host !== currentHost &&
+     !isSubdomain(redirectUrlParts.host, currentHost)) {
+    removeMatchingHeaders(/^(?:authorization|cookie)$/i, this._options.headers);
+  }
+
+  // Evaluate the beforeRedirect callback
+  if (typeof this._options.beforeRedirect === "function") {
+    var responseDetails = { headers: response.headers };
+    try {
+      this._options.beforeRedirect.call(null, this._options, responseDetails);
+    }
+    catch (err) {
+      this.emit("error", err);
+      return;
+    }
+    this._sanitizeOptions(this._options);
+  }
+
+  // Perform the redirected request
+  try {
+    this._performRequest();
+  }
+  catch (cause) {
+    this.emit("error", new RedirectionError(cause));
   }
 };
 
@@ -14290,7 +14373,7 @@ function wrap(protocols) {
     var wrappedProtocol = exports[scheme] = Object.create(nativeProtocol);
 
     // Executes a request, following redirects
-    wrappedProtocol.request = function (input, options, callback) {
+    function request(input, options, callback) {
       // Parse parameters
       if (typeof input === "string") {
         var urlStr = input;
@@ -14325,14 +14408,20 @@ function wrap(protocols) {
       assert.equal(options.protocol, protocol, "protocol mismatch");
       debug("options", options);
       return new RedirectableRequest(options, callback);
-    };
+    }
 
     // Executes a GET request, following redirects
-    wrappedProtocol.get = function (input, options, callback) {
-      var request = wrappedProtocol.request(input, options, callback);
-      request.end();
-      return request;
-    };
+    function get(input, options, callback) {
+      var wrappedRequest = wrappedProtocol.request(input, options, callback);
+      wrappedRequest.end();
+      return wrappedRequest;
+    }
+
+    // Expose the properties on the wrapped protocol
+    Object.defineProperties(wrappedProtocol, {
+      request: { value: request, configurable: true, enumerable: true, writable: true },
+      get: { value: get, configurable: true, enumerable: true, writable: true },
+    });
   });
   return exports;
 }
@@ -14368,19 +14457,39 @@ function removeMatchingHeaders(regex, headers) {
       delete headers[header];
     }
   }
-  return lastValue;
+  return (lastValue === null || typeof lastValue === "undefined") ?
+    undefined : String(lastValue).trim();
 }
 
 function createErrorType(code, defaultMessage) {
-  function CustomError(message) {
+  function CustomError(cause) {
     Error.captureStackTrace(this, this.constructor);
-    this.message = message || defaultMessage;
+    if (!cause) {
+      this.message = defaultMessage;
+    }
+    else {
+      this.message = defaultMessage + ": " + cause.message;
+      this.cause = cause;
+    }
   }
   CustomError.prototype = new Error();
   CustomError.prototype.constructor = CustomError;
   CustomError.prototype.name = "Error [" + code + "]";
   CustomError.prototype.code = code;
   return CustomError;
+}
+
+function abortRequest(request) {
+  for (var e = 0; e < events.length; e++) {
+    request.removeListener(events[e], eventHandlers[events[e]]);
+  }
+  request.on("error", noop);
+  request.abort();
+}
+
+function isSubdomain(subdomain, domain) {
+  const dot = subdomain.length - domain.length - 1;
+  return dot > 0 && subdomain[dot] === "." && subdomain.endsWith(domain);
 }
 
 // Exports
@@ -14399,14 +14508,20 @@ module.exports = require("url");
 /***/ (function(module, exports, __webpack_require__) {
 
 var debug;
-try {
-  /* eslint global-require: off */
-  debug = __webpack_require__(205)("follow-redirects");
-}
-catch (error) {
-  debug = function () { /* */ };
-}
-module.exports = debug;
+
+module.exports = function () {
+  if (!debug) {
+    try {
+      /* eslint global-require: off */
+      debug = __webpack_require__(205)("follow-redirects");
+    }
+    catch (error) { /* */ }
+    if (typeof debug !== "function") {
+      debug = function () { /* */ };
+    }
+  }
+  debug.apply(null, arguments);
+};
 
 
 /***/ }),
@@ -18490,7 +18605,6 @@ function pauseStreams (streams, options) {
 
 module.exports = glob
 
-var fs = __webpack_require__(132)
 var rp = __webpack_require__(245)
 var minimatch = __webpack_require__(247)
 var Minimatch = minimatch.Minimatch
@@ -18501,8 +18615,6 @@ var assert = __webpack_require__(162)
 var isAbsolute = __webpack_require__(253)
 var globSync = __webpack_require__(254)
 var common = __webpack_require__(255)
-var alphasort = common.alphasort
-var alphasorti = common.alphasorti
 var setopts = common.setopts
 var ownProp = common.ownProp
 var inflight = __webpack_require__(256)
@@ -18953,7 +19065,7 @@ Glob.prototype._readdirInGlobStar = function (abs, cb) {
   var lstatcb = inflight(lstatkey, lstatcb_)
 
   if (lstatcb)
-    fs.lstat(abs, lstatcb)
+    self.fs.lstat(abs, lstatcb)
 
   function lstatcb_ (er, lstat) {
     if (er && er.code === 'ENOENT')
@@ -18994,7 +19106,7 @@ Glob.prototype._readdir = function (abs, inGlobStar, cb) {
   }
 
   var self = this
-  fs.readdir(abs, readdirCb(this, abs, cb))
+  self.fs.readdir(abs, readdirCb(this, abs, cb))
 }
 
 function readdirCb (self, abs, cb) {
@@ -19198,13 +19310,13 @@ Glob.prototype._stat = function (f, cb) {
   var self = this
   var statcb = inflight('stat\0' + abs, lstatcb_)
   if (statcb)
-    fs.lstat(abs, statcb)
+    self.fs.lstat(abs, statcb)
 
   function lstatcb_ (er, lstat) {
     if (lstat && lstat.isSymbolicLink()) {
       // If it's a symlink, then treat it as the target, unless
       // the target does not exist, then treat it as a file.
-      return fs.stat(abs, function (er, stat) {
+      return self.fs.stat(abs, function (er, stat) {
         if (er)
           self._stat2(f, abs, null, lstat, cb)
         else
@@ -20924,7 +21036,6 @@ module.exports.win32 = win32;
 module.exports = globSync
 globSync.GlobSync = GlobSync
 
-var fs = __webpack_require__(132)
 var rp = __webpack_require__(245)
 var minimatch = __webpack_require__(247)
 var Minimatch = minimatch.Minimatch
@@ -20934,8 +21045,6 @@ var path = __webpack_require__(4)
 var assert = __webpack_require__(162)
 var isAbsolute = __webpack_require__(253)
 var common = __webpack_require__(255)
-var alphasort = common.alphasort
-var alphasorti = common.alphasorti
 var setopts = common.setopts
 var ownProp = common.ownProp
 var childrenIgnored = common.childrenIgnored
@@ -21171,7 +21280,7 @@ GlobSync.prototype._readdirInGlobStar = function (abs) {
   var lstat
   var stat
   try {
-    lstat = fs.lstatSync(abs)
+    lstat = this.fs.lstatSync(abs)
   } catch (er) {
     if (er.code === 'ENOENT') {
       // lstat failed, doesn't exist
@@ -21208,7 +21317,7 @@ GlobSync.prototype._readdir = function (abs, inGlobStar) {
   }
 
   try {
-    return this._readdirEntries(abs, fs.readdirSync(abs))
+    return this._readdirEntries(abs, this.fs.readdirSync(abs))
   } catch (er) {
     this._readdirError(abs, er)
     return null
@@ -21367,7 +21476,7 @@ GlobSync.prototype._stat = function (f) {
   if (!stat) {
     var lstat
     try {
-      lstat = fs.lstatSync(abs)
+      lstat = this.fs.lstatSync(abs)
     } catch (er) {
       if (er && (er.code === 'ENOENT' || er.code === 'ENOTDIR')) {
         this.statCache[abs] = false
@@ -21377,7 +21486,7 @@ GlobSync.prototype._stat = function (f) {
 
     if (lstat && lstat.isSymbolicLink()) {
       try {
-        stat = fs.statSync(abs)
+        stat = this.fs.statSync(abs)
       } catch (er) {
         stat = lstat
       }
@@ -21413,8 +21522,6 @@ GlobSync.prototype._makeAbs = function (f) {
 /* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports.alphasort = alphasort
-exports.alphasorti = alphasorti
 exports.setopts = setopts
 exports.ownProp = ownProp
 exports.makeAbs = makeAbs
@@ -21427,17 +21534,14 @@ function ownProp (obj, field) {
   return Object.prototype.hasOwnProperty.call(obj, field)
 }
 
+var fs = __webpack_require__(132)
 var path = __webpack_require__(4)
 var minimatch = __webpack_require__(247)
 var isAbsolute = __webpack_require__(253)
 var Minimatch = minimatch.Minimatch
 
-function alphasorti (a, b) {
-  return a.toLowerCase().localeCompare(b.toLowerCase())
-}
-
 function alphasort (a, b) {
-  return a.localeCompare(b)
+  return a.localeCompare(b, 'en')
 }
 
 function setupIgnores (self, options) {
@@ -21496,6 +21600,7 @@ function setopts (self, pattern, options) {
   self.stat = !!options.stat
   self.noprocess = !!options.noprocess
   self.absolute = !!options.absolute
+  self.fs = options.fs || fs
 
   self.maxLength = options.maxLength || Infinity
   self.cache = options.cache || Object.create(null)
@@ -21565,7 +21670,7 @@ function finish (self) {
     all = Object.keys(all)
 
   if (!self.nosort)
-    all = all.sort(self.nocase ? alphasorti : alphasort)
+    all = all.sort(alphasort)
 
   // at *some* point we statted all of these
   if (self.mark) {
@@ -53527,7 +53632,7 @@ async function sortPackageJson(kbn) {
   await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.writeFile(packageJsonPath, JSON.stringify(sort_package_json__WEBPACK_IMPORTED_MODULE_1___default()(JSON.parse(packageJson), {
     // top level keys in the order they were written when this was implemented
     sortOrder: ['name', 'description', 'keywords', 'private', 'version', 'branch', 'types', 'tsdocMetadata', 'build', 'homepage', 'bugs', 'kibana', 'author', 'scripts', 'repository', 'engines', 'resolutions']
-  }), null, 2));
+  }), null, 2) + '\n');
 }
 
 /***/ }),
@@ -61060,7 +61165,7 @@ async function setupRemoteCache(repoRootPath) {
   try {
     const {
       stdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cache'], {
+    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/ui-team/kibana-bazel-remote-cache'], {
       stdio: 'pipe'
     });
     apiKey = stdout.trim();

@@ -117,7 +117,7 @@ Arguments:
 | timelineIntegration?.hooks.useInsertTimeline                         | `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`                                                        |
 | timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent? | `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`                                           |
 | timelineIntegration?.ui?renderTimelineDetailsPanel?                  | `() => JSX.Element;` space to render `TimelineDetailsPanel`                                                                             |
-| useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts                                                                  |
+| useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, unknown>];` fetch alerts                                                              |
 | userCanCrud                                                          | `boolean;` user permissions to crud                                                                                                     |
 
 UI component:

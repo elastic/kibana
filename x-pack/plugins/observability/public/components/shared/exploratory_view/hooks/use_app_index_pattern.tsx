@@ -14,6 +14,8 @@ import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
 import { useExploratoryView } from '../contexts/exploatory_view_config';
+import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
+import { getApmDataViewTitle } from '../utils/utils';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -69,9 +71,9 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
               break;
             case 'apm':
             case 'mobile':
-              const resultApm = await getDataHandler('apm')?.hasData();
+              const resultApm = await getDataHandler('apm')!.hasData();
               hasDataT = Boolean(resultApm?.hasData);
-              indices = resultApm?.indices.transaction;
+              indices = getApmDataViewTitle(resultApm?.indices);
               break;
           }
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
@@ -84,7 +86,10 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
-          if ((e as HttpFetchError).body.error === 'Forbidden') {
+          if (
+            e instanceof DataViewInsufficientAccessError ||
+            (e as HttpFetchError).body === 'Forbidden'
+          ) {
             setIndexPatternErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));

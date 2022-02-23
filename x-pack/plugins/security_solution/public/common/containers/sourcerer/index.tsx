@@ -51,21 +51,21 @@ export const useInitSourcerer = (
     (state) => getDataViewsSelector(state)
   );
 
-  const { addError } = useAppToasts();
+  const { addError, addWarning } = useAppToasts();
 
   useEffect(() => {
     if (defaultDataView.error != null) {
-      addError(defaultDataView.error, {
+      addWarning({
         title: i18n.translate('xpack.securitySolution.sourcerer.permissions.title', {
           defaultMessage: 'Write role required to generate data',
         }),
-        toastMessage: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
+        text: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
           defaultMessage:
             'Users with write permission need to access the Elastic Security app to initialize the app source data.',
         }),
       });
     }
-  }, [addError, defaultDataView.error]);
+  }, [addWarning, defaultDataView.error]);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>

@@ -75,12 +75,15 @@ export async function getNodes(
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
+  const filters = [{ exists: { field: 'logstash_stats.logstash.uuid' } }];
+
   const params = {
     index: lsIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignore_unavailable: true,
     body: {
       query: createQuery({
+        filters,
         start,
         end,
         clusterUuid,
