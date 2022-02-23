@@ -83,7 +83,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
       displaySuccessToast(
         i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.success', {
           defaultMessage:
-            '{successCount} {successCount, plural, one {job} other {jobs}} synchronized',
+            '{successCount} {successCount, plural, one {item} other {items}} synchronized',
           values: { successCount },
         })
       );

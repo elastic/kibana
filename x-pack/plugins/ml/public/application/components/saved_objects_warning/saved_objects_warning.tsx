@@ -55,14 +55,14 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         mounted.current = false;
       };
     },
-    [forceRefresh, mounted]
+    [forceRefresh, mounted, checkStatus]
   );
 
   const onClose = useCallback(() => {
+    setShowSyncFlyout(false);
     if (forceRefresh === undefined) {
       checkStatus();
     }
-    setShowSyncFlyout(false);
     if (typeof onCloseFlyout === 'function') {
       onCloseFlyout();
     }
@@ -83,7 +83,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         title={
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.title"
-            defaultMessage="ML job synchronization required"
+            defaultMessage="ML job and trained model synchronization required"
           />
         }
         color="warning"
