@@ -6,43 +6,41 @@
  */
 
 import { useCallback } from 'react';
+import { AllCasesSelectorModalProps } from '.';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { CreateCaseFlyoutProps } from './create_case_flyout';
 
-export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
+export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps) => {
   const { dispatch } = useCasesContext();
-
-  const closeFlyout = useCallback(() => {
+  const closeModal = useCallback(() => {
     dispatch({
-      type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
+      type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL,
     });
   }, [dispatch]);
 
-  const openFlyout = useCallback(() => {
+  const openModal = useCallback(() => {
     dispatch({
-      type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
+      type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
       payload: {
         ...props,
         onClose: () => {
-          closeFlyout();
+          closeModal();
           if (props.onClose) {
             return props.onClose();
           }
         },
-        afterCaseCreated: async (...args) => {
-          closeFlyout();
-          if (props.afterCaseCreated) {
-            return props.afterCaseCreated(...args);
+        updateCase: async (...args) => {
+          closeModal();
+          if (props.updateCase) {
+            return props.updateCase(...args);
           }
         },
       },
     });
-  }, [closeFlyout, dispatch, props]);
+  }, [closeModal, dispatch, props]);
   return {
-    open: openFlyout,
-    close: closeFlyout,
+    open: openModal,
+    close: closeModal,
   };
 };
-
-export type UseCasesAddToNewCaseFlyout = typeof useCasesAddToNewCaseFlyout;
+export type UseCasesAddToExistingCaseModal = typeof useCasesAddToExistingCaseModal;
