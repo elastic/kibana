@@ -1,8 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`KibanaPageTemplate render basic template 1`] = `
-<EuiPageTemplate
-  className="kbnPageTemplate"
+<KibanaPageTemplateInner
   pageHeader={
     Object {
       "description": "test",
@@ -13,27 +12,12 @@ exports[`KibanaPageTemplate render basic template 1`] = `
       "title": "test",
     }
   }
-  pageSideBarProps={
-    Object {
-      "className": "kbnPageTemplate__pageSideBar",
-      "paddingSize": "l",
-    }
-  }
-  restrictWidth={true}
 />
 `;
 
 exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
-<EuiPageTemplate
-  className="kbnPageTemplate kbnPageTemplate--centeredBody"
-  pageSideBarProps={
-    Object {
-      "className": "kbnPageTemplate__pageSideBar",
-      "paddingSize": "l",
-    }
-  }
-  restrictWidth={true}
-  template="centeredBody"
+<KibanaPageTemplateInner
+  isEmptyState={true}
 >
   <EuiEmptyPrompt
     title={
@@ -42,12 +26,12 @@ exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
       </h1>
     }
   />
-</EuiPageTemplate>
+</KibanaPageTemplateInner>
 `;
 
 exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
-<EuiPageTemplate
-  className="kbnPageTemplate kbnPageTemplate--centeredContent"
+<KibanaPageTemplateInner
+  isEmptyState={true}
   pageHeader={
     Object {
       "description": "test",
@@ -58,14 +42,6 @@ exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
       "title": "test",
     }
   }
-  pageSideBarProps={
-    Object {
-      "className": "kbnPageTemplate__pageSideBar",
-      "paddingSize": "l",
-    }
-  }
-  restrictWidth={true}
-  template="centeredContent"
 >
   <EuiEmptyPrompt
     title={
@@ -74,41 +50,46 @@ exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
       </h1>
     }
   />
-</EuiPageTemplate>
+</KibanaPageTemplateInner>
 `;
 
 exports[`KibanaPageTemplate render default empty prompt 1`] = `
-<EuiPageTemplate
-  className="kbnPageTemplate kbnPageTemplate--centeredBody"
-  pageSideBarProps={
+<KibanaPageTemplateInner
+  isEmptyState={true}
+  pageHeader={
     Object {
-      "className": "kbnPageTemplate__pageSideBar",
-      "paddingSize": "l",
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
     }
   }
-  restrictWidth={true}
-  template="centeredBody"
->
-  <EuiEmptyPrompt
-    actions={
-      Array [
-        "test",
-      ]
-    }
-    body={
-      <p>
-        test
-      </p>
-    }
-    iconColor=""
-    iconType="test"
-  />
-</EuiPageTemplate>
+/>
 `;
 
 exports[`KibanaPageTemplate render noDataContent 1`] = `
-<EmptyStatePage
-  className="kbnPageTemplate kbnPageTemplate--centeredBody"
+<WithSolutionNavBarprops => {
+  const {
+    className,
+    noDataConfig
+  } = props;
+
+  if (!noDataConfig) {
+    return null;
+  }
+
+  const template = _no_data_page.NO_DATA_PAGE_TEMPLATE_PROPS.template;
+  const classes = (0, _classnames.default)('kbnPageTemplate', {
+    [\`kbnPageTemplate--\${template}\`]: template
+  }, className);
+  return /*#__PURE__*/_react.default.createElement(_eui.EuiPageTemplate, (0, _extends2.default)({
+    "data-test-subj": props['data-test-subj'],
+    template: template,
+    className: classes
+  }, _no_data_page.NO_DATA_PAGE_TEMPLATE_PROPS), /*#__PURE__*/_react.default.createElement(_no_data_page.NoDataPage, noDataConfig));
+}
   noDataConfig={
     Object {
       "actions": Object {
@@ -120,67 +101,106 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
       "solution": "Elastic",
     }
   }
-  pageSideBar={
-    <KibanaPageTemplateSolutionNav
-      icon="solution"
-      isOpenOnDesktop={true}
-      items={
-        Array [
-          Object {
-            "id": "1",
-            "items": Array [
-              Object {
-                "id": "1.1",
-                "name": "Ingest Node Pipelines",
-              },
-              Object {
-                "id": "1.2",
-                "name": "Logstash Pipelines",
-              },
-              Object {
-                "id": "1.3",
-                "name": "Beats Central Management",
-              },
-            ],
-            "name": "Ingest",
-          },
-          Object {
-            "id": "2",
-            "items": Array [
-              Object {
-                "id": "2.1",
-                "name": "Index Management",
-              },
-              Object {
-                "id": "2.2",
-                "name": "Index Lifecycle Policies",
-              },
-              Object {
-                "id": "2.3",
-                "name": "Snapshot and Restore",
-              },
-            ],
-            "name": "Data",
-          },
-        ]
-      }
-      name="Solution"
-      onCollapse={[Function]}
-    />
-  }
-  pageSideBarProps={
+  solutionNav={
     Object {
-      "className": "kbnPageTemplate__pageSideBar",
-      "paddingSize": "none",
+      "icon": "solution",
+      "items": Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "name": "Ingest Node Pipelines",
+            },
+            Object {
+              "id": "1.2",
+              "name": "Logstash Pipelines",
+            },
+            Object {
+              "id": "1.3",
+              "name": "Beats Central Management",
+            },
+          ],
+          "name": "Ingest",
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "name": "Index Management",
+            },
+            Object {
+              "id": "2.2",
+              "name": "Index Lifecycle Policies",
+            },
+            Object {
+              "id": "2.3",
+              "name": "Snapshot and Restore",
+            },
+          ],
+          "name": "Data",
+        },
+      ],
+      "name": "Solution",
     }
   }
-  template="centeredBody"
 />
 `;
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
-<EuiPageTemplate
-  className="kbnPageTemplate"
+<WithSolutionNavBar({
+  template,
+  className,
+  pageHeader,
+  children,
+  isEmptyState,
+  solutionNav,
+  ...rest
+}) => {
+  /**
+   * An easy way to create the right content for empty pages
+   */
+  const emptyStateDefaultTemplate = 'centeredBody';
+
+  if (isEmptyState && pageHeader && !children) {
+    var _template;
+
+    template = (_template = template) !== null && _template !== void 0 ? _template : emptyStateDefaultTemplate;
+    const {
+      iconType,
+      pageTitle,
+      description,
+      rightSideItems
+    } = pageHeader;
+    pageHeader = undefined;
+    children = /*#__PURE__*/_react.default.createElement(_eui.EuiEmptyPrompt, {
+      iconType: iconType,
+      iconColor: '' // This is likely a solution or app logo, so keep it multi-color
+      ,
+      title: pageTitle ? /*#__PURE__*/_react.default.createElement("h1", null, pageTitle) : undefined,
+      body: description ? /*#__PURE__*/_react.default.createElement("p", null, description) : undefined,
+      actions: rightSideItems
+    });
+  } else if (isEmptyState && pageHeader && children) {
+    var _template2;
+
+    template = (_template2 = template) !== null && _template2 !== void 0 ? _template2 : 'centeredContent';
+  } else if (isEmptyState && !pageHeader) {
+    var _template3;
+
+    template = (_template3 = template) !== null && _template3 !== void 0 ? _template3 : emptyStateDefaultTemplate;
+  }
+
+  const classes = (0, _classnames.default)('kbnPageTemplate', {
+    [\`kbnPageTemplate--\${template}\`]: template
+  }, className);
+  return /*#__PURE__*/_react.default.createElement(_eui.EuiPageTemplate, (0, _extends2.default)({
+    template: template,
+    className: classes,
+    pageHeader: pageHeader
+  }, rest), children);
+}
   pageHeader={
     Object {
       "description": "test",
@@ -191,60 +211,49 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
       "title": "test",
     }
   }
-  pageSideBar={
-    <KibanaPageTemplateSolutionNav
-      icon="solution"
-      isOpenOnDesktop={true}
-      items={
-        Array [
-          Object {
-            "id": "1",
-            "items": Array [
-              Object {
-                "id": "1.1",
-                "name": "Ingest Node Pipelines",
-              },
-              Object {
-                "id": "1.2",
-                "name": "Logstash Pipelines",
-              },
-              Object {
-                "id": "1.3",
-                "name": "Beats Central Management",
-              },
-            ],
-            "name": "Ingest",
-          },
-          Object {
-            "id": "2",
-            "items": Array [
-              Object {
-                "id": "2.1",
-                "name": "Index Management",
-              },
-              Object {
-                "id": "2.2",
-                "name": "Index Lifecycle Policies",
-              },
-              Object {
-                "id": "2.3",
-                "name": "Snapshot and Restore",
-              },
-            ],
-            "name": "Data",
-          },
-        ]
-      }
-      name="Solution"
-      onCollapse={[Function]}
-    />
-  }
-  pageSideBarProps={
+  solutionNav={
     Object {
-      "className": "kbnPageTemplate__pageSideBar",
-      "paddingSize": "none",
+      "icon": "solution",
+      "items": Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "name": "Ingest Node Pipelines",
+            },
+            Object {
+              "id": "1.2",
+              "name": "Logstash Pipelines",
+            },
+            Object {
+              "id": "1.3",
+              "name": "Beats Central Management",
+            },
+          ],
+          "name": "Ingest",
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "name": "Index Management",
+            },
+            Object {
+              "id": "2.2",
+              "name": "Index Lifecycle Policies",
+            },
+            Object {
+              "id": "2.3",
+              "name": "Snapshot and Restore",
+            },
+          ],
+          "name": "Data",
+        },
+      ],
+      "name": "Solution",
     }
   }
-  restrictWidth={true}
 />
 `;

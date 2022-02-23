@@ -167,8 +167,6 @@ describe('KibanaPageTemplate', () => {
         pageSideBarProps={{ className: 'customClass' }}
       />
     );
-    expect(component.prop('pageSideBarProps').className).toEqual(
-      'kbnPageTemplate__pageSideBar customClass'
-    );
+    expect(component.html().includes('kbnPageTemplate__pageSideBar customClass')).toBe(true);
   });
 });

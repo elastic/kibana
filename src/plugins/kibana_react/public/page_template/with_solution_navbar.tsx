@@ -31,11 +31,15 @@ export const withSolutionNavbar = (
       // Have to store it as the opposite of the default we want
       localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
     };
-    const sideBarClasses = classNames('kbnPageTemplate__pageSideBar', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'kbnPageTemplate__pageSideBar--shrink':
-        isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
-    });
+    const sideBarClasses = classNames(
+      'kbnPageTemplate__pageSideBar',
+      {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'kbnPageTemplate__pageSideBar--shrink':
+          isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
+      },
+      props.pageSideBarProps?.className
+    );
 
     const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
 
@@ -49,7 +53,7 @@ export const withSolutionNavbar = (
     const pageSideBarProps = {
       paddingSize: 'none',
       ...props.pageSideBarProps,
-      className: classNames(sideBarClasses, props.pageSideBarProps?.className),
+      className: sideBarClasses,
     } as EuiPageSideBarProps;
     return (
       <WrappedComponent
