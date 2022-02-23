@@ -40,7 +40,11 @@ The 8.0.1 release includes the following enhancement and bug fixes.
 [[breaking-changes-8.0.1]]
 === Breaking changes
 
+// tag::notable-breaking-changes[]
+
 There are no breaking changes in the 8.0.1 release. 
+
+// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
