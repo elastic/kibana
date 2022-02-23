@@ -17,9 +17,10 @@ import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const BrowserSimpleFields = memo<Props>(({ validate }) => {
+export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -61,20 +62,25 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
   );
 
   return (
-    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
@@ -85,6 +91,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
@@ -99,6 +106,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
       >
         <SourceField
           onChange={onChangeSourceField}
+          onFieldBlur={onFieldBlur}
           defaultConfig={useMemo(
             () => ({
               zipUrl: defaultValues[ConfigKey.SOURCE_ZIP_URL],
