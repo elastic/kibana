@@ -99,4 +99,34 @@ describe('ActionContext', () => {
 - Timestamp: 2020-01-01T00:00:00.000Z`
     );
   });
+
+  it('generates expected properties if value is string', async () => {
+    const params = ParamsSchema.validate({
+      index: '[index]',
+      timeField: '[timeField]',
+      aggType: 'count',
+      groupBy: 'top',
+      termField: 'x',
+      termSize: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: 'between',
+      threshold: [4, 5],
+    });
+    const base: BaseActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      group: '[group]',
+      value: 'unknown',
+      conditions: 'count between 4 and 5',
+    };
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
+    expect(context.message).toEqual(
+      `alert '[alert-name]' is active for group '[group]':
+
+- Value: unknown
+- Conditions Met: count between 4 and 5 over 5m
+- Timestamp: 2020-01-01T00:00:00.000Z`
+    );
+  });
 });
