@@ -525,20 +525,23 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       }
       pkgVersion = installedPackage.version;
     }
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy!.package!.name,
-      pkgVersion: pkgVersion ?? '',
-    });
+    let packageInfo: PackageInfo | undefined;
+    if (packagePolicy) {
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy!.package!.name,
+        pkgVersion: pkgVersion ?? '',
+      });
+    }
 
     this.validateUpgradePackagePolicy(id, packageInfo, packagePolicy);
 
-    return { packagePolicy: packagePolicy!, packageInfo };
+    return { packagePolicy: packagePolicy!, packageInfo: packageInfo! };
   }
 
   private validateUpgradePackagePolicy(
     id: string,
-    packageInfo: PackageInfo,
+    packageInfo?: PackageInfo,
     packagePolicy?: PackagePolicy
   ) {
     if (!packagePolicy) {
