@@ -13,7 +13,7 @@ import { DetailPanelProcessTab } from './index';
 const getLeaderDetail = (leader: string): DetailPanelProcessLeader => ({
   id: `${leader}-id`,
   name: `${leader}-name`,
-  start: new Date('2022-02-24'),
+  start: new Date('2022-02-24').toISOString(),
   entryMetaType: 'sshd',
   userName: `${leader}-jack`,
   interactive: true,
@@ -24,8 +24,8 @@ const getLeaderDetail = (leader: string): DetailPanelProcessLeader => ({
 
 const TEST_PROCESS_DETAIL: DetailPanelProcess = {
   id: 'process-id',
-  start: new Date('2022-02-22'),
-  end: new Date('2022-02-23'),
+  start: new Date('2022-02-22').toISOString(),
+  end: new Date('2022-02-23').toISOString(),
   exit_code: 137,
   user: 'process-jack',
   args: ['vi', 'test.txt'],
@@ -58,8 +58,8 @@ describe('DetailPanelProcessTab component', () => {
 
       // Process detail rendered correctly
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.id)).toBeVisible();
-      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.start.toISOString())).toBeVisible();
-      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.end.toISOString())).toBeVisible();
+      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.start)).toBeVisible();
+      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.end)).toBeVisible();
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.exit_code)).toBeVisible();
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.user)).toBeVisible();
       expect(renderResult.queryByText(`['vi','test.txt']`)).toBeVisible();

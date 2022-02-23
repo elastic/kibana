@@ -18,7 +18,7 @@ export const useFetchSessionViewProcessEvents = (
 ) => {
   const { http } = useKibana<CoreStart>().services;
 
-  const jumpToCursor = jumpToEvent && jumpToEvent['@timestamp'].toISOString();
+  const jumpToCursor = jumpToEvent && jumpToEvent['@timestamp'];
 
   const query = useInfiniteQuery(
     'sessionViewProcessEvents',

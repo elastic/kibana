@@ -27,8 +27,8 @@ export interface EuiTabProps {
 
 export interface DetailPanelProcess {
   id: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   exit_code: number;
   user: string;
   args: string[];
@@ -43,7 +43,7 @@ export interface DetailPanelProcess {
 export interface DetailPanelProcessLeader {
   id: string;
   name: string;
-  start: Date;
+  start: string;
   entryMetaType: string;
   userName: string;
   interactive: boolean;

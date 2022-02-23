@@ -14,7 +14,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
       _id: 'FMUGTX0BGGlsPv9flMF7',
       _score: null,
       _source: {
-        '@timestamp': new Date('2021-11-23T13:40:16.528Z'),
+        '@timestamp': '2021-11-23T13:40:16.528Z',
         event: {
           kind: 'event',
           category: 'process',
@@ -78,7 +78,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
           interactive: false,
           working_directory: '/',
           pid: 3,
-          start: new Date('2021-10-14T08:05:34.853Z'),
+          start: '2021-10-14T08:05:34.853Z',
           parent: {
             entity_id: '4322',
             args: ['/bin/sshd'],
@@ -89,7 +89,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/',
             pid: 2,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '2',
               name: 'kg',
@@ -127,7 +127,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             group_leader: {
               entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
               pid: 1234, // this directly replaces parent.pgid
-              start: new Date('2021-10-14T08:05:34.853Z'),
+              start: '2021-10-14T08:05:34.853Z',
             },
             file_descriptions: [
               {
@@ -158,7 +158,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -222,7 +222,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -260,12 +260,12 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             // parent: {
             //   entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //   pid: 2,
-            //   start: new Date('2021-10-14T08:05:34.853Z'),
+            //   start: '2021-10-14T08:05:34.853Z',
             //   session_leader: {
             //     // used as a foreign key to the parent session of the session_leader
             //     entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //     pid: 4321,
-            //     start: new Date('2021-10-14T08:05:34.853Z'),
+            //     start: '2021-10-14T08:05:34.853Z',
             //   },
             // },
             file_descriptions: [
@@ -297,7 +297,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -335,12 +335,12 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             // parent: {
             //   entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //   pid: 2,
-            //   start: new Date('2021-10-14T08:05:34.853Z'),
+            //   start: '2021-10-14T08:05:34.853Z',
             //   session_leader: {
             //     // used as a foreign key to the parent session of the entry_leader
             //     entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //     pid: 4321,
-            //     start: new Date('2021-10-14T08:05:34.853Z'),
+            //     start: '2021-10-14T08:05:34.853Z',
             //   },
             // },
             entry_meta: {
@@ -417,7 +417,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
       _id: 'FsUGTX0BGGlsPv9flMGF',
       _score: null,
       _source: {
-        '@timestamp': new Date('2021-11-23T13:40:16.541Z'),
+        '@timestamp': '2021-11-23T13:40:16.541Z',
         event: {
           kind: 'event',
           category: 'process',
@@ -486,7 +486,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
           interactive: true,
           working_directory: '/home/kg',
           pid: 3,
-          start: new Date('2021-10-14T08:05:34.853Z'),
+          start: '2021-10-14T08:05:34.853Z',
           previous: [{ args: ['/bin/sshd'], args_count: 1, executable: '/bin/sshd' }],
           parent: {
             entity_id: '4322',
@@ -498,7 +498,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/',
             pid: 2,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -536,7 +536,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             group_leader: {
               entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
               pid: 1234, // this directly replaces parent.pgid
-              start: new Date('2021-10-14T08:05:34.853Z'),
+              start: '2021-10-14T08:05:34.853Z',
             },
             file_descriptions: [
               {
@@ -567,7 +567,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -631,7 +631,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -669,12 +669,12 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             // parent: {
             //   entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //   pid: 2,
-            //   start: new Date('2021-10-14T08:05:34.853Z'),
+            //   start: '2021-10-14T08:05:34.853Z',
             //   session_leader: {
             //     // used as a foreign key to the parent session of the session_leader
             //     entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //     pid: 4321,
-            //     start: new Date('2021-10-14T08:05:34.853Z'),
+            //     start: '2021-10-14T08:05:34.853Z',
             //   },
             // },
             file_descriptions: [
@@ -706,7 +706,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -744,12 +744,12 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             // parent: {
             //   entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //   pid: 2,
-            //   start: new Date('2021-10-14T08:05:34.853Z'),
+            //   start: '2021-10-14T08:05:34.853Z',
             //   session_leader: {
             //     // used as a foreign key to the parent session of the entry_leader
             //     entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //     pid: 4321,
-            //     start: new Date('2021-10-14T08:05:34.853Z'),
+            //     start: '2021-10-14T08:05:34.853Z',
             //   },
             // },
             entry_meta: {
@@ -826,7 +826,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
       _id: 'H8UGTX0BGGlsPv9fp8F_',
       _score: null,
       _source: {
-        '@timestamp': new Date('2021-11-23T13:40:21.392Z'),
+        '@timestamp': '2021-11-23T13:40:21.392Z',
         event: {
           kind: 'event',
           category: 'process',
@@ -895,8 +895,8 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
           interactive: true,
           working_directory: '/home/kg',
           pid: 3,
-          start: new Date('2021-10-14T08:05:34.853Z'),
-          end: new Date('2021-10-14T10:05:34.853Z'),
+          start: '2021-10-14T08:05:34.853Z',
+          end: '2021-10-14T10:05:34.853Z',
           exit_code: 137,
           previous: [{ args: ['/bin/sshd'], args_count: 1, executable: '/bin/sshd' }],
           parent: {
@@ -909,7 +909,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/',
             pid: 2,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -947,7 +947,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             group_leader: {
               entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
               pid: 1234, // this directly replaces parent.pgid
-              start: new Date('2021-10-14T08:05:34.853Z'),
+              start: '2021-10-14T08:05:34.853Z',
             },
             file_descriptions: [
               {
@@ -978,7 +978,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -1042,7 +1042,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -1080,12 +1080,12 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             // parent: {
             //   entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //   pid: 2,
-            //   start: new Date('2021-10-14T08:05:34.853Z'),
+            //   start: '2021-10-14T08:05:34.853Z',
             //   session_leader: {
             //     // used as a foreign key to the parent session of the session_leader
             //     entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //     pid: 4321,
-            //     start: new Date('2021-10-14T08:05:34.853Z'),
+            //     start: '2021-10-14T08:05:34.853Z',
             //   },
             // },
             file_descriptions: [
@@ -1117,7 +1117,7 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             interactive: true,
             working_directory: '/home/kg',
             pid: 3,
-            start: new Date('2021-10-14T08:05:34.853Z'),
+            start: '2021-10-14T08:05:34.853Z',
             user: {
               id: '0',
               name: 'root',
@@ -1155,12 +1155,12 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
             // parent: {
             //   entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //   pid: 2,
-            //   start: new Date('2021-10-14T08:05:34.853Z'),
+            //   start: '2021-10-14T08:05:34.853Z',
             //   session_leader: {
             //     // used as a foreign key to the parent session of the entry_leader
             //     entity_id: '0fe5f6a0-6f04-49a5-8faf-768445b38d16',
             //     pid: 4321,
-            //     start: new Date('2021-10-14T08:05:34.853Z'),
+            //     start: '2021-10-14T08:05:34.853Z',
             //   },
             // },
             entry_meta: {

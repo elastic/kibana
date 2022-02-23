@@ -33,7 +33,7 @@ const mockActionProps: ActionProps = {
   timelineId: 'test-timeline-id',
 };
 
-jest.mock('../SessionView/index.tsx', () => {
+jest.mock('../session_view/index.tsx', () => {
   return {
     SessionView: () => {
       return <div data-test-subj="SessionView">Mock</div>;
@@ -41,7 +41,7 @@ jest.mock('../SessionView/index.tsx', () => {
   };
 });
 
-jest.mock('../SessionLeaderTable/index.tsx', () => {
+jest.mock('../session_leader_table/index.tsx', () => {
   return {
     SessionLeaderTable: (props: SessionLeaderTableProps) => {
       const { onOpenSessionViewer = () => {} } = props;
