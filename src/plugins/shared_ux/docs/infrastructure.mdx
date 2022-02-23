@@ -1,0 +1,80 @@
+---
+id: sharedUX/Infrastructure
+slug: /shared-ux/infrastructure
+title: About UX Infrastructure
+description: Read about how Shared UX infrastructure enables solutions to create consistent user experiences while reducing development time and effort.
+tags: ['shared-ux', 'infrastructure']
+---
+
+## What is UX Infrastructure?
+
+Shared UX Infrastructure is a collection of shared code to share common UX tasks and workflows throughout Kibana that conform to a defined design pattern.  Some examples might include:
+
+- a button to exit "full screen" mode.
+- a universal menu bar.
+- a hook to load an advanced setting value.
+- a page template to organize content into one of three defined layouts.
+- a button to launch the Visualize Library workflow, returning a "by-value" embeddable.
+
+As a semi-obvious rule of thumb, the closer the code is to the user interface, the more likely it is fall into the category of "UX Infrastructure".  We'll likely try to split code between "UX Infrastructure" and 
+"Service Infrastructure" to keep things manageable.
+
+## Contributions
+
+Contributions are *always* welcome, (and exciting!)
+
+<DocCallOut>
+  TODO: @clintandrewhall
+</DocCallOut>
+
+## Proposals
+
+Infrastructure will likely be the most active area of focus for the Shared UX team-- it has the highest impact potential and can substantially lower development time.  As a relatively new team, we're also aware we can quickly become a bottleneck if we commit to too much, or try to space our efforts too far apart.
+
+To mitigate these concerns, we're taking a step back from the typical release planning cadence and instead focusing on "proposals" on which we can collaborate and deliver quickly.
+
+### What is a proposal?
+
+A proposal is any infrastructure enhancement or project the community or solution(s) needs that requires direct involvement from the Shared UX team.  It can also just be an idea that we want to track or discuss.
+
+Any team or person can submit a proposal.  Success and prioritization will be dependent on a lot of factors, such as:
+
+- its size.
+- its novelty.
+- its impact on our business.
+- its reliance on non-UI services, (existing or new).
+- how many teams need it.
+- how many teams will contribute to it.
+
+### Creating a proposal
+
+We want this to be easy.  Our goal is to collect and track proposals, not push them out until we alone have time to complete it.  We may create a template at some point in the future, but, for now, we want this to be low-friction.
+
+One of the most important things to consider when creating an infrastructure proposal is its scope:
+
+- is it a solution, system, or component?
+- how much support do you need from Shared UX?
+- does code already exist that needs to be migrated and deprecated, or is this something new?
+- is it universal to all Kibana solutions, or only to a few?
+- is it tied directly to a plugin or service?  Should it be co-located there with that team?
+
+Also keep size in mind: the larger the scope, the more likely other stakeholders will need to be involved to complete it.
+
+### Submitting a proposal
+
+The easiest way to submit a proposal is to contact the team.  There are a number of ways to reach us for infrastructure proposals:
+
+Attend our "Shared UX Hour" meeting
+: We hold this open meeting on an ongoing basis.  You can find it on the Kibana Dev calendar, or reach out to us for an invite.
+
+Start a discussion
+: You can create a post on our [discussion forum](https://github.com/orgs/elastic/teams/shared-ux/discussions) with details of your infrastructure proposal, (or even just to ask a question).
+
+Create a Github issue
+: You create an issue on Github, or tag our team ([@elastic/shared-ux](https://github.com/orgs/elastic/teams/shared-ux/)) on an existing issue.  You can add also add issues to the `[Shared UX] Infrastructure Proposals` Github project.
+
+Contact us on Slack
+: Send us a message on Slack at `#shared-ux`.
+
+Invite us to a meeting
+: If it's pressing, we're happy to pop in on a planning meeting, or even an ad-hoc chat.

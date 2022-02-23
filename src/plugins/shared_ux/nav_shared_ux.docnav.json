@@ -6,10 +6,45 @@
   "description": "Developer documentation for Shared UX.",
   "items": [
     {
-      "label": "About",
+      "label": "Introduction",
       "items": [
         {
-          "id": "sharedUX/About"
+          "id": "sharedUX/About",
+          "label": "About our team"
+        },
+        {
+          "label": "Areas of focus",
+          "items": [
+            {
+              "id": "sharedUX/Infrastructure",
+              "label": "Infrastructure"
+            },
+            {
+              "id": "sharedUX/Patterns",
+              "label": "Patterns"
+            },
+            {
+              "id": "sharedUX/Solutions",
+              "label": "Solutions"
+            }
+          ]
+        },
+        {
+          "id": "sharedUX/Ownership"
+        }
+      ]
+    },
+    {
+      "label": "Infrastructure",
+      "items": [
+        {
+          "id": "sharedUX/Infrastructure/Components"
+        },
+        {
+          "id": "sharedUX/Infrastructure/Hooks"
+        },
+        {
+          "id": "sharedUX/Infrastructure/Storybook"
         }
       ]
     }
