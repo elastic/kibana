@@ -74,12 +74,15 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import type { LensPublicSetup } from '../../lens/public';
+
 import { setupLensChoroplethChart } from './lens';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
+  lens: LensPublicSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
@@ -177,7 +180,7 @@ export class MapsPlugin
       },
     });
 
-    setupLensChoroplethChart(core, plugins.expressions);
+    setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
     plugins.expressions.registerFunction(createRegionMapFn);
