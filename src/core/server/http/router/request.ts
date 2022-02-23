@@ -227,6 +227,7 @@ export class KibanaRequest<
     // the response's underlying connection was terminated prematurely
     const aborted$ = closed$.pipe(
       filter(() => !isCompleted(request)),
+      shareReplay(1),
       first(),
       takeUntil(finished$)
     );
