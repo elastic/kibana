@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'rxjs';
 import {
   switchMap,
   map,
@@ -27,8 +27,14 @@ import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_commo
 import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
 import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
 import type { TimeRangeBounds } from '../../../../../../src/plugins/data/common';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import {
+  ANOMALY_SWIM_LANE_HARD_LIMIT,
+  SWIMLANE_TYPE,
+  VIEW_BY_JOB_LABEL,
+} from './explorer_constants';
+// FIXME get rid of the static import
 import { mlJobService } from '../services/job_service';
+import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -62,6 +68,8 @@ export class AnomalyTimelineStateService {
   private _swimLaneCardinality$ = new BehaviorSubject<number | undefined>(undefined);
   private _viewBySwimlaneFieldName$ = new BehaviorSubject<string | undefined>(undefined);
   private _viewBySwimLaneOptions$ = new BehaviorSubject<string[]>([]);
+
+  private _topFieldValues$ = new BehaviorSubject<string[]>([]);
 
   private _isOverallSwimLaneLoading$ = new BehaviorSubject(false);
   private _isViewBySwimLaneLoading$ = new BehaviorSubject(false);
@@ -133,6 +141,60 @@ export class AnomalyTimelineStateService {
       });
 
     combineLatest([
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+      this.getViewBySwimlaneFieldName$(),
+      this.getSwimLanePagination$(),
+      this.getSwimLaneCardinality$(),
+      this.getContainerWidth$(),
+      this.getSelectedCells$(),
+    ])
+      .pipe(
+        switchMap(
+          ([
+            selectedJobs,
+            influencersFilterQuery,
+            viewBySwimlaneFieldName,
+            swimLanePagination,
+            swimLaneCardinality,
+            swimlaneContainerWidth,
+            selectedCells,
+          ]) => {
+            if (!selectedCells?.showTopFieldValues) {
+              return of([]);
+            }
+
+            const selectionInfluencers = getSelectionInfluencers(
+              selectedCells,
+              viewBySwimlaneFieldName
+            );
+
+            const timerange = getSelectionTimeRange(
+              selectedCells,
+              this._bucketSpanInterval,
+              this.timefilter.getBounds()
+            );
+
+            return from(
+              this.anomalyTimelineService.loadViewByTopFieldValuesForSelectedTime(
+                timerange.earliestMs,
+                timerange.latestMs,
+                selectedJobs,
+                viewBySwimlaneFieldName!,
+                swimLaneCardinality,
+                swimLanePagination.viewByPerPage,
+                swimLanePagination.viewByFromPage,
+                swimlaneContainerWidth,
+                selectionInfluencers,
+                influencersFilterQuery
+              )
+            );
+          }
+        )
+      )
+      .subscribe(this._topFieldValues$);
+
+    combineLatest([
       this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
@@ -140,6 +202,7 @@ export class AnomalyTimelineStateService {
       this.getContainerWidth$(),
       this.getViewBySwimlaneFieldName$(),
       this.getSwimLanePagination$(),
+      this._topFieldValues$.pipe(distinctUntilChanged(isEqual)),
     ])
       .pipe(
         tap(() => {
@@ -154,10 +217,11 @@ export class AnomalyTimelineStateService {
             swimlaneContainerWidth,
             viewBySwimlaneFieldName,
             swimLanePagination,
+            topFieldValues,
           ]) => {
             return from(
               this.anomalyTimelineService.loadViewBySwimlane(
-                [],
+                topFieldValues,
                 {
                   earliest: overallSwimLaneData!.earliest,
                   latest: overallSwimLaneData!.latest,
@@ -532,18 +596,18 @@ export class AnomalyTimelineStateService {
     if (swimLaneSelectedCells !== undefined) {
       swimLaneSelectedCells.showTopFieldValues = false;
 
-      // const currentSwimlaneType = selectedCells?.type;
-      // const currentShowTopFieldValues = selectedCells?.showTopFieldValues;
+      const currentSwimlaneType = this._selectedCells$.getValue()?.type;
+      const currentShowTopFieldValues = this._selectedCells$.getValue()?.showTopFieldValues;
       const newSwimlaneType = swimLaneSelectedCells?.type;
 
-      // if (
-      //   (currentSwimlaneType === SWIMLANE_TYPE.OVERALL &&
-      //     newSwimlaneType === SWIMLANE_TYPE.VIEW_BY) ||
-      //   newSwimlaneType === SWIMLANE_TYPE.OVERALL ||
-      //   currentShowTopFieldValues === true
-      // ) {
-      //   swimLaneSelectedCells.showTopFieldValues = true;
-      // }
+      if (
+        (currentSwimlaneType === SWIMLANE_TYPE.OVERALL &&
+          newSwimlaneType === SWIMLANE_TYPE.VIEW_BY) ||
+        newSwimlaneType === SWIMLANE_TYPE.OVERALL ||
+        currentShowTopFieldValues === true
+      ) {
+        swimLaneSelectedCells.showTopFieldValues = true;
+      }
 
       mlExplorerSwimlane.selectedType = swimLaneSelectedCells.type;
       mlExplorerSwimlane.selectedLanes = swimLaneSelectedCells.lanes;

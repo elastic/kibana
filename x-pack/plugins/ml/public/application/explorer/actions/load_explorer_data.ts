@@ -76,10 +76,7 @@ export interface LoadExplorerDataConfig {
   tableInterval: string;
   tableSeverity: number;
   viewBySwimlaneFieldName: string;
-  viewByFromPage: number;
-  viewByPerPage: number;
   swimlaneContainerWidth: number;
-  swimLaneSeverity: number;
 }
 
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
@@ -117,13 +114,10 @@ const loadExplorerDataProvider = (
       selectedCells,
       selectedJobs,
       swimlaneBucketInterval,
-      swimlaneLimit,
       tableInterval,
       tableSeverity,
       viewBySwimlaneFieldName,
       swimlaneContainerWidth,
-      viewByFromPage,
-      viewByPerPage,
     } = config;
 
     const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
@@ -193,27 +187,11 @@ const loadExplorerDataProvider = (
         tableSeverity,
         influencersFilterQuery
       ),
-      topFieldValues:
-        selectedCells !== undefined && selectedCells.showTopFieldValues === true
-          ? anomalyTimelineService.loadViewByTopFieldValuesForSelectedTime(
-              timerange.earliestMs,
-              timerange.latestMs,
-              selectedJobs,
-              viewBySwimlaneFieldName,
-              swimlaneLimit,
-              viewByPerPage,
-              viewByFromPage,
-              swimlaneContainerWidth,
-              selectionInfluencers,
-              influencersFilterQuery
-            )
-          : Promise.resolve([]),
     }).pipe(
       // Trigger a side-effect action to reset view-by swimlane,
       // show the view-by loading indicator
       // and pass on the data we already fetched.
-      tap(explorerService.setViewBySwimlaneLoading),
-      tap(({ anomalyChartRecords, topFieldValues }) => {
+      tap(({ anomalyChartRecords }) => {
         memoizedAnomalyDataChange(
           lastRefresh,
           explorerService,
@@ -228,6 +206,7 @@ const loadExplorerDataProvider = (
           tableSeverity
         );
       }),
+      tap(explorerService.setViewBySwimlaneLoading),
       mergeMap(
         ({
           overallAnnotations,
@@ -254,38 +233,15 @@ const loadExplorerDataProvider = (
                     influencersFilterQuery
                   )
                 : Promise.resolve(influencers),
-            // viewBySwimlaneState: memoizedLoadViewBySwimlane(
-            //   lastRefresh,
-            //   topFieldValues,
-            //   {
-            //     earliest: overallState.earliest,
-            //     latest: overallState.latest,
-            //   },
-            //   selectedJobs,
-            //   viewBySwimlaneFieldName,
-            //   ANOMALY_SWIM_LANE_HARD_LIMIT,
-            //   viewByPerPage,
-            //   viewByFromPage,
-            //   swimlaneContainerWidth,
-            //   influencersFilterQuery,
-            //   undefined,
-            //   swimLaneSeverity
-            // ),
           }).pipe(
-            map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
+            map(({ filteredTopInfluencers }) => {
               return {
                 overallAnnotations,
                 annotations: annotationsData,
                 influencers: filteredTopInfluencers as any,
                 loading: false,
-                // viewBySwimlaneDataLoading: false,
                 anomalyChartsDataLoading: false,
-                // overallSwimlaneData: overallState,
-                // viewBySwimlaneData: viewBySwimlaneState as any,
                 tableData,
-                // swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
-                //   ? viewBySwimlaneState.cardinality
-                //   : undefined,
               };
             })
           )
