@@ -77,6 +77,7 @@ export const AdvancedSettings: FC<Props> = ({
         onIndexNameChange={onIndexChange}
         onIndexNameValidationStart={() => {}}
         onIndexNameValidationEnd={() => {}}
+        data-test-subj="dataVisualizerFileIndexNameInput"
       />
 
       <EuiSpacer size="m" />

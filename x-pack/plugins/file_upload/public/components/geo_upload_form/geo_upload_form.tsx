@@ -126,6 +126,7 @@ export class GeoUploadForm extends Component<Props, State> {
               onIndexNameChange={this.props.onIndexNameChange}
               onIndexNameValidationStart={this.props.onIndexNameValidationStart}
               onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
+              data-test-subj="fileUploadIndexNameInput"
             />
 
             <EuiCallOut

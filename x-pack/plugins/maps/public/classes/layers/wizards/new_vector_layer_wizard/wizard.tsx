@@ -185,6 +185,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
           onIndexNameChange={this._onIndexChange}
           onIndexNameValidationStart={() => {}}
           onIndexNameValidationEnd={() => {}}
+          data-test-subj="fileUploadIndexNameInput"
         />
       </EuiPanel>
     );

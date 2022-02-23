@@ -17,6 +17,7 @@ export interface Props {
   onIndexNameChange: (name: string, error: string) => void;
   onIndexNameValidationStart: () => void;
   onIndexNameValidationEnd: () => void;
+  disabled?: boolean;
 }
 
 export class IndexNameForm extends Component<CommonProps & Props> {
@@ -60,7 +61,6 @@ export class IndexNameForm extends Component<CommonProps & Props> {
           error={errors}
         >
           <EuiFieldText
-            data-test-subj="fileUploadIndexNameInput"
             value={this.props.indexName}
             onChange={this._onIndexNameChange}
             isInvalid={!!errors.length}
