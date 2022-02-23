@@ -12,8 +12,8 @@
   "optionalPlugins":[
      "security",
      "spaces",
-     "usageCollection",
-     "taskManager"
+     "taskManager",
+     "usageCollection"
   ],
   "owner":{
      "githubTeam":"response-ops",

@@ -34,6 +34,8 @@ import { LensServerPluginSetup } from '../../lens/server';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { TaskManagerSetupContract } from '../../task_manager/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { createCasesTelemetry } from './telemetry';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -77,6 +79,12 @@ export class CasePlugin {
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
+    this.log.debug(
+      `Setting up Case Workflow with core contract [${Object.keys(
+        core
+      )}] and plugins [${Object.keys(plugins)}]`
+    );
+
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
@@ -93,18 +101,19 @@ export class CasePlugin {
     core.savedObjects.registerType(caseUserActionSavedObjectType);
     core.savedObjects.registerType(casesTelemetrySavedObjectType);
 
-    this.log.debug(
-      `Setting up Case Workflow with core contract [${Object.keys(
-        core
-      )}] and plugins [${Object.keys(plugins)}]`
-    );
-
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
       })
     );
+
+    if (plugins.taskManager && plugins.usageCollection) {
+      createCasesTelemetry({
+        taskManager: plugins.taskManager,
+        usageCollection: plugins.usageCollection,
+      });
+    }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
