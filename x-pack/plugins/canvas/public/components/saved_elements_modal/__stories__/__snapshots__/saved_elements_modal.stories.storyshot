@@ -704,6 +704,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 <button
                   aria-label="Clear input"
                   className="euiFormControlLayoutClearButton"
+                  data-test-subj="clearSearchButton"
                   onClick={[Function]}
                   type="button"
                 >
