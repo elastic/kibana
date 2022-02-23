@@ -78,7 +78,6 @@ export class DataServerPlugin
   private readonly autocompleteService: AutocompleteService;
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
-  private config: PluginInitializerContext<ConfigSchema>['config'];
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get('data');
@@ -86,8 +85,6 @@ export class DataServerPlugin
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
-
-    this.config = initializerContext.config;
   }
 
   public setup(
@@ -114,7 +111,6 @@ export class DataServerPlugin
       search: searchSetup,
       query: querySetup,
       fieldFormats,
-      config: this.config,
     };
   }
 

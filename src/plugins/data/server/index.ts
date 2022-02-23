@@ -128,5 +128,3 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
 };
-
-export type { ConfigSchema as DataConfigSchema };
