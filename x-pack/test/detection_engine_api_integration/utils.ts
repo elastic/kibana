@@ -924,7 +924,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
   log: ToolingLog,
-  maxTimeout: number = 100000,
+  maxTimeout: number = 400000,
   timeoutWait: number = 250
 ): Promise<void> => {
   let found = false;
