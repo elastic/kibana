@@ -178,7 +178,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
         const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
-        actions.setServerSourceStatuses(sourceStatuses);
+        actions.setServerSourceStatuses(sourceStatuses ?? []);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
@@ -190,7 +190,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       pollingInterval = window.setInterval(async () => {
         const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
 
-        sourceStatuses.some((source: ContentSourceStatus) => {
+        (sourceStatuses ?? []).some((source: ContentSourceStatus) => {
           if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
             return actions.initializeSources();
           }
@@ -249,7 +249,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 export const fetchSourceStatuses = async (
   isOrganization: boolean,
   breakpoint: BreakPointFunction
-) => {
+): Promise<ContentSourceStatus[] | undefined> => {
   const route = isOrganization
     ? '/internal/workplace_search/org/sources/status'
     : '/internal/workplace_search/account/sources/status';
@@ -267,8 +267,7 @@ export const fetchSourceStatuses = async (
     }
   }
 
-  // TODO: remove casting. return type should be ContentSourceStatus[] | undefined
-  return response as ContentSourceStatus[];
+  return response;
 };
 
 const updateSourcesOnToggle = (

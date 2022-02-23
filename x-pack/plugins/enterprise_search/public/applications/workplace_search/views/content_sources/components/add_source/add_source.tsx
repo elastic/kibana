@@ -30,7 +30,7 @@ import {
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
-import { ConfigurationExternalChoice } from './configuration_external_choice';
+import { ConfigurationChoice } from './configuration_choice';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureCustom } from './configure_custom';
 import { ConfigureOauth } from './configure_oauth';
@@ -65,10 +65,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   }, []);
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
-  const goToExternalChoice = () => setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
-  // TODO: Fix this once we have more than just Sharepoint here
-  const goToExternalConfig = () =>
-    KibanaLogic.values.navigateToUrl(`${getSourcesPath(ADD_EXTERNAL_PATH, isOrganization)}/`);
   const goToCustomConfig = () =>
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}/`);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
@@ -100,25 +96,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
-      {addSourceCurrentStep === AddSourceSteps.ConfigChoiceStep && (
-        <ConfigurationExternalChoice
-          sourceData={props.sourceData}
-          advanceStepInternal={goToFirstStep}
-          advanceStepExternal={goToExternalConfig}
-          advanceStepCustom={goToCustomConfig}
-          header={header}
-        />
-      )}
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
-      )}
-      {addSourceCurrentStep === AddSourceSteps.ConfigExternalConnectorStep && (
-        <ExternalConnectorConfig
-          name={name}
-          advanceStep={goToSaveConfig}
-          goBackStep={goToExternalChoice}
-          header={header}
-        />
       )}
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig

@@ -497,9 +497,42 @@ export const staticSourceData: SourceDataItem[] = [
         FeatureIds.SyncedItems,
       ],
     },
+
     accountContextOnly: false,
     internalConnectorAvailable: true,
     externalConnectorAvailable: true,
+  },
+  // TODO: temporary hack until backend sends us stuff
+  {
+    name: SOURCE_NAMES.SHAREPOINT,
+    iconName: SOURCE_NAMES.SHAREPOINT,
+    serviceType: 'external',
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchSharePoint,
+      applicationPortalUrl: 'https://portal.azure.com/',
+    },
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: true,
+    externalConnectorAvailable: false,
+    customConnectorAvailable: false,
   },
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
@@ -519,7 +552,7 @@ export const staticSourceData: SourceDataItem[] = [
       applicationPortalUrl: '',
     },
     accountContextOnly: false,
-    // we are specifically not including the internalConnectorAvailable prop
+    internalConnectorAvailable: false,
     customConnectorAvailable: true,
   },
   {

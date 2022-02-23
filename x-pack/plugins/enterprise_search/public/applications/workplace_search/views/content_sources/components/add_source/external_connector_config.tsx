@@ -22,55 +22,42 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ApiKey } from '../../../../components/shared/api_key';
+import { AppLogic } from '../../../../app_logic';
 import {
-  PUBLIC_KEY_LABEL,
-  CONSUMER_KEY_LABEL,
-  BASE_URI_LABEL,
-  BASE_URL_LABEL,
-  CLIENT_ID_LABEL,
-  CLIENT_SECRET_LABEL,
-  REMOVE_BUTTON,
-} from '../../../../constants';
-import { Configuration } from '../../../../types';
+  PersonalDashboardLayout,
+  WorkplaceSearchPageTemplate,
+} from '../../../../components/layout';
+import { NAV, REMOVE_BUTTON } from '../../../../constants';
+import { SourceDataItem } from '../../../../types';
 
+import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic } from './add_source_logic';
-import { ConfigDocsLinks } from './config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
+import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
 
 interface SaveConfigProps {
-  header: React.ReactNode;
-  name: string;
-  // configuration: Configuration;
-  advanceStep(): void;
-  goBackStep?(): void;
-  onDeleteConfig?(): void;
+  sourceData: SourceDataItem;
+  goBack?: () => void;
+  onDeleteConfig?: () => void;
 }
 
 export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
-  name,
-  // configuration: {
-  //   isPublicKey,
-  //   needsBaseUrl,
-  //   documentationUrl,
-  //   applicationPortalUrl,
-  //   applicationLinkTitle,
-  //   baseUrlTitle,
-  // },
-  goBackStep,
+  sourceData: { serviceType },
+  goBack,
   onDeleteConfig,
-  header,
 }) => {
   const { setExternalConnectorApiKey, setExternalConnectorUrl, saveExternalConnectorConfig } =
     useActions(AddSourceLogic);
 
-  const { buttonLoading, externalConnectorUrl, externalConnectorApiKey } =
+  const { buttonLoading, externalConnectorUrl, externalConnectorApiKey, sourceConfigData } =
     useValues(AddSourceLogic);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
     saveExternalConnectorConfig({ url: externalConnectorUrl, apiKey: externalConnectorApiKey });
   };
+
+  const { name, categories } = sourceConfigData;
+  const { isOrganization } = useValues(AppLogic);
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} type="submit">
@@ -84,14 +71,14 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     </EuiButton>
   );
 
-  const backButton = <EuiButtonEmpty onClick={goBackStep}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
+  const backButton = <EuiButtonEmpty onClick={goBack}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
 
   const formActions = (
     <EuiFormRow>
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {goBackStep && backButton}
+          {goBack && backButton}
           {onDeleteConfig && deleteButton}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -160,13 +147,15 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     },
   ];
 
+  const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
+
   return (
-    <>
-      {header}
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
       <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} />
       </form>
-    </>
+    </Layout>
   );
 };

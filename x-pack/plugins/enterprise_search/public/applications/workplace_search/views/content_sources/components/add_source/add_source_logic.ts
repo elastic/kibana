@@ -21,11 +21,7 @@ import {
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import {
-  CUSTOM_SERVICE_TYPE,
-  EXTERNAL_SERVICE_TYPE,
-  WORKPLACE_SEARCH_URL_PREFIX,
-} from '../../../../constants';
+import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
 import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 import { CustomSource, SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
@@ -39,14 +35,12 @@ export interface AddSourceProps {
 }
 
 export enum AddSourceSteps {
-  ConfigChoiceStep = 'Config Choice',
-  ConfigExternalConnectorStep = 'Config External Connector',
   ConfigIntroStep = 'Config Intro',
   SaveConfigStep = 'Save Config',
   ConfigCompletedStep = 'Config Completed',
   ConnectInstanceStep = 'Connect Instance',
-  ConfigureCustomStep = 'Configure Custom',
   ConfigureOauthStep = 'Configure Oauth',
+  ConfigureCustomStep = 'Configure Custom',
   SaveCustomStep = 'Save Custom',
   ReauthenticateStep = 'Reauthenticate',
 }
@@ -415,23 +409,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   }),
   listeners: ({ actions, values }) => ({
     initializeAddSource: ({ addSourceProps }) => {
-      const {
-        serviceType,
-        externalConnectorAvailable,
-        internalConnectorAvailable,
-        customConnectorAvailable,
-      } = addSourceProps.sourceData;
+      const { serviceType } = addSourceProps.sourceData;
       actions.setAddSourceProps({ addSourceProps });
-      if (
-        [externalConnectorAvailable, internalConnectorAvailable, customConnectorAvailable].filter(
-          (available) => !!available
-        ).length > 1
-      ) {
-        // TODO move this to its own view and out of this state machine entirely
-        actions.setAddSourceStep(AddSourceSteps.ConfigChoiceStep);
-      } else {
-        actions.setAddSourceStep(getFirstStep(addSourceProps));
-      }
+      actions.setAddSourceStep(getFirstStep(addSourceProps));
       actions.getSourceConfigData(serviceType);
     },
     getSourceConfigData: async ({ serviceType }) => {
@@ -680,13 +660,10 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   const { sourceData, connect, configure, reAuthenticate } = props;
   const { serviceType } = sourceData;
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE; // TODO base it on route
-  const isExternal = serviceType === EXTERNAL_SERVICE_TYPE; // TODO base it on route
-
+  const isCustom = serviceType === CUSTOM_SERVICE_TYPE; // T
   if (isCustom) return AddSourceSteps.ConfigureCustomStep;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
-  if (isExternal) return AddSourceSteps.ConfigExternalConnectorStep;
   return AddSourceSteps.ConfigIntroStep;
 };

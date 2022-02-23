@@ -100,8 +100,8 @@ export const AddSourceList: React.FC = () => {
 
   const visibleAvailableSources = availableSources.filter(filterAvailableSources);
   const visibleConfiguredSources = configuredSources.filter(filterConfiguredSources);
-  // TODO: Handle this better once Connectors 2.0 is more mature
-  // .filter((source) => !source.externalConnectorAvailable);
+  // The API returns configured external sources as a separate entry, but we don't want to present them as options to add
+  // .filter((source) => source.serviceType !== EXTERNAL_SERVICE_TYPE);
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

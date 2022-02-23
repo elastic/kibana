@@ -83,10 +83,9 @@ export interface SourceDataItem {
   features?: Features;
   objTypes?: string[];
   accountContextOnly: boolean;
-  internalConnectorAvailable?: true;
-  externalConnectorAvailable?: true;
-  customConnectorAvailable?: true;
-  // internalConnectorServiceType?: string
+  internalConnectorAvailable?: boolean;
+  externalConnectorAvailable?: boolean;
+  customConnectorAvailable?: boolean;
 }
 
 export interface ContentSource {
