@@ -558,11 +558,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should display title field formatted labels with byte field formatted values by default', async () => {
         const expectedLegendItems = [
-          'Win 8: 4.968KB',
-          'Win Xp: 4.23KB',
-          'Win 7: 6.181KB',
-          'Ios: 5.84KB',
-          'Osx: 5.928KB',
+          'win 8: 4.968KB',
+          'win Xp: 4.23KB',
+          'win 7: 6.181KB',
+          'ios: 5.84KB',
+          'osx: 5.928KB',
         ];
 
         const legendItems = await visualBuilder.getLegendItemsContent();
@@ -571,11 +571,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should display title field formatted labels with raw values', async () => {
         const expectedLegendItems = [
-          'Win 8: 5,087.5',
-          'Win Xp: 4,332',
-          'Win 7: 6,328.938',
-          'Ios: 5,980',
-          'Osx: 6,070',
+          'win 8: 5,087.5',
+          'win Xp: 4,332',
+          'win 7: 6,328.938',
+          'ios: 5,980',
+          'osx: 6,070',
         ];
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
@@ -586,11 +586,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should display title field formatted labels with TSVB formatted values', async () => {
         const expectedLegendItems = [
-          'Win 8: 5,087.5 format',
-          'Win Xp: 4,332 format',
-          'Win 7: 6,328.938 format',
-          'Ios: 5,980 format',
-          'Osx: 6,070 format',
+          'win 8: 5,087.5 format',
+          'win Xp: 4,332 format',
+          'win 7: 6,328.938 format',
+          'ios: 5,980 format',
+          'osx: 6,070 format',
         ];
 
         await visualBuilder.clickSeriesOption();

@@ -160,10 +160,10 @@ export interface Panel {
   markdown_scrollbars: number;
   markdown_vertical_align?: string;
   max_bars: number;
-  pivot_id?: string | Array<string | null> | null;
+  pivot_id?: string | Array<string | null>;
   pivot_label?: string;
   pivot_rows?: string;
-  pivot_type?: KBN_FIELD_TYPES | Array<KBN_FIELD_TYPES | undefined>;
+  pivot_type?: KBN_FIELD_TYPES | Array<KBN_FIELD_TYPES | null>;
   series: Series[];
   show_grid: number;
   show_legend: number;

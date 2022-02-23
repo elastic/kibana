@@ -67,18 +67,18 @@ export class TablePanelConfig extends Component<
   handlePivotChange = (selectedOptions: Array<string | null>) => {
     const { fields, model } = this.props;
 
-    const getPivotType = (fieldName?: string | null) => {
+    const getPivotType = (fieldName?: string | null): KBN_FIELD_TYPES | null => {
       const field = fields[getIndexPatternKey(model.index_pattern)].find(
         (f) => f.name === fieldName
       );
-      return get(field, 'type');
+      return get(field, 'type', null);
     };
 
     this.props.onChange(
       selectedOptions.length === 1
         ? {
-            pivot_id: selectedOptions[0],
-            pivot_type: getPivotType(selectedOptions[0]),
+            pivot_id: selectedOptions[0] || undefined,
+            pivot_type: getPivotType(selectedOptions[0]) || undefined,
           }
         : {
             pivot_id: selectedOptions,

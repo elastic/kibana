@@ -52,7 +52,7 @@ export const toSanitizedFieldType = (fields: FieldSpec[]) =>
     );
 
 export const getFieldsForTerms = (fields: string | Array<string | null> | undefined): string[] => {
-  return fields ? (Array.isArray(fields) ? (fields.filter(Boolean) as string[]) : [fields]) : [];
+  return fields ? ([fields].flat().filter(Boolean) as string[]) : [];
 };
 
 export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFieldType[]) => {

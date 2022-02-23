@@ -82,7 +82,7 @@ class TableVis extends Component {
     if (pivotIds.length) {
       rowDisplay = pivotIds
         .map((item, index) => {
-          const value = (Array.isArray(row.key) ? row.key : [row.key])[index];
+          const value = [row.key ?? null].flat()[index];
           const formatted = fieldValuesFormatter(item, value, 'html');
 
           // eslint-disable-next-line react/no-danger
@@ -246,18 +246,12 @@ class TableVis extends Component {
   render() {
     const { visData, model, indexPattern } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
-
-    const fields = (
-      model.pivot_type
-        ? Array.isArray(model.pivot_type)
-          ? model.pivot_type
-          : [model.pivot_type]
-        : []
-    ).map((type, index) => ({
-      name: (Array.isArray(model.pivot_id) ? model.pivot_id : [model.pivot_id])[index],
-      type,
-    }));
-
+    const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
+      (type, index) => ({
+        name: [model.pivot_id ?? null].flat()[index],
+        type,
+      })
+    );
     const fieldValuesFormatter = createCachedFieldValueFormatter(
       indexPattern,
       fields,

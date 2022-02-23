@@ -63,7 +63,7 @@ export function FieldSelect({
 }: FieldSelectProps) {
   const htmlId = htmlIdGenerator();
   const fieldsSelector = getIndexPatternKey(indexPattern);
-  const selectedIds = useMemo(() => (Array.isArray(value) ? value : [value || null]), [value]);
+  const selectedIds = useMemo(() => [value ?? null].flat(), [value]);
 
   const groupedOptions = useMemo(
     () => getGroupedOptions(type, selectedIds, fields[fieldsSelector], uiRestrictions, restrict),
