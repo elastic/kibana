@@ -9,10 +9,34 @@
 import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
 import { ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
+
+const validateOptions = (
+  value: string,
+  availableOptions: Record<string, string>,
+  getErrorMessage: () => string
+) => {
+  if (!Object.values(availableOptions).includes(value)) {
+    throw new Error(getErrorMessage());
+  }
+};
+
+const errors = {
+  invalidColorModeError: () =>
+    i18n.translate('expressionMetricVis.function.errors.invalidColorModeError', {
+      defaultMessage: 'Invalid color mode is specified. Supported color modes: {colorModes}',
+      values: { colorModes: Object.values(ColorMode).join(', ') },
+    }),
+  invalidLabelPositionError: () =>
+    i18n.translate('expressionMetricVis.function.errors.invalidLabelPositionError', {
+      defaultMessage:
+        'Invalid label position is specified. Supported label positions: {labelPosition}',
+      values: { labelPosition: Object.values(LabelPosition).join(', ') },
+    }),
+};
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
@@ -57,6 +81,21 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       default: `{font size=60 align="center"}`,
     },
+    labelFont: {
+      types: ['style'],
+      help: i18n.translate('expressionMetricVis.function.labelFont.help', {
+        defaultMessage: 'Label font settings.',
+      }),
+      default: `{font size=24 align="center"}`,
+    },
+    labelPosition: {
+      types: ['string'],
+      options: [LabelPosition.BOTTOM, LabelPosition.TOP],
+      help: i18n.translate('expressionMetricVis.function.labelPosition.help', {
+        defaultMessage: 'Label position',
+      }),
+      default: LabelPosition.BOTTOM,
+    },
     metric: {
       types: ['vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
@@ -71,11 +110,21 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'bucket dimension configuration',
       }),
     },
+    autoScale: {
+      types: ['boolean'],
+      help: i18n.translate('expressionMetricVis.function.autoScale.help', {
+        defaultMessage: 'Enable auto scale',
+      }),
+      required: false,
+    },
   },
   fn(input, args, handlers) {
     if (args.percentageMode && !args.palette?.params) {
       throw new Error('Palette must be provided when using percentageMode');
     }
+
+    validateOptions(args.colorMode, ColorMode, errors.invalidColorModeError);
+    validateOptions(args.labelPosition, LabelPosition, errors.invalidLabelPositionError);
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
@@ -111,12 +160,17 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             metricColorMode: args.colorMode,
             labels: {
               show: args.showLabels,
+              position: args.labelPosition,
+              style: {
+                ...args.labelFont,
+              },
             },
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,
               ...args.font,
             },
+            autoScale: args.autoScale,
           },
           dimensions: {
             metrics: args.metric,

@@ -15,6 +15,7 @@ import { ObservabilityDataViews } from '../../../../utils/observability_data_vie
 import { getDataHandler } from '../../../../data_handler';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
 import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
+import { getApmDataViewTitle } from '../utils/utils';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -44,7 +45,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   const [hasAppData, setHasAppData] = useState<HasAppDataState>({} as HasAppDataState);
 
   const {
-    services: { data },
+    services: { dataViews },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const { indexPatterns: indexPatternsList } = useExploratoryView();
@@ -75,15 +76,15 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
               break;
             case 'apm':
             case 'mobile':
-              const resultApm = await getDataHandler('apm')?.hasData();
+              const resultApm = await getDataHandler('apm')!.hasData();
               hasDataT = Boolean(resultApm?.hasData);
-              indices = resultApm?.indices.transaction;
+              indices = getApmDataViewTitle(resultApm?.indices);
               break;
           }
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT && indices) {
-            const obsvIndexP = new ObservabilityDataViews(data);
+            const obsvIndexP = new ObservabilityDataViews(dataViews);
             const indPattern = await obsvIndexP.getDataView(dataType, indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
@@ -100,7 +101,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
         }
       }
     },
-    [data, hasAppData, indexPatternsList, loading]
+    [dataViews, hasAppData, indexPatternsList, loading]
   );
 
   return (

@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ConfigKey.NAME]: 'Modified name',
       };
 
-      const modifiedMonitor = { ...savedMonitor, ...updates };
+      const modifiedMonitor = { ...savedMonitor, ...updates, revision: 2 };
 
       const editResponse = await supertest
         .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

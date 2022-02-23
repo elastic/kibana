@@ -21,7 +21,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
+import { Prompt } from '../../../../../observability/public';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';

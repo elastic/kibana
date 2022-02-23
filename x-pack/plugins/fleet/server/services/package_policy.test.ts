@@ -10,7 +10,7 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-
+import { produce } from 'immer';
 import type {
   SavedObjectsClient,
   SavedObjectsClientContract,
@@ -25,6 +25,7 @@ import type {
   PostPackagePolicyDeleteCallback,
   RegistryDataStream,
   PackagePolicyInputStream,
+  PackagePolicy,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -49,7 +50,6 @@ import {
   updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
-  incrementPackageName,
 } from './package_policy';
 import { appContextService } from './app_context';
 import { fetchInfo } from './epm/registry';
@@ -949,6 +949,55 @@ describe('Package policy service', () => {
       );
 
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+    });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        // this mimics the way that OSQuery plugin create immutable objects
+        produce<PackagePolicy>(
+          { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+          (draft) => draft
+        )
+      );
+
+      expect(result.name).toEqual('test');
     });
   });
 
@@ -3241,26 +3290,5 @@ describe('_applyIndexPrivileges()', () => {
 
     const streamOut = _applyIndexPrivileges(packageStream, inputStream);
     expect(streamOut).toEqual(expectedStream);
-  });
-
-  describe('increment package name', () => {
-    it('should return 1 if no existing policies', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue(undefined);
-      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
-      expect(newName).toEqual('apache-1');
-    });
-
-    it('should return 11 if max policy name is 10', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue({
-        items: [
-          { name: 'apache-1' },
-          { name: 'aws-11' },
-          { name: 'apache-10' },
-          { name: 'apache-9' },
-        ],
-      });
-      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
-      expect(newName).toEqual('apache-11');
-    });
   });
 });

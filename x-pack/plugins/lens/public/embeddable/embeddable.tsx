@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Filter } from '@kbn/es-query';
-import type {
+import {
   ExecutionContextSearch,
   Query,
   TimefilterContract,
@@ -60,12 +60,17 @@ import {
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import { IBasePath, ThemeServiceStart } from '../../../../../src/core/public';
+import type {
+  IBasePath,
+  KibanaExecutionContext,
+  ThemeServiceStart,
+} from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
 import type { SpacesPluginStart } from '../../../spaces/public';
+import { inferTimeField } from '../utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -413,14 +418,20 @@ export class Embeddable
 
     this.renderComplete.dispatchInProgress();
 
-    const executionContext = {
+    const parentContext = this.input.executionContext;
+    const child: KibanaExecutionContext = {
       type: 'lens',
       name: this.savedVis.visualizationType ?? '',
       id: this.id,
       description: this.savedVis.title || this.input.title || '',
       url: this.output.editUrl,
-      parent: this.input.executionContext,
     };
+    const executionContext = parentContext
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     const input = this.getInput();
 
@@ -519,7 +530,10 @@ export class Embeddable
     }
     if (isLensBrushEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: event.data,
+        data: {
+          ...event.data,
+          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+        },
         embeddable: this,
       });
 
@@ -529,7 +543,10 @@ export class Embeddable
     }
     if (isLensFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: event.data,
+        data: {
+          ...event.data,
+          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+        },
         embeddable: this,
       });
       if (this.input.onFilter) {

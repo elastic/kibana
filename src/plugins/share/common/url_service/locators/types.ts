@@ -23,7 +23,7 @@ export interface ILocatorClient extends PersistableStateService<LocatorData> {
   /**
    * Create and register a new locator.
    *
-   * @param urlGenerator Definition of the new locator.
+   * @param locatorDefinition Definition of the new locator.
    */
   create<P extends SerializableRecord>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
 
