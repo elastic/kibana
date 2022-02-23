@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiButton,
   EuiText,
   EuiBadge,
   EuiPopover,
@@ -198,6 +199,12 @@ export function RulesPage() {
           <>{i18n.translate('xpack.observability.rulesTitle', { defaultMessage: 'Rules' })} </>
         ),
         rightSideItems: [
+          <EuiButton key="create-alert" data-test-subj="createAlertButton" fill onClick={() => {}}>
+            <FormattedMessage
+              id="xpack.observability.rules.addRuleButtonLabel"
+              defaultMessage="Create rule"
+            />
+          </EuiButton>,
           <EuiButtonEmpty
             href={docLinks.links.alerting.guide}
             target="_blank"
