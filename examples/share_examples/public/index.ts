@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-test'],
-};
+import { ShareDemoPlugin } from './plugin';
+
+export const plugin = () => new ShareDemoPlugin();
