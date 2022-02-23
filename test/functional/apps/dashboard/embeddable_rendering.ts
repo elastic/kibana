@@ -103,7 +103,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+        types: [
+          'search',
+          'index-pattern',
+          'visualization',
+          'dashboard',
+          'lens',
+          'map',
+          'graph-workspace',
+          'query',
+          'tag',
+          'url',
+        ],
       });
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -127,7 +138,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+        types: [
+          'search',
+          'index-pattern',
+          'visualization',
+          'dashboard',
+          'lens',
+          'map',
+          'graph-workspace',
+          'query',
+          'tag',
+          'url',
+        ],
       });
     });
 
@@ -135,6 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       visNames = await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
+      expect(visNames.length).to.be.equal(24);
       await dashboardExpect.visualizationsArePresent(visNames);
 
       // This one is rendered via svg which lets us do better testing of what is being rendered.

@@ -10,16 +10,18 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const archives = {
-    es: 'test/functional/fixtures/es_archiver/dashboard/current/kibana',
-  };
 
   describe('saved search in canvas', function () {
     before(async () => {
-      await esArchiver.load(archives.es);
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
@@ -28,7 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(archives.es);
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
     });
 
     describe('by-reference', () => {

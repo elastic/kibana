@@ -15,13 +15,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const archives = {
-    es: 'test/functional/fixtures/es_archiver/dashboard/current/kibana',
-  };
 
   describe('visualization in canvas', function () {
     before(async () => {
-      await esArchiver.load(archives.es);
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
+      });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
