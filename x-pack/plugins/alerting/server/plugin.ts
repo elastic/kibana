@@ -27,9 +27,7 @@ import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  SavedObjectsServiceStart,
   IContextProvider,
-  ElasticsearchServiceStart,
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
@@ -49,7 +47,6 @@ import {
   RuleType,
   AlertTypeParams,
   AlertTypeState,
-  Services,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -381,7 +378,8 @@ export class AlertingPlugin {
     this.config.then((config) => {
       taskRunnerFactory.initialize({
         logger,
-        getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+        savedObjects: core.savedObjects,
+        elasticsearch: core.elasticsearch,
         getRulesClientWithRequest,
         spaceIdToNamespace,
         actionsPlugin: plugins.actions,
@@ -443,23 +441,6 @@ export class AlertingPlugin {
       };
     };
   };
-
-  private getServicesFactory(
-    savedObjects: SavedObjectsServiceStart,
-    elasticsearch: ElasticsearchServiceStart
-  ): (request: KibanaRequest) => Services {
-    return (request) => ({
-      savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
-      scopedClusterClient: elasticsearch.client.asScoped(request),
-    });
-  }
-
-  private getScopedClientWithAlertSavedObjectType(
-    savedObjects: SavedObjectsServiceStart,
-    request: KibanaRequest
-  ) {
-    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert', 'action'] });
-  }
 
   public stop() {
     if (this.licenseState) {

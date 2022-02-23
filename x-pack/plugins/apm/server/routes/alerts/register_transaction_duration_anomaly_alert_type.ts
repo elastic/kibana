@@ -85,6 +85,7 @@ export function registerTransactionDurationAnomalyAlertType({
           apmActionVariables.environment,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
+          apmActionVariables.reason,
         ],
       },
       producer: 'apm',
@@ -210,7 +211,13 @@ export function registerTransactionDurationAnomalyAlertType({
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
           const severityLevel = getSeverity(score);
-
+          const reasonMessage = formatTransactionDurationAnomalyReason({
+            measured: score,
+            serviceName,
+            severityLevel,
+            windowSize: params.windowSize,
+            windowUnit: params.windowUnit,
+          });
           services
             .alertWithLifecycle({
               id: [
@@ -229,13 +236,7 @@ export function registerTransactionDurationAnomalyAlertType({
                 [ALERT_SEVERITY]: severityLevel,
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
-                [ALERT_REASON]: formatTransactionDurationAnomalyReason({
-                  measured: score,
-                  serviceName,
-                  severityLevel,
-                  windowSize: params.windowSize,
-                  windowUnit: params.windowUnit,
-                }),
+                [ALERT_REASON]: reasonMessage,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -244,6 +245,7 @@ export function registerTransactionDurationAnomalyAlertType({
               environment: getEnvironmentLabel(environment),
               threshold: selectedOption?.label,
               triggerValue: severityLevel,
+              reason: reasonMessage,
             });
         });
 
