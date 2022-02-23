@@ -8,6 +8,9 @@
 import {
   getLogViewResponsePayloadRT,
   getLogViewUrl,
+  PutLogViewRequestPayload,
+  putLogViewRequestPayloadRT,
+  putLogViewResponsePayloadRT,
 } from '../../../plugins/infra/common/http_api/log_views';
 import { decodeOrThrow } from '../../../plugins/infra/common/runtime_types';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -32,7 +35,24 @@ export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext)
     return decodeOrThrow(getLogViewResponsePayloadRT)(response.body);
   };
 
+  const createPutLogViewAgent = (logViewId: string, payload: PutLogViewRequestPayload) =>
+    supertest
+      .put(getLogViewUrl(logViewId))
+      .set({
+        'kbn-xsrf': 'some-xsrf-token',
+      })
+      .send(putLogViewRequestPayloadRT.encode(payload));
+
+  const putLogView = async (logViewId: string, payload: PutLogViewRequestPayload) => {
+    log.debug(`Storing log view "${logViewId}"...`);
+
+    const response = await createPutLogViewAgent(logViewId, payload);
+
+    return decodeOrThrow(putLogViewResponsePayloadRT)(response.body);
+  };
+
   return {
     getLogView,
+    putLogView,
   };
 }

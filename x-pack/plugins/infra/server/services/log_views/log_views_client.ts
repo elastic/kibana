@@ -7,7 +7,12 @@
 
 import { Logger, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { LogIndexReference as LogSourceLogIndexReference } from '../../../common/log_sources';
-import { LogIndexReference, LogView, LogViewAttributes } from '../../../common/log_views';
+import {
+  defaultLogViewAttributes,
+  LogIndexReference,
+  LogView,
+  LogViewAttributes,
+} from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { InfraSource, InfraSources } from '../../lib/sources';
 import {
@@ -47,11 +52,18 @@ export class LogViewsClient implements ILogViewsClient {
 
   public async putLogView(
     logViewId: string,
-    logViewAttributes: LogViewAttributes
+    logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView> {
     this.logger.debug(`Trying to store log view "${logViewId}"...`);
 
-    const { attributes, references } = extractLogViewSavedObjectReferences(logViewAttributes);
+    const logViewAttributesWithDefaults = {
+      ...defaultLogViewAttributes,
+      ...logViewAttributes,
+    };
+
+    const { attributes, references } = extractLogViewSavedObjectReferences(
+      logViewAttributesWithDefaults
+    );
 
     const savedObject = await this.savedObjectsClient.create(logViewSavedObjectName, attributes, {
       id: logViewId,
