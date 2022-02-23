@@ -37,6 +37,7 @@ interface Props {
   children?: React.ReactNode;
   appendAdvancedFields?: React.ReactNode;
   minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
 const dataStreamToString = [
@@ -55,7 +56,7 @@ const dataStreamToString = [
 ];
 
 export const CustomFields = memo<Props>(
-  ({ validate, dataStreams = [], children, appendAdvancedFields, minColumnWidth }) => {
+  ({ validate, dataStreams = [], children, appendAdvancedFields, minColumnWidth, onFieldBlur }) => {
     const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
       usePolicyConfigContext();
 
@@ -71,13 +72,24 @@ export const CustomFields = memo<Props>(
     const renderSimpleFields = (type: DataStream) => {
       switch (type) {
         case DataStream.HTTP:
-          return <HTTPSimpleFields validate={validate} />;
+          return (
+            <HTTPSimpleFields validate={validate} onFieldBlur={(field) => onFieldBlur?.(field)} />
+          );
         case DataStream.ICMP:
-          return <ICMPSimpleFields validate={validate} />;
+          return (
+            <ICMPSimpleFields validate={validate} onFieldBlur={(field) => onFieldBlur?.(field)} />
+          );
         case DataStream.TCP:
-          return <TCPSimpleFields validate={validate} />;
+          return (
+            <TCPSimpleFields validate={validate} onFieldBlur={(field) => onFieldBlur?.(field)} />
+          );
         case DataStream.BROWSER:
-          return <BrowserSimpleFields validate={validate} />;
+          return (
+            <BrowserSimpleFields
+              validate={validate}
+              onFieldBlur={(field) => onFieldBlur?.(field)}
+            />
+          );
         default:
           return null;
       }
@@ -132,6 +144,7 @@ export const CustomFields = memo<Props>(
                     options={dataStreamOptions}
                     value={monitorType}
                     onChange={(event) => setMonitorType(event.target.value as DataStream)}
+                    onBlur={() => onFieldBlur?.(ConfigKey.MONITOR_TYPE)}
                     data-test-subj="syntheticsMonitorTypeField"
                   />
                 </EuiFormRow>
@@ -204,17 +217,25 @@ export const CustomFields = memo<Props>(
         )}
         <EuiSpacer size="m" />
         {isHTTP && (
-          <HTTPAdvancedFields validate={validate} minColumnWidth={minColumnWidth}>
+          <HTTPAdvancedFields
+            validate={validate}
+            minColumnWidth={minColumnWidth}
+            onFieldBlur={onFieldBlur}
+          >
             {appendAdvancedFields}
           </HTTPAdvancedFields>
         )}
         {isTCP && (
-          <TCPAdvancedFields minColumnWidth={minColumnWidth}>
+          <TCPAdvancedFields minColumnWidth={minColumnWidth} onFieldBlur={onFieldBlur}>
             {appendAdvancedFields}
           </TCPAdvancedFields>
         )}
         {isBrowser && (
-          <BrowserAdvancedFields validate={validate} minColumnWidth={minColumnWidth}>
+          <BrowserAdvancedFields
+            validate={validate}
+            minColumnWidth={minColumnWidth}
+            onFieldBlur={onFieldBlur}
+          >
             {appendAdvancedFields}
           </BrowserAdvancedFields>
         )}
