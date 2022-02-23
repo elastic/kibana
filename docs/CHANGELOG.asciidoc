@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.1>>
 * <<release-notes-7.17.0>>
 //* <<release-notes-7.16.3>>
 //* <<release-notes-7.16.2>>
@@ -70,6 +71,36 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.17.1]]
+== {kib} 7.17.1
+
+coming::[7.17.1]
+
+The 7.17.1 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.1]]
+=== Bug fixes
+Elastic Security::
+For the Elastic Security 7.17.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Removes tabify performance issue {kibana-pull}124931[#124931]
+* Fixes an issue where shard failures were not reported in *TSVB* {kibana-pull}123474[#123474]
+Machine Learning::
+* Fixes results service space checks {kibana-pull}124707[#124707]
+* Fixes anomaly detector jobs list filter delay {kibana-pull}124328[#124328]
+Management::
+* You can now use the search bar in the snapshots list of the Snapshot & Restore app with date strings {kibana-pull}125234[#125234]
+* Adds warning when remote clusters are configured {kibana-pull}125138[#125138]
+* Updates logic for handling reindex failures {kibana-pull}124571[#124571]
+* Fixes redirect to the wizard {kibana-pull}124337[#124337]
+* Fixes cross cluster search when using the `fields` search request parameter for versions of {es} prior to 7.0 {kibana-pull}123267[#123267]
+Maps::
+Fixes an issue where layers from WMS capabilities for a specific URL were unable to load {kibana-pull}123386[#123386]
+Security::
+* Exponentially increases retry time when extending session fails {kibana-pull}125973[#125973]
+* Changed deprecation warning for elasticsearch.username {kibana-pull}124717[#124717]
 
 [[release-notes-7.17.0]]
 == {kib} 7.17.0
