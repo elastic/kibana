@@ -689,6 +689,31 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
+  it('tests processing dimension field', () => {
+    const literalYml = `
+- name: example.id
+  type: keyword
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              ignore_above: 1024,
+              time_series_dimension: true,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('processes meta fields', () => {
     const metaFieldLiteralYaml = `
 - name: fieldWithMetas

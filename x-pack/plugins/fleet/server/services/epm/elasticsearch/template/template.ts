@@ -264,6 +264,9 @@ function generateKeywordMapping(field: Field): IndexTemplateMapping {
   if (field.normalizer) {
     mapping.normalizer = field.normalizer;
   }
+  if (field.dimension) {
+    mapping.time_series_dimension = field.dimension;
+  }
   return mapping;
 }
 
