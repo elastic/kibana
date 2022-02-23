@@ -16,7 +16,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
     context.dispatch({
       type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL,
     });
-  }, [context]);
+  }, [context.dispatch]);
 
   const openModal = useCallback(() => {
     context.dispatch({
@@ -37,7 +37,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         },
       },
     });
-  }, [closeModal, context, props]);
+  }, [closeModal, context.dispatch, props]);
   return {
     open: openModal,
     close: closeModal,

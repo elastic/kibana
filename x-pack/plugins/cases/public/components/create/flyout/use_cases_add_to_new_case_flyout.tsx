@@ -17,7 +17,7 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
     context.dispatch({
       type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
     });
-  }, [context]);
+  }, [context.dispatch]);
 
   const openFlyout = useCallback(() => {
     context.dispatch({
@@ -38,7 +38,7 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
         },
       },
     });
-  }, [closeFlyout, context, props]);
+  }, [closeFlyout, context.dispatch, props]);
   return {
     open: openFlyout,
     close: closeFlyout,
