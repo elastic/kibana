@@ -125,7 +125,7 @@ export interface ProcessEventAlert {
 }
 
 export interface ProcessEvent {
-  '@timestamp': string;
+  '@timestamp': Date;
   event: {
     kind: EventKind;
     category: string;

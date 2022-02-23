@@ -8,7 +8,7 @@
 import React from 'react';
 import { waitFor, fireEvent } from '@testing-library/react';
 import { SessionViewTableProcessTree } from '.';
-import { SessionLeaderTableProps } from '../SessionLeaderTable';
+import { SessionLeaderTableProps } from '../session_leader_table';
 import { ActionProps } from '../../../../timelines/common';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 

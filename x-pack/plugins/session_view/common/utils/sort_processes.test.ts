@@ -21,8 +21,10 @@ describe('sortProcesses(a, b)', () => {
 
     for (let i = 0; i < processes.length - 1; i++) {
       const current = processes[i];
-      const next = processes[i+1];
-      expect(new Date(next.getDetails().process.start) >= new Date(current.getDetails().process.start)).toBeTruthy();
+      const next = processes[i + 1];
+      expect(
+        new Date(next.getDetails().process.start) >= new Date(current.getDetails().process.start)
+      ).toBeTruthy();
     }
   });
 });

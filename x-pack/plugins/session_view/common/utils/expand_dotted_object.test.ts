@@ -33,7 +33,7 @@ describe('expandDottedObject(obj)', () => {
     expect(Array.isArray(expanded.nested.array)).toBeTruthy();
     expect(expanded.nested.array[0].arrayProp).toEqual('arrayValue');
   });
-  it('doesn\'t break regular value access', () => {
+  it("doesn't break regular value access", () => {
     const expanded: any = expandDottedObject(testFlattenedObj);
 
     expect(expanded.regularProp.nestedProp).toEqual('nestedValue');

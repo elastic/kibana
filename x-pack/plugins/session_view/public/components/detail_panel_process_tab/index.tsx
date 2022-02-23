@@ -81,7 +81,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>start</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={leader.start}>
+          <DetailPanelCopy textToCopy={leader.start.toISOString()}>
             <span css={styles.description}>{leader.start}</span>
           </DetailPanelCopy>
         ),
@@ -167,7 +167,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>start</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processDetail.start}>
+              <DetailPanelCopy textToCopy={processDetail.start.toISOString()}>
                 <span css={styles.description}>{processDetail.start}</span>
               </DetailPanelCopy>
             ),
@@ -175,7 +175,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>end</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processDetail.end}>
+              <DetailPanelCopy textToCopy={processDetail.end.toISOString()}>
                 <span css={styles.description}>{processDetail.end}</span>
               </DetailPanelCopy>
             ),
