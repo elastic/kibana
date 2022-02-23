@@ -143,13 +143,17 @@ const LogsStep = ({ setIsComplete, hasPrivileges, navigateToEsDeprecationLogs }:
         title={i18nTexts.loadingError}
         color="danger"
         iconType="alert"
-        data-test-subj="errorCallout"
+        data-test-subj="deprecationLogsErrorCallout"
       >
         <p>
           {error.statusCode} - {error.message}
         </p>
 
-        <EuiButton color="danger" onClick={resendRequest} data-test-subj="retryButton">
+        <EuiButton
+          color="danger"
+          onClick={resendRequest}
+          data-test-subj="deprecationLogsRetryButton"
+        >
           {i18nTexts.retryButton}
         </EuiButton>
       </EuiCallOut>
@@ -165,7 +169,9 @@ const LogsStep = ({ setIsComplete, hasPrivileges, navigateToEsDeprecationLogs }:
           <EuiSpacer />
 
           <EuiText>
-            <p>{i18nTexts.logsCountDescription(logsCount.count, checkpoint)}</p>
+            <p data-test-subj="logsCountDescription">
+              {i18nTexts.logsCountDescription(logsCount.count, checkpoint)}
+            </p>
           </EuiText>
 
           <EuiSpacer />
