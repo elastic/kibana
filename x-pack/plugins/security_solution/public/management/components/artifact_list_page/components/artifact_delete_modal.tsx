@@ -77,7 +77,7 @@ export const ARTIFACT_DELETE_LABELS = Object.freeze({
   ),
 });
 
-export interface DeleteArtifactModalProps {
+interface DeleteArtifactModalProps {
   apiClient: ExceptionsListApiClient;
   item: ExceptionListItemSchema;
   onCancel: () => void;

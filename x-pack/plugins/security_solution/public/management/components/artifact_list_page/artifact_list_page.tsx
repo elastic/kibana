@@ -166,7 +166,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
           // Scroll to the top to ensure that when new set of data is received and list updated,
           // the user is back at the top of the list
-          window.scrollTo(0, 0);
+          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         },
         [setUrlParams]
       );
@@ -242,7 +242,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           />
         )}
 
-        {!doesDataExist && (
+        {!doesDataExist ? (
           <NoDataEmptyState
             onAdd={handleOpenCreateFlyoutClick}
             titleLabel={labels.emptyStateTitle}
@@ -251,9 +251,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
           />
-        )}
-
-        {doesDataExist && (
+        ) : (
           <>
             <SearchExceptions
               defaultValue={filter}

@@ -27,9 +27,7 @@ export interface UseArtifactCardPropsProviderProps {
   dataTestSubj?: string;
 }
 
-export type ArtifactCardPropsProvider = (
-  artifactItem: ExceptionListItemSchema
-) => ArtifactEntryCardProps;
+type ArtifactCardPropsProvider = (artifactItem: ExceptionListItemSchema) => ArtifactEntryCardProps;
 
 /**
  * Return a function that can be used to retrieve props for an `ArtifactCardEntry` component given an
