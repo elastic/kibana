@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+const preset = require('../jest-preset');
+
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-test'],
+  ...preset,
+  testEnvironment: 'node',
+  snapshotSerializers: [],
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
 };
