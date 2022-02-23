@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
+import React, { FormEvent, useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -31,8 +31,8 @@ import { NAV, REMOVE_BUTTON } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
 
 import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic } from './add_source_logic';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
+import { ExternalConnectorLogic } from './external_connector_logic';
 
 interface SaveConfigProps {
   sourceData: SourceDataItem;
@@ -40,16 +40,28 @@ interface SaveConfigProps {
   onDeleteConfig?: () => void;
 }
 
-export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
-  sourceData: { serviceType },
-  goBack,
-  onDeleteConfig,
-}) => {
-  const { setExternalConnectorApiKey, setExternalConnectorUrl, saveExternalConnectorConfig } =
-    useActions(AddSourceLogic);
+export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onDeleteConfig }) => {
+  const serviceType = 'external';
+  const {
+    setExternalConnectorApiKey,
+    setExternalConnectorUrl,
+    saveExternalConnectorConfig,
+    initializeAddExternalSource,
+    resetSourceState,
+  } = useActions(ExternalConnectorLogic);
 
-  const { buttonLoading, externalConnectorUrl, externalConnectorApiKey, sourceConfigData } =
-    useValues(AddSourceLogic);
+  const {
+    buttonLoading,
+    dataLoading,
+    externalConnectorUrl,
+    externalConnectorApiKey,
+    sourceConfigData,
+  } = useValues(ExternalConnectorLogic);
+
+  useEffect(() => {
+    initializeAddExternalSource();
+    return resetSourceState;
+  }, []);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
@@ -152,6 +164,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
+      ({header})
       <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} />

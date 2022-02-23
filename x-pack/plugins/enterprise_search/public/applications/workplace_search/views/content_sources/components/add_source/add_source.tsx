@@ -19,23 +19,15 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import {
-  SOURCES_PATH,
-  getSourcesPath,
-  ADD_EXTERNAL_PATH,
-  getAddPath,
-  ADD_CUSTOM_PATH,
-} from '../../../../routes';
+import { SOURCES_PATH, getSourcesPath, getAddPath, ADD_CUSTOM_PATH } from '../../../../routes';
 
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
-import { ConfigurationChoice } from './configuration_choice';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureCustom } from './configure_custom';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
-import { ExternalConnectorConfig } from './external_connector_config';
 import { Reauthenticate } from './reauthenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
@@ -45,7 +37,6 @@ import './add_source.scss';
 export const AddSource: React.FC<AddSourceProps> = (props) => {
   const {
     initializeAddSource,
-    goToFirstStep,
     setAddSourceStep,
     saveSourceConfig,
     createContentSource,
