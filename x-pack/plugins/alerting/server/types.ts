@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
+import { Client } from '@elastic/elasticsearch';
+import type {
+  IRouter,
+  RequestHandlerContext,
+  SavedObjectReference,
+  ElasticsearchClient,
+} from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -14,7 +20,6 @@ import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
-  KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
@@ -39,8 +44,11 @@ import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
+
+export interface ElasticsearchClientWithChild extends ElasticsearchClient {
+  child: Client['child'];
+}
 
 /**
  * @public
@@ -64,16 +72,13 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
-export interface Services {
-  savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: IScopedClusterClient;
-}
-
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
-> extends Services {
+> {
+  savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: IScopedClusterClient;
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
     done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
