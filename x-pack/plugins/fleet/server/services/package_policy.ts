@@ -115,7 +115,7 @@ class PackagePolicyService {
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
         throw new IngestManagerError(
-          `There is already an integration policy with the same name: ${packagePolicy.name}`
+          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
         );
       }
     }
@@ -389,7 +389,9 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already an integration policy with the same name');
+      throw new IngestManagerError(
+        `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+      );
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
