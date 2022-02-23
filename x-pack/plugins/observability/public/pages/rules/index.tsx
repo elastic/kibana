@@ -27,9 +27,18 @@ import { useKibana } from '../../utils/kibana_react';
 
 import { loadAlerts as loadRules } from '../../../../triggers_actions_ui/public';
 
+const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
+
 interface RuleState {
   data: [];
+  totalItemsCount: number;
 }
+
+interface Pagination {
+  index: number;
+  size: number;
+}
+
 export function RulesPage() {
   const { core, ObservabilityPageTemplate } = usePluginContext();
   const { docLinks } = useKibana().services;
@@ -37,7 +46,9 @@ export function RulesPage() {
     http,
     notifications: { toasts },
   } = core;
-  const [rules, setRules] = useState<RuleState>({ data: [] });
+  const [rules, setRules] = useState<RuleState>({ data: [], totalItemsCount: 0 });
+  const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   async function loadObservabilityRules() {
@@ -61,6 +72,7 @@ export function RulesPage() {
       });
       setRules({
         data: response.data as any,
+        totalItemsCount: response.total,
       });
     } catch (_e) {
       toasts.addDanger({
@@ -207,6 +219,13 @@ export function RulesPage() {
             hasActions={true}
             columns={rulesTableColumns}
             isSelectable={true}
+            pagination={{
+              pageIndex: page.index,
+              pageSize: page.size,
+              /* Don't display alert count until we have the alert types initialized */
+              totalItemCount: rules.totalItemsCount,
+            }}
+            onChange={() => {}}
             selection={{
               selectable: () => true,
               onSelectionChange: (selectedItems) => {
