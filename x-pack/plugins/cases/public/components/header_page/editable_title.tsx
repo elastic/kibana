@@ -118,22 +118,17 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
       </EuiFlexGroup>
     </EuiFormRow>
   ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <Title title={title} releasePhase={releasePhase} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
-        {!isLoading && userCanCrud && (
-          <MyEuiButtonIcon
-            aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
-            iconType="pencil"
-            onClick={onClickEditIcon}
-            data-test-subj="editable-title-edit-icon"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Title title={title} releasePhase={releasePhase}>
+      {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
+      {!isLoading && userCanCrud && (
+        <MyEuiButtonIcon
+          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
+          iconType="pencil"
+          onClick={onClickEditIcon}
+          data-test-subj="editable-title-edit-icon"
+        />
+      )}
+    </Title>
   );
 };
 EditableTitleComponent.displayName = 'EditableTitle';

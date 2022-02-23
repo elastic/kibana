@@ -40,4 +40,15 @@ describe('Title', () => {
     expect(screen.getByText('Test title')).toBeInTheDocument();
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });
+
+  it('renders the children if provided', () => {
+    render(
+      <Title title="Test title" releasePhase="ga">
+        <span>{'children'}</span>
+      </Title>
+    );
+
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('children')).toBeInTheDocument();
+  });
 });

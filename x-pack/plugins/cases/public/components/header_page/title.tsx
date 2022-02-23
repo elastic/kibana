@@ -16,6 +16,7 @@ import * as i18n from './translations';
 interface Props {
   title: string | React.ReactNode;
   releasePhase: ReleasePhase;
+  children?: React.ReactNode;
 }
 
 const ExperimentalBadge: React.FC = () => (
@@ -34,14 +35,19 @@ const BetaBadge: React.FC = () => (
 
 BetaBadge.displayName = 'BetaBadge';
 
-const TitleComponent: React.FC<Props> = ({ title, releasePhase }) => (
-  <EuiFlexGroup alignItems="baseline">
+const TitleComponent: React.FC<Props> = ({ title, releasePhase, children }) => (
+  <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="l">
-        <h1 data-test-subj="header-page-title">
-          {isString(title) ? <TruncatedText text={title} /> : title}
-        </h1>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="l">
+            <h1 data-test-subj="header-page-title">
+              {isString(title) ? <TruncatedText text={title} /> : title}
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       {releasePhase === 'experimental' && <ExperimentalBadge />}
