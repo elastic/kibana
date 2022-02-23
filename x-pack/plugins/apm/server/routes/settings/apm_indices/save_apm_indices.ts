@@ -20,11 +20,8 @@ export function saveApmIndices(
   return withApmSpan('save_apm_indices', () =>
     savedObjectsClient.create(
       APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-      removeEmpty(apmIndices),
-      {
-        id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
-        overwrite: true,
-      }
+      { ...removeEmpty(apmIndices), isSpaceAware: true },
+      { id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID, overwrite: true }
     )
   );
 }

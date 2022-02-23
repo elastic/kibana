@@ -23,12 +23,12 @@ async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient
 ) {
   const apmIndices = await withApmSpan('get_apm_indices_saved_object', () =>
-    savedObjectsClient.get<Partial<ApmIndicesConfig>>(
-      APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-      APM_INDEX_SETTINGS_SAVED_OBJECT_ID
-    )
+    savedObjectsClient.get<
+      Partial<ApmIndicesConfig & { isSpaceAware: boolean }>
+    >(APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE, APM_INDEX_SETTINGS_SAVED_OBJECT_ID)
   );
-  return apmIndices.attributes;
+  const { isSpaceAware, ...attributes } = apmIndices.attributes;
+  return attributes;
 }
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {

@@ -29,12 +29,7 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
-import {
-  apmIndices,
-  apmTelemetry,
-  apmServerSettings,
-  apmIndicesSpace,
-} from './saved_objects';
+import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -78,7 +73,6 @@ export class APMPlugin
     const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmIndices);
-    core.savedObjects.registerType(apmIndicesSpace);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
 
