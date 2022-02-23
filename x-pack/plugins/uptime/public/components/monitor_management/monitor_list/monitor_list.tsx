@@ -147,10 +147,9 @@ export const MonitorManagementList = ({
       align: 'left' as const,
       field: ConfigKey.SCHEDULE,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.schedule', {
-        defaultMessage: 'Schedule',
+        defaultMessage: 'Frequency (min)',
       }),
-      render: (schedule: CommonFields[ConfigKey.SCHEDULE]) =>
-        `@every ${schedule?.number}${schedule?.unit}`,
+      render: (schedule: CommonFields[ConfigKey.SCHEDULE]) => schedule?.number,
     },
     {
       align: 'left' as const,
