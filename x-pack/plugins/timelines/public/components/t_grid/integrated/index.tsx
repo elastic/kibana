@@ -101,6 +101,7 @@ export interface TGridIntegratedProps {
   createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
@@ -145,6 +146,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   columns,
   data,
   dataProviders,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
@@ -236,6 +238,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
       data,
+      dataViewId,
       docValueFields,
       endDate: end,
       entityType,
@@ -347,50 +350,48 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     </UpdatedFlexItem>
                   )}
               </UpdatedFlexGroup>
-              {!graphEventId && graphOverlay == null && (
-                <>
-                  {!hasAlerts && !loading && <TGridEmpty height="short" />}
-                  {hasAlerts && (
-                    <FullWidthFlexGroup
-                      $visible={!graphEventId && graphOverlay == null}
-                      gutterSize="none"
-                    >
-                      <ScrollableFlexItem grow={1}>
-                        <StatefulBody
-                          activePage={pageInfo.activePage}
-                          appId={appId}
-                          browserFields={browserFields}
-                          bulkActions={bulkActions}
-                          createFieldComponent={createFieldComponent}
-                          data={nonDeletedEvents}
-                          defaultCellActions={defaultCellActions}
-                          disabledCellActions={disabledCellActions}
-                          filterQuery={filterQuery}
-                          filters={filters}
-                          filterStatus={filterStatus}
-                          hasAlertsCrud={hasAlertsCrud}
-                          id={id}
-                          indexNames={indexNames}
-                          isEventViewer={true}
-                          itemsPerPageOptions={itemsPerPageOptions}
-                          leadingControlColumns={leadingControlColumns}
-                          loadPage={loadPage}
-                          onRuleChange={onRuleChange}
-                          pageSize={itemsPerPage}
-                          refetch={refetch}
-                          renderCellValue={renderCellValue}
-                          rowRenderers={rowRenderers}
-                          tableView={tableView}
-                          tabType={TimelineTabs.query}
-                          totalItems={totalCountMinusDeleted}
-                          trailingControlColumns={trailingControlColumns}
-                          unit={unit}
-                        />
-                      </ScrollableFlexItem>
-                    </FullWidthFlexGroup>
-                  )}
-                </>
-              )}
+              <>
+                {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                {hasAlerts && (
+                  <FullWidthFlexGroup
+                    $visible={!graphEventId && graphOverlay == null}
+                    gutterSize="none"
+                  >
+                    <ScrollableFlexItem grow={1}>
+                      <StatefulBody
+                        activePage={pageInfo.activePage}
+                        appId={appId}
+                        browserFields={browserFields}
+                        bulkActions={bulkActions}
+                        createFieldComponent={createFieldComponent}
+                        data={nonDeletedEvents}
+                        defaultCellActions={defaultCellActions}
+                        disabledCellActions={disabledCellActions}
+                        filterQuery={filterQuery}
+                        filters={filters}
+                        filterStatus={filterStatus}
+                        hasAlertsCrud={hasAlertsCrud}
+                        id={id}
+                        indexNames={indexNames}
+                        isEventViewer={true}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        leadingControlColumns={leadingControlColumns}
+                        loadPage={loadPage}
+                        onRuleChange={onRuleChange}
+                        pageSize={itemsPerPage}
+                        refetch={refetch}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        tableView={tableView}
+                        tabType={TimelineTabs.query}
+                        totalItems={totalCountMinusDeleted}
+                        trailingControlColumns={trailingControlColumns}
+                        unit={unit}
+                      />
+                    </ScrollableFlexItem>
+                  </FullWidthFlexGroup>
+                )}
+              </>
             </EventsContainerLoading>
           </TimelineContext.Provider>
         )}

@@ -106,7 +106,7 @@ export class VegaBaseView {
       }
 
       if (this._parser.error) {
-        this._addMessage('err', this._parser.error);
+        this.onError(this._parser.error);
         return;
       }
 
@@ -235,7 +235,9 @@ export class VegaBaseView {
   }
 
   onError() {
-    this._addMessage('err', Utils.formatErrorToStr(...arguments));
+    const error = Utils.formatErrorToStr(...arguments);
+    this._addMessage('err', error);
+    this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
   }
 
   onWarn() {
@@ -260,16 +262,19 @@ export class VegaBaseView {
     }
   }
 
-  resize() {
+  async resize(dimensions) {
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view);
-      return this._view.runAsync();
+      this.updateVegaSize(this._view, dimensions);
+      await this._view.runAsync();
+
+      // The derived class should create this method
+      this.onViewContainerResize?.();
     }
   }
 
-  updateVegaSize(view) {
-    const width = Math.floor(Math.max(0, this._$container.width()));
-    const height = Math.floor(Math.max(0, this._$container.height()));
+  updateVegaSize(view, dimensions) {
+    const width = Math.floor(Math.max(0, dimensions?.width ?? this._$container.width()));
+    const height = Math.floor(Math.max(0, dimensions?.height ?? this._$container.height()));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);

@@ -118,7 +118,8 @@ export function GraphVisualization({
             workspace.edges.map((edge) => {
               const edgeId = makeEdgeId(edge.source.id, edge.target.id);
               return (
-                <Fragment key={edgeId}>
+                <g key={edgeId} className="gphEdge--wrapper">
+                  {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                   <line
                     x1={edge.topSrc.kx}
                     y1={edge.topSrc.ky}
@@ -127,28 +128,26 @@ export function GraphVisualization({
                     className={classNames('gphEdge', {
                       'gphEdge--selected': edge.isSelected,
                     })}
+                    strokeLinecap="round"
                     style={{
                       strokeWidth: edge.width,
                       opacity: !filterSet.size || filterSet.has(edgeId) ? 1 : 0.1,
                     }}
-                    strokeLinecap="round"
                   />
                   <line
                     x1={edge.topSrc.kx}
                     y1={edge.topSrc.ky}
                     x2={edge.topTarget.kx}
                     y2={edge.topTarget.ky}
-                    onClick={(e) => {
-                      edgeClick(edge, e);
+                    onClick={() => {
+                      edgeClick(edge);
                     }}
-                    className="gphEdge"
+                    className="gphEdge gphEdge--clickable"
                     style={{
                       strokeWidth: Math.max(edge.width, 15),
-                      fill: 'transparent',
-                      opacity: 0,
                     }}
                   />
-                </Fragment>
+                </g>
               );
             })}
         </g>

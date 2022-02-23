@@ -13,9 +13,10 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+import { isDataLayer, isReferenceLayer } from './visualization_helpers';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -58,7 +59,7 @@ export function toPreviewExpression(
     {
       ...state,
       layers: state.layers.map((layer) =>
-        layer.layerType === layerTypes.DATA
+        isDataLayer(layer)
           ? { ...layer, hide: true }
           : // cap the reference line to 1px
             {
@@ -341,12 +342,11 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color:
-                                  layer.layerType === layerTypes.REFERENCELINE
-                                    ? [yConfig.color || defaultReferenceLineColor]
-                                    : yConfig.color
-                                    ? [yConfig.color]
-                                    : [],
+                                color: isReferenceLayer(layer)
+                                  ? [yConfig.color || defaultReferenceLineColor]
+                                  : yConfig.color
+                                  ? [yConfig.color]
+                                  : [],
                                 lineStyle: [yConfig.lineStyle || 'solid'],
                                 lineWidth: [yConfig.lineWidth || 1],
                                 fill: [yConfig.fill || 'none'],

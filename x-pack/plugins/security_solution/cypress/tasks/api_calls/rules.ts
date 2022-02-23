@@ -20,7 +20,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-50000h',
-      index: ['exceptions-*'],
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: false,

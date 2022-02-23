@@ -27,7 +27,6 @@ export const getVegaVisRenderer: (
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-
     render(
       <KibanaThemeProvider theme$={deps.core.theme.theme$}>
         <VisualizationContainer handlers={handlers}>
