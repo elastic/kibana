@@ -252,7 +252,7 @@ export class ApiService {
       Array<{
         nodeId: string;
         nodeName: string;
-        used: string;
+        available: string;
         lowDiskWatermarkSetting: string;
       }>
     >({

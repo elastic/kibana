@@ -41,6 +41,7 @@ describe('Disk space API', () => {
         body: {
           nodes: {
             '1YOaoS9lTNOiTxR1uzSgRA': {
+              name: 'node_name',
               fs: {
                 total: {
                   // Keeping these numbers (inaccurately) small so it's easier to reason the math when scanning through :)
@@ -76,8 +77,9 @@ describe('Disk space API', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual([
         {
+          nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          used: '80%',
+          available: '20%',
           lowDiskWatermarkSetting: '75%',
         },
       ]);
@@ -103,8 +105,9 @@ describe('Disk space API', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual([
         {
+          nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          used: '80%',
+          available: '20%',
           lowDiskWatermarkSetting: '75%',
         },
       ]);
@@ -130,8 +133,9 @@ describe('Disk space API', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual([
         {
+          nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          used: '80%',
+          available: '20%',
           lowDiskWatermarkSetting: '80%',
         },
       ]);
@@ -159,8 +163,9 @@ describe('Disk space API', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual([
         {
+          nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
-          used: '80%',
+          available: '20%',
           lowDiskWatermarkSetting: '80b',
         },
       ]);
@@ -194,7 +199,7 @@ describe('Disk space API', () => {
       ).mockResolvedValue({
         body: {
           defaults: {
-            'cluster.routing.allocation.disk.watermark.low': '90%',
+            'cluster.routing.allocation.disk.watermark.low': '10%',
           },
           transient: {},
           persistent: {},

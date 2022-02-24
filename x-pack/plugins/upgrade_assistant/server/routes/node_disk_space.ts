@@ -14,7 +14,7 @@ import { RouteDependencies } from '../types';
 interface NodeWithLowDiskSpace {
   nodeId: string;
   nodeName: string;
-  used: string;
+  available: string;
   lowDiskWatermarkSetting: string;
 }
 
@@ -88,17 +88,16 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
 
               if (isLowDiskWatermarkPercentage) {
                 const percentageAvailable = (availableInBytes / totalInBytes) * 100;
-                const percentageUsed = 100 - percentageAvailable;
                 const rawLowDiskWatermarkPercentageValue = Number(
                   lowDiskWatermarkSetting!.replace('%', '')
                 );
 
-                // If the percentage in use is >= to the low disk watermark setting, mark node as having low disk space
-                if (percentageUsed >= rawLowDiskWatermarkPercentageValue) {
+                // If the percentage available is < the low disk watermark setting, mark node as having low disk space
+                if (percentageAvailable < rawLowDiskWatermarkPercentageValue) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
                     nodeName: node.name,
-                    used: `${Math.round(percentageUsed)}%`,
+                    available: `${Math.round(percentageAvailable)}%`,
                     lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
                   });
                 }
@@ -109,16 +108,13 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
                 ).getValueInBytes();
 
                 const percentageAvailable = (availableInBytes / totalInBytes) * 100;
-                const percentageUsed = 100 - percentageAvailable;
-                const rawLowDiskWatermarkPercentageValue =
-                  (rawLowDiskWatermarkBytesValue / totalInBytes) * 100;
 
-                // If the percentage in use is >= to the low disk watermark setting, mark node as having low disk space
-                if (percentageUsed >= rawLowDiskWatermarkPercentageValue) {
+                // If bytes available < the low disk watermarket setting, mark node as having low disk space
+                if (availableInBytes < rawLowDiskWatermarkBytesValue) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
                     nodeName: node.name,
-                    used: `${Math.round(percentageUsed)}%`,
+                    available: `${Math.round(percentageAvailable)}%`,
                     lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
                   });
                 }

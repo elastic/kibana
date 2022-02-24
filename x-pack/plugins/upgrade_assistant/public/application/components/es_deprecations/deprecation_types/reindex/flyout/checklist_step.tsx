@@ -133,15 +133,14 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 <EuiSpacer size="s" />
 
                 <ul>
-                  {nodes.map(({ nodeName, used, nodeId, lowDiskWatermarkSetting }) => (
+                  {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
                         id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceUsedText"
-                        defaultMessage="{nodeName}: {used} used ({allocated} allocated)"
+                        defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
-                          used,
-                          allocated: lowDiskWatermarkSetting,
+                          available,
                         }}
                       />
                     </li>
