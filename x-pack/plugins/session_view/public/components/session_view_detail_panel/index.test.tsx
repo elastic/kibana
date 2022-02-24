@@ -20,12 +20,6 @@ describe('SessionView component', () => {
   });
 
   describe('When SessionViewDetailPanel is mounted', () => {
-    it('shows empty message', async () => {
-      renderResult = mockedContext.render(<SessionViewDetailPanel selectedProcess={null} />);
-
-      expect(renderResult.queryByText('Please select a process')).toBeVisible();
-    });
-
     it('shows process detail by default', async () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel selectedProcess={sessionViewBasicProcessMock} />

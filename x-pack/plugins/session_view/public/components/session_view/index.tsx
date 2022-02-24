@@ -137,7 +137,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     EuiResizableButton: ComponentType<EuiResizableButtonProps>,
     EuiResizablePanel: ComponentType<EuiResizablePanelProps>
   ) => {
-    if (isDetailOpen) {
+    if (isDetailOpen && selectedProcess) {
       return (
         <>
           <EuiResizableButton />
