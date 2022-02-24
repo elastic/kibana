@@ -125,6 +125,11 @@ export interface RequestEntityTooLargeException {
   type: 'request_entity_too_large_exception';
 }
 
+export interface ClusterRoutingAllocationDisabled {
+  type: 'cluster_routing_allocation_disabled';
+  clusterRoutingAllocationEnabled: boolean;
+}
+
 /** @internal */
 export interface AcknowledgeResponse {
   acknowledged: boolean;

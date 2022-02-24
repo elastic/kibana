@@ -1593,4 +1593,9 @@ describe('migration actions', () => {
       `);
     });
   });
+
+  describe('check_cluster_routing_allocation_enabled', () => {
+    it.todo('resolves right when cluster.routing.allocation.enabled is not none');
+    it.todo('resolves left when cluster.routing.allocation.enabled is none');
+  });
 });
