@@ -11,26 +11,30 @@ import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from 'kibana/public';
 import type { StartDependencies } from './plugin';
+import type { TypedLensByValueInput } from '../../../plugins/lens/public';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
-  async ({ element }: AppMountParameters) => {
+  async ({ element, history }: AppMountParameters) => {
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
+    const preloadedVisualizationAttributes = history.location
+      ?.state as TypedLensByValueInput['attributes'];
 
-    const defaultDataView = await plugins.data.indexPatterns.getDefault();
+    const dataView = await plugins.data.indexPatterns.getDefault();
     const stateHelpers = await plugins.lens.stateHelperApi();
 
     const i18nCore = core.i18n;
 
     const reactElement = (
       <i18nCore.Context>
-        {defaultDataView ? (
+        {dataView ? (
           <App
             core={core}
             plugins={plugins}
-            defaultDataView={defaultDataView}
+            defaultDataView={dataView}
             stateHelpers={stateHelpers}
+            preloadedVisualization={preloadedVisualizationAttributes}
           />
         ) : (
           <EuiCallOut
