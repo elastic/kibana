@@ -14,7 +14,7 @@
     "branches",
     "branching"
   ],
-  "version": "7.3.0",
+  "version": "7.3.1",
   "main": "./dist/entrypoint.module.js",
   "types": "dist/entrypoint.module.d.ts",
   "bin": {
