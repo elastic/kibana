@@ -252,17 +252,16 @@ function buildComponentTemplates(params: {
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
 
-  const registrySettings = registryElasticsearch?.['index_template.settings'] ?? {};
-  // @ts-expect-error 2339
-  const mappingSettings = registrySettings?.index?.mapping;
-
-  const registrySettingsForTemplate = cloneDeep(registrySettings);
+  const indexTemplateSettings = registryElasticsearch?.['index_template.settings'] ?? {};
+  // @ts-expect-error no property .mapping (yes there is)
+  const indexTemplateMappingSettings = indexTemplateSettings?.index?.mapping;
+  const indexTemplateSettingsForTemplate = cloneDeep(indexTemplateSettings);
 
   // index.mapping settings must go on the mapping component template otherwise
   // the template may be rejected e.g if nested_fields.limit has been increased
-  if (mappingSettings) {
-    // @ts-expect-error 2339
-    delete registrySettingsForTemplate.index.mapping;
+  if (indexTemplateMappingSettings) {
+    // @ts-expect-error no property .mapping
+    delete indexTemplateSettingsForTemplate.index.mapping;
   }
 
   templatesMap[mappingsTemplateName] = {
@@ -273,7 +272,7 @@ function buildComponentTemplates(params: {
             total_fields: {
               limit: '10000',
             },
-            ...mappingSettings,
+            ...indexTemplateMappingSettings,
           },
         },
       },
@@ -284,7 +283,7 @@ function buildComponentTemplates(params: {
 
   templatesMap[settingsTemplateName] = {
     template: {
-      settings: merge(defaultSettings, registrySettingsForTemplate),
+      settings: merge(defaultSettings, indexTemplateSettingsForTemplate),
     },
     _meta,
   };
