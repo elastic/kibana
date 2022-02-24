@@ -298,7 +298,7 @@ describe.skip('Fleet preconfiguration rest', () => {
         id: POLICY_ID,
       });
 
-      const resetAPI = getSupertestWithAdminUser(
+      const resetAPI = kbnTestServer.getSupertest(
         kbnServer.root,
         'post',
         `/internal/fleet/reset_preconfigured_agent_policies/${POLICY_ID}`
