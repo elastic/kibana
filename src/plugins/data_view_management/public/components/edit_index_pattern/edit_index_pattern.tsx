@@ -17,11 +17,12 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView, DataViewField } from '../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { useKibana, toMountPoint } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -50,7 +51,7 @@ const confirmModalOptionsDelete = {
     defaultMessage: 'Delete',
   }),
   title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
-    defaultMessage: 'Delete data view?',
+    defaultMessage: 'Delete data view',
   }),
 };
 
@@ -65,7 +66,7 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { application, uiSettings, overlays, chrome, dataViews } =
+    const { uiSettings, overlays, chrome, dataViews } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -110,11 +111,26 @@ export const EditIndexPattern = withRouter(
         }
       }
 
-      overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
-        if (isConfirmed) {
-          doRemove();
-        }
-      });
+      const warning =
+        indexPattern.namespaces.length > 1 ? (
+          <FormattedMessage
+            id="indexPatternManagement.editDataView.deleteWarning"
+            defaultMessage="When you delete {dataViewName}, you remove it from every space it is shared in. You can't undo this action."
+            values={{
+              dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+            }}
+          />
+        ) : (
+          ''
+        );
+
+      overlays
+        .openConfirm(toMountPoint(<div>{warning}</div>), confirmModalOptionsDelete)
+        .then((isConfirmed) => {
+          if (isConfirmed) {
+            doRemove();
+          }
+        });
     };
 
     const timeFilterHeader = i18n.translate(
@@ -143,15 +159,16 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
-    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+    const userEditPermission = dataViews.getCanSaveSync();
 
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
+          deleteIndexPatternClick={removePattern}
           defaultIndex={defaultIndex}
+          canSave={userEditPermission}
         >
           {showTagsSection && (
             <EuiFlexGroup wrap gutterSize="s">

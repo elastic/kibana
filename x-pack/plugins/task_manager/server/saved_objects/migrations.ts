@@ -13,15 +13,16 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '../../../../../src/core/server';
-import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
+import { REMOVED_TYPES } from '../task_type_dictionary';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
-  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> };
+  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<ConcreteTaskInstance> };
 }
 
 type TaskInstanceMigration = (
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-) => SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>;
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+) => SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
 
 export function getMigrations(): SavedObjectMigrationMap {
   return {
@@ -37,18 +38,19 @@ export function getMigrations(): SavedObjectMigrationMap {
       pipeMigrations(alertingTaskLegacyIdToSavedObjectIds, actionsTasksLegacyIdToSavedObjectIds),
       '8.0.0'
     ),
+    '8.2.0': executeMigrationWithErrorHandling(
+      pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule, resetUnrecognizedStatus),
+      '8.2.0'
+    ),
   };
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<
-    TaskInstanceWithDeprecatedFields,
-    TaskInstanceWithDeprecatedFields
-  >,
+  migrationFunc: SavedObjectMigrationFn<ConcreteTaskInstance, ConcreteTaskInstance>,
   version: string
 ) {
   return (
-    doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>,
+    doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -68,8 +70,8 @@ function executeMigrationWithErrorHandling(
 }
 
 function alertingTaskLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     let params: { spaceId?: string; alertId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -94,8 +96,8 @@ function alertingTaskLegacyIdToSavedObjectIds(
 }
 
 function actionsTasksLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('actions:')) {
     let params: { spaceId?: string; actionTaskParamsId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -126,7 +128,7 @@ function actionsTasksLegacyIdToSavedObjectIds(
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>): SavedObjectUnsanitizedDoc<TaskInstance> {
+}: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   return {
     ...doc,
     attributes: {
@@ -142,7 +144,52 @@ function moveIntervalIntoSchedule({
   };
 }
 
+function resetUnrecognizedStatus(
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  const status = doc?.attributes?.status;
+  if (status && status === 'unrecognized') {
+    const taskType = doc.attributes.taskType;
+    // If task type is in the REMOVED_TYPES list, maintain "unrecognized" status
+    if (REMOVED_TYPES.indexOf(taskType) >= 0) {
+      return doc;
+    }
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        status: 'idle',
+      },
+    } as SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
+  }
+
+  return doc;
+}
+
 function pipeMigrations(...migrations: TaskInstanceMigration[]): TaskInstanceMigration {
-  return (doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>) =>
+  return (doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+}
+
+function resetAttemptsAndStatusForTheTasksWithoutSchedule(
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  if (doc.attributes.taskType.startsWith('alerting:')) {
+    if (
+      !doc.attributes.schedule?.interval &&
+      (doc.attributes.status === TaskStatus.Failed || doc.attributes.status === TaskStatus.Running)
+    ) {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          attempts: 0,
+          status: TaskStatus.Idle,
+        },
+      };
+    }
+  }
+
+  return doc;
 }

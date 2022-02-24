@@ -35,7 +35,7 @@ export function beatsDetailRoute(server) {
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
       const beatUuid = req.params.beatUuid;
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 

@@ -7,7 +7,6 @@
 
 export const savedSearches = {
   farequoteFilter: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_filter',
@@ -66,7 +65,6 @@ export const savedSearches = {
     },
   },
   farequoteLucene: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_lucene',
@@ -98,7 +96,6 @@ export const savedSearches = {
     },
   },
   farequoteKuery: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_kuery',
@@ -130,7 +127,6 @@ export const savedSearches = {
     },
   },
   farequoteFilterAndLucene: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_filter_and_lucene',
@@ -189,7 +185,6 @@ export const savedSearches = {
     },
   },
   farequoteFilterAndKuery: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_filter_and_kuery',

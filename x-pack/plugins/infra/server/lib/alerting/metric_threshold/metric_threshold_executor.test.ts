@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -784,43 +782,39 @@ const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertCont
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
-services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
-  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
 
-  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
+services.scopedClusterClient.asCurrentUser.search.mockResponseImplementation(
+  (params?: any): any => {
+    const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
 
-  if (params.index === 'empty-response') return mocks.emptyMetricResponse;
+    if (params.index === 'alternatebeat-*') return { body: mocks.changedSourceIdResponse(from) };
 
-  const metric = params?.body.query.bool.filter[1]?.exists.field;
-  if (metric === 'test.metric.3') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
-        ? mocks.emptyRateResponse
-        : mocks.emptyMetricResponse
-    );
-  }
-  if (params?.body.aggs.groupings) {
-    if (params?.body.aggs.groupings.composite.after) {
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.compositeEndResponse
-      );
+    if (params.index === 'empty-response') return { body: mocks.emptyMetricResponse };
+
+    const metric = params?.body.query.bool.filter[1]?.exists.field;
+    if (metric === 'test.metric.3') {
+      return {
+        body: params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
+          ? mocks.emptyRateResponse
+          : mocks.emptyMetricResponse,
+      };
+    }
+    if (params?.body.aggs.groupings) {
+      if (params?.body.aggs.groupings.composite.after) {
+        return { body: mocks.compositeEndResponse };
+      }
+      if (metric === 'test.metric.2') {
+        return { body: mocks.alternateCompositeResponse(from) };
+      }
+      return { body: mocks.basicCompositeResponse(from) };
     }
     if (metric === 'test.metric.2') {
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.alternateCompositeResponse(from)
-      );
+      return { body: mocks.alternateMetricResponse() };
     }
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.basicCompositeResponse(from)
-    );
+    return { body: mocks.basicMetricResponse() };
   }
-  if (metric === 'test.metric.2') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse()
-    );
-  }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());
-});
+);
+
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
     return {
@@ -909,7 +903,9 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
+
       toBeNoDataAction(action?: Action): R;
+
       toBeErrorAction(action?: Action): R;
     }
   }

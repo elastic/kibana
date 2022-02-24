@@ -11,6 +11,7 @@ export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
 
 export const INTEGRATION_NAME_LINK = 'integrationNameLink';
 export const AGENT_POLICY_NAME_LINK = 'agentPolicyNameLink';
+export const AGENT_ACTIONS_BTN = 'agentActionsBtn';
 
 export const CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 export const CONFIRM_MODAL_BTN_SEL = `[data-test-subj=${CONFIRM_MODAL_BTN}]`;
@@ -19,6 +20,7 @@ export const FLYOUT_CLOSE_BTN_SEL = '[data-test-subj="euiFlyoutCloseButton"]';
 
 export const SETTINGS_TAB = 'tab-settings';
 export const POLICIES_TAB = 'tab-policies';
+export const ADVANCED_TAB = 'tab-custom';
 
 export const UPDATE_PACKAGE_BTN = 'updatePackageBtn';
 export const LATEST_VERSION = 'latestVersion';

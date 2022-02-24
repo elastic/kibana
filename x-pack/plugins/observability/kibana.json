@@ -23,6 +23,7 @@
     "alerting",
     "cases",
     "data",
+    "dataViews",
     "features",
     "inspector",
     "ruleRegistry",
@@ -35,6 +36,7 @@
   "requiredBundles": [
     "data",
     "dataViews",
+    "embeddable",
     "kibanaReact",
     "kibanaUtils",
     "lens"
