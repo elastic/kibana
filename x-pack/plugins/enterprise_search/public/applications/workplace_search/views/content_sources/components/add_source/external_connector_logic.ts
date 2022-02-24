@@ -22,13 +22,13 @@ import { getAddPath, getSourcesPath } from '../../../../routes';
 
 import { SourceConfigData } from './add_source_logic';
 
-export interface AddSourceActions {
-  initializeAddExternalSource: () => true;
-  initializeAddExternalSourceSuccess(sourceConfigData: SourceConfigData): SourceConfigData;
-  setExternalConnectorUrl(externalConnectorUrl: string): string;
+export interface ExternalConnectorActions {
+  fetchExternalSource: () => true;
+  onRecieveExternalSource(sourceConfigData: SourceConfigData): SourceConfigData;
+  onSaveExternalConnectorConfigSuccess(externalConnectorId: string): string;
   setExternalConnectorApiKey(externalConnectorApiKey: string): string;
   saveExternalConnectorConfig(config: ExternalConnectorConfig): ExternalConnectorConfig;
-  saveExternalConnectorConfigSuccess(externalConnectorId: string): string;
+  setExternalConnectorUrl(externalConnectorUrl: string): string;
   resetSourceState: () => true;
 }
 
@@ -37,72 +37,68 @@ export interface ExternalConnectorConfig {
   apiKey: string;
 }
 
-interface AddSourceValues {
-  dataLoading: boolean;
-  sectionLoading: boolean;
+export interface ExternalConnectorValues {
   buttonLoading: boolean;
-  externalConnectorUrl: string;
+  dataLoading: boolean;
   externalConnectorApiKey: string;
-  sourceConfigData: SourceConfigData | { name: string; categories: [] };
+  externalConnectorUrl: string;
+  sourceConfigData: SourceConfigData | Pick<SourceConfigData, 'name' | 'categories'>;
 }
 
-export const ExternalConnectorLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
+export const ExternalConnectorLogic = kea<
+  MakeLogicType<ExternalConnectorValues, ExternalConnectorActions>
+>({
   path: ['enterprise_search', 'workplace_search', 'external_connector_logic'],
   actions: {
-    initializeAddExternalSource: () => true,
-    initializeAddExternalSourceSuccess: (sourceConfigData: SourceConfigData) => sourceConfigData,
-    setExternalConnectorUrl: (externalConnectorUrl: string) => externalConnectorUrl,
+    fetchExternalSource: true,
+    onRecieveExternalSource: (sourceConfigData) => sourceConfigData,
+    onSaveExternalConnectorConfigSuccess: (externalConnectorId) => externalConnectorId,
+    saveExternalConnectorConfig: (config) => config,
     setExternalConnectorApiKey: (externalConnectorApiKey: string) => externalConnectorApiKey,
-    saveExternalConnectorConfig: (config: ExternalConnectorConfig) => config,
-    saveExternalConnectorConfigSuccess: () => true,
-    resetSourceState: () => true,
+    setExternalConnectorUrl: (externalConnectorUrl: string) => externalConnectorUrl,
   },
   reducers: {
     dataLoading: [
       true,
       {
-        initializeAddExternalSource: () => true,
-        initializeAddExternalSourceSuccess: () => true,
-        resetSourceState: () => false,
+        onRecieveExternalSource: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
+        onSaveExternalConnectorConfigSuccess: () => false,
         saveExternalConnectorConfig: () => true,
-        saveExternalConnectorConfigSuccess: () => false,
       },
     ],
     externalConnectorUrl: [
       '',
       {
+        onRecieveExternalSource: (_, { configuredFields: { url } }) => url || '',
         setExternalConnectorUrl: (_, url) => url,
-        initializeAddExternalSourceSuccess: (_, { configuredFields: { url } }) => url || '',
-        resetSourceState: () => '',
       },
     ],
     externalConnectorApiKey: [
       '',
       {
+        onRecieveExternalSource: (_, { configuredFields: { apiKey } }) => apiKey || '',
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
-        setSourceConfigData: (_, { configuredFields: { apiKey } }) => apiKey || '',
-        resetSourceState: () => '',
       },
     ],
     sourceConfigData: [
       { name: '', categories: [] },
       {
-        initializeAddExternalSourceSuccess: (_, sourceConfigData) => sourceConfigData,
+        onRecieveExternalSource: (_, sourceConfigData) => sourceConfigData,
       },
     ],
   },
   listeners: ({ actions }) => ({
-    initializeAddExternalSource: async () => {
+    fetchExternalSource: async () => {
       const route = '/internal/workplace_search/org/settings/connectors/external';
 
       try {
         const response = await HttpLogic.values.http.get<SourceConfigData>(route);
-        actions.initializeAddExternalSourceSuccess(response);
+        actions.onRecieveExternalSource(response);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -130,10 +126,10 @@ export const ExternalConnectorLogic = kea<MakeLogicType<AddSourceValues, AddSour
           )
         );
         // TODO: use response data instead
-        actions.saveExternalConnectorConfigSuccess('external');
-        KibanaLogic.values.navigateToUrl(
-          getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
-        );
+        actions.onSaveExternalConnectorConfigSuccess('external');
+        // KibanaLogic.values.navigateToUrl(
+        //   getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
+        // );
       } catch (e) {
         // flashAPIErrors(e);
       }

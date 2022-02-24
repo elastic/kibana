@@ -23,15 +23,15 @@ export enum AddCustomSourceSteps {
 }
 
 export interface AddCustomSourceActions {
+  createContentSource(): void;
   setButtonNotLoading(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setNewCustomSource(data: CustomSource): CustomSource;
-  createContentSource(): void;
 }
 
 interface AddCustomSourceValues {
-  currentStep: AddCustomSourceSteps;
   buttonLoading: boolean;
+  currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
   sourceData: SourceDataItem;
@@ -47,23 +47,23 @@ export const AddCustomSourceLogic = kea<
 >({
   path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
   actions: {
-    setCustomSourceNameValue: (customSourceNameValue) => customSourceNameValue,
-    setNewCustomSource: (data) => data,
     createContentSource: true,
     setButtonNotLoading: true,
+    setCustomSourceNameValue: (customSourceNameValue) => customSourceNameValue,
+    setNewCustomSource: (data) => data,
   },
   reducers: ({ props }) => ({
-    currentStep: [
-      AddCustomSourceSteps.ConfigureCustomStep,
-      {
-        setNewCustomSource: () => AddCustomSourceSteps.SaveCustomStep,
-      },
-    ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
         createContentSource: () => true,
+      },
+    ],
+    currentStep: [
+      AddCustomSourceSteps.ConfigureCustomStep,
+      {
+        setNewCustomSource: () => AddCustomSourceSteps.SaveCustomStep,
       },
     ],
     customSourceNameValue: [
@@ -76,7 +76,6 @@ export const AddCustomSourceLogic = kea<
       {} as CustomSource,
       {
         setNewCustomSource: (_, newCustomSource) => newCustomSource,
-        resetSourceState: () => ({} as CustomSource),
       },
     ],
     sourceData: [props.sourceData],
