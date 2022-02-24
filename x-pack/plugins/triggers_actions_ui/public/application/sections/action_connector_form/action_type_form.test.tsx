@@ -11,7 +11,7 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ActionConnector,
   ActionType,
-  AlertAction,
+  RuleAction,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -138,7 +138,7 @@ describe('action_type_form', () => {
 function getActionTypeForm(
   index?: number,
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
-  actionItem?: AlertAction,
+  actionItem?: RuleAction,
   defaultActionGroupId?: string,
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
   actionTypeIndex?: Record<string, ActionType>,
