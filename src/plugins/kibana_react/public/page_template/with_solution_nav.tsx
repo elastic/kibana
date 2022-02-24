@@ -20,7 +20,7 @@ type SolutionNavProps = KibanaPageTemplateProps & {
   solutionNav: KibanaPageTemplateSolutionNavProps;
 };
 
-export const withSolutionNav = (WrappedComponent: ComponentType<SolutionNavProps>) => {
+export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTemplateProps>) => {
   const WithSolutionNav = (props: SolutionNavProps) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);

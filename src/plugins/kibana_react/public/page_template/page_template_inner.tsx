@@ -7,17 +7,16 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import classNames from 'classnames';
 
 import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 import { withSolutionNav } from './with_solution_nav';
 import { KibanaPageTemplateProps } from './page_template';
+import { getClasses } from './helpers';
 
-type KibanaPageTemplateInnerProps = Omit<KibanaPageTemplateProps, 'solutionNav' | 'noDataConfig'>;
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateInnerProps> = ({
+export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   className,
   pageHeader,
@@ -48,11 +47,7 @@ export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateInnerP
     template = template ?? emptyStateDefaultTemplate;
   }
 
-  const classes = classNames(
-    'kbnPageTemplate',
-    { [`kbnPageTemplate--${template}`]: template },
-    className
-  );
+  const classes = getClasses('kbnPageTemplate', className);
 
   return (
     <EuiPageTemplate template={template} className={classes} pageHeader={pageHeader} {...rest}>

@@ -38,7 +38,7 @@ export function LandingPage() {
       noDataConfig={noDataConfig}
       restrictWidth
       // No side nav since nothing is setup
-      showSolutionNav={false}
+      showSolutionNav={true}
     />
   );
 }

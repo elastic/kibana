@@ -7,31 +7,38 @@
  */
 import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import classNames from 'classnames';
-import { NO_DATA_PAGE_TEMPLATE_PROPS, NoDataPage } from '../no_data_page';
+import { NoDataPage } from '../no_data_page';
 import { withSolutionNav } from '../../with_solution_nav';
 import { KibanaPageTemplateProps } from '../../page_template';
+import { getClasses } from '../../helpers';
+
+const NO_DATA_PAGE_MAX_WIDTH = 950;
+
+const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+  },
+};
 
 export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
-  const { className, noDataConfig } = props;
+  const { className, noDataConfig, ...rest } = props;
 
   if (!noDataConfig) {
     return null;
   }
 
   const template = NO_DATA_PAGE_TEMPLATE_PROPS.template;
-
-  const classes = classNames(
-    'kbnPageTemplate',
-    { [`kbnPageTemplate--${template}`]: template },
-    className
-  );
+  const classes = getClasses(template, className);
 
   return (
     <EuiPageTemplate
       data-test-subj={props['data-test-subj']}
       template={template}
       className={classes}
+      {...rest}
       {...NO_DATA_PAGE_TEMPLATE_PROPS}
     >
       <NoDataPage {...noDataConfig} />

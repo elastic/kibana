@@ -13,20 +13,9 @@ import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import { KibanaPageTemplateProps } from '../page_template';
 
 import { ElasticAgentCard, NoDataCard } from './no_data_card';
 import { NoDataPageBody } from './no_data_page_body/no_data_page_body';
-
-export const NO_DATA_PAGE_MAX_WIDTH = 950;
-export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
-  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
-  template: 'centeredBody',
-  pageContentProps: {
-    hasShadow: false,
-    color: 'transparent',
-  },
-};
 
 export const NO_DATA_RECOMMENDED = i18n.translate(
   'kibana-react.noDataPage.noDataPage.recommended',
