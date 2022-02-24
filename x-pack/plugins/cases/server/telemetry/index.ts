@@ -8,6 +8,7 @@
 import { TaskManagerSetupContract } from '../../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 
+const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
 interface CreateCasesTelemetryArgs {
   taskManager: TaskManagerSetupContract;
   usageCollection: UsageCollectionSetup;
@@ -16,4 +17,19 @@ interface CreateCasesTelemetryArgs {
 export const createCasesTelemetry = async ({
   taskManager,
   usageCollection,
-}: CreateCasesTelemetryArgs) => {};
+}: CreateCasesTelemetryArgs) => {
+  taskManager.registerTaskDefinitions({
+    [CASES_TELEMETRY_TASK_NAME]: {
+      title: 'Collect Cases usage',
+      createTaskRunner: () => {
+        return {
+          run: async () => {
+            await collectAndStore();
+          },
+        };
+      },
+    },
+  });
+
+  const collectAndStore = async () => {};
+};
