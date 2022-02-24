@@ -249,8 +249,10 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         // Close the flyout
         // `undefined` will cause params to be dropped from url
         setUrlParams({ id: undefined, show: undefined }, true);
+
+        onSuccess();
       });
-    }, [formState.item, isEditFlow, labels, setUrlParams, submitData, toasts]);
+    }, [formState.item, isEditFlow, labels, onSuccess, setUrlParams, submitData, toasts]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
