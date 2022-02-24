@@ -55,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     /**
+     * Skip until https://github.com/elastic/elasticsearch/issues/84256 is resolved
      * Seeing this error:
      *    │ proc [kibana] [2022-02-22T08:53:59.624-05:00][INFO ][plugins.ruleRegistry] Installing namespace-level resources and creating concrete index for .alerts-security.alerts-default
    │ info [r.suppressed] [node-01] path: /_index_template/_simulate_index/.internal.alerts-security.alerts-default-000001, params: {name=.internal.alerts-security.alerts-default-000001}
