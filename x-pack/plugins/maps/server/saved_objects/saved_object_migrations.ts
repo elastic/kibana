@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { extractReferences } from '../../common/migrations/references';
+// @ts-expect-error
 import { emsRasterTileToEmsVectorTile } from '../../common/migrations/ems_raster_tile_to_ems_vector_tile';
+// @ts-expect-error
 import { topHitsTimeToSort } from '../../common/migrations/top_hits_time_to_sort';
+// @ts-expect-error
 import { moveApplyGlobalQueryToSources } from '../../common/migrations/move_apply_global_query';
+// @ts-expect-error
 import { addFieldMetaOptions } from '../../common/migrations/add_field_meta_options';
+// @ts-expect-error
 import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_symbol_style_descriptor';
 import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { migrateJoinAggKey } from '../../common/migrations/join_agg_key';
@@ -19,8 +25,13 @@ import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin'
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
+import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
-function logMigrationWarning(context, errorMsg, doc) {
+function logMigrationWarning(
+  context: SavedObjectMigrationContext,
+  errorMsg: string,
+  doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>
+) {
   context.log.warning(
     `map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(
       doc
@@ -36,7 +47,10 @@ function logMigrationWarning(context, errorMsg, doc) {
  * This is the saved object migration registry.
  */
 export const savedObjectMigrations = {
-  '7.2.0': (doc, context) => {
+  '7.2.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const { attributes, references } = extractReferences(doc);
 
@@ -50,7 +64,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.4.0': (doc, context) => {
+  '7.4.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = emsRasterTileToEmsVectorTile(doc);
 
@@ -63,7 +80,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.5.0': (doc, context) => {
+  '7.5.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = topHitsTimeToSort(doc);
 
@@ -76,7 +96,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.6.0': (doc, context) => {
+  '7.6.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributesPhase1 = moveApplyGlobalQueryToSources(doc);
       const attributesPhase2 = addFieldMetaOptions({ attributes: attributesPhase1 });
@@ -90,7 +113,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.7.0': (doc, context) => {
+  '7.7.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributesPhase1 = migrateSymbolStyleDescriptor(doc);
       const attributesPhase2 = migrateUseTopHitsToScalingType({ attributes: attributesPhase1 });
@@ -104,7 +130,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.8.0': (doc, context) => {
+  '7.8.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = migrateJoinAggKey(doc);
 
@@ -117,7 +146,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.9.0': (doc, context) => {
+  '7.9.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = removeBoundsFromSavedObject(doc);
 
@@ -130,7 +162,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.10.0': (doc, context) => {
+  '7.10.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = setDefaultAutoFitToBounds(doc);
 
@@ -143,7 +178,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.12.0': (doc, context) => {
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = addTypeToTermJoin(doc);
 
@@ -156,7 +194,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '7.14.0': (doc, context) => {
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = moveAttribution(doc);
 
@@ -169,7 +210,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '8.0.0': (doc, context) => {
+  '8.0.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = setEmsTmsDefaultModes(doc);
 
@@ -182,7 +226,10 @@ export const savedObjectMigrations = {
       return doc;
     }
   },
-  '8.1.0': (doc, context) => {
+  '8.1.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
     try {
       const attributes = renameLayerTypes(doc);
 
