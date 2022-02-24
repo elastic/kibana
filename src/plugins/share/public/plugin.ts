@@ -11,11 +11,6 @@ import './index.scss';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
-import {
-  UrlGeneratorsService,
-  UrlGeneratorsSetup,
-  UrlGeneratorsStart,
-} from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
@@ -31,13 +26,6 @@ import type { BrowserUrlService } from './types';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
-  /**
-   * @deprecated
-   *
-   * URL Generators are deprecated use UrlService instead.
-   */
-  urlGenerators: UrlGeneratorsSetup;
-
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -58,13 +46,6 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
 /** @public */
 export type SharePluginStart = ShareMenuManagerStart & {
   /**
-   * @deprecated
-   *
-   * URL Generators are deprecated use UrlService instead.
-   */
-  urlGenerators: UrlGeneratorsStart;
-
-  /**
    * Utilities to work with URL locators and short URLs.
    */
   url: BrowserUrlService;
@@ -79,7 +60,6 @@ export type SharePluginStart = ShareMenuManagerStart & {
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
-  private readonly urlGeneratorsService = new UrlGeneratorsService();
 
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
@@ -128,7 +108,6 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
     return {
       ...this.shareMenuRegistry.setup(),
-      urlGenerators: this.urlGeneratorsService.setup(core),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -150,7 +129,6 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
     return {
       ...sharingContextMenuStart,
-      urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
     };

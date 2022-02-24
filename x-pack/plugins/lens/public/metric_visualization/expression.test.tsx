@@ -210,6 +210,7 @@ describe('metric_expression', () => {
         >
           <AutoScale
             key="3"
+            minScale={0.05}
           >
             <div
               className="lnsMetricExpression__value"
