@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
- * Track when a comonent is mounted/unmounted. Good for use in async processing that may update
+ * Track when a component is mounted/unmounted. Good for use in async processing that may update
  * a component's internal state.
  */
 export const useIsMounted = (): boolean => {
-  const isMounted = useRef(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    isMounted.current = true;
+    setIsMounted(true);
 
     return () => {
-      isMounted.current = false;
+      setIsMounted(false);
     };
   }, []);
 
-  return isMounted.current;
+  return isMounted;
 };

@@ -38,6 +38,7 @@ import { useToasts } from '../../../../common/lib/kibana';
 import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
 import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
+import { useIsMounted } from '../../hooks/use_is_mounted';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -185,6 +186,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
+    const isMounted = useIsMounted();
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
       return {
         ...ARTIFACT_FLYOUT_LABELS,
@@ -243,12 +245,14 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {
-        setFormState({
-          item: updatedItem,
-          isValid,
-        });
+        if (isMounted) {
+          setFormState({
+            item: updatedItem,
+            isValid,
+          });
+        }
       },
-      []
+      [isMounted]
     );
 
     const handleSuccess = useCallback(
@@ -259,13 +263,15 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
             : labels.flyoutCreateSubmitSuccess(result)
         );
 
-        // Close the flyout
-        // `undefined` will cause params to be dropped from url
-        setUrlParams({ id: undefined, show: undefined }, true);
+        if (isMounted) {
+          // Close the flyout
+          // `undefined` will cause params to be dropped from url
+          setUrlParams({ id: undefined, show: undefined }, true);
 
-        onSuccess();
+          onSuccess();
+        }
       },
-      [isEditFlow, labels, onSuccess, setUrlParams, toasts]
+      [isEditFlow, isMounted, labels, onSuccess, setUrlParams, toasts]
     );
 
     const handleSubmitClick = useCallback(() => {
@@ -273,12 +279,14 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         submitHandler(formState.item, formMode)
           .then(handleSuccess)
           .catch((submitHandlerError) => {
-            setExternalSubmitHandlerError(submitHandlerError);
+            if (isMounted) {
+              setExternalSubmitHandlerError(submitHandlerError);
+            }
           });
       } else {
         submitData(formState.item).then(handleSuccess);
       }
-    }, [formMode, formState.item, handleSuccess, submitData, submitHandler]);
+    }, [formMode, formState.item, handleSuccess, isMounted, submitData, submitHandler]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
