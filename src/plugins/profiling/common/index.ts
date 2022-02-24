@@ -47,7 +47,7 @@ function toMilliseconds(seconds: string): number {
 export function getTopN(obj) {
   const data = [];
 
-  if (obj.topN?.histogram?.buckets !== undefined) {
+  if (obj.topN?.histogram?.buckets!) {
     // needed for data served from Elasticsearch
     for (let i = 0; i < obj.topN.histogram.buckets.length; i++) {
       const bucket = obj.topN.histogram.buckets[i];
@@ -56,13 +56,15 @@ export function getTopN(obj) {
         data.push({ x: bucket.key, y: v.Count.value, g: v.key });
       }
     }
-  } else if (obj.TopN !== undefined) {
+  } else if (obj.TopN!) {
     // needed for data served from fixtures
     for (const x in obj.TopN) {
-      const values = obj.TopN[x];
-      for (let i = 0; i < values.length; i++) {
-        const v = values[i];
-        data.push({ x: toMilliseconds(x), y: v.Count, g: v.Value });
+      if (obj.TopN.hasOwnProperty(x)) {
+        const values = obj.TopN[x];
+        for (let i = 0; i < values.length; i++) {
+          const v = values[i];
+          data.push({ x: toMilliseconds(x), y: v.Count, g: v.Value });
+        }
       }
     }
   }
@@ -88,18 +90,3 @@ export function timeRangeFromRequest(request: any): [number, number] {
   const timeTo = parseInt(request.query.timeTo!, 10);
   return [timeFrom, timeTo];
 }
-
-export const now = (label?: string) => {
-  if (label) {
-    console.log('Started', label);
-  }
-  return new Date().getTime();
-};
-
-export const elapsed = (start: number, label?: string) => {
-  const duration = new Date().getTime() - start;
-  if (label) {
-    console.log(label, `${duration / 1000}s`);
-  }
-  return duration;
-};

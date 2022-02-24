@@ -5,39 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Logger } from 'kibana/server';
 import { StackTraceID, StackFrameID, FileID, StackTrace, StackFrame, Executable } from './types';
-
-function getExeFileName(exe: any, type: number) {
-  if (exe?.FileName === undefined) {
-    console.log('MISSING EXE');
-    return '';
-  }
-  if (exe.FileName !== '') {
-    return exe.FileName;
-  }
-  switch (type) {
-    case 0:
-      return '<unsymbolized frame>';
-    case 1:
-      return 'Python';
-    case 2:
-      return 'PHP';
-    case 3:
-      return 'Native';
-    case 4:
-      return 'Kernel';
-    case 5:
-      return 'JVM/Hotspot';
-    case 6:
-      return 'Ruby';
-    case 7:
-      return 'Perl';
-    case 8:
-      return 'JavaScript';
-    default:
-      return '';
-  }
-}
 
 function checkIfStringHasParentheses(s: string) {
   return /\(|\)/.test(s);
@@ -47,16 +16,6 @@ function getFunctionName(frame: any) {
   return frame.FunctionName !== '' && !checkIfStringHasParentheses(frame.FunctionName)
     ? `${frame.FunctionName}()`
     : frame.FunctionName;
-}
-
-// Generates the label for a flamegraph node
-//
-// This is slightly modified from the original code in elastic/prodfiler_ui
-function getLabel(frame: any, executable: any, type: number) {
-  if (frame.FunctionName !== '') {
-    return `${getExeFileName(executable, type)}: ${getFunctionName(frame)} in #${frame.LineNumber}`;
-  }
-  return getExeFileName(executable, type);
 }
 
 export class FlameGraph {
@@ -77,13 +36,16 @@ export class FlameGraph {
   stackframes: Map<StackFrameID, StackFrame>;
   executables: Map<FileID, Executable>;
 
+  private readonly logger: Logger;
+
   constructor(
     sampleRate: number,
     totalCount: number,
     events: Map<StackTraceID, number>,
     stackTraces: Map<StackTraceID, StackTrace>,
     stackFrames: Map<StackFrameID, StackFrame>,
-    executables: Map<FileID, Executable>
+    executables: Map<FileID, Executable>,
+    logger: Logger
   ) {
     this.sampleRate = sampleRate;
     this.totalCount = totalCount;
@@ -91,6 +53,51 @@ export class FlameGraph {
     this.stacktraces = stackTraces;
     this.stackframes = stackFrames;
     this.executables = executables;
+    this.logger = logger;
+  }
+
+  private getExeFileName(exe: any, type: number) {
+    if (exe?.FileName === undefined) {
+      this.logger.warn('missing executable FileName');
+      return '';
+    }
+    if (exe.FileName !== '') {
+      return exe.FileName;
+    }
+    switch (type) {
+      case 0:
+        return '<unsymbolized frame>';
+      case 1:
+        return 'Python';
+      case 2:
+        return 'PHP';
+      case 3:
+        return 'Native';
+      case 4:
+        return 'Kernel';
+      case 5:
+        return 'JVM/Hotspot';
+      case 6:
+        return 'Ruby';
+      case 7:
+        return 'Perl';
+      case 8:
+        return 'JavaScript';
+      default:
+        return '';
+    }
+  }
+
+  // Generates the label for a flamegraph node
+  //
+  // This is slightly modified from the original code in elastic/prodfiler_ui
+  private getLabel(frame: any, executable: any, type: number) {
+    if (frame.FunctionName !== '') {
+      return `${this.getExeFileName(executable, type)}: ${getFunctionName(frame)} in #${
+        frame.LineNumber
+      }`;
+    }
+    return this.getExeFileName(executable, type);
   }
 
   toElastic() {
@@ -100,7 +107,7 @@ export class FlameGraph {
     for (const trace of this.stacktraces.values()) {
       const path = ['root'];
       for (let i = trace.FrameID.length - 1; i >= 0; i--) {
-        const label = getLabel(
+        const label = this.getLabel(
           this.stackframes.get(trace.FrameID[i]),
           this.executables.get(trace.FileID[i]),
           parseInt(trace.Type[i], 10)

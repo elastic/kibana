@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IRouter } from 'kibana/server';
+import type { IRouter, Logger } from 'kibana/server';
 import { DataRequestHandlerContext } from '../../../data/server';
 import { registerFlameChartElasticRoute, registerFlameChartPixiRoute } from './load_flamechart';
 import {
@@ -25,7 +25,7 @@ import {
   registerTraceEventsTopNThreadsSearchRoute,
 } from './search_topn';
 
-export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
+export function registerRoutes(router: IRouter<DataRequestHandlerContext>, logger?: Logger) {
   registerFlameChartElasticRoute(router);
   registerFlameChartPixiRoute(router);
   registerTraceEventsTopNContainersRoute(router);
@@ -34,7 +34,7 @@ export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
   registerTraceEventsTopNStackTracesRoute(router);
   registerTraceEventsTopNThreadsRoute(router);
 
-  registerFlameChartSearchRoute(router);
+  registerFlameChartSearchRoute(router, logger!);
   registerTraceEventsTopNContainersSearchRoute(router);
   registerTraceEventsTopNDeploymentsSearchRoute(router);
   registerTraceEventsTopNHostsSearchRoute(router);
