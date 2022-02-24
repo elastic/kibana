@@ -9,7 +9,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
-import { EuiWrappingPopover, EuiLink, EuiContextMenu } from '@elastic/eui';
+import { EuiWrappingPopover, EuiLink, EuiContextMenu, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ISearchSource } from '../../../../../../data/common';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
@@ -72,6 +72,30 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     });
   }, [getParams, onCloseAlertFlyout, triggersActionsUi, alertFlyoutVisible]);
 
+  const hasTimeFieldName = dataView.timeFieldName;
+  let createSearchThresholdRuleLink = (
+    <EuiLink onClick={() => setAlertFlyoutVisibility(true)} disabled={!hasTimeFieldName}>
+      <FormattedMessage
+        id="discover.alerts.createSearchThreshold"
+        defaultMessage="Create search threshold rule"
+      />
+    </EuiLink>
+  );
+
+  if (!hasTimeFieldName) {
+    const toolTipContent = (
+      <FormattedMessage
+        id="discover.alerts.missedTimeFieldToolTip"
+        defaultMessage="Data view does not have time field."
+      />
+    );
+    createSearchThresholdRuleLink = (
+      <EuiToolTip position="top" content={toolTipContent}>
+        {createSearchThresholdRuleLink}
+      </EuiToolTip>
+    );
+  }
+
   const panels = [
     {
       id: 'mainPanel',
@@ -81,20 +105,11 @@ export function AlertsPopover(props: AlertsPopoverProps) {
           name: (
             <>
               {SearchThresholdAlertFlyout}
-              <EuiLink
-                onClick={() => {
-                  setAlertFlyoutVisibility(true);
-                }}
-              >
-                <FormattedMessage
-                  id="discover.alerts.createSearchThreshold"
-                  defaultMessage="Create search threshold rule"
-                />
-              </EuiLink>
+              {createSearchThresholdRuleLink}
             </>
           ),
           icon: 'bell',
-          disabled: !dataView.timeFieldName,
+          disabled: !hasTimeFieldName,
         },
         {
           name: (

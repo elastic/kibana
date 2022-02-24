@@ -58,9 +58,7 @@ const displayRuleChangedWarn = (toastNotifications: ToastsStart) => {
 const getCurrentChecksum = (params: SearchThresholdAlertParams) =>
   sha256.create().update(JSON.stringify(params)).hex();
 
-const isConcreteAlert = (
-  queryParams: QueryParams
-): queryParams is NonNullableEntry<QueryParams> => {
+const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntry<QueryParams> => {
   return Boolean(queryParams.from && queryParams.to && queryParams.checksum);
 };
 
@@ -81,7 +79,7 @@ export function ViewAlertRoute() {
     [query]
   );
 
-  const openConcreteAlert = isConcreteAlert(queryParams);
+  const openConcreteAlert = isActualAlert(queryParams);
 
   useEffect(() => {
     const fetchAlert = async () => {

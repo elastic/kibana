@@ -181,9 +181,7 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi && savedSearch.searchSource.getField('index')?.timeFieldName
-      ? [alerts]
-      : []),
+    ...(services.triggersActionsUi ? [alerts] : []),
     shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
