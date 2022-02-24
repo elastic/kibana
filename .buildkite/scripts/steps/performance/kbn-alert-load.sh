@@ -21,8 +21,7 @@ fi
 
 KIBANA_HOST=$(echo "KIBANA_URL" | awk -F/ '{print $3}')
 ELASTIC_HOST=$(echo "ELASTIC_URL" | awk -F/ '{print $3}')
-TEST_ALERT_LOAD_KBN_ES=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$ELASTIC_HOST
-TEST_ALERT_LOAD_KBN_KB=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$KIBANA_HOST
+
 
 echo "meta CLOUD_DEPLOYMENT_KIBANA_URL"
 
@@ -30,11 +29,14 @@ echo "--- Install KBN-ALERT-LOAD"
 
 mkdir kbn-alert-load
 cd kbn-alert-load
-yarn add test-alert-load-kbn
+yarn add test-alert-load-kbn@2.6.0
 
 echo "--- Run IM tests"
 
-npx test-alert-load-kbn run im-test  -r 'report-im.html' -o 'reports'
+TEST_ALERT_LOAD_KBN_ES=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$ELASTIC_HOST
+TEST_ALERT_LOAD_KBN_KB=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$KIBANA_HOST
+
+npx test-alert-load-kbn runSequence im-test  -r 'report-im.html' -o 'reports'
 
 buildkite-agent artifact upload './reports'
 
