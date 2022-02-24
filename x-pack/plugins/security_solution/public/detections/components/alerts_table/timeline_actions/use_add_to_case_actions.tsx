@@ -12,13 +12,12 @@ import { CaseAttachments } from '../../../../../../cases/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
-import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
-import { useInsertTimeline } from '../../../../cases/components/use_insert_timeline';
+import { APP_ID } from '../../../../../common/constants';
 import { Ecs } from '../../../../../common/ecs';
-import { ADD_TO_NEW_CASE } from '../translations';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
 export interface UseAddToCaseActions {
-  afterCaseSelection: () => void;
+  onMenuItemClick: () => void;
   ariaLabel?: string;
   ecsData?: Ecs;
   nonEcsData?: TimelineNonEcsData[];
@@ -26,32 +25,15 @@ export interface UseAddToCaseActions {
 }
 
 export const useAddToCaseActions = ({
-  afterCaseSelection,
+  onMenuItemClick,
   ariaLabel,
   ecsData,
   nonEcsData,
   timelineId,
 }: UseAddToCaseActions) => {
-  const { timelines: timelinesUi, cases: casesUi } = useKibana().services;
+  const { cases: casesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
-  const insertTimelineHook = useInsertTimeline;
   const casesToasts = casesUi.hooks.useCasesToast();
-
-  const addToCaseActionProps = useMemo(
-    () =>
-      ecsData?._id
-        ? {
-            ariaLabel,
-            event: { data: nonEcsData ?? [], ecs: ecsData, _id: ecsData?._id },
-            useInsertTimeline: insertTimelineHook,
-            casePermissions,
-            appId: APP_UI_ID,
-            owner: APP_ID,
-            onClose: afterCaseSelection,
-          }
-        : null,
-    [ecsData, ariaLabel, nonEcsData, insertTimelineHook, casePermissions, afterCaseSelection]
-  );
   const hasWritePermissions = casePermissions?.crud ?? false;
 
   const caseAttachments: CaseAttachments = useMemo(() => {
@@ -73,17 +55,32 @@ export const useAddToCaseActions = ({
     onSuccess: async (theCase: Case) => {
       casesToasts.showSuccessAttach(theCase);
     },
-    onClose: afterCaseSelection,
+    onClose: onMenuItemClick,
+  });
+
+  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+    attachments: caseAttachments,
+    onRowClick: (theCase?: Case) => {
+      if (theCase !== undefined) {
+        casesToasts.showSuccessAttach(theCase);
+      }
+    },
+    onClose: onMenuItemClick,
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
-    afterCaseSelection();
+    onMenuItemClick();
     createCaseFlyout.open();
-  }, [afterCaseSelection, createCaseFlyout]);
+  }, [onMenuItemClick, createCaseFlyout]);
+
+  const handleAddToExistingCaseClick = useCallback(() => {
+    // TODO rename this, this is really `closePopover()`
+    onMenuItemClick();
+    selectCaseModal.open();
+  }, [onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems = useMemo(() => {
-    const items = [];
     if (
       [
         TimelineId.detectionsPage,
@@ -92,32 +89,37 @@ export const useAddToCaseActions = ({
       ].includes(timelineId as TimelineId) &&
       hasWritePermissions
     ) {
-      if (addToCaseActionProps) {
-        items.push(timelinesUi.getAddToExistingCaseButton(addToCaseActionProps));
-      }
-      items.push(
+      return [
+        // add to existing case menu item
+        <EuiContextMenuItem
+          aria-label={ariaLabel}
+          data-test-subj="cases-actions-add-to-existing-case"
+          onClick={handleAddToExistingCaseClick}
+          size="s"
+        >
+          {ADD_TO_EXISTING_CASE} {'YES'}
+        </EuiContextMenuItem>,
+        // add to new case menu item
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="cases-actions-add-to-new-case"
           onClick={handleAddToNewCaseClick}
           size="s"
         >
-          {ADD_TO_NEW_CASE}
-        </EuiContextMenuItem>
-      );
+          {ADD_TO_NEW_CASE} {'here'}
+        </EuiContextMenuItem>,
+      ];
     }
-    return items;
+    return [];
   }, [
-    addToCaseActionProps,
     ariaLabel,
+    handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     hasWritePermissions,
     timelineId,
-    timelinesUi,
   ]);
 
   return {
     addToCaseActionItems,
-    addToCaseActionProps,
   };
 };
