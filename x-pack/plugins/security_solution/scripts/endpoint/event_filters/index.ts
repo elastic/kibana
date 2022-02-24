@@ -41,12 +41,10 @@ export const cli = () => {
         default: {
           count: 10,
           kibana: 'http://elastic:changeme@localhost:5601',
-          withWildcardPaths: false,
         },
         help: `
         --count               Number of event filters to create. Default: 10
         --kibana              The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
-        --withWildcardPaths   When true, generates event filters with file.path.text fields and wildcard-ed file paths
       `,
       },
     }
@@ -82,9 +80,10 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
     Array.from({ length: flags.count as unknown as number }),
     () => {
       let options: Partial<ExceptionListItemSchema> = {};
-      if (flags.withWildcardPaths) {
-        const seed = parseInt((Math.random() * 3).toString(), 10);
-        const os = seed === 0 ? 'linux' : seed === 1 ? 'macos' : 'windows';
+      const listSize = (flags.count ?? 10) as number;
+      const randomN = eventGenerator.randomN(listSize);
+      if (randomN > Math.floor(listSize / 2)) {
+        const os = eventGenerator.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
         options = {
           os_types: [os],
           entries: [
@@ -93,12 +92,6 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
               operator: 'included',
               type: 'wildcard',
               value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
-            },
-            {
-              field: 'file.path.text',
-              operator: 'included',
-              type: 'wildcard',
-              value: os === 'windows' ? 'D:\\Read*\\*\\file.exe' : '/sys/*/*/file.dmg',
             },
           ],
         };
