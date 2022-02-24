@@ -41,7 +41,7 @@ interface PolicyEventFiltersListProps {
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
   const { getAppUrl } = useAppUrl();
   const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
-  const policiesRequest = useGetEndpointSpecificPolicies();
+  const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
