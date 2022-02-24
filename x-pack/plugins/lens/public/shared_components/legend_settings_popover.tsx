@@ -229,6 +229,12 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         position={position}
         onPositionChange={onPositionChange}
       />
+      <LegendSizeSettings
+        legendSize={legendSize}
+        onLegendSizeChange={onLegendSizeChange}
+        isVerticalLegend={position === Position.Left || position === Position.Right}
+        isDisabled={mode === 'hide'}
+      />
       <EuiFormRow
         display="columnCompressedSwitch"
         label={i18n.translate('xpack.lens.shared.truncateLegend', {
@@ -346,11 +352,6 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           </TooltipWrapper>
         </EuiFormRow>
       )}
-      <LegendSizeSettings
-        legendSize={legendSize}
-        onLegendSizeChange={onLegendSizeChange}
-        isDisabled={mode === 'hide'}
-      />
     </ToolbarPopover>
   );
 };
