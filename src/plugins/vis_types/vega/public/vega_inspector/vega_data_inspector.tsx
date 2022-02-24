@@ -8,8 +8,8 @@
 
 import './vega_data_inspector.scss';
 
-import React from 'react';
-import { EuiTabbedContent } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiTabbedContent, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { VegaInspectorAdapters } from './vega_inspector';
@@ -31,6 +31,31 @@ const specLabel = i18n.translate('visTypeVega.inspector.specLabel', {
 });
 
 const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
+  const [error, setError] = useState<string | undefined>();
+
+  useEffect(() => {
+    const subscription = adapters.vega.getErrorObservable().subscribe((data) => {
+      setError(data);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [adapters.vega]);
+
+  if (error) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('visTypeVega.inspector.errorHeading', {
+          defaultMessage: `Vega didn't render successfully`,
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <p>{error}</p>
+      </EuiCallOut>
+    );
+  }
+
   const tabs = [
     {
       id: 'data-viewer--id',

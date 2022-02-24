@@ -25,8 +25,9 @@ export const getCasesLazy = ({
   refreshRef,
   timelineIntegration,
   features,
+  releasePhase,
 }: GetCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud, basePath, features }}>
+  <CasesProvider value={{ owner, userCanCrud, basePath, features, releasePhase }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesLazy
         onComponentInitialized={onComponentInitialized}

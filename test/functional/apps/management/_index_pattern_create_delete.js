@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('validation', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/124663
+    describe.skip('validation', function () {
       it('can display errors', async function () {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.settings.setIndexPatternField('log-fake*');
@@ -117,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Delete data view?';
+        const expectedAlertText = 'Delete data view';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
           expect(alertText).to.be(expectedAlertText);
         });

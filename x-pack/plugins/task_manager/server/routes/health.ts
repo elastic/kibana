@@ -128,7 +128,7 @@ export function healthRoute(params: HealthRouteParams): {
       // the `taskManager` feature, which is only available as part of the Global All privilege.
       if (usageCounter) {
         const clusterClient = await getClusterClient();
-        const { body: hasPrivilegesResponse } = await clusterClient
+        const hasPrivilegesResponse = await clusterClient
           .asScoped(req)
           .asCurrentUser.security.hasPrivileges({
             body: {

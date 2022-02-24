@@ -125,9 +125,9 @@ describe('fetchNodesFromClusterStats', () => {
   };
 
   it('fetch stats', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+      esRes
     );
     const result = await fetchNodesFromClusterStats(esClient, clusters);
     expect(result).toEqual([
@@ -155,7 +155,7 @@ describe('fetchNodesFromClusterStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchNodesFromClusterStats(esClient, clusters);
     expect(params).toStrictEqual({
@@ -172,6 +172,7 @@ describe('fetchNodesFromClusterStats', () => {
                 bool: {
                   should: [
                     { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -188,7 +189,9 @@ describe('fetchNodesFromClusterStats', () => {
               top: {
                 top_hits: {
                   sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                  _source: { includes: ['cluster_state.nodes_hash', 'cluster_state.nodes'] },
+                  _source: {
+                    includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
+                  },
                   size: 2,
                 },
               },
@@ -204,7 +207,7 @@ describe('fetchNodesFromClusterStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchNodesFromClusterStats(esClient, clusters);
     // @ts-ignore

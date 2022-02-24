@@ -10,6 +10,7 @@ import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import { Filter, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -22,8 +23,6 @@ import {
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  esFilters,
-  Filter,
   FilterManager,
   Query,
   SearchSessionInfoProvider,
@@ -277,7 +276,7 @@ export function getState({
         data.query,
         appStateContainer,
         {
-          filters: esFilters.FilterStateStore.APP_STATE,
+          filters: FilterStateStore.APP_STATE,
           query: true,
         }
       );
@@ -322,7 +321,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
 }
 
 /**
