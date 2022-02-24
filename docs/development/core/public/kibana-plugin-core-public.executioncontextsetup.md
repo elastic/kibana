@@ -15,15 +15,15 @@ export interface ExecutionContextSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [context$](./kibana-plugin-core-public.executioncontextsetup.context_.md) | Observable&lt;KibanaExecutionContext&gt; |  |
+|  [context$](./kibana-plugin-core-public.executioncontextsetup.context_.md) | Observable&lt;KibanaExecutionContext&gt; | The current context observable |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [clear()](./kibana-plugin-core-public.executioncontextsetup.clear.md) |  |
-|  [get()](./kibana-plugin-core-public.executioncontextsetup.get.md) |  |
+|  [clear()](./kibana-plugin-core-public.executioncontextsetup.clear.md) | clears the context |
+|  [get()](./kibana-plugin-core-public.executioncontextsetup.get.md) | Get the current top level context |
 |  [getAsLabels()](./kibana-plugin-core-public.executioncontextsetup.getaslabels.md) | returns apm labels |
-|  [set(c$)](./kibana-plugin-core-public.executioncontextsetup.set.md) |  |
-|  [withGlobalContext(context)](./kibana-plugin-core-public.executioncontextsetup.withglobalcontext.md) | merges the current global context with the specific event context |
+|  [set(c$)](./kibana-plugin-core-public.executioncontextsetup.set.md) | Set the current top level context |
+|  [withGlobalContext(context)](./kibana-plugin-core-public.executioncontextsetup.withglobalcontext.md) | merges the current top level context with the specific event context |
 

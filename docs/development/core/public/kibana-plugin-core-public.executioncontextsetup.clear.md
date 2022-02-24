@@ -4,6 +4,8 @@
 
 ## ExecutionContextSetup.clear() method
 
+clears the context
+
 <b>Signature:</b>
 
 ```typescript

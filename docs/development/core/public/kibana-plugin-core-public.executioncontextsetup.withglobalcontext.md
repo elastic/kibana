@@ -4,7 +4,7 @@
 
 ## ExecutionContextSetup.withGlobalContext() method
 
-merges the current global context with the specific event context
+merges the current top level context with the specific event context
 
 <b>Signature:</b>
 

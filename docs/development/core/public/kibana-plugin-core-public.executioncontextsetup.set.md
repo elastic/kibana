@@ -4,6 +4,8 @@
 
 ## ExecutionContextSetup.set() method
 
+Set the current top level context
+
 <b>Signature:</b>
 
 ```typescript

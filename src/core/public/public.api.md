@@ -518,15 +518,11 @@ export interface ErrorToastOptions extends ToastOptions {
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
-    // (undocumented)
     clear(): void;
-    // (undocumented)
     context$: Observable<KibanaExecutionContext>;
-    // (undocumented)
     get(): KibanaExecutionContext;
     // Warning: (ae-forgotten-export) The symbol "Labels" needs to be exported by the entry point index.d.ts
     getAsLabels(): Labels_2;
-    // (undocumented)
     set(c$: KibanaExecutionContext): void;
     withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
 }

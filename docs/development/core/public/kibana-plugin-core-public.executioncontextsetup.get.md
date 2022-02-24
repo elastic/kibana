@@ -4,6 +4,8 @@
 
 ## ExecutionContextSetup.get() method
 
+Get the current top level context
+
 <b>Signature:</b>
 
 ```typescript

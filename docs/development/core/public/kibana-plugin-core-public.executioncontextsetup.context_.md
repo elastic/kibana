@@ -4,6 +4,8 @@
 
 ## ExecutionContextSetup.context$ property
 
+The current context observable
+
 <b>Signature:</b>
 
 ```typescript
