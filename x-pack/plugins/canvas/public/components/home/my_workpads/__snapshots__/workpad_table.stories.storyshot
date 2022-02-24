@@ -853,7 +853,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           className="euiSpacer euiSpacer--m"
         />
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"

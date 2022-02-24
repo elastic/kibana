@@ -80,6 +80,7 @@ exports[`source editor geo_grid_source should render editor 1`] = `
       fields={Array []}
       key="12345"
       metrics={Array []}
+      metricsFilter={[Function]}
       onChange={[Function]}
     />
   </EuiPanel>
