@@ -129,9 +129,11 @@ export const EventSchema = schema.maybe(
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsNumber(),
+                        number_of_searches: ecsNumber(),
                         total_alerts_created: ecsNumber(),
                         total_alerts_detected: ecsNumber(),
                         total_indexing_duration_ms: ecsNumber(),
+                        es_search_duration_ms: ecsNumber(),
                         total_search_duration_ms: ecsNumber(),
                         execution_gap_duration_s: ecsNumber(),
                       })

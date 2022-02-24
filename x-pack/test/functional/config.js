@@ -53,7 +53,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/api_keys'),
-      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/data_views'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
       resolve(__dirname, './apps/ingest_pipelines'),
@@ -540,6 +540,25 @@ export default async function ({ readConfigFile }) {
                 names: ['*'],
                 privileges: ['all'],
               },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
             ],
           },
           kibana: [

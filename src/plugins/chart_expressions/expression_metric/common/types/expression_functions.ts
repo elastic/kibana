@@ -27,6 +27,7 @@ export interface MetricArguments {
   labelPosition: LabelPositionType;
   metric: ExpressionValueVisDimension[];
   bucket?: ExpressionValueVisDimension;
+  colorFullBackground: boolean;
   autoScale?: boolean;
 }
 
