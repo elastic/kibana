@@ -11,16 +11,16 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
 export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
-  const context = useCasesContext();
+  const { dispatch } = useCasesContext();
 
   const closeFlyout = useCallback(() => {
-    context.dispatch({
+    dispatch({
       type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
     });
-  }, [context]);
+  }, [dispatch]);
 
   const openFlyout = useCallback(() => {
-    context.dispatch({
+    dispatch({
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
       payload: {
         ...props,
@@ -38,7 +38,7 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
         },
       },
     });
-  }, [closeFlyout, context, props]);
+  }, [closeFlyout, dispatch, props]);
   return {
     open: openFlyout,
     close: closeFlyout,

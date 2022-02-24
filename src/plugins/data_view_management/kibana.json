@@ -5,6 +5,7 @@
   "ui": true,
   "requiredPlugins": ["management", "data", "urlForwarding", "dataViewFieldEditor", "dataViewEditor", "dataViews", "fieldFormats"],
   "requiredBundles": ["kibanaReact", "kibanaUtils"],
+  "optionalPlugins": ["spaces"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"
