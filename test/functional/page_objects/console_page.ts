@@ -138,11 +138,6 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(Key.ENTER);
   }
 
-  public async pressSpace() {
-    const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.pressKeys(Key.SPACE);
-  }
-
   public async clearTextArea() {
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
       const textArea = await this.testSubjects.find('console-textarea');

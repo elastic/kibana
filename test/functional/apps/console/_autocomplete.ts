@@ -57,19 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
       });
-
-      it('should add a comma on the same line', async () => {
-        await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
-        await PageObjects.console.pressSpace();
-        await PageObjects.console.pressSpace();
-        await PageObjects.console.pressSpace();
-        await PageObjects.console.promptAutocomplete();
-        await PageObjects.console.enterText('boost');
-        await PageObjects.console.pressEnter();
-
-        const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
-        expect(text).to.contain(',');
-      });
     });
   });
 }
