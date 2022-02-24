@@ -111,10 +111,10 @@ export interface EndpointPolicyResponseDocument {
             };
           };
           status: string;
-          configuration: NonPolicyConfiguration;
-          state: NonPolicyConfiguration;
         };
       };
+      configuration: NonPolicyConfiguration;
+      state: NonPolicyConfiguration;
     };
   };
 }
