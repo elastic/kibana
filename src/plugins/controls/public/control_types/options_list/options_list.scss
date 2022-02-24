@@ -48,6 +48,10 @@
   color: $euiTextSubduedColor;
 }
 
+.optionsList--filterBtnWrapper {
+  height: 100%;
+}
+
 .optionsList--filterBtn {
   .euiFilterButton__text-hasNotification {
     flex-grow: 1;

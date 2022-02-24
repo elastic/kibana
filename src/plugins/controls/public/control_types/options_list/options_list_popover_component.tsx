@@ -38,10 +38,12 @@ export const OptionsListPopover = ({
   totalCardinality,
   invalidSelections,
   updateSearchString,
+  width,
 }: {
   field?: DataViewField;
   searchString: string;
   totalCardinality?: number;
+  width: number;
   loading: OptionsListComponentState['loading'];
   invalidSelections?: string[];
   updateSearchString: (newSearchString: string) => void;
@@ -68,22 +70,16 @@ export const OptionsListPopover = ({
 
   return (
     <>
-      <EuiPopoverTitle className="optionsList__popoverTitle" paddingSize="s">
-        {title}
-      </EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       {field?.type !== 'boolean' && (
         <div className="optionsList__actions">
-          <EuiFormRow>
-            <EuiFlexGroup
-              gutterSize="xs"
-              direction="row"
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
+          <EuiFormRow fullWidth>
+            <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <EuiFieldSearch
                   compressed
                   disabled={showOnlySelected}
+                  fullWidth
                   onChange={(event) => updateSearchString(event.target.value)}
                   value={searchString}
                   data-test-subj="optionsList-control-search-input"
@@ -147,6 +143,7 @@ export const OptionsListPopover = ({
         </div>
       )}
       <div
+        style={{ width: width > 300 ? width : undefined }}
         className="optionsList__items"
         data-option-count={availableOptions?.length ?? 0}
         data-test-subj={`optionsList-control-available-options`}
