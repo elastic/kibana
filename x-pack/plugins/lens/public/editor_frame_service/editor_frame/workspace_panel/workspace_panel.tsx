@@ -122,8 +122,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
-let lastApplyChangesCounter = 0;
-
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
@@ -145,11 +143,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
   const applyChangesCounter = useLensSelector(selectApplyChangesCounter);
 
-  const triggerApply = applyChangesCounter !== lastApplyChangesCounter;
-  lastApplyChangesCounter = applyChangesCounter;
-
   const [expressionToRender, setExpressionToRender] = useState<string | null | undefined>();
   const [finishedInitialRender, setFinishedInitialRender] = useState(false);
+  const [lastApplyChangesCounter, setLastApplyChangesCounter] = useState(0);
+
+  const triggerApply = applyChangesCounter !== lastApplyChangesCounter;
+
+  if (triggerApply) {
+    setLastApplyChangesCounter(applyChangesCounter);
+  }
 
   const shouldApplyChanges = autoApplyEnabled || !finishedInitialRender || triggerApply;
 
@@ -373,7 +375,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (!expressionExists) {
+    if (expression === null) {
       return renderEmptyWorkspace();
     }
     return (

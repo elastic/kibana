@@ -177,6 +177,8 @@ describe('workspace_panel', () => {
 
     instance = mounted.instance;
 
+    instance.update();
+
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
       "kibana
       | lens_merge_tables layerIds=\\"first\\" tables={datasource}
@@ -184,25 +186,13 @@ describe('workspace_panel', () => {
     `);
   });
 
-  it('should use applied state when available (when auto-apply is disabled)', async () => {
+  it.skip('should give user control when auto-apply disabled', async () => {
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
-    framePublicAPI.appliedDatasourceLayers = {
-      first: { ...mockDatasource.publicAPIMock, applied: true } as DatasourcePublicAPI,
-    };
-
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
-
-    const toExpression = jest.fn(
-      (
-        state: unknown,
-        datasourceLayers: Record<string, DatasourcePublicAPI>,
-        attributes?: Partial<{ title: string; description: string }>
-      ) => 'testVis'
-    );
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -212,51 +202,51 @@ describe('workspace_panel', () => {
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
-      />,
-      {
-        preloadedState: {
-          appliedState: {
-            activeDatasourceId: 'testDatasource',
-            visualization: {
-              activeId: 'testVis',
-              state: { applied: true },
-            },
-            datasourceStates: {
-              [mockDatasource.id]: { isLoading: false, state: { applied: true } },
-            },
-          },
-        },
-      }
+      />
     );
 
     instance = mounted.instance;
 
-    expect(toExpression).toHaveBeenCalled();
-    const [appliedVisualizationState, appliedDatasourceLayers] = toExpression.mock.calls[0];
-    expect((appliedVisualizationState as { applied: boolean }).applied).toBe(true);
-    expect(
-      (appliedDatasourceLayers?.first as DatasourcePublicAPI & { applied: boolean }).applied
-    ).toBe(true);
+    instance.update();
 
-    // START NEW SCENARIO — make sure it switches back to using working state when auto-apply is reenabled
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    "kibana
+    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+    | testVis"
+  `);
 
-    // have to do this part manually in the test, but in the application it will happen in the frame API selector which will be called in the parent component tree
-    instance.setProps({
-      framePublicAPI: { ...framePublicAPI, appliedDatasourceLayers: undefined },
+    act(() => {
+      mounted.lensStore.dispatch(disableAutoApply());
     });
-    toExpression.mockClear();
 
-    mounted.lensStore.dispatch(enableAutoApply());
+    mockDatasource.toExpression.mockReturnValue('new-datasource');
+    instance.setProps({
+      visualizationMap: {
+        testVis: { ...mockVisualization, toExpression: () => 'new-vis' },
+      },
+    });
 
-    expect(toExpression).toHaveBeenCalledTimes(1);
-    const [visualizationState, datasourceLayers] = toExpression.mock.calls[0];
-    expect((visualizationState as { applied: boolean }).applied).toBeUndefined();
-    expect(
-      (datasourceLayers?.first as DatasourcePublicAPI & { applied: boolean }).applied
-    ).toBeUndefined();
+    // nothing should change
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    "kibana
+    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+    | testVis"
+  `);
+
+    act(() => {
+      mounted.lensStore.dispatch(applyChanges());
+    });
+    instance.update();
+
+    // should update
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    "kibana
+    | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
+    | new-vis"
+  `);
   });
 
   it('should execute a trigger on expression event', async () => {
@@ -371,6 +361,7 @@ describe('workspace_panel', () => {
       }
     );
     instance = mounted.instance;
+    instance.update();
 
     const ast = fromExpression(instance.find(expressionRendererMock).prop('expression') as string);
 
@@ -654,6 +645,9 @@ describe('workspace_panel', () => {
       />
     );
     instance = mounted.instance;
+    act(() => {
+      instance.update();
+    });
 
     expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
