@@ -173,6 +173,8 @@ async function legacyFetchFieldExistenceSampling({
   const indexPattern = await dataViewsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
+  const runtimeMappings = indexPattern.getRuntimeMappings();
+
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
@@ -181,6 +183,7 @@ async function legacyFetchFieldExistenceSampling({
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
+    runtimeMappings,
     includeFrozen,
   });
 
@@ -216,6 +219,7 @@ async function fetchIndexPatternStats({
   fromDate,
   toDate,
   fields,
+  runtimeMappings,
   includeFrozen,
 }: {
   client: ElasticsearchClient;
@@ -225,12 +229,12 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
+  runtimeMappings: estypes.MappingRuntimeFields;
   includeFrozen: boolean;
 }) {
   const query = toQuery(timeFieldName, fromDate, toDate, dslQuery);
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const runtimeFields = fields.filter((f) => f.runtimeField);
   const result = await client.search(
     {
       index,
@@ -242,11 +246,7 @@ async function fetchIndexPatternStats({
         sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
         fields: ['*'],
         _source: false,
-        runtime_mappings: runtimeFields.reduce((acc, field) => {
-          if (!field.runtimeField) return acc;
-          acc[field.name] = field.runtimeField;
-          return acc;
-        }, {} as Record<string, estypes.MappingRuntimeField>),
+        runtime_mappings: runtimeMappings,
         script_fields: scriptedFields.reduce((acc, field) => {
           acc[field.name] = {
             script: {
