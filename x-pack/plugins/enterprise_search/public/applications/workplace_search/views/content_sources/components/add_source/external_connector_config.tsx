@@ -121,7 +121,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
             type="text"
             autoComplete="off"
             onChange={(e) => setExternalConnectorUrl(e.target.value)}
-            name="external-connector-uri"
+            name="external-connector-url"
           />
         </EuiFormRow>
         <EuiFormRow

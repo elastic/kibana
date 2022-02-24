@@ -13,34 +13,25 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSteps, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSteps } from '@elastic/eui';
 
-import { ApiKey } from '../../../../components/shared/api_key';
 import { staticSourceData } from '../../source_data';
 
-import { ConfigDocsLinks } from './config_docs_links';
-import { SaveConfig } from './save_config';
+import { ExternalConnectorConfig } from './external_connector_config';
 
-describe('SaveConfig', () => {
-  const advanceStep = jest.fn();
-  const goBackStep = jest.fn();
+describe('ExternalConnectorConfig', () => {
+  const goBack = jest.fn();
   const onDeleteConfig = jest.fn();
-  const setClientIdValue = jest.fn();
-  const setClientSecretValue = jest.fn();
-  const setBaseUrlValue = jest.fn();
-
-  const credentialsSourceConfig = staticSourceData[0].configuration;
-  const needsBaseUrlSourceConfig = staticSourceData[1].configuration;
-  const publicKeySourceConfig = staticSourceData[2].configuration;
-  const accountContextOnlySourceConfig = staticSourceData[6].configuration;
+  const setExternalConnectorApiKey = jest.fn();
+  const setExternalConnectorUrl = jest.fn();
+  const saveExternalConnectorConfig = jest.fn();
+  const initializeAddExternalSource = jest.fn();
+  const resetSourceState = jest.fn();
 
   const props = {
-    name: 'foo',
-    configuration: credentialsSourceConfig,
-    advanceStep,
-    goBackStep,
+    sourceData: staticSourceData[0],
+    goBack,
     onDeleteConfig,
-    header: <h1>Header</h1>,
   };
 
   const values = {
@@ -54,98 +45,48 @@ describe('SaveConfig', () => {
 
   beforeEach(() => {
     setMockActions({
-      setClientIdValue,
-      setClientSecretValue,
-      setBaseUrlValue,
+      setExternalConnectorApiKey,
+      setExternalConnectorUrl,
+      saveExternalConnectorConfig,
+      initializeAddExternalSource,
+      resetSourceState,
     });
     setMockValues({ ...values });
   });
 
   it('renders', () => {
-    const wrapper = shallow(<SaveConfig {...props} />);
+    const wrapper = shallow(<ExternalConnectorConfig {...props} />);
 
     expect(wrapper.find(EuiSteps)).toHaveLength(1);
   });
 
   it('handles form submission', () => {
-    const wrapper = shallow(<SaveConfig {...props} />);
+    const wrapper = shallow(<ExternalConnectorConfig {...props} />);
 
     const preventDefault = jest.fn();
     wrapper.find('form').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
-    expect(advanceStep).toHaveBeenCalled();
+    expect(saveExternalConnectorConfig).toHaveBeenCalled();
   });
 
-  describe('credentials item', () => {
-    it('handles Client Id change', () => {
-      const wrapper = shallow(<SaveConfig {...props} />);
+  describe('external connector configuration', () => {
+    it('handles url change', () => {
+      const wrapper = shallow(<ExternalConnectorConfig {...props} />);
       const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="client-id"]');
-      input.simulate('change', { target: { value: 'client-id' } });
+      const input = steps.dive().find('[name="external-connector-url"]');
+      input.simulate('change', { target: { value: 'url' } });
 
-      expect(setClientIdValue).toHaveBeenCalledWith('client-id');
+      expect(setExternalConnectorUrl).toHaveBeenCalledWith('url');
     });
 
     it('handles Client secret change', () => {
-      const wrapper = shallow(<SaveConfig {...props} />);
+      const wrapper = shallow(<ExternalConnectorConfig {...props} />);
       const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="client-secret"]');
-      input.simulate('change', { target: { value: 'client-secret' } });
+      const input = steps.dive().find('[name="external-connector-api-key"]');
+      input.simulate('change', { target: { value: 'api-key' } });
 
-      expect(setClientSecretValue).toHaveBeenCalledWith('client-secret');
+      expect(setExternalConnectorApiKey).toHaveBeenCalledWith('api-key');
     });
-  });
-
-  describe('public key item', () => {
-    const publicProps = {
-      ...props,
-      configuration: publicKeySourceConfig,
-    };
-
-    it('renders form controls', () => {
-      const wrapper = shallow(<SaveConfig {...publicProps} />);
-      const steps = wrapper.find(EuiSteps);
-
-      expect(steps.dive().find(EuiButton)).toHaveLength(2);
-      expect(steps.dive().find(EuiButtonEmpty)).toHaveLength(1);
-    });
-
-    it('renders ApiKeys', () => {
-      const wrapper = shallow(<SaveConfig {...publicProps} />);
-      const steps = wrapper.find(EuiSteps);
-
-      expect(steps.dive().find(ApiKey)).toHaveLength(2);
-      expect(steps.dive().find(ConfigDocsLinks)).toHaveLength(1);
-    });
-
-    it('handles Base URI change', () => {
-      const wrapper = shallow(<SaveConfig {...publicProps} />);
-      const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="base-uri"]');
-      input.simulate('change', { target: { value: 'base-uri' } });
-
-      expect(setBaseUrlValue).toHaveBeenCalledWith('base-uri');
-    });
-  });
-
-  it('handles Base URL change', () => {
-    const wrapper = shallow(<SaveConfig {...props} configuration={needsBaseUrlSourceConfig} />);
-    const steps = wrapper.find(EuiSteps);
-    const input = steps.dive().find('[name="base-url"]');
-    input.simulate('change', { target: { value: 'base-url' } });
-
-    expect(setBaseUrlValue).toHaveBeenCalledWith('base-url');
-  });
-
-  it('hides form controls for non-platinum users on account-only source', () => {
-    setMockValues({ ...values, hasPlatinumLicense: false });
-
-    const wrapper = shallow(
-      <SaveConfig {...props} configuration={accountContextOnlySourceConfig} />
-    );
-    const steps = wrapper.find(EuiSteps);
-
-    expect(steps.dive().find(EuiButton)).toHaveLength(2);
   });
 });
