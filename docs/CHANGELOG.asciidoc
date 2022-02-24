@@ -75,8 +75,6 @@ Review important information about the {kib} 7.17.x releases.
 [[release-notes-7.17.1]]
 == {kib} 7.17.1
 
-coming::[7.17.1]
-
 The 7.17.1 release includes the following bug fixes.
 
 [float]
