@@ -25,7 +25,7 @@ describe('makeExecutionContext', () => {
     });
   });
 
-  test('ommits undefined values', () => {
+  test('omits undefined values', () => {
     const context = makeExecutionContext({ id: '123', description: undefined });
     expect(context).toStrictEqual({
       name: 'maps',
