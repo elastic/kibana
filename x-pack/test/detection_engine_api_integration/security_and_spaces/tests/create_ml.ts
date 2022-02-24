@@ -230,7 +230,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
+    // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+    it.skip('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
       const rule: MachineLearningCreateSchema = {
         ...testRule,
         anomaly_threshold: 20,
