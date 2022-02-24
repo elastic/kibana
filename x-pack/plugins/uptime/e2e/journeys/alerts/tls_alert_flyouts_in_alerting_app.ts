@@ -23,7 +23,7 @@ journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {
   });
 
   step('Open tls alert flyout', async () => {
-    await page.click(byTestId('createFirstAlertButton'));
+    await page.click(byTestId('createFirstRuleButton'));
     await waitForLoadingToFinish({ page });
     await page.click(byTestId('"xpack.uptime.alerts.tlsCertificate-SelectOption"'));
     await waitForLoadingToFinish({ page });
