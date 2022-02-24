@@ -8,11 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { Case, CommentType } from '../../../../../../cases/common';
-import {
-  CaseAttachments,
-  CasesDeepLinkId,
-  generateCaseViewPath,
-} from '../../../../../../cases/public';
+import { CaseAttachments } from '../../../../../../cases/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
@@ -79,6 +75,7 @@ export const useAddToCaseActions = ({
     },
     onClose: afterCaseSelection,
   });
+
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     afterCaseSelection();
