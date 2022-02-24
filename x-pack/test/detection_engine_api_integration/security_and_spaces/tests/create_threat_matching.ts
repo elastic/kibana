@@ -145,7 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log);
       });
 
-      it('should be able to execute and get 10 signals when doing a specific query', async () => {
+      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+      it.skip('should be able to execute and get 10 signals when doing a specific query', async () => {
         const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
