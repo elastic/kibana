@@ -207,6 +207,7 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 
 describe('policy preconfiguration', () => {
   beforeEach(() => {
+    mockedPackagePolicyService.getByIDs.mockReset();
     mockedPackagePolicyService.create.mockReset();
     mockInstalledPackages.clear();
     mockInstallPackageErrors.clear();
@@ -515,6 +516,54 @@ describe('policy preconfiguration', () => {
     expect(policiesB[0].id).toBe('test-id');
     expect(policiesB[0].updated_at).toEqual(policiesA[0].updated_at);
     expect(nonFatalErrorsB.length).toBe(0);
+  });
+
+  it('should not try to recreate preconfigure package policy that has been renamed', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedPackagePolicyService.getByIDs.mockResolvedValue([
+      { name: 'Renamed package policy', id: 'test_package1' } as PackagePolicy,
+    ]);
+
+    mockConfiguredPolicies.set('test-id', {
+      name: 'Test policy',
+      description: 'Test policy description',
+      unenroll_timeout: 120,
+      namespace: 'default',
+      id: 'test-id',
+      package_policies: [
+        {
+          name: 'test_package1',
+          id: 'test_package1',
+        },
+      ],
+      is_managed: true,
+    } as PreconfiguredAgentPolicy);
+
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      [
+        {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          is_managed: true,
+          package_policies: [
+            {
+              package: { name: 'test_package' },
+              name: 'test_package1',
+              id: 'test_package1',
+            },
+          ],
+        },
+      ] as PreconfiguredAgentPolicy[],
+      [{ name: 'test_package', version: '3.0.0' }],
+      mockDefaultOutput
+    );
+
+    expect(mockedPackagePolicyService.create).not.toBeCalled();
   });
 
   it('should update a managed policy if top level fields are changed', async () => {
