@@ -14,9 +14,9 @@ import {
   AlertTypeParams,
   AlertTypeState,
   IntervalSchedule,
+  RuleExecutionState,
   RuleMonitoring,
   RuleTaskState,
-  RuleTaskStateWithActions,
   SanitizedAlert,
 } from '../../common';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -26,7 +26,7 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
 
 export interface RuleTaskRunResultWithActions {
-  state: RuleTaskStateWithActions;
+  state: RuleExecutionState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
