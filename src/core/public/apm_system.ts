@@ -83,7 +83,10 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
-        this.apm.startTransaction(appId, 'app-change');
+        this.apm.startTransaction(appId, 'app-change', {
+          managed: true,
+          canReuse: true,
+        });
       }
     });
   }

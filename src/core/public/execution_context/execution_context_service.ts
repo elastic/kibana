@@ -19,16 +19,28 @@ export interface Labels {
 
 /** @public */
 export interface ExecutionContextSetup {
+  /**
+   * The current context observable
+   **/
   context$: Observable<KibanaExecutionContext>;
+  /**
+   * Set the current top level context
+   **/
   set(c$: KibanaExecutionContext): void;
+  /**
+   * Get the current top level context
+   **/
   get(): KibanaExecutionContext;
+  /**
+   * clears the context
+   **/
   clear(): void;
   /**
    * returns apm labels
    **/
   getAsLabels(): Labels;
   /**
-   * merges the current global context with the specific event context
+   * merges the current top level context with the specific event context
    **/
   withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
 }

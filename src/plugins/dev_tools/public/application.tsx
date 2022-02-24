@@ -20,7 +20,7 @@ import type {
   ChromeStart,
   ScopedHistory,
   CoreTheme,
-  CoreStart,
+  ExecutionContextStart,
 } from 'src/core/public';
 import { KibanaThemeProvider, useExecutionContext } from '../../kibana_react/public';
 import type { DocTitleService, BreadcrumbService } from './services';
@@ -30,7 +30,7 @@ import { DevToolApp } from './dev_tool';
 export interface AppServices {
   docTitleService: DocTitleService;
   breadcrumbService: BreadcrumbService;
-  executionContext: CoreStart['executionContext'];
+  executionContext: ExecutionContextStart;
 }
 
 interface DevToolsWrapperProps {
