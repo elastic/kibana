@@ -124,6 +124,8 @@ export class DataRecognizer {
   private _resultsService: ReturnType<typeof resultsServiceProvider>;
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
 
+  private _configCache: Config[] | null = null;
+
   /**
    * List of the module jobs that require model memory estimation
    */
@@ -181,6 +183,10 @@ export class DataRecognizer {
   }
 
   private async _loadConfigs(): Promise<Config[]> {
+    if (this._configCache !== null) {
+      return this._configCache;
+    }
+
     const configs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
@@ -211,7 +217,9 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    return [...configs, ...savedObjectConfigs];
+    this._configCache = [...configs, ...savedObjectConfigs];
+
+    return this._configCache;
   }
 
   private async _loadSavedObjectModules() {
