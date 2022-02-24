@@ -88,7 +88,6 @@ Lens & Visualizations::
 * Removes tabify performance issue {kibana-pull}124931[#124931]
 * Fixes an issue where shard failures were not reported in *TSVB* {kibana-pull}123474[#123474]
 Machine Learning::
-* Fixes results service space checks {kibana-pull}124707[#124707]
 * Fixes anomaly detector jobs list filter delay {kibana-pull}124328[#124328]
 Management::
 * You can now use the search bar in the snapshots list of the Snapshot & Restore app with date strings {kibana-pull}125234[#125234]
