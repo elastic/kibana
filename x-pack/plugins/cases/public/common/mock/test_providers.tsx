@@ -21,12 +21,14 @@ import {
 } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
+import { ReleasePhase } from '../../components/types';
 
-interface Props {
+interface TestProviderProps {
   children: React.ReactNode;
   userCanCrud?: boolean;
   features?: CasesFeatures;
   owner?: string[];
+  releasePhase?: ReleasePhase;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -34,11 +36,12 @@ window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
+const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
+  releasePhase = 'ga',
 }) => {
   return (
     <I18nProvider>
@@ -63,18 +66,17 @@ export const createAppMockRenderer = ({
   features,
   owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
-}: {
-  features?: CasesFeatures;
-  owner?: string[];
-  userCanCrud?: boolean;
-} = {}): AppMockRenderer => {
+  releasePhase = 'ga',
+}: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+          <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
+            {children}
+          </CasesProvider>
         </ThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
