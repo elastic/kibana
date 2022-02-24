@@ -279,7 +279,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         {queryField ? (
           <>
             <SavedQueriesDropdown
-              disabled={queryComponentProps.disabled || !permissions.runSavedQueries}
+              disabled={
+                queryComponentProps.disabled ||
+                !permissions.runSavedQueries ||
+                !permissions.readSavedQueries
+              }
               onChange={handleSavedQueryChange}
             />
             <EuiSpacer />
@@ -357,6 +361,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       queryField,
       queryComponentProps,
       permissions.runSavedQueries,
+      permissions.readSavedQueries,
       permissions.writeSavedQueries,
       handleSavedQueryChange,
       ecsMappingField,

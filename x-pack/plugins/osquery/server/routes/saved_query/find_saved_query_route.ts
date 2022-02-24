@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const findSavedQueryRoute = (router: IRouter) => {
   router.get(
     {
       path: '/internal/osquery/saved_query',
@@ -26,21 +26,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           { unknowns: 'allow' }
         ),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
-
-      const [coreStartServices] = await osqueryContext.getStartServices();
-
-      const {
-        osquery: { runSavedQueries, readSavedQueries },
-      } = await coreStartServices.capabilities.resolveCapabilities(request);
-
-      const isValid = runSavedQueries || readSavedQueries;
-
-      if (!isValid) {
-        return response.forbidden();
-      }
 
       const savedQueries = await savedObjectsClient.find<{
         ecs_mapping: Array<{ field: string; value: string }>;
