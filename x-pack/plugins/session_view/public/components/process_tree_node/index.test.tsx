@@ -12,12 +12,6 @@ import {
   childProcessMock,
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import {
-  EventKind,
-  EventAction,
-  ProcessFields,
-  ProcessEvent,
-} from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeNode } from './index';
 
