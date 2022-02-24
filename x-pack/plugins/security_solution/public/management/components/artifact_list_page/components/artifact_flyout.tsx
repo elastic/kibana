@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
+import { HttpFetchError } from 'kibana/public';
 import { useUrlParams } from '../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -150,6 +151,10 @@ export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
   onSuccess(): void;
+  submitHandler?: (
+    item: ArtifactFormComponentOnChangeCallbackProps['item'],
+    mode: ArtifactFormComponentProps['mode']
+  ) => Promise<ExceptionListItemSchema>;
   /**
    * If the artifact data is provided and it matches the id in the URL, then it will not be
    * retrieved again via the API
@@ -170,6 +175,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     item,
     FormComponent,
     onSuccess,
+    submitHandler,
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
     size = 'm',
@@ -185,6 +191,9 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
+    const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
+      HttpFetchError | undefined
+    >(undefined);
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
@@ -192,8 +201,12 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const {
       isLoading: isSubmittingData,
       mutateAsync: submitData,
-      error: submitError,
+      error: internalSubmitError,
     } = useWithArtifactSubmitData(apiClient, formMode);
+
+    const submitError = useMemo(() => {
+      return submitHandler ? externalSubmitHandlerError : internalSubmitError;
+    }, [externalSubmitHandlerError, internalSubmitError, submitHandler]);
 
     const {
       isLoading: isLoadingItemForEdit,
@@ -238,8 +251,8 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       []
     );
 
-    const handleSubmitClick = useCallback(() => {
-      submitData(formState.item).then((result) => {
+    const handleSuccess = useCallback(
+      (result: ExceptionListItemSchema) => {
         toasts.addSuccess(
           isEditFlow
             ? labels.flyoutEditSubmitSuccess(result)
@@ -251,8 +264,21 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         setUrlParams({ id: undefined, show: undefined }, true);
 
         onSuccess();
-      });
-    }, [formState.item, isEditFlow, labels, onSuccess, setUrlParams, submitData, toasts]);
+      },
+      [isEditFlow, labels, onSuccess, setUrlParams, toasts]
+    );
+
+    const handleSubmitClick = useCallback(() => {
+      if (submitHandler) {
+        submitHandler(formState.item, formMode)
+          .then(handleSuccess)
+          .catch((submitHandlerError) => {
+            setExternalSubmitHandlerError(submitHandlerError);
+          });
+      } else {
+        submitData(formState.item).then(handleSuccess);
+      }
+    }, [formMode, formState.item, handleSuccess, submitData, submitHandler]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
