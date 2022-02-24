@@ -7,14 +7,16 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { LensPublicStart } from '../../../../../lens/public';
+import { useParams, useLocation } from 'react-router-dom';
+
+import { LensPublicStart, TypedLensByValueInput } from '../../../../../lens/public';
 import { APP_ID } from '../../../../common/constants';
 import { EmbeddableHistogram } from './embeddable_histogram';
 import { ActionTypes } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TestProviders } from '../../mock';
 
-const mockLensAttrs = {
+const mockLensAttrs: TypedLensByValueInput['attributes'] = {
   title: '[Host] KPI Hosts - metric 1',
   description: '',
   visualizationType: 'lnsMetric',
@@ -106,8 +108,8 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
 jest.mock('../../containers/sourcerer', () => {
   return {
     useSourcererDataView: jest.fn().mockReturnValue({
-      dataViewId: 'security-solution-default',
-      selectedPatterns: ['auditbeat-*'],
+      dataViewId: 'mock-security-solution-default',
+      selectedPatterns: ['auditbeat-*', 'filebeat-*'],
     }),
   };
 });
@@ -122,7 +124,7 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('EmbeddableHistogram', () => {
-  const mockEmbeddable = jest.fn(() => <div>{'mockEmbeddable'}</div>);
+  const mockEmbeddable = jest.fn((props) => <div>{'mockEmbeddable'}</div>);
   beforeEach(() => {
     jest.clearAllMocks();
     useKibana.mockReturnValue({
@@ -149,9 +151,9 @@ describe('EmbeddableHistogram', () => {
     );
     // expect(container.querySelector(`[data-test-subj="exploratoryView-title"]`)).toBeInTheDocument();
     // expect(getByText(mockTitle)).toBeInTheDocument();
-    expect(mockEmbeddable.mock.calls[0][0].alignLnsMetric).toEqual('flex-start');
+
     expect(mockEmbeddable.mock.calls[0][0].appId).toEqual('securitySolutionUI');
-    expect(mockEmbeddable.mock.calls[0][0].attributes).toEqual([{ dataType: 'security' }]);
+    expect(mockEmbeddable.mock.calls[0][0].attributes).toEqual([{ dataType: 'security-solution' }]);
     expect(mockEmbeddable.mock.calls[0][0].disableBorder).toEqual(true);
     expect(mockEmbeddable.mock.calls[0][0].disableShadow).toEqual(true);
     expect(mockEmbeddable.mock.calls[0][0].customHeight).toEqual('100%');
@@ -163,5 +165,166 @@ describe('EmbeddableHistogram', () => {
       'addToCase',
       'openInLens',
     ]);
+    expect(mockEmbeddable.mock.calls[0][0].retryOnFetchDataViewFailure).toEqual(true);
+  });
+
+  test('render with tabs filter - Host: external alerts', () => {
+    useParams.mockReturnValue({ tabName: 'externalAlerts' });
+    useLocation.mockReturnValue({ pathname: 'hosts' });
+    const { container, getByText } = render(
+      <TestProviders>
+        <EmbeddableHistogram
+          customLensAttrs={mockLensAttrs}
+          customTimeRange={mockTimeRange}
+          title={mockTitle}
+          isSingleMetric={false}
+        />
+      </TestProviders>
+    );
+    // expect(container.querySelector(`[data-test-subj="exploratoryView-title"]`)).toBeInTheDocument();
+    // expect(getByText(mockTitle)).toBeInTheDocument();
+    const expectedFilters = [
+      {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            exists: {
+                              field: 'source.ip',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            exists: {
+                              field: 'destination.ip',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          key: 'bool',
+          negate: false,
+          type: 'custom',
+          value:
+            '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field": "source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field": "destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}',
+        },
+      },
+    ];
+    expect(JSON.stringify(mockEmbeddable.mock.calls[0][0].customLensAttrs.state.filters)).toEqual(
+      JSON.stringify(expectedFilters)
+    );
+  });
+
+  test('render with tabs filter - Network: external alerts', () => {
+    useParams.mockReturnValue({ tabName: 'external-alerts' });
+    useLocation.mockReturnValue({ pathname: 'network' });
+    const { container, getByText } = render(
+      <TestProviders>
+        <EmbeddableHistogram
+          customLensAttrs={mockLensAttrs}
+          customTimeRange={mockTimeRange}
+          title={mockTitle}
+          isSingleMetric={false}
+        />
+      </TestProviders>
+    );
+    // expect(container.querySelector(`[data-test-subj="exploratoryView-title"]`)).toBeInTheDocument();
+    // expect(getByText(mockTitle)).toBeInTheDocument();
+    const expectedFilters = [
+      {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            exists: {
+                              field: 'source.ip',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            exists: {
+                              field: 'destination.ip',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          key: 'bool',
+          negate: false,
+          type: 'custom',
+          value:
+            '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field": "source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field": "destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}',
+        },
+      },
+    ];
+    expect(JSON.stringify(mockEmbeddable.mock.calls[0][0].customLensAttrs.state.filters)).toEqual(
+      JSON.stringify(expectedFilters)
+    );
+  });
+
+  test.only('render with tabs filter - Network: external alerts', () => {
+    useParams.mockReturnValue({ tabName: 'external-alerts' });
+    useLocation.mockReturnValue({ pathname: 'network' });
+    const { container, getByText } = render(
+      <TestProviders>
+        <EmbeddableHistogram
+          customLensAttrs={mockLensAttrs}
+          customTimeRange={mockTimeRange}
+          title={mockTitle}
+          isSingleMetric={false}
+        />
+      </TestProviders>
+    );
+    // expect(container.querySelector(`[data-test-subj="exploratoryView-title"]`)).toBeInTheDocument();
+    // expect(getByText(mockTitle)).toBeInTheDocument();
+    mockEmbeddable.mock.calls[0][0].customLensAttrs.references.forEach((ref) => {
+      expect(ref.id).toEqual('mock-security-solution-default');
+    });
   });
 });
