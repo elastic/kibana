@@ -4,7 +4,7 @@ import { logger, consoleLog } from './services/logger';
 import { sequentially } from './services/sequentially';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { cherrypickAndCreateTargetPullRequest } from './ui/cherrypickAndCreateTargetPullRequest';
-import { setupRepo } from './ui/setupRepo';
+import { GitConfigAuthor } from './ui/getGitConfigAuthor';
 
 export type Result =
   | {
@@ -26,14 +26,17 @@ export async function runSequentially({
   options,
   commits,
   targetBranches,
+  gitConfigAuthor,
 }: {
   options: ValidConfigOptions;
   commits: Commit[];
   targetBranches: string[];
+  gitConfigAuthor?: GitConfigAuthor;
 }): Promise<Result[]> {
   logger.verbose('Backport options', options);
-  await setupRepo(options, commits);
+
   const results = [] as Result[];
+
   await sequentially(targetBranches, async (targetBranch) => {
     logger.info(`Backporting ${JSON.stringify(commits)} to ${targetBranch}`);
     try {
@@ -42,6 +45,7 @@ export async function runSequentially({
           options,
           commits,
           targetBranch,
+          gitConfigAuthor: gitConfigAuthor,
         });
 
       results.push({

@@ -56,7 +56,10 @@ describe('backport cli', () => {
             --editor                          Editor to be opened during conflict resolution      [string]
             --skipRemoteConfig                Use local .backportrc.json config instead of loading from
                                               Github                                             [boolean]
-            --fork                            Create backports in fork or origin repo            [boolean]
+            --fork                            Create backports in fork or origin repo. Defaults to true
+                                                                                                 [boolean]
+            --gitAuthorName                   Set commit author name                              [string]
+            --gitAuthorEmail                  Set commit author email                             [string]
             --mainline                        Parent id of merge commit. Defaults to 1 when supplied
                                               without arguments                                   [number]
         -n, --maxNumber, --number             Number of commits to choose from                    [number]
@@ -76,6 +79,8 @@ describe('backport cli', () => {
             --pullNumber, --pr                Pull request to backport                            [number]
             --resetAuthor                     Set yourself as commit author                      [boolean]
             --reviewer                        Add reviewer to the target PR                        [array]
+            --repoForkOwner                   The owner of the fork where the backport branch is pushed.
+                                              Defaults to the currently authenticated user        [string]
             --repoOwner                       Repository owner                                    [string]
             --repoName                        Repository name                                     [string]
             --repo                            Repo owner and name                                 [string]
@@ -86,7 +91,6 @@ describe('backport cli', () => {
         -b, --targetBranch, --branch          Branch(es) to backport to                            [array]
             --targetBranchChoice              List branches to backport to                         [array]
         -l, --targetPRLabel, --label          Add labels to the target (backport) PR               [array]
-            --username                        Defaults to the authenticated user                  [string]
             --verbose                         Show additional debug information                  [boolean]
             --verify                          Opposite of no-verify                              [boolean]
             --help                            Show help                                          [boolean]

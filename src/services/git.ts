@@ -232,15 +232,18 @@ export async function getCommitsInMergeCommit(
   }
 }
 
-export async function cherrypick(
-  options: ValidConfigOptions,
-  sha: string,
-  mergedTargetPullRequest?: ExpectedTargetPullRequest
-): Promise<{
-  conflictingFiles: {
-    absolute: string;
-    relative: string;
-  }[];
+export async function cherrypick({
+  options,
+  sha,
+  mergedTargetPullRequest,
+  commitAuthor,
+}: {
+  options: ValidConfigOptions;
+  sha: string;
+  mergedTargetPullRequest?: ExpectedTargetPullRequest;
+  commitAuthor: { name: string; email: string };
+}): Promise<{
+  conflictingFiles: { absolute: string; relative: string }[];
   unstagedFiles: string[];
   needsResolving: boolean;
 }> {
@@ -265,7 +268,8 @@ export async function cherrypick(
       }
     }
   }
-  const cmd = `git cherry-pick${cherrypickRefArg}${mainlinArg} ${shaOrRange}`;
+
+  const cmd = `git -c user.name="${commitAuthor.name}" -c user.email="${commitAuthor.email}" cherry-pick${cherrypickRefArg}${mainlinArg} ${shaOrRange}`;
 
   try {
     await exec(cmd, { cwd: getRepoPath(options) });
@@ -293,7 +297,7 @@ export async function cherrypick(
 
     // git info missing
     if (e.message.includes('Please tell me who you are')) {
-      throw new HandledError(`Cherrypick failed:\n${e.message}`);
+      throw new HandledError(e.message);
     }
 
     if (e.message.includes(`bad object ${sha}`)) {
@@ -302,8 +306,7 @@ export async function cherrypick(
       );
     }
 
-    const isCherryPickError = e.cmd === cmd;
-
+    const isCherryPickError = e.cmd?.includes('cherry-pick') && e.code > 0;
     if (isCherryPickError) {
       const [conflictingFiles, unstagedFiles] = await Promise.all([
         getConflictingFiles(options),
@@ -405,24 +408,6 @@ export async function getUnstagedFiles(options: ValidConfigOptions) {
   return uniq(files);
 }
 
-export async function setCommitAuthor(
-  options: ValidConfigOptions,
-  author: string
-) {
-  const spinner = ora(options.ci, `Changing author to "${author}"`).start();
-  try {
-    const res = await exec(
-      `git commit --amend --no-edit --author "${author} <${author}@users.noreply.github.com>"`,
-      { cwd: getRepoPath(options) }
-    );
-    spinner.succeed();
-    return res;
-  } catch (e) {
-    spinner.fail();
-    throw e;
-  }
-}
-
 export async function getGitConfig({
   dir,
   key,
@@ -434,23 +419,6 @@ export async function getGitConfig({
     const res = await exec(`git config ${key}`, { cwd: dir });
     return res.stdout;
   } catch (e) {
-    return;
-  }
-}
-
-export async function setGitConfig({
-  dir,
-  key,
-  value,
-}: {
-  dir: string;
-  key: 'user.name' | 'user.email';
-  value: string;
-}) {
-  try {
-    await exec(`git config ${key} ${value}`, { cwd: dir });
-  } catch (e) {
-    logger.error(`Could not set git config: ${key}=${value}`, e);
     return;
   }
 }
@@ -514,7 +482,7 @@ export async function deleteBackportBranch({
  * Returns the repo owner of the forked repo or the source repo
  */
 export function getRepoForkOwner(options: ValidConfigOptions) {
-  return options.fork ? options.authenticatedUsername : options.repoOwner;
+  return options.fork ? options.repoForkOwner : options.repoOwner;
 }
 
 export async function pushBackportBranch({

@@ -9,7 +9,6 @@ import {
   createBackportBranch,
   deleteBackportBranch,
   pushBackportBranch,
-  setCommitAuthor,
   getUnstagedFiles,
   commitChanges,
   getConflictingFiles,
@@ -33,16 +32,19 @@ import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
 import { Commit } from '../services/sourceCommit/parseSourceCommit';
 import { getCommitsWithoutBackports } from './getCommitsWithoutBackports';
+import { GitConfigAuthor } from './getGitConfigAuthor';
 import { ora } from './ora';
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
   commits,
   targetBranch,
+  gitConfigAuthor,
 }: {
   options: ValidConfigOptions;
   commits: Commit[];
   targetBranch: string;
+  gitConfigAuthor?: GitConfigAuthor;
 }): Promise<{ url: string; number: number; didUpdate: boolean }> {
   const backportBranch = getBackportBranchName(targetBranch, commits);
   const repoForkOwner = getRepoForkOwner(options);
@@ -51,12 +53,8 @@ export async function cherrypickAndCreateTargetPullRequest({
   await createBackportBranch({ options, targetBranch, backportBranch });
 
   await sequentially(commits, (commit) =>
-    waitForCherrypick(options, commit, targetBranch)
+    waitForCherrypick(options, commit, targetBranch, gitConfigAuthor)
   );
-
-  if (options.resetAuthor) {
-    await setCommitAuthor(options, options.authenticatedUsername);
-  }
 
   if (options.dryRun) {
     ora(options.ci).succeed('Dry run complete');
@@ -156,7 +154,8 @@ function getBackportBranchName(targetBranch: string, commits: Commit[]) {
 async function waitForCherrypick(
   options: ValidConfigOptions,
   commit: Commit,
-  targetBranch: string
+  targetBranch: string,
+  gitConfigAuthor?: GitConfigAuthor
 ) {
   const spinnerText = `Cherry-picking: ${chalk.greenBright(
     getFirstLine(commit.sourceCommit.message)
@@ -172,13 +171,21 @@ async function waitForCherrypick(
   let unstagedFiles: string[];
   let needsResolving: boolean;
 
+  const commitAuthor = getCommitAuthor({
+    options,
+    gitConfigAuthor,
+    commit,
+  });
+
   try {
     await fetchBranch(options, commit.sourceBranch);
-    ({ conflictingFiles, unstagedFiles, needsResolving } = await cherrypick(
+
+    ({ conflictingFiles, unstagedFiles, needsResolving } = await cherrypick({
       options,
-      commit.sourceCommit.sha,
-      mergedTargetPullRequest
-    ));
+      sha: commit.sourceCommit.sha,
+      mergedTargetPullRequest,
+      commitAuthor,
+    }));
 
     // no conflicts encountered
     if (!needsResolving) {
@@ -342,4 +349,27 @@ Press ENTER when the conflicts are resolved and files are staged`);
     conflictingFiles: _conflictingFiles.map((file) => file.absolute),
     unstagedFiles: _unstagedFiles,
   });
+}
+
+function getCommitAuthor({
+  options,
+  gitConfigAuthor,
+  commit,
+}: {
+  options: ValidConfigOptions;
+  gitConfigAuthor?: GitConfigAuthor;
+  commit: Commit;
+}) {
+  if (options.resetAuthor) {
+    return {
+      name: options.authenticatedUsername,
+      email: `<${options.authenticatedUsername}@users.noreply.github.com>`,
+    };
+  }
+
+  return {
+    name: options.gitAuthorName ?? gitConfigAuthor?.name ?? commit.author.name,
+    email:
+      options.gitAuthorEmail ?? gitConfigAuthor?.email ?? commit.author.email,
+  };
 }

@@ -24,12 +24,11 @@ export type OptionsFromGithub = Awaited<
 >;
 export async function getOptionsFromGithub(options: {
   accessToken: string;
+  cwd?: string;
   githubApiBaseUrlV4?: string;
   repoName: string;
   repoOwner: string;
-  username?: string;
   skipRemoteConfig?: boolean;
-  cwd?: string;
 }) {
   const { accessToken, githubApiBaseUrlV4, repoName, repoOwner } = options;
 
@@ -65,7 +64,7 @@ export async function getOptionsFromGithub(options: {
   );
 
   return {
-    authenticatedUsername: options.username ?? res.viewer.login,
+    authenticatedUsername: res.viewer.login,
     sourceBranch: res.repository.defaultBranchRef.name,
     ...remoteConfig,
   };

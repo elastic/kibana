@@ -90,6 +90,9 @@ export async function getOptions(
     // default author
     author: optionsFromGithub.authenticatedUsername,
 
+    // default fork owner
+    repoForkOwner: optionsFromGithub.authenticatedUsername,
+
     // default values have lowest precedence
     ...defaultConfigOptions,
 
@@ -184,11 +187,11 @@ function throwForRequiredOptions(
     'prDescription',
     'prFilter',
     'prTitle',
+    'repoForkOwner',
     'repoName',
     'repoOwner',
     'sha',
     'sourceBranch',
-    'username',
   ];
 
   // Disallow empty strings

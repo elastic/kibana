@@ -72,9 +72,9 @@ describe('getOptions', () => {
     describe('whe option is an empty string', () => {
       it('throws for "username"', async () => {
         await expect(() =>
-          getOptions([], { username: '', author: 'sqren' })
+          getOptions([], { repoForkOwner: '', author: 'sqren' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"\\"username\\" cannot be empty!"`
+          `"\\"repoForkOwner\\" cannot be empty!"`
         );
       });
 
@@ -196,6 +196,7 @@ describe('getOptions', () => {
       multipleCommits: false,
       noVerify: true,
       publishStatusComment: true,
+      repoForkOwner: 'john.diller',
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,

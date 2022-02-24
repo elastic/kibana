@@ -1,6 +1,5 @@
 import os from 'os';
 import del from 'del';
-import { Commit } from '../entrypoint.module';
 import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
 import * as gitModule from '../services/git';
@@ -37,14 +36,11 @@ describe('setupRepo', () => {
         });
 
       await expect(
-        setupRepo(
-          {
-            repoName: 'kibana',
-            repoOwner: 'elastic',
-            cwd: '/path/to/source/repo',
-          } as ValidConfigOptions,
-          [getMockCommit()]
-        )
+        setupRepo({
+          repoName: 'kibana',
+          repoOwner: 'elastic',
+          cwd: '/path/to/source/repo',
+        } as ValidConfigOptions)
       ).rejects.toThrowError('Simulated git clone failure');
 
       expect(del).toHaveBeenCalledWith(
@@ -96,17 +92,12 @@ describe('setupRepo', () => {
         onCloneComplete();
       }, 50);
 
-      await setupRepo(
-        {
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          gitUserEmail: 'my-email',
-          gitUserName: 'my-username',
-          gitHostname: 'github.com',
-          cwd: '/path/to/source/repo',
-        } as ValidConfigOptions,
-        [getMockCommit()]
-      );
+      await setupRepo({
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        gitHostname: 'github.com',
+        cwd: '/path/to/source/repo',
+      } as ValidConfigOptions);
 
       expect(spinnerTextSpy.mock.calls.map((call) => call[0]))
         .toMatchInlineSnapshot(`
@@ -143,18 +134,15 @@ describe('setupRepo', () => {
     });
 
     it('should re-create remotes for both source repo and fork', async () => {
-      await setupRepo(
-        {
-          accessToken: 'myAccessToken',
-          authenticatedUsername: 'sqren_authenticated',
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          gitUserEmail: 'my-email',
-          gitUserName: 'my-username',
-          cwd: '/path/to/source/repo',
-        } as ValidConfigOptions,
-        [getMockCommit()]
-      );
+      await setupRepo({
+        accessToken: 'myAccessToken',
+        authenticatedUsername: 'sqren_authenticated',
+        cwd: '/path/to/source/repo',
+        fork: true,
+        repoForkOwner: 'sqren',
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+      } as ValidConfigOptions);
 
       expect(
         execSpy.mock.calls.map(([cmd, { cwd }]) => ({ cmd, cwd }))
@@ -165,32 +153,15 @@ describe('setupRepo', () => {
         },
         { cmd: 'git remote --verbose', cwd: '/path/to/source/repo' },
         {
-          cmd: 'git config user.name',
-          cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
-        },
-        {
-          cmd: 'git config user.email',
-          cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
-        },
-        { cmd: 'git remote --verbose', cwd: '/path/to/source/repo' },
-        {
-          cmd: 'git config user.name my-username',
-          cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
-        },
-        {
-          cmd: 'git config user.email my-email',
-          cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
-        },
-        {
           cmd: 'git remote rm origin',
           cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
         },
         {
-          cmd: 'git remote rm sqren_authenticated',
+          cmd: 'git remote rm sqren',
           cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
         },
         {
-          cmd: 'git remote add sqren_authenticated https://x-access-token:myAccessToken@github.com/sqren_authenticated/kibana.git',
+          cmd: 'git remote add sqren https://x-access-token:myAccessToken@github.com/sqren/kibana.git',
           cwd: '/myHomeDir/.backport/repositories/elastic/kibana',
         },
         {
@@ -221,18 +192,13 @@ describe('setupRepo', () => {
           return { stderr: { on: () => null } };
         });
 
-      await setupRepo(
-        {
-          accessToken: 'myAccessToken',
-          gitUserEmail: 'my-email',
-          gitUserName: 'my-username',
-          gitHostname: 'github.com',
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          cwd: '/path/to/source/repo',
-        } as ValidConfigOptions,
-        [getMockCommit()]
-      );
+      await setupRepo({
+        accessToken: 'myAccessToken',
+        gitHostname: 'github.com',
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        cwd: '/path/to/source/repo',
+      } as ValidConfigOptions);
     });
 
     it('should clone it from github.com', async () => {
@@ -272,14 +238,11 @@ describe('setupRepo', () => {
           return { stderr: { on: () => null } };
         });
 
-      await setupRepo(
-        {
-          repoName: 'kibana',
-          repoOwner: 'elastic',
-          cwd: '/path/to/source/repo',
-        } as ValidConfigOptions,
-        [getMockCommit()]
-      );
+      await setupRepo({
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        cwd: '/path/to/source/repo',
+      } as ValidConfigOptions);
     });
 
     it('should clone it from local folder', async () => {
@@ -298,50 +261,15 @@ describe('setupRepo', () => {
   describe('if `repoPath` is a parent of current working directory (cwd)', () => {
     it('should clone it from local folder', async () => {
       await expect(() =>
-        setupRepo(
-          {
-            repoName: 'kibana',
-            repoOwner: 'elastic',
-            cwd: '/myHomeDir/.backport/repositories/owner/repo/foo',
-            dir: '/myHomeDir/.backport/repositories/owner/repo',
-          } as ValidConfigOptions,
-          [getMockCommit()]
-        )
+        setupRepo({
+          repoName: 'kibana',
+          repoOwner: 'elastic',
+          cwd: '/myHomeDir/.backport/repositories/owner/repo/foo',
+          dir: '/myHomeDir/.backport/repositories/owner/repo',
+        } as ValidConfigOptions)
       ).rejects.toThrowError(
         'Refusing to clone repo into "/myHomeDir/.backport/repositories/owner/repo" when current working directory is "/myHomeDir/.backport/repositories/owner/repo/foo". Please change backport directory via `--dir` option or run backport from another location'
       );
     });
   });
 });
-
-function getMockCommit(): Commit {
-  return {
-    author: { email: 'sorenlouv@gmail.com', name: 'Søren Louv-Jansen' },
-    sourceCommit: {
-      committedDate: '2020-08-15T10:44:04Z',
-      message: 'Add family emoji (#2)',
-      sha: '59d6ff1ca90a4ce210c0a4f0e159214875c19d60',
-    },
-    sourcePullRequest: {
-      number: 2,
-      url: 'https://github.com/backport-org/backport-e2e/pull/2',
-      mergeCommit: {
-        message: 'Add family emoji (#2)',
-        sha: '59d6ff1ca90a4ce210c0a4f0e159214875c19d60',
-      },
-    },
-    sourceBranch: 'master',
-    expectedTargetPullRequests: [
-      {
-        branch: '7.x',
-        number: 4,
-        state: 'MERGED',
-        url: 'https://github.com/backport-org/backport-e2e/pull/4',
-        mergeCommit: {
-          message: 'Add family emoji (#2) (#4)',
-          sha: 'f8b4f6ae7ffaf2732fa5e33e98b3ea772bdfff1d',
-        },
-      },
-    ],
-  };
-}

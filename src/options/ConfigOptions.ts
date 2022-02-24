@@ -35,11 +35,11 @@ type Options = Partial<{
   dir: string;
   editor: string;
   fork: boolean;
+  gitAuthorEmail: string;
+  gitAuthorName: string;
   gitHostname: string;
   githubApiBaseUrlV3: string;
   githubApiBaseUrlV4: string;
-  gitUserEmail: string;
-  gitUserName: string;
   logFilePath: string;
   maxNumber: number;
   multiple: boolean;
@@ -51,6 +51,7 @@ type Options = Partial<{
   prTitle: string;
   publishStatusComment: boolean;
   pullNumber: number;
+  repoForkOwner: string;
   repoName: string;
   repoOwner: string;
   resetAuthor: boolean;
@@ -62,7 +63,6 @@ type Options = Partial<{
   targetBranchChoices: TargetBranchChoiceOrString[];
   targetBranches: string[];
   targetPRLabels: string[];
-  username: string;
   verbose: boolean;
 }>;
 

@@ -1,5 +1,4 @@
 import del = require('del');
-import { Commit } from '../entrypoint.module';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { getRepoPath } from '../services/env';
@@ -7,18 +6,13 @@ import {
   addRemote,
   cloneRepo,
   deleteRemote,
-  getGitConfig,
   getGitProjectRootPath,
   getLocalRepoPath,
   getRemoteUrl,
-  setGitConfig,
 } from '../services/git';
 import { ora } from './ora';
 
-export async function setupRepo(
-  options: ValidConfigOptions,
-  commits: Commit[]
-) {
+export async function setupRepo(options: ValidConfigOptions) {
   const repoPath = getRepoPath(options);
   const isAlreadyCloned = await getIsRepoCloned(options);
 
@@ -61,17 +55,15 @@ export async function setupRepo(
     }
   }
 
-  await setupGitUsernameAndEmail(options, commits);
-
   // delete default "origin" remote to avoid confusion
   await deleteRemote(options, 'origin');
 
   // ensure remote are setup with latest accessToken
-  await deleteRemote(options, options.authenticatedUsername);
-  await addRemote(options, options.authenticatedUsername);
+  await deleteRemote(options, options.repoForkOwner);
+  await addRemote(options, options.repoForkOwner);
 
   // add remote for non-fork repo (if the above is a fork)
-  if (options.authenticatedUsername !== options.repoOwner) {
+  if (options.repoForkOwner !== options.repoOwner) {
     await deleteRemote(options, options.repoOwner);
     await addRemote(options, options.repoOwner);
   }
@@ -81,46 +73,4 @@ async function getIsRepoCloned(options: ValidConfigOptions): Promise<boolean> {
   const repoPath = getRepoPath(options);
   const projectRoot = await getGitProjectRootPath(repoPath);
   return repoPath === projectRoot;
-}
-
-async function setupGitUsernameAndEmail(
-  options: ValidConfigOptions,
-  commits: Commit[]
-): Promise<void> {
-  const repoPath = getRepoPath(options);
-
-  const userName = await getGitConfig({ dir: repoPath, key: 'user.name' });
-  const userEmail = await getGitConfig({ dir: repoPath, key: 'user.email' });
-
-  // return early if user.email and user.name is already set
-  if (userName && userEmail) {
-    return;
-  }
-
-  const commitAuthor = commits[0].author;
-  const localRepoPath = await getLocalRepoPath(options);
-
-  if (!userName) {
-    const gitConfigUsername = localRepoPath
-      ? await getGitConfig({ dir: localRepoPath, key: 'user.name' })
-      : undefined;
-
-    await setGitConfig({
-      dir: repoPath,
-      key: 'user.name',
-      value: gitConfigUsername ?? options.gitUserName ?? commitAuthor.name,
-    });
-  }
-
-  if (!userEmail) {
-    const gitConfigEmail = localRepoPath
-      ? await getGitConfig({ dir: localRepoPath, key: 'user.email' })
-      : undefined;
-
-    await setGitConfig({
-      dir: repoPath,
-      key: 'user.email',
-      value: gitConfigEmail ?? options.gitUserEmail ?? commitAuthor.email,
-    });
-  }
 }

@@ -27,6 +27,8 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+const commitAuthor = { name: 'Soren L', email: 'soren@mail.dk' };
+
 describe('getUnstagedFiles', () => {
   it('should split lines and remove empty', async () => {
     jest.spyOn(childProcess, 'exec').mockResolvedValueOnce({
@@ -352,7 +354,13 @@ describe('cherrypick', () => {
       // mock cherrypick(...)
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
 
-    expect(await cherrypick(options, 'abcd')).toEqual({
+    expect(
+      await cherrypick({
+        options,
+        sha: 'abcd',
+        commitAuthor,
+      })
+    ).toEqual({
       conflictingFiles: [],
       unstagedFiles: [],
       needsResolving: false,
@@ -369,10 +377,14 @@ describe('cherrypick', () => {
       // mock cherry pick command
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
 
-    await cherrypick({ ...options, mainline: 1 }, 'abcd');
+    await cherrypick({
+      options: { ...options, mainline: 1 },
+      sha: 'abcd',
+      commitAuthor,
+    });
 
     expect(execSpy.mock.calls[0][0]).toBe(
-      'git cherry-pick -x --mainline 1 abcd'
+      'git -c user.name="Soren L" -c user.email="soren@mail.dk" cherry-pick -x --mainline 1 abcd'
     );
   });
 
@@ -383,7 +395,7 @@ describe('cherrypick', () => {
       // mock getIsMergeCommit(...)
       .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
-      // mock cherry pick command
+      // mock `git cherrypick`
       .mockRejectedValueOnce(
         new ExecError({
           killed: false,
@@ -408,7 +420,13 @@ describe('cherrypick', () => {
       // mock getUnstagedFiles
       .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
-    expect(await cherrypick(options, 'abcd')).toEqual({
+    expect(
+      await cherrypick({
+        options,
+        sha: 'abcd',
+        commitAuthor,
+      })
+    ).toEqual({
       conflictingFiles: [
         {
           absolute:
@@ -441,7 +459,13 @@ describe('cherrypick', () => {
         })
       );
 
-    await expect(cherrypick(options, 'abcd')).rejects
+    await expect(
+      cherrypick({
+        options,
+        sha: 'abcd',
+        commitAuthor,
+      })
+    ).rejects
       .toThrowError(`Cherrypick failed because the selected commit was a merge commit. Please try again by specifying the parent with the \`mainline\` argument:
 
 > backport --mainline
@@ -474,7 +498,13 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
         })
       );
 
-    await expect(cherrypick(options, 'abcd')).rejects.toThrowError(
+    await expect(
+      cherrypick({
+        options,
+        sha: 'abcd',
+        commitAuthor,
+      })
+    ).rejects.toThrowError(
       `Cherrypick failed because the selected commit (abcd) is empty. Did you already backport this commit?`
     );
   });
@@ -499,10 +529,14 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
         })
       );
 
-    await expect(cherrypick(options, 'abcd')).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
-            "Cherrypick failed:
-
+    await expect(
+      cherrypick({
+        options,
+        sha: 'abcd',
+        commitAuthor,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+            "
             *** Please tell me who you are.
 
             Run
@@ -535,7 +569,11 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
       .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
     await expect(
-      cherrypick(options, 'abcd')
+      cherrypick({
+        options,
+        sha: 'abcd',
+        commitAuthor,
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"non-cherrypick error"`);
   });
 });
@@ -619,13 +657,13 @@ describe('commitChanges', () => {
   });
 
   it('should re-throw other errors', async () => {
-    const err = new Error('non-cherrypick error');
+    const err = new Error('another error');
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
     expect.assertions(1);
 
     await expect(
       commitChanges(commit, options)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"non-cherrypick error"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"another error"`);
   });
 });
 
@@ -682,8 +720,9 @@ describe('pushBackportBranch', () => {
   const options = {
     authenticatedUsername: 'sqren_authenticated',
     fork: true,
-    repoOwner: 'elastic',
+    repoForkOwner: 'the_fork_owner',
     repoName: 'kibana',
+    repoOwner: 'elastic',
   } as ValidConfigOptions;
 
   const backportBranch = 'backport/7.x/pr-2';
@@ -702,7 +741,7 @@ describe('pushBackportBranch', () => {
     await expect(
       pushBackportBranch({ options, backportBranch })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error pushing to https://github.com/sqren_authenticated/kibana. Repository does not exist. Either fork the source repository (https://github.com/elastic/kibana) or disable fork mode \\"--no-fork\\".  Read more about \\"fork mode\\" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork"`
+      `"Error pushing to https://github.com/the_fork_owner/kibana. Repository does not exist. Either fork the source repository (https://github.com/elastic/kibana) or disable fork mode \\"--no-fork\\".  Read more about \\"fork mode\\" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork"`
     );
   });
 });

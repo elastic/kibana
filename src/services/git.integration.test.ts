@@ -16,6 +16,8 @@ import { getShortSha } from './github/commitFormatters';
 jest.unmock('del');
 jest.unmock('make-dir');
 
+const commitAuthor = { name: 'Soren L', email: 'soren@mail.dk' };
+
 describe('git.integration', () => {
   describe('getIsCommitInBranch', () => {
     let firstSha: string;
@@ -132,20 +134,25 @@ describe('git.integration', () => {
     it('should not cherrypick commit that already exists', async () => {
       const shortSha = getShortSha(firstSha);
       return expect(() =>
-        cherrypick({ dir: sandboxPath } as ValidConfigOptions, firstSha)
+        cherrypick({
+          options: { dir: sandboxPath } as ValidConfigOptions,
+          sha: firstSha,
+          commitAuthor: { name: 'Soren L', email: 'soren@mail.dk' },
+        })
       ).rejects.toThrowError(
         `Cherrypick failed because the selected commit (${shortSha}) is empty. Did you already backport this commit?`
       );
     });
 
     it('should cherrypick commit cleanly', async () => {
-      const res = await cherrypick(
-        {
+      const res = await cherrypick({
+        options: {
           cherrypickRef: false,
           dir: sandboxPath,
         } as ValidConfigOptions,
-        secondSha
-      );
+        sha: secondSha,
+        commitAuthor,
+      });
       expect(res).toEqual({
         conflictingFiles: [],
         needsResolving: false,
@@ -158,13 +165,14 @@ describe('git.integration', () => {
     });
 
     it('should cherrypick commit cleanly and append "(cherry picked from commit...)"', async () => {
-      const res = await cherrypick(
-        {
+      const res = await cherrypick({
+        options: {
           cherrypickRef: true,
           dir: sandboxPath,
         } as ValidConfigOptions,
-        secondSha
-      );
+        sha: secondSha,
+        commitAuthor,
+      });
       expect(res).toEqual({
         conflictingFiles: [],
         needsResolving: false,
@@ -179,17 +187,16 @@ describe('git.integration', () => {
     });
 
     it('should cherrypick commit with conflicts', async () => {
-      const res = await cherrypick(
-        { dir: sandboxPath } as ValidConfigOptions,
-        fourthSha
-      );
+      const res = await cherrypick({
+        options: { dir: sandboxPath } as ValidConfigOptions,
+        sha: fourthSha,
+        commitAuthor,
+      });
+
       expect(res).toEqual({
         needsResolving: true,
         conflictingFiles: [
-          {
-            absolute: `${sandboxPath}/foo.md`,
-            relative: 'foo.md',
-          },
+          { absolute: `${sandboxPath}/foo.md`, relative: 'foo.md' },
         ],
         unstagedFiles: [`${sandboxPath}/foo.md`],
       });

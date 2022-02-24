@@ -10,8 +10,10 @@ import { GithubV4Exception } from './services/github/v4/apiRequestV4';
 import { consoleLog, initLogger, logger } from './services/logger';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { getCommits } from './ui/getCommits';
+import { getGitConfigAuthor } from './ui/getGitConfigAuthor';
 import { getTargetBranches } from './ui/getTargetBranches';
 import { ora } from './ui/ora';
+import { setupRepo } from './ui/setupRepo';
 
 export type BackportResponse =
   | {
@@ -58,7 +60,17 @@ export async function backportRun(
     const targetBranches = await getTargetBranches(options, commits);
     logger.info('Target branches', targetBranches);
 
-    const results = await runSequentially({ options, commits, targetBranches });
+    const [gitConfigAuthor] = await Promise.all([
+      getGitConfigAuthor(options),
+      setupRepo(options),
+    ]);
+
+    const results = await runSequentially({
+      options,
+      commits,
+      targetBranches,
+      gitConfigAuthor,
+    });
     logger.info('Results', results);
 
     const backportResponse: BackportResponse = {
