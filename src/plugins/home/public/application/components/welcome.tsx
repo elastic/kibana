@@ -20,8 +20,6 @@ import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
 
-export type HomeWelcomeRenderTelemetryNotice = () => null | JSX.Element;
-
 interface Props {
   urlBasePath: string;
   onSkip: () => void;

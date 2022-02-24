@@ -28,6 +28,7 @@ export type {
   TutorialVariables,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
+  WelcomeRenderTelemetryNotice,
 } from './services';
 
 export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';

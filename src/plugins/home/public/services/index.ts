@@ -30,4 +30,4 @@ export { AddDataService } from './add_data';
 export type { AddDataServiceSetup, AddDataTab } from './add_data';
 
 export { WelcomeService } from './welcome';
-export type { WelcomeServiceSetup } from './welcome';
+export type { WelcomeServiceSetup, WelcomeRenderTelemetryNotice } from './welcome';

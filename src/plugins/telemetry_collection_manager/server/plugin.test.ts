@@ -223,12 +223,12 @@ describe('Telemetry Collection Manager', () => {
         };
 
         describe('getStats', () => {
-          test('getStats returns empty because clusterDetails returns empty, and the soClient is not an instance of the TelemetrySavedObjectsClient', async () => {
+          test('getStats returns empty because clusterDetails returns empty, and the soClient is an instance of the TelemetrySavedObjectsClient', async () => {
             collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
           test('returns encrypted payload (assumes opted-in when no explicitly opted-out)', async () => {
             collectionStrategy.clusterDetailsGetter.mockResolvedValue([
@@ -248,7 +248,7 @@ describe('Telemetry Collection Manager', () => {
 
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
           it('calls getStats with config { refreshCache: true } even if set to false', async () => {
@@ -266,7 +266,6 @@ describe('Telemetry Collection Manager', () => {
             expect(getStatsCollectionConfig).toReturnWith(
               expect.objectContaining({
                 refreshCache: true,
-                kibanaRequest: mockRequest,
               })
             );
 
@@ -280,7 +279,7 @@ describe('Telemetry Collection Manager', () => {
             await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
           test('returns results for opt-in true', async () => {
@@ -295,7 +294,7 @@ describe('Telemetry Collection Manager', () => {
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
           test('returns results for opt-in false', async () => {
@@ -310,7 +309,7 @@ describe('Telemetry Collection Manager', () => {
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
         });
       });

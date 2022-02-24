@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { WelcomeServiceSetup } from './welcome_service';
+export type { WelcomeServiceSetup, WelcomeRenderTelemetryNotice } from './welcome_service';
 export { WelcomeService } from './welcome_service';
