@@ -82,7 +82,7 @@ export class SavedMap {
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
     originatingPath?: string;
-    defaultLayerWizard: string;
+    defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
     this._mapEmbeddableInput = mapEmbeddableInput;
@@ -92,7 +92,7 @@ export class SavedMap {
     this._originatingPath = originatingPath;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
-    this._defaultLayerWizard = defaultLayerWizard;
+    this._defaultLayerWizard = defaultLayerWizard || '';
   }
 
   public getStore() {
