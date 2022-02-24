@@ -333,22 +333,22 @@ const getReducedGroupByResults = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
   ) => Object.values(key).join(', ');
 
+  const reducedGroupByResults: ReducedGroupByResults = [];
   if (isOptimizedGroupedSearchQueryResponse(results)) {
-    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+    for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
-      return [...acc, groupResult];
-    }, []);
+      reducedGroupByResults.push({ name: groupName, documentCount: groupBucket.doc_count });
+    }
   } else {
-    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+    for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const groupResult = {
+      reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
-      };
-      return [...acc, groupResult];
-    }, []);
+      });
+    }
   }
+  return reducedGroupByResults;
 };
 
 export const processGroupByResults = (
