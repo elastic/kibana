@@ -11,8 +11,9 @@ import { trustedAppsAllHttpMocks } from '../../pages/mocks';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
 import { artifactListPageLabels } from './translations';
-import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ArtifactFormComponentProps } from './types';
 
 describe('When using the ArtifactListPage component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -20,7 +21,7 @@ describe('When using the ArtifactListPage component', () => {
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
-  let FormComponentMock: ArtifactListPageProps['ArtifactFormComponent'];
+  let FormComponentMock: jest.Mock<ArtifactListPageProps['ArtifactFormComponent']>;
 
   interface FutureInterface<T = void> {
     promise: Promise<T>;
@@ -39,6 +40,13 @@ describe('When using the ArtifactListPage component', () => {
 
     // @ts-ignore
     return { promise, resolve, reject };
+  };
+
+  /**
+   * Returns the props object that the Form component was last called with
+   */
+  const getLastFormComponentProps = (): ArtifactFormComponentProps => {
+    return FormComponentMock.mock.calls[FormComponentMock.mock.calls.length - 1][0];
   };
 
   beforeEach(() => {
@@ -129,31 +137,111 @@ describe('When using the ArtifactListPage component', () => {
       });
     });
 
-    it.todo('should display `Cancel` button enabled');
-
-    it.todo('should display `Submit` button as disabled');
-
-    it.each([
-      ['Cancel', ''],
-      ['Close', 'euiFlyoutCloseButton'],
-    ])('should close flyout when `%s` button is clicked', (_, testId) => {
-      // FIXME: PT implement
+    it('should display `Cancel` button enabled', () => {
+      expect(
+        (renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled
+      ).toBe(false);
     });
 
-    it.todo('should pass along to Form component the proper pros');
+    it('should display `Submit` button as disabled', () => {
+      expect(
+        (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
+      ).toBe(true);
+    });
 
-    it.todo(
-      'should show expired license warning when unsupported features are being used (downgrade scenario)'
-    );
+    it.each([
+      ['Cancel', 'testPage-flyout-cancelButton'],
+      ['Close', 'euiFlyoutCloseButton'],
+    ])('should close flyout when `%s` button is clicked', async (_, testId) => {
+      act(() => {
+        userEvent.click(renderResult.getByTestId(testId));
+      });
+
+      expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should pass to the Form component the expected props', () => {
+      expect(FormComponentMock).toHaveBeenLastCalledWith(
+        {
+          disabled: false,
+          error: undefined,
+          item: {
+            comments: [],
+            description: '',
+            entries: [],
+            item_id: undefined,
+            list_id: 'endpoint_trusted_apps',
+            meta: expect.any(Object),
+            name: '',
+            namespace_type: 'agnostic',
+            os_types: [],
+            tags: ['policy:all'],
+            type: 'simple',
+          },
+          mode: 'create',
+          onChange: expect.any(Function),
+        },
+        expect.anything()
+      );
+    });
 
     describe('and form data is valid', () => {
-      it.todo('should enable the `Submit` button');
+      beforeEach(() => {
+        act(() => {
+          const lastProps = getLastFormComponentProps();
+          lastProps.onChange({ item: lastProps.item, isValid: true });
+        });
+      });
 
-      it.todo('should disable all buttons while an update is in flight');
+      it('should enable the `Submit` button', () => {
+        expect(
+          (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
+        ).toBe(false);
+      });
 
-      it.todo('should display loading indicator on Submit while an update is in flight');
+      describe('and user clicks submit', () => {
+        let releaseApiUpdateResponse: () => void;
+        let getByTestId: typeof renderResult['getByTestId'];
 
-      it.todo('should pass `disabled=true` to the Form component while an update is in flight');
+        beforeEach(() => {
+          getByTestId = renderResult.getByTestId;
+
+          // Mock a delay into the list results http call
+          const deferrable = getFuture();
+          mockedApi.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(deferrable.promise);
+          releaseApiUpdateResponse = deferrable.resolve;
+
+          act(() => {
+            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          });
+        });
+
+        afterEach(() => {
+          if (releaseApiUpdateResponse) {
+            releaseApiUpdateResponse();
+          }
+        });
+
+        it('should disable all buttons while an update is in flight', () => {
+          expect((getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled).toBe(
+            true
+          );
+          expect((getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled).toBe(
+            true
+          );
+        });
+
+        it('should display loading indicator on Submit while an update is in flight', () => {
+          expect(
+            getByTestId('testPage-flyout-submitButton').querySelector('.euiLoadingSpinner')
+          ).toBeTruthy();
+        });
+
+        it('should pass `disabled=true` to the Form component while an update is in flight', () => {
+          expect(getLastFormComponentProps().disabled).toBe(true);
+        });
+      });
 
       describe('and submit is successful', () => {
         it.todo('should show a success toast');
@@ -172,8 +260,14 @@ describe('When using the ArtifactListPage component', () => {
       });
     });
 
-    describe('and in Edit mode with invalid item id in url', () => {
+    describe('and in Edit mode', () => {
       it.todo('should show loader while initializing in edit mode');
+
+      it.todo(
+        'should show expired license warning when unsupported features are being used (downgrade scenario)'
+      );
+
+      it.todo('should provide Form component with the item for exit');
 
       it.todo('should show error toast and close flyout if item for edit does not exist');
     });
