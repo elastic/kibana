@@ -13,10 +13,9 @@ import { groupBy } from 'lodash';
 
 import type { ResolvedSimpleSavedObject } from 'src/core/public';
 
-import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 
-import type { PackageInfo, StartPlugins } from '../../../../../types';
+import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 
 import {
@@ -37,9 +36,9 @@ interface AssetsPanelProps {
 
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
-  const { spaces } = useKibana<StartPlugins>().services;
   const pkgkey = `${name}-${version}`;
   const {
+    spaces,
     savedObjects: { client: savedObjectsClient },
   } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
