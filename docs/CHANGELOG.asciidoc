@@ -99,7 +99,7 @@ Management::
 Maps::
 Fixes an issue where layers from WMS capabilities for a specific URL were unable to load {kibana-pull}123386[#123386]
 Security::
-* Exponentially increases retry time when extending session fails {kibana-pull}125973[#125973]
+* Prevents repeated calls to extend session when Kibana is unavailable {kibana-pull}125973[#125973]
 * Changed deprecation warning for elasticsearch.username {kibana-pull}124717[#124717]
 
 [[release-notes-7.17.0]]
