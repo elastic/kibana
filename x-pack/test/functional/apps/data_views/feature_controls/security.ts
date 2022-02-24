@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
-    describe('global index_patterns all privileges', () => {
+    describe('global data views all privileges', () => {
       before(async () => {
         await security.role.create('global_index_patterns_all_role', {
           elasticsearch: {
@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global index_patterns read-only privileges', () => {
+    describe('global data views read-only privileges', () => {
       before(async () => {
         await security.role.create('global_index_patterns_read_role', {
           elasticsearch: {
@@ -142,7 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no index_patterns privileges', () => {
+    describe('no data views privileges', () => {
       before(async () => {
         await security.role.create('no_index_patterns_privileges_role', {
           elasticsearch: {
@@ -183,7 +183,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Discover']);
       });
 
-      it(`doesn't show Index Patterns in management side-nav`, async () => {
+      it(`doesn't show Data Views in management side-nav`, async () => {
         await PageObjects.common.navigateToActualUrl('management', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
