@@ -61,5 +61,9 @@ export const apmIndices: SavedObjectsType = {
       const attributes = updateApmOssIndexPaths(doc.attributes);
       return { ...doc, attributes };
     },
+    '8.2.0': (doc) => {
+      // Any future changes on this structure should be also tested on migrateLegacyAPMIndicesToSpaceAware
+      return { ...doc, attributes: { apmIndices: doc.attributes } };
+    },
   },
 };
