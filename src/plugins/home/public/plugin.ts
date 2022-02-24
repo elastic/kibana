@@ -157,14 +157,11 @@ export type TutorialSetup = TutorialServiceSetup;
 export type AddDataSetup = AddDataServiceSetup;
 
 /** @public */
-export type WelcomeSetup = WelcomeServiceSetup;
-
-/** @public */
 export interface HomePublicPluginSetup {
   tutorials: TutorialServiceSetup;
   addData: AddDataServiceSetup;
   featureCatalogue: FeatureCatalogueSetup;
-  welcomeScreen: WelcomeSetup;
+  welcomeScreen: WelcomeServiceSetup;
   /**
    * The environment service is only available for a transition period and will
    * be replaced by display specific extension points.

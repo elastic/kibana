@@ -12,7 +12,6 @@ export type {
   FeatureCatalogueSetup,
   EnvironmentSetup,
   TutorialSetup,
-  WelcomeSetup,
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from './plugin';
@@ -29,6 +28,7 @@ export type {
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
   WelcomeRenderTelemetryNotice,
+  WelcomeServiceSetup,
 } from './services';
 
 export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';
