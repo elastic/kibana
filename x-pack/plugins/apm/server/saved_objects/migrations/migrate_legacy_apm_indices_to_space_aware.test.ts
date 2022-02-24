@@ -108,12 +108,14 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
       expect(mockCreate).toBeCalledWith(
         APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
         {
-          transaction: 'default-apm-*',
-          span: 'default-apm-*',
-          error: 'default-apm-*',
-          metric: 'default-apm-*',
-          sourcemap: 'default-apm-*',
-          onboarding: 'default-apm-*',
+          apmIndices: {
+            transaction: 'default-apm-*',
+            span: 'default-apm-*',
+            error: 'default-apm-*',
+            metric: 'default-apm-*',
+            sourcemap: 'default-apm-*',
+            onboarding: 'default-apm-*',
+          },
           isSpaceAware: true,
         },
         {
@@ -195,7 +197,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
               type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
               id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
               initialNamespaces: [id],
-              attributes: { ...attributes, isSpaceAware: true },
+              attributes: { apmIndices: attributes, isSpaceAware: true },
             };
           })
       );

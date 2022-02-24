@@ -15,6 +15,7 @@ import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
+import { APMIndices } from '../apm_indices';
 
 async function fetchLegacyAPMIndices(repository: ISavedObjectsRepository) {
   try {
@@ -58,8 +59,8 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
       fields: ['name'], // to avoid fetching *all* fields
     });
 
-    const savedObjectAttributes = {
-      ...legacyAPMIndices.attributes,
+    const savedObjectAttributes: APMIndices = {
+      apmIndices: legacyAPMIndices.attributes,
       isSpaceAware: true,
     };
 
@@ -72,7 +73,7 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
     });
 
     // Create new APM indices space aware for all spaces available
-    await repository.bulkCreate<Partial<ApmIndicesConfig>>(
+    await repository.bulkCreate<Partial<APMIndices>>(
       spaces.saved_objects
         // Skip default space since it was already updated
         .filter(({ id: spaceId }) => spaceId !== 'default')

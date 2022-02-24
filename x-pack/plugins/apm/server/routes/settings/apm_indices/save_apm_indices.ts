@@ -10,6 +10,7 @@ import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
+import { APMIndices } from '../../../saved_objects/apm_indices';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { ApmIndicesConfig } from './get_apm_indices';
 
@@ -18,9 +19,9 @@ export function saveApmIndices(
   apmIndices: Partial<ApmIndicesConfig>
 ) {
   return withApmSpan('save_apm_indices', () =>
-    savedObjectsClient.create(
+    savedObjectsClient.create<APMIndices>(
       APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-      { ...removeEmpty(apmIndices), isSpaceAware: true },
+      { apmIndices: removeEmpty(apmIndices), isSpaceAware: true },
       { id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID, overwrite: true }
     )
   );

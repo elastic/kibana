@@ -26,7 +26,10 @@ describe('saveApmIndices', () => {
     await saveApmIndices(savedObjectsClient, apmIndices);
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       expect.any(String),
-      { settingA: 'aa', settingF: 'ff', settingG: 'gg', isSpaceAware: true },
+      {
+        apmIndices: { settingA: 'aa', settingF: 'ff', settingG: 'gg' },
+        isSpaceAware: true,
+      },
       expect.any(Object)
     );
   });

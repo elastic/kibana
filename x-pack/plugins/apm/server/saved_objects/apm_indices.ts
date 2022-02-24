@@ -10,17 +10,36 @@ import { i18n } from '@kbn/i18n';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 import { ApmIndicesConfigName } from '..';
 
+export interface APMIndices {
+  apmIndices?: {
+    sourcemap?: string;
+    error?: string;
+    onboarding?: string;
+    span?: string;
+    transaction?: string;
+    metric?: string;
+  };
+  isSpaceAware?: boolean;
+}
+
 const properties: {
-  [Property in ApmIndicesConfigName]: { type: 'keyword' };
-} & {
+  apmIndices: {
+    properties: {
+      [Property in ApmIndicesConfigName]: { type: 'keyword' };
+    };
+  };
   isSpaceAware: { type: 'boolean' };
 } = {
-  sourcemap: { type: 'keyword' },
-  error: { type: 'keyword' },
-  onboarding: { type: 'keyword' },
-  span: { type: 'keyword' },
-  transaction: { type: 'keyword' },
-  metric: { type: 'keyword' },
+  apmIndices: {
+    properties: {
+      sourcemap: { type: 'keyword' },
+      error: { type: 'keyword' },
+      onboarding: { type: 'keyword' },
+      span: { type: 'keyword' },
+      transaction: { type: 'keyword' },
+      metric: { type: 'keyword' },
+    },
+  },
   isSpaceAware: { type: 'boolean' },
 };
 
