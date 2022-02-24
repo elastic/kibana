@@ -131,7 +131,7 @@ describe('XmattersActionConnectorFields renders', () => {
       secrets: {
         user: '',
         password: '',
-        urlSecrets: 'http:\\test?apiKey=someKey',
+        secretsUrl: 'http:\\test?apiKey=someKey',
       },
       id: 'test',
       actionTypeId: '.xmatters',

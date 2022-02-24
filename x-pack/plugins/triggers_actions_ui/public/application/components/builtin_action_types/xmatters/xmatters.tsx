@@ -42,30 +42,30 @@ export function getActionType(): ActionTypeModel<
     ),
     validateConnector: async (
       action: XmattersActionConnector
-    ): Promise<ConnectorValidationResult<Pick<XmattersConfig, 'urlConfig'>, XmattersSecrets>> => {
+    ): Promise<ConnectorValidationResult<Pick<XmattersConfig, 'configUrl'>, XmattersSecrets>> => {
       const translations = await import('./translations');
       const configErrors = {
-        urlConfig: new Array<string>(),
+        configUrl: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
         password: new Array<string>(),
-        urlSecrets: new Array<string>(),
+        secretsUrl: new Array<string>(),
       };
       const validationResult = {
         config: { errors: configErrors },
         secrets: { errors: secretsErrors },
       };
       // basic auth validation
-      if (!action.config.urlConfig && action.config.usesBasic) {
-        configErrors.urlConfig.push(translations.URL_REQUIRED);
+      if (!action.config.configUrl && action.config.usesBasic) {
+        configErrors.configUrl.push(translations.URL_REQUIRED);
       }
       if (action.config.usesBasic && !action.secrets.user && !action.secrets.password) {
         secretsErrors.user.push(translations.USERNAME_REQUIRED);
         secretsErrors.password.push(translations.PASSWORD_REQUIRED);
       }
-      if (action.config.urlConfig && !isValidUrl(action.config.urlConfig)) {
-        configErrors.urlConfig = [...configErrors.urlConfig, translations.URL_INVALID];
+      if (action.config.configUrl && !isValidUrl(action.config.configUrl)) {
+        configErrors.configUrl = [...configErrors.configUrl, translations.URL_INVALID];
       }
       if (action.config.usesBasic && action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER);
@@ -74,11 +74,11 @@ export function getActionType(): ActionTypeModel<
         secretsErrors.user.push(translations.USERNAME_REQUIRED_FOR_PASSWORD);
       }
       // API Key auth validation
-      if (!action.config.usesBasic && !action.secrets.urlSecrets) {
-        secretsErrors.urlSecrets.push(translations.URL_REQUIRED);
+      if (!action.config.usesBasic && !action.secrets.secretsUrl) {
+        secretsErrors.secretsUrl.push(translations.URL_REQUIRED);
       }
-      if (action.secrets.urlSecrets && !isValidUrl(action.secrets.urlSecrets)) {
-        secretsErrors.urlSecrets.push(translations.URL_INVALID);
+      if (action.secrets.secretsUrl && !isValidUrl(action.secrets.secretsUrl)) {
+        secretsErrors.secretsUrl.push(translations.URL_INVALID);
       }
       return validationResult;
     },

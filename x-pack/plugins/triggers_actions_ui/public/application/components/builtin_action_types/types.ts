@@ -152,14 +152,14 @@ export interface XmattersActionParams {
 }
 
 export interface XmattersConfig {
-  urlConfig?: string;
+  configUrl?: string;
   usesBasic: boolean;
 }
 
 export interface XmattersSecrets {
   user: string;
   password: string;
-  urlSecrets?: string;
+  secretsUrl?: string;
 }
 
 export type XmattersActionConnector = UserConfiguredActionConnector<

@@ -41,7 +41,7 @@ describe('xmatters connector validation', () => {
       name: 'xmatters',
       isPreconfigured: false,
       config: {
-        urlConfig: 'http://test.com',
+        configUrl: 'http://test.com',
         usesBasic: true,
       },
     } as XmattersActionConnector;
@@ -49,14 +49,14 @@ describe('xmatters connector validation', () => {
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          urlConfig: [],
+          configUrl: [],
         },
       },
       secrets: {
         errors: {
           user: [],
           password: [],
-          urlSecrets: [],
+          secretsUrl: [],
         },
       },
     });
@@ -67,7 +67,7 @@ describe('xmatters connector validation', () => {
       secrets: {
         user: '',
         password: '',
-        urlSecrets: 'https://test.com?apiKey=someKey',
+        secretsUrl: 'https://test.com?apiKey=someKey',
       },
       id: 'test',
       actionTypeId: '.xmatters',
@@ -81,14 +81,14 @@ describe('xmatters connector validation', () => {
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          urlConfig: [],
+          configUrl: [],
         },
       },
       secrets: {
         errors: {
           user: [],
           password: [],
-          urlSecrets: [],
+          secretsUrl: [],
         },
       },
     });
@@ -110,14 +110,14 @@ describe('xmatters connector validation', () => {
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          urlConfig: ['URL is required.'],
+          configUrl: ['URL is required.'],
         },
       },
       secrets: {
         errors: {
           user: [],
           password: ['Password is required when username is used.'],
-          urlSecrets: [],
+          secretsUrl: [],
         },
       },
     });
@@ -133,7 +133,7 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       config: {
-        urlConfig: 'invalid.url',
+        configUrl: 'invalid.url',
         usesBasic: true,
       },
     } as XmattersActionConnector;
@@ -141,14 +141,14 @@ describe('xmatters connector validation', () => {
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          urlConfig: ['URL is invalid.'],
+          configUrl: ['URL is invalid.'],
         },
       },
       secrets: {
         errors: {
           user: [],
           password: [],
-          urlSecrets: [],
+          secretsUrl: [],
         },
       },
     });
