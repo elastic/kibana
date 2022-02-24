@@ -14,21 +14,13 @@ export { getFieldValidityAndErrorMessage } from './helpers';
 
 export { FormProvider, useFormContext } from './form_context';
 
-export {
-  ArrayItem,
-  Form,
-  FormArrayField,
-  FormDataProvider,
-  getUseField,
-  UseArray,
-  UseField,
-  UseFieldProps,
-  UseMultiFields,
-} from './components';
+export { Form, getUseField, UseArray, UseField, UseMultiFields } from './components';
+
+export type { ArrayItem, FormArrayField, UseFieldProps } from './components';
 
 export { FIELD_TYPES, VALIDATION_TYPES } from './constants';
 
-export {
+export type {
   FieldConfig,
   FieldHook,
   FieldsMap,
