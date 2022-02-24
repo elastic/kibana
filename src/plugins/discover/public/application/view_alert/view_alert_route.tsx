@@ -55,6 +55,24 @@ const displayRuleChangedWarn = (toastNotifications: ToastsStart) => {
   });
 };
 
+const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
+  const infoTitle = i18n.translate('discover.viewAlert.possibleDocsDifferenceInfoTitle', {
+    defaultMessage: 'Possibly different documents',
+  });
+  const infoDescription = i18n.translate(
+    'discover.viewAlert.possibleDocsDifferenceInfoDescription',
+    {
+      defaultMessage: `Displayed documents might not match the documents triggered 
+      notification, since documents might have been deleted or added.`,
+    }
+  );
+
+  toastNotifications.addInfo({
+    title: infoTitle,
+    text: toMountPoint(<MarkdownSimple>{infoDescription}</MarkdownSimple>),
+  });
+};
+
 const getCurrentChecksum = (params: SearchThresholdAlertParams) =>
   sha256.create().update(JSON.stringify(params)).hex();
 
@@ -124,8 +142,11 @@ export function ViewAlertRoute() {
         return;
       }
 
-      if (openConcreteAlert && getCurrentChecksum(fetchedAlert.params) !== queryParams.checksum) {
+      const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
+      if (openConcreteAlert && calculatedChecksum !== queryParams.checksum) {
         displayRuleChangedWarn(toastNotifications);
+      } else if (openConcreteAlert && calculatedChecksum === queryParams.checksum) {
+        displayPossibleDocsDiffInfoAlert(toastNotifications);
       }
 
       const fetchedSearchSource = await fetchSearchSource(fetchedAlert);
