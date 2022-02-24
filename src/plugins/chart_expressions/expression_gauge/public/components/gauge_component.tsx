@@ -111,6 +111,28 @@ function normalizeBands(
   return [...firstRanges, ...orderedStops, ...lastRanges];
 }
 
+const toPercents = (min: number, max: number) => (v: number) => (v - min) / (max - min);
+
+function normalizeBandsLegacy({ colors, stops }: CustomPaletteState, value: number) {
+  const min = stops[0];
+  const max = stops[stops.length - 1];
+  const convertToPercents = toPercents(min, max);
+  const normalizedStops = stops.map(convertToPercents);
+
+  if (max < value) {
+    normalizedStops.push(convertToPercents(value));
+  }
+
+  return normalizedStops;
+}
+
+function actualValueToPercentsLegacy({ stops }: CustomPaletteState, value: number) {
+  const min = stops[0];
+  const max = stops[stops.length - 1];
+  const convertToPercents = toPercents(min, max);
+  return convertToPercents(value);
+}
+
 function getTitle(
   majorMode?: GaugeLabelMajorMode | GaugeCentralMajorMode,
   major?: string,
@@ -144,7 +166,8 @@ function getTicksLabels(baseStops: number[]) {
 function getTicks(
   ticksPosition: GaugeTicksPosition,
   range: [number, number],
-  colorBands?: number[]
+  colorBands?: number[],
+  percentageMode?: boolean
 ) {
   if (ticksPosition === GaugeTicksPositions.HIDDEN) {
     return [];
@@ -158,12 +181,15 @@ function getTicks(
   const min = Math.min(...(colorBands || []), ...range);
   const max = Math.max(...(colorBands || []), ...range);
   const step = (max - min) / TICKS_NO;
-  return [
+
+  const ticks = [
     ...Array(TICKS_NO)
       .fill(null)
       .map((_, i) => Number((min + step * i).toFixed(2))),
     max,
   ];
+  const convertToPercents = toPercents(min, max);
+  return percentageMode ? ticks.map(convertToPercents) : ticks;
 }
 
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
@@ -252,16 +278,22 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     );
 
     const colors = palette?.params?.colors ? normalizeColors(palette.params, min, max) : undefined;
-    const bands: number[] = (palette?.params as CustomPaletteState)
-      ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
+    let bands: number[] = (palette?.params as CustomPaletteState)
+      ? normalizeBands(palette?.params as CustomPaletteState, { min, max })
       : [min, max];
 
     // TODO: format in charts
-    const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
-    const goalConfig = getGoalConfig(gaugeType);
-    const totalTicks = getTicks(ticksPosition, [min, max], bands);
+    let actualValue = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
+    const totalTicks = getTicks(ticksPosition, [min, max], bands, args.percentageMode);
     const ticks =
       gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
+
+    if (args.percentageMode && palette?.params && palette?.params.stops?.length) {
+      bands = normalizeBandsLegacy(palette?.params as CustomPaletteState, actualValue);
+      actualValue = actualValueToPercentsLegacy(palette?.params as CustomPaletteState, actualValue);
+    }
+
+    const goalConfig = getGoalConfig(gaugeType);
 
     const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
 
@@ -271,7 +303,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     const extraTitles = isRoundShape(gaugeType)
       ? {
-          centralMinor: tickFormatter.convert(metricValue),
+          centralMinor: tickFormatter.convert(actualValue),
           centralMajor: getTitle(centralMajorMode, centralMajor, metricColumn?.name),
         }
       : {};
@@ -289,8 +321,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           subtype={getSubtypeByGaugeType(gaugeType)}
           base={bands[0]}
           target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
-          actual={formattedActual}
+          actual={actualValue}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
+          tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
           bands={bands}
           ticks={ticks}
           bandFillColor={

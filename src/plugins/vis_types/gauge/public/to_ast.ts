@@ -71,6 +71,7 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     colorMode: 'palette',
     centralMajorMode,
     ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
+    percentageMode,
   });
 
   if (colorsRange && colorsRange.length) {
