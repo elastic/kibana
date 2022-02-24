@@ -7,7 +7,7 @@
  */
 
 import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
-// import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
+import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import { SavedObjectsManagementColumn } from './types';
 
 export interface SavedObjectsManagementColumnServiceSetup {
@@ -53,5 +53,5 @@ function registerSpacesApiColumns(
   spacesApi: SpacesApi
 ) {
   // Note: this column is hidden for now because no saved objects are shareable. It should be uncommented when at least one saved object type is multi-namespace.
-  // service.setup().register(new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui));
+  service.setup().register(new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui));
 }
