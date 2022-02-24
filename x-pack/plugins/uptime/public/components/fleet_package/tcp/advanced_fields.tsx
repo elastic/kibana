@@ -19,9 +19,10 @@ import { OptionalLabel } from '../optional_label';
 interface Props {
   children?: React.ReactNode;
   minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
-export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth }) => {
+export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -79,6 +80,7 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth }) => {
                 configKey: ConfigKey.PROXY_URL,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.PROXY_URL)}
             data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
@@ -127,6 +129,7 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth }) => {
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.REQUEST_SEND_CHECK)}
             data-test-subj="syntheticsTCPRequestSendCheck"
           />
         </EuiFormRow>
@@ -173,6 +176,7 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth }) => {
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_RECEIVE_CHECK)}
             data-test-subj="syntheticsTCPResponseReceiveCheck"
           />
         </EuiFormRow>
