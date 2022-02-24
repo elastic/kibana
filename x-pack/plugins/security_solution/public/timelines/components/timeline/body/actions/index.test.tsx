@@ -12,6 +12,7 @@ import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../
 import { Actions } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -58,6 +59,13 @@ jest.mock('../../../../../common/lib/kibana', () => ({
     addWarning: jest.fn(),
   }),
   useGetUserCasesPermissions: jest.fn(),
+}));
+
+jest.mock('../../../../../common/components/user_privileges', () => ({
+  useUserPrivileges: () => ({
+    ...mockInitialUserPrivilegesState(),
+    endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
+  }),
 }));
 
 const defaultProps = {
