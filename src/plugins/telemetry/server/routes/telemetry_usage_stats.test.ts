@@ -97,7 +97,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
       });
     });
 
-    it('returns 403 when the user does not have enough permissions', async () => {
+    it('returns 403 when the user does not have enough permissions to request unencrypted telemetry', async () => {
       const getSecurityMock = jest.fn().mockReturnValue({
         authz: {
           checkPrivilegesWithRequest: () => ({
@@ -116,6 +116,27 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         unencrypted: true,
       });
       expect(mockResponse.forbidden).toBeCalled();
+    });
+
+    it('returns 200 when the user does not have enough permissions to request unencrypted telemetry but it requests encrypted', async () => {
+      const getSecurityMock = jest.fn().mockReturnValue({
+        authz: {
+          checkPrivilegesWithRequest: () => ({
+            globally: () => ({ hasAllRequested: false }),
+          }),
+        },
+      });
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurityMock
+      );
+      const { mockResponse } = await runRequest(mockRouter, {
+        refreshCache: false,
+        unencrypted: false,
+      });
+      expect(mockResponse.ok).toBeCalled();
     });
 
     it.todo('always returns an empty array on errors on encrypted payload');

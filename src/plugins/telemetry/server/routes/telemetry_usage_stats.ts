@@ -36,7 +36,7 @@ export function registerTelemetryUsageStatsRoutes(
       const { unencrypted, refreshCache } = req.body;
 
       const security = getSecurity();
-      if (security) {
+      if (security && unencrypted) {
         const { hasAllRequested } = await security.authz
           .checkPrivilegesWithRequest(req)
           .globally({ kibana: 'decryptedTelemetry' });
