@@ -100,6 +100,11 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     it('returns 403 when the user does not have enough permissions to request unencrypted telemetry', async () => {
       const getSecurityMock = jest.fn().mockReturnValue({
         authz: {
+          actions: {
+            api: {
+              get: jest.fn(),
+            },
+          },
           checkPrivilegesWithRequest: () => ({
             globally: () => ({ hasAllRequested: false }),
           }),
@@ -121,6 +126,11 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     it('returns 200 when the user does not have enough permissions to request unencrypted telemetry but it requests encrypted', async () => {
       const getSecurityMock = jest.fn().mockReturnValue({
         authz: {
+          actions: {
+            api: {
+              get: jest.fn(),
+            },
+          },
           checkPrivilegesWithRequest: () => ({
             globally: () => ({ hasAllRequested: false }),
           }),

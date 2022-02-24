@@ -37,9 +37,13 @@ export function registerTelemetryUsageStatsRoutes(
 
       const security = getSecurity();
       if (security && unencrypted) {
-        const { hasAllRequested } = await security.authz
-          .checkPrivilegesWithRequest(req)
-          .globally({ kibana: 'decryptedTelemetry' });
+        // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
+        // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
+        // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
+        // granted to users that have "Global All" or "Global Read" privileges in Kibana.
+        const { checkPrivilegesWithRequest, actions } = security.authz;
+        const privileges = { kibana: actions.api.get('decryptedTelemetry') };
+        const { hasAllRequested } = await checkPrivilegesWithRequest(req).globally(privileges);
         if (!hasAllRequested) {
           return res.forbidden();
         }
