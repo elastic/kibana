@@ -39,9 +39,7 @@ describe('DetailPanelDescriptionList component', () => {
         <DetailPanelDescriptionList listItems={TEST_LIST_ITEM} />
       );
 
-      expect(
-        renderResult.queryByTestId('sessionViewer:detail-panel-description-list')
-      ).toBeVisible();
+      expect(renderResult.queryByTestId('sessionView:detail-panel-description-list')).toBeVisible();
 
       // check list items are rendered
       expect(renderResult.queryByText(TEST_FIRST_TITLE)).toBeVisible();

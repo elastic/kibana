@@ -155,7 +155,11 @@ export const ProcessTree = ({
   }
 
   return (
-    <div ref={scrollerRef} css={styles.scroller} data-test-subj="sessionViewProcessTree">
+    <div
+      ref={scrollerRef}
+      css={styles.scroller}
+      data-test-subj="sessionView:sessionViewProcessTree"
+    >
       {hasPreviousPage &&
         renderLoadMoreButton(
           <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />,

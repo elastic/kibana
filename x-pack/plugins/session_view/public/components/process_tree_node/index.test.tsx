@@ -28,7 +28,7 @@ describe('ProcessTreeNode component', () => {
     it('should render given a valid process', async () => {
       renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
 
-      expect(renderResult.queryByTestId('processTreeNode')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:processTreeNode')).toBeTruthy();
     });
 
     it('should have an alternate rendering for a session leader', async () => {
@@ -66,7 +66,7 @@ describe('ProcessTreeNode component', () => {
 
       renderResult = mockedContext.render(<ProcessTreeNode process={userEnteredProcessMock} />);
 
-      expect(renderResult.queryByTestId('processTreeNodeUserIcon')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeUserIcon')).toBeTruthy();
     });
 
     it('renders Exec icon for executed process', async () => {
@@ -77,7 +77,7 @@ describe('ProcessTreeNode component', () => {
 
       renderResult = mockedContext.render(<ProcessTreeNode process={executedProcessMock} />);
 
-      expect(renderResult.queryByTestId('processTreeNodeExecIcon')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
     });
 
     it('renders Root Escalation flag properly', async () => {
@@ -104,7 +104,9 @@ describe('ProcessTreeNode component', () => {
 
       renderResult = mockedContext.render(<ProcessTreeNode process={rootEscalationProcessMock} />);
 
-      expect(renderResult.queryByTestId('processTreeNodeRootEscalationFlag')).toBeTruthy();
+      expect(
+        renderResult.queryByTestId('sessionView:processTreeNodeRootEscalationFlag')
+      ).toBeTruthy();
     });
 
     it('executes callback function when user Clicks', async () => {
@@ -114,7 +116,7 @@ describe('ProcessTreeNode component', () => {
         <ProcessTreeNode process={processMock} onProcessSelected={onProcessSelected} />
       );
 
-      userEvent.click(renderResult.getByTestId('processTreeNodeRow'));
+      userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
       expect(onProcessSelected).toHaveBeenCalled();
     });
 
@@ -130,7 +132,7 @@ describe('ProcessTreeNode component', () => {
       // @ts-ignore
       windowGetSelectionSpy.mockImplementation(() => ({ type: 'Range' }));
 
-      userEvent.click(renderResult.getByTestId('processTreeNodeRow'));
+      userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
       expect(onProcessSelected).not.toHaveBeenCalled();
 
       // cleanup
@@ -149,9 +151,9 @@ describe('ProcessTreeNode component', () => {
           <ProcessTreeNode process={sessionViewAlertProcessMock} />
         );
         userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
-        expect(renderResult.queryByTestId('sessionViewAlertDetails')).toBeTruthy();
+        expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
         userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
-        expect(renderResult.queryByTestId('sessionViewAlertDetails')).toBeFalsy();
+        expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
       });
     });
     describe('Child processes', () => {
@@ -163,7 +165,9 @@ describe('ProcessTreeNode component', () => {
 
         renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithChildren} />);
 
-        expect(renderResult.queryByTestId('processTreeNodeChildProcessesButton')).toBeTruthy();
+        expect(
+          renderResult.queryByTestId('sessionView:processTreeNodeChildProcessesButton')
+        ).toBeTruthy();
       });
       it('toggle Child processes nodes when Child processes button is clicked', async () => {
         const processMockWithChildren: typeof processMock = {
@@ -173,13 +177,17 @@ describe('ProcessTreeNode component', () => {
 
         renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithChildren} />);
 
-        expect(renderResult.getAllByTestId('processTreeNode')).toHaveLength(1);
+        expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
 
-        userEvent.click(renderResult.getByTestId('processTreeNodeChildProcessesButton'));
-        expect(renderResult.getAllByTestId('processTreeNode')).toHaveLength(2);
+        userEvent.click(
+          renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
+        );
+        expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(2);
 
-        userEvent.click(renderResult.getByTestId('processTreeNodeChildProcessesButton'));
-        expect(renderResult.getAllByTestId('processTreeNode')).toHaveLength(1);
+        userEvent.click(
+          renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
+        );
+        expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
       });
     });
     describe('Search', () => {
@@ -189,9 +197,9 @@ describe('ProcessTreeNode component', () => {
 
         renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
 
-        expect(renderResult.getByTestId('processNodeSearchHighlight').textContent).toEqual(
-          '/vagrant'
-        );
+        expect(
+          renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent
+        ).toEqual('/vagrant');
       });
     });
   });

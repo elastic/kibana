@@ -60,7 +60,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const renderNoData = () => {
     return (
       <EuiEmptyPrompt
-        data-test-subj="sessionViewProcessEventsEmpty"
+        data-test-subj="sessionView:sessionViewProcessEventsEmpty"
         title={
           <h2>
             <FormattedMessage
@@ -172,7 +172,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="sessionViewProcessEventsSearch" css={{ position: 'relative' }}>
+        <EuiFlexItem
+          data-test-subj="sessionView:sessionViewProcessEventsSearch"
+          css={{ position: 'relative' }}
+        >
           <SessionViewSearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}

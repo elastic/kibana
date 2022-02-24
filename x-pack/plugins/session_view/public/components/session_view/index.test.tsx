@@ -38,13 +38,15 @@ describe('SessionView component', () => {
       it('should show the Empty message', async () => {
         render();
         await waitForApiCall();
-        expect(renderResult.getByTestId('sessionViewProcessEventsEmpty')).toBeTruthy();
+        expect(renderResult.getByTestId('sessionView:sessionViewProcessEventsEmpty')).toBeTruthy();
       });
 
       it('should not display the search bar', async () => {
         render();
         await waitForApiCall();
-        expect(renderResult.queryByTestId('sessionViewProcessEventsSearch')).toBeFalsy();
+        expect(
+          renderResult.queryByTestId('sessionView:sessionViewProcessEventsSearch')
+        ).toBeFalsy();
       });
     });
 
@@ -62,28 +64,28 @@ describe('SessionView component', () => {
         await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
+        expect(renderResult.getByText('Loading session…')).toBeTruthy();
 
         // release the request
         releaseApiResponse!(mockedApi);
 
         //  check the loader is gone
-        await waitForElementToBeRemoved(renderResult.getByTestId('sectionLoading'));
+        await waitForElementToBeRemoved(renderResult.getByText('Loading session…'));
       });
 
       it('should display the search bar', async () => {
         render();
         await waitForApiCall();
-        expect(renderResult.getByTestId('sessionViewProcessEventsSearch')).toBeTruthy();
+        expect(renderResult.getByTestId('sessionView:sessionViewProcessEventsSearch')).toBeTruthy();
       });
 
       it('should show items on the list, and auto selects session leader', async () => {
         render();
         await waitForApiCall();
 
-        expect(renderResult.getAllByTestId('processTreeNode')).toBeTruthy();
+        expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
 
-        const selectionArea = renderResult.queryByTestId('processTreeSelectionArea');
+        const selectionArea = renderResult.queryByTestId('sessionView:processTreeSelectionArea');
 
         expect(selectionArea?.parentElement?.getAttribute('data-id')).toEqual('test-entity-id');
       });

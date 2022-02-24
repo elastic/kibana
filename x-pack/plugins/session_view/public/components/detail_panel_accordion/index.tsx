@@ -49,7 +49,7 @@ export const DetailPanelAccordion = ({
             <span>{title}</span>
           </EuiFlexItem>
           {tooltipContent && (
-            <EuiFlexItem grow={false} data-test-subj="sessionViewer:detail-panel-accordion-tooltip">
+            <EuiFlexItem grow={false} data-test-subj="sessionView:detail-panel-accordion-tooltip">
               <EuiIconTip content={tooltipContent} />
             </EuiFlexItem>
           )}
@@ -61,14 +61,14 @@ export const DetailPanelAccordion = ({
             size="s"
             color="primary"
             onClick={onExtraActionClick}
-            data-test-subj="sessionViewer:detail-panel-accordion-action"
+            data-test-subj="sessionView:detail-panel-accordion-action"
           >
             {extraActionTitle}
           </EuiButtonEmpty>
         ) : null
       }
       css={styles.accordion}
-      data-test-subj="sessionViewer:detail-panel-accordion"
+      data-test-subj="sessionView:detail-panel-accordion"
     >
       <DetailPanelDescriptionList listItems={listItems} />
     </EuiAccordion>

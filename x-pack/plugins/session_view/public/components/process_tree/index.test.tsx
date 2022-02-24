@@ -34,8 +34,8 @@ describe('ProcessTree component', () => {
           onProcessSelected={jest.fn()}
         />
       );
-      expect(renderResult.queryByTestId('sessionViewProcessTree')).toBeTruthy();
-      expect(renderResult.queryAllByTestId('processTreeNode')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
     });
 
     it('should insert a DOM element used to highlight a process when selectedProcess is set', () => {
@@ -54,6 +54,9 @@ describe('ProcessTree component', () => {
           onProcessSelected={jest.fn()}
         />
       );
+
+      // click on view more button
+      renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton').click();
 
       expect(
         renderResult

@@ -43,7 +43,7 @@ export const DetailPanelListItem = ({
   }
 
   return (
-    <EuiText {...props} data-test-subj="sessionViewer:detail-panel-list-item">
+    <EuiText {...props} data-test-subj="sessionView:detail-panel-list-item">
       {children}
       {isHovered && copy}
     </EuiText>

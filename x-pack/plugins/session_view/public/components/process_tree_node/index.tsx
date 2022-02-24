@@ -59,7 +59,7 @@ export function ProcessTreeNode({
 
       if (text) {
         const html = text.replace(regex, (match) => {
-          return `<span data-test-subj="processNodeSearchHighlight" style="${styles.searchHighlight}">${match}</span>`;
+          return `<span data-test-subj="sessionView:processNodeSearchHighlight" style="${styles.searchHighlight}">${match}</span>`;
         });
 
         // eslint-disable-next-line no-unsanitized/property
@@ -131,7 +131,7 @@ export function ProcessTreeNode({
               key="group-leaders-only-button"
               css={styles.getButtonStyle(ButtonType.children)}
               onClick={onShowGroupLeaderOnlyClick}
-              data-test-subj="processTreeNodeChildProcessesButton"
+              data-test-subj="sessionView:processTreeNodeChildProcessesButton"
             >
               <FormattedMessage
                 id="xpack.sessionView.plusCountMore"
@@ -155,7 +155,7 @@ export function ProcessTreeNode({
           key="child-processes-button"
           css={styles.getButtonStyle(ButtonType.children)}
           onClick={() => setChildrenExpanded(!childrenExpanded)}
-          data-test-subj="processTreeNodeChildProcessesButton"
+          data-test-subj="sessionView:processTreeNodeChildProcessesButton"
         >
           <FormattedMessage
             id="xpack.sessionView.childProcesses"
@@ -233,13 +233,13 @@ export function ProcessTreeNode({
       <span>
         {process.isUserEntered() && (
           <EuiIcon
-            data-test-subj="processTreeNodeUserIcon"
+            data-test-subj="sessionView:processTreeNodeUserIcon"
             css={styles.userEnteredIcon}
             type="user"
           />
         )}
         {hasExec ? (
-          <EuiIcon data-test-subj="processTreeNodeExecIcon" type="console" />
+          <EuiIcon data-test-subj="sessionView:processTreeNodeExecIcon" type="console" />
         ) : (
           <EuiIcon type="branch" />
         )}
@@ -255,7 +255,7 @@ export function ProcessTreeNode({
     if (user.name === 'root' && user.id !== parent.user.id) {
       return (
         <EuiButton
-          data-test-subj="processTreeNodeRootEscalationFlag"
+          data-test-subj="sessionView:processTreeNodeRootEscalationFlag"
           css={styles.getButtonStyle(ButtonType.userChanged)}
         >
           <FormattedMessage
@@ -288,10 +288,14 @@ export function ProcessTreeNode({
         data-id={id}
         key={id + searchMatched}
         css={styles.processNode}
-        data-test-subj="processTreeNode"
+        data-test-subj="sessionView:processTreeNode"
       >
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-        <div data-test-subj="processTreeNodeRow" css={styles.wrapper} onClick={onProcessClicked}>
+        <div
+          data-test-subj="sessionView:processTreeNodeRow"
+          css={styles.wrapper}
+          onClick={onProcessClicked}
+        >
           {isSessionLeader ? renderSessionLeader() : renderProcess()}
           {renderRootEscalation()}
           {renderButtons()}

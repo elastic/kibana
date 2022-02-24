@@ -36,7 +36,7 @@ const mockActionProps: ActionProps = {
 jest.mock('../session_view/index.tsx', () => {
   return {
     SessionView: () => {
-      return <div data-test-subj="SessionView">Mock</div>;
+      return <div data-test-subj="sessionView:SessionView">Mock</div>;
     },
   };
 });
@@ -48,7 +48,7 @@ jest.mock('../session_leader_table/index.tsx', () => {
       return (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <div
-          data-test-subj="SessionLeaderTable"
+          data-test-subj="sessionView:SessionLeaderTable"
           onClick={() => onOpenSessionViewer(mockActionProps)}
         >
           Mock
@@ -84,35 +84,35 @@ describe('SessionViewTableProcessTree component', () => {
 
     it('Renders session leader table initially', async () => {
       renderResult = mockedContext.render(<SessionViewTableProcessTree />);
-      expect(renderResult.queryByTestId('SessionLeaderTable')).toBeTruthy();
-      expect(renderResult.queryByTestId('SessionView')).toBeNull();
+      expect(renderResult.queryByTestId('sessionView:SessionLeaderTable')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:SessionView')).toBeNull();
     });
 
     it('Switches to session view when the user picks a session', async () => {
       renderResult = mockedContext.render(<SessionViewTableProcessTree />);
-      const sessionLeaderTable = renderResult.getByTestId('SessionLeaderTable');
+      const sessionLeaderTable = renderResult.getByTestId('sessionView:SessionLeaderTable');
       fireEvent.click(sessionLeaderTable);
       await waitForApiCall();
 
       // Now that we fetched the entity id, session view should be visible
-      expect(renderResult.queryByTestId('SessionView')).toBeTruthy();
-      expect(renderResult.queryByTestId('SessionLeaderTable')).toBeNull();
+      expect(renderResult.queryByTestId('sessionView:SessionView')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:SessionLeaderTable')).toBeNull();
     });
 
     it('Close button works', async () => {
       renderResult = mockedContext.render(<SessionViewTableProcessTree />);
-      const sessionLeaderTable = renderResult.getByTestId('SessionLeaderTable');
+      const sessionLeaderTable = renderResult.getByTestId('sessionView:SessionLeaderTable');
       fireEvent.click(sessionLeaderTable);
       await waitForApiCall();
 
-      expect(renderResult.queryByTestId('SessionView')).toBeTruthy();
-      expect(renderResult.queryByTestId('SessionLeaderTable')).toBeNull();
+      expect(renderResult.queryByTestId('sessionView:SessionView')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:SessionLeaderTable')).toBeNull();
 
-      const closeButton = renderResult.getByTestId('session-view-close-button');
+      const closeButton = renderResult.getByTestId('sessionView:session-view-close-button');
       fireEvent.click(closeButton);
 
-      expect(renderResult.queryByTestId('SessionLeaderTable')).toBeTruthy();
-      expect(renderResult.queryByTestId('SessionView')).toBeNull();
+      expect(renderResult.queryByTestId('sessionView:SessionLeaderTable')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:SessionView')).toBeNull();
     });
   });
 });

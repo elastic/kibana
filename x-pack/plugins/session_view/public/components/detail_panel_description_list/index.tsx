@@ -27,7 +27,7 @@ export const DetailPanelDescriptionList = ({ listItems }: DetailPanelDescription
       css={styles.descriptionList}
       titleProps={{ style: styles.tabListTitle }}
       descriptionProps={{ style: styles.tabListDescription }}
-      data-test-subj="sessionViewer:detail-panel-description-list"
+      data-test-subj="sessionView:detail-panel-description-list"
     />
   );
 };

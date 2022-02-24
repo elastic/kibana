@@ -13,9 +13,9 @@ import { DetailPanelListItem } from './index';
 const TEST_STRING = 'item title';
 const TEST_CHILD = <span>{TEST_STRING}</span>;
 const TEST_COPY_STRING = 'test copy button';
-const BUTTON_TEST_ID = 'test-copy-button';
+const BUTTON_TEST_ID = 'sessionView:test-copy-button';
 const TEST_COPY = <button data-test-subj={BUTTON_TEST_ID}>{TEST_COPY_STRING}</button>;
-const LIST_ITEM_TEST_ID = 'sessionViewer:detail-panel-list-item';
+const LIST_ITEM_TEST_ID = 'sessionView:detail-panel-list-item';
 const WAIT_TIMEOUT = 500;
 
 describe('DetailPanelListItem component', () => {

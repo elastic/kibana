@@ -23,13 +23,13 @@ describe('ProcessTreeAlerts component', () => {
     it('should return null if no alerts', async () => {
       renderResult = mockedContext.render(<ProcessTreeAlerts alerts={[]} />);
 
-      expect(renderResult.queryByTestId('sessionViewAlertDetails')).toBeNull();
+      expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeNull();
     });
 
     it('should return an array of alert details', async () => {
       renderResult = mockedContext.render(<ProcessTreeAlerts alerts={mockAlerts} />);
 
-      expect(renderResult.queryByTestId('sessionViewAlertDetails')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
       mockAlerts.forEach((alert) => {
         if (!alert.kibana) {
           return;
@@ -37,8 +37,12 @@ describe('ProcessTreeAlerts component', () => {
         const { uuid, rule, original_event: event, workflow_status: status } = alert.kibana.alert;
         const { name, query, severity } = rule;
 
-        expect(renderResult.queryByTestId(`sessionViewAlertDetail-${uuid}`)).toBeTruthy();
-        expect(renderResult.queryByTestId(`sessionViewAlertDetailViewRule-${uuid}`)).toBeTruthy();
+        expect(
+          renderResult.queryByTestId(`sessionView:sessionViewAlertDetail-${uuid}`)
+        ).toBeTruthy();
+        expect(
+          renderResult.queryByTestId(`sessionView:sessionViewAlertDetailViewRule-${uuid}`)
+        ).toBeTruthy();
         expect(renderResult.queryAllByText(new RegExp(event.action, 'i')).length).toBeTruthy();
         expect(renderResult.queryAllByText(new RegExp(status, 'i')).length).toBeTruthy();
         expect(renderResult.queryAllByText(new RegExp(name, 'i')).length).toBeTruthy();

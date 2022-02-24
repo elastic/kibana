@@ -44,7 +44,7 @@ export const SessionViewSearchBar = ({
     if (searchResults?.length) {
       return (
         <EuiPagination
-          data-test-subj="searchPagination"
+          data-test-subj="sessionView:searchPagination"
           css={styles.pagination}
           pageCount={searchResults.length}
           activePage={selectedResult}
@@ -64,7 +64,7 @@ export const SessionViewSearchBar = ({
   }, [searchResults, setSelectedProcess, selectedResult]);
 
   return (
-    <div data-test-subj="searchInput" css={{ position: 'relative' }}>
+    <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
       <EuiSearchBar query={searchQuery} onChange={onSearch} />
       {renderSearchResults()}
     </div>
