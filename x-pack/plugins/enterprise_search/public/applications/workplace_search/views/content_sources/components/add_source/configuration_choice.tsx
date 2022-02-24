@@ -31,7 +31,6 @@ import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
 import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic } from './add_source_logic';
 
 interface ConfigurationIntroProps {
   sourceData: SourceDataItem;
@@ -187,60 +186,56 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
         )}
         {customConnectorAvailable && (
           <EuiFlexItem grow>
-            <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
-              <EuiSplitPanel.Inner>
-                <EuiFlexGroup
-                  justifyContent="center"
-                  alignItems="center"
-                  direction="column"
-                  gutterSize="s"
-                  responsive={false}
-                >
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <h4>{name}</h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <h3>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.title',
-                          {
-                            defaultMessage: 'Custom connector',
-                          }
-                        )}
-                      </h3>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
+            <EuiPanel>
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                direction="column"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h4>{name}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <h3>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.description',
+                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.title',
                         {
-                          defaultMessage:
-                            'Set up a custom connector for more configurability and control.',
+                          defaultMessage: 'Custom connector',
                         }
                       )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton color="primary" fill onClick={goToCustom}>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.button',
-                        {
-                          defaultMessage: 'Instructions',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
+                    </h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.description',
+                      {
+                        defaultMessage:
+                          'Set up a custom connector for more configurability and control.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="primary" fill onClick={goToCustom}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.button',
+                      {
+                        defaultMessage: 'Instructions',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
