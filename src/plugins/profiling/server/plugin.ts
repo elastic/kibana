@@ -5,13 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
 
 import type { DataRequestHandlerContext } from '../../data/server';
 
@@ -46,7 +40,7 @@ export class ProfilingPlugin
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
-      registerRoutes(router);
+      registerRoutes(router, this.logger);
     });
 
     return {};
