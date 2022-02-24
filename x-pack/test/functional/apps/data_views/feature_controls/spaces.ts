@@ -47,14 +47,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.contain('Stack Management');
       });
 
-      it(`index pattern listing shows create button`, async () => {
+      it(`data views listing shows create button`, async () => {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('createIndexPatternButton');
       });
     });
 
-    describe('space with Index Patterns disabled', () => {
+    describe('space with Data Views disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
