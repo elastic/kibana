@@ -306,10 +306,30 @@ export const getInvalidConnectors = async (
   actionsClient: ActionsClient
 ): Promise<[BulkError[], PromiseFromStreams[]]> => {
   let actionsFind: FindActionResult[] = [];
+  const reducerAccumulator = {
+    errors: new Map<string, BulkError>(),
+    rulesAcc: new Map<string, PromiseFromStreams>(),
+  };
   try {
     actionsFind = await actionsClient.getAll();
   } catch (exc) {
-    // probably doesn't have privileges
+    if (exc?.output?.statusCode === 403) {
+      reducerAccumulator.errors.set(
+        uuid.v4(),
+        createBulkErrorObject({
+          statusCode: exc.output.statusCode,
+          message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
+        })
+      );
+    } else {
+      reducerAccumulator.errors.set(
+        uuid.v4(),
+        createBulkErrorObject({
+          statusCode: 404,
+          message: JSON.stringify(exc),
+        })
+      );
+    }
   }
   const actionIds = new Set(actionsFind.map((action) => action.id));
   const { errors, rulesAcc } = rules.reduce(
@@ -344,10 +364,7 @@ export const getInvalidConnectors = async (
       }
       return acc;
     }, // using map (preserves ordering)
-    {
-      errors: new Map<string, BulkError>(),
-      rulesAcc: new Map<string, PromiseFromStreams>(),
-    }
+    reducerAccumulator
   );
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];

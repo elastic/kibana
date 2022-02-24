@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
       });
-      it('should import rules without actions privileges', async () => {
+      it('should successfully import rules without actions when user has no actions privileges', async () => {
         await createUserAndRole(getService, ROLES.hunter_no_actions);
 
         const { body } = await supertestWithoutAuth
@@ -120,9 +120,70 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors: [],
-          success: true,
+          errors: [
+            {
+              error: {
+                message:
+                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                status_code: 403,
+              },
+              rule_id: '(unknown id)',
+            },
+          ],
+          success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+      });
+      it('should not import rules with actions when a user has no actions privileges', async () => {
+        await createUserAndRole(getService, ROLES.hunter_no_actions);
+
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter_no_actions, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+        expect(body).to.eql({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              error: {
+                message:
+                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                status_code: 403,
+              },
+              rule_id: '(unknown id)',
+            },
+            {
+              error: {
+                message: `1 connector is missing. Connector id missing is: ${hookAction.id}`,
+                status_code: 404,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
