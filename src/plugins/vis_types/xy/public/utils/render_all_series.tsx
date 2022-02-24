@@ -19,6 +19,7 @@ import {
   AccessorFn,
   ColorVariant,
   LabelOverflowConstraint,
+  computeRatioByGroups,
 } from '@elastic/charts';
 
 import { DatatableRow } from '../../../../expressions/public';
@@ -90,7 +91,24 @@ export const renderAllSeries = (
 
       const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-      const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
+      // compute percentage mode data
+      const splitChartAccessor = aspects.splitColumn?.accessor || aspects.splitRow?.accessor;
+      const groupAccessors = [String(xAccessor)];
+      if (splitChartAccessor) {
+        groupAccessors.push(splitChartAccessor);
+      }
+      let computedData = data;
+      if (yAxisScale?.mode === 'percentage') {
+        yAccessors.forEach((accessor) => {
+          computedData = computeRatioByGroups(
+            computedData,
+            groupAccessors,
+            (d) => d[accessor],
+            accessor
+          );
+        });
+      }
+      const isStacked = mode === 'stacked';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
       // needed to seperate stacked and non-stacked bars into unique pseudo groups
       const pseudoGroupId = isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId;
@@ -113,7 +131,7 @@ export const renderAllSeries = (
               xAccessor={xAccessor}
               yAccessors={yAccessors}
               splitSeriesAccessors={splitSeriesAccessors}
-              data={data}
+              data={computedData}
               timeZone={timeZone}
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
               enableHistogramMode={enableHistogramMode}
@@ -153,7 +171,7 @@ export const renderAllSeries = (
               markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}
-              data={data}
+              data={computedData}
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
               displayValueSettings={{
                 showValueLabel,

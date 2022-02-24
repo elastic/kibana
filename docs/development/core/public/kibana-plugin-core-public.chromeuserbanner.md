@@ -15,5 +15,5 @@ export interface ChromeUserBanner
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [content](./kibana-plugin-core-public.chromeuserbanner.content.md) | <code>MountPoint&lt;HTMLDivElement&gt;</code> |  |
+|  [content](./kibana-plugin-core-public.chromeuserbanner.content.md) | MountPoint&lt;HTMLDivElement&gt; |  |
 

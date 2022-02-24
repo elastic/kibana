@@ -232,17 +232,24 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
@@ -252,6 +259,7 @@ readonly links: {
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
@@ -267,6 +275,9 @@ readonly links: {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 ```

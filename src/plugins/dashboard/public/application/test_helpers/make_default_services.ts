@@ -15,6 +15,7 @@ import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
@@ -72,6 +73,7 @@ export function makeDefaultServices(): DashboardAppServices {
   } as PluginInitializerContext;
 
   return {
+    screenshotModeService: screenshotModePluginMock.createSetupContract(),
     visualizations: visualizationsPluginMock.createStartContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),

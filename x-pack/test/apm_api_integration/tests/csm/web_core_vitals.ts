@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function rumServicesApiTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   registry.when('CSM web core vitals without data', { config: 'trial', archives: [] }, () => {

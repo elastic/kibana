@@ -14,6 +14,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
+import { TimelineId } from '../../../../common';
 import { mockBrowserFields } from '../../containers/source/mock';
 
 jest.mock('../../lib/kibana');
@@ -47,6 +48,24 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
     expect(getByTestId('summary-view')).toBeInTheDocument();
+  });
+
+  test('it renders the action cell by default', () => {
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...props} />
+      </TestProviders>
+    );
+    expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
+  });
+
+  test('it does NOT render the action cell for the active timeline', () => {
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...props} timelineId={TimelineId.active} />
+      </TestProviders>
+    );
+    expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
   });
 
   test("render no investigation guide if it doesn't exist", async () => {

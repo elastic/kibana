@@ -15,6 +15,7 @@ jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     http: {
       post: jest.fn().mockImplementation(async () => ({ count: 1 })),
+      basePath: { prepend: (path) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
     chrome: {

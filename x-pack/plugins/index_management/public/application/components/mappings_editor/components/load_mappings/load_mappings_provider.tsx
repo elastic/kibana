@@ -12,7 +12,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { validateMappings, MappingsValidationError, VALID_MAPPINGS_PARAMETERS } from '../../lib';
+import {
+  validateMappings,
+  MappingsValidationError,
+  mappingsConfigurationSchemaKeys,
+} from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 
@@ -20,6 +24,8 @@ type OpenJsonModalFunc = () => void;
 
 interface Props {
   onJson(json: { [key: string]: any }): void;
+  /** List of plugins installed in the cluster nodes */
+  esNodesPlugins: string[];
   children: (openModal: OpenJsonModalFunc) => React.ReactNode;
 }
 
@@ -122,9 +128,9 @@ const getErrorMessage = (error: MappingsValidationError) => {
 };
 
 const areAllObjectKeysValidParameters = (obj: { [key: string]: any }) =>
-  Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
+  Object.keys(obj).every((key) => mappingsConfigurationSchemaKeys.includes(key));
 
-export const LoadMappingsProvider = ({ onJson, children }: Props) => {
+export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const [totalErrorsToDisplay, setTotalErrorsToDisplay] = useState<number>(MAX_ERRORS_TO_DISPLAY);
   const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>(undefined);
@@ -219,7 +225,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
         mappingsToValidate = unparsed[customType];
       }
 
-      const { value: parsed, errors } = validateMappings(mappingsToValidate);
+      const { value: parsed, errors } = validateMappings(mappingsToValidate, esNodesPlugins);
 
       // Wrap the mappings definition with custom type if one was provided.
       const parsedWithType = customType !== undefined ? { [customType]: parsed } : parsed;

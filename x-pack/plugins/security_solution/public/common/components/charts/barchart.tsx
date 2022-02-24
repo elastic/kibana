@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
-import { getOr, get, isNumber } from 'lodash/fp';
+import { getOr, get, isNumber, isEmpty } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import uuid from 'uuid';
 import styled from 'styled-components';
@@ -18,6 +18,7 @@ import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
+import { EMPTY_VALUE_LABEL } from '../charts/translation';
 
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -32,6 +33,7 @@ import {
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
+import type { ChartData } from './common';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;
@@ -50,7 +52,9 @@ const checkIfAnyValidSeriesExist = (
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 const yAccessors = ['y'];
-const splitSeriesAccessors = ['g'];
+const splitSeriesAccessors = [
+  (datum: ChartData) => (isEmpty(datum.g) ? EMPTY_VALUE_LABEL : datum.g),
+];
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({

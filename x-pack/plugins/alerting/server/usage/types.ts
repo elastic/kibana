@@ -13,11 +13,21 @@ export interface AlertsUsage {
   count_active_by_type: Record<string, number>;
   count_rules_namespaces: number;
   throttle_time: {
+    min: string;
+    avg: string;
+    max: string;
+  };
+  schedule_time: {
+    min: string;
+    avg: string;
+    max: string;
+  };
+  throttle_time_number_s: {
     min: number;
     avg: number;
     max: number;
   };
-  schedule_time: {
+  schedule_time_number_s: {
     min: number;
     avg: number;
     max: number;

@@ -16,9 +16,9 @@ register(path: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  path | <code>string</code> |  |
+|  path | string |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

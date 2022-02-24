@@ -16,17 +16,7 @@ import { getNotifications } from '../../services';
 import { SearchRequest } from '..';
 
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
-  const { rawResponse, warning } = response;
-  if (warning && !shouldIgnoreWarning(warning)) {
-    getNotifications().toasts.addWarning({
-      title: i18n.translate('data.search.searchSource.fetch.warningMessage', {
-        defaultMessage: 'Warning: {warning}',
-        values: {
-          warning,
-        },
-      }),
-    });
-  }
+  const { rawResponse } = response;
 
   if (rawResponse.timed_out) {
     getNotifications().toasts.addWarning({
@@ -63,11 +53,4 @@ export function handleResponse(request: SearchRequest, response: IKibanaSearchRe
   }
 
   return response;
-}
-
-function shouldIgnoreWarning(warning: string): boolean {
-  // https://github.com/elastic/kibana/issues/115632
-  if (warning.includes('Elasticsearch built-in security features are not enabled')) return true;
-
-  return false;
 }

@@ -10,8 +10,8 @@ import { PluginConfigDescriptor } from 'src/core/server';
 
 export const config: PluginConfigDescriptor = {
   deprecations: ({ deprecate, unused }) => [
-    deprecate('enabled', '8.0.0'),
-    unused('unsafe.indexUpgrade.enabled'),
+    deprecate('enabled', '8.0.0', { level: 'critical' }),
+    unused('unsafe.indexUpgrade.enabled', { level: 'warning' }),
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

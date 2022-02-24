@@ -26,12 +26,12 @@ const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
 });
 
 const ANALYZE_DATA = i18n.translate('xpack.uptime.analyzeDataButtonLabel', {
-  defaultMessage: 'Analyze data',
+  defaultMessage: 'Explore data',
 });
 
 const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.message', {
   defaultMessage:
-    'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
 export function ActionMenuContent(): React.ReactElement {
@@ -87,7 +87,7 @@ export function ActionMenuContent(): React.ReactElement {
       <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
         <EuiHeaderLink
           aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
-            defaultMessage: 'Navigate to the "Analyze Data" view to visualize Synthetics/User data',
+            defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
           })}
           href={syntheticExploratoryViewLink}
           color="text"
@@ -99,11 +99,9 @@ export function ActionMenuContent(): React.ReactElement {
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
-          defaultMessage: 'Navigate to the Elastic Synthetics integration to add Uptime data',
+          defaultMessage: 'Navigate to a tutorial about adding Uptime data',
         })}
-        href={kibana.services?.application?.getUrlForApp(
-          '/integrations/detail/synthetics/overview'
-        )}
+        href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
         color="primary"
         iconType="indexOpen"
       >

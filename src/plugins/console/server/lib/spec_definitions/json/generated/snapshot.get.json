@@ -4,6 +4,7 @@
       "master_timeout": "",
       "ignore_unavailable": "__flag__",
       "index_details": "__flag__",
+      "include_repository": "__flag__",
       "verbose": "__flag__"
     },
     "methods": [

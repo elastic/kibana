@@ -7,6 +7,14 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="snapshot-repositories"]
+== Snapshot and Restore
+Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
+
+[role="exclude",id="snapshot-restore-tutorial"]
+== Tutorial: Snapshot and Restore
+Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
+
 [role="exclude",id="configuring-tls"]
 == Encrypt TLS communications in {kib}
 Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].

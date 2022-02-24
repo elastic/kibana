@@ -18,7 +18,6 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { maybe } from '../../../../common/utils/maybe';
-import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
 
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
@@ -131,20 +130,18 @@ export function TransactionDetailsTabs() {
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      <HeightRetainer>
-        <EuiPanel hasBorder={true}>
-          <TabContent
-            {...{
-              clearChartSelection,
-              onFilter,
-              sampleRangeFrom,
-              sampleRangeTo,
-              selectSampleFromChartSelection,
-              traceSamples,
-            }}
-          />
-        </EuiPanel>
-      </HeightRetainer>
+      <EuiPanel hasBorder={true}>
+        <TabContent
+          {...{
+            clearChartSelection,
+            onFilter,
+            sampleRangeFrom,
+            sampleRangeTo,
+            selectSampleFromChartSelection,
+            traceSamples,
+          }}
+        />
+      </EuiPanel>
     </>
   );
 }

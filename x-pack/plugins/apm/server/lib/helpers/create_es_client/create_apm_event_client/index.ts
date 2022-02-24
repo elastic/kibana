@@ -100,7 +100,7 @@ export function createApmEventClient({
 
       const searchParams = {
         ...withPossibleLegacyDataFilter,
-        ignore_throttled: !includeFrozen,
+        ...(includeFrozen ? { ignore_throttled: false } : {}),
         ignore_unavailable: true,
         preference: 'any',
       };

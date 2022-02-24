@@ -10,11 +10,12 @@
 ```typescript
 export interface ConfigDeprecationDetails extends BaseDeprecationDetails 
 ```
+<b>Extends:</b> BaseDeprecationDetails
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [configPath](./kibana-plugin-core-server.configdeprecationdetails.configpath.md) | <code>string</code> |  |
-|  [deprecationType](./kibana-plugin-core-server.configdeprecationdetails.deprecationtype.md) | <code>'config'</code> |  |
+|  [configPath](./kibana-plugin-core-server.configdeprecationdetails.configpath.md) | string |  |
+|  [deprecationType](./kibana-plugin-core-server.configdeprecationdetails.deprecationtype.md) | 'config' |  |
 

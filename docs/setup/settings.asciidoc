@@ -20,14 +20,15 @@ configuration using `${MY_ENV_VAR}` syntax.
 [cols="2*<"]
 |===
 
-| `console.enabled:`
- | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported. Use `console.ui.enabled` instead."]
-Set to `false` to disable Console. *Default: `true`*
-
 | `console.ui.enabled:`
-Toggling this causes the server to regenerate assets on the next startup,
+| Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
+
+| `console.enabled:`
+ | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
+Set to `false` to disable Console. *Default: `true`*
+
 
 | `cpu.cgroup.path.override:`
  | deprecated:[7.10.0,"In 8.0 and later, this setting will no longer be supported."]
@@ -224,7 +225,7 @@ In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>> and/or
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
 
-| `elasticsearch.ssl.keyPassphrase:`
+| [[elasticsearch-ssl-keyPassphrase]] `elasticsearch.ssl.keyPassphrase:`
  | The password that decrypts the private key that is specified
 via <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.key`>>. This value is optional, as the key may not be
 encrypted.

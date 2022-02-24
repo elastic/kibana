@@ -23,7 +23,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "eui_theme_vars/package.json",
   "package.json",
   "README.md"
 ]

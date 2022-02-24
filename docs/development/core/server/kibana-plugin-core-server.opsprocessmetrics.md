@@ -16,9 +16,9 @@ export interface OpsProcessMetrics
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [event\_loop\_delay\_histogram](./kibana-plugin-core-server.opsprocessmetrics.event_loop_delay_histogram.md) | <code>IntervalHistogram</code> | node event loop delay histogram since last collection |
-|  [event\_loop\_delay](./kibana-plugin-core-server.opsprocessmetrics.event_loop_delay.md) | <code>number</code> | mean event loop delay since last collection |
-|  [memory](./kibana-plugin-core-server.opsprocessmetrics.memory.md) | <code>{</code><br/><code>        heap: {</code><br/><code>            total_in_bytes: number;</code><br/><code>            used_in_bytes: number;</code><br/><code>            size_limit: number;</code><br/><code>        };</code><br/><code>        resident_set_size_in_bytes: number;</code><br/><code>    }</code> | process memory usage |
-|  [pid](./kibana-plugin-core-server.opsprocessmetrics.pid.md) | <code>number</code> | pid of the kibana process |
-|  [uptime\_in\_millis](./kibana-plugin-core-server.opsprocessmetrics.uptime_in_millis.md) | <code>number</code> | uptime of the kibana process |
+|  [event\_loop\_delay\_histogram](./kibana-plugin-core-server.opsprocessmetrics.event_loop_delay_histogram.md) | IntervalHistogram | node event loop delay histogram since last collection |
+|  [event\_loop\_delay](./kibana-plugin-core-server.opsprocessmetrics.event_loop_delay.md) | number | mean event loop delay since last collection |
+|  [memory](./kibana-plugin-core-server.opsprocessmetrics.memory.md) | { heap: { total\_in\_bytes: number; used\_in\_bytes: number; size\_limit: number; }; resident\_set\_size\_in\_bytes: number; } | process memory usage |
+|  [pid](./kibana-plugin-core-server.opsprocessmetrics.pid.md) | number | pid of the kibana process |
+|  [uptime\_in\_millis](./kibana-plugin-core-server.opsprocessmetrics.uptime_in_millis.md) | number | uptime of the kibana process |
 

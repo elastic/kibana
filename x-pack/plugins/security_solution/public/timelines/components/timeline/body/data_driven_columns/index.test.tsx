@@ -13,12 +13,14 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import '../../../../../common/mock/match_media';
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
-import { defaultControlColumn } from '../control_columns';
+import { getDefaultControlColumn } from '../control_columns';
 
 import { DataDrivenColumns } from '.';
 
 describe('Columns', () => {
   const headersSansTimestamp = defaultHeaders.filter((h) => h.id !== '@timestamp');
+  const ACTION_BUTTON_COUNT = 4;
+  const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 
   test('it renders the expected columns', () => {
     const wrapper = shallow(
@@ -45,7 +47,7 @@ describe('Columns', () => {
         toggleShowNotes={jest.fn()}
         refetch={jest.fn()}
         eventIdToNoteIds={{}}
-        leadingControlColumns={[defaultControlColumn]}
+        leadingControlColumns={leadingControlColumns}
         trailingControlColumns={[]}
         setEventsLoading={jest.fn()}
         setEventsDeleted={jest.fn()}

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ExpViewActionMenu } from '../components/action_menu';
@@ -34,15 +34,7 @@ export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props)
             <h2>
               {i18n.translate('xpack.observability.expView.heading.label', {
                 defaultMessage: 'Explore data',
-              })}{' '}
-              <EuiBetaBadge
-                style={{
-                  verticalAlign: `middle`,
-                }}
-                label={i18n.translate('xpack.observability.expView.heading.experimental', {
-                  defaultMessage: 'Experimental',
-                })}
-              />
+              })}
             </h2>
           </EuiText>
         </EuiFlexItem>

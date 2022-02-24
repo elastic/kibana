@@ -75,7 +75,12 @@ export interface InventoryMetricConditions {
 export interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
   filterQuery?: string;
+  filterQueryText?: string;
   nodeType: InventoryItemType;
   sourceId?: string;
   alertOnNoData?: boolean;
 }
+
+export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
+
+export type FilterQuery = string | typeof QUERY_INVALID;

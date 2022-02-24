@@ -18,6 +18,22 @@
     "collectionSource": {
       "type": "keyword"
     },
+    "cacheDetails": {
+      "properties": {
+        "updatedAt": {
+          "type": "date",
+          "_meta": {
+            "description": "The timestamp the payload was last cached."
+          }
+        },
+        "fetchedAt": {
+          "type": "date",
+          "_meta": {
+            "description": "The timestamp the payload was grabbed from cache."
+          }
+        }
+      }
+    },
     "stack_stats": {
       "properties": {
         "data": {

@@ -11,6 +11,18 @@ import { DeprecationsServiceSetup, PackageInfo } from 'src/core/server';
 import type { PrivilegeDeprecationsService, Role } from '../../../security/common/model';
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
 
+const PREVIEW_INDEX_PREFIX = '.preview.alerts-security.alerts';
+const READ_PRIVILEGES = ['all', 'read'];
+
+export const roleHasReadAccess = (role: Role, indexPrefix = DEFAULT_SIGNALS_INDEX): boolean =>
+  role.elasticsearch.indices.some(
+    (index) =>
+      index.names.some((indexName) => indexName.startsWith(indexPrefix)) &&
+      index.privileges.some((indexPrivilege) => READ_PRIVILEGES.includes(indexPrivilege))
+  );
+
+export const roleIsExternal = (role: Role): boolean => role.metadata?._reserved !== true;
+
 const buildManualSteps = (roleNames: string[]): string[] => {
   const baseSteps = [
     i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep1', {
@@ -61,7 +73,17 @@ export const registerRulePreviewPrivilegeDeprecations = ({
           return errors;
         }
 
-        rolesWhichReadSignals = roles?.filter(roleHasSignalsReadAccess) ?? [];
+        rolesWhichReadSignals =
+          roles?.filter(
+            (role) =>
+              roleIsExternal(role) &&
+              roleHasReadAccess(role) &&
+              !roleHasReadAccess(role, PREVIEW_INDEX_PREFIX)
+          ) ?? [];
+      }
+
+      if (rolesWhichReadSignals.length === 0) {
+        return [];
       }
 
       const roleNamesWhichReadSignals = rolesWhichReadSignals.map((role) => role.name);
@@ -75,11 +97,11 @@ export const registerRulePreviewPrivilegeDeprecations = ({
             'xpack.securitySolution.deprecations.rulePreviewPrivileges.message',
             {
               values: {
-                previewIndexPrefix: '.alerts-security.preview.alert',
+                previewIndexPrefix: PREVIEW_INDEX_PREFIX,
                 signalsIndexPrefix: DEFAULT_SIGNALS_INDEX,
               },
               defaultMessage:
-                'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
+                'In order to enable a more robust preview in 8.0+, users will need read privileges to new detection alerts preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
             }
           ),
           level: 'warning',
@@ -93,12 +115,3 @@ export const registerRulePreviewPrivilegeDeprecations = ({
     },
   });
 };
-
-const READ_PRIVILEGES = ['all', 'read'];
-
-export const roleHasSignalsReadAccess = (role: Role): boolean =>
-  role.elasticsearch.indices.some(
-    (index) =>
-      index.names.some((indexName) => indexName.startsWith(DEFAULT_SIGNALS_INDEX)) &&
-      index.privileges.some((indexPrivilege) => READ_PRIVILEGES.includes(indexPrivilege))
-  );

@@ -8,7 +8,8 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ALERT_END, ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_STATUS, ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from './common';

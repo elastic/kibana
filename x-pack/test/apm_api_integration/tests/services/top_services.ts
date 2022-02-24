@@ -12,10 +12,10 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const apmApiClient = getService('apmApiClient');

@@ -15,9 +15,9 @@ export interface SavedObjectsCreateOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [coreMigrationVersion](./kibana-plugin-core-public.savedobjectscreateoptions.coremigrationversion.md) | <code>string</code> | A semver value that is used when upgrading objects between Kibana versions. |
-|  [id](./kibana-plugin-core-public.savedobjectscreateoptions.id.md) | <code>string</code> | (Not recommended) Specify an id instead of having the saved objects service generate one for you. |
-|  [migrationVersion](./kibana-plugin-core-public.savedobjectscreateoptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
-|  [overwrite](./kibana-plugin-core-public.savedobjectscreateoptions.overwrite.md) | <code>boolean</code> | If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
-|  [references](./kibana-plugin-core-public.savedobjectscreateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
+|  [coreMigrationVersion?](./kibana-plugin-core-public.savedobjectscreateoptions.coremigrationversion.md) | string | <i>(Optional)</i> A semver value that is used when upgrading objects between Kibana versions. |
+|  [id?](./kibana-plugin-core-public.savedobjectscreateoptions.id.md) | string | <i>(Optional)</i> (Not recommended) Specify an id instead of having the saved objects service generate one for you. |
+|  [migrationVersion?](./kibana-plugin-core-public.savedobjectscreateoptions.migrationversion.md) | SavedObjectsMigrationVersion | <i>(Optional)</i> Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [overwrite?](./kibana-plugin-core-public.savedobjectscreateoptions.overwrite.md) | boolean | <i>(Optional)</i> If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
+|  [references?](./kibana-plugin-core-public.savedobjectscreateoptions.references.md) | SavedObjectReference\[\] | <i>(Optional)</i> |
 

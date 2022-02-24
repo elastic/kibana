@@ -16,5 +16,5 @@ export interface SavedObjectsUpdateObjectsSpacesResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponse.objects.md) | <code>SavedObjectsUpdateObjectsSpacesResponseObject[]</code> |  |
+|  [objects](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponse.objects.md) | SavedObjectsUpdateObjectsSpacesResponseObject\[\] |  |
 

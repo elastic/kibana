@@ -13,7 +13,7 @@ const alertTypeMetric = {
     init_script: 'state.ruleTypes = [:]; state.namespaces = [:]',
     map_script: `
       String alertType = doc['alert.alertTypeId'].value;
-      String namespace = doc['namespaces'] !== null ? doc['namespaces'].value : 'default';
+      String namespace = doc['namespaces'] !== null && doc['namespaces'].size() > 0 ? doc['namespaces'].value : 'default';
       state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
       if (state.namespaces.containsKey(namespace) === false) {
         state.namespaces.put(namespace, 1);
@@ -48,6 +48,8 @@ export async function getTotalCountAggregations(
     | 'count_by_type'
     | 'throttle_time'
     | 'schedule_time'
+    | 'throttle_time_number_s'
+    | 'schedule_time_number_s'
     | 'connectors_per_alert'
     | 'count_rules_namespaces'
   >
@@ -194,11 +196,21 @@ export async function getTotalCountAggregations(
       {}
     ),
     throttle_time: {
+      min: `${aggregations.min_throttle_time.value}s`,
+      avg: `${aggregations.avg_throttle_time.value}s`,
+      max: `${aggregations.max_throttle_time.value}s`,
+    },
+    schedule_time: {
+      min: `${aggregations.min_interval_time.value}s`,
+      avg: `${aggregations.avg_interval_time.value}s`,
+      max: `${aggregations.max_interval_time.value}s`,
+    },
+    throttle_time_number_s: {
       min: aggregations.min_throttle_time.value,
       avg: aggregations.avg_throttle_time.value,
       max: aggregations.max_throttle_time.value,
     },
-    schedule_time: {
+    schedule_time_number_s: {
       min: aggregations.min_interval_time.value,
       avg: aggregations.avg_interval_time.value,
       max: aggregations.max_interval_time.value,

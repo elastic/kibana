@@ -64,6 +64,7 @@ describe('createEsContext', () => {
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
+    elasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
     elasticsearchClient.indices.existsAlias.mockResolvedValue(asApiResponse(false));
     const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
     expect(doesAliasExist).toBeFalsy();

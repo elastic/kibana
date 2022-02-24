@@ -7,7 +7,7 @@
  */
 
 // **PLEASE NOTE**
-// The functionality in this file targets a browser environment and is intended to be used both in public and server.
+// The functionality in this file targets a browser environment AND is intended to be used both in public and server.
 // For instance, reporting uses these functions when starting puppeteer to set the current browser into "screenshot" mode.
 
 export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
@@ -59,5 +59,33 @@ export const setScreenshotModeDisabled = () => {
       configurable: false,
       value: undefined,
     }
+  );
+};
+
+/** @deprecated */
+export const KBN_SCREENSHOT_MODE_LAYOUT_KEY = '__KBN_SCREENSHOT_MODE_LAYOUT_KEY__';
+
+/** @deprecated */
+export type Layout = 'canvas' | 'preserve_layout' | 'print';
+
+/** @deprecated */
+export const setScreenshotLayout = (value: Layout) => {
+  Object.defineProperty(
+    window,
+    '__KBN_SCREENSHOT_MODE_LAYOUT_KEY__', // Literal value to prevent adding an external reference
+    {
+      enumerable: true,
+      writable: true,
+      configurable: false,
+      value,
+    }
+  );
+};
+
+/** @deprecated */
+export const getScreenshotLayout = (): undefined | Layout => {
+  return (
+    (window as unknown as Record<string, Layout>)[KBN_SCREENSHOT_MODE_LAYOUT_KEY] ||
+    (window.localStorage.getItem(KBN_SCREENSHOT_MODE_LAYOUT_KEY) as Layout)
   );
 };

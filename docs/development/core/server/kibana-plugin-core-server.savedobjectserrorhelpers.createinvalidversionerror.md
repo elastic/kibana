@@ -14,9 +14,9 @@ static createInvalidVersionError(versionInput?: string): DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  versionInput | <code>string</code> |  |
+|  versionInput | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { EVENT_KIND as EVENT_KIND_TYPED } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { EVENT_KIND as EVENT_KIND_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { EVENT_KIND } from '@kbn/rule-data-utils/technical_field_names';
 import { IRuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
@@ -15,8 +13,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-
-const EVENT_KIND: typeof EVENT_KIND_TYPED = EVENT_KIND_NON_TYPED;
 
 export async function getServiceAlerts({
   ruleDataClient,

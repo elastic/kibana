@@ -1,5 +1,86 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table render conflict summary modal  1`] = `
+<React.Fragment>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <h1>
+        <FormattedMessage
+          defaultMessage="This field has a type conflict"
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+          values={Object {}}
+        />
+      </h1>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="The type of the {fieldName} field changes across indices and might not be available for search, visualizations, and other analysis."
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
+          values={
+            Object {
+              "fieldName": <EuiCode>
+                message
+              </EuiCode>,
+            }
+          }
+        />
+      </p>
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "type",
+              "name": "Type",
+            },
+            Object {
+              "field": "indices",
+              "name": "Indices",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "indices": "index_a",
+              "type": "keyword",
+            },
+            Object {
+              "indices": "index_b",
+              "type": "long",
+            },
+          ]
+        }
+        noItemsMessage={
+          <EuiI18n
+            default="No items found"
+            token="euiBasicTable.noItemsMessage"
+          />
+        }
+        responsive={true}
+        rowHeader="firstName"
+        tableCaption="Demo of EuiBasicTable"
+        tableLayout="auto"
+      />
+    </EuiText>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButton
+      fill={true}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Close"
+        id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</React.Fragment>
+`;
+
 exports[`Table render name 1`] = `
 <span>
   customer
@@ -26,16 +107,25 @@ exports[`Table render name 2`] = `
 
 exports[`Table should render conflicting type 1`] = `
 <span>
-  conflict
+  text, long
   <span>
-     
-    <EuiIconTip
-      aria-label="Multiple type field"
+    <EuiBadge
       color="warning"
-      content="The type of this field changes across indices. It is unavailable for many analysis functions."
-      type="alert"
-    />
+      iconOnClick={[Function]}
+      iconOnClickAriaLabel="Conflict Detail"
+      iconType="alert"
+      onClick={[Function]}
+      onClickAriaLabel="Conflict Detail"
+    >
+      Conflict
+    </EuiBadge>
   </span>
+</span>
+`;
+
+exports[`Table should render mixed, non-conflicting type 1`] = `
+<span>
+  keyword, constant_keyword
 </span>
 `;
 
@@ -160,6 +250,14 @@ exports[`Table should render normally 1`] = `
         "type": "date",
       },
       Object {
+        "conflictDescriptions": Object {
+          "keyword": Array [
+            "index_a",
+          ],
+          "long": Array [
+            "index_b",
+          ],
+        },
         "displayName": "conflictingField",
         "excluded": false,
         "hasRuntime": false,

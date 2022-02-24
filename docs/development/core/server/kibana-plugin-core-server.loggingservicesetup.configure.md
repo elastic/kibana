@@ -16,11 +16,11 @@ configure(config$: Observable<LoggerContextConfigInput>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  config$ | <code>Observable&lt;LoggerContextConfigInput&gt;</code> |  |
+|  config$ | Observable&lt;LoggerContextConfigInput&gt; |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Remarks
 
@@ -37,6 +37,5 @@ core.logging.configure(
     loggers: [{ name: 'search', appenders: ['default'] }]
   })
 )
-
 ```
 

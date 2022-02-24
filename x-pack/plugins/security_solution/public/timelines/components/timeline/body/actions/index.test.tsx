@@ -169,7 +169,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
-    test('it enables for event.kind: alert and agent.type: endpoint', () => {
+    test('it disables for event.kind: alert and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
@@ -183,7 +183,7 @@ describe('Actions', () => {
 
       expect(
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(false);
+      ).toBe(true);
     });
     test('it shows the analyze event button when the event is from an endpoint', () => {
       const ecsData = {

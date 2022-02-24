@@ -60,4 +60,15 @@ describe('SyncAlertsSwitch', () => {
 
     expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
   });
+
+  it('it does not call onStatusChanged if selection is same as current status', async () => {
+    const wrapper = mount(
+      <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+    );
+
+    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
+    wrapper.find(`[data-test-subj="case-view-status-dropdown-open"] button`).simulate('click');
+
+    expect(onStatusChanged).not.toHaveBeenCalled();
+  });
 });

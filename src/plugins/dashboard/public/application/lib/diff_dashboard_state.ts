@@ -75,15 +75,12 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
   }
   // embeddable ids are equal so let's compare individual panels.
   for (const id of embeddableIdsA) {
-    if (
-      Object.keys(
-        commonDiff<DashboardPanelState>(
-          panelsA[id] as unknown as DashboardDiffCommon,
-          panelsB[id] as unknown as DashboardDiffCommon,
-          ['panelRefName']
-        )
-      ).length > 0
-    ) {
+    const panelCommonDiff = commonDiff<DashboardPanelState>(
+      panelsA[id] as unknown as DashboardDiffCommon,
+      panelsB[id] as unknown as DashboardDiffCommon,
+      ['panelRefName']
+    );
+    if (Object.keys(panelCommonDiff).length > 0) {
       return false;
     }
   }

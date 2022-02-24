@@ -3,7 +3,7 @@
     "Elastic"
   ],
   "description": "This rule is triggered when indicators from the Threat Intel Filebeat module has a match against local file or network observations.",
-  "from": "now-10m",
+  "from": "now-65m",
   "index": [
     "auditbeat-*",
     "endgame-*",
@@ -12,7 +12,7 @@
     "packetbeat-*",
     "winlogbeat-*"
   ],
-  "interval": "9m",
+  "interval": "1h",
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Threat Intel Filebeat Module Indicator Match",
@@ -194,5 +194,5 @@
   "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
   "timeline_title": "Generic Threat Match Timeline",
   "type": "threat_match",
-  "version": 2
+  "version": 3
 }

@@ -137,11 +137,14 @@ export class IndexPatternsFetcher {
   async validatePatternListActive(patternList: string[]) {
     const result = await Promise.all(
       patternList
-        .map((pattern) =>
-          this.elasticsearchClient.count({
+        .map((pattern) => {
+          if (pattern.startsWith('-')) {
+            return Promise.resolve({ body: { count: 1 } });
+          }
+          return this.elasticsearchClient.count({
             index: pattern,
-          })
-        )
+          });
+        })
         .map((p) =>
           p.catch((e) => {
             if (e.body.error.type === 'index_not_found_exception') {

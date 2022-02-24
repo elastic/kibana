@@ -110,6 +110,7 @@ export async function mountApp({
     embeddable: embeddableStart,
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
+    screenshotModeService: screenshotMode,
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
@@ -132,7 +133,6 @@ export async function mountApp({
       activeSpaceId || 'default'
     ),
     spacesService: spacesApi,
-    screenshotModeService: screenshotMode,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

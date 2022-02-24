@@ -35,14 +35,14 @@ export async function runFindBabelHelpersInEntryBundlesCli() {
         }
 
         for (const { userRequest } of module.reasons) {
-          if (userRequest.startsWith('@babel/runtime/')) {
+          if (userRequest.startsWith('@babel/runtime')) {
             imports.add(userRequest);
           }
         }
       }
     }
 
-    log.success('found', imports.size, '@babel/register imports in entry bundles');
+    log.success('found', imports.size, '@babel/runtime* imports in entry bundles');
     log.write(
       Array.from(imports, (i) => `'${i}',`)
         .sort()

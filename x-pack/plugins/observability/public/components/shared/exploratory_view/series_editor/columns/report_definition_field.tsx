@@ -66,7 +66,9 @@ export function ReportDefinitionField({
           const values = selectedReportDefinitions?.[fieldT];
           if (!values.includes(ALL_VALUES_SELECTED)) {
             const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
-            filtersN.push(valueFilter.query);
+            if (valueFilter.query) {
+              filtersN.push(valueFilter.query);
+            }
           }
         }
       });

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { ALERT_STATUS } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 import type { CellValueElementProps } from '../../../../timelines/common';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import * as PluginHook from '../../hooks/use_plugin_context';

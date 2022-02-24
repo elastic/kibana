@@ -16,5 +16,5 @@ constructor(rawConfig: ElasticsearchConfigType);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  rawConfig | <code>ElasticsearchConfigType</code> |  |
+|  rawConfig | ElasticsearchConfigType |  |
 

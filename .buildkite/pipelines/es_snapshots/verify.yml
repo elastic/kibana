@@ -27,9 +27,9 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 13
+    parallelism: 27
     agents:
-      queue: ci-group-6
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -41,7 +41,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: ci-group-6
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -77,7 +77,7 @@ steps:
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
     agents:
-      queue: jest
+      queue: n2-2
     timeout_in_minutes: 120
     key: api-integration
 

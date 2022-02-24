@@ -101,6 +101,7 @@ describe('getCerts', () => {
       size: 30,
       sortBy: 'not_after',
       direction: 'desc',
+      notValidAfter: 'now+100d',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -182,6 +183,20 @@ describe('getCerts', () => {
                           "gte": "now-2d",
                           "lte": "now+1h",
                         },
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "range": Object {
+                              "tls.certificate_not_valid_after": Object {
+                                "lte": "now+100d",
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],

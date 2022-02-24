@@ -13,14 +13,16 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
   ALERT_UUID,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
 
 export const apmAlertResponseExample = [
   {

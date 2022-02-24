@@ -34,7 +34,7 @@ export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
       root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
       caused_by = {}, // eslint-disable-line @typescript-eslint/naming-convention
     } = {},
-  } = JSON.parse(response);
+  } = typeof response === 'string' ? JSON.parse(response) : response;
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response, include the additional information from ES, and return it

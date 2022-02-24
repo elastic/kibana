@@ -68,6 +68,8 @@ describe('Body', () => {
     clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
     data: mockTimelineData,
+    defaultCellActions: [],
+    disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
     excludedRowRendererIds: [],
     id: 'timeline-test',
     isSelectAllChecked: false,
@@ -156,7 +158,7 @@ describe('Body', () => {
       ).toEqual(mockTimelineData[0].ecs.timestamp);
     });
 
-    test("timestamp column doesn't render cell actions", () => {
+    test('timestamp column renders cell actions', () => {
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
       const testProps = {
         ...props,
@@ -176,7 +178,7 @@ describe('Body', () => {
           .first()
           .prop<EuiDataGridColumn[]>('columns')
           .find((c) => c.id === '@timestamp')?.cellActions
-      ).toBeUndefined();
+      ).toBeDefined();
     });
 
     test("signal.rule.risk_score column doesn't render cell actions", () => {

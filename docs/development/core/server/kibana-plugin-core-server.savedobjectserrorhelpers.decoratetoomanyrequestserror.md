@@ -14,10 +14,10 @@ static decorateTooManyRequestsError(error: Error, reason?: string): DecoratedErr
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>Error</code> |  |
-|  reason | <code>string</code> |  |
+|  error | Error |  |
+|  reason | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

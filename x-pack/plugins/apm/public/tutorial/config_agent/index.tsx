@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../..//services/rest/createCallApmApi';
+import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
@@ -65,7 +66,7 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-0.4.0/overview`,
+        href: `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
       };
 }
 

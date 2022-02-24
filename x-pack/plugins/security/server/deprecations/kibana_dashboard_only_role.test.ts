@@ -107,7 +107,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
                 "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check user roles",
               },
             ]
           `);
@@ -132,7 +132,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "deprecationType": "feature",
                 "level": "fetch_error",
                 "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check user roles",
               },
             ]
           `);
@@ -158,7 +158,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/xpack-security.html#_required_permissions_7",
                 "level": "fetch_error",
                 "message": "You do not have enough permissions to fix this deprecation.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check role mappings",
               },
             ]
           `);
@@ -183,7 +183,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "deprecationType": "feature",
                 "level": "fetch_error",
                 "message": "Failed to perform deprecation check. Check Kibana logs for more details.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check role mappings",
               },
             ]
           `);
@@ -221,7 +221,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
                 "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check user roles",
               },
             ]
           `);
@@ -256,7 +256,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
                 "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check role mappings",
               },
             ]
           `);
@@ -301,7 +301,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
                 "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check user roles",
               },
               Object {
                 "correctiveActions": Object {
@@ -314,7 +314,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
                 "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/some-branch/built-in-roles.html",
                 "level": "warning",
                 "message": "Users with the \\"kibana_dashboard_only_user\\" role will not be able to access the Dashboard app. Use Kibana privileges instead.",
-                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated",
+                "title": "The \\"kibana_dashboard_only_user\\" role is deprecated: check role mappings",
               },
             ]
           `);

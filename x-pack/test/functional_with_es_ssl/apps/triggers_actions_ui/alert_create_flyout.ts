@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   async function getAlertsByName(name: string) {
     const {
@@ -104,7 +105,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/89397
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -289,6 +291,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
+    });
+
+    it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.setValue('alertNameInput', 'alertName');
+      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="alertSearchField"]');
+      await ruleTypeSearchBox.type('notexisting rule type');
+      await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
+
+      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__alertTypeNodeHeading');
+      expect(ruleTypes).to.have.length(0);
+
+      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
+      await searchClearButton.click();
+
+      const ruleTypesClearFilter = await find.allByCssSelector(
+        '.triggersActionsUI__alertTypeNodeHeading'
+      );
+      expect(ruleTypesClearFilter.length).to.above(0);
     });
   });
 };

@@ -100,8 +100,8 @@ describe('Fleet trusted apps card', () => {
       };
     });
     const component = await renderComponent();
-    expect(component.getByText('Trusted Applications')).not.toBeNull();
-    expect(component.getByText('Manage trusted applications')).not.toBeNull();
+    expect(component.getByText('Trusted applications')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
@@ -112,8 +112,8 @@ describe('Fleet trusted apps card', () => {
       };
     });
     const component = await renderComponent();
-    expect(component.getByText('Trusted Applications')).not.toBeNull();
-    expect(component.getByText('Manage trusted applications')).not.toBeNull();
+    expect(component.getByText('Trusted applications')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
     await reactTestingLibrary.waitFor(() => expect(addDanger).toBeCalledTimes(1));
   });
 });

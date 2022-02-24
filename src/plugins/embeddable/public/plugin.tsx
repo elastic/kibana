@@ -90,11 +90,12 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+    M extends unknown = unknown
   >(
     type: string,
-    options: AttributeServiceOptions<A>
-  ) => AttributeService<A, V, R>;
+    options: AttributeServiceOptions<A, M>
+  ) => AttributeService<A, V, R, M>;
 }
 
 export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;

@@ -30,7 +30,8 @@ interface State {
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
 
-  public readonly context!: DashboardReactContextValue;
+  public declare readonly context: DashboardReactContextValue;
+
   private subscription?: Subscription;
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {

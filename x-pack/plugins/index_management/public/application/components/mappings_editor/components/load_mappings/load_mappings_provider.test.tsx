@@ -22,7 +22,7 @@ import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
-  <LoadMappingsProvider onJson={onJson}>
+  <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
     {(openModal) => (
       <button onClick={openModal} data-test-subj="load-json-button">
         Load JSON

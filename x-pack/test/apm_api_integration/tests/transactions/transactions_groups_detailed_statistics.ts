@@ -12,13 +12,13 @@ import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_a
 import { asPercent } from '../../../../plugins/apm/common/utils/formatters';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { roundNumber } from '../../utils';
 
 type TransactionsGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -120,66 +120,52 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('without comparisons', () => {
           let transactionsStatistics: TransactionsGroupsDetailedStatistics;
-          let metricsStatistics: TransactionsGroupsDetailedStatistics;
           before(async () => {
-            [metricsStatistics, transactionsStatistics] = await Promise.all([
-              callApi({ query: { kuery: 'processor.event : "metric"' } }),
-              callApi({ query: { kuery: 'processor.event : "transaction"' } }),
-            ]);
+            transactionsStatistics = await callApi({
+              query: { kuery: 'processor.event : "transaction"' },
+            });
           });
 
           it('returns some transactions data', () => {
             expect(isEmpty(transactionsStatistics.currentPeriod)).to.be.equal(false);
           });
 
-          it('returns some metrics data', () => {
-            expect(isEmpty(metricsStatistics.currentPeriod)).to.be.equal(false);
-          });
-
-          it('has same latency mean value for metrics and transactions data', () => {
+          it('returns the expected latency mean value', () => {
             const transactionsCurrentPeriod =
               transactionsStatistics.currentPeriod[transactionNames[0]];
-            const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
+
             const transactionsLatencyMean = meanBy(transactionsCurrentPeriod.latency, 'y');
-            const metricsLatencyMean = meanBy(metricsCurrentPeriod.latency, 'y');
-            [transactionsLatencyMean, metricsLatencyMean].forEach((value) =>
-              expect(value).to.be.equal(1000000)
-            );
+
+            expect(transactionsLatencyMean).to.be.equal(1000000);
           });
 
-          it('has same error rate mean value for metrics and transactions data', () => {
+          it('returns the expected error rate mean value', () => {
             const transactionsCurrentPeriod =
               transactionsStatistics.currentPeriod[transactionNames[0]];
-            const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
 
             const transactionsErrorRateMean = meanBy(transactionsCurrentPeriod.errorRate, 'y');
-            const metricsErrorRateMean = meanBy(metricsCurrentPeriod.errorRate, 'y');
-            [transactionsErrorRateMean, metricsErrorRateMean].forEach((value) =>
-              expect(asPercent(value, 1)).to.be.equal(`${GO_PROD_ERROR_RATE}%`)
-            );
+
+            expect(asPercent(transactionsErrorRateMean, 1)).to.be.equal(`${GO_PROD_ERROR_RATE}%`);
           });
 
           it('has same throughput mean value for metrics and transactions data', () => {
             const transactionsCurrentPeriod =
               transactionsStatistics.currentPeriod[transactionNames[0]];
-            const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
             const transactionsThroughputMean = roundNumber(
               meanBy(transactionsCurrentPeriod.throughput, 'y')
             );
-            const metricsThroughputMean = roundNumber(meanBy(metricsCurrentPeriod.throughput, 'y'));
-            [transactionsThroughputMean, metricsThroughputMean].forEach((value) =>
-              expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_PROD_ERROR_RATE))
+
+            expect(transactionsThroughputMean).to.be.equal(
+              roundNumber(GO_PROD_RATE + GO_PROD_ERROR_RATE)
             );
           });
 
           it('has same impact value for metrics and transactions data', () => {
             const transactionsCurrentPeriod =
               transactionsStatistics.currentPeriod[transactionNames[0]];
-            const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
 
             const transactionsImpact = transactionsCurrentPeriod.impact;
-            const metricsImpact = metricsCurrentPeriod.impact;
-            [transactionsImpact, metricsImpact].forEach((value) => expect(value).to.be.equal(100));
+            expect(transactionsImpact).to.be.equal(100);
           });
         });
 
@@ -213,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 first(currentTimeseries)?.x ?? NaN
               ).toISOString();
               const firstPreviousPeriodDate = new Date(
-                first(previousPeriod.latency)?.x ?? NaN
+                first(previousTimeseries)?.x ?? NaN
               ).toISOString();
 
               expect(firstCurrentPeriodDate).to.equal(firstPreviousPeriodDate);
@@ -231,7 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 last(currentTimeseries)?.x ?? NaN
               ).toISOString();
               const lastPreviousPeriodDate = new Date(
-                last(previousPeriod.latency)?.x ?? NaN
+                last(previousTimeseries)?.x ?? NaN
               ).toISOString();
 
               expect(lastCurrentPeriodDate).to.equal(lastPreviousPeriodDate);

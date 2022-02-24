@@ -237,9 +237,16 @@ export class ReportingCore {
       .toPromise();
   }
 
+  private getScreenshotModeDep() {
+    return this.getPluginSetupDeps().screenshotMode;
+  }
+
   public getEnableScreenshotMode() {
-    const { screenshotMode } = this.getPluginSetupDeps();
-    return screenshotMode.setScreenshotModeEnabled;
+    return this.getScreenshotModeDep().setScreenshotModeEnabled;
+  }
+
+  public getSetScreenshotLayout() {
+    return this.getScreenshotModeDep().setScreenshotLayout;
   }
 
   /*

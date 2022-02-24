@@ -18,7 +18,6 @@ import {
   createMockAgentService,
   createArtifactsClientMock,
 } from '../../../fleet/server/mocks';
-import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
@@ -87,8 +86,6 @@ export const createMockEndpointAppContextServiceSetupContract =
 export const createMockEndpointAppContextServiceStartContract =
   (): jest.Mocked<EndpointAppContextServiceStartContract> => {
     const config = createMockConfig();
-    const factory = new AppClientFactory();
-    factory.setup({ getSpaceId: () => 'mockSpace', config });
 
     const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
@@ -107,7 +104,6 @@ export const createMockEndpointAppContextServiceStartContract =
       packageService: createMockPackageService(),
       logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
       manifestManager: getManifestManagerMock(),
-      appClientFactory: factory,
       security: securityMock.createStart(),
       alerting: alertsMock.createStart(),
       config,

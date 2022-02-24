@@ -13,6 +13,7 @@ import {
   AllSeries,
   allSeriesKey,
   convertAllShortSeries,
+  reportTypeKey,
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
@@ -93,11 +94,12 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
   return useMemo(() => {
     // we only use the data from url to apply, since that gets updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+    const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
 
-    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportType) {
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportTypeT) {
       return null;
     }
-    const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
+    const layerConfigs = getLayerConfigs(allSeriesT, reportTypeT, theme, indexPatterns);
 
     if (layerConfigs.length < 1) {
       return null;

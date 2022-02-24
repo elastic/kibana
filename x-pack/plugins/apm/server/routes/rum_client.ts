@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { Logger } from 'kibana/server';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
 import { setupRequest, Setup } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';

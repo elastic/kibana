@@ -65,29 +65,4 @@ describe('handleResponse', () => {
     const result = handleResponse(request, response);
     expect(result).toBe(response);
   });
-
-  test('should notify if has warning', () => {
-    const request = { body: {} };
-    const response = {
-      rawResponse: {},
-      warning: 'a warning',
-    } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response);
-    expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).toBeCalledWith(
-      expect.objectContaining({ title: expect.stringContaining(response.warning!) })
-    );
-  });
-
-  test("shouldn't notify on warning about disabled security", () => {
-    const request = { body: {} };
-    const response = {
-      rawResponse: {},
-      warning:
-        '299 Elasticsearch-7.16.0-SNAPSHOT-3e6393bc4ec8f0000b1bcd4371b2e607eb02a1d7 "Elasticsearch built-in security features are not enabled. Without authentication, your cluster could be accessible to anyone. See https://www.elastic.co/guide/en/elasticsearch/reference/7.16/security-minimal-setup.html to enable security."',
-    } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response);
-    expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).not.toBeCalled();
-  });
 });

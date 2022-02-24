@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import { IndexPatternSavedObjectDeprecatedCSV } from '../../../common/types';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
-import {
-  IndexPatternSavedObjectDeprecatedCSV,
-  JobParamsDeprecatedCSV,
-  TaskPayloadDeprecatedCSV,
-} from './types';
+import { JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV>

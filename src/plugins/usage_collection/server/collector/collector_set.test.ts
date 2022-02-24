@@ -10,20 +10,22 @@ import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
+  httpServerMock,
 } from '../../../../core/server/mocks';
 
-const logger = loggingSystemMock.createLogger();
-
-const loggerSpies = {
-  debug: jest.spyOn(logger, 'debug'),
-  warn: jest.spyOn(logger, 'warn'),
-};
-
 describe('CollectorSet', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  const loggerSpies = {
+    debug: jest.spyOn(logger, 'debug'),
+    warn: jest.spyOn(logger, 'warn'),
+  };
+
   describe('registers a collector set and runs lifecycle events', () => {
     let fetch: Function;
     beforeEach(() => {
@@ -83,7 +85,8 @@ describe('CollectorSet', () => {
       );
 
       const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
-      expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
+      expect(loggerSpies.debug).toHaveBeenCalledTimes(2);
+      expect(loggerSpies.debug).toHaveBeenCalledWith('Getting ready collectors');
       expect(loggerSpies.debug).toHaveBeenCalledWith(
         'Fetching data from MY_TEST_COLLECTOR collector'
       );
@@ -485,6 +488,153 @@ describe('CollectorSet', () => {
           {}
         )
       ).toStrictEqual({ test: 1 });
+    });
+  });
+
+  describe('bulkFetch', () => {
+    const collectorSetConfig = { logger, maximumWaitTimeForAllCollectorsInS: 1 };
+    let collectorSet = new CollectorSet(collectorSetConfig);
+    afterEach(() => {
+      collectorSet = new CollectorSet(collectorSetConfig);
+    });
+
+    it('skips collectors that are not ready', async () => {
+      const mockIsReady = jest.fn().mockReturnValue(true);
+      const mockIsNotReady = jest.fn().mockResolvedValue(false);
+      const mockNonReadyFetch = jest.fn().mockResolvedValue({});
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: mockIsReady,
+          schema: {},
+          fetch: mockReadyFetch,
+        })
+      );
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'not_ready_col',
+          isReady: mockIsNotReady,
+          schema: {},
+          fetch: mockNonReadyFetch,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(mockIsReady).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockIsNotReady).toBeCalledTimes(1);
+      expect(mockNonReadyFetch).toBeCalledTimes(0);
+
+      expect(results).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "result": Object {},
+            "type": "ready_col",
+          },
+        ]
+      `);
+    });
+
+    it('skips collectors that have timed out', async () => {
+      const mockFastReady = jest.fn().mockImplementation(async () => {
+        return new Promise((res) => {
+          setTimeout(() => res(true), 0.5 * 1000);
+        });
+      });
+      const mockTimedOutReady = jest.fn().mockImplementation(async () => {
+        return new Promise((res) => {
+          setTimeout(() => res(true), 2 * 1000);
+        });
+      });
+      const mockNonReadyFetch = jest.fn().mockResolvedValue({});
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: mockFastReady,
+          schema: {},
+          fetch: mockReadyFetch,
+        })
+      );
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'timeout_col',
+          isReady: mockTimedOutReady,
+          schema: {},
+          fetch: mockNonReadyFetch,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(mockFastReady).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockTimedOutReady).toBeCalledTimes(1);
+      expect(mockNonReadyFetch).toBeCalledTimes(0);
+
+      expect(results).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "result": Object {},
+            "type": "ready_col",
+          },
+        ]
+      `);
+    });
+
+    it('passes context to fetch', async () => {
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: () => true,
+          schema: {},
+          fetch: mockReadyFetch,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledWith({
+        esClient: mockEsClient,
+        soClient: mockSoClient,
+      });
+      expect(results).toHaveLength(1);
+    });
+
+    it('adds extra context to collectors with extendFetchContext config', async () => {
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: () => true,
+          schema: {},
+          fetch: mockReadyFetch,
+          extendFetchContext: { kibanaRequest: true },
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const request = httpServerMock.createKibanaRequest();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, request);
+
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledWith({
+        esClient: mockEsClient,
+        soClient: mockSoClient,
+        kibanaRequest: request,
+      });
+      expect(results).toHaveLength(1);
     });
   });
 });

@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { createApmApiClient, SupertestReturnType } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('supertest');
   const apmApiSupertest = createApmApiClient(supertest);
 

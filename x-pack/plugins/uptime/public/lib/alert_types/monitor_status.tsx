@@ -12,9 +12,9 @@ import {
   ALERT_END,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
   ALERT_REASON,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from './common';

@@ -145,7 +145,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
 export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => [
   ...Object.keys(FIELD_DEPRECATION_FACTORIES).map(
     (key): ConfigDeprecation =>
-      (completeConfig, rootPath, addDeprecation) => {
+      (completeConfig, _rootPath, addDeprecation) => {
         const configuredValue = get(completeConfig, `xpack.infra.sources.default.fields.${key}`);
         if (typeof configuredValue === 'undefined') {
           return completeConfig;
@@ -179,8 +179,9 @@ export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => 
         return completeConfig;
       }
   ),
-  deprecate('sources.default.logAlias', '8.0.0'),
-  deprecate('sources.default.metricAlias', '8.0.0'),
+  deprecate('sources.default.logAlias', '8.0.0', { level: 'critical' }),
+  deprecate('sources.default.metricAlias', '8.0.0', { level: 'critical' }),
+  deprecate('enabled', '8.0.0', { level: 'critical' }),
 ];
 
 export const getInfraDeprecationsFactory =

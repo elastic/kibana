@@ -16,6 +16,6 @@ export interface SavedObjectsImportAmbiguousConflictError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [destinations](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.destinations.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        title?: string;</code><br/><code>        updatedAt?: string;</code><br/><code>    }&gt;</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.type.md) | <code>'ambiguous_conflict'</code> |  |
+|  [destinations](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.destinations.md) | Array&lt;{ id: string; title?: string; updatedAt?: string; }&gt; |  |
+|  [type](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.type.md) | 'ambiguous\_conflict' |  |
 

@@ -400,14 +400,18 @@ describe('Lens App', () => {
             savedObjectId: savedObjectId || 'aaa',
           }));
         services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-          sharingSavedObjectProps: {
-            outcome: 'exactMatch',
+          metaInfo: {
+            sharingSavedObjectProps: {
+              outcome: 'exactMatch',
+            },
           },
-          savedObjectId: initialSavedObjectId ?? 'aaa',
-          references: [],
-          state: {
-            query: 'fake query',
-            filters: [],
+          attributes: {
+            savedObjectId: initialSavedObjectId ?? 'aaa',
+            references: [],
+            state: {
+              query: 'fake query',
+              filters: [],
+            },
           },
         } as jest.ResolvedValue<Document>);
 

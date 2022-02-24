@@ -60,7 +60,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with index management', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
+
+        // The index_management_user has been given permissions to advanced settings for Stack Management Tests.
+        // https://github.com/elastic/kibana/pull/113078/
+        // In 7.16, this user also has global_dashboard_read permissions so we updated the sections
+        // section to have a length of 3 instead of 2.
+        expect(sections).to.have.length(3);
         expect(sections[0]).to.eql({
           sectionId: 'data',
           sectionLinks: ['index_management', 'transform'],

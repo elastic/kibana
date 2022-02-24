@@ -233,7 +233,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .join(' or ');
 
       if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and ${kueryStatus}`;
+        kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
       } else {
         kueryBuilder = kueryStatus;
       }

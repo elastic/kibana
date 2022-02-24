@@ -80,6 +80,7 @@ function mockStatsCollectionConfig(
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
+    refreshCache: false,
   };
 }
 

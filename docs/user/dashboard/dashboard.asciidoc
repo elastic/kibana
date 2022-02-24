@@ -361,17 +361,31 @@ To exit *Edit* mode, click *Switch to view mode*.
 
 [float]
 [[download-csv]]
-== Download panel data
+== View the panel data and requests
 
-Download panel data in a CSV file. When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer index names.
+View the data in visualizations and the requests that collect the data. 
 
-. Open the panel menu, then select *Inspect*.
+. Open the panel menu, then click *More > Inspect*.
 
-. Click *Download CSV*, then select the format type from the dropdown:
+. View and download the panel data.
+
+.. Open the *View* dropdown, then click *Data*.
+
+.. Click *Download CSV*, then select the format type from the dropdown:
 
 * *Formatted CSV* &mdash; Contains human-readable dates and numbers.
 
 * *Unformatted* &mdash; Best used for computer use.
++
+When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer {data-source} names.
+
+. View the requests that collect the data.
+
+.. Open the *View* dropdown, then click *Requests*.
+
+.. From the dropdown, select the requests you want to view.
+
+.. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
 [float]
 [[share-the-dashboard]]

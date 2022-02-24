@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
-import { ReportViewType } from '../types';
+import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
@@ -24,6 +24,7 @@ export interface ExploratoryEmbeddableProps {
   showCalculationMethod?: boolean;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   legendIsVisible?: boolean;
+  dataTypesIndexPatterns?: Record<AppDataType, string>;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {

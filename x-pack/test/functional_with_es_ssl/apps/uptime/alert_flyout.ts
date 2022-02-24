@@ -15,8 +15,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
+    const alertName = 'uptime-test';
 
-    // FLAKY: https://github.com/elastic/kibana/issues/101984
+    // FLAKY: https://github.com/elastic/kibana/issues/88177
     describe.skip('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
@@ -38,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can set alert name', async () => {
-        await alerts.setAlertName('uptime-test');
+        await alerts.setAlertName(alertName);
       });
 
       it('can set alert tags', async () => {
@@ -88,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveAlertButton(alertName);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
@@ -103,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await delay(1500);
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
-            ({ name }: { name: string }) => name === 'uptime-test'
+            ({ name }: { name: string }) => name === alertName
           );
           expect(alertsFromThisTest.length >= 1).to.be(true);
           alert = alertsFromThisTest[0];
@@ -178,7 +179,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveAlertButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });

@@ -60,7 +60,7 @@ export const HostIsolationExceptionsList = () => {
   const history = useHistory();
   const privileges = useEndpointPrivileges();
   const showFlyout = privileges.canIsolateHost && !!location.show;
-  const hasDataToShow = !isLoading && (!!location.filter || listItems.length > 0);
+  const hasDataToShow = !!location.filter || listItems.length > 0;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {

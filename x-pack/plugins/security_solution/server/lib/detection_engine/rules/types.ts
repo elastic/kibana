@@ -276,7 +276,6 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   existingRule: SanitizedAlert<RuleParams> | null | undefined;
-  migratedRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 

@@ -12,7 +12,7 @@ export { readConfigFile, Config } from './config';
 export { readProviderSpec, ProviderCollection } from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
-export { FailureMetadata } from './failure_metadata';
+export * from './test_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 

@@ -237,12 +237,21 @@ export function registerRepositoriesRoutes({
           .cleanupRepository({
             repository: name,
           })
-          .catch((e) => ({
-            body: {
-              cleaned: false,
-              error: e.response ? JSON.parse(e.response) : e,
-            },
-          }));
+          .catch((e) => {
+            // This API returns errors in a non-standard format, which we'll need to
+            // munge to be compatible with wrapEsError.
+            const normalizedError = {
+              statusCode: e.meta.body.status,
+              response: e.meta.body,
+            };
+
+            return {
+              body: {
+                cleaned: false,
+                error: wrapEsError(normalizedError),
+              },
+            };
+          });
 
         return res.ok({
           body: {

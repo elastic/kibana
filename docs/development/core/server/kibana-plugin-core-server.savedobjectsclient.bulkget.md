@@ -16,12 +16,12 @@ bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjec
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObjectsBulkGetObject[]</code> | an array of ids, or an array of objects containing id, type and optionally fields |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  objects | SavedObjectsBulkGetObject\[\] | an array of ids, or an array of objects containing id, type and optionally fields |
+|  options | SavedObjectsBaseOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBulkResponse<T>>`
+Promise&lt;SavedObjectsBulkResponse&lt;T&gt;&gt;
 
 ## Example
 

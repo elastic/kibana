@@ -30,6 +30,7 @@ import {
   AlertTypeParams,
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
+import { QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -117,10 +118,14 @@ export const Expressions: React.FC<Props> = (props) => {
   const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQueryText', filter);
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      try {
+        setAlertParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setAlertParams('filterQuery', QUERY_INVALID);
+      }
     },
     [setAlertParams, derivedIndexPattern]
   );
@@ -276,15 +281,16 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [alertParams.groupBy]);
 
   const redundantFilterGroupBy = useMemo(() => {
-    if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
+    const { filterQuery } = alertParams;
+    if (typeof filterQuery !== 'string' || !groupByFilterTestPatterns) return [];
     return groupByFilterTestPatterns
       .map(({ groupName, pattern }) => {
-        if (pattern.test(alertParams.filterQuery!)) {
+        if (pattern.test(filterQuery)) {
           return groupName;
         }
       })
       .filter((g) => typeof g === 'string') as string[];
-  }, [alertParams.filterQuery, groupByFilterTestPatterns]);
+  }, [alertParams, groupByFilterTestPatterns]);
 
   return (
     <>

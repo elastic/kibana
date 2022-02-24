@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Webshell Detection: Script Process Child of Common Web Processes",
   "note": "## Triage and analysis\n\nDetections should be investigated to identify if the activity corresponds to legitimate activity. As this rule detects post-exploitation process activity, investigations into this should be prioritized.",
-  "query": "process where event.type == \"start\" and\n  process.parent.name : (\"w3wp.exe\", \"httpd.exe\", \"nginx.exe\", \"php.exe\", \"php-cgi.exe\", \"tomcat.exe\") and \n  process.name : (\"cmd.exe\", \"cscript.exe\", \"powershell.exe\", \"pwsh.exe\", \"wmic.exe\", \"wscript.exe\")\n",
+  "query": "process where event.type == \"start\" and\n  process.parent.name : (\"w3wp.exe\", \"httpd.exe\", \"nginx.exe\", \"php.exe\", \"php-cgi.exe\", \"tomcat.exe\") and \n  process.name : (\"cmd.exe\", \"cscript.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\", \"wmic.exe\", \"wscript.exe\")\n",
   "references": [
     "https://www.microsoft.com/security/blog/2020/02/04/ghost-in-the-shell-investigating-web-shell-attacks/"
   ],
@@ -71,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

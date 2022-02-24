@@ -16,6 +16,15 @@ export type CardSectionPanelProps = Exclude<
 
 const StyledEuiPanel = styled(EuiPanel)`
   padding: 32px;
+  &.top-section {
+    padding-bottom: 24px;
+  }
+  &.bottom-section {
+    padding-top: 24px;
+  }
+  &.artifact-entry-collapsible-card {
+    padding: 24px !important;
+  }
 `;
 
 export const CardSectionPanel = memo<CardSectionPanelProps>((props) => {

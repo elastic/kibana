@@ -343,7 +343,7 @@ const destLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.dest',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingdest`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-settings.html#log-to-file-example`,
       title: i18n.translate('core.deprecations.loggingDest.deprecationTitle', {
         defaultMessage: `Setting "logging.dest" is deprecated`,
       }),
@@ -375,14 +375,14 @@ const quietLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.quiet',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingquiet`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingQuiet.deprecationTitle', {
         defaultMessage: `Setting "logging.quiet" is deprecated`,
       }),
       message: i18n.translate('core.deprecations.loggingQuiet.deprecationMessage', {
         defaultMessage:
           '"logging.quiet" has been deprecated and will be removed ' +
-          'in 8.0. Moving forward, you can use "logging.root.level:error" in your logging configuration. ',
+          'in 8.0. Moving forward, you can use "logging.root.level:error" in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -406,14 +406,14 @@ const silentLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.silent',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingsilent`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingSilent.deprecationTitle', {
         defaultMessage: `Setting "logging.silent" is deprecated`,
       }),
       message: i18n.translate('core.deprecations.loggingSilent.deprecationMessage', {
         defaultMessage:
           '"logging.silent" has been deprecated and will be removed ' +
-          'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration. ',
+          'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -437,14 +437,14 @@ const verboseLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.verbose',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingverbose`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingVerbose.deprecationTitle', {
         defaultMessage: `Setting "logging.verbose" is deprecated`,
       }),
       message: i18n.translate('core.deprecations.loggingVerbose.deprecationMessage', {
         defaultMessage:
           '"logging.verbose" has been deprecated and will be removed ' +
-          'in 8.0. Moving forward, you can use "logging.root.level:all" in your logging configuration. ',
+          'in 8.0. Moving forward, you can use "logging.root.level:all" in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -472,7 +472,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.json',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#json-layout`,
       title: i18n.translate('core.deprecations.loggingJson.deprecationTitle', {
         defaultMessage: `Setting "logging.json" is deprecated`,
       }),
@@ -505,7 +505,7 @@ const logRotateDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.rotate',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#rolling-file-appender`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#rolling-file-appender`,
       title: i18n.translate('core.deprecations.loggingRotate.deprecationTitle', {
         defaultMessage: `Setting "logging.rotate" is deprecated`,
       }),
@@ -537,7 +537,7 @@ const logEventsLogDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.events.log',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingEventsLog.deprecationTitle', {
         defaultMessage: `Setting "logging.events.log" is deprecated`,
       }),
@@ -550,7 +550,7 @@ const logEventsLogDeprecation: ConfigDeprecation = (
         manualSteps: [
           removeFromConfigStep('logging.events.log'),
           i18n.translate('core.deprecations.loggingEventsLog.manualSteps2', {
-            defaultMessage: `Customize log levels can be per-logger using the new logging configuration.`,
+            defaultMessage: `Customized log levels can be per-logger using the new logging configuration.`,
           }),
         ],
       },
@@ -568,7 +568,7 @@ const logEventsErrorDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.events.error',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingevents`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingEventsError.deprecationTitle', {
         defaultMessage: `Setting "logging.events.error" is deprecated`,
       }),
@@ -599,7 +599,6 @@ const logFilterDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.filter',
       level: 'critical',
-      documentationUrl: `https://github.com/elastic/kibana/blob/${branch}/src/core/server/logging/README.mdx#loggingfilter`,
       title: i18n.translate('core.deprecations.loggingFilter.deprecationTitle', {
         defaultMessage: `Setting "logging.filter" is deprecated`,
       }),
@@ -611,6 +610,50 @@ const logFilterDeprecation: ConfigDeprecation = (
       },
     });
   }
+};
+
+const logFormatDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
+  addDeprecation({
+    configPath: 'logging',
+    level: 'warning',
+    documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-configuration-migration.html`,
+    title: i18n.translate('core.deprecations.loggingFormat.deprecationTitle', {
+      defaultMessage: `Kibana's logging format is changing in 8.0`,
+    }),
+    message: i18n.translate('core.deprecations.loggingFormat.deprecationMessage', {
+      defaultMessage:
+        'Starting in 8.0, the Kibana logging format will be changing. ' +
+        'This may affect you if you are doing any special handling of your Kibana logs, ' +
+        'such as ingesting logs into Elasticsearch for further analysis. ' +
+        'If you are using the new logging configuration, you are already receiving logs in both ' +
+        'old and new formats, and the old format will simply be going away. ' +
+        'If you are not yet using the new logging configuration, the log format will change ' +
+        'upon upgrade to 8.0. Beginning in 8.0, the format of JSON logs will be ECS-compatible JSON, ' +
+        'and the default pattern log format will be configurable with our new logging system. ' +
+        'Please refer to the documentation for more information about the new logging format.',
+    }),
+    correctiveActions: {
+      manualSteps: [
+        i18n.translate('core.deprecations.loggingFormat.manualSteps1', {
+          defaultMessage: `Determine whether your infrastructure is relying on Kibana's legacy log format.`,
+        }),
+        i18n.translate('core.deprecations.loggingFormat.manualSteps2', {
+          defaultMessage: `Learn more about our new logging system by checking out the documentation.`,
+        }),
+        i18n.translate('core.deprecations.loggingFormat.manualSteps3', {
+          defaultMessage: `Learn more about ECS at https://www.elastic.co/guide/en/ecs/8.0/ecs-reference.html.`,
+        }),
+        i18n.translate('core.deprecations.loggingFormat.manualSteps4', {
+          defaultMessage: `Update your ingest tooling to use the new logging format.`,
+        }),
+      ],
+    },
+  });
 };
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
@@ -674,4 +717,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   logEventsLogDeprecation,
   logEventsErrorDeprecation,
   logFilterDeprecation,
+  logFormatDeprecation,
 ];

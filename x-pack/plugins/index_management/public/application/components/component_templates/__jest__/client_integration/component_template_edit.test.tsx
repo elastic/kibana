@@ -80,6 +80,9 @@ describe('<ComponentTemplateEdit />', () => {
 
       await act(async () => {
         form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
         actions.clickNextButton();
       });
 

@@ -12,13 +12,16 @@ import mappings from '../../generated/mappings.json';
 export function getIndexTemplate(esNames: EsNames) {
   const indexTemplateBody = {
     index_patterns: [esNames.indexPatternWithVersion],
-    settings: {
-      number_of_shards: 1,
-      auto_expand_replicas: '0-1',
-      'index.lifecycle.name': esNames.ilmPolicy,
-      'index.lifecycle.rollover_alias': esNames.alias,
+    template: {
+      settings: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+        'index.lifecycle.name': esNames.ilmPolicy,
+        'index.lifecycle.rollover_alias': esNames.alias,
+        'index.hidden': true,
+      },
+      mappings,
     },
-    mappings,
   };
 
   return indexTemplateBody;

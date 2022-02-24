@@ -314,6 +314,13 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.click('collapseSideBarButton');
   }
 
+  public async closeSidebar() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.toggleSidebarCollapse();
+      await this.testSubjects.missingOrFail('discover-sidebar');
+    });
+  }
+
   public async getAllFieldNames() {
     const sidebar = await this.testSubjects.find('discover-sidebar');
     const $ = await sidebar.parseDomContent();

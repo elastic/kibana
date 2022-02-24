@@ -15,7 +15,7 @@ import { get } from 'lodash/fp';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../timelines/public';
 import { Ecs } from '../../../../../common/ecs';
 import {
   AddExceptionModal,
@@ -164,6 +164,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
+    disabled: !isEvent,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
@@ -185,7 +186,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {addToCaseActionProps && timelinesUi.getAddToCaseAction(addToCaseActionProps)}
       {items.length > 0 && (
         <div key="actions-context-menu">
-          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiPopover
               id="singlePanel"
               button={button}

@@ -36,6 +36,7 @@ import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
+import { deleteIndexTemplates } from './service/lib/delete_index_templates';
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
@@ -435,6 +436,7 @@ export class SavedObjectsService
       // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
       if (compatibleNodes) {
         this.logger.info('Starting saved objects migrations');
+        await deleteIndexTemplates({ client: client.asInternalUser, log: this.logger });
         await migrator.runMigrations();
       }
     }

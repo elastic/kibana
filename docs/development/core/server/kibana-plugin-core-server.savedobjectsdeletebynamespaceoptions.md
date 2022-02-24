@@ -10,10 +10,11 @@
 ```typescript
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions 
 ```
+<b>Extends:</b> SavedObjectsBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [refresh](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.refresh.md) | <code>boolean</code> | The Elasticsearch supports only boolean flag for this operation |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.refresh.md) | boolean | <i>(Optional)</i> The Elasticsearch supports only boolean flag for this operation |
 

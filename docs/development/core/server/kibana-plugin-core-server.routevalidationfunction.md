@@ -37,6 +37,5 @@ const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (data, validat
     return badRequest('Wrong payload', ['body']);
   }
 }
-
 ```
 

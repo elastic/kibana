@@ -10,9 +10,9 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function suggestionsTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const archiveName = 'apm_8.0.0';
 

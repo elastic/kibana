@@ -13,7 +13,8 @@ const OPEN_ALERTS_ROWS_COUNT = 12;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('alert workflow status', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/117290
+  describe.skip('alert workflow status', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
