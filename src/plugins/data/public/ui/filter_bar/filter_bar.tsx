@@ -14,7 +14,6 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
 import { FilterItem } from './filter_item';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern, SavedQueryService } from '../..';
@@ -25,6 +24,7 @@ import { FilterExpressionItem } from './filter_expression_item';
 import { EditFilterModal, FilterGroup } from '../query_string_input/edit_filter_modal';
 import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { SavedQueryMeta } from '../saved_query_form';
+import { QUERY_BUILDER } from '../query_string_input/add_filter_modal';
 
 interface Props {
   filters: Filter[];
@@ -63,6 +63,23 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       : minValue;
   }, []);
 
+  const sortFiltersByGroupId = useCallback((multipleFilters: Filter[]) => {
+    // when user adds new filters in edit modal they should appear near of editing filter
+    let gId: number = 0;
+    let reserveGroupId: number; // for cases where multiple filters have same groupId
+    return multipleFilters.map((filter, idx) => {
+      if (filter.groupId !== reserveGroupId) {
+        reserveGroupId = filter.groupId;
+        gId++;
+      }
+      return {
+        ...filter,
+        groupId: gId,
+        id: idx,
+      };
+    });
+  }, []);
+
   useEffect(() => {
     const savedFiltersGroupIds: number[] = [];
     let groupId = getInitForField(props.multipleFilters, 'groupId', 1);
@@ -90,23 +107,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-
-  const sortFiltersByGroupId = useCallback((multipleFilters: Filter[]) => {
-    // when user adds new filters in edit modal they should appear near of editing filter
-    let gId: number = 0;
-    let reserveGroupId: number; // for cases where multiple filters have same groupId
-    return multipleFilters.map((filter, idx) => {
-      if (filter.groupId !== reserveGroupId) {
-        reserveGroupId = filter.groupId;
-        gId++;
-      }
-      return {
-        ...filter,
-        groupId: gId,
-        id: idx,
-      };
-    });
-  }, []);
 
   function onFiltersUpdated(filters: Filter[]) {
     if (props.onFiltersUpdated) {
@@ -167,7 +167,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       };
     });
 
-    multipleFilters.splice(idxEditedFilterInMultiple, 1, ...newMultipleFilters);
+    multipleFilters.splice(idxEditedFilterInMultiple, groupIds.length, ...newMultipleFilters);
     const updatedMultipleFilters = sortFiltersByGroupId(multipleFilters);
 
     props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
@@ -203,7 +203,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const indexOfCurFilter = multipleFilters.findIndex(
       (f) => Number(f.groupId) === Number(groupIds[0])
     );
-    multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
+    multipleFilters.splice(indexOfCurFilter, groupIds.length, ...mergedFilters);
     const updatedMultipleFilters = sortFiltersByGroupId(multipleFilters);
 
     props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
@@ -313,12 +313,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       });
     });
 
-    const queryBuilderTab = {
-      type: 'query_builder',
-      label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
-        defaultMessage: 'Query builder',
-      }),
-    };
+    const queryBuilderTab = QUERY_BUILDER;
     const tabs = selectedSavedFiltersGroupIds.some((g) => groupIds.includes(g))
       ? [queryBuilderTab]
       : undefined;

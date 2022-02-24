@@ -58,26 +58,9 @@ import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
+import { ITab, QUERY_BUILDER, QUICK_FORM } from './add_filter_modal';
 
-interface ITab {
-  type: string;
-  label: string;
-}
-
-const possibleTabs: ITab[] = [
-  {
-    type: 'quick_form',
-    label: i18n.translate('data.filter.filterEditor.quickFormLabel', {
-      defaultMessage: 'Quick form',
-    }),
-  },
-  {
-    type: 'query_builder',
-    label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
-      defaultMessage: 'Query builder',
-    }),
-  },
-];
+const possibleTabs: ITab[] = [QUICK_FORM, QUERY_BUILDER];
 
 export interface FilterGroup {
   field: IFieldType | undefined;
@@ -130,7 +113,9 @@ export function EditFilterModal({
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
-  const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
+  const [addFilterMode, setAddFilterMode] = useState<string>(
+    initialAddFilterMode ?? QUICK_FORM.type
+  );
   const [customLabel, setCustomLabel] = useState<string>(initialLabel || '');
   const [queryDsl, setQueryDsl] = useState<string>(
     JSON.stringify(
@@ -145,7 +130,7 @@ export function EditFilterModal({
     )
   );
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    tabs.includes(possibleTabs[1])
+    tabs.includes(QUICK_FORM)
       ? convertFilterToFilterGroup(currentEditFilters)
       : [
           {
@@ -274,7 +259,7 @@ export function EditFilterModal({
       return '';
     }
     return (
-      tabs.includes(possibleTabs[1]) && (
+      tabs.includes(QUICK_FORM) && (
         <EuiFormRow
           fullWidth
           display="columnCompressed"
@@ -486,7 +471,7 @@ export function EditFilterModal({
       return;
     }
 
-    if (addFilterMode === 'query_builder') {
+    if (addFilterMode === QUERY_BUILDER.type) {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
       let builtCustomFilter = [];
@@ -504,7 +489,7 @@ export function EditFilterModal({
       if (alias) {
         onSubmitWithLabel(builtCustomFilter);
       }
-    } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
+    } else if (addFilterMode === QUICK_FORM.type && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
           return buildFilter(
@@ -811,8 +796,8 @@ export function EditFilterModal({
 
       <EuiModalBody className="kbnQueryBar__filterModalWrapper">
         <EuiForm className="kbnQueryBar__filterModalForm">
-          {addFilterMode === 'quick_form' && renderGroupedFilters()}
-          {addFilterMode === 'query_builder' && renderCustomEditor()}
+          {addFilterMode === QUICK_FORM.type && renderGroupedFilters()}
+          {addFilterMode === QUERY_BUILDER.type && renderCustomEditor()}
         </EuiForm>
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />
