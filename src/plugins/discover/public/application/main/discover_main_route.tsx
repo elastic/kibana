@@ -8,7 +8,7 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import { DataViewAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
 import {
   SavedSearch,
   getSavedSearch,
@@ -45,9 +45,9 @@ export function DiscoverMainRoute() {
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
-  const [indexPatternList, setIndexPatternList] = useState<
-    Array<SavedObject<IndexPatternAttributes>>
-  >([]);
+  const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
+    []
+  );
   const { id } = useParams<DiscoverLandingParams>();
 
   const navigateToOverview = useCallback(() => {
@@ -73,9 +73,9 @@ export function DiscoverMainRoute() {
         await checkForDataViews();
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
-        const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
+        const ip = await loadIndexPattern(index || '', data.dataViews, config);
 
-        const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
+        const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
         const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
 
         setIndexPatternList(ipList);
@@ -147,7 +147,7 @@ export function DiscoverMainRoute() {
     chrome.recentlyAccessed,
     config,
     core.application.navigateToApp,
-    data.indexPatterns,
+    data.dataViews,
     history,
     id,
     services,
