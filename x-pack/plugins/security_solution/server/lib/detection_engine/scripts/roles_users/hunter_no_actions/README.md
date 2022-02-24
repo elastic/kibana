@@ -8,4 +8,4 @@ privileges whereas the T1 and T2 have "read" privileges which prevents them from
 
 |        Role         | Data Sources | Security Solution ML Jobs/Results | Lists | Rules/Exceptions | Action Connectors | Signals/Alerts |
 | :-----------------: | :----------: | :------------------: | :---: | :--------------: | :---------------: | :------------: |
-| Hunter / T3 Analyst | read, write  |         read         | read  |   read, write    |       read        |  read, write   |
+| Hunter / T3 Analyst | read, write  |         read         | read  |   read, write    |       none        |  read, write   |
