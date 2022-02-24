@@ -211,7 +211,6 @@ export class ExecuteReportTask implements ReportingTask {
     const doc: ReportFailedFields = {
       completed_at: completedTime,
       output: docOutput ?? null,
-      error_code: error?.code,
     };
 
     return await store.setReportFailed(report, doc);
@@ -233,6 +232,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
       docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.error_code = output.code;
     }
 
     return docOutput;
