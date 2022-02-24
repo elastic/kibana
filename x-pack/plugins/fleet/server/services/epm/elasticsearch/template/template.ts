@@ -132,6 +132,9 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         case 'scaled_float':
           fieldProps.type = 'scaled_float';
           fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
+          if (field.metric_type) {
+            fieldProps.time_series_metric = { type: field.metric_type };
+          }
           break;
         case 'text':
           const textMapping = generateTextMapping(field);
@@ -193,7 +196,6 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
             break;
           default: {
             const meta = {};
-            if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
             if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
             fieldProps.meta = meta;
           }
