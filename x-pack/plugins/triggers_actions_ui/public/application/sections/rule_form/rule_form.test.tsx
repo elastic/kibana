@@ -187,7 +187,7 @@ describe('rule_form', () => {
           rule={initialRule}
           config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -367,7 +367,7 @@ describe('rule_form', () => {
           rule={initialRule}
           config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -430,7 +430,7 @@ describe('rule_form', () => {
           rule={initialRule}
           config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
