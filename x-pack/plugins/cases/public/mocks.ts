@@ -12,11 +12,13 @@ const createStartContract = (): jest.Mocked<CasesUiStart> => ({
   getCases: jest.fn(),
   getCasesContext: jest.fn(),
   getAllCasesSelectorModal: jest.fn(),
+  getAllCasesSelectorModalNoProvider: jest.fn(),
   getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
   getCreateCaseFlyoutNoProvider: jest.fn(),
   hooks: {
     getUseCasesAddToNewCaseFlyout: jest.fn(),
+    getUseCasesAddToExistingCaseModal: jest.fn(),
   },
 });
 

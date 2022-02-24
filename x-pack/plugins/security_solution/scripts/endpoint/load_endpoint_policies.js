@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import type { SpacesPluginStart } from '../../../spaces/public';
-
-export interface StartPlugins {
-  spaces?: SpacesPluginStart;
-}
+require('../../../../../src/setup_node_env');
+require('./endpoint_policies').cli();
