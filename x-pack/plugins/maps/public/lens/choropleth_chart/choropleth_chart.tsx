@@ -18,6 +18,7 @@ import {
   COLOR_MAP_TYPE,
 } from '../../../common';
 import { ChoroplethChartProps } from './types';
+import { Icon } from './icon';
 
 export function ChoroplethChart({
   data,
@@ -28,6 +29,10 @@ export function ChoroplethChart({
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
 }) {
+  if (args.isPreview) {
+    return <Icon />;
+  }
+
   const layerList = args.layerId
     ? [
         {

@@ -13,9 +13,8 @@ import type { FileLayer } from '@elastic/ems-client';
 import { ThemeServiceStart } from 'kibana/public';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { ColorMode } from '../../../../../../src/plugins/charts/common';
 import { getSuggestions } from './suggestions';
-import { layerTypes } from '../../../../lens/common';
+import { layerTypes } from '../../../../lens/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
@@ -176,7 +175,7 @@ export const getVisualization = ({
   },
 
   removeDimension({ prevState }) {
-    return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
+    return { ...prevState, accessor: undefined };
   },
 
   renderDimensionEditor(domElement, props) {
