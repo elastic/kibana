@@ -55,7 +55,7 @@ export const NoDataViews = ({
       data-test-subj="noDataViewsPrompt"
       layout="horizontal"
       css={css`
-        max-width: ${MAX_WIDTH}px !important;
+        max-width: ${MAX_WIDTH}px !important; // Necessary to override EuiEmptyPrompt to fit content
       `}
       color={emptyPromptColor}
       icon={<DataViewIllustration />}
