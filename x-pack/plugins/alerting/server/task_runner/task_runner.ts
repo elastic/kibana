@@ -5,7 +5,6 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
@@ -27,7 +26,6 @@ import {
 import {
   RawRule,
   IntervalSchedule,
-  Services,
   RawAlertInstance,
   RuleTaskState,
   Alert,
@@ -39,7 +37,7 @@ import {
   RuleMonitoringHistory,
   RawRuleExecutionStatus,
   AlertAction,
-  RuleTaskStateWithActions,
+  RuleExecutionState,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
@@ -47,7 +45,6 @@ import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   ActionGroup,
@@ -66,6 +63,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
+import { createWrappedScopedClusterClientFactory } from '../lib';
 import { getRecoveredAlerts } from '../lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -83,8 +81,8 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   },
 });
 
-interface RuleTaskRunResultWithActions {
-  state: RuleTaskStateWithActions;
+interface RuleExecutionRunResult {
+  state: RuleExecutionState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
@@ -198,14 +196,6 @@ export class TaskRunner<
     return fakeRequest;
   }
 
-  private getServicesWithSpaceLevelPermissions(
-    spaceId: string,
-    apiKey: RawRule['apiKey']
-  ): [Services, PublicMethodsOf<RulesClient>] {
-    const request = this.getFakeKibanaRequest(spaceId, apiKey);
-    return [this.context.getServices(request), this.context.getRulesClientWithRequest(request)];
-  }
-
   private getExecutionHandler(
     ruleId: string,
     ruleName: string,
@@ -214,7 +204,8 @@ export class TaskRunner<
     apiKey: RawRule['apiKey'],
     kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
-    ruleParams: Params
+    ruleParams: Params,
+    request: KibanaRequest
   ) {
     return createExecutionHandler<
       Params,
@@ -237,7 +228,7 @@ export class TaskRunner<
       ruleType: this.ruleType,
       kibanaBaseUrl,
       eventLogger: this.context.eventLogger,
-      request: this.getFakeKibanaRequest(spaceId, apiKey),
+      request,
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
@@ -301,13 +292,13 @@ export class TaskRunner<
   }
 
   async executeAlerts(
-    services: Services,
+    fakeRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
     event: Event
-  ): Promise<RuleTaskStateWithActions> {
+  ): Promise<RuleExecutionState> {
     const {
       alertTypeId,
       consumer,
@@ -346,6 +337,18 @@ export class TaskRunner<
     const eventLogger = this.context.eventLogger;
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
+    const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
+    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule: {
+        name: rule.name,
+        alertTypeId: rule.alertTypeId,
+        id: rule.id,
+        spaceId,
+      },
+      logger: this.logger,
+    });
+
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -362,7 +365,10 @@ export class TaskRunner<
           alertId: ruleId,
           executionId: this.executionId,
           services: {
-            ...services,
+            savedObjectsClient: this.context.savedObjects.getScopedClient(fakeRequest, {
+              includedHiddenTypes: ['alert', 'action'],
+            }),
+            scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
@@ -375,7 +381,7 @@ export class TaskRunner<
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
             search: createAbortableEsClientFactory({
-              scopedClusterClient: services.scopedClusterClient,
+              scopedClusterClient,
               abortController: this.searchAbortController,
             }),
           },
@@ -425,6 +431,8 @@ export class TaskRunner<
       ...event.rule,
       name: rule.name,
     };
+
+    const searchMetrics = wrappedScopedClusterClient.getMetrics();
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
@@ -535,6 +543,7 @@ export class TaskRunner<
     }
 
     return {
+      metrics: searchMetrics,
       triggeredActions,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
@@ -545,7 +554,7 @@ export class TaskRunner<
   }
 
   async validateAndExecuteRule(
-    services: Services,
+    fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
     event: Event
@@ -564,14 +573,13 @@ export class TaskRunner<
       apiKey,
       this.context.kibanaBaseUrl,
       rule.actions,
-      rule.params
+      rule.params,
+      fakeRequest
     );
-    return this.executeAlerts(services, rule, validatedParams, executionHandler, spaceId, event);
+    return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(
-    event: Event
-  ): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
+  async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleExecutionRunResult, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
@@ -592,7 +600,10 @@ export class TaskRunner<
       );
     }
 
-    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
+
+    // Get rules client with space level permissions
+    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
 
     let rule: SanitizedAlert<Params>;
 
@@ -630,8 +641,8 @@ export class TaskRunner<
     }
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleTaskStateWithActions, Error>(
-        this.validateAndExecuteRule(services, apiKey, rule, event)
+      state: await promiseResult<RuleExecutionState, Error>(
+        this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
@@ -705,9 +716,9 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
-    const executionStatus = map<RuleTaskStateWithActions, ElasticsearchError, AlertExecutionStatus>(
+    const executionStatus = map<RuleExecutionState, ElasticsearchError, AlertExecutionStatus>(
       state,
-      (ruleTaskState) => executionStatusFromState(ruleTaskState),
+      (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
 
@@ -760,6 +771,25 @@ export class TaskRunner<
       );
     }
 
+    // Copy search stats into event log
+    if (executionStatus.metrics) {
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_searches',
+        executionStatus.metrics.numSearches ?? 0
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.es_search_duration_ms',
+        executionStatus.metrics.esSearchDurationMs ?? 0
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+        executionStatus.metrics.totalSearchDurationMs ?? 0
+      );
+    }
+
     ruleMonitoring.execution.history.push(monitoringHistory);
     ruleMonitoring.execution.calculated_metrics = {
       success_ratio: getExecutionSuccessRatio(ruleMonitoring),
@@ -780,20 +810,19 @@ export class TaskRunner<
       });
     }
 
-    const transformStateForTaskState = (
-      stateWithActions: RuleTaskStateWithActions
+    const transformExecutionStateToTaskState = (
+      executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(stateWithActions, 'triggeredActions'),
+        ...omit(executionState, ['triggeredActions', 'metrics']),
         previousStartedAt: startedAt,
       };
     };
 
     return {
-      state: map<RuleTaskStateWithActions, ElasticsearchError, RuleTaskState>(
+      state: map<RuleExecutionState, ElasticsearchError, RuleTaskState>(
         state,
-        (stateWithActions: RuleTaskStateWithActions) =>
-          transformStateForTaskState(stateWithActions),
+        (executionState: RuleExecutionState) => transformExecutionStateToTaskState(executionState),
         (err: ElasticsearchError) => {
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
@@ -1242,8 +1271,8 @@ function logActiveAndRecoveredAlerts<
  * so that we can treat each field independantly
  */
 async function errorAsRuleTaskRunResult(
-  future: Promise<Resultable<RuleTaskRunResultWithActions, Error>>
-): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
+  future: Promise<Resultable<RuleExecutionRunResult, Error>>
+): Promise<Resultable<RuleExecutionRunResult, Error>> {
   try {
     return await future;
   } catch (e) {
