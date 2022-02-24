@@ -10,7 +10,6 @@ import { useState, useEffect } from 'react';
 import {
   EventAction,
   EventKind,
-  EventActionPartition,
   Process,
   ProcessEvent,
   ProcessMap,
@@ -54,8 +53,7 @@ export class ProcessImpl implements Process {
     this.autoExpand = false;
   }
 
-  // hideSameGroup will filter out any processes which have the same pgid as this process
-  getChildren(hideSameGroup: boolean = false) {
+  getChildren(verboseMode: boolean) {
     let children = this.children;
 
     // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
@@ -63,14 +61,31 @@ export class ProcessImpl implements Process {
       children = [...children, ...this.orphans].sort(sortProcesses);
     }
 
-    if (hideSameGroup) {
-      const { pid } = this.getDetails().process;
+    // When verboseMode is false, we filter out noise via a few techniques.
+    // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
+    if (!verboseMode) {
+      return children.filter((child) => {
+        const { group_leader: groupLeader, session_leader: sessionLeader } =
+          child.getDetails().process;
 
-      return children.filter((process) => {
-        const pgid = process.getDetails().process.group_leader.pid;
+        // search matches will never be filtered out
+        if (child.searchMatched) {
+          return true;
+        }
 
-        // TODO: needs update after field rename to match ECS
-        return pgid !== pid || process.searchMatched;
+        // Hide processes that have their session leader as their process group leader.
+        // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
+        // other shell startup activities (e.g bashrc .profile etc)
+        if (groupLeader.pid === sessionLeader.pid) {
+          return false;
+        }
+
+        // If the process has no children and has not exec'd (fork only), we hide it.
+        if (child.children.length === 0 && !child.hasExec()) {
+          return false;
+        }
+
+        return true;
       });
     }
 
@@ -106,11 +121,28 @@ export class ProcessImpl implements Process {
     return '';
   }
 
+  // isUserEntered is a best guess at which processes were initiated by a real person
+  // In most situations a user entered command in a shell such as bash, will cause bash
+  // to fork, create a new process group, and exec the command (e.g ls). If the session
+  // has a controlling tty (aka an interactive session), we assume process group leaders
+  // with a session leader for a parent are "user entered".
+  // Because of the presence of false positives in this calculation, it is currently
+  // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
-    const { tty } = event.process;
+    const {
+      pid,
+      tty,
+      parent,
+      session_leader: sessionLeader,
+      group_leader: groupLeader,
+    } = event.process;
 
-    return !!tty && process.pid === event.process.group_leader.pid;
+    const parentIsASessionLeader = parent.pid === sessionLeader.pid; // possibly bash, zsh or some other shell
+    const processIsAGroupLeader = pid === groupLeader.pid;
+    const sessionIsInteractive = !!tty;
+
+    return sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader;
   }
 
   getMaxAlertLevel() {
@@ -134,27 +166,19 @@ export class ProcessImpl implements Process {
     return events.filter(({ event }) => event.kind === kind);
   });
 
+  // returns the most recent fork, exec, or end event
+  // to be used as a source for the most up to date details
+  // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
-    const eventsPartition = events.reduce(
-      (currEventsParition, processEvent) => {
-        currEventsParition[processEvent.event.action]?.push(processEvent);
-        return currEventsParition;
-      },
-      Object.values(EventAction).reduce((currActions, action) => {
-        currActions[action] = [] as ProcessEvent[];
-        return currActions;
-      }, {} as EventActionPartition)
-    );
+    const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
+    const filtered = events.filter((processEvent) => {
+      return actionsToFind.includes(processEvent.event.action);
+    });
 
-    if (eventsPartition.exec.length) {
-      return eventsPartition.exec[eventsPartition.exec.length - 1];
-    }
-
-    if (eventsPartition.fork.length) {
-      return eventsPartition.fork[eventsPartition.fork.length - 1];
-    }
-
-    return this.events[this.events.length - 1] || ({} as ProcessEvent);
+    // because events is already ordered by @timestamp we take the last event
+    // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
+    // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
+    return filtered[filtered.length - 1] || ({} as ProcessEvent);
   });
 }
 

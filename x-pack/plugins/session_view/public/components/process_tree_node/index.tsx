@@ -75,7 +75,7 @@ export function ProcessTreeNode({
   const { tty } = processDetails.process;
 
   const renderChildren = () => {
-    const children = process.getChildren(showGroupLeadersOnly);
+    const children = process.getChildren(!showGroupLeadersOnly);
 
     if (!childrenExpanded || !children || children.length === 0) {
       return null;
@@ -107,10 +107,10 @@ export function ProcessTreeNode({
 
   const renderButtons = () => {
     const buttons = [];
-    const childCount = process.getChildren().length;
+    const childCount = process.getChildren(true).length;
 
     if (isSessionLeader) {
-      const groupLeaderCount = process.getChildren(true).length;
+      const groupLeaderCount = process.getChildren(false).length;
       const sameGroupCount = childCount - groupLeaderCount;
 
       if (sameGroupCount > 0) {

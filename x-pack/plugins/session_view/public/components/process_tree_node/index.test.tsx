@@ -39,19 +39,6 @@ describe('ProcessTreeNode component', () => {
       expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
     });
 
-    it('if many processes with same pgid as session leader, +X more button should be shown', async () => {
-      const processMockWithChildren: typeof processMock = {
-        ...processMock,
-        getChildren: (showSameGroup) => (showSameGroup ? [] : [childProcessMock]), // TODO: seems strange we are mocking out ProcessImpl, testing a mock seems pointless.
-      };
-
-      renderResult = mockedContext.render(
-        <ProcessTreeNode isSessionLeader process={processMockWithChildren} />
-      );
-
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant+1 more');
-    });
-
     // commented out until we get new UX for orphans treatment aka disjointed tree
     // it('renders orphaned node', async () => {
     //   renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
