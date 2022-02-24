@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, httpServerMock } from '../../../core/server/mocks';
+import { coreMock } from '../../../core/server/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
@@ -217,7 +217,6 @@ describe('Telemetry Collection Manager', () => {
         });
       });
       describe('unencrypted: true', () => {
-        const mockRequest = httpServerMock.createKibanaRequest();
         const config: StatsGetterConfig = {
           unencrypted: true,
         };
