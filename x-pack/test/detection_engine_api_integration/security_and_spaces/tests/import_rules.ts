@@ -101,6 +101,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('import_rules', () => {
     describe('importing rules with different roles', () => {
+      before(async () => {
+        await createUserAndRole(getService, ROLES.hunter_no_actions);
+        await createUserAndRole(getService, ROLES.hunter);
+      });
+      after(async () => {
+        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+        await deleteUserAndRole(getService, ROLES.hunter);
+      });
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
       });
@@ -110,8 +118,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllAlerts(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
-        await createUserAndRole(getService, ROLES.hunter_no_actions);
-
         const { body } = await supertestWithoutAuth
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .auth(ROLES.hunter_no_actions, 'changeme')
@@ -136,11 +142,42 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_success: true,
           exceptions_success_count: 0,
         });
-        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+      });
+      it('should successfully import rules with actions when user has "read" actions privileges', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
       });
       it('should not import rules with actions when a user has no actions privileges', async () => {
-        await createUserAndRole(getService, ROLES.hunter_no_actions);
-
         // create a new action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -188,7 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_success: true,
           exceptions_success_count: 0,
         });
-        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
       });
     });
     describe('importing rules with an index', () => {
