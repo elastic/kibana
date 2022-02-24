@@ -130,7 +130,7 @@ export const LegendSizeSettings = ({
               ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
                   defaultMessage: 'Requires legend to be shown',
                 })
-              : i18n.translate('xpack.lens.shared.legendIsTruncated', {
+              : i18n.translate('xpack.lens.legendSizeSetting.legendAutoSize', {
                   defaultMessage: 'Requires legend auto {sizeProperty} to be disabled',
                   values: { sizeProperty },
                 })
