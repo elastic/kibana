@@ -5,7 +5,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-monaco"
 PKG_REQUIRE_NAME = "@kbn/monaco"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__monaco"
 
 SOURCE_FILES = glob(
   [
@@ -131,7 +130,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

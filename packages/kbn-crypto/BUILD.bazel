@@ -5,7 +5,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-crypto"
 PKG_REQUIRE_NAME = "@kbn/crypto"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__crypto"
 
 SOURCE_FILES = glob(
   [
@@ -29,7 +28,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-dev-utils",
+  "//packages/kbn-dev-utils:build",
   "@npm//node-forge",
 ]
 
@@ -97,7 +96,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

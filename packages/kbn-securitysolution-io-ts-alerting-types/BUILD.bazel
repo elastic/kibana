@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-securitysolution-io-ts-alerting-types"
 PKG_REQUIRE_NAME = "@kbn/securitysolution-io-ts-alerting-types"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__securitysolution-io-ts-alerting-types"
 
 SOURCE_FILES = glob(
   [
@@ -110,7 +109,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )
