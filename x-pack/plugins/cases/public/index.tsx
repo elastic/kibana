@@ -12,12 +12,16 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new CasesUiPlugin(initializerContext);
 }
 
+export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/lens/constants';
+
 export type { CasesUiPlugin };
 export type { CasesUiStart } from './types';
 export type { GetCasesProps } from './methods/get_cases';
 export type { GetCreateCaseFlyoutProps } from './methods/get_create_case_flyout';
 export type { GetAllCasesSelectorModalProps } from './methods/get_all_cases_selector_modal';
 export type { GetRecentCasesProps } from './methods/get_recent_cases';
+
+export type { CaseAttachments } from './types';
 
 export type { ICasesDeepLinkId } from './common/navigation';
 export {
