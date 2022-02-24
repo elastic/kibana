@@ -33,6 +33,10 @@ When a tile exceeds `index.max_result_window`, results exceeding `index.max_resu
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
+*ML Anomalies*:: Points and lines associated with anomalies. The {anomaly-job}
+must use a `lat_long` function. Go to
+{ml-docs}/geographic-anomalies.html[Detecting anomalous locations in geographic data] for an example.
+
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
 
