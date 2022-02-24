@@ -144,7 +144,11 @@ export class ObservabilityDataViews {
     }
   }
 
-  async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
+  async getDataView(
+    app: AppDataType,
+    indices?: string,
+    retryOnFetchDataViewFailure?: boolean
+  ): Promise<DataView | undefined> {
     if (!this.dataViews) {
       throw new Error('data is not defined');
     }
@@ -154,25 +158,37 @@ export class ObservabilityDataViews {
     }
 
     if (appIndices) {
-      try {
-        const dataViewId = getAppDataViewId(app, appIndices);
-        const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
-        // we will get the data view by id
-        const dataView = await this.dataViews?.get(dataViewId);
+      let err = null;
+      do {
+        try {
+          const dataViewId = getAppDataViewId(app, appIndices);
+          const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
+          // we will get the data view by id
+          const dataView = await this.dataViews?.get(dataViewId);
 
-        // and make sure title matches, otherwise, we will need to create it
-        if (dataView.title !== dataViewTitle) {
-          return await this.createDataView(app, appIndices);
-        }
+          // and make sure title matches, otherwise, we will need to create it
+          if (dataView.title !== dataViewTitle) {
+            try {
+              const createdDataView = await this.createDataView(app, appIndices);
+              return createdDataView;
+            } catch (e) {
+              err = e;
+            }
+          }
 
-        // this is intentional a non blocking call, so no await clause
-        this.validateFieldFormats(app, dataView);
-        return dataView;
-      } catch (e: unknown) {
-        if (e instanceof SavedObjectNotFound) {
-          return await this.createDataView(app, appIndices);
+          // this is intentional a non blocking call, so no await clause
+          this.validateFieldFormats(app, dataView);
+          return dataView;
+        } catch (e: unknown) {
+          if (e instanceof SavedObjectNotFound) {
+            try {
+              return await this.createDataView(app, appIndices);
+            } catch (error) {
+              err = error;
+            }
+          }
         }
-      }
+      } while (err != null && retryOnFetchDataViewFailure);
     }
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { AllSeries, useTheme } from '../../../..';
@@ -22,11 +22,12 @@ import { AddToCaseAction } from '../header/add_to_case_action';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common';
 import { observabilityFeatureId } from '../../../../../common';
 import { SingleMetric, SingleMetricOptions } from './single_metric';
+import { addDataViewToLensAttributes } from './utils';
 
 export interface ExploratoryEmbeddableProps {
   appId?: 'securitySolutionUI' | 'observability';
   appendTitle?: JSX.Element;
-  attributes?: AllSeries;
+  attributes: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   customHeight?: string | number;
   customLensAttrs?: any; // Takes LensAttributes
@@ -38,6 +39,7 @@ export interface ExploratoryEmbeddableProps {
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
+  retryOnFetchDataViewFailure?: boolean;
   showCalculationMethod?: boolean;
   singleMetricOptions?: SingleMetricOptions;
   title?: string | JSX.Element;
@@ -76,7 +78,7 @@ export default function Embeddable({
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
-
+  const dataType = (attributes && attributes[0]).dataType;
   const series = Object.entries(attributes)[0]?.[1];
 
   const [operationType, setOperationType] = useState(series?.operationType);
@@ -96,7 +98,17 @@ export default function Embeddable({
     // eslint-disable-next-line no-empty
   } catch (error) {}
 
-  const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
+  const dataViewId = indexPatterns[dataType].id;
+
+  const customLensAttrsWithDataViewId = useMemo(
+    () =>
+      dataViewId
+        ? addDataViewToLensAttributes({ lensAttributes: customLensAttrs, dataViewId })
+        : customLensAttrs,
+    [customLensAttrs, dataViewId]
+  );
+
+  const attributesJSON = customLensAttrsWithDataViewId ?? lensAttributes?.getJSON();
   const timeRange = customTimeRange ?? series?.time;
   if (typeof axisTitlesVisibility !== 'undefined') {
     (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
@@ -118,7 +130,7 @@ export default function Embeddable({
     timeRange,
   });
 
-  if (!attributesJSON && layerConfigs.length < 1) {
+  if ((!attributesJSON && layerConfigs.length < 1) || dataViewId == null) {
     return null;
   }
 
