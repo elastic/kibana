@@ -93,20 +93,20 @@ export const useAddToCaseActions = ({
         // add to existing case menu item
         <EuiContextMenuItem
           aria-label={ariaLabel}
-          data-test-subj="cases-actions-add-to-existing-case"
+          data-test-subj="add-to-existing-case-action"
           onClick={handleAddToExistingCaseClick}
           size="s"
         >
-          {ADD_TO_EXISTING_CASE} {'YES'}
+          {ADD_TO_EXISTING_CASE}
         </EuiContextMenuItem>,
         // add to new case menu item
         <EuiContextMenuItem
           aria-label={ariaLabel}
-          data-test-subj="cases-actions-add-to-new-case"
+          data-test-subj="add-to-new-case-action"
           onClick={handleAddToNewCaseClick}
           size="s"
         >
-          {ADD_TO_NEW_CASE} {'here'}
+          {ADD_TO_NEW_CASE}
         </EuiContextMenuItem>,
       ];
     }
