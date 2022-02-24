@@ -689,42 +689,78 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
+  it('tests processing dimension field', () => {
+    const literalYml = `
+- name: example.id
+  type: keyword
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              ignore_above: 1024,
+              time_series_dimension: true,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field', () => {
+    const literalYml = `
+- name: total.norm.pct
+  type: scaled_float
+  metric_type: gauge
+  unit: percent
+  format: percent
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          properties: {
+            norm: {
+              properties: {
+                pct: {
+                  scaling_factor: 1000,
+                  type: 'scaled_float',
+                  meta: {
+                    metric_type: 'gauge',
+                    unit: 'percent',
+                  },
+                  time_series_metric: 'gauge',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('processes meta fields', () => {
     const metaFieldLiteralYaml = `
 - name: fieldWithMetas
   type: integer
   unit: byte
-  metric_type: gauge
   `;
     const metaFieldMapping = {
       properties: {
         fieldWithMetas: {
           type: 'long',
           meta: {
-            metric_type: 'gauge',
             unit: 'byte',
-          },
-        },
-      },
-    };
-    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
-  });
-
-  it('processes meta fields with only one meta value', () => {
-    const metaFieldLiteralYaml = `
-- name: fieldWithMetas
-  type: integer
-  metric_type: gauge
-  `;
-    const metaFieldMapping = {
-      properties: {
-        fieldWithMetas: {
-          type: 'long',
-          meta: {
-            metric_type: 'gauge',
           },
         },
       },
@@ -740,16 +776,13 @@ describe('EPM template', () => {
 - name: groupWithMetas
   type: group
   unit: byte
-  metric_type: gauge
   fields:
     - name: fieldA
       type: integer
       unit: byte
-      metric_type: gauge
     - name: fieldB
       type: integer
       unit: byte
-      metric_type: gauge
   `;
     const metaFieldMapping = {
       properties: {
@@ -758,14 +791,12 @@ describe('EPM template', () => {
             fieldA: {
               type: 'long',
               meta: {
-                metric_type: 'gauge',
                 unit: 'byte',
               },
             },
             fieldB: {
               type: 'long',
               meta: {
-                metric_type: 'gauge',
                 unit: 'byte',
               },
             },
