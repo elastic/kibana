@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export class PdfWorkerOutOfMemoryError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PdfWorkerOutOfMemoryError';
-  }
-}
+require('../../../../../src/setup_node_env');
+require('./endpoint_policies').cli();
