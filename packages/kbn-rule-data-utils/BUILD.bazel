@@ -63,11 +63,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   incremental = False,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
