@@ -488,7 +488,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       },
     });
 
-    this.props?.onFiltersUpdated?.(filters!);
+    // remove filters from state if it is included in selected saved filters
+    const existingFiltersWithoutDuplicate = this.props.filters?.filter(
+      (existingFilter) =>
+        filters.filter((savedFilter) => !isEqual(existingFilter.query, savedFilter.query)).length
+    );
+    const existingMFiltersWithoutDuplicate = this.state.multipleFilters?.filter(
+      (existingFilter) =>
+        filters.filter((savedFilter) => !isEqual(existingFilter.query, savedFilter.query)).length
+    );
+    this.setState({ multipleFilters: existingMFiltersWithoutDuplicate });
+
+    this.props?.onFiltersUpdated?.([...existingFiltersWithoutDuplicate!, ...filters!]);
   };
 
   public applySelectedQuery = (selectedSavedQuery: SavedQuery) => {
