@@ -204,17 +204,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     currentProps: this.props,
     selectedSavedQueries: [],
     finalSelectedSavedQueries: [],
-    multipleFilters: this.props.filters?.length ?
-      [...this.props.filters.map((filter: Filter, idx: number) => (
-        {
-          ...filter,
-          groupId: idx + 1,
-          id: idx,
-          subGroupId: 1,
-          relationship: undefined,
-          groupsCount: 1,
-        }))
-      ] : [],
+    multipleFilters: this.props.filters?.length
+      ? [
+          ...this.props.filters.map((filter: Filter, idx: number) => ({
+            ...filter,
+            groupId: idx + 1,
+            id: idx,
+            subGroupId: 1,
+            relationship: undefined,
+            groupsCount: 1,
+          })),
+        ]
+      : [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
@@ -491,14 +492,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     // remove filters from state if it is included in selected saved filters
     const existingFiltersWithoutDuplicate = this.props.filters?.filter(
       (existingFilter) =>
-        filters.filter((savedFilter) => !isEqual(existingFilter.query, savedFilter.query)).length
+        !filters.find((savedFilter) => isEqual(savedFilter.query, existingFilter.query))
     );
     const existingMFiltersWithoutDuplicate = this.state.multipleFilters?.filter(
       (existingFilter) =>
-        filters.filter((savedFilter) => !isEqual(existingFilter.query, savedFilter.query)).length
+        !filters.find((savedFilter) => isEqual(savedFilter.query, existingFilter.query))
     );
-    this.setState({ multipleFilters: existingMFiltersWithoutDuplicate });
 
+    this.setState({ multipleFilters: existingMFiltersWithoutDuplicate });
     this.props?.onFiltersUpdated?.([...existingFiltersWithoutDuplicate!, ...filters!]);
   };
 
