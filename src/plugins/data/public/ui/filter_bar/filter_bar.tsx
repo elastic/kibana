@@ -11,9 +11,10 @@ import { groupBy, isEqual } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { Filter, toggleFilterNegated } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { FilterItem } from './filter_item';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern, SavedQueryService } from '../..';
@@ -50,6 +51,42 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   const [groupIds, setGroupIds] = useState<number[]>([]);
+  // we need this to disable quick_form tab for editing saved filters
+  const [selectedSavedFiltersGroupIds, setSelectedSavedFiltersGroupIds] = useState<number[]>([]);
+
+  const getInitForField = useCallback((multipleFilters: any[], field: string, minValue: number) => {
+    return multipleFilters.length
+      ? Math.max.apply(
+          Math,
+          multipleFilters.map((f) => f[field])
+        ) + 1
+      : minValue;
+  }, []);
+
+  useEffect(() => {
+    const savedFiltersGroupIds: number[] = [];
+    let groupId = getInitForField(props.multipleFilters, 'groupId', 1);
+    let id = getInitForField(props.multipleFilters, 'id', 0);
+
+    const groupsFromSavedFilters: Filter[] = [];
+    props.selectedSavedQueries?.map((savedQuery) => {
+      savedQuery.attributes.filters?.map((f) => {
+        savedFiltersGroupIds.push(groupId);
+        groupsFromSavedFilters.push({
+          ...f,
+          groupId,
+          id,
+          subgroupId: 1,
+          relationship: undefined,
+        });
+        groupId++;
+        id++;
+      });
+    });
+    setSelectedSavedFiltersGroupIds(savedFiltersGroupIds);
+    props?.onMultipleFiltersUpdated?.([...props.multipleFilters, ...groupsFromSavedFilters]);
+  }, [props.selectedSavedQueries]);
+
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -119,19 +156,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const idxEditedFilterInMultiple = props.multipleFilters.findIndex(
       (f) => Number(f.groupId) === Number(editedFilterGroupId)
     );
-    const maxGroupId = Math.max.apply(
-      Math,
-      props.multipleFilters.map((f) => f.groupId)
-    );
-    const maxId = Math.max.apply(
-      Math,
-      props.multipleFilters.map((f) => f.id)
-    );
+    const initGroupId = getInitForField(props.multipleFilters, 'groupId', 1);
+    const initId = getInitForField(props.multipleFilters, 'id', 0);
     const newMultipleFilters = selectedFilters.map((filter, idx) => {
       return {
         ...filter,
-        groupId: maxGroupId + idx + 1,
-        id: maxId + idx + 1,
+        groupId: initGroupId + idx,
+        id: initId + idx,
         relationship: 'AND',
         subGroupId: 1,
       };
@@ -268,7 +299,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderEditFilter() {
-    let currentEditFilters = [];
+    const currentEditFilters: Filter[] = [];
     groupIds?.forEach((groupId) => {
       const filteredFilters = props.multipleFilters.filter((filter) => filter.groupId === groupId);
       currentEditFilters.push(...filteredFilters);
@@ -283,6 +314,16 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         }
       });
     });
+
+    const queryBuilderTab = {
+      type: 'query_builder',
+      label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
+        defaultMessage: 'Query builder',
+      }),
+    };
+    const tabs = selectedSavedFiltersGroupIds.some((g) => groupIds.includes(g))
+      ? [queryBuilderTab]
+      : undefined;
 
     return (
       <EuiFlexItem grow={false}>
@@ -301,6 +342,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             initialAddFilterMode={undefined}
             saveFilters={props.onFilterSave}
             savedQueryService={props.savedQueryService}
+            tabs={tabs}
+            initialLabel={saerchedFilters[0].meta.alias!}
           />
         )}
       </EuiFlexItem>
@@ -395,7 +438,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           tabIndex={-1}
         >
           {renderMultipleFilters()}
-          {renderSelectedSavedQueries()}
+          {/*{renderSelectedSavedQueries()}*/}
           {props.multipleFilters.length === 0 && renderItems()}
           {renderEditFilter()}
         </EuiFlexGroup>
