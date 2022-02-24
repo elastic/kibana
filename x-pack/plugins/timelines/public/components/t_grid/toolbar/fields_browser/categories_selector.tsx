@@ -58,7 +58,7 @@ const renderOption = (option: CategoryOption, searchValue: string) => {
     >
       <EuiFlexItem grow={false}>
         <CategoryName
-          data-test-subj={`categories-selector-option-name-${idAttr})}`}
+          data-test-subj={`categories-selector-option-name-${idAttr}`}
           bold={checked === 'on'}
         >
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
