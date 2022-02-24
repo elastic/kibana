@@ -59,8 +59,8 @@ export const setupPublicBaseUrlConfigWarning = ({
           />{' '}
           <a href={`${docLinks.links.settings}#server-publicBaseUrl`} target="_blank">
             <FormattedMessage
-              id="core.ui.publicBaseUrlWarning.seeDocumentationLinkLabel"
-              defaultMessage="Refer to the documentation."
+              id="core.ui.publicBaseUrlWarning.learnMoreLinkLabel"
+              defaultMessage="Learn more."
             />
           </a>
         </p>
