@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import type { IScopedSearchClient } from 'src/plugins/data/server';
 import type { Datatable } from 'src/plugins/expressions/server';
@@ -42,6 +41,7 @@ import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { i18nTexts } from './i18n_texts';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -365,11 +365,7 @@ export class CsvGenerator {
 
       // Add warnings to be logged
       if (this.csvContainsFormulas && escapeFormulaValues) {
-        warnings.push(
-          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
-            defaultMessage: 'CSV may contain formulas whose values have been escaped',
-          })
-        );
+        warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
       this.logger.error(err);
@@ -380,30 +376,10 @@ export class CsvGenerator {
       if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
         reportingError = new AuthenticationExpiredError();
         warnings.push(
-          totalRecords > 0
-            ? i18n.translate(
-                'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.partialResultsMessage',
-                {
-                  defaultMessage:
-                    'This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.',
-                }
-              )
-            : i18n.translate(
-                'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.noResultsMessage`',
-                {
-                  defaultMessage:
-                    'This report contains no results because authentication failed. Retry the request or increase your authentication timeout.',
-                }
-              )
+          totalRecords > 0 ? i18nTexts.partialResultsMessage : i18nTexts.noResultsMessage
         );
       } else {
-        warnings.push(
-          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.unknownErrorMessage`', {
-            defaultMessage: 'This report could not finish due to the following error: {error}',
-            values: { error: err.message },
-          })
-        );
-        reportingError = new UnknownError();
+        throw new UnknownError(err.message);
       }
     } finally {
       // clear scrollID
