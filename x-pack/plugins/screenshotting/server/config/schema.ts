@@ -67,6 +67,7 @@ export const ConfigSchema = schema.object({
       }),
     }),
   }),
+  poolSize: schema.number({ defaultValue: 1, min: 1 }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

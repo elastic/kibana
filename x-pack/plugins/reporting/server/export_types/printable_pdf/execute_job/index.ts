@@ -11,13 +11,7 @@ import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PDF_JOB_TYPE, REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  omitBlockedHeaders,
-  getCustomLogo,
-} from '../../common';
+import { decryptJobHeaders, getFullUrls, getCustomLogo } from '../../common';
 import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
@@ -34,12 +28,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
-        map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-        mergeMap((conditionalHeaders) =>
-          getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
-        ),
-        mergeMap(({ logo, conditionalHeaders }) => {
+        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap(({ headers, logo }) => {
           const urls = getFullUrls(config, job);
 
           const { browserTimezone, layout, title } = job;
@@ -53,7 +43,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
             {
               urls,
               browserTimezone,
-              conditionalHeaders,
+              headers,
               layout,
             },
             logo
@@ -65,8 +55,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
             stream.write(buffer);
           }
         }),
-        map(({ warnings }) => ({
+        map(({ metrics, warnings }) => ({
           content_type: 'application/pdf',
+          metrics: { pdf: metrics },
           warnings,
         })),
         catchError((err) => {

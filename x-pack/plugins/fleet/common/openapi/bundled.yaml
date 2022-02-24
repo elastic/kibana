@@ -396,6 +396,8 @@ paths:
               properties:
                 force:
                   type: boolean
+                ignore_constraints:
+                  type: boolean
     put:
       summary: Packages - Update
       tags: []
@@ -2661,8 +2663,6 @@ components:
         ca_sha256:
           type: string
         ca_trusted_fingerprint:
-          type: string
-        api_key:
           type: string
         config:
           type: object

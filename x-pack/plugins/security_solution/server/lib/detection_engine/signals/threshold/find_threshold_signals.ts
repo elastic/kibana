@@ -56,6 +56,11 @@ export const findThresholdSignals = async ({
         field: timestampOverride != null ? timestampOverride : TIMESTAMP,
       },
     },
+    min_timestamp: {
+      min: {
+        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
+      },
+    },
     ...(threshold.cardinality?.length
       ? {
           cardinality_count: {

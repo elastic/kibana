@@ -38,6 +38,7 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
     },
     {
       ignore: [404],
+      meta: true,
     }
   );
 
@@ -63,6 +64,7 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
     },
     {
       ignore: [404],
+      meta: true,
     }
   );
   if (response.statusCode === 404 || !response.body.aggregations) {

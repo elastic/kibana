@@ -11,7 +11,7 @@ import Url, { UrlObject } from 'url';
 import { ROLES } from '../../common/test';
 import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { hostDetailsUrl, LOGOUT_URL } from '../urls/navigation';
+import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -359,6 +359,11 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
 
 export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
   loginAndWaitForPage(hostDetailsUrl(hostName));
+  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
+};
+
+export const loginAndWaitForUsersDetailsPage = (userName = 'bob') => {
+  loginAndWaitForPage(userDetailsUrl(userName));
   cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 
