@@ -9592,10 +9592,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@7.3.0:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-7.3.0.tgz#96ffd732feabcb920e284e446fedd68c83ef643d"
-  integrity sha512-PFNAeu1XI+/bMrqlyXpSJujsPtOArP4NWLiDWxYgfCv2kSvpUSoIkRD+4TEQRKuVAMKbKXKYfSj9mcaGDOBygA==
+backport@^7.3.1:
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-7.3.1.tgz#c5c57e03c87f5883f769e30efc0e7193ce7670f2"
+  integrity sha512-F1gjJx/pxn9zI74Np6FlTD8ovqeUbzzgzGyBpoYypAdDTJG8Vxt1jcrcwZtRIaSd7McfXCSoQsinlFzO4qlPcA==
   dependencies:
     "@octokit/rest" "^18.12.0"
     axios "^0.25.0"
