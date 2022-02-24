@@ -34,7 +34,6 @@ export type ReportProcessingFields = Required<{
 export type ReportFailedFields = Required<{
   completed_at: Report['completed_at'];
   output: ReportOutput | null;
-  error_code: undefined | string;
 }>;
 
 export type ReportCompletedFields = Required<{

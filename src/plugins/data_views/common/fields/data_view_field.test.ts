@@ -27,7 +27,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'java' as const,
     count: 1,
-    esTypes: ['text'], // note, this will get replaced by the runtime field type
+    esTypes: ['keyword'],
     aggregatable: true,
     filterable: true,
     searchable: true,
