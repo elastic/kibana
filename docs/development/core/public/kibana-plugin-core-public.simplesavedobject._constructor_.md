@@ -9,7 +9,7 @@ Constructs a new instance of the `SimpleSavedObject` class
 <b>Signature:</b>
 
 ```typescript
-constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObjectType<T>);
+constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObjectType<T>);
 ```
 
 ## Parameters
@@ -17,5 +17,5 @@ constructor(client: SavedObjectsClientContract, { id, type, version, attributes,
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  client | SavedObjectsClientContract |  |
-|  { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, } | SavedObjectType&lt;T&gt; |  |
+|  { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated\_at: updatedAt, } | SavedObjectType&lt;T&gt; |  |
 

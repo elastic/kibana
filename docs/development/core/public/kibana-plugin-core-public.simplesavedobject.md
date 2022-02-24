@@ -18,7 +18,7 @@ export declare class SimpleSavedObject<T = unknown>
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(client, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, })](./kibana-plugin-core-public.simplesavedobject._constructor_.md) |  | Constructs a new instance of the <code>SimpleSavedObject</code> class |
+|  [(constructor)(client, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated\_at: updatedAt, })](./kibana-plugin-core-public.simplesavedobject._constructor_.md) |  | Constructs a new instance of the <code>SimpleSavedObject</code> class |
 
 ## Properties
 
@@ -33,6 +33,7 @@ export declare class SimpleSavedObject<T = unknown>
 |  [namespaces](./kibana-plugin-core-public.simplesavedobject.namespaces.md) |  | SavedObjectType&lt;T&gt;\['namespaces'\] | Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with <code>namespaceType: 'agnostic'</code>. |
 |  [references](./kibana-plugin-core-public.simplesavedobject.references.md) |  | SavedObjectType&lt;T&gt;\['references'\] |  |
 |  [type](./kibana-plugin-core-public.simplesavedobject.type.md) |  | SavedObjectType&lt;T&gt;\['type'\] |  |
+|  [updatedAt](./kibana-plugin-core-public.simplesavedobject.updatedat.md) |  | SavedObjectType&lt;T&gt;\['updated\_at'\] |  |
 
 ## Methods
 
