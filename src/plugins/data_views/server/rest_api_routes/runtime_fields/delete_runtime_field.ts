@@ -35,14 +35,10 @@ export const deleteRuntimeField = async ({
 }: DeleteRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
   const dataView = await dataViewsService.get(id);
-  const field = dataView.fields.getByName(name);
+  const field = dataView.getRuntimeField(name);
 
   if (!field) {
     throw new ErrorIndexPatternFieldNotFound(id, name);
-  }
-
-  if (!field.runtimeField) {
-    throw new Error('Only runtime fields can be deleted.');
   }
 
   dataView.removeRuntimeField(name);
