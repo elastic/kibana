@@ -81,13 +81,6 @@ describe('Fields Browser', () => {
       cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', '2');
     });
 
-    it('displays a count of only the fields in the selected category that match the filter input', () => {
-      const filterInput = 'host';
-      filterFieldsBrowser(filterInput);
-
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '6');
-    });
-
     it('the `default ECS` category matches the default timeline header fields', () => {
       const category = 'default ECS';
       toggleCategory(category);
