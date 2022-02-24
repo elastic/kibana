@@ -54,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('It should return a 400 with a user without the correct ES permissions', async () => {
+    it('should return a 400 with a user without the correct ES permissions', async () => {
       await supertestWithoutAuth
         .post(`/api/fleet/logstash_api_keys`)
         .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)

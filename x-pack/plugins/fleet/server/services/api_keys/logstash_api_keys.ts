@@ -40,7 +40,7 @@ export async function canCreateLogstashApiKey(esClient: ElasticsearchClient) {
  */
 export async function generateLogstashApiKey(esClient: ElasticsearchClient) {
   const apiKey = await esClient.security.createApiKey({
-    name: 'Logstash output',
+    name: 'Fleet Logstash output',
     metadata: {
       managed_by: 'fleet',
       managed: true,

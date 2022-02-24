@@ -148,14 +148,15 @@ export const deleteOutputHandler: RequestHandler<
 export const postLogstashApiKeyHandler: RequestHandler = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    if (!(await canCreateLogstashApiKey(esClient))) {
+    const hasCreatePrivileges = await canCreateLogstashApiKey(esClient);
+    if (!hasCreatePrivileges) {
       throw new FleetUnauthorizedError('Missing permissions to create logstash API key');
     }
 
     const apiKey = await generateLogstashApiKey(esClient);
 
     const body: PostLogstashApiKeyResponse = {
-      // Logstash expect the key to be formated like this id:key
+      // Logstash expect the key to be formatted like this id:key
       api_key: `${apiKey.id}:${apiKey.api_key}`,
     };
 
