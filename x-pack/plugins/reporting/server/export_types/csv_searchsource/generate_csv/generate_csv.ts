@@ -31,7 +31,11 @@ import type {
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
-import { AuthenticationExpiredError } from '../../../../common/errors';
+import {
+  AuthenticationExpiredError,
+  UnknownError,
+  ReportingError,
+} from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import type { LevelLogger } from '../../../lib';
 import type { TaskRunResult } from '../../../lib/tasks';
@@ -257,6 +261,7 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
+    let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
 
@@ -371,8 +376,34 @@ export class CsvGenerator {
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
       }
+
       if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
-        throw new AuthenticationExpiredError();
+        reportingError = new AuthenticationExpiredError();
+        warnings.push(
+          totalRecords > 0
+            ? i18n.translate(
+                'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.partialResultsMessage',
+                {
+                  defaultMessage:
+                    'This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.',
+                }
+              )
+            : i18n.translate(
+                'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.noResultsMessage`',
+                {
+                  defaultMessage:
+                    'This report contains no results because authentication expired before it could finish. Try increasing your authentication timeout.',
+                }
+              )
+        );
+      } else {
+        warnings.push(
+          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.unknownErrorMessage`', {
+            defaultMessage: 'This report could not finish due to the following error: {error}',
+            values: { error: err.message },
+          })
+        );
+        reportingError = new UnknownError();
       }
     } finally {
       // clear scrollID
@@ -405,6 +436,7 @@ export class CsvGenerator {
         csv: { rows: this.csvRowCount },
       },
       warnings,
+      error_code: reportingError?.code,
     };
   }
 }
