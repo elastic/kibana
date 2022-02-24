@@ -215,7 +215,12 @@ export function ProcessTreeNode({
           <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
           <span css={styles.darkText}>{args[0]}</span>&nbsp;
           {args.slice(1).join(' ')}
-          {exitCode && <small> [exit_code: {exitCode}]</small>}
+          {exitCode !== undefined && (
+            <small data-test-subj="sessionView:processTreeNodeExitCode">
+              {' '}
+              [exit_code: {exitCode}]
+            </small>
+          )}
         </span>
       );
     } else {

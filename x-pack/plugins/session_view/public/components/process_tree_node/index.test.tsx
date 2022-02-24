@@ -12,6 +12,12 @@ import {
   childProcessMock,
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
+import {
+  EventKind,
+  EventAction,
+  ProcessFields,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeNode } from './index';
 
@@ -56,7 +62,7 @@ describe('ProcessTreeNode component', () => {
       expect(renderResult.queryByTestId('sessionView:processTreeNodeUserIcon')).toBeTruthy();
     });
 
-    it('renders Exec icon for executed process', async () => {
+    it('renders Exec icon and exit code for executed process', async () => {
       const executedProcessMock: typeof processMock = {
         ...processMock,
         hasExec: () => true,
@@ -65,6 +71,24 @@ describe('ProcessTreeNode component', () => {
       renderResult = mockedContext.render(<ProcessTreeNode process={executedProcessMock} />);
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeTruthy();
+    });
+
+    it('does not render exit code if it does not exist', async () => {
+      const processWithoutExitCode: typeof processMock = {
+        ...processMock,
+        hasExec: () => true,
+        getDetails: () => ({
+          ...processMock.getDetails(),
+          process: {
+            ...processMock.getDetails().process,
+            exit_code: undefined,
+          },
+        }),
+      };
+
+      renderResult = mockedContext.render(<ProcessTreeNode process={processWithoutExitCode} />);
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeFalsy();
     });
 
     it('renders Root Escalation flag properly', async () => {
