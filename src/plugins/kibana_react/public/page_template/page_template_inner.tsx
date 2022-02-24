@@ -6,47 +6,23 @@
  * Side Public License, v 1.
  */
 
-import './page_template.scss';
-
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
 
-import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { withSolutionNav } from './with_solution_nav';
+import { KibanaPageTemplateProps } from './page_template';
 
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav/solution_nav';
-
-import { NoDataPageProps } from './no_data_page';
-import { withSolutionNavbar } from './with_solution_navbar';
-
+type KibanaPageTemplateInnerProps = Omit<KibanaPageTemplateProps, 'solutionNav' | 'noDataConfig'>;
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export type KibanaPageTemplateProps = EuiPageTemplateProps & {
-  /**
-   * Changes the template type depending on other props provided.
-   * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.
-   * With `children` only: Uses `centeredBody`
-   * With `pageHeader` and `children`: Uses `centeredContent`
-   */
-  isEmptyState?: boolean;
-  /**
-   * Quick creation of EuiSideNav. Hooks up mobile instance too
-   */
-  solutionNav?: KibanaPageTemplateSolutionNavProps;
-  /**
-   * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
-   * displays Agent, Beats, and custom cards to direct users to the right ingest location
-   */
-  noDataConfig?: NoDataPageProps;
-};
-
-export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps> = ({
+export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateInnerProps> = ({
   template,
   className,
   pageHeader,
   children,
   isEmptyState,
-  solutionNav,
   ...rest
 }) => {
   /**
@@ -85,4 +61,4 @@ export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps>
   );
 };
 
-export const KibanaPageTemplateWithSolutionNav = withSolutionNavbar(KibanaPageTemplateInner);
+export const KibanaPageTemplateWithSolutionNav = withSolutionNav(KibanaPageTemplateInner);

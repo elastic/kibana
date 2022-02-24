@@ -6,26 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
-import { KibanaPageTemplateSolutionNav } from '../page_template/solution_nav';
+import {
+  KibanaPageTemplateSolutionNav,
+  KibanaPageTemplateSolutionNavProps,
+} from '../page_template/solution_nav';
 import { KibanaPageTemplateProps } from '../page_template';
 
-export const withSolutionNavbar = (
-  WrappedComponent: React.FunctionComponent<KibanaPageTemplateProps>
-) => {
-  const WithSolutionNavBar = (props: KibanaPageTemplateProps) => {
+type SolutionNavProps = KibanaPageTemplateProps & {
+  solutionNav: KibanaPageTemplateSolutionNavProps;
+};
+
+export const withSolutionNav = (WrappedComponent: ComponentType<SolutionNavProps>) => {
+  const WithSolutionNav = (props: SolutionNavProps) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed')))
     );
     const { solutionNav, children, isEmptyState, template } = props;
-    if (!solutionNav) {
-      return <WrappedComponent {...props} />;
-    }
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
       // Have to store it as the opposite of the default we want
@@ -66,6 +68,6 @@ export const withSolutionNavbar = (
       </WrappedComponent>
     );
   };
-  WithSolutionNavBar.displayName = `WithSolutionNavBar${WrappedComponent}`;
-  return WithSolutionNavBar;
+  WithSolutionNav.displayName = `WithSolutionNavBar${WrappedComponent}`;
+  return WithSolutionNav;
 };

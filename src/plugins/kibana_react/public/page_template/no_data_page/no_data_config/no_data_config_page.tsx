@@ -9,7 +9,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import classNames from 'classnames';
 import { NO_DATA_PAGE_TEMPLATE_PROPS, NoDataPage } from '../no_data_page';
-import { withSolutionNavbar } from '../../with_solution_navbar';
+import { withSolutionNav } from '../../with_solution_nav';
 import { KibanaPageTemplateProps } from '../../page_template';
 
 export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
@@ -39,4 +39,4 @@ export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
   );
 };
 
-export const NoDataConfigPageWithSolutionNavBar = withSolutionNavbar(NoDataConfigPage);
+export const NoDataConfigPageWithSolutionNavBar = withSolutionNav(NoDataConfigPage);

@@ -46,7 +46,6 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   className,
-  pageHeader,
   children,
   solutionNav,
   noDataConfig,
@@ -81,7 +80,6 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       <KibanaPageTemplateWithSolutionNav
         template={template}
         className={className}
-        pageHeader={pageHeader}
         solutionNav={solutionNav}
         children={children}
         {...rest}
@@ -93,7 +91,6 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
     <KibanaPageTemplateInner
       template={template}
       className={className}
-      pageHeader={pageHeader}
       children={children}
       {...rest}
     />
