@@ -24,6 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
+      // The kbn_archiver above was created from an es_archiver which intentionally had
+      // 2 missing index patterns.  But that would fail to load with kbn_archiver.
+      // So we unload those 2 index patterns here.
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
+      );
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
