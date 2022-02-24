@@ -21,10 +21,6 @@ export const postCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      if (!context.cases) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
       const casesClient = await context.cases.getCasesClient();
       const caseId = request.params.case_id;
       const comment = request.body as CommentRequest;

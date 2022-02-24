@@ -25,10 +25,6 @@ export const getUserActionsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
-      if (!context.cases) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
       logDeprecatedEndpoint(
         logger,
         request.headers,

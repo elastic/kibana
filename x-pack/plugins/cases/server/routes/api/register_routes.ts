@@ -55,6 +55,10 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
       async (context, request, response) => {
         const isKibanaRequest = getIsKibanaRequest(request.headers);
 
+        if (!context.cases) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
         try {
           const res = await handler({ logger, context, request, response, kibanaVersion });
 

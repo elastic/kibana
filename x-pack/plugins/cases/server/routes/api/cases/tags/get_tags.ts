@@ -15,10 +15,6 @@ export const getTagsRoute = createCasesRoute({
   path: CASE_TAGS_URL,
   handler: async ({ context, request, response }) => {
     try {
-      if (!context.cases) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
       const client = await context.cases.getCasesClient();
       const options = request.query as AllTagsFindRequest;
 

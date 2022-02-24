@@ -21,10 +21,6 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
   path: CASE_PUSH_URL,
   handler: async ({ context, request, response }) => {
     try {
-      if (!context.cases) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
       const casesClient = await context.cases.getCasesClient();
 
       const params = pipe(

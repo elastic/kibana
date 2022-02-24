@@ -15,9 +15,6 @@ export const postCaseRoute = createCasesRoute({
   path: CASES_URL,
   handler: async ({ context, request, response }) => {
     try {
-      if (!context.cases) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
       const casesClient = await context.cases.getCasesClient();
       const theCase = request.body as CasePostRequest;
 

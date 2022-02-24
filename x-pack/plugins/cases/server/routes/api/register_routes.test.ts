@@ -30,6 +30,7 @@ describe('registerRoutes', () => {
 
   const handler = jest.fn();
   const customError = jest.fn();
+  const badRequest = jest.fn();
 
   const routes = [
     createCasesRoute({
@@ -85,10 +86,12 @@ describe('registerRoutes', () => {
     const simulateRequest = async ({
       method,
       path,
+      context = { cases: {} },
       headers = {},
     }: {
       method: keyof Pick<CasesRouter, 'get' | 'post'>;
       path: string;
+      context?: Record<string, unknown>;
       headers?: Record<string, unknown>;
     }) => {
       const [, registeredRouteHandler] =
@@ -97,7 +100,11 @@ describe('registerRoutes', () => {
           return call[0].path === path;
         }) ?? [];
 
-      const result = await registeredRouteHandler({}, { headers }, { customError });
+      const result = await registeredRouteHandler(
+        context,
+        { headers },
+        { customError, badRequest }
+      );
       return result;
     };
 
@@ -254,6 +261,19 @@ describe('registerRoutes', () => {
         body: expect.anything(),
         headers: {},
         statusCode: 500,
+      });
+    });
+
+    it('returns an error response when the case context is not registered', async () => {
+      const { simulateRequest } = initApi(routes);
+      await simulateRequest({
+        method: 'get',
+        path: '/foo/{case_id}',
+        context: {},
+      });
+
+      expect(badRequest).toBeCalledWith({
+        body: 'RouteHandlerContext is not registered for cases',
       });
     });
   });
