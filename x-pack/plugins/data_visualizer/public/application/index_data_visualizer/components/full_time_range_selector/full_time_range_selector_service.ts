@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -27,7 +26,7 @@ export async function setFullTimeRange(
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean
 ): Promise<GetTimeFieldRangeResponse> {
-  const runtimeMappings = indexPattern.getRuntimeMappings() as estypes.MappingRuntimeFields;
+  const runtimeMappings = indexPattern.getRuntimeMappings();
   const resp = await getTimeFieldRange({
     index: indexPattern.title,
     timeFieldName: indexPattern.timeFieldName,

@@ -24,6 +24,7 @@ describe('get runtime field', () => {
             }),
           },
           getRuntimeField: jest.fn().mockReturnValueOnce({}),
+          getFieldsByRuntimeFieldName: jest.fn().mockReturnValueOnce({}),
         } as unknown as DataView)
     );
 

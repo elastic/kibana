@@ -7,9 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -337,6 +335,10 @@ export function MachineLearningCommonUIProvider({
 
     async waitForDatePickerIndicatorLoaded() {
       await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
+    },
+
+    async waitForRefreshButtonEnabled() {
+      await testSubjects.waitForEnabled('~mlRefreshPageButton');
     },
   };
 }

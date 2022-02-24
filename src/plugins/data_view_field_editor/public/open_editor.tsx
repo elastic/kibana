@@ -106,7 +106,11 @@ export const getFieldEditorOpener =
 
       const isNewRuntimeField = !fieldName;
       const isExistingRuntimeField =
-        dataViewField && dataViewField.runtimeField && !dataViewField.isMapped;
+        dataViewField &&
+        dataViewField.runtimeField &&
+        !dataViewField.isMapped &&
+        // treat composite field instances as mapped fields for field editing purposes
+        dataViewField.runtimeField.type !== ('composite' as RuntimeType);
       const fieldTypeToProcess: InternalFieldType =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 

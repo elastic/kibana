@@ -11,10 +11,13 @@ import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+import type {
+  ListArray,
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import {
@@ -22,7 +25,7 @@ import {
   Privilege,
   RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common';
-import {
+import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
@@ -33,8 +36,8 @@ import {
   AlertServices,
   parseDuration,
 } from '../../../../../alerting/server';
-import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import {
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+import type {
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -47,9 +50,9 @@ import {
   SimpleHit,
   WrappedEventHit,
 } from './types';
-import { BuildRuleMessage } from './rule_messages';
-import { ShardError } from '../../types';
-import {
+import type { BuildRuleMessage } from './rule_messages';
+import type { ShardError } from '../../types';
+import type {
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
@@ -58,9 +61,9 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { RACAlert, WrappedRACAlert } from '../rule_types/types';
-import { SearchTypes } from '../../../../common/detection_engine/types';
-import { IRuleExecutionLogForExecutors } from '../rule_execution_log';
+import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
+import type { SearchTypes } from '../../../../common/detection_engine/types';
+import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SortExceptionsReturn {
@@ -193,21 +196,19 @@ export const checkPrivilegesFromEsClient = async (
   withSecuritySpan(
     'checkPrivilegesFromEsClient',
     async () =>
-      (
-        await esClient.transport.request({
-          path: '/_security/user/_has_privileges',
-          method: 'POST',
-          body: {
-            index: [
-              {
-                names: indices ?? [],
-                allow_restricted_indices: true,
-                privileges: ['read'],
-              },
-            ],
-          },
-        })
-      ).body as Privilege
+      (await esClient.transport.request({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: indices ?? [],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      })) as Privilege
   );
 
 export const getNumCatchupIntervals = ({
@@ -271,18 +272,28 @@ export const getExceptions = async ({
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
-      const items = await client.findExceptionListsItem({
+
+      // Stream the results from the Point In Time (PIT) finder into this array
+      let items: ExceptionListItemSchema[] = [];
+      const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+        items = [...items, ...response.data];
+      };
+
+      await client.findExceptionListsItemPointInTimeFinder({
+        executeFunctionOnStream,
         listId: listIds,
         namespaceType: namespaceTypes,
-        page: 1,
-        perPage: MAX_EXCEPTION_LIST_SIZE,
+        perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
         filter: [],
+        maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
         sortOrder: undefined,
         sortField: undefined,
       });
-      return items != null ? items.data : [];
-    } catch {
-      throw new Error('unable to fetch exception list items');
+      return items;
+    } catch (e) {
+      throw new Error(
+        `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
+      );
     }
   } else {
     return [];

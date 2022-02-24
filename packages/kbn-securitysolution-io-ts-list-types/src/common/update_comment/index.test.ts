@@ -19,7 +19,7 @@ import {
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-describe('CommentsUpdate', () => {
+describe('UpdateComment', () => {
   describe('updateComment', () => {
     test('it should pass validation when supplied typical comment update', () => {
       const payload = getUpdateCommentMock();

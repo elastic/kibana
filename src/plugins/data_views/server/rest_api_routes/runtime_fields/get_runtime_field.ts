@@ -7,7 +7,7 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { DataViewsService, DataViewField } from 'src/plugins/data_views/common';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
@@ -49,22 +49,7 @@ export const getRuntimeField = async ({
     throw new ErrorIndexPatternFieldNotFound(id, name);
   }
 
-  // Access the data view fields created for the runtime field
-  let dataViewFields: DataViewField[];
-
-  if (field.type === 'composite') {
-    // For "composite" runtime fields we need to look at the "fields"
-    dataViewFields = Object.keys(field.fields!)
-      .map((subFieldName) => {
-        const fullName = `${name}.${subFieldName}`;
-        return dataView.fields.getByName(fullName);
-      })
-      .filter(Boolean) as DataViewField[];
-  } else {
-    dataViewFields = [dataView.fields.getByName(name)].filter(Boolean) as DataViewField[];
-  }
-
-  return { dataView, fields: dataViewFields };
+  return { dataView, fields: Object.values(dataView.getFieldsByRuntimeFieldName(name) || {}) };
 };
 
 const getRuntimeFieldRouteFactory =
@@ -114,7 +99,7 @@ const getRuntimeFieldRouteFactory =
           name,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields: fields || [] }));
       })
     );
   };

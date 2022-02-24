@@ -200,7 +200,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
     async performSearch(intervalMs) {
       const searchBody = this.createSearch(intervalMs);
 
-      const { body } = await asCurrentUser.search({
+      const body = await asCurrentUser.search({
         index: this.index,
         size: 0,
         body: searchBody,
