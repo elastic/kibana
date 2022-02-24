@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACE1 = 'space1';
 
-  describe('ruleRegistrySearchStrategy', () => {
+  describe('ruleRegistryAlertsSearchStrategy', () => {
     describe('logs', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
-          strategy: 'ruleRegistrySearchStrategy',
+          strategy: 'ruleRegistryAlertsSearchStrategy',
         });
         expect(result.rawResponse.hits.total).to.eql(5);
         const consumers = result.rawResponse.hits.hits.map((hit) => {
@@ -54,17 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    /**
-     * Skip until https://github.com/elastic/elasticsearch/issues/84256 is resolved
-     * Seeing this error:
-     *    │ proc [kibana] [2022-02-22T08:53:59.624-05:00][INFO ][plugins.ruleRegistry] Installing namespace-level resources and creating concrete index for .alerts-security.alerts-default
-   │ info [r.suppressed] [node-01] path: /_index_template/_simulate_index/.internal.alerts-security.alerts-default-000001, params: {name=.internal.alerts-security.alerts-default-000001}
-   │      java.lang.IllegalStateException: Cannot remove non-existent alias [.siem-signals-default] for index [.internal.alerts-security.alerts-default-000001]
-      │ proc [kibana] [2022-02-22T08:53:59.680-05:00][ERROR][plugins.ruleRegistry] RuleDataWriterInitializationError: There has been a catastrophic error trying to install namespace level resources for the following registration context: security.
-   │ proc [kibana]     This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: ResponseError: illegal_state_exception: [illegal_state_exception] Reason: Cannot remove non-existent alias [.siem-signals-default] for index [.internal.alerts-security.alerts-default-000001]
-   │ proc [kibana]     at prepareForWriting (/Users/chris/dev/repos/kibana/x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts:175:17)
-     */
-    describe.skip('siem', () => {
+    describe('siem', () => {
       beforeEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await createSignalsIndex(supertest, log);
@@ -91,24 +81,14 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, log, createdId);
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
 
-        // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
-        const ruleForSignals: QueryCreateSchema = {
-          ...getRuleForSignalTesting([`.alerts-security.alerts-default*`]),
-          rule_id: 'signal-on-signal',
-        };
-
-        const { id } = await createRule(supertest, log, ruleForSignals);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-
         const result = await bsearch.send<RuleRegistrySearchResponse>({
           supertest,
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
-          strategy: 'ruleRegistrySearchStrategy',
+          strategy: 'ruleRegistryAlertsSearchStrategy',
         });
-        expect(result.rawResponse.hits.total).to.eql(2);
+        expect(result.rawResponse.hits.total).to.eql(1);
         const consumers = result.rawResponse.hits.hits.map(
           (hit) => hit.fields?.['kibana.alert.rule.consumer']
         );
@@ -130,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           options: {
             featureIds: [AlertConsumers.APM],
           },
-          strategy: 'ruleRegistrySearchStrategy',
+          strategy: 'ruleRegistryAlertsSearchStrategy',
           space: SPACE1,
         });
         expect(result.rawResponse.hits.total).to.eql(2);
@@ -148,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
           options: {
             featureIds: [],
           },
-          strategy: 'ruleRegistrySearchStrategy',
+          strategy: 'ruleRegistryAlertsSearchStrategy',
           space: SPACE1,
         });
         expect(result.rawResponse).to.eql({});
