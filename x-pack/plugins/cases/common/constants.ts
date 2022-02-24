@@ -17,7 +17,6 @@ export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
-export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/fixtures/plugins
@@ -105,3 +104,15 @@ export const DEFAULT_FEATURES: CasesContextFeatures = Object.freeze({
   alerts: { sync: true },
   metrics: [],
 });
+
+/**
+ * Task manager
+ */
+
+export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
+
+/**
+ * Telemetry
+ */
+export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
+export const CASE_TELEMETRY_SAVED_OBJECT_ID = 'cases-telemetry';

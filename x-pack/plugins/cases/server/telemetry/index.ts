@@ -14,9 +14,12 @@ import {
 import { TaskManagerSetupContract } from '../../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { collectTelemetryData } from './collect_telemetry_data';
-import { CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
+import {
+  CASE_TELEMETRY_SAVED_OBJECT,
+  CASES_TELEMETRY_TASK_NAME,
+  CASE_TELEMETRY_SAVED_OBJECT_ID,
+} from '../../common/constants';
 
-const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
 interface CreateCasesTelemetryArgs {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
@@ -60,7 +63,7 @@ export const createCasesTelemetry = async ({
         ...telemetryData,
         kibanaVersion,
       },
-      { id: CASE_TELEMETRY_SAVED_OBJECT, overwrite: true }
+      { id: CASE_TELEMETRY_SAVED_OBJECT_ID, overwrite: true }
     );
   };
 };
