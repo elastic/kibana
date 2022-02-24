@@ -39,6 +39,7 @@ import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../co
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
@@ -49,7 +50,6 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { EndpointAction } from '../store/action';
-import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
