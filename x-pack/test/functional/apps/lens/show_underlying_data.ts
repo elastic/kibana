@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   describe('show underlying data', () => {
     it('should show the open button for a compatible saved visualization', async () => {
@@ -27,13 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
-      // discard the changes and navigate to Discover
-      await testSubjects.click('confirmModalConfirmButton');
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['ip', '@timestamp', 'bytes']);
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should ignore the top values column if other category is enabled', async () => {
@@ -55,11 +59,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
-      // discard the changes and navigate to Discover
-      await testSubjects.click('confirmModalConfirmButton');
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       expect(await queryBar.getQueryString()).be.eql('');
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should show the open button for a compatible saved visualization with a lucene query', async () => {
@@ -83,8 +89,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
-      // discard the changes and navigate to Discover
-      await testSubjects.click('confirmModalConfirmButton');
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the query
@@ -94,6 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const filterPills = await filterBar.getFiltersLabel();
       expect(filterPills.length).to.be(1);
       expect(filterPills[0]).to.be('Lens context (lucene)');
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should show the underlying data extracting all filters and columsn from a formula', async () => {
@@ -117,8 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
-      // discard the changes and navigate to Discover
-      await testSubjects.click('confirmModalConfirmButton');
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the columns
@@ -128,6 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await queryBar.getQueryString()).be.eql(
         '( ( bytes > 6000 ) AND ( ( ip: 97.220.3.248 ) OR ( ip: 169.228.188.120 ) OR ( ip: 78.83.247.30 ) ) )'
       );
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should extract a filter from a formula global filter', async () => {
@@ -150,8 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
-      // discard the changes and navigate to Discover
-      await testSubjects.click('confirmModalConfirmButton');
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
 
@@ -159,6 +169,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await queryBar.getQueryString()).be.eql(
         '( ( bytes > 4000 ) AND ( ( ip: 97.220.3.248 ) OR ( ip: 169.228.188.120 ) OR ( ip: 78.83.247.30 ) ) )'
       );
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
     });
   });
 }
