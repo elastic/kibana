@@ -38,6 +38,7 @@ describe('MetricVisValue', () => {
         style={font}
         metric={baseMetric}
         onFilter={() => {}}
+        colorFullBackground={false}
         labelConfig={labelConfig}
       />
     );
@@ -46,7 +47,12 @@ describe('MetricVisValue', () => {
 
   it('should not be wrapped in button without having a click listener', () => {
     const component = shallow(
-      <MetricVisValue style={font} metric={baseMetric} labelConfig={labelConfig} />
+      <MetricVisValue
+        style={font}
+        metric={baseMetric}
+        colorFullBackground={false}
+        labelConfig={labelConfig}
+      />
     );
     expect(component.find('button').exists()).toBe(false);
   });
@@ -58,6 +64,7 @@ describe('MetricVisValue', () => {
         style={font}
         metric={baseMetric}
         onFilter={onFilter}
+        colorFullBackground={false}
         labelConfig={labelConfig}
       />
     );
@@ -67,7 +74,12 @@ describe('MetricVisValue', () => {
 
   it('should not add -isfilterable class if onFilter is not provided', () => {
     const component = shallow(
-      <MetricVisValue style={font} metric={baseMetric} labelConfig={labelConfig} />
+      <MetricVisValue
+        style={font}
+        metric={baseMetric}
+        colorFullBackground={false}
+        labelConfig={labelConfig}
+      />
     );
     component.simulate('click');
     expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(0);
@@ -80,10 +92,24 @@ describe('MetricVisValue', () => {
         style={font}
         metric={baseMetric}
         onFilter={onFilter}
+        colorFullBackground={false}
         labelConfig={labelConfig}
       />
     );
     component.simulate('click');
     expect(onFilter).toHaveBeenCalled();
+  });
+
+  it('should add correct class name if colorFullBackground is true', () => {
+    const component = shallow(
+      <MetricVisValue
+        style={font}
+        metric={baseMetric}
+        onFilter={() => {}}
+        colorFullBackground={true}
+        labelConfig={labelConfig}
+      />
+    );
+    expect(component.find('.mtrVis__container-isfull').exists()).toBe(true);
   });
 });
