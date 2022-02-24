@@ -73,12 +73,12 @@ export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
 }
 
-export function makePublicExecutionContext(
-  id: string,
-  description?: string
-): KibanaExecutionContext {
+export function makePublicExecutionContext(description: string): KibanaExecutionContext {
   const topLevelContext = getExecutionContext().get();
-  const context = makeExecutionContext(id, window.location.pathname, description);
+  const context = makeExecutionContext({
+    url: window.location.pathname,
+    description,
+  });
 
   // Distinguish between running in maps app vs. embedded
   return topLevelContext.name !== context.name
@@ -86,5 +86,8 @@ export function makePublicExecutionContext(
         ...topLevelContext,
         child: context,
       }
-    : context;
+    : {
+        ...topLevelContext,
+        ...context,
+      };
 }

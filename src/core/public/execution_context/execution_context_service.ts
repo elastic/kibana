@@ -68,17 +68,14 @@ export class ExecutionContextService
         }
       },
       get: () => {
-        return this.context$.value;
+        return this.mergeContext();
       },
       getAsLabels: () => {
-        return omitBy(
-          {
-            name: this.appId,
-            id: this.context$.value?.id,
-            page: this.context$.value?.page,
-          },
-          isUndefined
-        ) as Labels;
+        return this.removeUndefined({
+          name: this.appId,
+          id: this.context$.value?.id,
+          page: this.context$.value?.page,
+        }) as Labels;
       },
       withGlobalContext: (context: KibanaExecutionContext) => {
         return this.mergeContext(context);
@@ -104,6 +101,10 @@ export class ExecutionContextService
 
   public stop() {
     this.subscription.unsubscribe();
+  }
+
+  private removeUndefined(context: KibanaExecutionContext = {}) {
+    return omitBy(context, isUndefined);
   }
 
   private mergeContext(context: KibanaExecutionContext = {}): KibanaExecutionContext {

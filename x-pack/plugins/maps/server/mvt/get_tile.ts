@@ -57,7 +57,10 @@ export async function getEsTile({
     };
 
     const tile = await core.executionContext.withContext(
-      makeExecutionContext('mvt:get_tile', url),
+      makeExecutionContext({
+        description: 'mvt:get_tile',
+        url,
+      }),
       async () => {
         return await context.core.elasticsearch.client.asCurrentUser.transport.request(
           {
