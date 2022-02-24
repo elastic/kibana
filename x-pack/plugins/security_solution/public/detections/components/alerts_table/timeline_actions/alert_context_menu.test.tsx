@@ -12,6 +12,9 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+
+jest.mock('../../../../common/components/user_privileges');
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -108,6 +111,10 @@ describe('InvestigateInResolverAction', () => {
   });
 
   test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
+    // Enable endpoint management in order to display event filter action, otherwise the context menu is not present
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
+    });
     // In order to enable alert context menu without a timelineId, event needs to be event.kind === 'event' and agent.type === 'endpoint'
     const customProps = {
       ...props,
