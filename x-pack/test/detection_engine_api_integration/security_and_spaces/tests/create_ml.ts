@@ -110,7 +110,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest, log);
     });
 
-    it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
+    // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+    it.skip('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, testRule);
       const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
