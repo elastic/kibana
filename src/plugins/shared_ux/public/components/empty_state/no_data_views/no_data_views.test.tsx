@@ -7,13 +7,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
+
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiButton } from '@elastic/eui';
 
 import { ServicesProvider, SharedUXServices } from '../../../services';
 import { servicesFactory } from '../../../services/mocks';
-import { NoDataViewsPage } from './no_data_views_page';
-import { EuiButton } from '@elastic/eui';
+import { NoDataViews } from './no_data_views';
 
 describe('<NoDataViewsPageTest />', () => {
   let services: SharedUXServices;
@@ -31,7 +32,7 @@ describe('<NoDataViewsPageTest />', () => {
 
   test('on dataView created', () => {
     const component = mount(
-      <NoDataViewsPage
+      <NoDataViews
         onDataViewCreated={jest.fn()}
         dataViewsDocLink={services.docLinks.dataViewsDocsLink}
       />

@@ -8,14 +8,13 @@
 
 import React from 'react';
 import { EuiLink, EuiTitle } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
-  documentationUrl: string;
+  href: string;
 }
 
-export function DocumentationLink({ documentationUrl }: Props) {
+export function DocumentationLink({ href }: Props) {
   return (
     <dl>
       <EuiTitle size="xxs">
@@ -28,7 +27,7 @@ export function DocumentationLink({ documentationUrl }: Props) {
       </EuiTitle>
       &emsp;
       <dd className="eui-displayInline">
-        <EuiLink href={documentationUrl} target="_blank" external>
+        <EuiLink href={href} target="_blank" external>
           <FormattedMessage
             id="sharedUX.noDataViews.readDocumentation"
             defaultMessage="Read the docs"
