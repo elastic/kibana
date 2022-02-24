@@ -55,7 +55,10 @@ describe('when using EffectedPolicySelect component', () => {
   describe('and no policy entries exist', () => {
     it('should display no options available message', () => {
       const { getByTestId } = render({ isGlobal: false });
-      expect(getByTestId('test-policiesSelectable').textContent).toEqual('No options available');
+      const euiSelectableMessageElement =
+        getByTestId('test-policiesSelectable').getElementsByClassName('euiSelectableMessage')[0];
+      expect(euiSelectableMessageElement).not.toBeNull();
+      expect(euiSelectableMessageElement.textContent).toEqual('No options available');
     });
   });
 
