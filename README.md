@@ -11,6 +11,10 @@
 A [Github Action](https://github.com/elastic/kibana-github-actions/tree/main/backport) around The Backport Tool now exists. It makes it a breeze to get automatic backports when pull requests are merged.
 
 
+# Backport CLI tool
+
+The remaining documentation focuses on the Backport CLI tool (not the Github Action) although all configuration options apply to the Github Action too. The only difference is that the CLI tool is interactive and run manually locally, where the Github Action runs automatically.
+
 ## How it works
 
 1. Select a commit to backport
