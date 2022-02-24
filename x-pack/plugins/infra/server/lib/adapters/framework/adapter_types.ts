@@ -14,6 +14,7 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../../../../src/plugins/data/server';
+import { PluginStart as DataViewsPluginStart } from '../../../../../../../src/plugins/data_views/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
@@ -36,6 +37,7 @@ export interface InfraServerPluginSetupDeps {
 
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

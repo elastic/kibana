@@ -6,12 +6,16 @@
  */
 
 import { Logger, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { LogIndexReference as LogSourceLogIndexReference } from '../../../common/log_sources';
 import {
   defaultLogViewAttributes,
   LogIndexReference,
   LogView,
   LogViewAttributes,
+  LogViewsStaticConfig,
+  ResolvedLogView,
+  resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { InfraSource, InfraSources } from '../../lib/sources';
@@ -24,6 +28,8 @@ import { logViewSavedObjectRT } from '../../saved_objects/log_view/types';
 import { NotFoundError } from './errors';
 import { ILogViewsClient } from './types';
 
+type DataViewsService = ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>;
+
 export class LogViewsClient implements ILogViewsClient {
   static errors = {
     NotFoundError,
@@ -31,9 +37,11 @@ export class LogViewsClient implements ILogViewsClient {
 
   constructor(
     private readonly logger: Logger,
+    private readonly dataViews: DataViewsService,
     private readonly savedObjectsClient: SavedObjectsClientContract,
     private readonly infraSources: InfraSources,
-    private readonly internalLogViews: Map<string, LogView>
+    private readonly internalLogViews: Map<string, LogView>,
+    private readonly config: LogViewsStaticConfig
   ) {}
 
   public async getLogView(logViewId: string): Promise<LogView> {
@@ -48,6 +56,12 @@ export class LogViewsClient implements ILogViewsClient {
           ? this.getLogViewFromInfraSourceConfiguration(logViewId)
           : Promise.reject(err)
       );
+  }
+
+  public async getResolvedLogView(logViewId: string): Promise<ResolvedLogView> {
+    const logView = await this.getLogView(logViewId);
+    const resolvedLogView = await this.resolveLogView(logView.attributes);
+    return resolvedLogView;
   }
 
   public async putLogView(
@@ -72,6 +86,10 @@ export class LogViewsClient implements ILogViewsClient {
     });
 
     return getLogViewFromSavedObject(savedObject);
+  }
+
+  public async resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView> {
+    return await resolveLogView(logViewAttributes, await this.dataViews, this.config);
   }
 
   private async getSavedLogView(logViewId: string): Promise<LogView> {

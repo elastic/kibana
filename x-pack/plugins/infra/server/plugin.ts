@@ -18,6 +18,7 @@ import {
 } from 'src/core/server';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { publicConfigKeys } from '../common/plugin_config_types';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
@@ -34,7 +35,11 @@ import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
+import {
+  defaultSourceConfiguration,
+  infraSourceConfigurationSavedObjectType,
+  InfraSources,
+} from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { initLogViewRoutes } from './routes/log_views';
 import { logViewSavedObjectType } from './saved_objects';
@@ -78,6 +83,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
     ),
   }),
   deprecations: configDeprecations,
+  exposeToBrowser: publicConfigKeys,
 };
 
 export type { InfraConfig };
@@ -107,8 +113,8 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private logViews: LogViewsService;
 
-  constructor(context: PluginInitializerContext) {
-    this.config = context.config.get<InfraConfig>();
+  constructor(context: PluginInitializerContext<InfraConfig>) {
+    this.config = context.config.get();
     this.logger = context.logger.get();
 
     this.logsRules = new RulesService(
@@ -139,9 +145,7 @@ export class InfraServerPlugin
         sources,
       }
     );
-    const logViews = this.logViews.setup({
-      infraSources: sources,
-    });
+    const logViews = this.logViews.setup();
 
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
@@ -229,10 +233,17 @@ export class InfraServerPlugin
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart, _plugins: InfraServerPluginStartDeps) {
+  start(core: CoreStart, plugins: InfraServerPluginStartDeps) {
     const logViews = this.logViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
+      dataViews: plugins.dataViews,
+      elasticsearch: core.elasticsearch,
+      config: {
+        messageFields:
+          this.config.sources?.default?.fields?.message ??
+          defaultSourceConfiguration.fields.message,
+      },
     });
 
     return {

@@ -10,6 +10,7 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
@@ -27,7 +28,11 @@ import {
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 
 export class Plugin implements InfraClientPluginClass {
-  constructor(_context: PluginInitializerContext) {}
+  public config: InfraPublicConfig;
+
+  constructor(context: PluginInitializerContext<InfraPublicConfig>) {
+    this.config = context.config.get();
+  }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
     if (pluginsSetup.home) {
@@ -204,7 +209,9 @@ export class Plugin implements InfraClientPluginClass {
     });
   }
 
-  start(_core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {}
+  start(_core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {
+    // TODO: start and return log views service
+  }
 
   stop() {}
 }

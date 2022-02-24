@@ -8,19 +8,14 @@
 import { KibanaRequest, Logger } from 'src/core/server';
 import { LogView, LogViewAttributes } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
-import {
-  LogViewsServiceSetup,
-  LogViewsServiceSetupDeps,
-  LogViewsServiceStart,
-  LogViewsServiceStartDeps,
-} from './types';
+import { LogViewsServiceSetup, LogViewsServiceStart, LogViewsServiceStartDeps } from './types';
 
 export class LogViewsService {
   private internalLogViews: Map<string, LogView> = new Map();
 
   constructor(private readonly logger: Logger) {}
 
-  public setup(_deps: LogViewsServiceSetupDeps): LogViewsServiceSetup {
+  public setup(): LogViewsServiceSetup {
     const { internalLogViews } = this;
 
     return {
@@ -35,16 +30,27 @@ export class LogViewsService {
     };
   }
 
-  public start({ infraSources, savedObjects }: LogViewsServiceStartDeps): LogViewsServiceStart {
+  public start({
+    config,
+    dataViews,
+    elasticsearch,
+    infraSources,
+    savedObjects,
+  }: LogViewsServiceStartDeps): LogViewsServiceStart {
     const { internalLogViews, logger } = this;
 
     return {
       getScopedClient(request: KibanaRequest) {
+        const savedObjectsClient = savedObjects.getScopedClient(request);
+        const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
+
         return new LogViewsClient(
           logger,
-          savedObjects.getScopedClient(request),
+          dataViews.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient, request),
+          savedObjectsClient,
           infraSources,
-          internalLogViews
+          internalLogViews,
+          config
         );
       },
     };

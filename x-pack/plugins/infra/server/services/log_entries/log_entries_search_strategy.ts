@@ -19,10 +19,6 @@ import type {
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
 import {
-  LogSourceColumnConfiguration,
-  logSourceFieldColumnConfigurationRT,
-} from '../../../common/log_sources';
-import {
   getLogEntryCursorFromHit,
   LogColumn,
   LogEntry,
@@ -32,6 +28,10 @@ import {
   logEntryBeforeCursorRT,
   LogEntryContext,
 } from '../../../common/log_entry';
+import {
+  LogSourceColumnConfiguration,
+  logSourceFieldColumnConfigurationRT,
+} from '../../../common/log_sources';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntriesSearchRequestParams,
@@ -45,6 +45,7 @@ import {
   createErrorFromShardFailure,
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
+import { LogViewsServiceStart } from '../log_views/types';
 import {
   CompiledLogMessageFormattingRule,
   compileFormattingRules,
@@ -56,16 +57,16 @@ import {
   getSortDirection,
   LogEntryHit,
 } from './queries/log_entries';
-import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;
 type LogEntriesSearchResponse = IKibanaSearchResponse<LogEntriesSearchResponsePayload>;
 
 export const logEntriesSearchStrategyProvider = ({
   data,
-  sources,
+  logViews,
 }: {
   data: DataPluginStart;
+  logViews: LogViewsServiceStart;
   sources: IInfraSources;
 }): ISearchStrategy<LogEntriesSearchRequest, LogEntriesSearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
@@ -75,25 +76,12 @@ export const logEntriesSearchStrategyProvider = ({
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-        const resolvedSourceConfiguration$ = defer(() =>
-          forkJoin([
-            sources.getSourceConfiguration(
-              dependencies.savedObjectsClient,
-              request.params.sourceId
-            ),
-            data.indexPatterns.indexPatternsServiceFactory(
-              dependencies.savedObjectsClient,
-              dependencies.esClient.asCurrentUser
-            ),
-          ]).pipe(
-            concatMap(([sourceConfiguration, indexPatternsService]) =>
-              resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
-            )
-          )
+        const resolvedLogView$ = defer(() =>
+          logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.sourceId)
         ).pipe(take(1), shareReplay(1));
 
         const messageFormattingRules$ = defer(() =>
-          resolvedSourceConfiguration$.pipe(
+          resolvedLogView$.pipe(
             map(({ messageField }) => compileFormattingRules(getBuiltinRules(messageField)))
           )
         ).pipe(take(1), shareReplay(1));
@@ -106,7 +94,7 @@ export const logEntriesSearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            forkJoin([resolvedSourceConfiguration$, messageFormattingRules$]).pipe(
+            forkJoin([resolvedLogView$, messageFormattingRules$]).pipe(
               map(
                 ([
                   { indices, timestampField, tiebreakerField, columns, runtimeMappings },
@@ -138,11 +126,7 @@ export const logEntriesSearchStrategyProvider = ({
           concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies))
         );
 
-        return combineLatest([
-          searchResponse$,
-          resolvedSourceConfiguration$,
-          messageFormattingRules$,
-        ]).pipe(
+        return combineLatest([searchResponse$, resolvedLogView$, messageFormattingRules$]).pipe(
           map(([esResponse, { columns }, messageFormattingRules]) => {
             const rawResponse = decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse);
 

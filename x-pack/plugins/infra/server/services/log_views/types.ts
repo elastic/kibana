@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsServiceStart } from 'src/core/server';
-import { LogView, LogViewAttributes } from '../../../common/log_views';
+import {
+  ElasticsearchServiceStart,
+  KibanaRequest,
+  SavedObjectsServiceStart,
+} from 'src/core/server';
+import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
+import {
+  LogView,
+  LogViewAttributes,
+  LogViewsStaticConfig,
+  ResolvedLogView,
+} from '../../../common/log_views';
 import { InfraSources } from '../../lib/sources';
 
-export interface LogViewsServiceSetupDeps {
-  infraSources: InfraSources;
-}
-
 export interface LogViewsServiceStartDeps {
+  config: LogViewsStaticConfig;
+  dataViews: DataViewsServerPluginStart;
+  elasticsearch: ElasticsearchServiceStart;
   infraSources: InfraSources;
   savedObjects: SavedObjectsServiceStart;
 }
@@ -28,5 +37,7 @@ export interface LogViewsServiceStart {
 
 export interface ILogViewsClient {
   getLogView(logViewId: string): Promise<LogView>;
+  getResolvedLogView(logViewId: string): Promise<ResolvedLogView>;
   putLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): Promise<LogView>;
+  resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
 }

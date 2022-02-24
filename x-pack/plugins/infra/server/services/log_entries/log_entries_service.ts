@@ -10,14 +10,21 @@ import { LOG_ENTRY_SEARCH_STRATEGY } from '../../../common/search_strategies/log
 import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
 import { logEntriesSearchStrategyProvider } from './log_entries_search_strategy';
 import { logEntrySearchStrategyProvider } from './log_entry_search_strategy';
-import { LogEntriesServiceSetupDeps, LogEntriesServiceStartDeps } from './types';
+import {
+  LogEntriesServiceSetupDeps,
+  LogEntriesServicePluginsStartDeps,
+  LogEntriesServicePluginSelfDeps,
+} from './types';
 
 export class LogEntriesService {
-  public setup(core: CoreSetup<LogEntriesServiceStartDeps>, setupDeps: LogEntriesServiceSetupDeps) {
-    core.getStartServices().then(([, startDeps]) => {
+  public setup(
+    core: CoreSetup<LogEntriesServicePluginsStartDeps, LogEntriesServicePluginSelfDeps>,
+    setupDeps: LogEntriesServiceSetupDeps
+  ) {
+    core.getStartServices().then(([, startDeps, selfStartDeps]) => {
       setupDeps.data.search.registerSearchStrategy(
         LOG_ENTRIES_SEARCH_STRATEGY,
-        logEntriesSearchStrategyProvider({ ...setupDeps, ...startDeps })
+        logEntriesSearchStrategyProvider({ ...setupDeps, ...startDeps, ...selfStartDeps })
       );
       setupDeps.data.search.registerSearchStrategy(
         LOG_ENTRY_SEARCH_STRATEGY,
@@ -26,5 +33,5 @@ export class LogEntriesService {
     });
   }
 
-  public start(_startDeps: LogEntriesServiceStartDeps) {}
+  public start(_startDeps: LogEntriesServicePluginsStartDeps) {}
 }

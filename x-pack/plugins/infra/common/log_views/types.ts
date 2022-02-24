@@ -8,6 +8,10 @@
 import * as rt from 'io-ts';
 import { logSourceColumnConfigurationRT } from '../log_sources';
 
+export interface LogViewsStaticConfig {
+  messageFields: string[];
+}
+
 export const logViewOriginRT = rt.keyof({
   stored: null,
   internal: null,
@@ -33,6 +37,9 @@ export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 
 export const logIndexReferenceRT = rt.union([logDataViewReferenceRT, logIndexNameReferenceRT]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
+
+export const logViewColumnConfigurationRT = logSourceColumnConfigurationRT;
+export type LogViewColumnConfiguration = rt.TypeOf<typeof logViewColumnConfigurationRT>;
 
 export const logViewAttributesRT = rt.strict({
   name: rt.string,
