@@ -34,6 +34,7 @@ import { checkColumnForPrecisionError, Query } from '../../../../../src/plugins/
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { DEFAULT_MAX_DOC_COUNT, supportsRarityRanking } from './operations/definitions/terms';
+import { getOriginalId } from '../../common/expressions';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -318,8 +319,9 @@ export function getFiltersInLayer(
         isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
-        // Fallback in case of no data: just return the field existence
-        if (!layerData) {
+        // Fallback in case of no data or transposed data: just return the field existence
+        const dataId = layerData?.columns.find(({ id }) => getOriginalId(id) === colId)?.id;
+        if (!layerData || !dataId || dataId !== colId) {
           return {
             kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
               column.params.secondaryFields?.map((field) => ({
@@ -332,23 +334,25 @@ export function getFiltersInLayer(
         const fields = [column.sourceField]
           .concat(column.params.secondaryFields || [])
           .filter(Boolean) as string[];
-        // extract the filters from the columns of the activeData
-        const queryWithTerms = layerData.rows
-          .map(({ [colId]: value }) => {
-            if (typeof value !== 'string' && Array.isArray(value.keys)) {
-              return {
-                query: value.keys
-                  .map((term: string, index: number) => `${fields[index]}: ${term || "''"}`)
-                  .join(' AND '),
-                language: 'kuery',
-              };
-            }
-            return { query: `${column.sourceField}: ${value}`, language: 'kuery' };
-          })
-          .filter(Boolean) as Query[];
 
+        // extract the filters from the columns of the activeData
         return {
-          kuery: queryWithTerms,
+          kuery: layerData.rows
+            .map(({ [colId]: value }) => {
+              if (value == null) {
+                return;
+              }
+              if (typeof value !== 'string' && Array.isArray(value.keys)) {
+                return {
+                  query: value.keys
+                    .map((term: string, index: number) => `${fields[index]}: ${term || "''"}`)
+                    .join(' AND '),
+                  language: 'kuery',
+                };
+              }
+              return { query: `${column.sourceField}: ${value}`, language: 'kuery' };
+            })
+            .filter(Boolean) as Query[],
         };
       }
     })
