@@ -63,7 +63,7 @@ export const getVisualization = ({
     return {
       icon: Icon,
       label: i18n.translate('xpack.maps.metric.label', {
-        defaultMessage: 'Regionmap',
+        defaultMessage: 'Choropleth chart',
       }),
     };
   },
@@ -126,7 +126,6 @@ export const getVisualization = ({
 
   toExpression: (state, datasourceLayers, attributes) => {
     if (
-      !state.accessor ||
       !state.emsField ||
       !state.emsLayerId ||
       !state.bucketColumnId ||

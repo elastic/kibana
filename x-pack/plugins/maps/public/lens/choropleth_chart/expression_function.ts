@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import type { LensMultiTable } from '../../../../lens/common';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
+import { RENDERER_ID } from './expression_renderer';
 
 interface ChoroplethChartRender {
   type: 'render';
@@ -40,6 +41,10 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
       types: ['string'],
       help: '',
     },
+    layerId: {
+      types: ['string'],
+      help: '',
+    },
     emsField: {
       types: ['string'],
       help: 'emsField',
@@ -65,7 +70,7 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
   fn(data, args) {
     return {
       type: 'render',
-      as: 'lens_choropleth_chart_renderer',
+      as: RENDERER_ID,
       value: {
         data,
         args,

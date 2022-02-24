@@ -5,50 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import type { ExpressionsSetup, IInterpreterRenderHandlers } from 'src/plugins/expressions/public';
+import type { ExpressionsSetup } from 'src/plugins/expressions/public';
 import type { CoreSetup, CoreStart } from 'src/core/public';
 import type { LensPublicSetup } from '../../../../lens/public';
 import type { MapsPluginStartDependencies } from '../../plugin';
-import type { ChoroplethChartProps } from './types';
 import { getExpressionFunction } from './expression_function';
+import { getExpressionRenderer } from './expression_renderer';
 
 export function setupLensChoroplethChart(
   coreSetup: CoreSetup<MapsPluginStartDependencies>,
   expressions: ExpressionsSetup,
   lens: LensPublicSetup
 ) {
-  expressions.registerRenderer(() => {
-    return {
-      name: 'lens_choroplethmap_chart_renderer',
-      displayName: 'Choropleth chart',
-      help: 'Choropleth chart renderer',
-      validate: () => undefined,
-      reuseDomNode: true,
-      render: async (
-        domNode: Element,
-        config: ChoroplethChartProps,
-        handlers: IInterpreterRenderHandlers
-      ) => {
-        const [coreStart, plugins]: [CoreStart, MapsPluginStartDependencies, unknown] =
-          await coreSetup.getStartServices();
-        const { ChoroplethChart } = await import('./choropleth_chart');
-        ReactDOM.render(
-          <ChoroplethChart
-            {...config}
-            formatFactory={plugins.fieldFormats.deserialize}
-            uiSettings={coreStart.uiSettings}
-          />,
-          domNode,
-          () => {
-            handlers.done();
-          }
-        );
-        handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-      },
-    };
-  });
+  expressions.registerRenderer(() => { return getExpressionRenderer(coreSetup); });
 
   expressions.registerFunction(getExpressionFunction);
 
