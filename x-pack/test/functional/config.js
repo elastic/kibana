@@ -554,12 +554,11 @@ export default async function ({ readConfigFile }) {
 
         snapshot_restore_user: {
           elasticsearch: {
-            cluster: ['monitor', 'create_snapshot', 'manage'],
-            indices: [
-              {
-                names: ['*'],
-                privileges: ['all'],
-              },
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
             ],
           },
           kibana: [
