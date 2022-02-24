@@ -43,6 +43,7 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
 
     const { uuid, rule, original_event: event, workflow_status: status } = alert.kibana.alert;
     const { name, query, severity } = rule;
+    const isLastAlert = index < alerts.length - 1;
 
     return (
       <EuiText key={uuid} size="s" data-test-subj={`sessionViewAlertDetail-${uuid}`}>
@@ -87,7 +88,7 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {index < alerts.length - 1 && (
+        {!isLastAlert && (
           <div>
             <EuiHorizontalRule margin="m" />
           </div>

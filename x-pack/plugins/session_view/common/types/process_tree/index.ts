@@ -153,6 +153,7 @@ export interface Process {
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
+  clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
   getAlerts(): ProcessEvent[];

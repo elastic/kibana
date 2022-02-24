@@ -69,8 +69,7 @@ export const useFetchSessionViewProcessEvents = (
     if (jumpToEvent && query.data?.pages.length === 1) {
       query.fetchPreviousPage();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.data]);
+  }, [jumpToEvent, query]);
 
   return query;
 };

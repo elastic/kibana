@@ -7,6 +7,8 @@
 import { Process, ProcessEvent, ProcessMap } from '../../../common/types/process_tree';
 import { ProcessImpl } from './hooks';
 
+// given a page of new events, add these events to the appropriate process class model
+// create a new process if none are created and return the mutated processMap
 export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[]) => {
   events.forEach((event) => {
     const { entity_id: id } = event.process;
@@ -23,6 +25,12 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
   return processMap;
 };
 
+// given a page of events, update process model parent child relationships
+// if we cannot find a parent for a process include said process
+// in the array of orphans. We track orphans in their own array, so
+// we can attempt to re-parent the orphans when new pages of events are
+// processed. This is especially important when paginating backwards
+// (e.g in the case where the SessionView jumpToEvent prop is used, potentially skipping over ancestor processes)
 export const buildProcessTree = (
   processMap: ProcessMap,
   events: ProcessEvent[],
@@ -30,6 +38,7 @@ export const buildProcessTree = (
   sessionEntityId: string,
   backwardDirection: boolean = false
 ) => {
+  // we process events in reverse order when paginating backwards.
   if (backwardDirection) {
     events = events.slice().reverse();
   }
@@ -79,17 +88,25 @@ export const buildProcessTree = (
   return newOrphans;
 };
 
+// given a plain text searchQuery, iterates over all processes in processMap
+// and marks ones which match the below text (currently what is rendered in the process line item)
+// process.searchMatched is used by process_tree_node to highlight the text which matched the search
+// this funtion also returns a list of process results which is used by session_view_search_bar to drive
+// result navigation UX
+// FYI: this function mutates properties of models contained in processMap
 export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | undefined) => {
   const results = [];
 
-  if (searchQuery) {
-    for (const processId of Object.keys(processMap)) {
-      const process = processMap[processId];
+  for (const processId of Object.keys(processMap)) {
+    const process = processMap[processId];
+
+    if (searchQuery) {
       const event = process.getDetails();
       const { working_directory: workingDirectory, args } = event.process;
 
       // TODO: the text we search is the same as what we render.
-      // should this be customizable??
+      // in future we may support KQL searches to match against any property
+      // for now plain text search is limited to searching process.working_directory + process.args
       const text = `${workingDirectory} ${args?.join(' ')}`;
 
       process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
@@ -97,17 +114,19 @@ export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | 
       if (process.searchMatched) {
         results.push(process);
       }
-    }
-  } else {
-    for (const processId of Object.keys(processMap)) {
-      processMap[processId].searchMatched = null;
-      processMap[processId].autoExpand = false;
+    } else {
+      process.clearSearch();
     }
   }
 
   return results;
 };
 
+// Iterate over all processes in processMap, and mark each process (and it's ancestors) for auto expansion if:
+// a) the process was "user entered" (aka an interactive group leader)
+// b) matches the plain text search above
+// Returns the processMap with it's processes autoExpand bool set to true or false
+// process.autoExpand is read by process_tree_node to determine whether to auto expand it's child processes.
 export const autoExpandProcessTree = (processMap: ProcessMap) => {
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];

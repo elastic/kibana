@@ -49,6 +49,11 @@ export class ProcessImpl implements Process {
     this.events = this.events.concat(event);
   }
 
+  clearSearch() {
+    this.searchMatched = null;
+    this.autoExpand = false;
+  }
+
   // hideSameGroup will filter out any processes which have the same pgid as this process
   getChildren(hideSameGroup: boolean = false) {
     let children = this.children;
@@ -207,6 +212,10 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
     setProcessMap({ ...eventsProcessMap });
     setProcessedPages([...processedPages, ...newProcessedPages]);
     setOrphans(newOrphans);
+
+    // we disable this eslint rule since this hook will mutate orphans, processMap and processedPages
+    // by including those in the dependency array we create an infinite useEffect loop.
+    // the only time this useEffect should run is if data changes and there are new pages of events to process.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 

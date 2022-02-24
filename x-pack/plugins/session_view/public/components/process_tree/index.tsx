@@ -169,7 +169,7 @@ export const ProcessTree = ({
         />
       )}
       <div
-        data-test-subj="processTreeSelectionArea"
+        data-test-subj="sessionView:processTreeSelectionArea"
         ref={selectionAreaRef}
         css={styles.selectionArea}
       />
