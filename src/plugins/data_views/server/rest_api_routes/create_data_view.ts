@@ -10,11 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { DataViewSpec, DataViewsService } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
-import {
-  fieldSpecSchema,
-  runtimeFieldSpecSchema,
-  serializedFieldFormatSchema,
-} from './util/schemas';
+import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
@@ -71,7 +67,7 @@ const dataViewSpecSchema = schema.object({
     )
   ),
   allowNoIndex: schema.maybe(schema.boolean()),
-  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
+  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
 });
 
 const registerCreateDataViewRouteFactory =
