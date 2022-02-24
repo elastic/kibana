@@ -20,6 +20,7 @@ import {
   setFullScreenMode,
   setPanels,
   setQuery,
+  setTimeRange,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
@@ -109,6 +110,10 @@ export const applyContainerChangesToState = ({
 
   if (!_.isEqual(input.query, latestState.query)) {
     dispatchDashboardStateChange(setQuery(input.query));
+  }
+
+  if (input.timeRestore && !_.isEqual(input.timeRange, latestState.timeRange)) {
+    dispatchDashboardStateChange(setTimeRange(input.timeRange));
   }
 
   if (!_.isEqual(input.expandedPanelId, latestState.expandedPanelId)) {

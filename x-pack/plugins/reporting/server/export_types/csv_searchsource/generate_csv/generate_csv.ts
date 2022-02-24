@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import type { IScopedSearchClient } from 'src/plugins/data/server';
@@ -30,6 +31,7 @@ import type {
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
+import { AuthenticationExpiredError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import type { LevelLogger } from '../../../lib';
 import type { TaskRunResult } from '../../../lib/tasks';
@@ -369,6 +371,9 @@ export class CsvGenerator {
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
       }
+      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
+        throw new AuthenticationExpiredError();
+      }
     } finally {
       // clear scrollID
       if (scrollId) {
@@ -395,8 +400,10 @@ export class CsvGenerator {
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
-      csv_rows: this.csvRowCount,
       max_size_reached: this.maxSizeReached,
+      metrics: {
+        csv: { rows: this.csvRowCount },
+      },
       warnings,
     };
   }
