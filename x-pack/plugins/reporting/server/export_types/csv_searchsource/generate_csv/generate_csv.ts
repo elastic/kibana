@@ -392,7 +392,7 @@ export class CsvGenerator {
                 'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.noResultsMessage`',
                 {
                   defaultMessage:
-                    'This report contains no results because authentication expired before it could finish. Try increasing your authentication timeout.',
+                    'This report contains no results because authentication failed. Retry the request or increase your authentication timeout.',
                 }
               )
         );
