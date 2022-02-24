@@ -17,3 +17,4 @@ export const getIsTimesliderOpen = ({ ui }: MapStoreState): boolean => ui.isTime
 export const getOpenTOCDetails = ({ ui }: MapStoreState): string[] => ui.openTOCDetails;
 export const getIsFullScreen = ({ ui }: MapStoreState): boolean => ui.isFullScreen;
 export const getIsReadOnly = ({ ui }: MapStoreState): boolean => ui.isReadOnly;
+export const getLayerWizardId = ({ ui }: MapStoreState): string => ui.layerWizardId;

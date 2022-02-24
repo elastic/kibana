@@ -16,6 +16,7 @@ import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descrip
 import { VectorTileLayerIcon } from '../../layers/wizards/icons/vector_tile_layer_icon';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
+  id: 'mvtVector',
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {

@@ -24,6 +24,7 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const SET_DRAW_MODE = 'SET_DRAW_MODE';
+export const UPDATE_WIZARD_LAYER = 'UPDATE_WIZARD_LAYER';
 
 export function exitFullScreen() {
   return {
@@ -121,5 +122,19 @@ export function closeTimeslider() {
       isTimesliderOpen: false,
     });
     dispatch(setQuery({ clearTimeslice: true }));
+  };
+}
+
+export function openLayerWizard(layerWizardId: string) {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch(setSelectedLayer(null));
+    dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
+    dispatch(setDrawMode(DRAW_MODE.NONE));
+
+    // todo: complete this action layer
+    dispatch({
+      type: UPDATE_WIZARD_LAYER,
+      layerWizardId,
+    });
   };
 }

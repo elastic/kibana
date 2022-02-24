@@ -29,28 +29,33 @@ import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
 
 let registered = false;
+export const layersForRegistration = [
+  uploadLayerWizardConfig,
+  esDocumentsLayerWizardConfig,
+  choroplethLayerWizardConfig,
+  clustersLayerWizardConfig,
+  heatmapLayerWizardConfig,
+  esTopHitsLayerWizardConfig,
+  geoLineLayerWizardConfig,
+  point2PointLayerWizardConfig,
+  emsBoundariesLayerWizardConfig,
+  newVectorLayerWizardConfig,
+  emsBaseMapLayerWizardConfig,
+  kibanaBasemapLayerWizardConfig,
+  tmsLayerWizardConfig,
+  wmsLayerWizardConfig,
+  mvtVectorSourceWizardConfig,
+  ObservabilityLayerWizardConfig,
+  SecurityLayerWizardConfig,
+];
+
 export function registerLayerWizards() {
   if (registered) {
     return;
   }
 
-  registerLayerWizardInternal(uploadLayerWizardConfig);
-  registerLayerWizardInternal(esDocumentsLayerWizardConfig);
-  registerLayerWizardInternal(choroplethLayerWizardConfig);
-  registerLayerWizardInternal(clustersLayerWizardConfig);
-  registerLayerWizardInternal(heatmapLayerWizardConfig);
-  registerLayerWizardInternal(esTopHitsLayerWizardConfig);
-  registerLayerWizardInternal(geoLineLayerWizardConfig);
-  registerLayerWizardInternal(point2PointLayerWizardConfig);
-  registerLayerWizardInternal(emsBoundariesLayerWizardConfig);
-  registerLayerWizardInternal(newVectorLayerWizardConfig);
-  registerLayerWizardInternal(emsBaseMapLayerWizardConfig);
-  registerLayerWizardInternal(kibanaBasemapLayerWizardConfig);
-  registerLayerWizardInternal(tmsLayerWizardConfig);
-  registerLayerWizardInternal(wmsLayerWizardConfig);
-
-  registerLayerWizardInternal(mvtVectorSourceWizardConfig);
-  registerLayerWizardInternal(ObservabilityLayerWizardConfig);
-  registerLayerWizardInternal(SecurityLayerWizardConfig);
+  layersForRegistration.map((layer) => {
+    registerLayerWizardInternal(layer);
+  });
   registered = true;
 }

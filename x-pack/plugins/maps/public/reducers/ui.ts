@@ -19,6 +19,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
+  UPDATE_WIZARD_LAYER,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -37,6 +38,7 @@ export type MapUiState = {
   isLayerTOCOpen: boolean;
   isTimesliderOpen: boolean;
   openTOCDetails: string[];
+  layerWizardId: string;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -51,6 +53,7 @@ export const DEFAULT_MAP_UI_STATE = {
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
+  layerWizardId: '',
 };
 
 // Reducer
@@ -82,6 +85,8 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
           return layerId !== action.layerId;
         }),
       };
+    case UPDATE_WIZARD_LAYER:
+      return { ...state, layerWizardId: action.layerWizardId };
     default:
       return state;
   }

@@ -23,11 +23,14 @@ import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common/constants';
+import { getLayerWizardId } from '../../selectors/ui_selectors';
+import { UPDATE_WIZARD_LAYER } from '../../actions/ui_actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     hasPreviewLayers: hasPreviewLayers(state),
     isLoadingPreviewLayers: isLoadingPreviewLayers(state),
+    layerWizardId: getLayerWizardId(state),
   };
 }
 
@@ -48,6 +51,12 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     enableEditMode: () => {
       dispatch(setEditLayerToSelectedLayer());
       dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
+    },
+    clearLayerWizard: () => {
+      dispatch({
+        type: UPDATE_WIZARD_LAYER,
+        layerWizardId: '',
+      });
     },
   };
 }

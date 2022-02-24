@@ -17,6 +17,7 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { WebMapServiceLayerIcon } from '../../layers/wizards/icons/web_map_service_layer_icon';
 
 export const wmsLayerWizardConfig: LayerWizard = {
+  id: 'wmsLayer',
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.wmsDescription', {

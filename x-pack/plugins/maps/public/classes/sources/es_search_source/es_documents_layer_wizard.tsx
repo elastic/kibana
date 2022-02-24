@@ -35,6 +35,7 @@ export function createDefaultLayerDescriptor(
 }
 
 export const esDocumentsLayerWizardConfig: LayerWizard = {
+  id: 'esDocument',
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esSearchDescription', {

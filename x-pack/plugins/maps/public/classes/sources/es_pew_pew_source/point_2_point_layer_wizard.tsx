@@ -27,6 +27,7 @@ import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/desc
 import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
+  id: 'point2Point',
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {

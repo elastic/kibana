@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
+import { layersForRegistration } from '../../classes/layers/wizards/load_layer_wizards';
 
 export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
@@ -34,6 +35,8 @@ export interface Props {
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
   enableEditMode: () => void;
+  layerWizardId: string;
+  clearLayerWizard: () => void;
 }
 
 interface State {
@@ -58,6 +61,18 @@ export class AddLayerPanel extends Component<Props, State> {
   state = {
     ...INITIAL_STATE,
   };
+
+  componentDidMount() {
+    if (this.props.layerWizardId) {
+      const selectedWizard = layersForRegistration.find(
+        (wizard) => wizard.id === this.props.layerWizardId
+      );
+      if (selectedWizard) {
+        this._onWizardSelect(selectedWizard);
+        this.props.clearLayerWizard();
+      }
+    }
+  }
 
   _previewLayers = (layerDescriptors: LayerDescriptor[]) => {
     this.props.addPreviewLayers(layerDescriptors);

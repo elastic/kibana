@@ -35,4 +35,23 @@ export function registerIntegrations(
     shipper: 'other',
     isBeta: false,
   });
+  customIntegrations.registerCustomIntegration({
+    id: 'ingest_geojson',
+    title: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationTitle', {
+      defaultMessage: 'GeoJson',
+    }),
+    description: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationDescription', {
+      defaultMessage: 'Upload GeoJson with Elastic Maps.',
+    }),
+    uiInternalPath: core.http.basePath.prepend(`/app/maps/map#?openLayerWizard=upload_geojson`),
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoMaps',
+      },
+    ],
+    categories: ['upload_file', 'geo'],
+    shipper: 'other',
+    isBeta: false,
+  });
 }
