@@ -42,9 +42,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visualizationIdFromUrl
   );
 
-  const editorName = savedVisInstance
-    ? savedVisInstance.vis.type.title.toLowerCase().replace(' ', '_')
-    : '';
+  const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
   useExecutionContext(services.executionContext, {
     type: 'application',
     page: `editor${editorName ? `:${editorName}` : ''}`,
