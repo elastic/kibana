@@ -32,6 +32,7 @@ export interface ReportDocumentHead {
 
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
+  error_code?: string;
   size: number;
 }
 

@@ -1,0 +1,14 @@
+{
+  "name": "testing_embedded_lens",
+  "version": "1.0.0",
+  "main": "target/examples/testing_embedded_lens",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "kbn": "node ../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../node_modules/.bin/tsc"
+  }
+}

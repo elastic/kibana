@@ -528,9 +528,11 @@ export class VectorStyle implements IVectorStyle {
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = { categories: [] };
       }
-      styleMeta.fieldMeta[name].categories =
+      const categories =
         dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
-
+      if (categories.length) {
+        styleMeta.fieldMeta[name].categories = categories;
+      }
       const ordinalStyleMeta =
         dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
       if (ordinalStyleMeta) {
@@ -608,8 +610,10 @@ export class VectorStyle implements IVectorStyle {
         if (!styleMeta.fieldMeta[name]) {
           styleMeta.fieldMeta[name] = { categories: [] };
         }
-        styleMeta.fieldMeta[name].categories =
-          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        const categories = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        if (categories.length) {
+          styleMeta.fieldMeta[name].categories = categories;
+        }
         const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
         if (ordinalStyleMeta) {
           styleMeta.fieldMeta[name].range = ordinalStyleMeta;

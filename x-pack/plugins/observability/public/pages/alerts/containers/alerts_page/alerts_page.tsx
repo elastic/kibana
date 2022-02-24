@@ -13,18 +13,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
+import { observabilityFeatureId } from '../../../../../common';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
-import { callObservabilityApi } from '../../../../services/call_observability_api';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { LoadingObservability } from '../../../overview/loading_observability';
 import { AlertsTableTGrid } from '../alerts_table_t_grid';
@@ -35,6 +37,7 @@ import {
 } from '../state_container';
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 interface RuleStatsState {
   total: number;
@@ -56,7 +59,6 @@ const Divider = euiStyled.div`
 `;
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-const NO_INDEX_NAMES: string[] = [];
 const NO_INDEX_PATTERNS: DataViewBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
@@ -97,6 +99,7 @@ function AlertsPage() {
       }),
     },
   ]);
+  const indexNames = useAlertIndexNames();
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);
@@ -138,23 +141,6 @@ function AlertsPage() {
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
-
-  const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
-    return callObservabilityApi('GET /api/observability/rules/alerts/dynamic_index_pattern', {
-      signal,
-      params: {
-        query: {
-          namespace: 'default',
-          registrationContexts: [
-            'observability.apm',
-            'observability.logs',
-            'observability.metrics',
-            'observability.uptime',
-          ],
-        },
-      },
-    });
-  }, []);
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -227,6 +213,10 @@ function AlertsPage() {
 
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
+
+  const kibana = useKibana<ObservabilityAppServices>();
+  const CasesContext = kibana.services.cases.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
@@ -322,13 +312,19 @@ function AlertsPage() {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AlertsTableTGrid
-            indexNames={indexNames}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            kuery={kuery}
-            setRefetch={setRefetch}
-          />
+          <CasesContext
+            owner={[observabilityFeatureId]}
+            userCanCrud={userPermissions?.crud ?? false}
+            features={{ alerts: { sync: false } }}
+          >
+            <AlertsTableTGrid
+              indexNames={indexNames}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              setRefetch={setRefetch}
+            />
+          </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
