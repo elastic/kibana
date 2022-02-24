@@ -37,21 +37,21 @@ const leaderDescriptionListInfo = [
   {
     id: 'processSessionLeader',
     title: 'Session Leader',
-    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.sessionLeaderTooltip', {
       defaultMessage: 'A session leader placeholder description',
     }),
   },
   {
     id: 'processGroupLeader',
     title: 'Group Leader',
-    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.processGroupLeaderTooltip', {
       defaultMessage: 'a group leader placeholder description',
     }),
   },
   {
     id: 'processParent',
     title: 'Parent',
-    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
+    tooltipContent: i18n.translate('xpack.sessionView.detailPanel.processParentTooltip', {
       defaultMessage: 'a parent placeholder description',
     }),
   },
