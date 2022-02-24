@@ -46,7 +46,7 @@ import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
 
-const MyValuesInput = styled(EuiFlexItem)`
+const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
@@ -186,19 +186,22 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
           data-test-subj="exceptionBuilderEntryField"
-          fieldInputWidth={275}
         />
       );
 
       if (isFirst) {
         return (
-          <EuiFormRow label={i18n.FIELD} data-test-subj="exceptionBuilderEntryFieldFormRow">
+          <EuiFormRow
+            fullWidth
+            label={i18n.FIELD}
+            data-test-subj="exceptionBuilderEntryFieldFormRow"
+          >
             {comboBox}
           </EuiFormRow>
         );
       } else {
         return (
-          <EuiFormRow label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
+          <EuiFormRow fullWidth label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
             {comboBox}
           </EuiFormRow>
         );
@@ -375,14 +378,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       className="exceptionItemEntryContainer"
       data-test-subj="exceptionItemEntryContainer"
     >
-      <EuiFlexItem grow={false}>{renderFieldInput(showLabel)}</EuiFlexItem>
+      <FieldFlexItem grow={4}>{renderFieldInput(showLabel)}</FieldFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
-      <MyValuesInput grow={6}>
+      <FieldFlexItem grow={5}>
         {renderFieldValueInput(
           showLabel,
           entry.nested === 'parent' ? OperatorTypeEnum.EXISTS : entry.operator.type
         )}
-      </MyValuesInput>
+      </FieldFlexItem>
     </EuiFlexGroup>
   );
 };

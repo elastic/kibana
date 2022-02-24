@@ -21,6 +21,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         <label
           className="euiFormLabel euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
         >
           Series id
         </label>
@@ -99,6 +100,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Line
             </label>
@@ -184,6 +186,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Bar
             </label>
@@ -269,6 +272,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Point
             </label>
