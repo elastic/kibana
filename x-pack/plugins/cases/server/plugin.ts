@@ -66,7 +66,7 @@ export interface PluginStartContract {
 }
 
 export class CasePlugin {
-  private readonly log: Logger;
+  private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
@@ -74,12 +74,12 @@ export class CasePlugin {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.log = this.initializerContext.logger.get();
-    this.clientFactory = new CasesClientFactory(this.log);
+    this.logger = this.initializerContext.logger.get();
+    this.clientFactory = new CasesClientFactory(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    this.log.debug(
+    this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
       )}] and plugins [${Object.keys(plugins)}]`
@@ -97,7 +97,7 @@ export class CasePlugin {
     );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(createCaseSavedObjectType(core, this.log));
+    core.savedObjects.registerType(createCaseSavedObjectType(core, this.logger));
     core.savedObjects.registerType(caseUserActionSavedObjectType);
     core.savedObjects.registerType(casesTelemetrySavedObjectType);
 
@@ -110,8 +110,11 @@ export class CasePlugin {
 
     if (plugins.taskManager && plugins.usageCollection) {
       createCasesTelemetry({
+        core,
         taskManager: plugins.taskManager,
         usageCollection: plugins.usageCollection,
+        logger: this.logger,
+        kibanaVersion: this.kibanaVersion,
       });
     }
 
@@ -121,14 +124,14 @@ export class CasePlugin {
     registerRoutes({
       router,
       routes: getExternalRoutes(),
-      logger: this.log,
+      logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
     });
   }
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
-    this.log.debug(`Starting Case Workflow`);
+    this.logger.debug(`Starting Case Workflow`);
 
     this.clientFactory.initialize({
       securityPluginSetup: this.securityPluginSetup,
@@ -162,7 +165,7 @@ export class CasePlugin {
   }
 
   public stop() {
-    this.log.debug(`Stopping Case Workflow`);
+    this.logger.debug(`Stopping Case Workflow`);
   }
 
   private createRouteHandlerContext = ({
