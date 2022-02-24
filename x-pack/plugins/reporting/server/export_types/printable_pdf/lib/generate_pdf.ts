@@ -13,7 +13,7 @@ import type { PdfMetrics } from '../../../../common/types';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
-import { PdfMaker, PdfWorkerOutOfMemoryError } from '../../common/pdf';
+import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
@@ -96,14 +96,7 @@ export function generatePdfObservable(
         tracker.setByteLength(byteLength);
       } catch (err) {
         logger.error(`Could not generate the PDF buffer!`);
-        logger.error(err);
-        if (err instanceof PdfWorkerOutOfMemoryError) {
-          warnings.push(
-            'Failed to generate PDF due to low memory. Please consider generating a smaller PDF.'
-          );
-        } else {
-          warnings.push(`Failed to generate PDF due to the following error: ${err.message}`);
-        }
+        throw err;
       }
 
       tracker.end();
