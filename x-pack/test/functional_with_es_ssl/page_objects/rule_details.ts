@@ -16,10 +16,10 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async getHeadingText() {
-      return await testSubjects.getVisibleText('alertDetailsTitle');
+      return await testSubjects.getVisibleText('ruleDetailsTitle');
     },
     async getRuleType() {
-      return await testSubjects.getVisibleText('alertTypeLabel');
+      return await testSubjects.getVisibleText('ruleTypeLabel');
     },
     async getActionsLabels() {
       return {
@@ -98,20 +98,20 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {
-        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInApp`);
         expect(await viewInAppButton.getAttribute('disabled')).to.eql('true');
       });
       return true;
     },
     async isViewInAppEnabled() {
       await retry.try(async () => {
-        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInApp`);
         expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
       });
       return true;
     },
     async clickViewInApp() {
-      return await testSubjects.click('alertDetails-viewInApp');
+      return await testSubjects.click('ruleDetails-viewInApp');
     },
     async getNoOpAppTitle() {
       await retry.try(async () => {
