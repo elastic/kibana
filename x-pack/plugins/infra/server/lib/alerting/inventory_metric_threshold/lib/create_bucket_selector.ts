@@ -24,6 +24,7 @@ export const createBucketSelector = (
 ) => {
   const metricId = customMetric && customMetric.field ? customMetric.id : metric;
   const hasWarn = condition.warningThreshold != null && condition.warningComparator != null;
+  const hasTrigger = condition.threshold != null && condition.comparator != null;
 
   const shouldWarn = hasWarn
     ? {
@@ -40,14 +41,16 @@ export const createBucketSelector = (
       }
     : EMPTY_SHOULD_WARN;
 
-  const shouldTrigger = {
-    bucket_script: {
-      buckets_path: {
-        value: metricId,
-      },
-      script: createConditionScript(condition.threshold, condition.comparator, metric),
-    },
-  };
+  const shouldTrigger = hasTrigger
+    ? {
+        bucket_script: {
+          buckets_path: {
+            value: metricId,
+          },
+          script: createConditionScript(condition.threshold, condition.comparator, metric),
+        },
+      }
+    : EMPTY_SHOULD_WARN;
 
   return {
     selectedBucket: {
