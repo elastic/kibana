@@ -95,24 +95,16 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
   }, [props.consumers, capabilities, kibanaFeatures]);
   const { dataViews } = useFetchDataViews(visibleConsumers, http, data);
 
-  const columns = [
-    {
-      id: 'kibana.alert.rule.name',
-      displayAsText: 'Name',
-    },
-    {
-      id: 'kibana.alert.rule.category',
-      displayAsText: 'Category',
-    },
-  ];
-
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
+  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
 
   const RenderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const column = get(alerts, columnId);
-    if (Array.isArray(column)) {
-      return column[rowIndex];
+    const row = alerts[rowIndex];
+    if (row) {
+      const val = get(row, columnId);
+      if (val.length === 1) {
+        return val[0];
+      }
     }
     return 'N/A';
   };
@@ -133,7 +125,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
       <EuiSpacer size="m" />
       <EuiDataGrid
         aria-label="Data grid demo"
-        columns={columns}
+        columns={props.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         rowCount={alertCount}
@@ -142,7 +134,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
           ...pagination,
-          pageSizeOptions: [10, 50, 100],
+          pageSizeOptions: props.itemsPerPageOptions,
           onChangeItemsPerPage,
           onChangePage,
         }}

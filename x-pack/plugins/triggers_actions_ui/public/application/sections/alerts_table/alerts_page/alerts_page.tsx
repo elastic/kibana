@@ -35,7 +35,7 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
       onPageChange,
       onSortChange,
       refresh: () => {},
-      alertCount: 1,
+      alertCount: mockAlertData.rawResponse.fields.length,
     };
   };
 
@@ -56,7 +56,12 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
     bulkActions: [],
     columns: [
       {
-        id: 'name',
+        id: 'kibana.alert.rule.name',
+        displayAsText: 'Name',
+      },
+      {
+        id: 'kibana.alert.rule.category',
+        displayAsText: 'Category',
       },
     ],
     deletedEventIds: [],
@@ -73,7 +78,13 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
     useFetchAlertData,
     ...useFetchAlertData(),
   };
-  return <AlertsTable {...tableProps} />;
+
+  return (
+    <>
+      <h2>Loading: {isLoading ? 'yes' : 'no'}</h2>
+      <AlertsTable {...tableProps} />
+    </>
+  );
 };
 
 export { AlertsPage };
