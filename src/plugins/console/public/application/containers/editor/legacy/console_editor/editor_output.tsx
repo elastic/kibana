@@ -12,7 +12,7 @@ import React, { useEffect, useRef } from 'react';
 
 // Ensure the modes we might switch to dynamically are available
 import 'brace/mode/text';
-import 'brace/mode/json';
+import 'brace/mode/hjson';
 import 'brace/mode/yaml';
 
 import { expandLiteralStrings } from '../../../../../shared_imports';
@@ -44,7 +44,7 @@ function modeForContentType(contentType?: string) {
     return 'ace/mode/text';
   }
   if (isJSONContentType(contentType)) {
-    return 'ace/mode/json';
+    return 'ace/mode/hjson';
   } else if (contentType.indexOf('application/yaml') >= 0) {
     return 'ace/mode/yaml';
   }
