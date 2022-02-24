@@ -18,7 +18,7 @@ import { InfraSource, InfraSources } from '../../lib/sources';
 import {
   extractLogViewSavedObjectReferences,
   logViewSavedObjectName,
-  resolveLogViewSavedObjectRefences,
+  resolveLogViewSavedObjectReferences,
 } from '../../saved_objects/log_view';
 import { logViewSavedObjectRT } from '../../saved_objects/log_view/types';
 import { NotFoundError } from './errors';
@@ -122,7 +122,7 @@ const getLogViewFromSavedObject = (savedObject: SavedObject<unknown>): LogView =
     version: logViewSavedObject.version,
     updatedAt: logViewSavedObject.updated_at,
     origin: 'stored',
-    attributes: resolveLogViewSavedObjectRefences(
+    attributes: resolveLogViewSavedObjectReferences(
       logViewSavedObject.attributes,
       savedObject.references
     ),

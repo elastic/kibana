@@ -15,6 +15,6 @@ export const extractLogViewSavedObjectReferences = extractSavedObjectReferences(
   extractLogIndicesSavedObjectReferences,
 ]);
 
-export const resolveLogViewSavedObjectRefences = resolveSavedObjectReferences([
+export const resolveLogViewSavedObjectReferences = resolveSavedObjectReferences([
   resolveLogIndicesSavedObjectReferences,
 ]);
