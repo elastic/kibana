@@ -29,7 +29,7 @@ import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useAlertsActions } from './use_alerts_actions';
-import { useExceptionModal } from './use_add_exception_modal';
+import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -125,12 +125,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
 
   const {
-    exceptionModalType,
+    exceptionFlyoutType,
     onAddExceptionCancel,
     onAddExceptionConfirm,
     onAddExceptionTypeClick,
     ruleIndices,
-  } = useExceptionModal({
+  } = useExceptionFlyout({
     ruleIndex,
     refetch: refetchAll,
     timelineId,
@@ -204,7 +204,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           </EventsTdContent>
         </div>
       )}
-      {exceptionModalType != null &&
+      {exceptionFlyoutType != null &&
         ruleId != null &&
         ruleName != null &&
         ecsRowData?._id != null && (
@@ -212,7 +212,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
-            exceptionListType={exceptionModalType}
+            exceptionListType={exceptionFlyoutType}
             eventId={ecsRowData?._id}
             onCancel={onAddExceptionCancel}
             onConfirm={onAddExceptionConfirm}
