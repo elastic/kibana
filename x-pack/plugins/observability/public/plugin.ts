@@ -270,6 +270,12 @@ export class Plugin
       },
       createExploratoryViewUrl,
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      // useLoadIndexPattern: ({ dataType, dataTypesIndexPatterns }) =>
+      //   useLoadIndexPattern.bind(null, {
+      //     dataType,
+      //     dataTypesIndexPatterns,
+      //     dataViewsPlugin: pluginsStart.dataViews,
+      //   }),
     };
   }
 }
