@@ -31,17 +31,15 @@ export interface SingleMetricOptions {
 }
 
 type AppId = 'securitySolutionUI' | 'observability';
-
+const dataType = 'security-solution';
 const configs = {
-  alignLnsMetric: 'flex-start',
   appId: 'securitySolutionUI' as AppId,
-  attributes: [{ dataType: 'security' }] as unknown as SeriesUrl[],
-  disableBorder: true,
-  disableShadow: true,
+  attributes: [{ dataType }] as unknown as SeriesUrl[],
   customHeight: '100%',
   isSingleMetric: true,
   owner: APP_ID,
   reportType: 'kpi-over-time' as ReportViewType,
+  retryOnFetchDataViewFailure: true,
   withActions: ['save', 'addToCase', 'openInLens'] as ActionTypes[],
 };
 
@@ -99,7 +97,7 @@ export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {
   const mergedProps = {
     ...configs,
     ...props,
-    indexPatterns: selectedPatterns.join(','),
+    dataTypesIndexPatterns: { [dataType]: selectedPatterns.join(',') },
     customLensAttrs,
   };
   return <ExploratoryViewEmbeddable {...mergedProps} />;
