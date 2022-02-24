@@ -23,7 +23,7 @@ import { suspendedComponentWithProps } from './lib/suspended_component_with_prop
 const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
-const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
@@ -133,7 +133,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             <Route
               exact
               path={routeToRules}
-              component={suspendedComponentWithProps(AlertsList, 'xl')}
+              component={suspendedComponentWithProps(RulesList, 'xl')}
             />
             <Route
               exact
