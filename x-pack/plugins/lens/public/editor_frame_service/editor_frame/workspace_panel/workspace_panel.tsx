@@ -92,6 +92,8 @@ interface WorkspaceState {
     fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
+  initialRenderComplete: boolean;
+  lastApplyChangesCounter: number;
 }
 
 const dropProps = {
@@ -122,6 +124,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
+let expressionToRender: null | undefined | string;
+
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
@@ -143,23 +147,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
   const applyChangesCounter = useLensSelector(selectApplyChangesCounter);
 
-  const [expressionToRender, setExpressionToRender] = useState<string | null | undefined>();
-  const [finishedInitialRender, setFinishedInitialRender] = useState(false);
-  const [lastApplyChangesCounter, setLastApplyChangesCounter] = useState(0);
-
-  const triggerApply = applyChangesCounter !== lastApplyChangesCounter;
-
-  if (triggerApply) {
-    setLastApplyChangesCounter(applyChangesCounter);
-  }
-
-  const shouldApplyChanges = autoApplyEnabled || !finishedInitialRender || triggerApply;
-
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
+    lastApplyChangesCounter: 0,
+    initialRenderComplete: false,
   });
+
+  const triggerApply = applyChangesCounter !== localState.lastApplyChangesCounter;
+
+  if (triggerApply) {
+    setLocalState((s) => ({ ...s, lastApplyChangesCounter: applyChangesCounter }));
+  }
+
+  const shouldApplyChanges = autoApplyEnabled || !localState.initialRenderComplete || triggerApply;
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -256,19 +258,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization.activeId,
   ]);
 
-  useEffect(() => {
-    if (shouldApplyChanges) {
-      setExpressionToRender(expression);
-    }
-  }, [expression, shouldApplyChanges]);
+  if (shouldApplyChanges) {
+    expressionToRender = expression;
+  }
 
-  useEffect(() => {
+  if (!autoApplyEnabled) {
     dispatchLens(setChangesApplied(expression === expressionToRender));
-  }, [expression, dispatchLens, expressionToRender]);
+  }
 
   const expressionExists = Boolean(expressionToRender);
-  if (expressionExists && !finishedInitialRender) {
-    setFinishedInitialRender(true);
+  if (expressionExists && !localState.initialRenderComplete) {
+    setLocalState((s) => ({ ...s, initialRenderComplete: true }));
   }
 
   useEffect(() => {
