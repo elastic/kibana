@@ -36,6 +36,7 @@ import { Loading } from '..';
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
+import { ConfirmAgentEnrollment } from './confirm_agent_enrollment';
 import type { BaseProps } from './types';
 
 type FlyoutMode = 'managed' | 'standalone';
@@ -98,6 +99,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+        {/* TODO: component here for testing */}
+        <ConfirmAgentEnrollment policyId={policyId} onButtonClick={onClose} />
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
             <FormattedMessage
