@@ -28,7 +28,7 @@ exports.help = (defaults = {}) => {
       --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on Elasticsearch
       -E                Additional key=value settings to pass to Elasticsearch
-      --no-ready-check  Disable the ready check,
+      --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
     Example:
@@ -45,13 +45,13 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       sourcePath: 'source-path',
       dataArchive: 'data-archive',
-      skipReadyCheck: 'no-ready-check',
+      skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
       esArgs: 'E',
     },
 
     string: ['ready-timeout'],
-    boolean: ['no-ready-check'],
+    boolean: ['skip-ready-check'],
 
     default: defaults,
   });

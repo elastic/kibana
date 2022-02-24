@@ -31,7 +31,7 @@ exports.help = (defaults = {}) => {
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on Elasticsearch
       --use-cached      Skips cache verification and use cached ES snapshot.
-      --no-ready-check  Disable the ready check,
+      --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
     Example:
@@ -56,12 +56,12 @@ exports.run = async (defaults = {}) => {
       dataArchive: 'data-archive',
       esArgs: 'E',
       useCached: 'use-cached',
-      skipReadyCheck: 'no-ready-check',
+      skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
     },
 
     string: ['version', 'ready-timeout'],
-    boolean: ['download-only', 'use-cached', 'no-ready-check'],
+    boolean: ['download-only', 'use-cached', 'skip-ready-check'],
 
     default: defaults,
   });
