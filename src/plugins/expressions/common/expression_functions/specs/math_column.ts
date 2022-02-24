@@ -29,7 +29,11 @@ export const mathColumn: ExpressionFunctionDefinition<
   help: i18n.translate('expressions.functions.mathColumnHelpText', {
     defaultMessage:
       'Adds a column by evaluating TinyMath on each row. ' +
-      'This function is optimized for math, so it performs better than the mapColumn with a math',
+      'This function is optimized for math and performs better than using a math expression in {mapColumnFn}.',
+      values: {
+        mapColumnFn: '`mapColumn`',
+        tinymath: '`TinyMath`',
+      },
   }),
   args: {
     ...math.args,
