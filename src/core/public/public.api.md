@@ -516,7 +516,7 @@ export interface ErrorToastOptions extends ToastOptions {
     toastMessage?: string;
 }
 
-// @public (undocumented)
+// @public
 export interface ExecutionContextSetup {
     clear(): void;
     context$: Observable<KibanaExecutionContext>;

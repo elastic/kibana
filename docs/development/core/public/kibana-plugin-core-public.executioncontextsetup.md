@@ -4,6 +4,7 @@
 
 ## ExecutionContextSetup interface
 
+Kibana execution context. Used to provide execution context to Elasticsearch, reporting, performance monitoring, etc.
 
 <b>Signature:</b>
 
