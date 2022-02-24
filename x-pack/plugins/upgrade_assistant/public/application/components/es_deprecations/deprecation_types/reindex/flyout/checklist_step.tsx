@@ -127,7 +127,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               <>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutDescription"
-                  defaultMessage="Disk usage is close to exceeding or has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
                 />
 
                 <EuiSpacer size="s" />

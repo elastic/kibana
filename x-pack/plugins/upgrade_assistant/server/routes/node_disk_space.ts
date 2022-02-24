@@ -18,10 +18,6 @@ interface NodeWithLowDiskSpace {
   lowDiskWatermarkSetting: string;
 }
 
-// Buffer percentage used to determine if the user has low disk space
-// For example, if a user has used 80%, and has defined a low disk watermark setting of 85%, we would warn the user
-const LOW_DISK_SPACE_BUFFER_PERCENTAGE = 5;
-
 const getLowDiskWatermarkSetting = (clusterSettings: ClusterGetSettingsResponse) => {
   const { defaults, persistent, transient } = clusterSettings;
 
@@ -97,12 +93,8 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
                   lowDiskWatermarkSetting!.replace('%', '')
                 );
 
-                // Substract LOW_DISK_SPACE_BUFFER_PERCENTAGE (5%) from the low disk watermark setting
-                // If the percentage in use is >= to this, mark node as having low disk space
-                if (
-                  percentageUsed >=
-                  rawLowDiskWatermarkPercentageValue - LOW_DISK_SPACE_BUFFER_PERCENTAGE
-                ) {
+                // If the percentage in use is >= to the low disk watermark setting, mark node as having low disk space
+                if (percentageUsed >= rawLowDiskWatermarkPercentageValue) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
                     nodeName: node.name,
@@ -121,12 +113,8 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
                 const rawLowDiskWatermarkPercentageValue =
                   (rawLowDiskWatermarkBytesValue / totalInBytes) * 100;
 
-                // Substract LOW_DISK_SPACE_BUFFER_PERCENTAGE (5%) from the low disk watermark setting
-                // If the percentage in use is >= to this, mark node as having low disk space
-                if (
-                  percentageUsed >=
-                  rawLowDiskWatermarkPercentageValue - LOW_DISK_SPACE_BUFFER_PERCENTAGE
-                ) {
+                // If the percentage in use is >= to the low disk watermark setting, mark node as having low disk space
+                if (percentageUsed >= rawLowDiskWatermarkPercentageValue) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
                     nodeName: node.name,
