@@ -20,6 +20,8 @@ import {
   CASE_TELEMETRY_SAVED_OBJECT_ID,
 } from '../../common/constants';
 
+export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';
+
 interface CreateCasesTelemetryArgs {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;

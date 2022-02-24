@@ -33,9 +33,9 @@ import { PluginStartContract as FeaturesPluginStart } from '../../features/serve
 import { LensServerPluginSetup } from '../../lens/server';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
-import { TaskManagerSetupContract } from '../../task_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { createCasesTelemetry } from './telemetry';
+import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -46,10 +46,11 @@ export interface PluginsSetup {
 }
 
 export interface PluginsStart {
-  security?: SecurityPluginStart;
-  features: FeaturesPluginStart;
-  spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  features: FeaturesPluginStart;
+  taskManager?: TaskManagerStartContract;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -132,6 +133,10 @@ export class CasePlugin {
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
     this.logger.debug(`Starting Case Workflow`);
+
+    if (plugins.taskManager) {
+      scheduleCasesTelemetryTask(plugins.taskManager);
+    }
 
     this.clientFactory.initialize({
       securityPluginSetup: this.securityPluginSetup,
