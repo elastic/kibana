@@ -7,8 +7,8 @@
 
 import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -18,11 +18,11 @@ import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { APMQueryParams } from '../../../shared/links/url_helpers';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 
 const ErrorLink = euiStyled(ErrorOverviewLink)`
   ${truncate('100%')};
@@ -37,12 +37,12 @@ export function getColumns({
   serviceName,
   errorGroupDetailedStatistics,
   comparisonEnabled,
-  urlParams,
+  query,
 }: {
   serviceName: string;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
-  urlParams: ApmUrlParams;
+  query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
 }): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
   return [
     {
@@ -58,9 +58,9 @@ export function getColumns({
             serviceName={serviceName}
             query={
               {
-                ...urlParams,
+                ...query,
                 kuery: `error.exception.type:"${type}"`,
-              } as APMQueryParams
+              } as TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query']
             }
           >
             {type}
