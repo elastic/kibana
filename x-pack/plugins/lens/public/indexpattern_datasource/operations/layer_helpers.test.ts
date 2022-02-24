@@ -2119,6 +2119,51 @@ describe('state_helpers', () => {
           },
         });
       });
+
+      it('should carry over a custom formatting when transitioning from a managed reference', () => {
+        const actual = replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                label: 'MY CUSTOM LABEL',
+                customLabel: true,
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  isFormulaBroken: false,
+                  formula: 'average(bytes)',
+                  format: {
+                    id: 'number',
+                    params: { decimals: 2 },
+                  },
+                },
+                references: [],
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          indexPattern,
+          columnId: 'col1',
+          op: 'average',
+          field: indexPattern.fields[2], // bytes field
+          visualizationGroups: [],
+          shouldResetLabel: undefined,
+        });
+
+        expect(actual.columns.col1).toEqual(
+          expect.objectContaining({
+            params: {
+              format: {
+                id: 'number',
+                params: { decimals: 2 },
+              },
+            },
+          })
+        );
+      });
     });
 
     it('should allow making a replacement on an operation that is being referenced, even if it ends up invalid', () => {

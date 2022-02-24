@@ -251,11 +251,10 @@ describe('PKIAuthenticationProvider', () => {
         mockGetPeerCertificate.mockReturnValueOnce(peerCertificate1);
         const request = httpServerMock.createKibanaRequest({ socket });
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-          securityMock.createApiResponse({
-            body: { authentication: user, access_token: 'access-token' },
-          })
-        );
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          authentication: user,
+          access_token: 'access-token',
+        });
 
         await expect(operation(request)).resolves.toEqual(
           AuthenticationResult.succeeded(
@@ -296,11 +295,10 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { authentication: user, access_token: 'access-token' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        authentication: user,
+        access_token: 'access-token',
+      });
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
@@ -334,11 +332,10 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { authentication: user, access_token: 'access-token' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        authentication: user,
+        access_token: 'access-token',
+      });
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
@@ -501,11 +498,10 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '3A:9A:C5:DD' };
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { authentication: user, access_token: 'access-token' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        authentication: user,
+        access_token: 'access-token',
+      });
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.succeeded(
@@ -545,11 +541,10 @@ describe('PKIAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { authentication: user, access_token: 'access-token' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        authentication: user,
+        access_token: 'access-token',
+      });
 
       const nonAjaxRequest = httpServerMock.createKibanaRequest({
         socket: getMockSocket({
@@ -669,9 +664,7 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: user })
-      );
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(

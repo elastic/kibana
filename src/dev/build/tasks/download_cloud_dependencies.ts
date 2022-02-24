@@ -36,12 +36,19 @@ export const DownloadCloudDependencies: Task = {
 
     let buildId = '';
     if (!config.isRelease) {
-      const manifest = await Axios.get(
-        `https://artifacts-api.elastic.co/v1/versions/${config.getBuildVersion()}/builds/latest`
-      );
-      buildId = manifest.data.build.build_id;
+      const manifestUrl = `https://artifacts-api.elastic.co/v1/versions/${config.getBuildVersion()}/builds/latest`;
+      try {
+        const manifest = await Axios.get(manifestUrl);
+        buildId = manifest.data.build.build_id;
+      } catch (e) {
+        log.error(
+          `Unable to find Elastic artifacts for ${config.getBuildVersion()} at ${manifestUrl}.`
+        );
+        throw e;
+      }
     }
     await del([config.resolveFromRepo('.beats')]);
+
     await downloadBeat('metricbeat', buildId);
     await downloadBeat('filebeat', buildId);
   },

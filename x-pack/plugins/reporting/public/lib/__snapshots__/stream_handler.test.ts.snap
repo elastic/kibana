@@ -11,6 +11,14 @@ Object {
       "status": "completed",
       "title": "specimen",
     },
+    Object {
+      "csvContainsFormulas": true,
+      "id": "job-source-mock4",
+      "jobtype": undefined,
+      "maxSizeReached": false,
+      "status": "completed",
+      "title": "specimen",
+    },
   ],
   "failed": Array [
     Object {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { ServiceLocation } from '../../../../common/runtime_types';
 
@@ -16,54 +16,54 @@ interface Props {
   selectedLocations: ServiceLocation[];
   setLocations: React.Dispatch<React.SetStateAction<ServiceLocation[]>>;
   isInvalid: boolean;
+  onBlur?: () => void;
 }
 
-export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid }: Props) => {
+export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, onBlur }: Props) => {
   const [error, setError] = useState<string | null>(null);
+  const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
+    {}
+  );
   const { locations } = useSelector(monitorManagementListSelector);
 
-  const onLocationChange = (
-    selectedLocationOptions: Array<EuiComboBoxOptionOption<ServiceLocation>>
-  ) => {
-    setLocations(selectedLocationOptions as ServiceLocation[]);
-    setError(null);
-  };
-
-  const onSearchChange = (value: string, hasMatchingOptions?: boolean) => {
-    setError(value.length === 0 || hasMatchingOptions ? null : getInvalidOptionError(value));
-  };
-
-  const onBlur = (event: unknown) => {
-    const inputElement = (event as FocusEvent)?.target as HTMLInputElement;
-    if (inputElement) {
-      const { value } = inputElement;
-      setError(value.length === 0 ? null : getInvalidOptionError(value));
+  const onLocationChange = (optionId: string) => {
+    const isSelected = !checkboxIdToSelectedMap[optionId];
+    const location = locations.find((loc) => loc.id === optionId);
+    if (isSelected) {
+      setLocations((prevLocations) => (location ? [...prevLocations, location] : prevLocations));
+    } else {
+      setLocations((prevLocations) => [...prevLocations].filter((loc) => loc.id !== optionId));
     }
+    setError(null);
   };
 
   const errorMessage = error ?? (isInvalid ? VALIDATION_ERROR : null);
 
+  useEffect(() => {
+    const newCheckboxIdToSelectedMap = selectedLocations.reduce<Record<string, boolean>>(
+      (acc, location) => {
+        acc[location.id] = true;
+        return acc;
+      },
+      {}
+    );
+    setCheckboxIdToSelectedMap(newCheckboxIdToSelectedMap);
+  }, [selectedLocations]);
+
   return (
     <EuiFormRow label={LOCATIONS_LABEL} error={errorMessage} isInvalid={errorMessage !== null}>
-      <EuiComboBox
-        placeholder={PLACEHOLDER_LABEL}
-        options={locations}
-        selectedOptions={selectedLocations}
-        onChange={onLocationChange}
-        onSearchChange={onSearchChange}
-        onBlur={onBlur}
-        data-test-subj="syntheticsServiceLocationsComboBox"
+      <EuiCheckboxGroup
+        options={locations.map((location) => ({
+          ...location,
+          'data-test-subj': `syntheticsServiceLocation--${location.id}`,
+        }))}
+        idToSelectedMap={checkboxIdToSelectedMap}
+        onChange={(id) => onLocationChange(id)}
+        onBlur={() => onBlur?.()}
       />
     </EuiFormRow>
   );
 };
-
-const PLACEHOLDER_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.serviceLocationsPlaceholderLabel',
-  {
-    defaultMessage: 'Select one or more locations to run your monitor.',
-  }
-);
 
 const VALIDATION_ERROR = i18n.translate(
   'xpack.uptime.monitorManagement.serviceLocationsValidationError',
@@ -71,14 +71,6 @@ const VALIDATION_ERROR = i18n.translate(
     defaultMessage: 'At least one service location must be specified',
   }
 );
-
-const getInvalidOptionError = (value: string) =>
-  i18n.translate('xpack.uptime.monitorManagement.serviceLocationsOptionError', {
-    defaultMessage: '"{value}" is not a valid option',
-    values: {
-      value,
-    },
-  });
 
 export const LOCATIONS_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorLocationsLabel',
