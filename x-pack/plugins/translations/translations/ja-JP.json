@@ -27063,7 +27063,6 @@
     "xpack.timelines.fieldBrowser.categoriesCountTitle": "{totalCount} {totalCount, plural, other  {カテゴリ}}",
     "xpack.timelines.fieldBrowser.categoriesTitle": "カテゴリー",
     "xpack.timelines.fieldBrowser.categoryLabel": "カテゴリー",
-    "xpack.timelines.fieldBrowser.categoryLinkAriaLabel": "{category} {totalCount} {totalCount, plural, other  {フィールド}}このボタンをクリックすると、{category} カテゴリを選択します。",
     "xpack.timelines.fieldBrowser.closeButton": "閉じる",
     "xpack.timelines.fieldBrowser.descriptionForScreenReaderOnly": "フィールド {field} の説明：",
     "xpack.timelines.fieldBrowser.descriptionLabel": "説明",
