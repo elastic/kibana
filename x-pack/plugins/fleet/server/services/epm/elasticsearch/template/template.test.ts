@@ -732,11 +732,10 @@ describe('EPM template', () => {
                   scaling_factor: 1000,
                   type: 'scaled_float',
                   meta: {
+                    metric_type: 'gauge',
                     unit: 'percent',
                   },
-                  time_series_metric: {
-                    type: 'gauge',
-                  },
+                  time_series_metric: 'gauge',
                 },
               },
             },
