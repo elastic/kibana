@@ -59,7 +59,12 @@ import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
 
-const tabs = [
+interface ITab {
+  type: string;
+  label: string;
+}
+
+const possibleTabs: ITab[] = [
   {
     type: 'quick_form',
     label: i18n.translate('data.filter.filterEditor.quickFormLabel', {
@@ -99,6 +104,8 @@ export function EditFilterModal({
   saveFilters,
   savedQueryService,
   filters,
+  tabs = possibleTabs,
+  initialLabel,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (
@@ -117,12 +124,14 @@ export function EditFilterModal({
   saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   savedQueryService: SavedQueryService;
   filters: Filter[];
+  tabs?: ITab[];
+  initialLabel?: string;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
-  const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
+  const [customLabel, setCustomLabel] = useState<string>(initialLabel || '');
   const [queryDsl, setQueryDsl] = useState<string>(
     JSON.stringify(
       // {
@@ -136,9 +145,23 @@ export function EditFilterModal({
     )
   );
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    convertFilterToFilterGroup(currentEditFilters)
+    tabs.includes(possibleTabs[1])
+      ? convertFilterToFilterGroup(currentEditFilters)
+      : [
+          {
+            field: undefined,
+            operator: undefined,
+            value: undefined,
+            groupId: 1,
+            id: 0,
+            subGroupId: 1,
+            relationship: undefined,
+          },
+        ]
   );
-  const [groupsCount, setGroupsCount] = useState<number>(currentEditFilters[currentEditFilters?.length - 1].groupCount ?? 0);
+  const [groupsCount, setGroupsCount] = useState<number>(
+    currentEditFilters[currentEditFilters?.length - 1].groupCount ?? 0
+  );
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -162,7 +185,7 @@ export function EditFilterModal({
           id: 0,
           subGroupId: 1,
           relationship: undefined,
-          groupsCount
+          groupsCount,
         },
       ];
     }
@@ -176,7 +199,7 @@ export function EditFilterModal({
         id: convertedfilter.id,
         subGroupId: convertedfilter.subGroupId,
         relationship: convertedfilter.relationship,
-        groupsCount: convertedfilter.groupsCount
+        groupsCount: convertedfilter.groupsCount,
       };
     });
   }
@@ -198,15 +221,15 @@ export function EditFilterModal({
         value: undefined,
         groupId: multipleFilters?.length
           ? Math.max.apply(
-            Math,
-            multipleFilters.map((f) => f.groupId)
-          ) + 1
+              Math,
+              multipleFilters.map((f) => f.groupId)
+            ) + 1
           : 1,
         id: multipleFilters?.length
           ? Math.max.apply(
-            Math,
-            multipleFilters.map((f) => f.id)
-          ) + 1
+              Math,
+              multipleFilters.map((f) => f.id)
+            ) + 1
           : 0,
         subGroupId: 1,
       },
@@ -251,29 +274,31 @@ export function EditFilterModal({
       return '';
     }
     return (
-      <EuiFormRow
-        fullWidth
-        display="columnCompressed"
-        className="kbnQueryBar__dataViewInput"
-        label={i18n.translate('data.filter.filterEditor.dataViewSelectLabel', {
-          defaultMessage: 'Data view',
-        })}
-      >
-        <GenericComboBox
+      tabs.includes(possibleTabs[1]) && (
+        <EuiFormRow
           fullWidth
-          compressed
-          placeholder={i18n.translate('data.filter.filterEditor.selectIndexPatternLabel', {
-            defaultMessage: 'Select an index pattern',
+          display="columnCompressed"
+          className="kbnQueryBar__dataViewInput"
+          label={i18n.translate('data.filter.filterEditor.dataViewSelectLabel', {
+            defaultMessage: 'Data view',
           })}
-          options={indexPatterns}
-          selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-          getLabel={(indexPattern: IIndexPattern) => indexPattern.title}
-          onChange={onIndexPatternChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          data-test-subj="filterIndexPatternsSelect"
-        />
-      </EuiFormRow>
+        >
+          <GenericComboBox
+            fullWidth
+            compressed
+            placeholder={i18n.translate('data.filter.filterEditor.selectIndexPatternLabel', {
+              defaultMessage: 'Select an index pattern',
+            })}
+            options={indexPatterns}
+            selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
+            getLabel={(indexPattern: IIndexPattern) => indexPattern.title}
+            onChange={onIndexPatternChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+            data-test-subj="filterIndexPatternsSelect"
+          />
+        </EuiFormRow>
+      )
     );
   };
 
@@ -324,11 +349,11 @@ export function EditFilterModal({
           placeholder={
             selectedField
               ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Operator',
-              })
+                  defaultMessage: 'Operator',
+                })
               : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
-              })
+                  defaultMessage: 'Waiting',
+                })
           }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -433,12 +458,12 @@ export function EditFilterModal({
       shouldIncludeTimefilter: false,
       filters,
     };
-    if (!filter.meta.alias) {
+    if (!initialLabel) {
       // if our filters had not alias before then we save them as new fiterSet
       saveFilters(queryMetaObj, true);
     } else {
       const curQuery = savedQueries.find(
-        (existingQuery) => existingQuery.attributes.title === filter.meta.alias
+        (existingQuery) => existingQuery.attributes.title === initialLabel
       );
       saveFilters(
         {
@@ -456,7 +481,7 @@ export function EditFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
-    if (alias && !filter.meta.alias && isLabelDuplicated()) {
+    if (alias && !initialLabel && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
     }
@@ -538,8 +563,8 @@ export function EditFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                  ? 'kbnQueryBar__filterModalGroups'
-                  : '';
+                ? 'kbnQueryBar__filterModalGroups'
+                : '';
             return (
               <>
                 <div className={classNames(classes)}>
