@@ -11,40 +11,45 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 
 import { LicenseBadge } from '../../../../components/shared/license_badge';
+import { staticCustomSourceData } from '../../source_data';
 
 import { SaveCustom } from './save_custom';
 
 describe('SaveCustom', () => {
-  const props = {
-    documentationUrl: 'http://string.boolean',
+  const mockValues = {
     newCustomSource: {
-      accessToken: 'dsgfsd',
-      key: 'sdfs',
-      name: 'source',
-      id: '12e1',
+      id: 'id',
+      accessToken: 'token',
+      name: 'name',
     },
+    sourceData: staticCustomSourceData,
     isOrganization: true,
-    header: <h1>Header</h1>,
+    hasPlatinumLicense: true,
   };
+
+  beforeEach(() => {
+    setMockValues(mockValues);
+  });
+
   it('renders', () => {
-    setMockValues({ hasPlatinumLicense: true });
-    const wrapper = shallow(<SaveCustom {...props} />);
+    const wrapper = shallow(<SaveCustom />);
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiTitle)).toHaveLength(4);
     expect(wrapper.find(EuiLinkTo)).toHaveLength(1);
+    expect(wrapper.find(LicenseBadge)).toHaveLength(0);
   });
-
-  it('renders platinum LicenseBadge and link', () => {
-    setMockValues({ hasPlatinumLicense: false });
-    const wrapper = shallow(<SaveCustom {...props} />);
+  it('renders platinum license badge if license is not present', () => {
+    setMockValues({ ...mockValues, hasPlatinumLicense: false });
+    const wrapper = shallow(<SaveCustom />);
 
     expect(wrapper.find(LicenseBadge)).toHaveLength(1);
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
+    expect(wrapper.find(EuiTitle)).toHaveLength(4);
+    expect(wrapper.find(EuiLinkTo)).toHaveLength(1);
   });
 });
