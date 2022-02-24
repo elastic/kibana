@@ -15,9 +15,10 @@ import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const TCPSimpleFields = memo<Props>(({ validate }) => {
+export const TCPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useTCPSimpleFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -27,7 +28,12 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
   );
 
   return (
-    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         label={
           <FormattedMessage
@@ -51,6 +57,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.HOSTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.HOSTS)}
           data-test-subj="syntheticsTCPHostField"
         />
       </EuiFormRow>
@@ -60,14 +67,14 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
@@ -78,6 +85,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
