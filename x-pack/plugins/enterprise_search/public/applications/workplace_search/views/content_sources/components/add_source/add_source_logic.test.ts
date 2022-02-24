@@ -41,6 +41,8 @@ import {
   SourceConfigData,
   SourceConnectData,
   OrganizationsMap,
+  AddSourceValues,
+  AddSourceProps,
 } from './add_source_logic';
 
 describe('AddSourceLogic', () => {
@@ -49,13 +51,12 @@ describe('AddSourceLogic', () => {
   const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
-  const DEFAULT_VALUES = {
+  const DEFAULT_VALUES: AddSourceValues = {
     addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
-    addSourceProps: {},
+    addSourceProps: {} as AddSourceProps,
     dataLoading: true,
     sectionLoading: true,
     buttonLoading: false,
-    customSourceNameValue: '',
     clientIdValue: '',
     clientSecretValue: '',
     baseUrlValue: '',
@@ -65,7 +66,6 @@ describe('AddSourceLogic', () => {
     indexPermissionsValue: false,
     sourceConfigData: {} as SourceConfigData,
     sourceConnectData: {} as SourceConnectData,
-    newCustomSource: {} as CustomSource,
     oauthConfigCompleted: false,
     currentServiceType: '',
     githubOrganizations: [],
@@ -88,8 +88,6 @@ describe('AddSourceLogic', () => {
     name: SOURCE_NAMES.BOX,
     iconName: SOURCE_NAMES.BOX,
     serviceType: 'box',
-    addPath: ADD_BOX_PATH,
-    editPath: EDIT_BOX_PATH,
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -111,26 +109,6 @@ describe('AddSourceLogic', () => {
         FeatureIds.SyncFrequency,
         FeatureIds.SyncedItems,
       ],
-    },
-    accountContextOnly: false,
-  };
-
-  const CUSTOM_SERVICE_TYPE = {
-    name: SOURCE_NAMES.CUSTOM,
-    iconName: SOURCE_NAMES.CUSTOM,
-    serviceType: 'custom',
-    addPath: ADD_CUSTOM_PATH,
-    editPath: EDIT_CUSTOM_PATH,
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: false,
-      needsBaseUrl: false,
-      helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
-        defaultMessage:
-          'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
-      }),
-      documentationUrl: docLinks.workplaceSearchCustomSources,
-      applicationPortalUrl: '',
     },
     accountContextOnly: false,
   };
@@ -196,15 +174,6 @@ describe('AddSourceLogic', () => {
       });
     });
 
-    it('setCustomSourceNameValue', () => {
-      AddSourceLogic.actions.setCustomSourceNameValue('name');
-
-      expect(AddSourceLogic.values).toEqual({
-        ...DEFAULT_VALUES,
-        customSourceNameValue: 'name',
-      });
-    });
-
     it('setSourceLoginValue', () => {
       AddSourceLogic.actions.setSourceLoginValue('login');
 
@@ -238,22 +207,6 @@ describe('AddSourceLogic', () => {
       expect(AddSourceLogic.values).toEqual({
         ...DEFAULT_VALUES,
         indexPermissionsValue: true,
-      });
-    });
-
-    it('setCustomSourceData', () => {
-      const newCustomSource = {
-        accessToken: 'foo',
-        key: 'bar',
-        name: 'source',
-        id: '123key',
-      };
-
-      AddSourceLogic.actions.setCustomSourceData(newCustomSource);
-
-      expect(AddSourceLogic.values).toEqual({
-        ...DEFAULT_VALUES,
-        newCustomSource,
       });
     });
 
@@ -311,13 +264,14 @@ describe('AddSourceLogic', () => {
     });
 
     it('handles fallback states', () => {
-      const { publicKey, privateKey, consumerKey } = sourceConfigData.configuredFields;
-      const sourceConfigDataMock = {
+      const { publicKey, privateKey, consumerKey, apiKey } = sourceConfigData.configuredFields;
+      const sourceConfigDataMock: SourceConfigData = {
         ...sourceConfigData,
         configuredFields: {
           publicKey,
           privateKey,
           consumerKey,
+          apiKey,
         },
       };
       AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
@@ -344,21 +298,13 @@ describe('AddSourceLogic', () => {
 
       expect(setAddSourcePropsSpy).toHaveBeenCalledWith({ addSourceProps });
       expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigIntroStep);
-      expect(getSourceConfigDataSpy).toHaveBeenCalledWith('confluence_cloud');
+      expect(getSourceConfigDataSpy).toHaveBeenCalledWith('box');
     });
 
     describe('getFirstStep', () => {
-      it('sets custom as first step', () => {
-        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: CUSTOM_SERVICE_TYPE };
-        AddSourceLogic.actions.initializeAddSource(addSourceProps);
-
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureCustomStep);
-      });
-
       it('sets connect as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: CUSTOM_SERVICE_TYPE, connect: true };
+        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE, connect: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
@@ -366,7 +312,7 @@ describe('AddSourceLogic', () => {
 
       it('sets configure as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: CUSTOM_SERVICE_TYPE, configure: true };
+        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE, configure: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureOauthStep);
@@ -452,7 +398,7 @@ describe('AddSourceLogic', () => {
         await nextTick();
 
         expect(setPreContentSourceIdSpy).toHaveBeenCalledWith(preContentSourceId);
-        expect(navigateToUrl).toHaveBeenCalledWith(`${ADD_GITHUB_PATH}/configure${queryString}`);
+        expect(navigateToUrl).toHaveBeenCalledWith(`/sources/add/github/configure${queryString}`);
       });
 
       describe('Github error edge case', () => {
@@ -686,7 +632,6 @@ describe('AddSourceLogic', () => {
         const errorCallback = jest.fn();
 
         const serviceType = 'zendesk';
-        const name = 'name';
         const login = 'login';
         const password = 'password';
         const indexPermissions = false;
@@ -694,7 +639,6 @@ describe('AddSourceLogic', () => {
         let params: any;
 
         beforeEach(() => {
-          AddSourceLogic.actions.setCustomSourceNameValue(name);
           AddSourceLogic.actions.setSourceLoginValue(login);
           AddSourceLogic.actions.setSourcePasswordValue(password);
           AddSourceLogic.actions.setPreContentSourceConfigData(config);
@@ -703,7 +647,6 @@ describe('AddSourceLogic', () => {
 
           params = {
             service_type: serviceType,
-            name,
             login,
             password,
             organizations: ['foo'],
@@ -712,8 +655,7 @@ describe('AddSourceLogic', () => {
 
         it('calls API and sets values', async () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
-          const setCustomSourceDataSpy = jest.spyOn(AddSourceLogic.actions, 'setCustomSourceData');
-          http.post.mockReturnValue(Promise.resolve({ sourceConfigData }));
+          http.post.mockReturnValue(Promise.resolve());
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
 
@@ -723,7 +665,6 @@ describe('AddSourceLogic', () => {
             body: JSON.stringify({ ...params }),
           });
           await nextTick();
-          expect(setCustomSourceDataSpy).toHaveBeenCalledWith({ sourceConfigData });
           expect(successCallback).toHaveBeenCalled();
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
         });

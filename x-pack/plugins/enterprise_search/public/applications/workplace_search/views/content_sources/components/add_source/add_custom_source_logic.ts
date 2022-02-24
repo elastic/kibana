@@ -76,7 +76,6 @@ export const AddCustomSourceLogic = kea<
       {} as CustomSource,
       {
         setNewCustomSource: (_, newCustomSource) => newCustomSource,
-        resetSourceState: () => ({} as CustomSource),
       },
     ],
     sourceData: [props.sourceData],
