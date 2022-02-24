@@ -6,4 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { getClasses } from './presentation';
+import { KibanaPageTemplateProps } from '../page_template';
+
+export const NO_DATA_PAGE_MAX_WIDTH = 950;
+
+export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+  },
+};

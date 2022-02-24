@@ -11,7 +11,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 import { withSolutionNav } from './with_solution_nav';
 import { KibanaPageTemplateProps } from './page_template';
-import { getClasses } from './helpers';
+import { getClasses } from './util';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions

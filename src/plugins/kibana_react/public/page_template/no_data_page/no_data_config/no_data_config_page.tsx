@@ -10,18 +10,7 @@ import React from 'react';
 import { NoDataPage } from '../no_data_page';
 import { withSolutionNav } from '../../with_solution_nav';
 import { KibanaPageTemplateProps } from '../../page_template';
-import { getClasses } from '../../helpers';
-
-const NO_DATA_PAGE_MAX_WIDTH = 950;
-
-const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
-  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
-  template: 'centeredBody',
-  pageContentProps: {
-    hasShadow: false,
-    color: 'transparent',
-  },
-};
+import { getClasses, NO_DATA_PAGE_TEMPLATE_PROPS } from '../../util';
 
 export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
   const { className, noDataConfig, ...rest } = props;
