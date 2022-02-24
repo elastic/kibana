@@ -28,6 +28,9 @@ def _deps_inputs(ctx):
   deps_files = depset(transitive = deps_files_depsets).to_list()
   return deps_files
 
+def _get_type_package_name(actualName):
+  return "@types/" + actualName.replace("@", "").replace("/", "__")
+
 def _calculate_entrypoint_path(ctx):
   return _join(ctx.bin_dir.path, ctx.label.package, _get_types_outdir_name(ctx), ctx.attr.entrypoint_name)
 
@@ -69,7 +72,7 @@ def _pkg_npm_types_impl(ctx):
 
   # gathering template args
   template_args = [
-    "NAME", ctx.attr.package_name
+    "NAME", _get_type_package_name(ctx.attr.package_name)
   ]
 
   # layout api extractor arguments
@@ -109,7 +112,7 @@ def _pkg_npm_types_impl(ctx):
       declarations = depset([package_dir])
     ),
     LinkablePackageInfo(
-      package_name = ctx.attr.package_name,
+      package_name = _get_type_package_name(ctx.attr.package_name),
       package_path = "",
       path = package_dir.path,
       files = package_dir_depset,
