@@ -20,7 +20,7 @@ Previous versions: {kibana-ref-all}/8.0/whats-new.html[8.0]
 [float]
 ==== Field statistics on by default
 
-Find interesting fields to visualize and learn more about the shape of your data
+Find fields to visualize and learn more about the shape of your data
 with *Field statistics*.  This view
 is similar to the *Index Data Visualizer* in *{ml-app}*.
 For details, check out {kibana-ref}/show-field-statistics.html[Explore the fields in your data].
@@ -30,8 +30,8 @@ image::discover/images/field-statistics-view.png[Filter panel in Canvas]
 
 [float]
 ==== New $ field syntax for Painless scripts
-Creating runtime fields is now easier and more reliable. When a script context supports the scripting fields API, use the new shortcut for the field method, which replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
-for the field method when a script context supports the scripting fields API.
+Creating runtime fields is now easier and more reliable.
+{kib} now has shortcut for the field method when a script context supports the scripting fields API.
 This shortcut replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
 
 *Before*
@@ -54,10 +54,10 @@ $('myfield', 'unavailable')
 [float]
 ==== Synchronized ML anomaly visualizations
 *{ml-app}* visualizations now synchronize your cursor position with the visualization panels you create with
-from *Lens*, *TSVB*, *Timelion*, and *Aggregation-based* editors.
+*Lens*, *TSVB*, *Timelion*, and *Aggregation-based* editors.
 Highlight an anomaly in time and see a visual indication
 of this time on other panels.
-The reverse is true as well&mdash;hovering in another editor highlights the same point-in-time in *{ml-app}* panels.
+The reverse is also true&mdash;hovering in another editor highlights the same point-in-time in *{ml-app}* panels.
 
 [float]
 === Canvas
@@ -70,7 +70,8 @@ and visual controls.
 
 [float]
 ==== New filter capabilities
-To help you create workpads with exactly the right behavior, use the new *Filters* on any element or object to view the applied object filters. 
+To help you create workpads with exactly the right behavior, use the new *Filters* on any
+element or object to view the applied filters.
 
 [role="screenshot"]
 image::images/highlights-canvas-filter.png[Filter panel in Canvas]
@@ -81,7 +82,8 @@ image::images/highlights-canvas-filter.png[Filter panel in Canvas]
 [float]
 ==== Combine fields with drag and drop
 
-To view the top combinations in *Lens*, combine multiple fields with drag and drop, which helps you to determine the combinations that contribute to your metric performance.
+To view the top combinations in *Lens*, combine multiple fields with drag and drop.
+This helps you to determine the combinations that contribute to your metric performance.
 
 [role="screenshot"]
 image::images/highlights-lens-combine.gif[Drag to combin in Lens]
@@ -89,8 +91,9 @@ image::images/highlights-lens-combine.gif[Drag to combin in Lens]
 [float]
 ==== Top values by rarity
 
-When looking for root cause, it is often useful to find rare values in your data.
-You can now take advantage of the {es} rare terms aggregations in *Lens* by viewing the top values by rarity, making it easy to ask "What's not normal here?"
+When looking for root cause, it is often useful to find the rare values in your data.
+Take advantage of the {es} rare terms aggregations in *Lens* and view the top values by rarity.
+You'll find answers to "What's not normal here?"
 
 [role="screenshot"]
 image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, width=50%]
@@ -114,7 +117,7 @@ image::images/highlights-lens-guage.png[Example horizontal gauge with target val
 The mosaic visualization, also known as marimekko or mekko, allows for side-by-side
 comparison of two dimensions against a single metric. Treemaps and two-layered
 pies do this as well, but the mosaic can be more effective for visual comparisons
-by aligning the colors for the terms side-by-side. For the best mosaic visualizations, create with low cardinality dimensions. 
+by aligning the colors for the terms side-by-side. For the best mosaic visualizations, create with low cardinality dimensions.
 The mosaic visualization is in technical preview in 8.1.
 
 [role="screenshot"]
@@ -126,7 +129,7 @@ image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
 Create proportional waffle visualizations that make
 more efficient use of space than pie charts.
 Waffles are designed for square spaces, which aligns well with how
-most dashboards are created. Since waffles display the data in 1% blocks, they are best for low cardinality breakdowns, and are not recommended for small partitions. 
+most dashboards are created. Because waffles display the data in 1% blocks, they are best for low cardinality breakdowns, and are not recommended for small partitions.
 You might be surprised how small you can make a waffle
 visualization and maintain readability. The waffle visualization is in technical preview in 8.1.
 
@@ -136,7 +139,7 @@ image::images/highlights-lens-waffle.png[Example waffle visualization in Lens, w
 [float]
 ==== Color by value in metrics
 
-Apply color to the text and background of metric visualizations 
+Apply color to the text and background of metric visualizations
 based on the value of the metric. Set up color stops for multiple colors, similar
 to what you can do in *Lens* tables, heatmaps, and gauge.
 
@@ -145,7 +148,7 @@ image::images/highlights-lens-metric.png[Metric color options in Lens, width=75%
 
 [float]
 ==== Sort tables in dashboard view mode
-You can now enable users with view-only dashboard privileges to sort data tables on the fly, similar to the existing visualization editor behavior.
+Enable users with view-only dashboard privileges to sort data tables on the fly, similar to the existing visualization editor behavior.
 
 [float]
 ==== Filter formulas globally
