@@ -126,13 +126,13 @@ export const LegendSizeSettings = ({
       >
         <TooltipWrapper
           tooltipContent={
-            isAutoSizeEnabled
-              ? i18n.translate('xpack.lens.shared.legendIsTruncated', {
+            isDisabled
+              ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+                  defaultMessage: 'Requires legend to be shown',
+                })
+              : i18n.translate('xpack.lens.shared.legendIsTruncated', {
                   defaultMessage: 'Requires legend auto {sizeProperty} to be disabled',
                   values: { sizeProperty },
-                })
-              : i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                  defaultMessage: 'Requires legend to be shown',
                 })
           }
           condition={isAutoSizeEnabled || isDisabled}
