@@ -106,18 +106,18 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _getMetricsFilter() {
-    if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
-      return (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
-        // these are countable metrics, where blending heatmap color blobs make sense
-        return metric.value ? isMetricCountable(metric.value) : false;
-      };
-    }
-
-    if (this.props.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      return (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
-        return metric.value !== AGG_TYPE.TERMS;
-      };
-    }
+    return this.props.currentLayerType === LAYER_TYPE.HEATMAP
+      ? (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+          // these are countable metrics, where blending heatmap color blobs make sense
+          return metric.value ? isMetricCountable(metric.value) : false;
+        }
+      : (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+          // terms aggregation is not supported with Elasticsearch _mvt endpoint
+          // The goal is to remove GeoJSON ESGeoGridSource implemenation and only have MVT ESGeoGridSource implemenation
+          // First step is to deprecate terms aggregation for ESGeoGridSource
+          // and prevent new uses of terms aggregation for ESGeoGridSource
+          return metric.value !== AGG_TYPE.TERMS;
+        };
   }
 
   _renderMetricsPanel() {

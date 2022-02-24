@@ -10,7 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSpecSchema } from '../util/schemas';
+import { runtimeFieldSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
@@ -55,14 +55,11 @@ export const putRuntimeField = async ({
     dataView.removeRuntimeField(name);
   }
 
-  dataView.addRuntimeField(name, runtimeField);
+  const fields = dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
-  const field = dataView.fields.getByName(name);
-  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
-
-  return { dataView, field };
+  return { dataView, fields };
 };
 
 const putRuntimeFieldRouteFactory =
@@ -90,7 +87,7 @@ const putRuntimeFieldRouteFactory =
               minLength: 1,
               maxLength: 1_000,
             }),
-            runtimeField: runtimeFieldSpecSchema,
+            runtimeField: runtimeFieldSchema,
           }),
         },
       },
@@ -104,9 +101,12 @@ const putRuntimeFieldRouteFactory =
           req
         );
         const id = req.params.id;
-        const { name, runtimeField } = req.body;
+        const { name, runtimeField } = req.body as {
+          name: string;
+          runtimeField: RuntimeField;
+        };
 
-        const { dataView, field } = await putRuntimeField({
+        const { dataView, fields } = await putRuntimeField({
           dataViewsService,
           id,
           name,
@@ -115,7 +115,7 @@ const putRuntimeFieldRouteFactory =
           counterName: `${req.route.method} ${path}`,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, field }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
       })
     );
   };

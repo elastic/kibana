@@ -16,7 +16,7 @@ import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../../field_formats/common/mocks';
 import { FieldFormat } from '../../../field_formats/common';
-import { RuntimeField } from '../types';
+import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
@@ -37,6 +37,8 @@ const runtimeField = {
   name: 'runtime_field',
   runtimeField: runtimeFieldScript,
   scripted: false,
+  esTypes: ['keyword'],
+  type: 'string',
 };
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
@@ -223,20 +225,80 @@ describe('IndexPattern', () => {
       },
     };
 
+    const runtimeWithAttrs = {
+      ...runtime,
+      popularity: 5,
+      customLabel: 'custom name',
+      format: {
+        id: 'bytes',
+      },
+    };
+
+    const runtimeComposite = {
+      type: 'composite' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world');",
+      },
+      fields: {
+        a: {
+          type: 'keyword' as RuntimeTypeExceptComposite,
+        },
+        b: {
+          type: 'long' as RuntimeTypeExceptComposite,
+        },
+      },
+    };
+
+    const runtimeCompositeWithAttrs = {
+      type: runtimeComposite.type,
+      script: runtimeComposite.script,
+      fields: {
+        a: {
+          ...runtimeComposite.fields.a,
+          popularity: 3,
+          customLabel: 'custom name a',
+          format: {
+            id: 'bytes',
+          },
+        },
+        b: {
+          ...runtimeComposite.fields.b,
+          popularity: 4,
+          customLabel: 'custom name b',
+          format: {
+            id: 'bytes',
+          },
+        },
+      },
+    };
+
     beforeEach(() => {
       const formatter = {
         toJSON: () => ({ id: 'bytes' }),
       } as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
+      indexPattern.getFormatterForFieldNoDefault = () => undefined;
     });
 
     test('add and remove runtime field to existing field', () => {
-      indexPattern.addRuntimeField('@tags', runtime);
+      indexPattern.addRuntimeField('@tags', runtimeWithAttrs);
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         '@tags': runtime,
         runtime_field: runtimeField.runtimeField,
       });
-      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toEqual(runtime);
+      const field = indexPattern.toSpec()!.fields!['@tags'];
+      expect(field.runtimeField).toEqual(runtime);
+      expect(field.count).toEqual(5);
+      expect(field.format).toEqual({
+        id: 'bytes',
+      });
+      expect(field.customLabel).toEqual('custom name');
+      expect(indexPattern.toSpec().fieldAttrs).toEqual({
+        '@tags': {
+          customLabel: 'custom name',
+          count: 5,
+        },
+      });
 
       indexPattern.removeRuntimeField('@tags');
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
@@ -246,12 +308,42 @@ describe('IndexPattern', () => {
     });
 
     test('add and remove runtime field as new field', () => {
-      indexPattern.addRuntimeField('new_field', runtime);
+      indexPattern.addRuntimeField('new_field', runtimeWithAttrs);
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
         new_field: runtime,
       });
+      expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
       expect(indexPattern.toSpec()!.fields!.new_field.runtimeField).toEqual(runtime);
+
+      indexPattern.removeRuntimeField('new_field');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
+    });
+
+    test('add and remove composite runtime field as new fields', () => {
+      const fieldCount = indexPattern.fields.length;
+      indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+        new_field: runtimeComposite,
+      });
+      expect(indexPattern.fields.length - fieldCount).toEqual(2);
+      expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
+      expect(indexPattern.toSpec()!.fields!['new_field.a']).toBeDefined();
+      expect(indexPattern.toSpec()!.fields!['new_field.b']).toBeDefined();
+      expect(indexPattern.toSpec()!.fieldAttrs).toEqual({
+        'new_field.a': {
+          count: 3,
+          customLabel: 'custom name a',
+        },
+        'new_field.b': {
+          count: 4,
+          customLabel: 'custom name b',
+        },
+      });
 
       indexPattern.removeRuntimeField('new_field');
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({

@@ -12,25 +12,25 @@ import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
 
-interface UseExceptionModalProps {
+interface UseExceptionFlyoutProps {
   ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
   timelineId: string;
 }
-interface UseExceptionModal {
-  exceptionModalType: ExceptionListType | null;
+interface UseExceptionFlyout {
+  exceptionFlyoutType: ExceptionListType | null;
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddExceptionCancel: () => void;
   onAddExceptionConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
   ruleIndices: string[];
 }
 
-export const useExceptionModal = ({
+export const useExceptionFlyout = ({
   ruleIndex,
   refetch,
   timelineId,
-}: UseExceptionModalProps): UseExceptionModal => {
-  const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
+}: UseExceptionFlyoutProps): UseExceptionFlyout => {
+  const [exceptionFlyoutType, setOpenAddExceptionFlyout] = useState<ExceptionListType | null>(null);
 
   const ruleIndices = useMemo((): string[] => {
     if (ruleIndex != null) {
@@ -41,11 +41,11 @@ export const useExceptionModal = ({
   }, [ruleIndex]);
 
   const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
-    setOpenAddExceptionModal(exceptionListType);
+    setOpenAddExceptionFlyout(exceptionListType);
   }, []);
 
   const onAddExceptionCancel = useCallback(() => {
-    setOpenAddExceptionModal(null);
+    setOpenAddExceptionFlyout(null);
   }, []);
 
   const onAddExceptionConfirm = useCallback(
@@ -53,13 +53,13 @@ export const useExceptionModal = ({
       if (refetch && (timelineId !== TimelineId.active || didBulkCloseAlert)) {
         refetch();
       }
-      setOpenAddExceptionModal(null);
+      setOpenAddExceptionFlyout(null);
     },
     [refetch, timelineId]
   );
 
   return {
-    exceptionModalType,
+    exceptionFlyoutType,
     onAddExceptionTypeClick,
     onAddExceptionCancel,
     onAddExceptionConfirm,
