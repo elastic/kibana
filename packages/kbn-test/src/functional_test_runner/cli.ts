@@ -46,6 +46,7 @@ export function runFtrCli() {
         {
           mochaOpts: {
             bail: flags.bail,
+            dryRun: flags['dry-run'],
             grep: flags.grep || undefined,
             invert: flags.invert,
           },
@@ -131,7 +132,15 @@ export function runFtrCli() {
           'kibana-install-dir',
           'es-version',
         ],
-        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'updateSnapshots', 'u'],
+        boolean: [
+          'bail',
+          'invert',
+          'test-stats',
+          'updateBaselines',
+          'updateSnapshots',
+          'u',
+          'dry-run',
+        ],
         default: {
           config: 'test/functional/config.js',
         },
@@ -155,6 +164,7 @@ export function runFtrCli() {
           --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
           -u                 replace both baseline screenshots and snapshots
           --kibana-install-dir  directory where the Kibana install being tested resides
+          --dry-run          report tests without executing them
         `,
       },
     }
