@@ -13,6 +13,7 @@ import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
+import { getProcessExecutableCopyText } from './helpers';
 import { useStyles } from './styles';
 
 interface DetailPanelProcessTabDeps {
@@ -101,32 +102,30 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       });
     }
     listItems.push(
-      ...[
-        {
-          title: <DetailPanelListItem>user.name</DetailPanelListItem>,
-          description: (
-            <DetailPanelCopy textToCopy={leader.userName}>
-              <span css={styles.description}>{dataOrDash(leader.userName)}</span>
-            </DetailPanelCopy>
-          ),
-        },
-        {
-          title: <DetailPanelListItem>interactive</DetailPanelListItem>,
-          description: (
-            <DetailPanelCopy textToCopy={leader.interactive ? 'True' : 'False'}>
-              <span css={styles.description}>{leader.interactive ? 'True' : 'False'}</span>
-            </DetailPanelCopy>
-          ),
-        },
-        {
-          title: <DetailPanelListItem>pid</DetailPanelListItem>,
-          description: (
-            <DetailPanelCopy textToCopy={leader.pid}>
-              <span css={styles.description}>{dataOrDash(leader.pid)}</span>
-            </DetailPanelCopy>
-          ),
-        },
-      ]
+      {
+        title: <DetailPanelListItem>user.name</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={leader.userName}>
+            <span css={styles.description}>{dataOrDash(leader.userName)}</span>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>interactive</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={leader.interactive ? 'True' : 'False'}>
+            <span css={styles.description}>{leader.interactive ? 'True' : 'False'}</span>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>pid</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={leader.pid}>
+            <span css={styles.description}>{dataOrDash(leader.pid)}</span>
+          </DetailPanelCopy>
+        ),
+      }
     );
     // Only include entry_meta.source.ip for entry leader
     if (idx === 0) {
@@ -210,12 +209,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>executable</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={processDetail.executable
-                  .map((execTuple) => {
-                    const [executable, eventAction] = execTuple;
-                    return `${executable} ${eventAction}`;
-                  })
-                  .join(', ')}
+                textToCopy={getProcessExecutableCopyText(processDetail.executable)}
                 display="block"
               >
                 {processDetail.executable.map((execTuple, idx) => {
