@@ -115,7 +115,7 @@ export class RuleRegistryPlugin
       );
 
       plugins.data.search.registerSearchStrategy(
-        'ruleRegistrySearchStrategy',
+        'ruleRegistryAlertsSearchStrategy',
         ruleRegistrySearchStrategy
       );
     });

@@ -13,7 +13,19 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
   query?: { bool: estypes.QueryDslBoolQuery };
 };
-type FieldsResponse = {
-  [Property in keyof Ecs]: any[];
-};
-export type RuleRegistrySearchResponse = IEsSearchResponse<FieldsResponse>;
+
+type DotPrefix<T extends string> = T extends '' ? '' : `.${T}`;
+type DotNestedKeys<T> = (
+  T extends object
+    ? { [K in Exclude<keyof T, symbol>]: `${K}${DotPrefix<DotNestedKeys<T[K]>>}` }[Exclude<
+        keyof T,
+        symbol
+      >]
+    : ''
+) extends infer D
+  ? Extract<D, string>
+  : never;
+
+export type RuleRegistrySearchResponse = IEsSearchResponse<{
+  [Property in DotNestedKeys<Ecs>]: any[];
+}>;
