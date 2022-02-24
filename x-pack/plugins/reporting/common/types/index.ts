@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ScreenshotResult } from '../../../screenshotting/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
@@ -30,7 +32,29 @@ export interface ReportDocumentHead {
 
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
+  error_code?: string;
   size: number;
+}
+
+type ScreenshotMetrics = Required<ScreenshotResult>['metrics'];
+
+export interface CsvMetrics {
+  rows: number;
+}
+
+export type PngMetrics = ScreenshotMetrics;
+
+export interface PdfMetrics extends Partial<ScreenshotMetrics> {
+  /**
+   * A number of emitted pages in the generated PDF report.
+   */
+  pages: number;
+}
+
+export interface TaskRunMetrics {
+  csv?: CsvMetrics;
+  png?: PngMetrics;
+  pdf?: PdfMetrics;
 }
 
 export interface TaskRunResult {
@@ -38,6 +62,7 @@ export interface TaskRunResult {
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
+  metrics?: TaskRunMetrics;
 }
 
 export interface ReportSource {
@@ -75,6 +100,7 @@ export interface ReportSource {
   started_at?: string; // timestamp in UTC
   completed_at?: string; // timestamp in UTC
   process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
+  metrics?: TaskRunMetrics;
 }
 
 /*

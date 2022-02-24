@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME } from '../constants';
@@ -40,6 +40,9 @@ const strings = {
     }),
     bucket: i18n.translate('expressionTagcloud.functions.tagcloud.args.bucketHelpText', {
       defaultMessage: 'bucket dimension configuration',
+    }),
+    ariaLabel: i18n.translate('expressionTagcloud.functions.tagcloud.args.ariaLabelHelpText', {
+      defaultMessage: 'Specifies the aria label of the tagcloud',
     }),
   },
   dimension: {
@@ -123,6 +126,11 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         types: ['vis_dimension'],
         help: argHelp.bucket,
       },
+      ariaLabel: {
+        types: ['string'],
+        help: argHelp.ariaLabel,
+        required: false,
+      },
     },
     fn(input, args, handlers) {
       const visParams: TagCloudRendererParams = {
@@ -136,6 +144,10 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           bucket: args.bucket,
         }),
         palette: args.palette,
+        ariaLabel:
+          args.ariaLabel ??
+          (handlers.variables?.embeddableTitle as string) ??
+          handlers.getExecutionContext?.()?.description,
       };
 
       if (handlers?.inspectorAdapters?.tables) {

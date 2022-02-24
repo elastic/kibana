@@ -11,12 +11,7 @@ import { kibanaResponseFactory } from '../../../../../../src/core/server';
 
 import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  coreMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -25,8 +20,6 @@ import { handleEsError } from '../../shared_imports';
 import { register } from './add_route';
 
 import { ScopedClusterClientMock } from './types';
-
-const { createApiResponse } = elasticsearchServiceMock;
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {
@@ -88,30 +81,26 @@ describe('ADD remote clusters', () => {
 
   describe('success', () => {
     test(`adds remote cluster with "sniff" mode`, async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(createApiResponse({ body: {} }));
-      putSettingsMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            acknowledged: true,
-            persistent: {
-              cluster: {
-                remote: {
-                  test: {
-                    connected: true,
-                    mode: 'sniff',
-                    seeds: ['127.0.0.1:9300'],
-                    num_nodes_connected: 1,
-                    max_connections_per_cluster: 3,
-                    initial_connect_timeout: '30s',
-                    skip_unavailable: false,
-                  },
-                },
+      remoteInfoMockFn.mockResponseOnce({});
+      putSettingsMockFn.mockResponseOnce({
+        acknowledged: true,
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                connected: true,
+                mode: 'sniff',
+                seeds: ['127.0.0.1:9300'],
+                num_nodes_connected: 1,
+                max_connections_per_cluster: 3,
+                initial_connect_timeout: '30s',
+                skip_unavailable: false,
               },
             },
-            transient: {},
           },
-        })
-      );
+        },
+        transient: {},
+      });
 
       const mockRequest = createMockRequest();
 
@@ -143,30 +132,26 @@ describe('ADD remote clusters', () => {
     });
 
     test(`adds remote cluster with "proxy" mode`, async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(createApiResponse({ body: {} }));
-      putSettingsMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            acknowledged: true,
-            persistent: {
-              cluster: {
-                remote: {
-                  test: {
-                    connected: true,
-                    mode: 'sniff',
-                    seeds: ['127.0.0.1:9300'],
-                    num_nodes_connected: 1,
-                    max_connections_per_cluster: 3,
-                    initial_connect_timeout: '30s',
-                    skip_unavailable: false,
-                  },
-                },
+      remoteInfoMockFn.mockResponseOnce({});
+      putSettingsMockFn.mockResponseOnce({
+        acknowledged: true,
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                connected: true,
+                mode: 'sniff',
+                seeds: ['127.0.0.1:9300'],
+                num_nodes_connected: 1,
+                max_connections_per_cluster: 3,
+                initial_connect_timeout: '30s',
+                skip_unavailable: false,
               },
             },
-            transient: {},
           },
-        })
-      );
+        },
+        transient: {},
+      });
 
       const mockRequest = createMockRequest({
         name: 'test',
@@ -206,21 +191,17 @@ describe('ADD remote clusters', () => {
 
   describe('failure', () => {
     test('returns 409 if remote cluster already exists', async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            test: {
-              connected: true,
-              mode: 'sniff',
-              seeds: ['127.0.0.1:9300'],
-              num_nodes_connected: 1,
-              max_connections_per_cluster: 3,
-              initial_connect_timeout: '30s',
-              skip_unavailable: false,
-            },
-          },
-        })
-      );
+      remoteInfoMockFn.mockResponseOnce({
+        test: {
+          connected: true,
+          mode: 'sniff',
+          seeds: ['127.0.0.1:9300'],
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+        },
+      });
 
       const mockRequest = createMockRequest();
 
@@ -236,8 +217,8 @@ describe('ADD remote clusters', () => {
     });
 
     test('returns 400 ES did not acknowledge remote cluster', async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(createApiResponse({ body: {} }));
-      putSettingsMockFn.mockResolvedValueOnce(createApiResponse({ body: {} as any }));
+      remoteInfoMockFn.mockResponseOnce({});
+      putSettingsMockFn.mockResponseOnce({} as any);
 
       const mockRequest = createMockRequest();
 

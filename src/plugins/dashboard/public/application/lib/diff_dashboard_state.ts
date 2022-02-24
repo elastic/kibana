@@ -8,20 +8,14 @@
 
 import { xor, omit, isEmpty } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, isFilterPinned } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
 
 import { DashboardContainerInput } from '../..';
 import { controlGroupInputIsEqual } from './dashboard_control_group';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 import { IEmbeddable } from '../../services/embeddable';
 
-const stateKeystoIgnore = [
-  'expandedPanelId',
-  'fullScreenMode',
-  'savedQuery',
-  'viewMode',
-  'tags',
-] as const;
+const stateKeystoIgnore = ['expandedPanelId', 'fullScreenMode', 'savedQuery', 'viewMode', 'tags'];
 type DashboardStateToCompare = Omit<DashboardState, typeof stateKeystoIgnore[number]>;
 
 const inputKeystoIgnore = ['searchSessionId', 'lastReloadRequestTime', 'executionContext'] as const;
@@ -60,6 +54,9 @@ export const diffDashboardState = async ({
   newState: DashboardState;
   getEmbeddable: (id: string) => Promise<IEmbeddable>;
 }): Promise<Partial<DashboardState>> => {
+  if (!newState.timeRestore) {
+    stateKeystoIgnore.push('timeRange');
+  }
   const {
     controlGroupInput: originalControlGroupInput,
     options: originalOptions,

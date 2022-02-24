@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
 
@@ -121,9 +119,9 @@ describe('fetchIndexShardSize', () => {
     },
   };
   it('fetch as expected', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+      esRes
     );
 
     const result = await fetchIndexShardSize(
@@ -163,6 +161,7 @@ describe('fetchIndexShardSize', () => {
                 bool: {
                   should: [
                     { term: { type: 'index_stats' } },
+                    { term: { 'metricset.name': 'index' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.index' } },
                   ],
                   minimum_should_match: 1,
@@ -187,6 +186,8 @@ describe('fetchIndexShardSize', () => {
                           '_index',
                           'index_stats.shards.primaries',
                           'index_stats.primaries.store.size_in_bytes',
+                          'elasticsearch.index.shards.primaries',
+                          'elasticsearch.index.primaries.store.size_in_bytes',
                         ],
                       },
                       size: 1,
@@ -206,7 +207,7 @@ describe('fetchIndexShardSize', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     // @ts-ignore
