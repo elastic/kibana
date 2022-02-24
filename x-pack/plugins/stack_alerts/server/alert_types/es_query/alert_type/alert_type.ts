@@ -7,17 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from 'src/core/server';
-import { RuleType } from '../../types';
-import { ActionContext } from './action_context';
+import { RuleType } from '../../../types';
+import { ActionContext } from '../action_context';
 import {
   EsQueryAlertParams,
   EsQueryAlertParamsSchema,
   EsQueryAlertState,
-} from './alert_type_params';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
-import { ActionGroupId, ES_QUERY_ID } from './constants';
-import { esQueryExecutor, searchSourceExecutor } from './executor';
+} from '../alert_type_params';
+import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
+import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from '../types';
+import { ActionGroupId, ES_QUERY_ID } from '../constants';
+import { esQueryExecutor } from './es_query_executor';
+import { searchSourceExecutor } from './search_source_executor';
 
 export function getAlertType(
   logger: Logger,
@@ -134,7 +135,8 @@ export function getAlertType(
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
     {
-      defaultMessage: 'A link to see records that triggered this alert.',
+      defaultMessage: `A link to see records that triggered this alert if it created from discover. 
+        In case of Elastic query alert, this link will navigate to stack management.`,
     }
   );
 
@@ -174,7 +176,11 @@ export function getAlertType(
 
   async function executor(options: ExecutorOptions<EsQueryAlertParams>) {
     if (isEsQueryAlert(options)) {
-      return await esQueryExecutor(logger, options as ExecutorOptions<OnlyEsQueryAlertParams>);
+      return await esQueryExecutor(
+        logger,
+        core,
+        options as ExecutorOptions<OnlyEsQueryAlertParams>
+      );
     } else {
       return await searchSourceExecutor(
         logger,

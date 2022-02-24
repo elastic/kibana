@@ -19,13 +19,9 @@ export async function searchSourceExecutor(
   core: CoreSetup,
   options: ExecutorOptions<OnlySearchSourceAlertParams>
 ) {
-  const { name, params, alertId, state, services } = options;
+  const { name, params, alertId, services } = options;
   const timestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
-
-  logger.debug(
-    `searchThreshold (${alertId}) previousTimestamp: ${state.previousTimestamp}, previousTimeRange ${state.previousTimeRange}`
-  );
 
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
@@ -45,7 +41,7 @@ export async function searchSourceExecutor(
 
   const timeFieldName = index?.timeFieldName;
   if (!timeFieldName) {
-    throw new Error('Invalid data view without timeFieldName');
+    throw new Error('Invalid data view without timeFieldName.');
   }
 
   loadedSearchSource.setField('size', params.size);
@@ -59,45 +55,37 @@ export async function searchSourceExecutor(
   const searchSourceChild = loadedSearchSource.createChild();
   searchSourceChild.setField('filter', filter);
 
-  let nrOfDocs = 0;
-  let searchResult;
-  try {
-    logger.info(
-      `searchThreshold (${alertId}) query: ${JSON.stringify(
-        searchSourceChild.getSearchRequestBody()
-      )}`
-    );
-    searchResult = await searchSourceChild.fetch();
-    nrOfDocs = Number(searchResult.hits.total);
-    logger.info(`searchThreshold (${alertId}) nrOfDocs: ${nrOfDocs}`);
-  } catch (error) {
-    logger.error('Error fetching documents: ' + error.message);
-    throw error;
-  }
+  logger.debug(
+    `search source query alert (${alertId}) query: ${JSON.stringify(
+      searchSourceChild.getSearchRequestBody()
+    )}`
+  );
 
-  const met = compareFn(nrOfDocs, params.threshold);
+  const searchResult = await searchSourceChild.fetch();
+  const matchedDocsNumber = Number(searchResult.hits.total);
 
+  logger.debug(
+    `search source query alert (${alertId}) number of matched documents: ${matchedDocsNumber}`
+  );
+
+  const met = compareFn(matchedDocsNumber, params.threshold);
   if (met) {
-    const conditions = `${nrOfDocs} is ${getHumanReadableComparator(params.thresholdComparator)} ${
-      params.threshold
-    }`;
+    const conditions = `${matchedDocsNumber} is ${getHumanReadableComparator(
+      params.thresholdComparator
+    )} ${params.threshold}`;
     const checksum = sha256.create().update(JSON.stringify(params));
-    const link = `${publicBaseUrl}/app/discover#/viewAlert/${alertId}?from=${from}&to=${to}&checksum=${checksum}`;
     const baseContext: ActionContext = {
       title: name,
-      message: `${nrOfDocs} documents found between ${from} and ${to}`,
+      message: `${matchedDocsNumber} documents found between ${from} and ${to}`,
       date: timestamp,
-      value: Number(nrOfDocs),
+      value: Number(matchedDocsNumber),
       conditions,
-      link,
+      link: `${publicBaseUrl}/app/discover#/viewAlert/${alertId}?from=${from}&to=${to}&checksum=${checksum}`,
       hits: searchResult.hits.hits,
     };
     const alertInstance = options.services.alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance.scheduleActions(ActionGroupId, baseContext);
   }
 
-  // this is the state that we can access in the next execution
-  return {
-    latestTimestamp: timestamp,
-  };
+  return { latestTimestamp: timestamp };
 }

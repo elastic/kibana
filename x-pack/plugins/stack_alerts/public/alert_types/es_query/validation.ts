@@ -83,7 +83,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
   const isSearchSource = isSearchSourceAlert(alertParams);
   if (isSearchSource) {
     if (!alertParams.searchConfiguration) {
-      errors.index.push(
+      errors.searchConfiguration.push(
         i18n.translate(
           'xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration',
           {

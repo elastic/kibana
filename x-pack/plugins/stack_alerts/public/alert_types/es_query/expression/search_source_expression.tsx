@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Filter, ISearchSource } from '../../../../../../../src/plugins/data/common';
@@ -28,7 +29,7 @@ import {
 import { DEFAULT_VALUES } from '../constants';
 import { ReadOnlyFilterItems } from './read_only_filter_items';
 
-export const SearchSourceThresholdExpression = ({
+export const SearchSourceExpression = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,
@@ -44,6 +45,7 @@ export const SearchSourceThresholdExpression = ({
     size,
   } = ruleParams;
   const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
+  const [paramsError, setParamsError] = useState<Error | undefined>();
 
   const [currentAlertParams, setCurrentAlertParams] = useState<
     EsQueryAlertParams<SearchType.searchSource>
@@ -68,35 +70,42 @@ export const SearchSourceThresholdExpression = ({
     [setRuleParams]
   );
 
-  useEffect(() => {
-    setRuleProperty('params', currentAlertParams);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setRuleProperty('params', currentAlertParams), []);
 
   useEffect(() => {
     async function initSearchSource() {
-      const loadedSearchSource = await data.search.searchSource.create(searchConfiguration);
-      setUsedSearchSource(loadedSearchSource);
+      try {
+        const loadedSearchSource = await data.search.searchSource.create(searchConfiguration);
+        setUsedSearchSource(loadedSearchSource);
+      } catch (error) {
+        setParamsError(error);
+      }
     }
     if (searchConfiguration) {
       initSearchSource();
     }
   }, [data.search.searchSource, searchConfiguration]);
 
-  if (!usedSearchSource) {
+  if (paramsError) {
     return (
-      <EuiEmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
-        body={
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.stackAlerts.searchThreshold.ui.loadingPrompt"
-              defaultMessage="Loading rule type params…"
-            />
-          </EuiText>
-        }
-      />
+      <>
+        <EuiCallOut
+          title={i18n.translate('xpack.stackAlerts.searchThreshold.ui.searchSourceParamsError', {
+            defaultMessage: 'Alert creation params error',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          <p>{paramsError.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </>
     );
+  }
+
+  if (!usedSearchSource) {
+    return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
   }
 
   const dataView = usedSearchSource.getField('index')!;

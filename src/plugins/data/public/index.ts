@@ -19,7 +19,7 @@ export * from './deprecated';
  */
 
 export { getEsQueryConfig } from '../common';
-export { FilterLabel, FilterItem, FilterBar } from './ui';
+export { FilterLabel, FilterItem } from './ui';
 export {
   getDisplayValueFromFilter,
   generateFilters,

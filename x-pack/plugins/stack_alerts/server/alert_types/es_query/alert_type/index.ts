@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { esQueryExecutor } from './es_query_executor';
-import { searchSourceExecutor } from './search_source_executor';
-
-export { esQueryExecutor, searchSourceExecutor };
+export { getAlertType } from './alert_type';

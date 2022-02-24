@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { EsQueryAlertActionContext, addMessages } from '../action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../../lib';
 import { parseDuration } from '../../../../../alerting/server';
@@ -17,11 +17,13 @@ import { ActionGroupId, ConditionMetAlertInstanceId, ES_QUERY_ID } from '../cons
 
 export async function esQueryExecutor(
   logger: Logger,
+  core: CoreSetup,
   options: ExecutorOptions<OnlyEsQueryAlertParams>
 ) {
   const { alertId, name, services, params, state } = options;
   const { alertFactory, search } = services;
   const previousTimestamp = state.latestTimestamp;
+  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
 
   const abortableEsClient = search.asCurrentUser;
   const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
@@ -82,12 +84,14 @@ export async function esQueryExecutor(
     track_total_hits: true,
   });
 
-  logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
+  logger.debug(
+    `es query alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`
+  );
 
   const { body: searchResult } = await abortableEsClient.search(query);
 
   logger.debug(
-    `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
+    ` es query alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
 
   const numMatches = (searchResult.hits.total as estypes.SearchTotalHits).value;
@@ -112,6 +116,7 @@ export async function esQueryExecutor(
       value: numMatches,
       conditions: humanFn,
       hits: searchResult.hits.hits,
+      link: `${publicBaseUrl}/app/management/insightsAndAlerting/triggersActions/rule/${alertId}`,
     };
 
     const actionContext = addMessages(options, baseContext, params);
@@ -130,9 +135,7 @@ export async function esQueryExecutor(
     }
   }
 
-  return {
-    latestTimestamp: timestamp,
-  };
+  return { latestTimestamp: timestamp };
 }
 
 function getInvalidComparatorError(comparator: string) {

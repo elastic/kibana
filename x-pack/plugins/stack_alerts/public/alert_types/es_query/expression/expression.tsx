@@ -13,7 +13,7 @@ import 'brace/theme/github';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 import { EsQueryAlertParams } from '../types';
-import { SearchSourceThresholdExpression } from './search_source_expression';
+import { SearchSourceExpression } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { isSearchSourceAlert } from '../util';
 
@@ -61,7 +61,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       )}
 
       {isSearchSource ? (
-        <SearchSourceThresholdExpression {...props} ruleParams={ruleParams} />
+        <SearchSourceExpression {...props} ruleParams={ruleParams} />
       ) : (
         <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}

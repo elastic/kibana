@@ -69,6 +69,20 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
   });
 
+  test('if searchConfiguration property is not set should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      searchType: SearchType.searchSource,
+    } as EsQueryAlertParams<SearchType.searchSource>;
+    expect(validateExpression(initialParams).errors.searchConfiguration.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.searchConfiguration[0]).toBe(
+      `Search source configuration is required.`
+    );
+  });
+
   test('if threshold0 property is not set should return proper error message', () => {
     const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
       index: ['test'],
