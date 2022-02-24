@@ -20,10 +20,13 @@ const CasesProviderLazyWrapper = ({
   userCanCrud,
   features,
   children,
+  releasePhase,
 }: GetCasesContextProps & { children: ReactNode }) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesProviderLazy value={{ owner, userCanCrud, features }}>{children}</CasesProviderLazy>
+      <CasesProviderLazy value={{ owner, userCanCrud, features, releasePhase }}>
+        {children}
+      </CasesProviderLazy>
     </Suspense>
   );
 };

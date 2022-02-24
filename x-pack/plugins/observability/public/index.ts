@@ -90,7 +90,7 @@ export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
-export type { SeriesUrl } from './components/shared/exploratory_view/types';
+export type { SeriesUrl, ReportViewType } from './components/shared/exploratory_view/types';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -99,6 +99,7 @@ export type {
 } from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
+export type { ActionTypes } from './components/shared/exploratory_view/embeddable/use_actions';
 
 export type { AddInspectorRequest } from './context/inspector/inspector_context';
 export { InspectorContextProvider } from './context/inspector/inspector_context';
