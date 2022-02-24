@@ -416,12 +416,13 @@ export class ExecuteReportTask implements ReportingTask {
                 if (report == null) {
                   throw new Error(`Report ${jobId} is null!`);
                 }
-                const maxAttemptsMsg = `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;
                 const error =
                   failedToExecuteErr instanceof ReportingError
                     ? failedToExecuteErr
                     : new UnknownError();
-                error.details = maxAttemptsMsg;
+                error.details =
+                  error.details ||
+                  `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;
                 const resp = await this._failJob(report, error);
                 report._seq_no = resp._seq_no;
                 report._primary_term = resp._primary_term;
