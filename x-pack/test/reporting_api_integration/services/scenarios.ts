@@ -164,6 +164,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     password = process.env.TEST_KIBANA_PASS || 'changeme'
   ) => {
     const jobParams = rison.encode(job as object as RisonValue);
+
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
@@ -189,6 +190,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const getCompletedJobOutput = async (downloadReportPath: string) => {
     const response = await supertest.get(downloadReportPath);
     return response.text as unknown;
+  };
+
+  const getJobErrorCode = async (
+    id: string,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ): Promise<undefined | string> => {
+    const {
+      body: [job],
+    } = await supertestWithoutAuth
+      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send()
+      .expect(200);
+    return job?.output?.error_code;
   };
 
   const deleteAllReports = async () => {
@@ -271,5 +288,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     checkIlmMigrationStatus,
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
+    getJobErrorCode,
   };
 }
