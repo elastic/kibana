@@ -9,6 +9,7 @@
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import { Filter, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -16,7 +17,8 @@ import {
   withNotifyOnErrors,
   ReduxLikeStateContainer,
 } from '../../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter } from '../../../../../data/public';
+
+import { FilterManager } from '../../../../../data/public';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
 export interface AppState {
@@ -222,7 +224,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
 }
 
 /**
@@ -239,7 +241,7 @@ function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalS
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return (
     isEqual(stateAPartial, stateBPartial) &&
-    esFilters.compareFilters(stateAFilters, stateBFilters, esFilters.COMPARE_ALL_OPTIONS)
+    compareFilters(stateAFilters, stateBFilters, COMPARE_ALL_OPTIONS)
   );
 }
 
