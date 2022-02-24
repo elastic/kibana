@@ -249,10 +249,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = [
-      'action.destructive_requires_name=true',
-      'ingest.geoip.downloader.enabled=false',
-    ].concat(options.esArgs || []);
+    const esArgs = ['action.destructive_requires_name=true'].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
