@@ -26,14 +26,10 @@ import { AppLogic } from '../../../../app_logic';
 
 import { SOURCE_NAMES, SOURCE_OBJ_TYPES } from '../../../../constants';
 import {
-  ADD_GITHUB_PATH,
   SOURCES_PATH,
   PRIVATE_SOURCES_PATH,
   getSourcesPath,
-  ADD_BOX_PATH,
   ADD_CUSTOM_PATH,
-  EDIT_BOX_PATH,
-  EDIT_CUSTOM_PATH,
 } from '../../../../routes';
 import { CustomSource, FeatureIds } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';

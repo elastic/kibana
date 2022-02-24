@@ -34,7 +34,7 @@ import {
 import { ContentSection } from '../../../../components/shared/content_section';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE, EXTERNAL_SERVICE_TYPE } from '../../../../constants';
 import { getSourcesPath, ADD_CUSTOM_PATH } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
@@ -98,10 +98,12 @@ export const AddSourceList: React.FC = () => {
   const filterConfiguredSources = (source: SourceDataItem) =>
     filterSources(source, configuredSources);
 
-  const visibleAvailableSources = availableSources.filter(filterAvailableSources);
+  const visibleAvailableSources = availableSources
+    .filter(filterAvailableSources)
+    .filter((source) => source.serviceType !== EXTERNAL_SERVICE_TYPE);
+  // The API returns available external sources as a separate entry, but we don't want to present them as options to add
+
   const visibleConfiguredSources = configuredSources.filter(filterConfiguredSources);
-  // The API returns configured external sources as a separate entry, but we don't want to present them as options to add
-  // .filter((source) => source.serviceType !== EXTERNAL_SERVICE_TYPE);
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

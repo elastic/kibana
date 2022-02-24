@@ -308,8 +308,8 @@ export const mergeServerAndStaticData = (
     const serverItem = serverData.find(({ serviceType }) => serviceType === type);
     const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
     combined.push({
-      ...serverItem,
       ...staticItem,
+      ...serverItem,
       connected: !!connectedSource,
     } as CombinedDataItem);
   });
