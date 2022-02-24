@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +27,6 @@ import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
-import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
@@ -51,7 +51,7 @@ const confirmModalOptionsDelete = {
     defaultMessage: 'Delete',
   }),
   title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
-    defaultMessage: 'Delete data view?',
+    defaultMessage: 'Delete data view',
   }),
 };
 
@@ -62,17 +62,11 @@ const securityDataView = i18n.translate(
   }
 );
 
-const deleteMsg = i18n.translate('indexPatternManagement.editIndexPattern.badge.deleteMsg', {
-  defaultMessage: 'Affected spaces:',
-});
-
 const securitySolution = 'security-solution';
-
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, dataViews, spaces } =
+    const { uiSettings, overlays, chrome, dataViews } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -117,27 +111,21 @@ export const EditIndexPattern = withRouter(
         }
       }
 
-      const LazySpaceList = spaces?.ui.components.getSpaceList;
-
-      const ContextWrapper = spaces
-        ? spaces.ui.components.getSpacesContextProvider
-        : getEmptyFunctionComponent;
-
-      const spacesList = LazySpaceList ? (
-        <ContextWrapper>
-          {deleteMsg}
-          <LazySpaceList
-            namespaces={indexPattern.namespaces}
-            displayLimit={0}
-            behaviorContext="outside-space"
+      const warning =
+        indexPattern.namespaces.length > 1 ? (
+          <FormattedMessage
+            id="indexPatternManagement.editDataView.deleteWarning"
+            defaultMessage="When you delete {dataViewName}, you remove it from every space it is shared in. You can't undo this action."
+            values={{
+              dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+            }}
           />
-        </ContextWrapper>
-      ) : (
-        <></>
-      );
+        ) : (
+          ''
+        );
 
       overlays
-        .openConfirm(toMountPoint(spacesList), confirmModalOptionsDelete)
+        .openConfirm(toMountPoint(<div>{warning}</div>), confirmModalOptionsDelete)
         .then((isConfirmed) => {
           if (isConfirmed) {
             doRemove();
