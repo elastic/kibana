@@ -5,16 +5,4 @@
  * 2.0.
  */
 
-import type React from 'react';
-export type TitleProp = string | React.ReactNode;
-
-export interface DraggableArguments {
-  field: string;
-  value: string;
-}
-
-export interface BadgeOptions {
-  beta?: boolean;
-  text: string;
-  tooltip?: string;
-}
+export { setupEmbeddable } from './setup_embeddable';
