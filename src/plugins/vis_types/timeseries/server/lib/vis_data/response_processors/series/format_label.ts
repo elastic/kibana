@@ -16,12 +16,14 @@ import type { Panel, PanelData, Series } from '../../../../../common/types';
 import type { FieldFormatsRegistry } from '../../../../../../../field_formats/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
+import type { BaseMeta } from '../../request_processors/types';
+import { SanitizedFieldType } from '../../../../../common/types';
 
 export function formatLabel(
   resp: unknown,
   panel: Panel,
   series: Series,
-  meta: any,
+  meta: BaseMeta,
   extractFields: ReturnType<typeof createFieldsFetcher>,
   fieldFormatService: FieldFormatsRegistry,
   cachedIndexPatternFetcher: CachedIndexPatternFetcher
@@ -35,21 +37,27 @@ export function formatLabel(
       termsIds.length && splitMode === BUCKET_TYPES.TERMS && panel.type !== PANEL_TYPES.MARKDOWN;
 
     if (shouldFormatLabels) {
-      const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.dataView });
-      let fields: any[] | undefined;
+      const fetchedIndex = meta.dataViewId
+        ? await cachedIndexPatternFetcher({ id: meta.dataViewId })
+        : undefined;
 
-      if (!indexPattern && meta.indexPatternString) {
+      let fields: SanitizedFieldType[] = [];
+
+      if (!fetchedIndex?.indexPattern && meta.indexPatternString) {
         fields = await extractFields(meta.indexPatternString);
       }
-      const formatField = createCachedFieldValueFormatter(indexPattern, fields, fieldFormatService);
+
+      const formatField = createCachedFieldValueFormatter(
+        fetchedIndex?.indexPattern,
+        fields,
+        fieldFormatService
+      );
 
       results
         .filter(({ seriesId }) => series.id === seriesId)
         .forEach((item) => {
           const formatted = termsIds
-            .map((i, index) =>
-              formatField(i, (Array.isArray(item.label) ? item.label : [item.label])[index])
-            )
+            .map((i, index) => formatField(i, [item.label].flat()[index]))
             .join(MULTI_FIELD_VALUES_SEPARATOR);
 
           if (formatted) {

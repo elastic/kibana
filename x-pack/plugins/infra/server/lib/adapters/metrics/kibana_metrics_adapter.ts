@@ -83,7 +83,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
               series: panel.series.map((series) => {
                 return {
                   id: series.id,
-                  label: series.label,
+                  label: [series.label].flat()[0],
                   data: series.data.map((point) => ({
                     timestamp: point[0] as number,
                     value: point[1] as number | null,
