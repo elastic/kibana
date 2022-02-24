@@ -14,7 +14,14 @@ export { getFieldValidityAndErrorMessage } from './helpers';
 
 export { FormProvider, useFormContext } from './form_context';
 
-export { Form, getUseField, UseArray, UseField, UseMultiFields } from './components';
+export {
+  Form,
+  getUseField,
+  UseArray,
+  UseField,
+  UseMultiFields,
+  FormDataProvider,
+} from './components';
 
 export type { ArrayItem, FormArrayField, UseFieldProps } from './components';
 
