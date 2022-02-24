@@ -15,7 +15,7 @@ export const isInlineScriptingEnabled = async ({
 }: {
   client: ElasticsearchClient;
 }): Promise<boolean> => {
-  const { body: settings } = await client.cluster.getSettings({
+  const settings = await client.cluster.getSettings({
     include_defaults: true,
     flat_settings: true,
   });

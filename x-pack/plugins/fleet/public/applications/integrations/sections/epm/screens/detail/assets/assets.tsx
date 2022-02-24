@@ -37,8 +37,8 @@ interface AssetsPanelProps {
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
   const pkgkey = `${name}-${version}`;
-
   const {
+    spaces,
     savedObjects: { client: savedObjectsClient },
   } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
@@ -47,6 +47,8 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(packageInfo.name);
 
+  // assume assets are installed in this space until we find otherwise
+  const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
   const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -54,6 +56,17 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
       if ('savedObject' in packageInfo) {
+        if (spaces) {
+          const { id: spaceId } = await spaces.getActiveSpace();
+          const assetInstallSpaceId = packageInfo.savedObject.attributes.installed_kibana_space_id;
+          // if assets are installed in a different space no need to attempt to load them.
+          if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
+            setAssetsInstalledInCurrentSpace(false);
+            setIsLoading(false);
+            return;
+          }
+        }
+
         const {
           savedObject: { attributes: packageAttributes },
         } = packageInfo;
@@ -114,7 +127,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       }
     };
     fetchAssetSavedObjects();
-  }, [savedObjectsClient, packageInfo]);
+  }, [savedObjectsClient, packageInfo, spaces]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -137,9 +150,20 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         error={fetchError}
       />
     );
+  } else if (!assetsInstalledInCurrentSpace) {
+    content = (
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpace"
+            defaultMessage="This integration is installed, but no assets are available in this space"
+          />
+        </h2>
+      </EuiTitle>
+    );
   } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {
-      // If a UI extension for custom asset entries is defined, render the custom component here depisite
+      // If a UI extension for custom asset entries is defined, render the custom component here despite
       // there being no saved objects found
       content = (
         <ExtensionWrapper>

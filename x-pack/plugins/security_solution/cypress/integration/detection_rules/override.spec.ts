@@ -34,7 +34,6 @@ import {
   DETAILS_DESCRIPTION,
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -70,10 +69,11 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe('Detection rules, override', () => {
+describe.skip('Detection rules, override', () => {
   const expectedUrls = getNewOverrideRule().referenceUrls.join('');
   const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples.join('');
   const expectedTags = getNewOverrideRule().tags.join('');

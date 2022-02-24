@@ -264,6 +264,9 @@ function generateKeywordMapping(field: Field): IndexTemplateMapping {
   if (field.normalizer) {
     mapping.normalizer = field.normalizer;
   }
+  if (field.dimension) {
+    mapping.time_series_dimension = field.dimension;
+  }
   return mapping;
 }
 
@@ -470,7 +473,7 @@ const getDataStreams = async (
 ): Promise<CurrentDataStream[] | undefined> => {
   const { indexTemplate } = template;
 
-  const { body } = await esClient.indices.getDataStream({
+  const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
   });
 

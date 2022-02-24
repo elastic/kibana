@@ -689,6 +689,31 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
+  it('tests processing dimension field', () => {
+    const literalYml = `
+- name: example.id
+  type: keyword
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              ignore_above: 1024,
+              time_series_dimension: true,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('processes meta fields', () => {
     const metaFieldLiteralYaml = `
 - name: fieldWithMetas
@@ -841,10 +866,8 @@ describe('EPM template', () => {
   describe('updateCurrentWriteIndices', () => {
     it('update all the index matching, index template index pattern', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [{ name: 'test.prefix1-default' }],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
@@ -868,13 +891,11 @@ describe('EPM template', () => {
     });
     it('update non replicated datastream', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [
-            { name: 'test-non-replicated' },
-            { name: 'test-replicated', replicated: true },
-          ],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [
+          { name: 'test-non-replicated' },
+          { name: 'test-replicated', replicated: true },
+        ],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
