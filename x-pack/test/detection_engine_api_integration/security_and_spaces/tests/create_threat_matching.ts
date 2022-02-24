@@ -503,7 +503,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
-        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
         it.skip('enriches signals with the single indicator that matched', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
@@ -595,7 +595,8 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('enriches signals with multiple indicators if several matched', async () => {
+        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+        it.skip('enriches signals with multiple indicators if several matched', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
