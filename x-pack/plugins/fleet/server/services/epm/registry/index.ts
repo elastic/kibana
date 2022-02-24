@@ -21,7 +21,6 @@ import type {
   InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
   GetCategoriesRequest,
 } from '../../../types';
 import {
@@ -34,6 +33,8 @@ import {
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -65,20 +66,16 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-// When `throwIfNotFound` is true or undefined, return type will never be undefined.
-export async function fetchFindLatestPackage(
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
+
+async function _fetchFindLatestPackage(
   packageName: string,
-  options?: { ignoreConstraints?: boolean; throwIfNotFound?: true }
-): Promise<RegistrySearchResult>;
-export async function fetchFindLatestPackage(
-  packageName: string,
-  options: { ignoreConstraints?: boolean; throwIfNotFound: false }
-): Promise<RegistrySearchResult | undefined>;
-export async function fetchFindLatestPackage(
-  packageName: string,
-  options?: { ignoreConstraints?: boolean; throwIfNotFound?: boolean }
-): Promise<RegistrySearchResult | undefined> {
-  const { ignoreConstraints = false, throwIfNotFound = true } = options ?? {};
+  options?: FetchFindLatestPackageOptions
+) {
+  const { ignoreConstraints = false } = options ?? {};
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
@@ -86,12 +83,55 @@ export async function fetchFindLatestPackage(
     setKibanaVersion(url);
   }
 
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
+  const res = await fetchUrl(url.toString(), 1);
+  const searchResults: RegistryPackage[] = JSON.parse(res);
+
+  return searchResults;
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+    }
+
     return searchResults[0];
-  } else if (throwIfNotFound) {
-    throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      throw error;
+    }
+
+    return bundledPackage;
+  }
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
+
+    if (!searchResults.length) {
+      return undefined;
+    }
+
+    return searchResults[0];
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      return undefined;
+    }
+
+    return bundledPackage;
   }
 }
 

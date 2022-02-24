@@ -4226,9 +4226,6 @@
           "ca_trusted_fingerprint": {
             "type": "string"
           },
-          "api_key": {
-            "type": "string"
-          },
           "config": {
             "type": "object"
           },
