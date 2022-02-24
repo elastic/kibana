@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { mockCasesContext } from './mock_cases_context';
+
 export const mockCases = {
   canUseCases: jest.fn(),
   getCases: jest.fn(),
-  getCasesContext: jest.fn(),
+  getCasesContext: () => mockCasesContext,
   getRecentCases: jest.fn(),
   getCreateCaseFlyout: jest.fn(),
   getAllCasesSelectorModal: jest.fn(),
