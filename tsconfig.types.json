@@ -6,7 +6,6 @@
     "stripInternal": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationMap": true,
   },
   "include": [
     "src/core/server/index.ts",
