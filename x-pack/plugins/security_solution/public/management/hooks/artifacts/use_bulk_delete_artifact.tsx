@@ -18,17 +18,24 @@ export function useBulkDeleteArtifact(
   } = {
     concurrency: 5,
   }
-): UseMutationResult<ExceptionListItemSchema[], HttpFetchError, string[], () => void> {
-  return useMutation<ExceptionListItemSchema[], HttpFetchError, string[], () => void>(
-    (exceptionIds: string[]) => {
-      return pMap(
-        exceptionIds,
-        (id) => {
-          return exceptionListApiClient.delete(id);
-        },
-        options
-      );
-    },
-    customOptions
-  );
+): UseMutationResult<
+  ExceptionListItemSchema[],
+  HttpFetchError,
+  Array<{ itemId?: string; id?: string }>,
+  () => void
+> {
+  return useMutation<
+    ExceptionListItemSchema[],
+    HttpFetchError,
+    Array<{ itemId?: string; id?: string }>,
+    () => void
+  >((exceptionIds: Array<{ itemId?: string; id?: string }>) => {
+    return pMap(
+      exceptionIds,
+      ({ itemId, id }) => {
+        return exceptionListApiClient.delete(itemId, id);
+      },
+      options
+    );
+  }, customOptions);
 }

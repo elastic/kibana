@@ -11,13 +11,14 @@ import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptio
 
 export function useGetArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  id: string,
-  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError>
+  itemId?: string,
+  id?: string,
+  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError> = {}
 ): QueryObserverResult<ExceptionListItemSchema, HttpFetchError> {
   return useQuery<ExceptionListItemSchema, HttpFetchError>(
-    ['get', exceptionListApiClient, id],
+    ['get', exceptionListApiClient, itemId, id],
     () => {
-      return exceptionListApiClient.get(id);
+      return exceptionListApiClient.get(itemId, id);
     },
     {
       refetchIntervalInBackground: false,

@@ -12,8 +12,18 @@ import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptio
 export function useDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   customOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError>
-): UseMutationResult<ExceptionListItemSchema, HttpFetchError, string, () => void> {
-  return useMutation<ExceptionListItemSchema, HttpFetchError, string, () => void>((id: string) => {
-    return exceptionListApiClient.delete(id);
+): UseMutationResult<
+  ExceptionListItemSchema,
+  HttpFetchError,
+  { itemId?: string; id?: string },
+  () => void
+> {
+  return useMutation<
+    ExceptionListItemSchema,
+    HttpFetchError,
+    { itemId?: string; id?: string },
+    () => void
+  >(({ itemId, id }) => {
+    return exceptionListApiClient.delete(itemId, id);
   }, customOptions);
 }
