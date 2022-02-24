@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { LayerType, LensMultiTable } from '../../../../lens/common';
+import type { LensMultiTable } from '../../../../lens/common';
 
 export interface ChoroplethChartState {
   layerId: string;
-  layerType: LayerType;
-  emsLayerId: string;
-  emsField: string;
-  accessor: string;
-  bucketColumnId: string;
-  metricColumnId: string;
-  isPreview: boolean;
+  emsLayerId?: string;
+  emsField?: string;
+  accessor?: string;
+  bucketColumnId?: string;
+  metricColumnId?: string;
+  isPreview?: boolean;
 }
 
 export interface ChoroplethChartConfig extends ChoroplethChartState {

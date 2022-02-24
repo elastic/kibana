@@ -39,7 +39,7 @@ export async function suggestEMSTermJoinConfig(
 
 export function emsAutoSuggest(
   sampleValuesConfig: SampleValuesConfig,
-  fileLayers: FileLayer[],
+  fileLayers: FileLayer[]
 ): EMSTermJoinConfig | null {
   const matches: EMSTermJoinConfig[] = [];
 

@@ -9,48 +9,21 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
+import type { FileLayer } from '@elastic/ems-client';
 import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ColorMode } from '../../../../../src/plugins/charts/common';
-import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { ColorMode } from '../../../../../../src/plugins/charts/common';
 import { getSuggestions } from './suggestions';
-import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
+import { layerTypes } from '../../../../lens/common';
+import type { OperationMetadata, SuggestionRequest, Visualization } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
-import type { LayerType } from '../../../../lens/common';
 import { Icon } from './icon';
-
-const toExpression = (
-  paletteService: PaletteRegistry,
-  state: ChoroplethChartState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: { title?: string, description?: string, isPreview: boolean },
-): Ast | null => {
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'lens_choropleth_chart',
-        arguments: {
-          title: [attributes?.title || ''],
-          description: [attributes?.description || ''],
-          isPreview: [attributes.isPreview],
-          layerId: [state.layerId],
-          emsField: [state.emsField],
-          emsLayerId: [state.emsLayerId],
-          bucketColumnId: [state.bucketColumnId],
-          metricColumnId: [state.metricColumnId],
-        },
-      },
-    ],
-  };
-};
 
 export const getVisualization = ({
   paletteService,
   theme,
-  emsAutoSuggest,
+  emsFileLayers,
 }: {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
@@ -89,7 +62,7 @@ export const getVisualization = ({
 
   getDescription() {
     return {
-      icon: RegionmapChartIcon,
+      icon: Icon,
       label: i18n.translate('xpack.maps.metric.label', {
         defaultMessage: 'Regionmap',
       }),
@@ -148,14 +121,55 @@ export const getVisualization = ({
 
   getLayerType(layerId, state) {
     if (state?.layerId === layerId) {
-      return state.layerType;
+      return layerTypes.DATA;
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { title: attributes.title, description: attributes.description, isPreview: false }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers, { isPreview: true }),
+  toExpression: (state, datasourceLayers, attributes) => {
+    if (
+      !state.accessor ||
+      !state.emsField ||
+      !state.emsLayerId ||
+      !state.bucketColumnId ||
+      !state.metricColumnId
+    ) {
+      return null;
+    }
+
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'lens_choropleth_chart',
+          arguments: {
+            title: [attributes?.title || ''],
+            isPreview: [false],
+            layerId: [state.layerId],
+            emsField: [state.emsField],
+            emsLayerId: [state.emsLayerId],
+            bucketColumnId: [state.bucketColumnId],
+            metricColumnId: [state.metricColumnId],
+          },
+        },
+      ],
+    };
+  },
+
+  toPreviewExpression: (state, datasourceLayers) => {
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'lens_choropleth_chart',
+          arguments: {
+            isPreview: [true],
+          },
+        },
+      ],
+    };
+  },
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };

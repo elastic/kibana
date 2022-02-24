@@ -12,6 +12,7 @@ import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public'
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -58,7 +59,6 @@ import type { PresentationUtilPluginStart } from '../../../../src/plugins/presen
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import {
   MapsAppLocatorDefinition,
   MapsAppRegionMapLocatorDefinition,
@@ -136,7 +136,10 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup<MapsPluginStartDependencies, MapsPluginStart>, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+  public setup(
+    core: CoreSetup<MapsPluginStartDependencies, MapsPluginStart>,
+    plugins: MapsPluginSetupDependencies
+  ): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();

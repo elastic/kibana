@@ -7,7 +7,8 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, VisualizationSuggestion } from '../types';
+import type { FileLayer } from '@elastic/ems-client';
+import type { SuggestionRequest, VisualizationSuggestion } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
 import { emsAutoSuggest } from '../../ems_autosuggest';
@@ -15,13 +16,10 @@ import { emsAutoSuggest } from '../../ems_autosuggest';
 /**
  * Generate choroplath chart suggestions for buckets that match administrative boundaries from the Elastic Maps Service.
  */
-export function getSuggestions({
-  table,
-  state,
-  keptLayerIds,
-  activeData,
-}: SuggestionRequest<ChoroplethChartState>,
-emsFileLayers: FileLayer[]): Array<VisualizationSuggestion<ChoroplethChartState>> {
+export function getSuggestions(
+  { table, state, keptLayerIds, activeData }: SuggestionRequest<ChoroplethChartState>,
+  emsFileLayers: FileLayer[]
+): Array<VisualizationSuggestion<ChoroplethChartState>> {
   if (!activeData) {
     return [];
   }
@@ -33,11 +31,11 @@ emsFileLayers: FileLayer[]): Array<VisualizationSuggestion<ChoroplethChartState>
     .filter((col) => {
       return col.operation.dataType === 'string';
     })
-    .forEach(bucket => {
+    .forEach((bucket) => {
       for (const tableId in activeData) {
         const sampleValues: string[] = [];
         const table = activeData[tableId];
-        table.rows.forEach(row => {
+        table.rows.forEach((row) => {
           const value = row[bucket.columnId];
           if (value && value !== '__other__' && !sampleValues.includes(value)) {
             sampleValues.push(value);
@@ -46,7 +44,7 @@ emsFileLayers: FileLayer[]): Array<VisualizationSuggestion<ChoroplethChartState>
 
         const emsSuggestion = emsAutoSuggest({ sampleValues }, emsFileLayers);
         if (emsSuggestion) {
-          metrics.forEach(metric => {
+          metrics.forEach((metric) => {
             suggestions.push({
               title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
                 defaultMessage: '{emsLayerLabel} by {metricLabel}',

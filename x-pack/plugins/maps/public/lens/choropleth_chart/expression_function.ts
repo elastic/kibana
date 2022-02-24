@@ -59,7 +59,7 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
     isPreview: {
       types: ['boolean'],
       help: 'When true, map is displayed as lens preview',
-    }
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data, args) {
