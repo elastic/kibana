@@ -232,7 +232,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       <LegendSizeSettings
         legendSize={legendSize}
         onLegendSizeChange={onLegendSizeChange}
-        isVerticalLegend={position === Position.Left || position === Position.Right}
+        isVerticalLegend={!position || position === Position.Left || position === Position.Right}
         isDisabled={mode === 'hide'}
       />
       <EuiFormRow
