@@ -57,8 +57,8 @@ describe('ProcessTree component', () => {
 
       expect(
         renderResult
-        .queryByTestId('sessionView:processTreeSelectionArea')
-        ?.parentElement?.getAttribute('data-id')
+          .queryByTestId('sessionView:processTreeSelectionArea')
+          ?.parentElement?.getAttribute('data-id')
       ).toEqual(mockSelectedProcess.id);
 
       // change the selected process
@@ -80,8 +80,8 @@ describe('ProcessTree component', () => {
 
       expect(
         renderResult
-        .queryByTestId('sessionView:processTreeSelectionArea')
-        ?.parentElement?.getAttribute('data-id')
+          .queryByTestId('sessionView:processTreeSelectionArea')
+          ?.parentElement?.getAttribute('data-id')
       ).toEqual(mockSelectedProcess2.id);
     });
   });
