@@ -122,7 +122,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
-let finishedInitialRender: boolean;
 let lastApplyChangesCounter = 0;
 
 // Exported for testing purposes only.
@@ -149,15 +148,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const triggerApply = applyChangesCounter !== lastApplyChangesCounter;
   lastApplyChangesCounter = applyChangesCounter;
 
-  const shouldApplyChanges = autoApplyEnabled || !finishedInitialRender || triggerApply;
-
   const [expressionToRender, setExpressionToRender] = useState<string | null | undefined>();
+  const [finishedInitialRender, setFinishedInitialRender] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      finishedInitialRender = false;
-    };
-  }, []);
+  const shouldApplyChanges = autoApplyEnabled || !finishedInitialRender || triggerApply;
 
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -271,8 +265,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, [expression, dispatchLens, expressionToRender]);
 
   const expressionExists = Boolean(expressionToRender);
-  if (expressionExists) {
-    finishedInitialRender = true;
+  if (expressionExists && !finishedInitialRender) {
+    setFinishedInitialRender(true);
   }
 
   useEffect(() => {
