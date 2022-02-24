@@ -32,7 +32,7 @@ export const AlertFlyout = ({ metric, nodeType, visible, setVisible }: Props) =>
         consumer: 'infrastructure',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
-        alertTypeId: METRIC_ANOMALY_ALERT_TYPE_ID,
+        ruleTypeId: METRIC_ANOMALY_ALERT_TYPE_ID,
         metadata: {
           metric,
           nodeType,

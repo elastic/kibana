@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
@@ -12,6 +13,7 @@ import { KeyValuePairsField, Pair } from './key_value_field';
 
 describe('<KeyValuePairsField />', () => {
   const onChange = jest.fn();
+  const onBlur = jest.fn();
   const defaultDefaultValue = [['', '']] as Pair[];
   const WrappedComponent = ({
     defaultValue = defaultDefaultValue,
@@ -21,10 +23,15 @@ describe('<KeyValuePairsField />', () => {
       <KeyValuePairsField
         defaultPairs={defaultValue}
         onChange={onChange}
+        onBlur={onBlur}
         addPairControlLabel={addPairControlLabel}
       />
     );
   };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('renders KeyValuePairsField', () => {
     const { getByText } = render(<WrappedComponent />);
@@ -32,6 +39,21 @@ describe('<KeyValuePairsField />', () => {
     expect(getByText('Value')).toBeInTheDocument();
 
     expect(getByText('Add pair')).toBeInTheDocument();
+  });
+
+  it('calls onBlur', () => {
+    const { getByText, getByTestId } = render(<WrappedComponent />);
+    const addPair = getByText('Add pair');
+    fireEvent.click(addPair);
+
+    const keyInput = getByTestId('keyValuePairsKey0') as HTMLInputElement;
+    const valueInput = getByTestId('keyValuePairsValue0') as HTMLInputElement;
+
+    userEvent.type(keyInput, 'some-key');
+    userEvent.type(valueInput, 'some-value');
+    fireEvent.blur(valueInput);
+
+    expect(onBlur).toHaveBeenCalledTimes(2);
   });
 
   it('handles adding and editing a new row', async () => {

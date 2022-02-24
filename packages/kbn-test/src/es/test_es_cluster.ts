@@ -244,9 +244,10 @@ export function createTestEsCluster<
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
             // If we have multiple nodes, we shouldn't try setting up the native realm
-            // right away, or ES will complain as the cluster isn't ready. So we only
+            // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
           });
         });
       }
