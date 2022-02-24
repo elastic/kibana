@@ -96,6 +96,7 @@ export const LegendSizeSettings = ({
           <EuiSwitch
             compressed
             showLabel={false}
+            disabled={isDisabled}
             label={autoSizeLabel}
             checked={isAutoSizeEnabled}
             onChange={handleAutoSizeChange}
