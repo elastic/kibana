@@ -20,18 +20,32 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const HostRiskTabBodyComponent: React.FC<
-  Pick<HostsComponentsQueryProps, 'startDate' | 'endDate'> & { hostName: string }
-> = ({ hostName, startDate, endDate }) => {
+  Pick<HostsComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
+    hostName: string;
+  }
+> = ({ hostName, startDate, endDate, setQuery, deleteQuery }) => {
   const { buttonHref } = useRiskyHostsDashboardButtonHref(startDate, endDate);
 
   return (
     <>
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={2}>
-          <HostRiskScoreOverTime hostName={hostName} from={startDate} to={endDate} />
+          <HostRiskScoreOverTime
+            hostName={hostName}
+            from={startDate}
+            to={endDate}
+            setQuery={setQuery}
+            deleteQuery={deleteQuery}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <TopHostScoreContributors hostName={hostName} from={startDate} to={endDate} />
+          <TopHostScoreContributors
+            hostName={hostName}
+            from={startDate}
+            to={endDate}
+            setQuery={setQuery}
+            deleteQuery={deleteQuery}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <StyledEuiFlexGroup gutterSize="s">

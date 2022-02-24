@@ -28,12 +28,15 @@ export const analyticsJobsCreationRouteFactory = (
 ): MlRoute => ({
   path: '/data_frame_analytics/new_job',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.createJob.docTitle', {
+    defaultMessage: 'Create Job',
+  }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameCreationLabel', {
-        defaultMessage: 'Create job',
+        defaultMessage: 'Create Job',
       }),
     },
   ],

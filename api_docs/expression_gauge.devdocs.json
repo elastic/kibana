@@ -613,7 +613,7 @@
                 "section": "def-common.CustomPaletteState",
                 "text": "CustomPaletteState"
               },
-              "> | undefined; }"
+              "> | undefined; ariaLabel?: string | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -908,7 +908,7 @@
             "section": "def-common.CustomPaletteState",
             "text": "CustomPaletteState"
           },
-          "> | undefined; }"
+          "> | undefined; ariaLabel?: string | undefined; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,

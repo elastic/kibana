@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { PalettePicker, PalettePickerProps } from './palette_picker';
 import { chartPluginMock } from '../../../../charts/public/mocks';

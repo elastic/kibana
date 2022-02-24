@@ -69,8 +69,10 @@ describe('AppLogic', () => {
   describe('setContext', () => {
     it('sets context', () => {
       AppLogic.actions.setContext(true);
-
-      expect(AppLogic.values.isOrganization).toEqual(true);
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        isOrganization: true,
+      });
     });
   });
 
@@ -79,7 +81,13 @@ describe('AppLogic', () => {
       mount(DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setSourceRestriction(true);
 
-      expect(AppLogic.values.account.canCreatePrivateSources).toEqual(true);
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        searchOAuth: DEFAULT_INITIAL_APP_DATA.searchOAuth,
+        account: {
+          canCreatePrivateSources: true,
+        },
+      });
     });
   });
 
@@ -89,7 +97,13 @@ describe('AppLogic', () => {
       mount(DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setOrgName(NAME);
 
-      expect(AppLogic.values.organization.name).toEqual(NAME);
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        searchOAuth: DEFAULT_INITIAL_APP_DATA.searchOAuth,
+        organization: {
+          name: NAME,
+        },
+      });
     });
   });
 });

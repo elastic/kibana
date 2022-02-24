@@ -646,6 +646,9 @@
                 "properties": {
                   "force": {
                     "type": "boolean"
+                  },
+                  "ignore_constraints": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -2872,6 +2875,35 @@
           }
         ]
       }
+    },
+    "/logstash_api_keys": {
+      "post": {
+        "summary": "Generate Logstash API key",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "generate-logstash-api-key",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -3002,9 +3034,14 @@
             ]
           },
           "is_default": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true
           },
           "is_default_fleet_server": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "has_fleet_server": {
             "type": "boolean"
           },
           "data_output_id": {
@@ -3759,6 +3796,9 @@
         "title": "New agent policy",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -3778,7 +3818,11 @@
               ]
             }
           }
-        }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
       },
       "new_package_policy": {
         "title": "New package policy",
@@ -4209,9 +4253,6 @@
             "type": "string"
           },
           "ca_trusted_fingerprint": {
-            "type": "string"
-          },
-          "api_key": {
             "type": "string"
           },
           "config": {

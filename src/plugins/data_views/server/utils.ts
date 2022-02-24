@@ -10,13 +10,13 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import {
   IFieldType,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  IndexPatternAttributes,
+  DataViewAttributes,
   SavedObject,
 } from '../common';
 
 export const getFieldByName = (
   fieldName: string,
-  indexPattern: SavedObject<IndexPatternAttributes>
+  indexPattern: SavedObject<DataViewAttributes>
 ): IFieldType | undefined => {
   const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
   const field = fields && fields.find((f) => f.name === fieldName);
@@ -27,8 +27,8 @@ export const getFieldByName = (
 export const findIndexPatternById = async (
   savedObjectsClient: SavedObjectsClientContract,
   index: string
-): Promise<SavedObject<IndexPatternAttributes> | undefined> => {
-  const savedObjectsResponse = await savedObjectsClient.find<IndexPatternAttributes>({
+): Promise<SavedObject<DataViewAttributes> | undefined> => {
+  const savedObjectsResponse = await savedObjectsClient.find<DataViewAttributes>({
     type: DATA_VIEW_SAVED_OBJECT_TYPE,
     fields: ['fields'],
     search: `"${index}"`,

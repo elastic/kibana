@@ -88,7 +88,7 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
         <EuiEmptyPrompt
           iconType="securityApp"
           title={
-            <h2>
+            <h2 data-test-subj="missingPrivilegesPromptTitle">
               <FormattedMessage
                 id="xpack.fleet.permissionDeniedErrorTitle"
                 defaultMessage="Permission denied"
@@ -96,7 +96,7 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
             </h2>
           }
           body={
-            <p>
+            <p data-test-subj="missingPrivilegesPromptMessage">
               <FormattedMessage
                 id="xpack.fleet.permissionDeniedErrorMessage"
                 defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
@@ -216,7 +216,6 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * and no routes defined
  */
 export const FleetAppContext: React.FC<{
-  basepath: string;
   startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];

@@ -14,11 +14,11 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiDescribedFormGroup,
   EuiSwitch,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from './common/described_form_group_with_wrap';
 import { ConfigKey, DataStream, Validation } from './types';
 import { usePolicyConfigContext } from './contexts';
 import { TLSFields } from './tls_fields';
@@ -36,6 +36,8 @@ interface Props {
   dataStreams?: DataStream[];
   children?: React.ReactNode;
   appendAdvancedFields?: React.ReactNode;
+  minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
 const dataStreamToString = [
@@ -54,7 +56,7 @@ const dataStreamToString = [
 ];
 
 export const CustomFields = memo<Props>(
-  ({ validate, dataStreams = [], children, appendAdvancedFields }) => {
+  ({ validate, dataStreams = [], children, appendAdvancedFields, minColumnWidth, onFieldBlur }) => {
     const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
       usePolicyConfigContext();
 
@@ -70,13 +72,24 @@ export const CustomFields = memo<Props>(
     const renderSimpleFields = (type: DataStream) => {
       switch (type) {
         case DataStream.HTTP:
-          return <HTTPSimpleFields validate={validate} />;
+          return (
+            <HTTPSimpleFields validate={validate} onFieldBlur={(field) => onFieldBlur?.(field)} />
+          );
         case DataStream.ICMP:
-          return <ICMPSimpleFields validate={validate} />;
+          return (
+            <ICMPSimpleFields validate={validate} onFieldBlur={(field) => onFieldBlur?.(field)} />
+          );
         case DataStream.TCP:
-          return <TCPSimpleFields validate={validate} />;
+          return (
+            <TCPSimpleFields validate={validate} onFieldBlur={(field) => onFieldBlur?.(field)} />
+          );
         case DataStream.BROWSER:
-          return <BrowserSimpleFields validate={validate} />;
+          return (
+            <BrowserSimpleFields
+              validate={validate}
+              onFieldBlur={(field) => onFieldBlur?.(field)}
+            />
+          );
         default:
           return null;
       }
@@ -86,7 +99,8 @@ export const CustomFields = memo<Props>(
 
     return (
       <EuiForm component="form">
-        <EuiDescribedFormGroup
+        <DescribedFormGroupWithWrap
+          minColumnWidth={minColumnWidth}
           title={
             <h4>
               <FormattedMessage
@@ -130,6 +144,7 @@ export const CustomFields = memo<Props>(
                     options={dataStreamOptions}
                     value={monitorType}
                     onChange={(event) => setMonitorType(event.target.value as DataStream)}
+                    onBlur={() => onFieldBlur?.(ConfigKey.MONITOR_TYPE)}
                     data-test-subj="syntheticsMonitorTypeField"
                   />
                 </EuiFormRow>
@@ -165,9 +180,10 @@ export const CustomFields = memo<Props>(
               {renderSimpleFields(monitorType)}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiDescribedFormGroup>
+        </DescribedFormGroupWithWrap>
         {(isHTTP || isTCP) && (
-          <EuiDescribedFormGroup
+          <DescribedFormGroupWithWrap
+            minColumnWidth={minColumnWidth}
             title={
               <h4>
                 <FormattedMessage
@@ -197,15 +213,31 @@ export const CustomFields = memo<Props>(
               onChange={(event) => setIsTLSEnabled(event.target.checked)}
             />
             <TLSFields />
-          </EuiDescribedFormGroup>
+          </DescribedFormGroupWithWrap>
         )}
         <EuiSpacer size="m" />
         {isHTTP && (
-          <HTTPAdvancedFields validate={validate}>{appendAdvancedFields}</HTTPAdvancedFields>
+          <HTTPAdvancedFields
+            validate={validate}
+            minColumnWidth={minColumnWidth}
+            onFieldBlur={onFieldBlur}
+          >
+            {appendAdvancedFields}
+          </HTTPAdvancedFields>
         )}
-        {isTCP && <TCPAdvancedFields>{appendAdvancedFields}</TCPAdvancedFields>}
+        {isTCP && (
+          <TCPAdvancedFields minColumnWidth={minColumnWidth} onFieldBlur={onFieldBlur}>
+            {appendAdvancedFields}
+          </TCPAdvancedFields>
+        )}
         {isBrowser && (
-          <BrowserAdvancedFields validate={validate}>{appendAdvancedFields}</BrowserAdvancedFields>
+          <BrowserAdvancedFields
+            validate={validate}
+            minColumnWidth={minColumnWidth}
+            onFieldBlur={onFieldBlur}
+          >
+            {appendAdvancedFields}
+          </BrowserAdvancedFields>
         )}
         {isICMP && <ICMPAdvancedFields>{appendAdvancedFields}</ICMPAdvancedFields>}
       </EuiForm>

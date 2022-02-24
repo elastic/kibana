@@ -14,6 +14,7 @@ export const RUNTIME_FIELD_TYPES = [
   'ip',
   'boolean',
   'geo_point',
+  'composite',
 ] as const;
 
 /**
@@ -40,3 +41,5 @@ export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
  */
 
 export const INDEX_PATTERN_SAVED_OBJECT_TYPE = DATA_VIEW_SAVED_OBJECT_TYPE;
+
+export const PLUGIN_NAME = 'DataViews';

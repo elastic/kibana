@@ -44,6 +44,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./editing'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./deleting'));
+    loadTestFile(require.resolve('./resetting'));
     loadTestFile(require.resolve('./starting'));
   });
 }

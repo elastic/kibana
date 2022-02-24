@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { cloneDeep, flow, mergeWith } from 'lodash';
+import { cloneDeep, flow } from 'lodash';
 import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationContext,
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
@@ -27,6 +27,7 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
 import {
@@ -36,7 +37,9 @@ import {
   commonMakeReversePaletteAsCustom,
   commonRenameFilterReferences,
   getLensFilterMigrations,
+  getLensCustomVisualizationMigrations,
   commonRenameRecordsField,
+  fixLensTopValuesCustomFormatting,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -456,6 +459,11 @@ const renameRecordsField: SavedObjectMigrationFn<LensDocShape810, LensDocShape81
   return { ...newDoc, attributes: commonRenameRecordsField(newDoc.attributes) };
 };
 
+const addParentFormatter: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: fixLensTopValuesCustomFormatting(newDoc.attributes) };
+};
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -469,25 +477,17 @@ const lensMigrations: SavedObjectMigrationMap = {
   '7.14.0': removeTimezoneDateHistogramParam,
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
-  '8.1.0': flow(renameFilterReferences, renameRecordsField),
-};
-
-export const mergeSavedObjectMigrationMaps = (
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
-): SavedObjectMigrationMap => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
-    }
-    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(state, context), context);
-  };
-
-  return mergeWith({ ...obj1 }, obj2, customizer);
+  '8.1.0': flow(renameFilterReferences, renameRecordsField, addParentFormatter),
 };
 
 export const getAllMigrations = (
-  filterMigrations: MigrateFunctionsObject
+  filterMigrations: MigrateFunctionsObject,
+  customVisualizationMigrations: CustomVisualizationMigrations
 ): SavedObjectMigrationMap =>
-  mergeSavedObjectMigrationMaps(lensMigrations, getLensFilterMigrations(filterMigrations));
+  mergeSavedObjectMigrationMaps(
+    mergeSavedObjectMigrationMaps(
+      lensMigrations,
+      getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+    ),
+    getLensCustomVisualizationMigrations(customVisualizationMigrations)
+  );

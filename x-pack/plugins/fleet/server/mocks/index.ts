@@ -99,9 +99,7 @@ export const xpackMocks = {
 
 export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
-    _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
-    buildPackagePolicyFromPackageWithVersion: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -127,7 +125,6 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
   return {
     get: jest.fn(),
     list: jest.fn(),
-    getDefaultAgentPolicyId: jest.fn(),
     getFullAgentPolicy: jest.fn(),
     getByIds: jest.fn(),
   };

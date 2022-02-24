@@ -20,10 +20,10 @@ import {
   AlertState,
   AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert, RawAlertInstance } from '../../../alerting/common';
+import { Alert as Rule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
@@ -47,7 +47,7 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule {
   }
 
   constructor(
-    sanitizedRule: Alert | undefined = undefined,
+    sanitizedRule: Rule | undefined = undefined,
     public readonly id: string,
     public readonly threadPoolType: string,
     public readonly name: string,
@@ -176,7 +176,7 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule {
     };
   }
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
     cluster: AlertCluster

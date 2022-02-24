@@ -38,14 +38,8 @@ describe('query_correlation_with_histogram', () => {
   describe('fetchTransactionDurationCorrelationWithHistogram', () => {
     it(`doesn't break on failing ES queries and adds messages to the log`, async () => {
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
-          return {
-            body: {} as unknown as estypes.SearchResponse,
-          };
+        (req: estypes.SearchRequest): Promise<estypes.SearchResponse> => {
+          return Promise.resolve({} as unknown as estypes.SearchResponse);
         }
       );
 
@@ -81,21 +75,15 @@ describe('query_correlation_with_histogram', () => {
 
     it('returns items with correlation and ks-test value', async () => {
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
-          return {
-            body: {
-              aggregations: {
-                latency_ranges: { buckets: [] },
-                transaction_duration_correlation: { value: 0.6 },
-                ks_test: { less: 0.001 },
-                logspace_ranges: { buckets: [] },
-              },
-            } as unknown as estypes.SearchResponse,
-          };
+        (req: estypes.SearchRequest): Promise<estypes.SearchResponse> => {
+          return Promise.resolve({
+            aggregations: {
+              latency_ranges: { buckets: [] },
+              transaction_duration_correlation: { value: 0.6 },
+              ks_test: { less: 0.001 },
+              logspace_ranges: { buckets: [] },
+            },
+          } as unknown as estypes.SearchResponse);
         }
       );
 

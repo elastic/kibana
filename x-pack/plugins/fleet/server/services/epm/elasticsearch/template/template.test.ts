@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { safeLoad } from 'js-yaml';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -689,42 +689,78 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
+  it('tests processing dimension field', () => {
+    const literalYml = `
+- name: example.id
+  type: keyword
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              ignore_above: 1024,
+              time_series_dimension: true,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field', () => {
+    const literalYml = `
+- name: total.norm.pct
+  type: scaled_float
+  metric_type: gauge
+  unit: percent
+  format: percent
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          properties: {
+            norm: {
+              properties: {
+                pct: {
+                  scaling_factor: 1000,
+                  type: 'scaled_float',
+                  meta: {
+                    metric_type: 'gauge',
+                    unit: 'percent',
+                  },
+                  time_series_metric: 'gauge',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('processes meta fields', () => {
     const metaFieldLiteralYaml = `
 - name: fieldWithMetas
   type: integer
   unit: byte
-  metric_type: gauge
   `;
     const metaFieldMapping = {
       properties: {
         fieldWithMetas: {
           type: 'long',
           meta: {
-            metric_type: 'gauge',
             unit: 'byte',
-          },
-        },
-      },
-    };
-    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
-  });
-
-  it('processes meta fields with only one meta value', () => {
-    const metaFieldLiteralYaml = `
-- name: fieldWithMetas
-  type: integer
-  metric_type: gauge
-  `;
-    const metaFieldMapping = {
-      properties: {
-        fieldWithMetas: {
-          type: 'long',
-          meta: {
-            metric_type: 'gauge',
           },
         },
       },
@@ -740,16 +776,13 @@ describe('EPM template', () => {
 - name: groupWithMetas
   type: group
   unit: byte
-  metric_type: gauge
   fields:
     - name: fieldA
       type: integer
       unit: byte
-      metric_type: gauge
     - name: fieldB
       type: integer
       unit: byte
-      metric_type: gauge
   `;
     const metaFieldMapping = {
       properties: {
@@ -758,14 +791,12 @@ describe('EPM template', () => {
             fieldA: {
               type: 'long',
               meta: {
-                metric_type: 'gauge',
                 unit: 'byte',
               },
             },
             fieldB: {
               type: 'long',
               meta: {
-                metric_type: 'gauge',
                 unit: 'byte',
               },
             },
@@ -841,10 +872,8 @@ describe('EPM template', () => {
   describe('updateCurrentWriteIndices', () => {
     it('update all the index matching, index template index pattern', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [{ name: 'test.prefix1-default' }],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
@@ -868,13 +897,11 @@ describe('EPM template', () => {
     });
     it('update non replicated datastream', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [
-            { name: 'test-non-replicated' },
-            { name: 'test-replicated', replicated: true },
-          ],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [
+          { name: 'test-non-replicated' },
+          { name: 'test-replicated', replicated: true },
+        ],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [

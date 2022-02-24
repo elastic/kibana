@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['settings']);
 
-  describe('filter scripted fields', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/126027
+  describe.skip('filter scripted fields', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await browser.setWindowSize(1200, 800);
@@ -66,6 +67,7 @@ export default function ({ getService, getPageObjects }) {
           expect(lang).to.be('painless');
         }
       });
+      await PageObjects.settings.clearScriptedFieldLanguageFilter('painless');
 
       await PageObjects.settings.setScriptedFieldLanguageFilter('expression');
 
@@ -76,6 +78,7 @@ export default function ({ getService, getPageObjects }) {
           expect(lang).to.be('expression');
         }
       });
+      await PageObjects.settings.clearScriptedFieldLanguageFilter('expression');
     });
   });
 }

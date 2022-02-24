@@ -49,6 +49,7 @@ export type DatatableRenderProps = DatatableProps & {
   renderMode: RenderMode;
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
+  interactive: boolean;
 
   /**
    * A boolean for each table row, which is true if the row active

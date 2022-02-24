@@ -22,6 +22,7 @@ import {
   CasePostRequestRt,
 } from '../../../common/api';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -59,6 +60,10 @@ export const create = async (
     );
   }
 
+  if (query.tags.some(isInvalidTag)) {
+    throw Boom.badRequest('A tag must contain at least one non-space character');
+  }
+
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -68,7 +73,6 @@ export const create = async (
     });
 
     const newCase = await caseService.postNewCase({
-      unsecuredSavedObjectsClient,
       attributes: transformNewCase({
         user,
         newCase: query,

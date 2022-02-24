@@ -6,7 +6,7 @@
  */
 
 import { Polygon, Position } from 'geojson';
-import { Filter } from '../../../../../src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
 import { ES_SPATIAL_RELATIONS } from '../constants';
 
 export type Coordinates = Position | Position[] | Position[][] | Position[][][];

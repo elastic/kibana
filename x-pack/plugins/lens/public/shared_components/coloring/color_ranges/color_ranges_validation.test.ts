@@ -27,97 +27,18 @@ describe('Color ranges validation', () => {
           color: '#aaa',
         },
       ];
-      const validation = validateColorRanges(colorRanges, { min: 0, max: 100 }, 'number');
+      const validation = validateColorRanges(colorRanges);
       expect(validation['0']).toEqual({
         errors: [],
-        warnings: [],
         isValid: true,
       });
       expect(validation['1']).toEqual({
         errors: ['invalidColor'],
-        warnings: [],
         isValid: false,
       });
       expect(validation.last).toEqual({
         errors: ['greaterThanMaxValue'],
-        warnings: [],
         isValid: false,
-      });
-    });
-
-    it('should return correct warnings for color ranges', () => {
-      const colorRanges = [
-        {
-          start: 0,
-          end: 10,
-          color: '#aaa',
-        },
-        {
-          start: 10,
-          end: 20,
-          color: '#bbb',
-        },
-        {
-          start: 20,
-          end: 35,
-          color: '#ccc',
-        },
-      ];
-      const validation = validateColorRanges(colorRanges, { min: 5, max: 30 }, 'number');
-      expect(validation['0']).toEqual({
-        errors: [],
-        warnings: ['lowerThanDataBounds'],
-        isValid: true,
-      });
-      expect(validation['1']).toEqual({
-        errors: [],
-        warnings: [],
-        isValid: true,
-      });
-      expect(validation.last).toEqual({
-        errors: [],
-        warnings: ['greaterThanDataBounds'],
-        isValid: true,
-      });
-    });
-
-    it('should not return warnings for color ranges in number mode if we get fallback as data bounds', () => {
-      const colorRanges = [
-        {
-          start: 0,
-          end: 10,
-          color: '#aaa',
-        },
-        {
-          start: 10,
-          end: 20,
-          color: '#bbb',
-        },
-        {
-          start: 20,
-          end: 35,
-          color: '#ccc',
-        },
-      ];
-      const validation = validateColorRanges(
-        colorRanges,
-        { min: 5, max: 30, fallback: true },
-        'number'
-      );
-      expect(validation['0']).toEqual({
-        errors: [],
-        warnings: [],
-        isValid: true,
-      });
-      expect(validation['1']).toEqual({
-        errors: [],
-        warnings: [],
-        isValid: true,
-      });
-      expect(validation.last).toEqual({
-        errors: [],
-        warnings: [],
-        isValid: true,
       });
     });
   });
@@ -141,10 +62,10 @@ describe('Color ranges validation', () => {
           color: '#ccc',
         },
       ];
-      let isValid = isAllColorRangesValid(colorRanges, { min: 5, max: 40 }, 'number');
+      let isValid = isAllColorRangesValid(colorRanges);
       expect(isValid).toBeFalsy();
       colorRanges[colorRanges.length - 1].end = 30;
-      isValid = isAllColorRangesValid(colorRanges, { min: 5, max: 40 }, 'number');
+      isValid = isAllColorRangesValid(colorRanges);
       expect(isValid).toBeTruthy();
     });
   });

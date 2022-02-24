@@ -396,6 +396,8 @@ paths:
               properties:
                 force:
                   type: boolean
+                ignore_constraints:
+                  type: boolean
     put:
       summary: Packages - Update
       tags: []
@@ -1758,6 +1760,23 @@ paths:
                   - item
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /logstash_api_keys:
+    post:
+      summary: Generate Logstash API key
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+      operationId: generate-logstash-api-key
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
 components:
   securitySchemes:
     basicAuth:
@@ -1850,7 +1869,11 @@ components:
             - type: number
         is_default:
           type: boolean
+          deprecated: true
         is_default_fleet_server:
+          type: boolean
+          deprecated: true
+        has_fleet_server:
           type: boolean
         data_output_id:
           type: string
@@ -2359,6 +2382,8 @@ components:
       title: New agent policy
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
         namespace:
@@ -2372,6 +2397,9 @@ components:
             enum:
               - metrics
               - logs
+      required:
+        - name
+        - namespace
     new_package_policy:
       title: New package policy
       type: object
@@ -2652,8 +2680,6 @@ components:
         ca_sha256:
           type: string
         ca_trusted_fingerprint:
-          type: string
-        api_key:
           type: string
         config:
           type: object

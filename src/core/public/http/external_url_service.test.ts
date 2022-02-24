@@ -73,6 +73,23 @@ const internalRequestScenarios = [
 ];
 
 describe('External Url Service', () => {
+  describe('#isInternalUrl', () => {
+    const { setup } = setupService({
+      location: new URL('https://example.com/app/management?q=1&bar=false#some-hash'),
+      serverBasePath: '',
+      policy: [],
+    });
+
+    it('internal request', () => {
+      expect(setup.isInternalUrl('/')).toBeTruthy();
+      expect(setup.isInternalUrl('https://example.com/')).toBeTruthy();
+    });
+
+    it('external request', () => {
+      expect(setup.isInternalUrl('https://elastic.co/')).toBeFalsy();
+    });
+  });
+
   describe('#validateUrl', () => {
     describe('internal requests with a server base path', () => {
       const serverBasePath = '/base-path';

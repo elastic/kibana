@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-cli-dev-mode"
 PKG_REQUIRE_NAME = "@kbn/cli-dev-mode"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__cli-dev-mode"
 
 SOURCE_FILES = glob(
   [
@@ -51,7 +50,7 @@ TYPES_DEPS = [
   "//packages/kbn-config:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-logging",
+  "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-optimizer:npm_module_types",
   "//packages/kbn-server-http-tools:npm_module_types",
   "//packages/kbn-std:npm_module_types",
@@ -93,11 +92,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -128,7 +125,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

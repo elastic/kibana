@@ -165,13 +165,31 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   }
 
   generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    const eventFilter = this.generate(overrides);
-
-    return {
-      ...eventFilter,
+    return this.generate({
       name: `Event filter (${this.randomString(5)})`,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-    };
+      entries: [
+        {
+          field: 'process.pe.company',
+          operator: 'excluded',
+          type: 'match',
+          value: 'elastic',
+        },
+        {
+          entries: [
+            {
+              field: 'status',
+              operator: 'included',
+              type: 'match',
+              value: 'dfdfd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
+      ...overrides,
+    });
   }
 
   generateEventFilterForCreate(
@@ -198,6 +216,15 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     return this.generate({
       name: `Host Isolation (${this.randomString(5)})`,
       list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      os_types: ['macos', 'linux', 'windows'],
+      entries: [
+        {
+          field: 'destination.ip',
+          operator: 'included',
+          type: 'match',
+          value: '0.0.0.0/24',
+        },
+      ],
       ...overrides,
     });
   }
@@ -207,6 +234,14 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): CreateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToCreateExceptionItem(this.generateHostIsolationException()),
+      ...overrides,
+    };
+  }
+  generateHostIsolationExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateHostIsolationException()),
       ...overrides,
     };
   }

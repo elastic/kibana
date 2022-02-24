@@ -20,7 +20,6 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 const columns: Array<EuiBasicTableColumn<RuleExecutionEvent>> = [
   {
     name: i18n.COLUMN_STATUS_TYPE,

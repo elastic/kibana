@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { Phase } from '../../../../common/types';
 import { createFormToggleAndSetValueAction } from './form_toggle_and_set_value_action';
 
