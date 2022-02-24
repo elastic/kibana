@@ -130,8 +130,6 @@ export function openLayerWizard(layerWizardId: string) {
     dispatch(setSelectedLayer(null));
     dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     dispatch(setDrawMode(DRAW_MODE.NONE));
-
-    // todo: complete this action layer
     dispatch({
       type: UPDATE_WIZARD_LAYER,
       layerWizardId,

@@ -6,12 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import '../../../classes/sources/wms_source';
-import '../../../classes/sources/ems_file_source';
-import '../../../classes/sources/es_search_source';
-import '../../../classes/sources/es_pew_pew_source';
-import '../../../classes/sources/es_geo_grid_source';
-import '../../../classes/sources/xyz_tms_source';
 import { getToasts } from '../../../kibana_services';
 
 export function getOpenLayerWizardFromUrlParam() {
@@ -28,8 +22,8 @@ export function getOpenLayerWizardFromUrlParam() {
     return mapAppParams.get('openLayerWizard') ? mapAppParams.get('openLayerWizard') : '';
   } catch (e) {
     getToasts().addWarning({
-      title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
-        defaultMessage: `Initial layers not added to map`,
+      title: i18n.translate('xpack.maps.initialLayers.unableToParseWizard', {
+        defaultMessage: `Error when parsing Wizard name`,
       }),
       text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
         defaultMessage: `Unable to parse contents of 'openLayerWizard' parameter. Error: {errorMsg}`,
