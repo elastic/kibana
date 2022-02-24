@@ -46,16 +46,19 @@ interface CategoryOption {
 
 const renderOption = (option: CategoryOption, searchValue: string) => {
   const { label, count, checked } = option;
+  // Some category names have spaces, but test selectors don't like spaces,
+  // Tests are not able to find subjects with spaces, so we need to clean them.
+  const idAttr = label.replace(/\s/g, '');
   return (
     <EuiFlexGroup
-      data-test-subj={`categories-selector-option-${label}`}
+      data-test-subj={`categories-selector-option-${idAttr}`}
       alignItems="center"
       gutterSize="none"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
         <CategoryName
-          data-test-subj={`categories-selector-option-name-${label}`}
+          data-test-subj={`categories-selector-option-name-${idAttr})}`}
           bold={checked === 'on'}
         >
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
@@ -140,12 +143,15 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <CategorySelectableContainer onKeyDown={onKeyDown}>
+        <CategorySelectableContainer
+          onKeyDown={onKeyDown}
+          data-test-subj="categories-selector-container"
+        >
           <EuiSelectable
             aria-label="Searchable categories"
             searchable
             searchProps={{
-              'data-test-subj': `categories-selector-search`,
+              'data-test-subj': 'categories-selector-search',
             }}
             options={categoryOptions}
             renderOption={renderOption}
