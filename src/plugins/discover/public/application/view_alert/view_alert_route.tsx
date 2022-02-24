@@ -11,7 +11,7 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
 import type { Alert } from '../../../../../../x-pack/plugins/alerting/common';
-import { AlertTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
+import type { AlertTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
 import { getTime, SerializedSearchSourceFields } from '../../../../data/common';
 import type { Filter, TimeRange } from '../../../../data/public';
 import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
