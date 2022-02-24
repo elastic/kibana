@@ -127,7 +127,6 @@ export function registerSnapshotsRoutes({
                   operator: searchOperator,
                 })
               : '_all',
-          // https://github.com/elastic/elasticsearch-specification/issues/845
           slm_policy_filter:
             searchField === 'policyName'
               ? getSnapshotSearchWildcard({
@@ -138,7 +137,7 @@ export function registerSnapshotsRoutes({
                 })
               : '*,_none',
           order: sortDirection,
-          // @ts-expect-error sortField: string is not comptible with SnapshotSnapshotSort type
+          // @ts-expect-error sortField: string is not compatible with SnapshotSnapshotSort type
           sort: sortField,
           size: pageSize,
           offset: pageIndex * pageSize,
