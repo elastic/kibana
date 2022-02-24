@@ -10,9 +10,11 @@ import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types'
 import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
+const DEFAULT_OPTIONS = Object.freeze({});
+
 export function useBulkDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema[], HttpFetchError>,
+  customOptions: UseQueryOptions<ExceptionListItemSchema[], HttpFetchError> = DEFAULT_OPTIONS,
   options: {
     concurrency: number;
   } = {

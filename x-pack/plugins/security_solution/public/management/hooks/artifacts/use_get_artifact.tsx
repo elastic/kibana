@@ -9,11 +9,13 @@ import { HttpFetchError } from 'kibana/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
+const DEFAULT_OPTIONS = Object.freeze({});
+
 export function useGetArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   itemId?: string,
   id?: string,
-  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError> = {}
+  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError> = DEFAULT_OPTIONS
 ): QueryObserverResult<ExceptionListItemSchema, HttpFetchError> {
   return useQuery<ExceptionListItemSchema, HttpFetchError>(
     ['get', exceptionListApiClient, itemId, id],
