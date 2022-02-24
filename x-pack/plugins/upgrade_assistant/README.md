@@ -113,13 +113,42 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   Run the following Console commands to trigger deprecation issues for cluster and index settings:
 
 ```
+// Can be set as persistent or transient
 PUT /_cluster/settings
 {
-   "persistent": {
-     "discovery.zen.commit_timeout": "10s"
-  },
-  "transient": {
-    "discovery.zen.publish_timeout": "10s"
+  "persistent" : {
+    "script.context.filter.cache_max_size": 10,
+    "script.context.update.cache_max_size": 10,
+    "script.context.update.max_compilations_rate": "10/1m",
+    "discovery.zen.minimum_master_nodes": 10,
+    "discovery.zen.commit_timeout": "10s",
+    "discovery.zen.no_master_block": "all",
+    "discovery.zen.publish_diff.enable": true,
+    "discovery.zen.publish_timeout": "10s",
+    "indices.lifecycle.step.master_timeout": "10s",
+    "script.context.field.max_compilations_rate": "10/1m",
+    "script.context.score.max_compilations_rate": "10/1m",
+    "script.context.interval.cache_expire": "10s",
+    "script.context.moving-function.cache_expire": "10s",
+    "xpack.watcher.history.cleaner_service.enabled": true,
+    "cluster.routing.allocation.exclude._tier": "data_warm",
+    "cluster.routing.allocation.include._tier": "data_cold",
+    "cluster.routing.allocation.require._tier": "data_hot",
+    "xpack.monitoring.elasticsearch.collection.enabled": true,
+    "xpack.monitoring.collection.enabled": true,
+    "xpack.monitoring.collection.interval": "20s",
+    "xpack.monitoring.collection.ccr.stats.timeout": "20s",
+    "xpack.monitoring.collection.cluster.stats.timeout": "20s",
+    "xpack.monitoring.collection.enrich.stats.timeout": "20s",
+    "xpack.monitoring.collection.index.recovery.timeout": "20s",
+    "xpack.monitoring.collection.index.stats.timeout": "20s",
+    "xpack.monitoring.collection.ml.job.stats.timeout": "20s",
+    "xpack.monitoring.collection.node.stats.timeout": "20s",
+    "xpack.monitoring.collection.index.recovery.active_only": true,
+    "xpack.monitoring.history.duration": "2d",
+    "xpack.monitoring.migration.decommission_alerts": true,
+    "cluster.routing.allocation.shard_state.reroute.priority": "HIGH",
+    "cluster.routing.allocation.disk.include_relocations": true
   }
 }
 ```
@@ -128,8 +157,15 @@ PUT /_cluster/settings
   PUT deprecated_settings
   {
     "settings": {
-      "index.routing.allocation.include._tier": "data_warm",
-      "index.routing.allocation.exclude._tier": "data_cold"
+      "index.indexing.slowlog.level": "warn",
+      "index.max_adjacency_matrix_filters":  10,
+      "index.routing.allocation.exclude._tier": "data_warm",
+      "index.routing.allocation.include._tier": "data_hot",
+      "index.routing.allocation.require._tier": "data_cold",
+      "index.search.slowlog.level": "warn",
+      "index.soft_deletes.enabled": true,
+      "index.translog.retention.size": "1mb",
+      "index.translog.retention.age": "5s"
     }
   }
   ```
