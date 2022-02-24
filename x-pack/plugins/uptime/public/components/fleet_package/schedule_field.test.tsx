@@ -17,6 +17,7 @@ import { ScheduleUnit } from './types';
 describe('<ScheduleField/>', () => {
   const number = '1';
   const unit = ScheduleUnit.MINUTES;
+  const onBlur = jest.fn();
   const WrappedComponent = ({
     allowedScheduleUnits,
   }: Omit<IPolicyConfigContextProvider, 'children'>) => {
@@ -31,10 +32,15 @@ describe('<ScheduleField/>', () => {
           number={config.number}
           unit={config.unit}
           onChange={(value) => setConfig(value)}
+          onBlur={onBlur}
         />
       </PolicyConfigContextProvider>
     );
   };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('shows all options by default (allowedScheduleUnits is not provided)', () => {
     const { getByText } = render(<WrappedComponent />);
@@ -109,5 +115,22 @@ describe('<ScheduleField/>', () => {
       expect(select.value).toBe(newUnit);
       expect(getByText('Seconds')).toBeInTheDocument();
     });
+  });
+
+  it('calls onBlur when changed', () => {
+    const { getByTestId } = render(
+      <WrappedComponent allowedScheduleUnits={[ScheduleUnit.SECONDS, ScheduleUnit.MINUTES]} />
+    );
+    const input = getByTestId('scheduleFieldInput') as HTMLInputElement;
+    const select = getByTestId('scheduleFieldSelect') as HTMLInputElement;
+
+    userEvent.clear(input);
+    userEvent.type(input, '2');
+
+    userEvent.selectOptions(select, ScheduleUnit.MINUTES);
+
+    userEvent.click(input);
+
+    expect(onBlur).toHaveBeenCalledTimes(2);
   });
 });

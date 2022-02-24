@@ -94,6 +94,8 @@ const fields = [
     name: 'runtime',
     displayName: 'runtime',
     runtimeField,
+    esTypes: ['long'],
+    type: 'number',
   },
 ].map(mockFieldToIndexPatternField);
 
