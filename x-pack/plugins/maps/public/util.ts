@@ -81,7 +81,7 @@ export function makePublicExecutionContext(description: string): KibanaExecution
   });
 
   // Distinguish between running in maps app vs. embedded
-  return topLevelContext.name !== context.name
+  return topLevelContext.name !== undefined && topLevelContext.name !== context.name
     ? {
         ...topLevelContext,
         child: context,
