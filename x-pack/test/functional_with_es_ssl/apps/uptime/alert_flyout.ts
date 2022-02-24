@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveRuleButton();
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
@@ -178,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveRuleButton();
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
