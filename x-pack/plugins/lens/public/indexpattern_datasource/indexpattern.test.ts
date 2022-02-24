@@ -1569,7 +1569,10 @@ describe('IndexPattern Data Source', () => {
         const data = {
           first: {
             type: 'datatable' as const,
-            columns: [],
+            columns: [
+              { id: 'col1', name: 'geo.src', meta: { type: 'string' as const } },
+              { id: 'col2', name: 'geo.dest > myField', meta: { type: 'string' as const } },
+            ],
             rows: [
               { col1: 'US', col2: { keys: ['IT', 'MyValue'] } },
               { col1: 'IN', col2: { keys: ['DE', 'MyOtherValue'] } },
@@ -1633,7 +1636,10 @@ describe('IndexPattern Data Source', () => {
         const data = {
           first: {
             type: 'datatable' as const,
-            columns: [],
+            columns: [
+              { id: 'col1', name: 'geo.src', meta: { type: 'string' as const } },
+              { id: 'col2', name: 'geo.dest > myField', meta: { type: 'string' as const } },
+            ],
             rows: [
               { col1: 'US', col2: { keys: ['IT', ''] } },
               { col1: 'IN', col2: { keys: ['DE', 'MyOtherValue'] } },
