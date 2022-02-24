@@ -8,6 +8,8 @@
 
 const preset = require('../jest-preset');
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   ...preset,
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
@@ -17,7 +19,6 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
   ],
   reporters: [
     'default',
@@ -38,4 +39,8 @@ module.exports = {
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]
     : ['html', 'text'],
+
+  testEnvironment: 'node',
+  snapshotSerializers: [],
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
 };
