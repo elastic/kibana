@@ -1347,10 +1347,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.isEuiSwitchChecked('lensToggleAutoApply');
     },
 
-    async applyChanges() {
-      const applyButtonSelector = 'lensApplyChanges';
+    async applyChanges(throughSuggestions = false) {
+      const applyButtonSelector = throughSuggestions
+        ? 'lnsSuggestionApplyChanges'
+        : 'lensApplyChanges';
       await testSubjects.waitForEnabled(applyButtonSelector);
       await testSubjects.click(applyButtonSelector);
+    },
+
+    async getAreSuggestionsPromptingToApply() {
+      return testSubjects.exists('lnsSuggestionApplyChanges');
     },
   });
 }

@@ -85,7 +85,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization();
     });
-    // it('should display workspace panel errors if present when "Apply" is clicked', () => {});
-    // it('should preview a suggestion', () => {});
+
+    it('should hide suggestions when a change is made', async () => {
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      expect(await PageObjects.lens.getAreSuggestionsPromptingToApply()).to.be.ok();
+
+      await PageObjects.lens.applyChanges(true);
+
+      expect(await PageObjects.lens.getAreSuggestionsPromptingToApply()).not.to.be.ok();
+    });
   });
 }
