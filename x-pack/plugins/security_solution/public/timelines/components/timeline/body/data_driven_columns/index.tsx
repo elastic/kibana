@@ -240,9 +240,10 @@ const TgridTdCell = ({
   tabType,
   timelineId,
 }: CellProps) => {
+  const ariaColIndex = index + ARIA_COLUMN_INDEX_OFFSET;
   return (
     <EventsTd
-      $ariaColumnIndex={index + ARIA_COLUMN_INDEX_OFFSET}
+      $ariaColumnIndex={ariaColIndex}
       key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
       onKeyDown={onKeyDown}
       role="button"
@@ -252,10 +253,11 @@ const TgridTdCell = ({
       <EventsTdContent data-test-subj="cell-container">
         <>
           <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
-            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: index + 2 })}</p>
+            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: ariaColIndex })}</p>
           </EuiScreenReaderOnly>
           <StatefulCell
-            ariaRowindex={ariaRowindex}
+            rowIndex={ariaRowindex - 1}
+            colIndex={ariaColIndex - 1}
             data={data}
             header={header}
             eventId={_id}
