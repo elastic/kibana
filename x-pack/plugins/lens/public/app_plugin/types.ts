@@ -152,5 +152,5 @@ export interface LensTopNavActions {
   goBack: () => void;
   cancel: () => void;
   exportToCSV: () => void;
-  showUnderlyingData: () => void;
+  getUnderlyingDataUrl: () => string | undefined;
 }

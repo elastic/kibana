@@ -100,13 +100,15 @@ function getLensTopNavConfig(options: {
   if (showOpenInDiscover) {
     topNavMenu.push({
       label: getShowUnderlyingDataLabel(),
-      run: actions.showUnderlyingData,
+      run: () => {},
       testId: 'lnsApp_openInDiscover',
       description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
         defaultMessage: 'Open underlying data in Discover',
       }),
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
+      target: '_blank',
+      href: actions.getUnderlyingDataUrl(),
     });
   }
 
@@ -433,7 +435,7 @@ export const LensTopNavMenu = ({
             redirectToOrigin();
           }
         },
-        showUnderlyingData: () => {
+        getUnderlyingDataUrl: () => {
           if (!canShowUnderlyingData) {
             return;
           }
@@ -450,7 +452,7 @@ export const LensTopNavMenu = ({
             indexPatterns
           );
 
-          discover.locator!.navigate({
+          return discover.locator!.getRedirectUrl({
             indexPatternId: meta.id,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
