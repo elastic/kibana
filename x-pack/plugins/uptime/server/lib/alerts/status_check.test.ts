@@ -311,6 +311,9 @@ describe('status check alert', () => {
       expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
+          Object {
+            "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
+          },
         ]
       `);
     });

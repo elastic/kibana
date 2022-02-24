@@ -360,7 +360,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           ...updateState(state, true),
         });
 
-        alert.scheduleActions(MONITOR_STATUS.id);
+        alert.scheduleActions(MONITOR_STATUS.id, {
+          [ALERT_REASON_MSG]: monitorSummary.reason,
+        });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
     }
