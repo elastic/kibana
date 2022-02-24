@@ -27,13 +27,17 @@ export async function getMatchingIndices({
   pattern: string;
   http: HttpSetup;
 }): Promise<Record<string, any>> {
-  const formattedPattern = formatPattern(pattern);
+  try {
+    const formattedPattern = formatPattern(pattern);
 
-  const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
-    `${DATA_API_ROOT}/_indices`,
-    { body: JSON.stringify({ pattern: formattedPattern }) }
-  );
-  return indices;
+    const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
+      `${DATA_API_ROOT}/_indices`,
+      { body: JSON.stringify({ pattern: formattedPattern }) }
+    );
+    return indices;
+  } catch (e) {
+    return [];
+  }
 }
 
 export async function getESIndexFields({
@@ -73,39 +77,43 @@ export const loadIndexPatterns = async (pattern: string) => {
   const formattedPattern = formatPattern(pattern);
   const perPage = 1000;
 
-  const { savedObjects, total } = await getSavedObjectsClient().find({
-    type: 'index-pattern',
-    fields: ['title'],
-    page: 1,
-    search: formattedPattern,
-    perPage,
-  });
+  try {
+    const { savedObjects, total } = await getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title'],
+      page: 1,
+      search: formattedPattern,
+      perPage,
+    });
 
-  allSavedObjects = savedObjects;
+    allSavedObjects = savedObjects;
 
-  if (total > perPage) {
-    let currentPage = 2;
-    const numberOfPages = Math.ceil(total / perPage);
-    const promises = [];
+    if (total > perPage) {
+      let currentPage = 2;
+      const numberOfPages = Math.ceil(total / perPage);
+      const promises = [];
 
-    while (currentPage <= numberOfPages) {
-      promises.push(
-        getSavedObjectsClient().find({
-          type: 'index-pattern',
-          page: currentPage,
-          fields: ['title'],
-          search: formattedPattern,
-          perPage,
-        })
-      );
-      currentPage++;
+      while (currentPage <= numberOfPages) {
+        promises.push(
+          getSavedObjectsClient().find({
+            type: 'index-pattern',
+            page: currentPage,
+            fields: ['title'],
+            search: formattedPattern,
+            perPage,
+          })
+        );
+        currentPage++;
+      }
+
+      const paginatedResults = await Promise.all(promises);
+
+      allSavedObjects = paginatedResults.reduce((oldResult, result) => {
+        return oldResult.concat(result.savedObjects);
+      }, allSavedObjects);
     }
-
-    const paginatedResults = await Promise.all(promises);
-
-    allSavedObjects = paginatedResults.reduce((oldResult, result) => {
-      return oldResult.concat(result.savedObjects);
-    }, allSavedObjects);
+    return allSavedObjects.map((indexPattern: any) => indexPattern.attributes.title);
+  } catch (e) {
+    return [];
   }
-  return allSavedObjects.map((indexPattern: any) => indexPattern.attributes.title);
 };
