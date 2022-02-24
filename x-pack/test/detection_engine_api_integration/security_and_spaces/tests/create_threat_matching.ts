@@ -503,7 +503,8 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
-        it('enriches signals with the single indicator that matched', async () => {
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+        it.skip('enriches signals with the single indicator that matched', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
