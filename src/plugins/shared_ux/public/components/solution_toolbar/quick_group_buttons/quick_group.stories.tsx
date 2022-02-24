@@ -20,17 +20,6 @@ export default {
       page: mdx,
     },
   },
-  argTypes: {
-    quickButtonCount: {
-      defaultValue: 2,
-      control: {
-        type: 'number',
-        min: 0,
-        max: 5,
-        step: 1,
-      },
-    },
-  },
 };
 
 const quickButtons = [
@@ -61,6 +50,18 @@ const quickButtons = [
   },
 ];
 
-export const Component: Story<{ quickButtonCount: number }> = ({ quickButtonCount }) => {
+export const ConnectedComponent: Story<{ quickButtonCount: number }> = ({ quickButtonCount }) => {
   return <QuickButtonGroup buttons={quickButtons.slice(0, quickButtonCount)} />;
+};
+
+ConnectedComponent.argTypes = {
+  quickButtonCount: {
+    defaultValue: 2,
+    control: {
+      type: 'number',
+      min: 0,
+      max: 5,
+      step: 1,
+    },
+  },
 };

@@ -16,6 +16,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
+import cx from 'classnames';
+
+import './quick_group.scss';
+import className from 'classnames';
+
 const strings = {
   getAriaButtonLabel: (createType: string) =>
     i18n.translate('sharedUX.solutionToolbar.quickButton.ariaButtonLabel', {
@@ -53,6 +58,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
+      className: `quickButtonGroup__button`,
     };
   });
 
@@ -61,9 +67,23 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
   };
 
   const quickButtonCSS = css`
+  & .quickButtonGroup {
+    & .euiButtonGroup__buttons {
     border-radius: ${euiTheme.border.radius};
-    background-color: ${euiTheme.colors.emptyShade};
-    border-color: ${euiTheme.border.color};
+      & .quickButtonGroup__button {
+        background-color: ${euiTheme.colors.emptyShade};
+        border-width: ${euiTheme.border.width.thin} !important;
+        border-style: solid !important;
+        border-color: ${euiTheme.border.color} !important;
+      }
+    & .quickButtonGroup__button:first-of-type {
+      border-top-left-radius: ${euiTheme.border.radius} !important;
+      border-bottom-left-radius: ${euiTheme.border.radius} !important;
+    }
+    & .quickButtonGroup__button:last-of-type {
+      border-top-right-radius: ${euiTheme.border.radius} !important;
+      border-bottom-right-radius: ${euiTheme.border.radius} !important;
+    }
   `;
 
   return (
@@ -75,6 +95,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
       type="multi"
       isIconOnly
       css={quickButtonCSS}
+      className={cx('quickButtonGroup', className)}
     />
   );
 };
