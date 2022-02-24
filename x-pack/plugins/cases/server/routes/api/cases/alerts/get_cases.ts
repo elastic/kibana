@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
 import { CasesByAlertIDRequest } from '../../../../../common/api';
 import { CASE_ALERTS_URL } from '../../../../../common/constants';
@@ -18,16 +17,12 @@ export const getCasesByAlertIdRoute = createCasesRoute({
   path: CASE_ALERTS_URL,
   params: {
     params: schema.object({
-      alert_id: schema.string(),
+      alert_id: schema.string({ minLength: 1 }),
     }),
   },
   handler: async ({ context, request, response }) => {
     try {
       const alertID = request.params.alert_id;
-
-      if (alertID == null || alertID === '') {
-        throw Boom.badRequest('The `alertId` is not valid');
-      }
 
       const casesClient = await context.cases.getCasesClient();
       const options = request.query as CasesByAlertIDRequest;
