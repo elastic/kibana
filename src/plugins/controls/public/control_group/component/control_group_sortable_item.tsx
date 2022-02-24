@@ -81,6 +81,7 @@ const SortableControlInner = forwardRef<
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
         'controlFrameWrapper-isDragging': isDragging,
+        'controlFrameWrapper-isEditable': isEditable,
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',

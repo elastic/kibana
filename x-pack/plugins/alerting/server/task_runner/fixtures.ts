@@ -216,6 +216,9 @@ export const generateEventLog = ({
           ...(!isNil(numberOfTriggeredActions) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
+              number_of_searches: 3,
+              es_search_duration_ms: 33,
+              total_search_duration_ms: 23423,
             },
           }),
         },

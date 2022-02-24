@@ -54,6 +54,6 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return simpleSavedObjectToSavedObject(response);
   }
   delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id);
+    return this.savedObjectClient.delete(type, id, { force: true });
   }
 }
