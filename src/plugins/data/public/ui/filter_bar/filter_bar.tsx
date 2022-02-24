@@ -145,8 +145,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   function onEditMultipleFilters(selectedFilters: Filter[]) {
     const editedFilters = props.multipleFilters.filter((f) => groupIds.includes(f.groupId));
     const oldFilters = props.filters.filter(
-      (filter) =>
-        editedFilters.filter((editedFilter) => !isEqual(filter.query, editedFilter.query)).length
+      (filter) => !editedFilters.find((editedFilter) => isEqual(filter.query, editedFilter.query))
     );
     const updatedFilters = [...oldFilters, ...selectedFilters];
     props?.onFiltersUpdated?.(updatedFilters);
@@ -182,8 +181,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   ) {
     const editedFilters = props.multipleFilters.filter((f) => groupIds.includes(f.groupId));
     const oldFilters = props.filters.filter(
-      (filter) =>
-        editedFilters.filter((editedFilter) => !isEqual(filter.query, editedFilter.query)).length
+      (filter) => !editedFilters.find((editedFilter) => isEqual(filter.query, editedFilter.query))
     );
     const updatedFilters = [...oldFilters, ...buildFilters];
     props?.onFiltersUpdated?.(updatedFilters);
