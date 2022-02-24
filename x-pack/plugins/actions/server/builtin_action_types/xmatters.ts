@@ -42,10 +42,16 @@ const secretSchemaProps = {
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     // user and password must be set together (or not at all)
-    if (!secrets.password && !secrets.user) return;
-    if (secrets.password && secrets.user) return;
-    return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
-      defaultMessage: 'Both user and password must be specified',
+    // if user/password provided, then no urlSecrets should be present
+    if ((!secrets.password && secrets.user) || (secrets.password && !secrets.user)) {
+      return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
+        defaultMessage: 'Both user and password must be specified',
+      });
+    }
+    if (secrets.password && secrets.user && !secrets.urlSecrets) return;
+    if (!secrets.password && !secrets.user && secrets.urlSecrets) return;
+    return i18n.translate('xpack.actions.builtin.xmatters.invalidSecrets', {
+      defaultMessage: 'Either user and password or URL authentication must be specified',
     });
   },
 });
@@ -85,6 +91,7 @@ export function getActionType({
         validate: curry(validateActionTypeSecrets)(configurationUtilities),
       }),
       params: ParamsSchema,
+      connector: validateConnector,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
   };
@@ -95,6 +102,8 @@ function validateActionTypeConfig(
   configObject: ActionTypeConfigType
 ): string | undefined {
   const configuredUrl = configObject.urlConfig;
+  const usesBasic = configObject.usesBasic;
+  if (!usesBasic) return;
   try {
     if (configuredUrl) {
       new URL(configuredUrl);
@@ -120,6 +129,39 @@ function validateActionTypeConfig(
       },
     });
   }
+}
+
+function validateConnector(
+  config: ActionTypeConfigType,
+  secrets: ActionTypeSecretsType
+): string | null {
+  const { user, password, urlSecrets } = secrets;
+  const { usesBasic, urlConfig } = config;
+
+  if (usesBasic) {
+    if (user === null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.missingUser', {
+        defaultMessage: 'Username must be provided',
+      });
+    }
+    if (password === null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.missingPassword', {
+        defaultMessage: 'Password must be provided',
+      });
+    }
+    if (urlConfig === null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.missingConfigUrl', {
+        defaultMessage: 'Url must be provided',
+      });
+    }
+  } else {
+    if (urlSecrets === null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.missingSecretsUrl', {
+        defaultMessage: 'Url with API Key must be provided',
+      });
+    }
+  }
+  return null;
 }
 
 function validateActionTypeSecrets(
@@ -230,6 +272,7 @@ interface XmattersPayload {
 }
 
 function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
+  // xMatters will assume the request is a test when the signalId adn alertActionGroupName are not defined
   const data: XmattersPayload = {
     alertActionGroupName: params.alertActionGroupName,
     signalId: params.signalId,

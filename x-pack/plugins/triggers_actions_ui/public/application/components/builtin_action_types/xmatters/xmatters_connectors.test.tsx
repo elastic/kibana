@@ -62,8 +62,8 @@ describe('XmattersActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="userCredsLabel"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="urlReenterDescription"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
   });
 
   test('should display a message on edit to re-enter credentials, Basic Auth', () => {
@@ -92,8 +92,8 @@ describe('XmattersActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="userCredsLabel"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="urlReenterDescription"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
 
   test('should display a message for missing secrets after import', () => {
@@ -152,7 +152,7 @@ describe('XmattersActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="urlReenterDescription"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="userCredsLabel"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
 });

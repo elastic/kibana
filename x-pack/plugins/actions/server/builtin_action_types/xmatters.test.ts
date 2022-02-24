@@ -63,7 +63,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Username is required when password is used."`
+      `"error validating action type secrets: Both user and password must be specified"`
     );
   });
 
@@ -78,6 +78,27 @@ describe('secrets validation', () => {
       urlSecrets: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
     };
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+  });
+
+  test('fails when user, password, and urlSecrets are omitted', () => {
+    expect(() => {
+      validateSecrets(actionType, {});
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: Either user and password or URL authentication must be specified"`
+    );
+  });
+
+  test('fails when user, password, and urlSecrets are provided', () => {
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+      secretsUrl: 'https://someUrl.com',
+    };
+    expect(() => {
+      validateSecrets(actionType, secrets);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: Either user and password or URL authentication must be specified"`
+    );
   });
 });
 
@@ -232,7 +253,10 @@ describe('execute()', () => {
     const { url, data, auth } = postxMattersMock.mock.calls[0][0];
     expect({ url, data, auth }).toMatchInlineSnapshot(`
       Object {
-        "auth": undefined,
+        "auth": {
+          "user": "abc",
+          "password": "123,
+        },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "date": "2022-01-18T19:01:08.818Z",

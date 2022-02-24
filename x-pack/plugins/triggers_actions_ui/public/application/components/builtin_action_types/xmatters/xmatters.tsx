@@ -31,7 +31,7 @@ export function getActionType(): ActionTypeModel<
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.selectMessageText',
       {
-        defaultMessage: 'Send a request to xMatters.',
+        defaultMessage: 'Trigger an xMatters workflow.',
       }
     ),
     actionTypeTitle: i18n.translate(
