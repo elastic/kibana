@@ -11,7 +11,7 @@ import { trustedAppsAllHttpMocks } from '../../pages/mocks';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
 import { artifactListPageLabels } from './translations';
-import { act, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
 
@@ -21,7 +21,7 @@ describe('When using the ArtifactListPage component', () => {
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
-  let FormComponentMock: jest.Mock<ArtifactListPageProps['ArtifactFormComponent']>;
+  let FormComponentMock: jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>;
 
   interface FutureInterface<T = void> {
     promise: Promise<T>;
@@ -58,15 +58,17 @@ describe('When using the ArtifactListPage component', () => {
     const apiClient = TrustedAppsApiClient.getInstance(coreStart.http);
     const labels = { ...artifactListPageLabels };
 
-    FormComponentMock = jest.fn(() => {
+    FormComponentMock = jest.fn((() => {
       return <div data-test-subj="formMock">{'Form here'}</div>;
-    });
+    }) as unknown as jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>);
 
     render = (props: Partial<ArtifactListPageProps> = {}) => {
       return (renderResult = mockedContext.render(
         <ArtifactListPage
           apiClient={apiClient}
-          ArtifactFormComponent={FormComponentMock}
+          ArtifactFormComponent={
+            FormComponentMock as unknown as ArtifactListPageProps['ArtifactFormComponent']
+          }
           labels={labels}
           data-test-subj="testPage"
           {...props}
@@ -175,7 +177,7 @@ describe('When using the ArtifactListPage component', () => {
             meta: expect.any(Object),
             name: '',
             namespace_type: 'agnostic',
-            os_types: [],
+            os_types: ['windows'],
             tags: ['policy:all'],
             type: 'simple',
           },
@@ -244,13 +246,17 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       describe('and submit is successful', () => {
+        beforeEach(() => {
+          // FIXME:PT  release api response
+        });
+
         it.todo('should show a success toast');
 
         it.todo('should close flyout');
       });
 
       describe('and submit fails', () => {
-        it.todo('should re-enable `Cancel` and `Close` and `Submit` buttons');
+        it.todo('should re-enable `Cancel` and `Submit` buttons');
 
         it.todo('should pass error along to the Form component and reset disabled back to `false`');
       });
