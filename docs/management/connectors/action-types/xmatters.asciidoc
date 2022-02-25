@@ -35,23 +35,23 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    name: preconfigured-xmatters-connector-type
    actionTypeId: .xmatters
    config:
-     url: https://test.host
+     configUrl: https://test.host
    secrets:
      user: testuser
      password: passwordkeystorevalue
-     url: https://test.host?apiKey=1234-abcd
+     secretsUrl: https://test.host?apiKey=1234-abcd
 --
 
 Config defines information for the connector type.
 
-`url`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is true.
+`configUrl`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is true.
 `usesBasic`:: A boolean that corresponds to *Authentication Type*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
 Secrets defines sensitive information for the connector type.
 
 `user`:: A string that corresponds to *User*. Required if `usesBasic` is set to `true`.
 `password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `usesBasic` is set to `true`.
-`url`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is false, indicating the API Key is included in the URL.
+`secretsUrl`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is false, indicating the API Key is included in the URL.
 
 [float]
 [[define-xmatters-ui]]
@@ -88,6 +88,7 @@ By integrating with xMatters, you can
 [[xmatters-connector-prerequisites]]
 ==== Prerequisites ** still needs to be string reviewed by the xMatters team **
 First Elastic must be configured within your xMatters instance. In your xMatters instance, navigate to workflows. Once you have installed the Elastic workflow template or created a custom workflow with the Elastic trigger, you can begin setup.
+
 [role="screenshot"]
 image::management/connectors/images/xmatters-copy-url.png[Elastic Trigger in xMatters]
 
