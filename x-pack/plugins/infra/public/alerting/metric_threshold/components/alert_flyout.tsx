@@ -30,7 +30,7 @@ export const AlertFlyout = (props: Props) => {
         consumer: 'infrastructure',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
-        alertTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
+        ruleTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
         metadata: {
           currentOptions: props.options,
           series: props.series,
