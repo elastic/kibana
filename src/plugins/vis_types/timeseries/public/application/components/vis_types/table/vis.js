@@ -21,6 +21,7 @@ import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
 
 import {
   createCachedFieldValueFormatter,
@@ -255,7 +256,8 @@ class TableVis extends Component {
     const fieldValuesFormatter = createCachedFieldValueFormatter(
       indexPattern,
       fields,
-      this.fieldFormatsService
+      this.fieldFormatsService,
+      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
     const header = this.renderHeader(pivotIds);

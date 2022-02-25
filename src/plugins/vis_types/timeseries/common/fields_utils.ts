@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isNestedField, FieldSpec, DataView } from '../../../data/common';
 import { FieldNotFoundError } from './errors';
 import type { FetchedIndexPattern, SanitizedFieldType } from './types';
-import { FieldFormat, FieldFormatsRegistry } from '../../../field_formats/common';
+import { FieldFormat, FieldFormatsRegistry, FIELD_FORMAT_IDS } from '../../../field_formats/common';
 
 export const extractFieldLabel = (
   fields: SanitizedFieldType[],
@@ -73,7 +73,8 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
 export const createCachedFieldValueFormatter = (
   indexPattern?: DataView | null,
   fields?: SanitizedFieldType[],
-  fieldFormatService?: FieldFormatsRegistry
+  fieldFormatService?: FieldFormatsRegistry,
+  excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = []
 ) => {
   const cache = new Map<string, FieldFormat>();
 
@@ -83,7 +84,10 @@ export const createCachedFieldValueFormatter = (
       return cachedFormatter.convert(value, contentType);
     }
 
-    if (indexPattern) {
+    if (
+      indexPattern &&
+      !excludedFieldFormatsIds.includes(indexPattern.fieldFormatMap?.[fieldName]?.id)
+    ) {
       const field = indexPattern.fields.getByName(fieldName);
       if (field) {
         const formatter = indexPattern.getFormatterForField(field);
