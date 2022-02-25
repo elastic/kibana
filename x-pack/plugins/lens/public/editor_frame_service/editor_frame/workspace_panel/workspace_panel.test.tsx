@@ -273,6 +273,63 @@ describe('workspace_panel', () => {
   `);
   });
 
+  it('should base saveability on working changes when auto-apply disabled', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockVisualization.getErrorMessages.mockImplementation((currentVisualizationState: any) => {
+      if (currentVisualizationState.hasProblem) {
+        return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
+      } else {
+        return [];
+      }
+    });
+
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    instance = mounted.instance;
+    const isSaveable = () => mounted.lensStore.getState().lens.isSaveable;
+
+    instance.update();
+
+    // allows initial render
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    "kibana
+    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+    | testVis"
+  `);
+    expect(isSaveable()).toBe(true);
+
+    act(() => {
+      mounted.lensStore.dispatch(
+        updateVisualizationState({
+          visualizationId: 'testVis',
+          newState: { activeId: 'testVis', hasProblem: true },
+        })
+      );
+    });
+    instance.update();
+
+    expect(isSaveable()).toBe(false);
+  });
+
   it('should allow empty workspace as initial render when auto-apply disabled', async () => {
     mockVisualization.toExpression.mockReturnValue('testVis');
     const framePublicAPI = createMockFramePublicAPI();
@@ -787,8 +844,8 @@ describe('workspace_panel', () => {
     });
     mockDatasource.getLayers.mockReturnValue(['first']);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockVisualization.getErrorMessages.mockImplementation((currentDatasourceState: any) => {
-      if (currentDatasourceState.hasProblem) {
+    mockVisualization.getErrorMessages.mockImplementation((currentVisualizationState: any) => {
+      if (currentVisualizationState.hasProblem) {
         return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
       } else {
         return [];

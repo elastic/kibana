@@ -265,6 +265,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization.activeId,
   ]);
 
+  useEffect(() => {
+    dispatchLens(setSaveable(Boolean(_expression)));
+  }, [_expression, dispatchLens]);
+
   if (shouldApplyExpression) {
     expressionToRender = _expression;
   }
@@ -278,10 +282,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   if ((expressionExists || expressionToRender === null) && !localState.initialRenderComplete) {
     setLocalState((s) => ({ ...s, initialRenderComplete: true }));
   }
-
-  useEffect(() => {
-    dispatchLens(setSaveable(expressionExists));
-  }, [expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
