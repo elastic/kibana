@@ -13,7 +13,6 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
-import { i18n } from '@kbn/i18n';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { docLinks } from '../../../../../shared/doc_links';
@@ -25,13 +24,8 @@ jest.mock('../../../../app_logic', () => ({
 import { AppLogic } from '../../../../app_logic';
 
 import { SOURCE_NAMES, SOURCE_OBJ_TYPES } from '../../../../constants';
-import {
-  SOURCES_PATH,
-  PRIVATE_SOURCES_PATH,
-  getSourcesPath,
-  ADD_CUSTOM_PATH,
-} from '../../../../routes';
-import { CustomSource, FeatureIds } from '../../../../types';
+import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import { FeatureIds } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
