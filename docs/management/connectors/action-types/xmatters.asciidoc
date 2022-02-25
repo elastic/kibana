@@ -57,10 +57,12 @@ Secrets defines sensitive information for the connector type.
 [[define-xmatters-ui]]
 ==== Define connector in Stack Management
 
-Define xMatters connector properties.
+Define xMatters connector properties. Choose between basic and url authentication for the requests.
 
 [role="screenshot"]
-image::management/connectors/images/xmatters-connector.png[xMatters connector]
+image::management/connectors/images/xmatters-connector-basic.png[xMatters connector with basic authentication]
+[role="screenshot"]
+image::management/connectors/images/xmatters-connector-url.png[xMatters connector with url authentication]
 
 Test xMatters rule parameters.
 
@@ -86,12 +88,17 @@ By integrating with xMatters, you can
 [[xmatters-connector-prerequisites]]
 ==== Prerequisites ** still needs to be string reviewed by the xMatters team **
 First Elastic must be configured within your xMatters instance. In your xMatters instance, navigate to workflows. Once you have installed the Elastic workflow template or created a custom workflow with the Elastic trigger, you can begin setup.
+[role="screenshot"]
+image::management/connectors/images/xmatters-copy-url.png[Elastic Trigger in xMatters]
 
 . Open the trigger in the workflow
-. Choose the type of authentication
+. Choose the type of authentication, making sure to copy the url after selecting the chose authentication type
 . Copy the URL (this is the URL to use in the xMatters connector in Elastic)
 . Paste the URL into the connector in Elastic once you have selected the appropriate authentication type
 
+Note: if using basic authentication, make sure you use your Web / App Login ID. This value can be found in the Edit Profile modal under a specific user.
+
+For more information https://help.xmatters.com/ondemand/#cshid=ElasticTrigger[see xMatters documentation]
 
 Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
 their values escaped, so that the final JSON will be valid (escaping double quote characters).
