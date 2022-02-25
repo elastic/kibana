@@ -37,24 +37,9 @@ export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
-  secretsUrl: schema.maybe(schema.string()),
+  secretsUrl: schema.nullable(schema.string()),
 };
-const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: (secrets) => {
-    // user and password must be set together (or not at all)
-    // if user/password provided, then no secretsUrl should be present
-    if ((!secrets.password && secrets.user) || (secrets.password && !secrets.user)) {
-      return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
-        defaultMessage: 'Both user and password must be specified',
-      });
-    }
-    if (secrets.password && secrets.user && !secrets.secretsUrl) return;
-    if (!secrets.password && !secrets.user && secrets.secretsUrl) return;
-    return i18n.translate('xpack.actions.builtin.xmatters.invalidSecrets', {
-      defaultMessage: 'Either user and password or URL authentication must be specified',
-    });
-  },
-});
+const SecretsSchema = schema.object(secretSchemaProps);
 
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
@@ -168,31 +153,56 @@ function validateActionTypeSecrets(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ): string | undefined {
-  const secretsUrl = secretsObject.secretsUrl;
-  try {
-    if (secretsUrl) {
-      new URL(secretsUrl);
-    }
-  } catch (err) {
-    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
-      defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
-      values: {
-        err,
-      },
+  if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
+    return i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
+      defaultMessage: 'Either user and password or URL authentication must be specified.',
     });
   }
 
-  try {
-    if (secretsUrl) {
-      configurationUtilities.ensureUriAllowed(secretsUrl);
+  // Check for secrets URL first
+  if (secretsObject.secretsUrl) {
+    // Neither user/password should be defined if secretsUrl is specified
+    if (secretsObject.user || secretsObject.password) {
+      return i18n.translate('xpack.actions.builtin.xmatters.noUserPassWhenSecretsUrl', {
+        defaultMessage:
+          'Cannot use user and password with URL authentication. Specify user/password or URL.',
+      });
     }
-  } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
-      defaultMessage: 'Error configuring xMatters action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+
+    // Test that URL is valid
+    try {
+      if (secretsObject.secretsUrl) {
+        new URL(secretsObject.secretsUrl);
+      }
+    } catch (err) {
+      return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
+        defaultMessage: 'Invalid URL: {err}',
+        values: {
+          err,
+        },
+      });
+    }
+
+    // Test that hostname is allowed
+    try {
+      if (secretsObject.secretsUrl) {
+        configurationUtilities.ensureUriAllowed(secretsObject.secretsUrl);
+      }
+    } catch (allowListError) {
+      return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
+        defaultMessage: '{message}',
+        values: {
+          message: allowListError.message,
+        },
+      });
+    }
+  } else {
+    // Username and password must both be set
+    if (!secretsObject.user || !secretsObject.password) {
+      return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
+        defaultMessage: 'Both user and password must be specified.',
+      });
+    }
   }
 }
 

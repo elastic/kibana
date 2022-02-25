@@ -42,7 +42,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('xmatters connector can be executed without username and password', async () => {
+    it('xmatters connector can be executed without username and password, with secretsUrl', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
@@ -50,8 +50,10 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           name: 'An xmatters action',
           connector_type_id: '.xmatters',
           config: {
-            url: xmattersSimulatorURL,
             usesBasic: false,
+          },
+          secrets: {
+            secretsUrl: xmattersSimulatorURL,
           },
         })
         .expect(200);
@@ -63,7 +65,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         connector_type_id: '.xmatters',
         is_missing_secrets: false,
         config: {
-          url: xmattersSimulatorURL,
           usesBasic: false,
         },
       });
@@ -78,13 +79,13 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .send({
           name: 'An xmatters action',
           connector_type_id: '.xmatters',
-          secrets: {
-            user: 'username',
-            password: 'mypassphrase',
-          },
           config: {
-            url: xmattersSimulatorURL,
+            configUrl: xmattersSimulatorURL,
             usesBasic: true,
+          },
+          secrets: {
+            password: 'mypassphrase',
+            user: 'username',
           },
         })
         .expect(200);
@@ -96,7 +97,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         connector_type_id: '.xmatters',
         is_missing_secrets: false,
         config: {
-          url: xmattersSimulatorURL,
+          configUrl: xmattersSimulatorURL,
           usesBasic: true,
         },
       });
@@ -104,7 +105,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
     });
 
-    it('should return unsuccessfully when default xmatters url is not present in allowedHosts', async () => {
+    it('should return unsuccessfully when default xmatters configUrl is not present in allowedHosts', async () => {
       await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
@@ -112,7 +113,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           name: 'A xmatters action',
           connector_type_id: '.xmatters',
           config: {
-            url: 'https://events.xmatters.com/v2/enqueue',
+            configUrl: 'https://events.xmatters.com/v2/enqueue',
           },
         })
         .expect(400)
@@ -134,12 +135,10 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           name: 'A xmatters simulator',
           connector_type_id: '.xmatters',
           config: {
-            url: xmattersSimulatorURL,
             usesBasic: false,
           },
           secrets: {
-            user: 'username',
-            password: 'mypassphrase',
+            secretsUrl: xmattersSimulatorURL,
           },
         })
         .expect(200);
@@ -186,7 +185,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/Error calling xMatters, invalid response/);
+      expect(result.message).to.match(/Error triggering xMatters workflow/);
     });
 
     it('should handle a 429 xmatters error', async () => {
@@ -203,7 +202,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/Error calling xMatters, invalid response/);
+      expect(result.message).to.match(/Error triggering xMatters workflow/);
     });
 
     it('should handle a 500 xmatters error', async () => {
@@ -220,7 +219,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/Error calling xMatters, retry later/);
+      expect(result.message).to.match(
+        /Error triggering xMatters flow: http status 502, retry later/
+      );
       expect(result.retry).to.equal(true);
     });
 

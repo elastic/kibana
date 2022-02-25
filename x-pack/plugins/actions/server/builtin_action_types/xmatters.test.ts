@@ -43,6 +43,13 @@ beforeAll(() => {
   mockedLogger = logger;
 });
 
+beforeEach(() => {
+  actionType = getActionType({
+    logger: mockedLogger,
+    configurationUtilities: actionsConfigMock.create(),
+  });
+});
+
 describe('actionType', () => {
   test('exposes the action as `xmatters` on its Id and Name', () => {
     expect(actionType.id).toEqual('.xmatters');
@@ -51,76 +58,129 @@ describe('actionType', () => {
 });
 
 describe('secrets validation', () => {
-  test('succeeds when secrets is valid', () => {
+  test('succeeds when secrets is valid with user and password', () => {
     const secrets: Record<string, string> = {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+    expect(validateSecrets(actionType, secrets)).toEqual({
+      ...secrets,
+      secretsUrl: null,
+    });
+  });
+
+  test('succeeds when secrets is valid with url auth', () => {
+    const secrets: Record<string, string> = {
+      secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
+    };
+    expect(validateSecrets(actionType, secrets)).toEqual({
+      ...secrets,
+      user: null,
+      password: null,
+    });
+  });
+
+  test('fails when url auth is provided with user', () => {
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
+    };
+    expect(() => {
+      validateSecrets(actionType, secrets);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: Cannot use user and password with URL authentication. Specify user/password or URL."`
+    );
+  });
+
+  test('fails when url auth is provided with password', () => {
+    const secrets: Record<string, string> = {
+      password: 'supersecret',
+      secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
+    };
+    expect(() => {
+      validateSecrets(actionType, secrets);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: Cannot use user and password with URL authentication. Specify user/password or URL."`
+    );
+  });
+
+  test('fails when url auth is provided with user and password', () => {
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+      secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
+    };
+    expect(() => {
+      validateSecrets(actionType, secrets);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: Cannot use user and password with URL authentication. Specify user/password or URL."`
+    );
   });
 
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Both user and password must be specified"`
+      `"error validating action type secrets: Both user and password must be specified."`
     );
   });
 
-  test('succeeds when basic authentication credentials are omitted', () => {
-    expect(validateSecrets(actionType, {})).toEqual({ password: null, user: null });
-  });
-
-  test('succeeds when URL auth used', () => {
-    const secrets: Record<string, string> = {
-      user: '',
-      password: '',
-      secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
-    };
-    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+  test('fails when password is provided, but user is omitted', () => {
+    expect(() => {
+      validateSecrets(actionType, { password: 'supersecret' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: Both user and password must be specified."`
+    );
   });
 
   test('fails when user, password, and secretsUrl are omitted', () => {
     expect(() => {
       validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Either user and password or URL authentication must be specified"`
+      `"error validating action type secrets: Either user and password or URL authentication must be specified."`
     );
   });
 
-  test('fails when user, password, and secretsUrl are provided', () => {
+  test('fails when url is invalid', () => {
     const secrets: Record<string, string> = {
-      user: 'bob',
-      password: 'supersecret',
-      secretsUrl: 'https://someUrl.com',
+      secretsUrl: 'example.com/do-something?apiKey=someKey',
     };
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Either user and password or URL authentication must be specified"`
+      '"error validating action type secrets: Invalid URL: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
+    );
+  });
+
+  test('fails when url host is not in allowedHosts', () => {
+    actionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not present in allowedHosts`);
+        },
+      },
+    });
+    const secrets: Record<string, string> = {
+      secretsUrl: 'http://mylisteningserver.com:9200/endpoint',
+    };
+
+    expect(() => {
+      validateSecrets(actionType, secrets);
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"error validating action type secrets: target url is not present in allowedHosts"'
     );
   });
 });
 
 describe('config validation', () => {
-  test('config validation passes when only required fields are provided', () => {
+  test('config validation passes when useBasic is true and url is provided', () => {
     const config: Record<string, string | boolean> = {
       configUrl: 'http://mylisteningserver:9200/endpoint',
       usesBasic: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-    });
-  });
-
-  test('config validation passes when a url is specified', () => {
-    const config: Record<string, string | boolean> = {
-      configUrl: 'http://mylisteningserver:9200/endpoint',
-      usesBasic: true,
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-    });
+    expect(validateConfig(actionType, config)).toEqual(config);
   });
 
   test('config validation failed when a url is invalid', () => {
@@ -135,19 +195,6 @@ describe('config validation', () => {
     );
   });
 
-  test('config validation passes when kibana config url does not present in allowedHosts', () => {
-    // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const config: Record<string, any> = {
-      configUrl: 'http://mylisteningserver.com:9200/endpoint',
-      usesBasic: true,
-    };
-
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-    });
-  });
-
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
@@ -159,9 +206,7 @@ describe('config validation', () => {
       },
     });
 
-    // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const config: Record<string, any> = {
+    const config: Record<string, string | boolean> = {
       configUrl: 'http://mylisteningserver.com:9200/endpoint',
       usesBasic: true,
     };
@@ -173,14 +218,12 @@ describe('config validation', () => {
     );
   });
 
-  test('config validations returns successful when URL auth used', () => {
+  test('config validations returns successful useBasic is false and no url is provided', () => {
     const config: Record<string, boolean> = {
       usesBasic: false,
     };
 
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-    });
+    expect(validateConfig(actionType, config)).toEqual(config);
   });
 });
 
@@ -211,14 +254,6 @@ describe('params validation', () => {
 });
 
 describe('execute()', () => {
-  beforeAll(() => {
-    postxMattersMock.mockReset();
-    actionType = getActionType({
-      logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
-    });
-  });
-
   beforeEach(() => {
     postxMattersMock.mockReset();
     postxMattersMock.mockResolvedValue({
@@ -229,7 +264,7 @@ describe('execute()', () => {
     });
   });
 
-  test('execute with username/password sends request with basic auth', async () => {
+  test('execute with useBasic=true uses authentication object', async () => {
     const config: ActionTypeConfigType = {
       configUrl: 'https://abc.def/my-xmatters',
       usesBasic: true,
@@ -238,7 +273,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123' },
+      secrets: { secretsUrl: null, user: 'abc', password: '123' },
       params: {
         alertActionGroupName: 'Small t-shirt',
         signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234',
@@ -250,12 +285,13 @@ describe('execute()', () => {
       },
     });
 
-    const { url, data, auth } = postxMattersMock.mock.calls[0][0];
-    expect({ url, data, auth }).toMatchInlineSnapshot(`
+    expect(postxMattersMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "auth": {
-          "user": "abc",
-          "password": "123,
+        "basicAuth": Object {
+          "auth": Object {
+            "password": "123",
+            "username": "abc",
+          },
         },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
@@ -276,7 +312,6 @@ describe('execute()', () => {
       configUrl: 'https://abc.def/my-xmatters',
       usesBasic: true,
     };
-    postxMattersMock.mockReset();
     postxMattersMock.mockRejectedValueOnce({
       tag: 'err',
       message: 'maxContentLength size of 1000000 exceeded',
@@ -285,7 +320,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123' },
+      secrets: { secretsUrl: null, user: 'abc', password: '123' },
       params: {
         alertActionGroupName: 'Small t-shirt',
         signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234',
@@ -296,12 +331,12 @@ describe('execute()', () => {
         tags: 'test1, test2',
       },
     });
-    expect(mockedLogger.error).toBeCalledWith(
-      'Error on some-id xMatters event: maxContentLength size of 1000000 exceeded'
+    expect(mockedLogger.warn).toBeCalledWith(
+      'Error thrown triggering xMatters workflow: maxContentLength size of 1000000 exceeded'
     );
   });
 
-  test('execute without username/password sends request without basic auth', async () => {
+  test('execute with useBasic=false uses empty authentication object', async () => {
     const config: ActionTypeConfigType = {
       usesBasic: false,
     };
