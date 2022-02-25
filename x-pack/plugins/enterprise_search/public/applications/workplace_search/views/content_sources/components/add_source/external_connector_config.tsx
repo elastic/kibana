@@ -50,13 +50,8 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
     resetSourceState,
   } = useActions(ExternalConnectorLogic);
 
-  const {
-    buttonLoading,
-    dataLoading,
-    externalConnectorUrl,
-    externalConnectorApiKey,
-    sourceConfigData,
-  } = useValues(ExternalConnectorLogic);
+  const { buttonLoading, externalConnectorUrl, externalConnectorApiKey, sourceConfigData } =
+    useValues(ExternalConnectorLogic);
 
   useEffect(() => {
     initializeAddExternalSource();
