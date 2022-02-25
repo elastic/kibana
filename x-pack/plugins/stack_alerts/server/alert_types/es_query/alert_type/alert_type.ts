@@ -120,7 +120,7 @@ export function getAlertType(
   const actionVariableSearchTypeLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextSearchTypeLabel',
     {
-      defaultMessage: 'The type of search is used.',
+      defaultMessage: 'The type of search.',
     }
   );
 
