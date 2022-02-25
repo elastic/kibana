@@ -26,6 +26,7 @@ const CasesAppComponent: React.FC = () => {
         userCanCrud: userCapabilities.crud,
         basePath: '/',
         features: { alerts: { sync: false } },
+        releasePhase: 'experimental',
       })}
     </Wrapper>
   );
