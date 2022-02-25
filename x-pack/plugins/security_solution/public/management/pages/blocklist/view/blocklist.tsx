@@ -5,80 +5,130 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
-import { AdministrationListPage } from '../../../components/administration_list_page';
-import { ListPageRouteState } from '../../../../../common/endpoint/types';
-import { useMemoizedRouteState } from '../../../common/hooks';
-import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
-import { BlocklistEmptyState } from './components/empty';
-import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
+import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useHttp } from '../../../../common/lib/kibana';
+import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
+import { HostIsolationExceptionsApiClient } from '../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 
-export const Blocklist = memo(() => {
-  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
-  const memoizedRouteState = useMemoizedRouteState(routeState);
-
-  const backButtonEmptyComponent = useMemo(() => {
-    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
-    }
-  }, [memoizedRouteState]);
-
-  const backButtonHeaderComponent = useMemo(() => {
-    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...memoizedRouteState} />;
-    }
-  }, [memoizedRouteState]);
-
-  const hasDataToShow = false;
-
-  const handleAddButtonClick = () => {};
+// FIXME:PT delete this when real component is implemented
+const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (props) => {
+  // For Dev. Delete once we implement this component
+  // @ts-ignore
+  if (!window._dev_artifact_form_props) {
+    // @ts-ignore
+    window._dev_artifact_form_props = [];
+    // @ts-ignore
+    window.console.log(window._dev_artifact_form_props);
+  }
+  // @ts-ignore
+  window._dev_artifact_form_props.push(props);
 
   return (
-    <AdministrationListPage
-      headerBackComponent={backButtonHeaderComponent}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.blocklist.pageTitle"
-          defaultMessage="Blocklist"
-        />
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.securitySolution.blocklist.pageSubTitle"
-          defaultMessage="Put that thing back where it came from or so help me"
-        />
-      }
-      actions={
-        hasDataToShow ? (
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            data-test-subj="blocklistAddButton"
-            onClick={handleAddButtonClick}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.blocklist.addButton"
-              defaultMessage="Add blocklist entry"
-            />
-          </EuiButton>
-        ) : (
-          []
-        )
-      }
-      hideHeader={!hasDataToShow}
-    >
-      {hasDataToShow ? (
-        <p>{'Data, search bar, etc here'}</p>
-      ) : (
-        <BlocklistEmptyState
-          onAdd={handleAddButtonClick}
-          backComponent={backButtonEmptyComponent}
-        />
-      )}
-    </AdministrationListPage>
+    <div>
+      <div style={{ margin: '3em 0' }}>
+        {props.error ? props.error?.body?.message || props.error : ''}
+      </div>
+      {`TODO: ${props.mode} Form here`}
+    </div>
+  );
+};
+
+const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+  pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
+    defaultMessage: 'Blocklist',
+  }),
+  pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
+    defaultMessage: '(DEV: temporarily using isolation exception api)', // FIXME: need wording from PM
+  }),
+  pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
+    defaultMessage: 'Add blocklist entry',
+  }),
+  getShowingCountLabel: (total) =>
+    i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
+      defaultMessage: 'Showing {total} {total, plural, one {blocklist} other {blocklists}}',
+      values: { total },
+    }),
+  cardActionEditLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionEditLabel', {
+    defaultMessage: 'Edit blocklist',
+  }),
+  cardActionDeleteLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionDeleteLabel', {
+    defaultMessage: 'Delete blocklist',
+  }),
+  flyoutCreateTitle: i18n.translate('xpack.securitySolution.blocklist.flyoutCreateTitle', {
+    defaultMessage: 'Add blocklist',
+  }),
+  flyoutEditTitle: i18n.translate('xpack.securitySolution.blocklist.flyoutEditTitle', {
+    defaultMessage: 'Edit blocklist',
+  }),
+  flyoutCreateSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.blocklist.flyoutCreateSubmitButtonLabel',
+    { defaultMessage: 'Add blocklist' }
+  ),
+  flyoutCreateSubmitSuccess: ({ name }) =>
+    i18n.translate('xpack.securitySolution.blocklist.flyoutCreateSubmitSuccess', {
+      defaultMessage: '"{name}" has been added to your blocklist.', // FIXME: match this to design (needs count of items)
+      values: { name },
+    }),
+  flyoutEditSubmitSuccess: ({ name }) =>
+    i18n.translate('xpack.securitySolution.blocklist.flyoutEditSubmitSuccess', {
+      defaultMessage: '"{name}" has been updated.',
+      values: { name },
+    }),
+  flyoutDowngradedLicenseDocsInfo: () => {
+    return 'tbd...';
+    // FIXME: define docs link for license downgrade message. sample code below
+
+    // const { docLinks } = useKibana().services;
+    // return (
+    //   <FormattedMessage
+    //     id="some-id-1"
+    //     defaultMessage="For more information, see our {link}."
+    //     value={{
+    //       link: (
+    //         <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
+    //           {' '}
+    //           <FormattedMessage
+    //             id="dome-id-2"
+    //             defaultMessage="Event filters documentation"
+    //           />{' '}
+    //         </EuiLink>
+    //       ),
+    //     }}
+    //   />
+    // );
+  },
+  deleteActionSuccess: (itemName) =>
+    i18n.translate('xpack.securitySolution.blocklist.deleteSuccess', {
+      defaultMessage: '"{itemName}" has been removed from blocklist.',
+      values: { itemName },
+    }),
+  emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
+    defaultMessage: 'Add your first blocklist',
+  }),
+  emptyStateInfo: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateInfo',
+    { defaultMessage: 'Add a blocklist to prevent execution on the endpoint' } // FIXME: need wording here form PM
+  ),
+  emptyStatePrimaryButtonLabel: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
+    { defaultMessage: 'Add blocklist' }
+  ),
+};
+
+export const Blocklist = memo(() => {
+  const http = useHttp();
+  // FIXME: Implement Blocklist API client and define list
+  // for now, just using Event Filters
+  const eventFiltersApiClient = HostIsolationExceptionsApiClient.getInstance(http);
+
+  return (
+    <ArtifactListPage
+      apiClient={eventFiltersApiClient}
+      ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
+      labels={BLOCKLIST_PAGE_LABELS}
+      data-test-subj="blocklistPage"
+    />
   );
 });
 
