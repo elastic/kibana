@@ -175,7 +175,7 @@ function validateActionTypeSecrets(
         new URL(secretsObject.secretsUrl);
       }
     } catch (err) {
-      return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
+      return i18n.translate('xpack.actions.builtin.xmatters.xmattersInvalidUrlError', {
         defaultMessage: 'Invalid URL: {err}',
         values: {
           err,
@@ -189,7 +189,7 @@ function validateActionTypeSecrets(
         configurationUtilities.ensureUriAllowed(secretsObject.secretsUrl);
       }
     } catch (allowListError) {
-      return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
+      return i18n.translate('xpack.actions.builtin.xmatters.xmattersHostnameNotAllowed', {
         defaultMessage: '{message}',
         values: {
           message: allowListError.message,
@@ -246,7 +246,7 @@ export async function executor(
 
   if (result.status >= 200 && result.status < 300) {
     const { status, statusText } = result;
-    logger.debug(`response from xMatters action "${actionId}": [HTTP ${status}] ${statusText}`);
+    logger.debug(`Response from xMatters action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     return successResult(actionId, data);
   }
