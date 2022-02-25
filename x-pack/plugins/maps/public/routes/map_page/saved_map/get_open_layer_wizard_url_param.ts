@@ -25,7 +25,7 @@ export function getOpenLayerWizardFromUrlParam() {
       title: i18n.translate('xpack.maps.initialLayers.unableToParseWizard', {
         defaultMessage: `Error when parsing Wizard name`,
       }),
-      text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
+      text: i18n.translate('xpack.maps.initialLayers.unableToParseWizardMessage', {
         defaultMessage: `Unable to parse contents of 'openLayerWizard' parameter. Error: {errorMsg}`,
         values: { errorMsg: e.message },
       }),
