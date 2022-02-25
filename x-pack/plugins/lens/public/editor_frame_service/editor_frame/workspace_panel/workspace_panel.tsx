@@ -274,7 +274,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }
 
   const expressionExists = Boolean(expressionToRender);
-  if (expressionExists && !localState.initialRenderComplete) {
+  // null signals an empty workspace which should count as an initial render
+  if ((expressionExists || expressionToRender === null) && !localState.initialRenderComplete) {
     setLocalState((s) => ({ ...s, initialRenderComplete: true }));
   }
 

@@ -742,7 +742,7 @@ describe('workspace_panel', () => {
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
-  it.skip('should NOT display errors for unapplied changes', async () => {
+  it('should NOT display errors for unapplied changes', async () => {
     // this test is important since we don't want the workspace panel to
     // display errors if the user has disabled auto-apply, messed something up,
     // but not yet applied their changes
