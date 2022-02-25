@@ -18,6 +18,7 @@ jest.mock('../../app_logic', () => ({
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
+import { staticSourceData } from './source_data';
 import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
 
 describe('SourcesLogic', () => {
@@ -32,8 +33,8 @@ describe('SourcesLogic', () => {
   const defaultValues = {
     contentSources: [],
     privateContentSources: [],
-    sourceData: [],
-    availableSources: [],
+    sourceData: staticSourceData.map((data) => ({ ...data, connected: false })),
+    availableSources: staticSourceData.map((data) => ({ ...data, connected: false })),
     configuredSources: [],
     serviceTypes: [],
     permissionsModal: null,
@@ -316,7 +317,7 @@ describe('SourcesLogic', () => {
     it('availableSources & configuredSources have correct length', () => {
       SourcesLogic.actions.onInitializeSources(serverResponse);
 
-      expect(SourcesLogic.values.availableSources).toHaveLength(1);
+      expect(SourcesLogic.values.availableSources).toHaveLength(14);
       expect(SourcesLogic.values.configuredSources).toHaveLength(5);
     });
   });

@@ -292,7 +292,7 @@ const updateSourcesOnToggle = (
  * The second is the base list of available sources that the server sends back in the collection,
  * `availableTypes` that is the source of truth for the name and whether the source has been configured.
  *
- * Fnally, also in the collection response is the current set of connected sources. We check for the
+ * Finally, also in the collection response is the current set of connected sources. We check for the
  * existence of a `connectedSource` of the type in the loop and set `connected` to true so that the UI
  * can diplay "Add New" instead of "Connect", the latter of which is displated only when a connector
  * has been configured but there are no connected sources yet.
@@ -303,9 +303,9 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ) => {
   const combined = [] as CombinedDataItem[];
-  serverData.forEach((serverItem) => {
-    const type = serverItem.serviceType;
-    const staticItem = staticData.find(({ serviceType }) => serviceType === type);
+  staticData.forEach((staticItem) => {
+    const type = staticItem.serviceType;
+    const serverItem = serverData.find(({ serviceType }) => serviceType === type);
     const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
     combined.push({
       ...staticItem,
