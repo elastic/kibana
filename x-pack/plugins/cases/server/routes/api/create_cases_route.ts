@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Default page number when interacting with the saved objects API.
- */
-export const DEFAULT_PAGE = 1;
-/**
- * Default number of results when interacting with the saved objects API.
- */
-export const DEFAULT_PER_PAGE = 20;
+import { CaseRoute } from './types';
+
+export const createCasesRoute = <P, Q, B>(route: CaseRoute<P, Q, B>) => route;
