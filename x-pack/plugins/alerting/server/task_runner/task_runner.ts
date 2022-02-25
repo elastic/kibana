@@ -5,7 +5,7 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import { Dictionary, pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
+import { pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
@@ -38,16 +38,16 @@ import {
   RawRuleExecutionStatus,
   AlertAction,
   RuleExecutionState,
+  RuleExecutionRunResult,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
-  ActionGroup,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -65,6 +65,14 @@ import {
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 import { createWrappedScopedClusterClientFactory } from '../lib';
 import { getRecoveredAlerts } from '../lib';
+import {
+  GenerateNewAndRecoveredAlertEventsParams,
+  LogActiveAndRecoveredAlertsParams,
+  RuleTaskInstance,
+  RuleTaskRunResult,
+  ScheduleActionsForRecoveredAlertsParams,
+  TrackAlertDurationsParams,
+} from './types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -80,22 +88,6 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
     },
   },
 });
-
-interface RuleExecutionRunResult {
-  state: RuleExecutionState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}
-
-interface RuleTaskRunResult {
-  state: RuleTaskState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}
-
-interface RuleTaskInstance extends ConcreteTaskInstance {
-  state: RuleTaskState;
-}
 
 export class TaskRunner<
   Params extends AlertTypeParams,
@@ -940,15 +932,6 @@ export class TaskRunner<
   }
 }
 
-interface TrackAlertDurationsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-}
-
 function trackAlertDurations<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
@@ -993,34 +976,6 @@ function trackAlertDurations<
       ...(state.start ? { end: currentTime } : {}),
     });
   }
-}
-
-interface GenerateNewAndRecoveredAlertEventsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  eventLogger: IEventLogger;
-  executionId: string;
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  ruleId: string;
-  ruleLabel: string;
-  namespace: string | undefined;
-  ruleType: NormalizedRuleType<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
-    {
-      [x: string]: unknown;
-    },
-    {
-      [x: string]: unknown;
-    },
-    string,
-    string
-  >;
-  rule: SanitizedAlert<AlertTypeParams>;
 }
 
 function generateNewAndRecoveredAlertEvents<
@@ -1144,19 +1099,6 @@ function generateNewAndRecoveredAlertEvents<
   }
 }
 
-interface ScheduleActionsForRecoveredAlertsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
-> {
-  logger: Logger;
-  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
-  mutedAlertIdsSet: Set<string>;
-  ruleLabel: string;
-}
-
 async function scheduleActionsForRecoveredAlerts<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -1198,19 +1140,6 @@ async function scheduleActionsForRecoveredAlerts<
     }
   }
   return triggeredActions;
-}
-
-interface LogActiveAndRecoveredAlertsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  logger: Logger;
-  activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  ruleLabel: string;
-  canSetRecoveryContext: boolean;
 }
 
 function logActiveAndRecoveredAlerts<

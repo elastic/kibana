@@ -7,14 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import {
+import type {
   Rule,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../../../../triggers_actions_ui/public';
+import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {
   alertFlyoutVisible: boolean;
-  initialAlert: Rule;
+  initialAlert: Rule<UptimeAlertTypeParams>;
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -32,7 +33,7 @@ export const UptimeEditAlertFlyoutComponent = ({
   const EditAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getEditAlertFlyout({
-        initialAlert,
+        initialRule: initialAlert,
         onClose: () => {
           setAlertFlyoutVisibility(false);
         },
