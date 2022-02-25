@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCopy, EuiListGroupItemProps } from '@elastic/eui';
+import { copyToClipboard, EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function buildCopyColumnNameButton(columnName: string) {
