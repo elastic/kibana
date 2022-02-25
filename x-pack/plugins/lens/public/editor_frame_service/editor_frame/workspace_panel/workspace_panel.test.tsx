@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
-import { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../../types';
+import { FramePublicAPI, Visualization } from '../../../types';
 import {
   createMockVisualization,
   createMockDatasource,
