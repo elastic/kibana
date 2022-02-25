@@ -5,4 +5,5 @@
  * 2.0.
  */
 export { parseTechnicalFields, type ParsedTechnicalFields } from './parse_technical_fields';
+export type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from './search_strategy';
 export { BASE_RAC_ALERTS_API_PATH } from './constants';
