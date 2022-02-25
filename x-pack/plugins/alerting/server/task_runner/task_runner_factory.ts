@@ -13,6 +13,8 @@ import type {
   ISavedObjectsRepository,
   IBasePath,
   ExecutionContextStart,
+  SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
 } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
@@ -20,7 +22,6 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../acti
 import {
   AlertTypeParams,
   RuleTypeRegistry,
-  GetServicesFunction,
   SpaceIdToNamespaceFunction,
   AlertTypeState,
   AlertInstanceState,
@@ -30,10 +31,13 @@ import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 
 export interface TaskRunnerContext {
   logger: Logger;
-  getServices: GetServicesFunction;
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;

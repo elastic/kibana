@@ -12,7 +12,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
 import 'brace/theme/github';
 
-import { EuiButtonEmpty, EuiSpacer, EuiFormRow, EuiTitle, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiFormRow,
+  EuiText,
+  EuiTitle,
+  EuiLink,
+  EuiIconTip,
+} from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from 'kibana/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -301,14 +311,31 @@ export const EsQueryExpression = ({
         </EuiFormRow>
       )}
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
-            defaultMessage="When number of matches"
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+                defaultMessage="When number of matches"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            position="right"
+            color="subdued"
+            type="questionInCircle"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+            content={i18n.translate('xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip', {
+              defaultMessage: 'The time window defined below applies only to the first rule check.',
+            })}
           />
-        </h5>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <ThresholdExpression
         data-test-subj="thresholdExpression"

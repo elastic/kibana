@@ -17,6 +17,7 @@ import { Validation, ConfigKey } from '../types';
 interface Props {
   validate: Validation;
   minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
 type ThrottlingConfigs =
@@ -25,7 +26,7 @@ type ThrottlingConfigs =
   | ConfigKey.UPLOAD_SPEED
   | ConfigKey.LATENCY;
 
-export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth }) => {
+export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -64,6 +65,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth }) => {
               configKey: ConfigKey.DOWNLOAD_SPEED,
             });
           }}
+          onBlur={() => onFieldBlur?.(ConfigKey.DOWNLOAD_SPEED)}
           data-test-subj="syntheticsBrowserDownloadSpeed"
           append={
             <EuiText size="xs">
@@ -98,6 +100,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth }) => {
               configKey: ConfigKey.UPLOAD_SPEED,
             })
           }
+          onBlur={() => onFieldBlur?.(ConfigKey.UPLOAD_SPEED)}
           data-test-subj="syntheticsBrowserUploadSpeed"
           append={
             <EuiText size="xs">
@@ -131,6 +134,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth }) => {
               configKey: ConfigKey.LATENCY,
             })
           }
+          onBlur={() => onFieldBlur?.(ConfigKey.LATENCY)}
           data-test-subj="syntheticsBrowserLatency"
           append={
             <EuiText size="xs">
@@ -177,6 +181,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth }) => {
             configKey: ConfigKey.IS_THROTTLING_ENABLED,
           })
         }
+        onBlur={() => onFieldBlur?.(ConfigKey.IS_THROTTLING_ENABLED)}
       />
       {throttlingInputs}
     </DescribedFormGroupWithWrap>

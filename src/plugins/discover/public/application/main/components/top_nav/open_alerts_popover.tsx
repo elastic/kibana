@@ -65,7 +65,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
       consumer: 'discover',
       onClose: onCloseAlertFlyout,
       canChangeTrigger: false,
-      alertTypeId: ALERT_TYPE_ID,
+      ruleTypeId: ALERT_TYPE_ID,
       initialValues: {
         params: getParams(),
       },
