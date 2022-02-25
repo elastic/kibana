@@ -86,7 +86,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     const toolTipContent = (
       <FormattedMessage
         id="discover.alerts.missedTimeFieldToolTip"
-        defaultMessage="Data view does not have time field."
+        defaultMessage="Data view does not have a time field."
       />
     );
     createSearchThresholdRuleLink = (
