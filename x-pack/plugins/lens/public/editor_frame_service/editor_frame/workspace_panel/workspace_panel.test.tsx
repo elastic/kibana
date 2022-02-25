@@ -273,6 +273,36 @@ describe('workspace_panel', () => {
   `);
   });
 
+  it('should allow empty workspace as initial render when auto-apply disabled', async () => {
+    mockVisualization.toExpression.mockReturnValue('testVis');
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: mockVisualization,
+        }}
+      />,
+      {
+        preloadedState: {
+          autoApplyDisabled: true,
+        },
+      }
+    );
+
+    instance = mounted.instance;
+
+    expect(instance.exists('[data-test-subj="empty-workspace"]')).toBeTruthy();
+  });
+
   it('should execute a trigger on expression event', async () => {
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
