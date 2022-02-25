@@ -676,7 +676,8 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('adds a single indicator that matched multiple fields', async () => {
+        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+        it.skip('adds a single indicator that matched multiple fields', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
