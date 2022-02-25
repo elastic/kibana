@@ -50,7 +50,7 @@ export const upgradeManagedPackagePolicies = async (
 
     for (const packagePolicy of packagePolicies) {
       if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-        await upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
+        await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
       }
     }
   }
@@ -84,13 +84,19 @@ function isPolicyVersionLtInstalledVersion(
 async function upgradePackagePolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  packagePolicyId: string,
+  packagePolicy: PackagePolicy,
+  installedPackage: Installation,
   results: UpgradeManagedPackagePoliciesResult[]
 ) {
   // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
   // to notify the user of any granular policy upgrade errors that occur during Fleet's
   // preconfiguration check
-  const dryRunResults = await packagePolicyService.getUpgradeDryRunDiff(soClient, packagePolicyId);
+  const dryRunResults = await packagePolicyService.getUpgradeDryRunDiff(
+    soClient,
+    packagePolicy.id,
+    packagePolicy,
+    installedPackage.version
+  );
 
   if (dryRunResults.hasErrors) {
     const errors = dryRunResults.diff
@@ -100,17 +106,24 @@ async function upgradePackagePolicy(
     appContextService
       .getLogger()
       .error(
-        new Error(`Error upgrading package policy ${packagePolicyId}: ${JSON.stringify(errors)}`)
+        new Error(`Error upgrading package policy ${packagePolicy.id}: ${JSON.stringify(errors)}`)
       );
 
-    results.push({ packagePolicyId, diff: dryRunResults.diff, errors });
+    results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors });
     return;
   }
 
   try {
-    await packagePolicyService.upgrade(soClient, esClient, [packagePolicyId]);
-    results.push({ packagePolicyId, diff: dryRunResults.diff, errors: [] });
+    await packagePolicyService.upgrade(
+      soClient,
+      esClient,
+      [packagePolicy.id],
+      undefined,
+      packagePolicy,
+      installedPackage.version
+    );
+    results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [] });
   } catch (error) {
-    results.push({ packagePolicyId, diff: dryRunResults.diff, errors: [error] });
+    results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [error] });
   }
 }

@@ -13,7 +13,8 @@
     "home",
      "security",
      "spaces",
-     "features"
+     "features",
+     "usageCollection"
   ],
   "owner":{
      "githubTeam":"response-ops",

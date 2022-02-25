@@ -14,6 +14,8 @@ import {
   getAllCasesSelectorModalLazy,
   getCreateCaseFlyoutLazy,
   canUseCases,
+  getCreateCaseFlyoutLazyNoProvider,
+  getAllCasesSelectorModalNoProviderLazy,
 } from './methods';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
@@ -85,9 +87,18 @@ export class CasesUiPlugin
     return {
       canUseCases: canUseCases(core.application.capabilities),
       getCases: getCasesLazy,
+      getCasesContext: getCasesContextLazy,
       getRecentCases: getRecentCasesLazy,
       getCreateCaseFlyout: getCreateCaseFlyoutLazy,
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
+      // Temporal methods to remove timelines and cases deep integration
+      // https://github.com/elastic/kibana/issues/123183
+      getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
+      getAllCasesSelectorModalNoProvider: getAllCasesSelectorModalNoProviderLazy,
+      hooks: {
+        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
+        getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+      },
     };
   }
 

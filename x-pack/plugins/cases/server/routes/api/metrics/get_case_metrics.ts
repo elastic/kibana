@@ -7,37 +7,35 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
-
 import { CASE_METRICS_DETAILS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initGetCaseMetricsApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_METRICS_DETAILS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string({ minLength: 1 }),
+export const getCaseMetricRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_METRICS_DETAILS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string({ minLength: 1 }),
+    }),
+    query: schema.object({
+      features: schema.arrayOf(schema.string({ minLength: 1 })),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+      return response.ok({
+        body: await client.metrics.getCaseMetrics({
+          caseId: request.params.case_id,
+          features: request.query.features,
         }),
-        query: schema.object({
-          features: schema.arrayOf(schema.string({ minLength: 1 })),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const client = await context.cases.getCasesClient();
-        return response.ok({
-          body: await client.metrics.getCaseMetrics({
-            caseId: request.params.case_id,
-            features: request.query.features,
-          }),
-        });
-      } catch (error) {
-        logger.error(`Failed to get case metrics in route: ${error}`);
-        return response.customError(wrapError(error));
-      }
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get case metrics in route: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});
