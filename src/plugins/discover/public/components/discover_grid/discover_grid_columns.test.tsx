@@ -30,12 +30,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="extension"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },
@@ -61,12 +60,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="message"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },
@@ -106,12 +104,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="extension"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },
@@ -137,12 +134,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="message"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },
@@ -179,12 +175,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="timestamp"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },
@@ -224,12 +219,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="extension"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },
@@ -258,12 +252,11 @@ describe('Discover grid columns', function () {
                   "size": "m",
                 },
                 "iconType": "copyClipboard",
-                "label": <EuiCopy
-                  afterMessage="Copied"
-                  textToCopy="message"
-                >
-                  [Function]
-                </EuiCopy>,
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
                 "onClick": [Function],
                 "size": "xs",
               },

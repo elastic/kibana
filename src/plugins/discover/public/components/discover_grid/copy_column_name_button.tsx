@@ -11,23 +11,17 @@ import { copyToClipboard, EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function buildCopyColumnNameButton(columnName: string) {
-  let copy: () => void;
   const copyToClipBoardButton: EuiListGroupItemProps = {
     size: 'xs',
     label: (
-      <EuiCopy textToCopy={columnName}>
-        {(copyCallback) => (
-          <FormattedMessage
-            ref={() => (copy = copyCallback)}
-            id="discover.grid.copyToClipBoardButton"
-            defaultMessage="Copy to clipboard"
-          />
-        )}
-      </EuiCopy>
+      <FormattedMessage
+        id="discover.grid.copyToClipBoardButton"
+        defaultMessage="Copy to clipboard"
+      />
     ),
     iconType: 'copyClipboard',
     iconProps: { size: 'm' },
-    onClick: () => copy(),
+    onClick: () => copyToClipboard(columnName),
   };
 
   return copyToClipBoardButton;
