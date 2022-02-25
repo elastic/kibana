@@ -37,7 +37,6 @@ it('output type links to named import from node modules', async () => {
   expect(output.code).toMatchInlineSnapshot(`
     "import { Foo } from 'foo';
     export type ValidName = string | Foo
-    ;
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(output.map).toMatchInlineSnapshot(`
@@ -70,7 +69,6 @@ it('output type links to default import from node modules', async () => {
   expect(output.code).toMatchInlineSnapshot(`
     "import { Bar } from 'bar';
     export type ValidName = string | Bar
-    ;
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(output.map).toMatchInlineSnapshot(`

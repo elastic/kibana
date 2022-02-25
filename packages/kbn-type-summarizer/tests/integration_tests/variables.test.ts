@@ -35,7 +35,7 @@ it('prints basic variable exports with sourcemaps', async () => {
     "/**
      * What is a type
      */
-    type Type = 'bar' | 'baz';
+    type Type = 'bar' | 'baz'
     /** some comment */
     export const bar: Type;
     /**

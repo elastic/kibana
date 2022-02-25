@@ -20,7 +20,7 @@ it('prints basic type alias', async () => {
   `);
 
   expect(output.code).toMatchInlineSnapshot(`
-    "export type Name = 'foo' | string;
+    "export type Name = 'foo' | string
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(output.map).toMatchInlineSnapshot(`
