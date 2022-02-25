@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
-        await retry.try(await PageObjects.settings.removeIndexPattern());
+        await retry.try(async () => await PageObjects.settings.removeIndexPattern());
       });
     });
 
