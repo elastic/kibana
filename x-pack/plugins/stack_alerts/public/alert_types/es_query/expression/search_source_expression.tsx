@@ -150,7 +150,7 @@ export const SearchSourceExpression = ({
       <EuiText size="xs">
         <FormattedMessage
           id="xpack.stackAlerts.searchThreshold.ui.notEditable"
-          defaultMessage="Note that data view, query, filter are currently not editable"
+          defaultMessage="The data view, query, and filter cannot be edited."
         />
       </EuiText>
 
