@@ -135,7 +135,7 @@ export function getAlertType(
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
     {
-      defaultMessage: `A link to see records that triggered this alert if it created from discover. 
+      defaultMessage: `A link to the records that triggered this alert, if it was created from Discover. 
         In case of Elastic query alert, this link will navigate to stack management.`,
     }
   );
