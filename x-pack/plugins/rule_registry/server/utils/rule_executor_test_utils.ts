@@ -7,6 +7,7 @@
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  httpServerMock,
 } from '../../../../../src/core/server/mocks';
 import {
   AlertExecutorOptions,
@@ -16,6 +17,7 @@ import {
   AlertTypeState,
 } from '../../../alerting/server';
 import { alertsMock } from '../../../alerting/server/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends AlertTypeParams = never,
@@ -73,6 +75,11 @@ export const createDefaultAlertExecutorOptions = <
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
     search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
+    searchSourceClient: Promise.resolve(
+      dataPluginMock
+        .createStartContract()
+        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
+    ),
   },
   state,
   updatedBy: null,
