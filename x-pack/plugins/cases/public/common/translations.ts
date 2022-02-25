@@ -260,5 +260,5 @@ export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
 });
 
 export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {
-  defaultMessage: 'Cases',
+  defaultMessage: 'Open and track issues, push information to third party systems.',
 });

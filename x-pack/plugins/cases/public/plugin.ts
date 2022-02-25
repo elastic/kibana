@@ -23,6 +23,9 @@ import { APP_TITLE, APP_DESC } from './common/translations';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { getCasesContextLazy } from './methods/get_cases_context';
+import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 /**
  * @public
