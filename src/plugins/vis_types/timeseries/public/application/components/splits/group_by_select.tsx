@@ -46,23 +46,28 @@ const getAvailableOptions = () => [
   },
 ];
 
-export const GroupBySelect = (props: GroupBySelectProps) => {
+export const GroupBySelect = ({
+  id,
+  onChange,
+  value = 'everything',
+  uiRestrictions,
+}: GroupBySelectProps) => {
   const modeOptions = getAvailableOptions().map((field) => ({
     ...field,
-    disabled: !isGroupByFieldsEnabled(field.value, props.uiRestrictions),
+    disabled: !isGroupByFieldsEnabled(field.value, uiRestrictions),
   }));
 
   const selectedOption: EuiComboBoxOptionOption<string> | undefined = modeOptions.find(
-    (option) => props.value ?? 'everything' === option.value
+    (option) => value === option.value
   );
 
   return (
     <EuiComboBox
-      id={props.id}
+      id={id}
       isClearable={false}
       options={modeOptions}
       selectedOptions={selectedOption ? [selectedOption] : undefined}
-      onChange={props.onChange}
+      onChange={onChange}
       singleSelection={{ asPlainText: true }}
       data-test-subj="groupBySelect"
     />
