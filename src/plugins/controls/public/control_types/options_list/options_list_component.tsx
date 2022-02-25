@@ -108,20 +108,20 @@ export const OptionsListComponent = ({
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
-      iconType="arrowDown"
-      isLoading={buttonLoading}
-      className={classNames('optionsList--filterBtn', {
-        'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
-        'optionsList--filterBtnPlaceholder': !hasSelections,
-      })}
-      data-test-subj={`optionsList-control-${id}`}
-      onClick={() => setIsPopoverOpen((openState) => !openState)}
-      isSelected={isPopoverOpen}
-      numActiveFilters={validSelectionsCount}
-      hasActiveFilters={Boolean(validSelectionsCount)}
-    >
-      {hasSelections ? selectionDisplayNode : OptionsListStrings.summary.getPlaceholder()}
-    </EuiFilterButton>
+        iconType="arrowDown"
+        isLoading={buttonLoading}
+        className={classNames('optionsList--filterBtn', {
+          'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
+          'optionsList--filterBtnPlaceholder': !hasSelections,
+        })}
+        data-test-subj={`optionsList-control-${id}`}
+        onClick={() => setIsPopoverOpen((openState) => !openState)}
+        isSelected={isPopoverOpen}
+        numActiveFilters={validSelectionsCount}
+        hasActiveFilters={Boolean(validSelectionsCount)}
+      >
+        {hasSelections ? selectionDisplayNode : OptionsListStrings.summary.getPlaceholder()}
+      </EuiFilterButton>
     </div>
   );
 

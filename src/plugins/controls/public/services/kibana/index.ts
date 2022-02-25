@@ -31,8 +31,8 @@ export const providers: PluginServiceProviders<
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
 
+  optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
   controls: new PluginServiceProvider(controlsServiceFactory),
-  optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<

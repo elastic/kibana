@@ -74,7 +74,12 @@ export const OptionsListPopover = ({
       {field?.type !== 'boolean' && (
         <div className="optionsList__actions">
           <EuiFormRow fullWidth>
-            <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="row"
+              justifyContent="spaceBetween"
+              alignItems="center"
+            >
               <EuiFlexItem>
                 <EuiFieldSearch
                   compressed

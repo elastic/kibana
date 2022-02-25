@@ -251,11 +251,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const invalid: string[] = [];
 
     for (const selectedOption of selectedOptions) {
-      if (invalidSelections?.includes(selectedOption)) {
-        invalid.push(selectedOption);
-        continue;
-      }
-      valid.push(selectedOption);
+      if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+      else valid.push(selectedOption);
     }
     this.updateComponentState({
       availableOptions: suggestions,
