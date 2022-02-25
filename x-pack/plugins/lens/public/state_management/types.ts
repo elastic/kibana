@@ -33,7 +33,7 @@ export interface PreviewState {
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
   stagedPreview?: PreviewState;
-  applyChangesDisabled?: boolean;
+  autoApplyDisabled?: boolean;
   applyChangesCounter?: number;
   changesApplied?: boolean;
   isFullscreenDatasource?: boolean;

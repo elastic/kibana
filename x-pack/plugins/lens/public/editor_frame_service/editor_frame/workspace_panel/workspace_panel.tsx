@@ -68,7 +68,6 @@ import {
   selectSearchSessionId,
   selectAutoApplyEnabled,
   selectApplyChangesCounter,
-  selectTriggerApplyChanges,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
@@ -147,7 +146,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
   const applyChangesCounter = useLensSelector(selectApplyChangesCounter);
 
-  const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -155,13 +153,22 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     initialRenderComplete: false,
   });
 
+  useEffect(() => {
+    return () => {
+      expressionToRender = null;
+    };
+  }, []);
+
   const triggerApply = applyChangesCounter !== localState.lastApplyChangesCounter;
 
   if (triggerApply) {
     setLocalState((s) => ({ ...s, lastApplyChangesCounter: applyChangesCounter }));
   }
 
-  const shouldApplyChanges = autoApplyEnabled || !localState.initialRenderComplete || triggerApply;
+  const shouldApplyExpression =
+    autoApplyEnabled || !localState.initialRenderComplete || triggerApply;
+
+  const { datasourceLayers } = framePublicAPI;
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -206,7 +213,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const expression = useMemo(() => {
+  const _expression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
@@ -258,12 +265,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization.activeId,
   ]);
 
-  if (shouldApplyChanges) {
-    expressionToRender = expression;
+  if (shouldApplyExpression) {
+    expressionToRender = _expression;
   }
 
   if (!autoApplyEnabled) {
-    dispatchLens(setChangesApplied(expression === expressionToRender));
+    dispatchLens(setChangesApplied(_expression === expressionToRender));
   }
 
   const expressionExists = Boolean(expressionToRender);
@@ -375,7 +382,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (expression === null) {
+    if (expressionToRender === null) {
       return renderEmptyWorkspace();
     }
     return (

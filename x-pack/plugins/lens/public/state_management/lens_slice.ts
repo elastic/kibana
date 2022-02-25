@@ -211,10 +211,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       };
     },
     [enableAutoApply.type]: (state) => {
-      state.applyChangesDisabled = false;
+      state.autoApplyDisabled = false;
     },
     [disableAutoApply.type]: (state) => {
-      state.applyChangesDisabled = true;
+      state.autoApplyDisabled = true;
     },
     [applyChanges.type]: (state) => {
       if (typeof state.applyChangesCounter === 'undefined') {
