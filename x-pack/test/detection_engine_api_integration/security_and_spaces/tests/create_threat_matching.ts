@@ -789,7 +789,8 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('generates multiple signals with multiple matches', async () => {
+        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+        it.skip('generates multiple signals with multiple matches', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
