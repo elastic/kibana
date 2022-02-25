@@ -18,6 +18,8 @@ import { EuiConfirmModal } from '@elastic/eui';
 
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
 
+import { staticSourceData } from '../../content_sources/source_data';
+
 import { SourceConfig } from './source_config';
 
 describe('SourceConfig', () => {
@@ -31,7 +33,7 @@ describe('SourceConfig', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
+    const wrapper = shallow(<SourceConfig sourceData={staticSourceData[1]} />);
     const saveConfig = wrapper.find(SaveConfig);
 
     // Trigger modal visibility
@@ -42,13 +44,13 @@ describe('SourceConfig', () => {
 
   it('renders a breadcrumb fallback while data is loading', () => {
     setMockValues({ dataLoading: true, sourceConfigData: {} });
-    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
+    const wrapper = shallow(<SourceConfig sourceData={staticSourceData[1]} />);
 
     expect(wrapper.prop('pageChrome')).toEqual(['Settings', 'Content source connectors', '...']);
   });
 
   it('handles delete click', () => {
-    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
+    const wrapper = shallow(<SourceConfig sourceData={staticSourceData[1]} />);
     const saveConfig = wrapper.find(SaveConfig);
 
     // Trigger modal visibility
@@ -60,7 +62,7 @@ describe('SourceConfig', () => {
   });
 
   it('saves source config', () => {
-    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
+    const wrapper = shallow(<SourceConfig sourceData={staticSourceData[1]} />);
     const saveConfig = wrapper.find(SaveConfig);
 
     // Trigger modal visibility
@@ -72,7 +74,7 @@ describe('SourceConfig', () => {
   });
 
   it('cancels and closes modal', () => {
-    const wrapper = shallow(<SourceConfig sourceIndex={1} />);
+    const wrapper = shallow(<SourceConfig sourceData={staticSourceData[1]} />);
     const saveConfig = wrapper.find(SaveConfig);
 
     // Trigger modal visibility

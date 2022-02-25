@@ -92,7 +92,8 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
 
   const connectorForm = (
     <EuiFlexGroup justifyContent="flexStart" direction="column" responsive={false}>
-      {/* <ConfigDocsLinks
+      {/* TODO: get a docs link in here for the external connector
+      <ConfigDocsLinks
         name={name}
         documentationUrl={documentationUrl}
         applicationPortalUrl={applicationPortalUrl}
@@ -156,7 +157,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={false}>
       {header}
       <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
