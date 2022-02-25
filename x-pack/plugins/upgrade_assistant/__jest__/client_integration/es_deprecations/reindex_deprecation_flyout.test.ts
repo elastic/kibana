@@ -243,8 +243,8 @@ describe('Reindex deprecation flyout', () => {
         {
           nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
           nodeName: 'MacBook-Pro.local',
-          used: '74%',
-          lowDiskWatermarkSetting: '20%',
+          available: '25%',
+          lowDiskWatermarkSetting: '50%',
         },
       ]);
 
@@ -260,7 +260,7 @@ describe('Reindex deprecation flyout', () => {
       expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
       expect(find('impactedNodeListItem').length).toEqual(1);
       expect(find('impactedNodeListItem').at(0).text()).toContain(
-        'MacBook-Pro.local: 74% used (20% allocated)'
+        'MacBook-Pro.local (25% available)'
       );
     });
   });
