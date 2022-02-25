@@ -54,7 +54,6 @@ export interface OauthParams {
 
 export interface AddSourceActions {
   initializeAddSource: (addSourceProps: AddSourceProps) => { addSourceProps: AddSourceProps };
-  goToFirstStep: () => void;
   setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => {
     addSourceProps: AddSourceProps;
   };
@@ -125,7 +124,7 @@ export interface OrganizationsMap {
   [key: string]: string | boolean;
 }
 
-interface AddSourceValues {
+export interface AddSourceValues {
   addSourceProps: AddSourceProps;
   addSourceCurrentStep: AddSourceSteps;
   dataLoading: boolean;
@@ -167,7 +166,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
   actions: {
     initializeAddSource: (addSourceProps: AddSourceProps) => ({ addSourceProps }),
-    goToFirstStep: () => true,
     setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => ({
       addSourceProps,
     }),
@@ -431,9 +429,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         flashAPIErrors(e);
       }
     },
-    goToFirstStep: () => {
-      actions.setAddSourceStep(getFirstStep(values.addSourceProps));
-    },
     saveSourceConfig: async ({ isUpdating, successCallback }) => {
       clearFlashMessages();
       const {
@@ -559,6 +554,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
 
       try {
+        await HttpLogic.values.http.post(route, {
+          body: JSON.stringify({ ...params }),
+        });
         successCallback();
       } catch (e) {
         flashAPIErrors(e);

@@ -43,19 +43,17 @@ interface SaveConfigProps {
 export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onDeleteConfig }) => {
   const serviceType = 'external';
   const {
+    fetchExternalSource,
     setExternalConnectorApiKey,
     setExternalConnectorUrl,
     saveExternalConnectorConfig,
-    initializeAddExternalSource,
-    resetSourceState,
   } = useActions(ExternalConnectorLogic);
 
   const { buttonLoading, externalConnectorUrl, externalConnectorApiKey, sourceConfigData } =
     useValues(ExternalConnectorLogic);
 
   useEffect(() => {
-    initializeAddExternalSource();
-    return resetSourceState;
+    fetchExternalSource();
   }, []);
 
   const handleFormSubmission = (e: FormEvent) => {
@@ -158,7 +156,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {header}
       <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
