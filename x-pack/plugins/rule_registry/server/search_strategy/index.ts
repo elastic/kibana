@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
-export const MAX_ALERT_SEARCH_SIZE = 1000;
+export { ruleRegistrySearchStrategyProvider } from './search_strategy';

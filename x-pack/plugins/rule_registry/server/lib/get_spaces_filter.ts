@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SPACE_IDS } from '../../common/technical_rule_data_field_names';
 
-export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
-export const MAX_ALERT_SEARCH_SIZE = 1000;
+export function getSpacesFilter(spaceId?: string) {
+  return spaceId ? { term: { [SPACE_IDS]: spaceId } } : undefined;
+}
