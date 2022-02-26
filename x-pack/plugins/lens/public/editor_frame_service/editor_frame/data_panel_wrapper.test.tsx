@@ -12,6 +12,7 @@ import { DragDropIdentifier } from '../../drag_drop';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { mockStoreDeps, mountWithProvider } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
+import { selectTriggerApplyChanges } from '../../state_management';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
@@ -59,28 +60,27 @@ describe('Data Panel Wrapper', () => {
     describe('setState', () => {
       it('applies state immediately when option true', async () => {
         lensStore.dispatch(disableAutoApply());
+        selectTriggerApplyChanges(lensStore.getState());
 
         const newDatasourceState = { age: 'new' };
         datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
 
-        const lensState = lensStore.getState().lens;
-        expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);
-        expect(lensState.appliedState?.datasourceStates.activeDatasource.state).toEqual(
+        expect(lensStore.getState().lens.datasourceStates.activeDatasource.state).toEqual(
           newDatasourceState
         );
+        expect(selectTriggerApplyChanges(lensStore.getState())).toBeTruthy();
       });
 
       it('does not apply state immediately when option false', async () => {
         lensStore.dispatch(disableAutoApply());
+        selectTriggerApplyChanges(lensStore.getState());
 
         const newDatasourceState = { age: 'new' };
         datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
 
         const lensState = lensStore.getState().lens;
         expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);
-        expect(lensState.appliedState?.datasourceStates.activeDatasource.state).not.toEqual(
-          newDatasourceState
-        );
+        expect(selectTriggerApplyChanges(lensStore.getState())).toBeFalsy();
       });
     });
   });

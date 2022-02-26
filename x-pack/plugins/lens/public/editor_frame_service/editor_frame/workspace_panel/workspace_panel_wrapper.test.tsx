@@ -15,7 +15,9 @@ import {
   selectAutoApplyEnabled,
   updateVisualizationState,
   disableAutoApply,
+  selectTriggerApplyChanges,
 } from '../../../state_management';
+import { setChangesApplied } from '../../../state_management/lens_slice';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -168,11 +170,18 @@ describe('workspace_panel_wrapper', () => {
           newState: { something: 'changed' },
         })
       );
+      // simulate workspace panel behavior
+      store.dispatch(setChangesApplied(false));
       harness.update();
 
       expect(harness.applyChangesDisabled).toBeFalsy();
 
       harness.applyChanges();
+
+      expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
+      // simulate workspace panel behavior
+      store.dispatch(setChangesApplied(true));
+      harness.update();
 
       expect(harness.applyChangesDisabled).toBeTruthy();
     });
@@ -186,6 +195,7 @@ describe('workspace_panel_wrapper', () => {
           newState: { something: 'changed' },
         })
       );
+      store.dispatch(setChangesApplied(false)); // simulate workspace panel behavior
       harness.update();
 
       expect(harness.applyChangesDisabled).toBeFalsy();

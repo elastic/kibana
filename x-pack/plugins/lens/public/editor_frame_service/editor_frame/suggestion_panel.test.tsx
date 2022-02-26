@@ -30,6 +30,7 @@ import {
   setToggleFullscreen,
   VisualizationState,
 } from '../../state_management';
+import { setChangesApplied } from '../../state_management/lens_slice';
 
 const SELECTORS = {
   APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsSuggestionApplyChanges"]',
@@ -132,12 +133,8 @@ describe('suggestion_panel', () => {
             something: 'changed',
           },
         } as VisualizationState,
-        // including appliedState signals that auto-apply has been disabled
-        appliedState: {
-          activeDatasourceId: 'foobar',
-          visualization: preloadedState.visualization as VisualizationState,
-          datasourceStates: preloadedState.datasourceStates as DatasourceStates,
-        },
+        changesApplied: false,
+        autoApplyDisabled: true,
       },
     });
 
@@ -147,9 +144,11 @@ describe('suggestion_panel', () => {
     instance.find(SELECTORS.APPLY_CHANGES_BUTTON).simulate('click');
 
     // check changes applied
-    const newLensState = lensStore.getState().lens;
-    expect(newLensState.appliedState?.visualization).toEqual(newLensState.visualization);
-    expect(newLensState.appliedState?.datasourceStates).toEqual(newLensState.datasourceStates);
+    expect(lensStore.dispatch).toHaveBeenCalledWith(applyChanges());
+
+    // simulate workspace panel behavior
+    lensStore.dispatch(setChangesApplied(true));
+    instance.update();
 
     // check UI updated
     expect(instance.exists(SELECTORS.APPLY_CHANGES_BUTTON)).toBeFalsy();

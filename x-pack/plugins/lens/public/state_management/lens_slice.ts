@@ -212,10 +212,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [enableAutoApply.type]: (state) => {
       state.autoApplyDisabled = false;
-      state.changesApplied = true;
     },
     [disableAutoApply.type]: (state) => {
       state.autoApplyDisabled = true;
+      state.changesApplied = true;
     },
     [applyChanges.type]: (state) => {
       if (typeof state.applyChangesCounter === 'undefined') {
