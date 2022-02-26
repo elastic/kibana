@@ -3,12 +3,13 @@
  */
 
 .globalFilterItem {
-  line-height: $euiSize;
+  @include euiFormControlText;
   border: none;
-  color: $euiTextColor;
-  padding-top: $euiSizeM / 2;
-  padding-bottom: $euiSizeM / 2;
+  // color: $euiTextColor;
+  // padding-top: $euiSizeM / 2;
+  // padding-bottom: $euiSizeM / 2;
   white-space: normal; /* 1 */
+  background: none;
 
   .euiBadge__childButton {
     flex-shrink: 1; /* 1 */
@@ -19,8 +20,8 @@
   }
 
   &:not(.globalFilterItem-isDisabled) {
-    @include euiFormControlDefaultShadow;
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
+    // @include euiFormControlDefaultShadow;
+    // box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
   }
 
   &:focus-within {
@@ -29,8 +30,8 @@
 }
 
 .globalFilterItem-isDisabled {
-  color: $euiColorDarkShade;
-  background-color: transparentize($euiColorLightShade, .5);
+  color: $euiColorDisabledText;
+  // background-color: transparentize($euiColorLightShade, .5);
   text-decoration: line-through;
   font-weight: $euiFontWeightRegular;
   font-style: italic;
@@ -72,10 +73,10 @@
 
 .globalFilterItem-isExcluded {
   &:not(.globalFilterItem-isDisabled) {
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColorExcluded;
+    // box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColorExcluded;
 
     &::before {
-      background-color: $kbnGlobalFilterItemPinnedColorExcluded;
+      // background-color: $kbnGlobalFilterItemPinnedColorExcluded;
     }
   }
 }

@@ -49,6 +49,7 @@ interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
+  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   const [groupIds, setGroupIds] = useState<[] | undefined>(undefined);
@@ -110,7 +111,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         id: selectedFilters[idx].id,
         relationship: selectedFilters[idx].relationship,
         subGroupId: selectedFilters[idx].subGroupId,
-        groupCount
+        groupCount,
       };
     });
 
@@ -250,7 +251,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   function renderEditFilter() {
     let currentEditFilters = [];
     groupIds?.forEach((groupId) => {
-      const filteredFilters = props.multipleFilters.filter(filter => filter.groupId === groupId);
+      const filteredFilters = props.multipleFilters.filter((filter) => filter.groupId === groupId);
       currentEditFilters.push(...filteredFilters);
     });
 
@@ -345,32 +346,34 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const classes = classNames('globalFilterBar', props.className);
 
   return (
-    <EuiFlexGroup
-      className={classNames('globalFilterGroup', {
-        'globalFilterGroup--hasFilters':
-          props.filters.length > 0 || props.multipleFilters.length > 0,
-      })}
-      gutterSize="none"
-      alignItems="flexStart"
-      responsive={false}
-    >
-      <EuiFlexItem className="globalFilterGroup__filterFlexItem">
-        <EuiFlexGroup
-          ref={groupRef}
-          className={classes}
-          wrap={true}
-          responsive={false}
-          gutterSize="xs"
-          alignItems="center"
-          tabIndex={-1}
-        >
-          {renderMultipleFilters()}
-          {renderSelectedSavedQueries()}
-          {props.multipleFilters.length === 0 && renderItems()}
-          {renderEditFilter()}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      {/* <EuiFlexGroup
+        className={classNames('globalFilterGroup', {
+          'globalFilterGroup--hasFilters':
+            props.filters.length > 0 || props.multipleFilters.length > 0,
+        })}
+        gutterSize="none"
+        alignItems="flexStart"
+        responsive={false}
+      >
+        <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+          <EuiFlexGroup
+            ref={groupRef}
+            className={classes}
+            wrap={true}
+            responsive={false}
+            gutterSize="xs"
+            alignItems="center"
+            tabIndex={-1}
+          > */}
+      {renderMultipleFilters()}
+      {renderSelectedSavedQueries()}
+      {props.multipleFilters.length === 0 && renderItems()}
+      {renderEditFilter()}
+      {/* </EuiFlexGroup>
+       </EuiFlexItem>
+       </EuiFlexGroup> */}
+    </>
   );
 });
 

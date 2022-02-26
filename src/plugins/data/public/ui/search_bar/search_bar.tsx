@@ -611,6 +611,43 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
+    let filterBar;
+    if (this.shouldRenderFilterBar()) {
+      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
+      });
+
+      filterBar = (
+        // <div id="GlobalFilterGroup" className={filterGroupClasses}>
+        <FilterBar
+          className="globalFilterGroup__filterBar"
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
+          indexPatterns={this.props.indexPatterns!}
+          appName={this.services.appName}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          selectedSavedQueries={this.state.finalSelectedSavedQueries}
+          removeSelectedSavedQuery={this.removeSelectedSavedQuery}
+          onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
+          multipleFilters={this.state.multipleFilters}
+          toggleEditFilterModal={this.toggleEditFilterModal}
+          isEditFilterModalOpen={this.state.isEditFilterModalOpen}
+          editFilterMode={this.state.editFilterMode}
+          savedQueryService={this.savedQueryService}
+          onFilterSave={(savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
+            console.log(this.state.query);
+            return this.onSave(savedQueryMeta, saveAsNew, {
+              language: this.state.query!.language,
+              query: '',
+            });
+          }}
+          onFilterBadgeSave={this.onFilterBadgeSave}
+        />
+        // </div>
+      );
+    }
+
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
@@ -654,6 +691,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           toggleAddFilterModal={this.toggleAddFilterModal}
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
+          filterBar={filterBar}
           onNewFiltersSave={(savedQueryMeta) =>
             this.onSave(savedQueryMeta, true, {
               language: this.state.query!.language,
@@ -705,43 +743,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
-    let filterBar;
-    if (this.shouldRenderFilterBar()) {
-      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
-      });
-
-      filterBar = (
-        <div id="GlobalFilterGroup" className={filterGroupClasses}>
-          <FilterBar
-            className="globalFilterGroup__filterBar"
-            filters={this.props.filters!}
-            onFiltersUpdated={this.props.onFiltersUpdated}
-            indexPatterns={this.props.indexPatterns!}
-            appName={this.services.appName}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            selectedSavedQueries={this.state.finalSelectedSavedQueries}
-            removeSelectedSavedQuery={this.removeSelectedSavedQuery}
-            onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
-            multipleFilters={this.state.multipleFilters}
-            toggleEditFilterModal={this.toggleEditFilterModal}
-            isEditFilterModalOpen={this.state.isEditFilterModalOpen}
-            editFilterMode={this.state.editFilterMode}
-            savedQueryService={this.savedQueryService}
-            onFilterSave={(savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
-              console.log(this.state.query);
-              return this.onSave(savedQueryMeta, saveAsNew, {
-                language: this.state.query!.language,
-                query: '',
-              });
-            }}
-            onFilterBadgeSave={this.onFilterBadgeSave}
-          />
-        </div>
-      );
-    }
-
     const globalQueryBarClasses = classNames('globalQueryBar', {
       'globalQueryBar--inPage': this.props.displayStyle === 'inPage',
     });
@@ -749,8 +750,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
-        {filterBar}
-
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}

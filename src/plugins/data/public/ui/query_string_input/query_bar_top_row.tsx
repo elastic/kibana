@@ -8,7 +8,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, ReactNode } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
@@ -93,6 +93,7 @@ export interface QueryBarTopRowProps {
   addFilterMode?: string;
   onNewFiltersSave: (savedQueryMeta: SavedQueryMeta) => void;
   savedQueryService: SavedQueryService;
+  filterBar?: ReactNode;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -367,23 +368,33 @@ export const QueryBarTopRow = React.memo(
         <>
           <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
           <EuiFlexItem className="globalFilterGroup__filterFlexItem">
-            <QueryStringInput
-              disableAutoFocus={props.disableAutoFocus}
-              indexPatterns={props.indexPatterns!}
-              query={props.query!}
-              screenTitle={props.screenTitle}
-              onChange={onQueryChange}
-              onChangeQueryInputFocus={onChangeQueryInputFocus}
-              onSubmit={onInputSubmit}
-              persistedLog={persistedLog}
-              dataTestSubj={props.dataTestSubj}
-              placeholder={props.placeholder}
-              isClearable={props.isClearable}
-              iconType={props.iconType}
-              nonKqlMode={props.nonKqlMode}
-              nonKqlModeHelpText={props.nonKqlModeHelpText}
-              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            />
+            <EuiFlexGroup
+              className={'globalFilterBar'}
+              wrap={true}
+              responsive={false}
+              gutterSize="xs"
+              alignItems="center"
+              tabIndex={-1}
+            >
+              {props.filterBar}
+              <QueryStringInput
+                disableAutoFocus={props.disableAutoFocus}
+                indexPatterns={props.indexPatterns!}
+                query={props.query!}
+                screenTitle={props.screenTitle}
+                onChange={onQueryChange}
+                onChangeQueryInputFocus={onChangeQueryInputFocus}
+                onSubmit={onInputSubmit}
+                persistedLog={persistedLog}
+                dataTestSubj={props.dataTestSubj}
+                placeholder={props.placeholder}
+                isClearable={props.isClearable}
+                iconType={props.iconType}
+                nonKqlMode={props.nonKqlMode}
+                nonKqlModeHelpText={props.nonKqlModeHelpText}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              />
+            </EuiFlexGroup>
           </EuiFlexItem>
         </>
       );

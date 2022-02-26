@@ -26,6 +26,7 @@ import { IIndexPattern } from '../..';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryService } from '../..';
+import classNames from 'classnames';
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
@@ -78,6 +79,7 @@ export const FilterExpressionItem: FC<Props> = ({
     meta: filter.meta,
     query: filter.query,
   }));
+
   function handleBadgeClick() {
     setIsPopoverOpen(!isPopoverOpen);
   }
@@ -108,12 +110,20 @@ export const FilterExpressionItem: FC<Props> = ({
       }
     });
 
-    onUpdate?.(multipleUpdatedFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], true);
+    onUpdate?.(
+      multipleUpdatedFilters,
+      [...new Set(groupedFilters.map((filter) => filter.groupId))],
+      true
+    );
   }
 
   function onToggleDisabled() {
     const multipleUpdatedFilters = groupedFilters?.map(toggleFilterDisabled);
-    onUpdate?.(multipleUpdatedFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], true);
+    onUpdate?.(
+      multipleUpdatedFilters,
+      [...new Set(groupedFilters.map((filter) => filter.groupId))],
+      true
+    );
   }
 
   function getPanels() {
@@ -154,11 +164,11 @@ export const FilterExpressionItem: FC<Props> = ({
       {
         name: groupedFilters[0].meta.disabled
           ? i18n.translate('data.filter.filterBar.enableFilterButtonLabel', {
-            defaultMessage: `Re-enable`,
-          })
+              defaultMessage: `Re-enable`,
+            })
           : i18n.translate('data.filter.filterBar.disableFilterButtonLabel', {
-            defaultMessage: `Temporarily disable`,
-          }),
+              defaultMessage: `Temporarily disable`,
+            }),
         icon: `${groupedFilters[0].meta.disabled ? 'eye' : 'eyeClosed'}`,
         onClick: () => {
           setIsPopoverOpen(false);
@@ -225,6 +235,7 @@ export const FilterExpressionItem: FC<Props> = ({
 
     return panels;
   }
+
   /**
    * Checks if filter field exists in any of the index patterns provided,
    * Because if so, a filter for the wrong index pattern may still be applied.
@@ -407,8 +418,8 @@ export const FilterExpressionItem: FC<Props> = ({
 
       const prefixText = filter.meta.negate
         ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
-          defaultMessage: 'NOT ',
-        })}`
+            defaultMessage: 'NOT ',
+          })}`
         : '';
       const prefix =
         filter.meta.negate && !filter.meta.disabled ? (
@@ -422,8 +433,9 @@ export const FilterExpressionItem: FC<Props> = ({
       filterExpression.push(filterContent);
 
       const text = label.title;
-      filterText += `${filter?.meta?.key}: ${text} ${groupedFilters.length > 1 ? filter.relationship || '' : ''
-        } `;
+      filterText += `${filter?.meta?.key}: ${text} ${
+        groupedFilters.length > 1 ? filter.relationship || '' : ''
+      } `;
     }
     if (needsParenthesis) {
       filterExpression.push(<EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>);
@@ -441,11 +453,12 @@ export const FilterExpressionItem: FC<Props> = ({
         closeButtonProps={{
           tabIndex: -1,
         }}
-        className={
-          isDisabled(getValueLabel(groupedFilters[0]), groupedFilters[0])
-            ? 'globalFilterExpression-isDisabled'
-            : ''
-        }
+        className={classNames('globalFilterItem', {
+          'globalFilterExpression-isDisabled': isDisabled(
+            getValueLabel(groupedFilters[0]),
+            groupedFilters[0]
+          ),
+        })}
         iconOnClick={() => onRemove([...new Set(groupedFilters.map((filter) => filter.groupId))])}
         iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filteradgeIconAriaLabel', {
           defaultMessage: 'Remove {title}',
@@ -456,18 +469,19 @@ export const FilterExpressionItem: FC<Props> = ({
         })}
         onClick={handleBadgeClick}
       >
-        <div ref={ref}>
-          {customLabel ? (
-            <>
-              <EuiIcon type="save" className="globalFilterExpression__saveIcon" />
-              <span>{customLabel}</span>
-            </>
-          ) : (
-            filterExpression.map((expression) => {
+        {customLabel ? (
+          <strong ref={ref}># {customLabel}</strong>
+        ) : (
+          // <>
+          //   <EuiIcon type="save" className="globalFilterExpression__saveIcon" />
+          //   <span>{customLabel}</span>
+          // </>
+          <div ref={ref}>
+            {filterExpression.map((expression) => {
               return <>{expression}</>;
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </EuiBadge>
     </EuiFlexItem>
   );
