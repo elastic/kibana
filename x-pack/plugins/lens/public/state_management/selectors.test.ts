@@ -5,114 +5,32 @@
  * 2.0.
  */
 
-import { LensAppState, selectAppliedState, selectChangesApplied } from '.';
+import { LensAppState, selectApplyChangesCounter, selectChangesApplied } from '.';
 
 describe('lens selectors', () => {
-  it('should select applied state', () => {
-    const lensState = {
-      appliedState: {
-        activeDatasourceId: 'foobar',
-        visualization: {
-          activeId: 'some-id',
-          state: {},
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {},
-          },
-        },
-      },
-    } as Partial<LensAppState>;
-
-    expect(selectAppliedState({ lens: lensState as LensAppState })).toStrictEqual(
-      lensState.appliedState
-    );
-  });
-
   describe('selecting changes applied', () => {
-    it('should be true when applied state matches working state', () => {
+    it('should be true when flag is set', () => {
       const lensState = {
-        activeDatasourceId: 'foobar',
-        visualization: {
-          activeId: 'some-id',
-          state: {},
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {},
-          },
-        },
-        appliedState: {
-          activeDatasourceId: 'foobar',
-          visualization: {
-            activeId: 'some-id',
-            state: {},
-          },
-          datasourceStates: {
-            indexpattern: {
-              isLoading: false,
-              state: {},
-            },
-          },
-        },
+        changesApplied: true,
       } as Partial<LensAppState>;
 
       expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
     });
 
-    it('should be true when no applied state (auto-apply enabled)', () => {
+    it('should be false when flag is not set', () => {
       const lensState = {
-        visualization: {
-          activeId: 'some-id',
-          state: {},
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {},
-          },
-        },
-        appliedState: undefined,
+        changesApplied: false,
       } as Partial<LensAppState>;
-
-      expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
-    });
-
-    it('should be false when applied state differs from working state', () => {
-      const lensState = {
-        activeDatasourceId: 'foobar',
-        visualization: {
-          activeId: 'some-other-id',
-          state: {
-            something: 'changed',
-          },
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {
-              something: 'changed',
-            },
-          },
-        },
-        appliedState: {
-          activeDatasourceId: 'foobar',
-          visualization: {
-            activeId: 'some-id',
-            state: {},
-          },
-          datasourceStates: {
-            indexpattern: {
-              isLoading: false,
-              state: {},
-            },
-          },
-        },
-      } as unknown as LensAppState;
 
       expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeFalsy();
     });
+  });
+  it('should select apply changes counter', () => {
+    expect(
+      selectApplyChangesCounter({ lens: { applyChangesCounter: undefined } as LensAppState })
+    ).toBe(0);
+    expect(selectApplyChangesCounter({ lens: { applyChangesCounter: 21 } as LensAppState })).toBe(
+      21
+    );
   });
 });
