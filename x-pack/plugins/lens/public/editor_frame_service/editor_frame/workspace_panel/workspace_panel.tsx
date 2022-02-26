@@ -67,7 +67,7 @@ import {
   selectActiveDatasourceId,
   selectSearchSessionId,
   selectAutoApplyEnabled,
-  selectApplyChangesCounter,
+  selectTriggerApplyChanges,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
@@ -92,7 +92,6 @@ interface WorkspaceState {
   }>;
   expandError: boolean;
   initialRenderComplete: boolean;
-  lastApplyChangesCounter: number;
 }
 
 const dropProps = {
@@ -144,12 +143,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
-  const applyChangesCounter = useLensSelector(selectApplyChangesCounter);
+  const triggerApply = useLensSelector(selectTriggerApplyChanges);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
-    lastApplyChangesCounter: 0,
     initialRenderComplete: false,
   });
 
@@ -158,12 +156,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       expressionToRender = null;
     };
   }, []);
-
-  const triggerApply = applyChangesCounter !== localState.lastApplyChangesCounter;
-
-  if (triggerApply) {
-    setLocalState((s) => ({ ...s, lastApplyChangesCounter: applyChangesCounter }));
-  }
 
   const shouldApplyExpression =
     autoApplyEnabled || !localState.initialRenderComplete || triggerApply;

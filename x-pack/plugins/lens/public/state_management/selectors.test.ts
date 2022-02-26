@@ -5,32 +5,45 @@
  * 2.0.
  */
 
-import { LensAppState, selectApplyChangesCounter, selectChangesApplied } from '.';
+import { LensAppState, selectTriggerApplyChanges, selectChangesApplied } from '.';
 
 describe('lens selectors', () => {
   describe('selecting changes applied', () => {
-    it('should be true when flag is set', () => {
+    it('should be true when auto-apply disabled and flag is set', () => {
       const lensState = {
         changesApplied: true,
+        autoApplyDisabled: true,
       } as Partial<LensAppState>;
 
       expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
     });
 
-    it('should be false when flag is not set', () => {
+    it('should be false when auto-apply disabled and flag is false', () => {
       const lensState = {
         changesApplied: false,
+        autoApplyDisabled: true,
       } as Partial<LensAppState>;
 
       expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeFalsy();
     });
+
+    it('should be true when auto-apply enabled no matter what', () => {
+      const lensState = {
+        changesApplied: false,
+        autoApplyDisabled: false,
+      } as Partial<LensAppState>;
+
+      expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
+    });
   });
-  it('should select apply changes counter', () => {
+  it('should select apply changes trigger', () => {
+    selectTriggerApplyChanges({ lens: { applyChangesCounter: 1 } as LensAppState }); // get the counters in sync
+
     expect(
-      selectApplyChangesCounter({ lens: { applyChangesCounter: undefined } as LensAppState })
-    ).toBe(0);
-    expect(selectApplyChangesCounter({ lens: { applyChangesCounter: 21 } as LensAppState })).toBe(
-      21
-    );
+      selectTriggerApplyChanges({ lens: { applyChangesCounter: 2 } as LensAppState })
+    ).toBeTruthy();
+    expect(
+      selectTriggerApplyChanges({ lens: { applyChangesCounter: 2 } as LensAppState })
+    ).toBeFalsy();
   });
 });
