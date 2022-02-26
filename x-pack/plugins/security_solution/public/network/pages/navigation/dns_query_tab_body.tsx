@@ -50,6 +50,7 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
+  lensAttributes: dnsTopDomainsAttrs,
 };
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
@@ -64,8 +65,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   type,
 }) => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-
-
 
   const isPtrIncluded = useShallowEqualSelector(
     (state) => getNetworkDnsSelector(state).isPtrIncluded
@@ -147,6 +146,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         setQuery={setQuery}
         showLegend={true}
         startDate={startDate}
+        showInspectButton={false}
         {...dnsHistogramConfigs}
       />
       <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>

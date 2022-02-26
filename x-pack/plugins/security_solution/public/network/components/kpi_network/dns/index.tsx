@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
+import { kpiDnsQueries } from '../../../configs/kpi_dns_queries';
 import { useNetworkKpiDns } from '../../../containers/kpi_network/dns';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
@@ -20,6 +21,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
       {
         key: 'dnsQueries',
         value: null,
+        lensAttributes: kpiDnsQueries,
       },
     ],
     description: i18n.DNS_QUERIES,
@@ -55,6 +57,7 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };
