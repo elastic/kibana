@@ -29,20 +29,25 @@ import {
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { HISTOGRAM_ACTIONS_BUTTON_CLASS, LensAttributes } from './histogram_actions';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
     defaultStackByOption: MatrixHistogramOption;
     errorMessage: string;
+    getLensAttributes?: (stackByField?: string) => LensAttributes;
     headerChildren?: React.ReactNode;
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
     legendPosition?: Position;
+    lensAttributes?: LensAttributes;
     mapping?: MatrixHistogramMappingTypes;
     onError?: () => void;
     showSpacer?: boolean;
     setQuery: GlobalTimeArgs['setQuery'];
+    showInspectButton?: boolean;
     setAbsoluteRangeDatePickerTarget?: InputsModelId;
     showLegend?: boolean;
     stackByOptions: MatrixHistogramOption[];
@@ -70,6 +75,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   endDate,
   errorMessage,
   filterQuery,
+  getLensAttributes,
   headerChildren,
   histogramType,
   hideHistogramIfEmpty = false,
@@ -78,12 +84,14 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   runtimeMappings,
   isPtrIncluded,
   legendPosition,
+  lensAttributes,
   mapping,
   onError,
   paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
+  showInspectButton = true,
   showLegend,
   showSpacer = true,
   stackByOptions,
@@ -196,13 +204,17 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     setIsInitialLoading,
   ]);
 
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   if (hideHistogram) {
     return null;
   }
 
   return (
     <>
-      <InspectButtonContainer show={!isInitialLoading}>
+      <HoverVisibilityContainer
+        show={!isInitialLoading}
+        targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
+      >
         <HistogramPanel
           data-test-subj={`${id}Panel`}
           height={panelHeight}
@@ -223,21 +235,26 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
             inspectMultiple
+            showInspectButton={showInspectButton}
             isInspectDisabled={filterQuery === undefined}
+            lensAttributes={lensAttributes}
+            stackByField={selectedStackByOption.value}
+            timerange={timerange}
+            getLensAttributes={getLensAttributes}
           >
-            <EuiFlexGroup alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                {stackByOptions.length > 1 && (
+            {stackByOptions.length > 1 && (
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
                   <EuiSelect
                     onChange={setSelectedChartOptionCallback}
                     options={stackByOptions}
                     prepend={i18n.STACK_BY}
                     value={selectedStackByOption?.value}
                   />
-                )}
-              </EuiFlexItem>
-              <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
-            </EuiFlexGroup>
+                </EuiFlexItem>
+                <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
+              </EuiFlexGroup>
+            )}
           </HeaderSection>
 
           {isInitialLoading ? (
@@ -251,7 +268,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             />
           )}
         </HistogramPanel>
-      </InspectButtonContainer>
+      </HoverVisibilityContainer>
       {showSpacer && <EuiSpacer data-test-subj="spacer" size="l" />}
     </>
   );

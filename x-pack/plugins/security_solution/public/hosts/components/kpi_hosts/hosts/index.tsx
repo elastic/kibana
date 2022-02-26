@@ -8,6 +8,8 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
+import { kpiHostArea } from '../../../configs/kpi_host_area';
+import { kpiHostMetric } from '../../../configs/kpi_host_metric';
 import { useHostsKpiHosts } from '../../../containers/kpi_hosts/hosts';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
@@ -22,10 +24,12 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.hosts,
         icon: 'storage',
+        lensAttributes: kpiHostMetric,
       },
     ],
     enableAreaChart: true,
     description: i18n.HOSTS,
+    areaChartLensAttributes: kpiHostArea,
   },
 ];
 
@@ -58,6 +62,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };

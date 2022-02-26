@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const events = {
+export const getEventsHistogramCongifs = ({
+  stackByField = 'event.action',
+}: {
+  stackByField?: string;
+}) => ({
   title: 'Host - events',
   description: '',
   visualizationType: 'lnsXY',
@@ -35,6 +39,11 @@ export const events = {
       },
       yLeftExtent: {
         mode: 'full',
+      },
+      axisTitlesVisibilitySettings: {
+        x: false,
+        yLeft: false,
+        yRight: true,
       },
     },
     query: {
@@ -67,11 +76,11 @@ export const events = {
                 sourceField: '___records___',
               },
               '34919782-4546-43a5-b668-06ac934d3acd': {
-                label: 'Top values of event.action', // could be event.dataset or event.module
+                label: `Top values of ${stackByField}`, // could be event.dataset or event.module
                 dataType: 'string',
                 operationType: 'terms',
                 scale: 'ordinal',
-                sourceField: 'event.action', // could be event.dataset or event.module
+                sourceField: `${stackByField}`, // could be event.dataset or event.module
                 isBucketed: true,
                 params: {
                   size: 10,
@@ -111,4 +120,4 @@ export const events = {
       name: 'indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75',
     },
   ],
-};
+});

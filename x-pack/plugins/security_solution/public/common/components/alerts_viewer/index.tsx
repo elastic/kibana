@@ -69,6 +69,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
           indexNames={indexNames}
           setQuery={setQuery}
           startDate={startDate}
+          showInspectButton={false}
           {...alertsHistogramConfigs}
         />
       )}

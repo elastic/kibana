@@ -108,6 +108,30 @@ export const getCustomChartData = (
   });
 };
 
+export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
+  hostName
+    ? [
+        {
+          meta: {
+            index: 'e5bb994d-e8fb-4ddb-a36e-730ad8cc0712',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            params: {
+              query: hostName,
+            },
+          },
+          query: {
+            match_phrase: {
+              'host.name': hostName,
+            },
+          },
+        },
+      ]
+    : [];
+
 export const filterHostExternalAlertData: Filter[] = [
   {
     query: {

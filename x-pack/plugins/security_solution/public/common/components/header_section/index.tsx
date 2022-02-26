@@ -8,8 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle, EuiTitleSize } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
 import { InspectButton } from '../inspect';
+import { HistogramActions } from '../matrix_histogram/histogram_actions';
 import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
@@ -39,37 +41,46 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  growLeftSplit?: boolean;
   headerFilters?: string | React.ReactNode;
   height?: number;
+  hideSubtitle?: boolean;
   id?: string;
+  inspectMultiple?: boolean;
   isInspectDisabled?: boolean;
+  lensAttributes?: LensAttributes | null;
+  showInspectButton?: boolean;
   split?: boolean;
+  stackByField?: string;
   stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
+  timerange?: { from: string; to: string };
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
-  growLeftSplit?: boolean;
-  inspectMultiple?: boolean;
-  hideSubtitle?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  getLensAttributes,
+  growLeftSplit = true,
   headerFilters,
   height,
+  hideSubtitle = false,
   id,
+  inspectMultiple = false,
   isInspectDisabled,
+  lensAttributes,
+  showInspectButton = true,
   split,
+  stackByField,
   stackHeader,
   subtitle,
+  timerange,
   title,
   titleSize = 'm',
   tooltip,
-  growLeftSplit = true,
-  inspectMultiple = false,
-  hideSubtitle = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
     <EuiFlexGroup
@@ -98,14 +109,32 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
           </EuiFlexItem>
 
           {id && (
-            <EuiFlexItem grow={false}>
-              <InspectButton
-                isDisabled={isInspectDisabled}
-                queryId={id}
-                multiple={inspectMultiple}
-                title={title}
-              />
-            </EuiFlexItem>
+            <>
+              {showInspectButton && (
+                <EuiFlexItem grow={false}>
+                  <InspectButton
+                    isDisabled={isInspectDisabled}
+                    queryId={id}
+                    multiple={inspectMultiple}
+                    title={title}
+                  />
+                </EuiFlexItem>
+              )}
+              {(getLensAttributes || lensAttributes) && timerange && (
+                <EuiFlexItem grow={false}>
+                  <HistogramActions
+                    getLensAttributes={getLensAttributes}
+                    isInspectButtonDisabled={isInspectDisabled}
+                    isMultipleQuery={inspectMultiple}
+                    lensAttributes={lensAttributes}
+                    queryId={id}
+                    stackByField={stackByField}
+                    timerange={timerange}
+                    title={title}
+                  />
+                </EuiFlexItem>
+              )}
+            </>
           )}
 
           {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}

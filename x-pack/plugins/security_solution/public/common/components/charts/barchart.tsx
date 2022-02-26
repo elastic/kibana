@@ -31,10 +31,17 @@ import {
   getChartWidth,
   WrappedByAutoSizer,
   useTheme,
+  Wrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import type { ChartData } from './common';
+import {
+  HistogramActions,
+  HistogramActionsProps,
+  HISTOGRAM_ACTIONS_BUTTON_CLASS,
+} from '../matrix_histogram/histogram_actions';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;
@@ -144,6 +151,7 @@ interface BarChartComponentProps {
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
   timelineId?: string;
+  histogramActionsOptions?: HistogramActionsProps;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -153,6 +161,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   configs,
   stackByField,
   timelineId,
+  histogramActionsOptions,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
@@ -176,27 +185,39 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
+  const isVlidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(barChart), [barChart]);
 
-  return checkIfAnyValidSeriesExist(barChart) ? (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={true}>
-        <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
-          <BarChartBase
-            configs={configs}
-            data={barChart}
-            yAxisTitle={yAxisTitle}
-            forceHiddenLegend={stackByField != null}
-            height={chartHeight}
-            width={chartHeight}
-          />
-        </WrappedByAutoSizer>
-      </EuiFlexItem>
-      <LegendFlexItem grow={false}>
-        <DraggableLegend legendItems={legendItems} height={height} />
-      </LegendFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
+  return (
+    <Wrapper>
+      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+        {isVlidSeriesExist && (
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem grow={true}>
+              <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+                <BarChartBase
+                  configs={configs}
+                  data={barChart}
+                  yAxisTitle={yAxisTitle}
+                  forceHiddenLegend={stackByField != null}
+                  height={chartHeight}
+                  width={chartHeight}
+                />
+              </WrappedByAutoSizer>
+            </EuiFlexItem>
+
+            <LegendFlexItem grow={false}>
+              <DraggableLegend legendItems={legendItems} height={height} />
+            </LegendFlexItem>
+          </EuiFlexGroup>
+        )}
+        {!isVlidSeriesExist && (
+          <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
+        )}
+        {histogramActionsOptions?.lensAttributes && histogramActionsOptions?.timerange && (
+          <HistogramActions {...histogramActionsOptions} className="kpi-matrix-histogram-actions" />
+        )}
+      </HoverVisibilityContainer>
+    </Wrapper>
   );
 };
 

@@ -8,6 +8,10 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
+import { kpiUniqueIpsArea } from '../../../configs/kpi_unique_ips-area';
+import { kpiUniqueIpsBar } from '../../../configs/kpi_unique_ips-bar';
+import { kpiUniqueIpsDestinationMetric } from '../../../configs/kpi_unique_ips-destination_metric';
+import { kpiUniqueIpsSourceMetric } from '../../../configs/kpi_unique_ips-source_metric';
 import { useHostsKpiUniqueIps } from '../../../containers/kpi_hosts/unique_ips';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
@@ -24,6 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.uniqueSourceIps,
         icon: 'visMapCoordinate',
+        lensAttributes: kpiUniqueIpsSourceMetric,
       },
       {
         key: 'uniqueDestinationIps',
@@ -32,11 +37,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.uniqueDestinationIps,
         icon: 'visMapCoordinate',
+        lensAttributes: kpiUniqueIpsDestinationMetric,
       },
     ],
     enableAreaChart: true,
     enableBarChart: true,
     description: i18n.UNIQUE_IPS,
+    areaChartLensAttributes: kpiUniqueIpsArea,
+    barChartLensAttributes: kpiUniqueIpsBar,
   },
 ];
 
@@ -69,6 +77,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };
