@@ -13,6 +13,10 @@ import { useNetworkKpiUniquePrivateIps } from '../../../containers/kpi_network/u
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
+import { kpiUniquePrivateIpsSourceMetric } from '../../../configs/kpi_unique_private_ips-source_metric';
+import { kpiUniquePrivateIpsDestinationMetric } from '../../../configs/kpi_unique_private_ips-destination_metric';
+import { kpiUniquePrivateIpsArea } from '../../../configs/kpi_unique_private_ips-area';
+import { kpiUniquePrivateIpsBar } from '../../../configs/kpi_unique_private_ips-bar';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -29,6 +33,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         description: i18n.SOURCE_UNIT_LABEL,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
+        lensAttributes: kpiUniquePrivateIpsSourceMetric,
       },
       {
         key: 'uniqueDestinationPrivateIps',
@@ -37,11 +42,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         description: i18n.DESTINATION_UNIT_LABEL,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
+        lensAttributes: kpiUniquePrivateIpsDestinationMetric,
       },
     ],
     description: i18n.UNIQUE_PRIVATE_IPS,
     enableAreaChart: true,
     enableBarChart: true,
+    areaChartLensAttributes: kpiUniquePrivateIpsArea,
+    barChartLensAttributes: kpiUniquePrivateIpsBar,
   },
 ];
 
@@ -74,6 +82,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };

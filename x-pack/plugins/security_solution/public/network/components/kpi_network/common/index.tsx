@@ -36,8 +36,18 @@ export const NetworkKpiBaseComponent = React.memo<{
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
+  showInspectButton?: boolean;
 }>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
+  ({
+    fieldsMapping,
+    data,
+    id,
+    loading = false,
+    from,
+    to,
+    narrowDateRange,
+    showInspectButton = true,
+  }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
       data,
@@ -60,7 +70,7 @@ export const NetworkKpiBaseComponent = React.memo<{
     return (
       <EuiFlexGroup wrap>
         {statItemsProps.map((mappedStatItemProps) => (
-          <StatItemsComponent {...mappedStatItemProps} />
+          <StatItemsComponent {...mappedStatItemProps} showInspectButton={showInspectButton} />
         ))}
       </EuiFlexGroup>
     );

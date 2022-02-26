@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
+import { kpiTlsHandshakes } from '../../../configs/kpi_tls_handshakes';
 import { useNetworkKpiTlsHandshakes } from '../../../containers/kpi_network/tls_handshakes';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
@@ -20,6 +21,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
       {
         key: 'tlsHandshakes',
         value: null,
+        lensAttributes: kpiTlsHandshakes,
       },
     ],
     description: i18n.TLS_HANDSHAKES,
@@ -55,6 +57,7 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };

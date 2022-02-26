@@ -13,6 +13,7 @@ import { useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/netw
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
+import { kpiNetworkEvents } from '../../../configs/kpi_network_events';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
@@ -25,6 +26,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         key: 'networkEvents',
         value: null,
         color: euiColorVis1,
+        lensAttributes: kpiNetworkEvents,
       },
     ],
     description: i18n.NETWORK_EVENTS,
@@ -60,6 +62,7 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };

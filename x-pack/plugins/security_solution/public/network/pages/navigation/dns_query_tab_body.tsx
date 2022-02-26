@@ -44,6 +44,7 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
+  lensAttributes: dnsTopDomainsAttrs,
 };
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
@@ -108,6 +109,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         setQuery={setQuery}
         showLegend={true}
         startDate={startDate}
+        showInspectButton={false}
         {...dnsHistogramConfigs}
       />
       <NetworkDnsTableManage
