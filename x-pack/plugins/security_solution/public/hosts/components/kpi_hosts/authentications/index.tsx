@@ -8,6 +8,10 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
+import { kpiUserAuthenticationsMetricSuccess } from '../../../configs/kpi_user_authentications-metric_success';
+import { kpiUserAuthenticationsArea } from '../../../configs/kpi_user_authentications_area';
+import { kpiUserAuthenticationsBar } from '../../../configs/kpi_user_authentications_bar';
+import { kpiUserAuthenticationsMetricFailure } from '../../../configs/kpi_user_authentication_metric_failure';
 import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
@@ -24,6 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.authenticationsSuccess,
         icon: 'check',
+        lensAttributes: kpiUserAuthenticationsMetricSuccess,
       },
       {
         key: 'authenticationsFailure',
@@ -32,11 +37,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.authenticationsFailure,
         icon: 'cross',
+        lensAttributes: kpiUserAuthenticationsMetricFailure,
       },
     ],
     enableAreaChart: true,
     enableBarChart: true,
     description: i18n.USER_AUTHENTICATIONS,
+    areaChartLensAttributes: kpiUserAuthenticationsArea,
+    barChartLensAttributes: kpiUserAuthenticationsBar,
   },
 ];
 
@@ -69,6 +77,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      showInspectButton={false}
     />
   );
 };

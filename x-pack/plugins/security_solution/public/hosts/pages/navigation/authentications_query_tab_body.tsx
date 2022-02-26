@@ -20,6 +20,8 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { authentication } from '../../configs/authentication';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 
@@ -60,6 +62,7 @@ const histogramConfigs: MatrixHistogramConfigs = {
   mapping: authenticationsMatrixDataMappingFields,
   stackByOptions: authenticationsStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+  lensAttributes: authentication as TypedLensByValueInput['attributes'],
 };
 
 const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
@@ -103,6 +106,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
+        showInspectButton={false}
         {...histogramConfigs}
       />
 

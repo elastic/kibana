@@ -17,6 +17,7 @@ import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { DocValueFields } from '../../../../common/search_strategy';
 import { FieldValueThreshold } from '../../../detections/components/rules/threshold_input';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -33,9 +34,11 @@ export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
+  getLensAttributes?: (params: { stackByField?: string }) => TypedLensByValueInput['attributes'];
   hideHistogramIfEmpty?: boolean;
   histogramType: MatrixHistogramType;
   legendPosition?: Position;
+  lensAttributes?: TypedLensByValueInput['attributes'];
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;

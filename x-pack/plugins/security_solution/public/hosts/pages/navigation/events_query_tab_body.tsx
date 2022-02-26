@@ -28,6 +28,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { getEventsHistogramCongifs } from '../../configs/events';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -57,6 +58,7 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   stackByOptions: eventsStackByOptions,
   subtitle: undefined,
   title: i18n.NAVIGATION_EVENTS_TITLE,
+  getLensAttributes: getEventsHistogramCongifs,
 };
 
 const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
@@ -109,6 +111,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           startDate={startDate}
           id={EVENTS_HISTOGRAM_ID}
           indexNames={indexNames}
+          showInspectButton={false}
           {...histogramConfigs}
         />
       )}

@@ -36,10 +36,11 @@ interface HostsKpiBaseComponentProps {
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
+  showInspectButton?: boolean;
 }
 
 export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, showInspectButton }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
       data,
@@ -56,7 +57,7 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
     return (
       <EuiFlexGroup wrap>
         {statItemsProps.map((mappedStatItemProps) => (
-          <StatItemsComponent {...mappedStatItemProps} />
+          <StatItemsComponent {...mappedStatItemProps} showInspectButton={showInspectButton} />
         ))}
       </EuiFlexGroup>
     );
