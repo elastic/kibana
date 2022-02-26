@@ -104,7 +104,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
       });
 
-      it('should abide by max_signals > 100', async () => {
+      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+      it.skip('should abide by max_signals > 100', async () => {
         const maxSignals = 500;
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
