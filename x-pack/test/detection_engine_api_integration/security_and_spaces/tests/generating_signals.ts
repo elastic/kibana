@@ -91,7 +91,8 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
-      it('should have the specific audit record for _id or none of these tests below will pass', async () => {
+      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+      it.skip('should have the specific audit record for _id or none of these tests below will pass', async () => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
