@@ -71,7 +71,7 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
 };
 
 export const createCachedFieldValueFormatter = (
-  indexPattern?: DataView | null,
+  dataView?: DataView | null,
   fields?: SanitizedFieldType[],
   fieldFormatService?: FieldFormatsRegistry,
   excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = []
@@ -84,13 +84,10 @@ export const createCachedFieldValueFormatter = (
       return cachedFormatter.convert(value, contentType);
     }
 
-    if (
-      indexPattern &&
-      !excludedFieldFormatsIds.includes(indexPattern.fieldFormatMap?.[fieldName]?.id)
-    ) {
-      const field = indexPattern.fields.getByName(fieldName);
+    if (dataView && !excludedFieldFormatsIds.includes(dataView.fieldFormatMap?.[fieldName]?.id)) {
+      const field = dataView.fields.getByName(fieldName);
       if (field) {
-        const formatter = indexPattern.getFormatterForField(field);
+        const formatter = dataView.getFormatterForField(field);
 
         if (formatter) {
           cache.set(fieldName, formatter);

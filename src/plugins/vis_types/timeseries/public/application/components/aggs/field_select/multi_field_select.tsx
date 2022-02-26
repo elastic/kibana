@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiDragDropContext,
   EuiDroppable,
@@ -19,6 +19,10 @@ import {
 import React, { FunctionComponent } from 'react';
 
 const DROPPABLE_ID = 'onDragEnd';
+
+const dragAriaLabel = i18n.translate('visTypeTimeseries.fieldSelect.dragAriaLabel', {
+  defaultMessage: 'Drag field',
+});
 
 export function MultiFieldSelect(props: {
   values: Array<string | null>;
@@ -43,7 +47,7 @@ export function MultiFieldSelect(props: {
                     color="transparent"
                     paddingSize="s"
                     {...provided.dragHandleProps}
-                    aria-label="Drag Handle"
+                    aria-label={dragAriaLabel}
                   >
                     <EuiIcon type="grab" />
                   </EuiPanel>
