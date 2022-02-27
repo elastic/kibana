@@ -17,6 +17,7 @@ interface UseInspectModalProps {
   inspectIndex?: number;
   isDisabled?: boolean;
   multiple?: boolean;
+  onClick?: () => void;
   onCloseInspect?: () => void;
   queryId: string;
 }
@@ -26,6 +27,7 @@ export const useInspect = ({
   inspectIndex = 0,
   isDisabled,
   multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
+  onClick,
   onCloseInspect,
   queryId,
 }: UseInspectModalProps) => {
@@ -38,6 +40,9 @@ export const useInspect = ({
   );
 
   const handleClick = useCallback(() => {
+    if (onClick) {
+      onClick();
+    }
     dispatch(
       inputsActions.setInspectionParameter({
         id: queryId,
@@ -46,7 +51,7 @@ export const useInspect = ({
         selectedInspectIndex: inspectIndex,
       })
     );
-  }, [dispatch, queryId, inputId, inspectIndex]);
+  }, [onClick, dispatch, queryId, inputId, inspectIndex]);
 
   const handleCloseModal = useCallback(() => {
     if (onCloseInspect != null) {
@@ -88,8 +93,8 @@ export const useInspect = ({
   );
 
   const isButtonDisabled = useMemo(
-    () => loading || isDisabled || request == null || response == null,
-    [isDisabled, loading, request, response]
+    () => loading || isDisabled || request == null || response == null || queryId == null,
+    [isDisabled, loading, queryId, request, response]
   );
 
   return {

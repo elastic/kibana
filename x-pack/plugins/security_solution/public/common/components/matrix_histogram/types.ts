@@ -145,3 +145,5 @@ export interface BarchartConfigs {
   };
   customHeight: number;
 }
+
+export type LensAttributes = TypedLensByValueInput['attributes'];
