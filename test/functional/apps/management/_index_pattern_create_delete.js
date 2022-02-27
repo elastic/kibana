@@ -45,8 +45,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
-        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         await new Promise((e) => setTimeout(e(), 5000));
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+
         //sometimes the initial click fails.
         if (await PageObjects.settings.getSaveIndexPatternButton()) {
           await (await PageObjects.settings.getSaveIndexPatternButton()).click();
