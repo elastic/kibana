@@ -13,3 +13,19 @@ export const STACK_BY = i18n.translate(
     defaultMessage: 'Stack by',
   }
 );
+
+export const ADD_TO_CASE_SUCCESS = (caseTitle: string) =>
+  i18n.translate(
+    'xpack.securitySolution.components.histogramActopms.addToCase.notificationSuccess',
+    {
+      defaultMessage: 'Successfully added visualization to the case: {caseTitle}',
+      values: { caseTitle },
+    }
+  );
+
+export const VIEW_CASE = i18n.translate(
+  'xpack.securitySolution.components.histogramActopms.addToCase.notification.viewCase',
+  {
+    defaultMessage: 'View case',
+  }
+);

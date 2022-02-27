@@ -7,12 +7,12 @@
 
 import { useMemo } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { TypedLensByValueInput } from '../../../../../lens/public';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
+import { LensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
   filterNetworkExternalAlertData,
@@ -24,10 +24,10 @@ export const useLensAttributes = ({
   getLensAttributes,
   stackByField,
 }: {
-  lensAttributes?: TypedLensByValueInput['attributes'];
-  getLensAttributes?: (params?: { stackByField?: string }) => TypedLensByValueInput['attributes'];
+  lensAttributes?: LensAttributes;
+  getLensAttributes?: (params?: { stackByField?: string }) => LensAttributes;
   stackByField?: string;
-}): TypedLensByValueInput['attributes'] | null => {
+}): LensAttributes | null => {
   const { dataViewId } = useSourcererDataView();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -78,7 +78,7 @@ export const useLensAttributes = ({
             ...ref,
             id: dataViewId,
           })),
-        } as TypedLensByValueInput['attributes'])
+        } as LensAttributes)
       : null;
   }, [
     lensAttributes,

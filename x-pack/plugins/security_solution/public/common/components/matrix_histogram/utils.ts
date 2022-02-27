@@ -214,3 +214,26 @@ export const filterNetworkExternalAlertData: Filter[] = [
     },
   },
 ];
+
+export const addToCase = async (
+  http: HttpSetup,
+  theCase: Case,
+  attributes: LensAttributes,
+  timeRange?: { from: string; to: string },
+  owner?: string
+) => {
+  const apiPath = `/api/cases/${theCase?.id}/comments`;
+
+  const vizPayload = {
+    attributes,
+    timeRange,
+  };
+
+  const payload = {
+    comment: `!{lens${JSON.stringify(vizPayload)}}`,
+    type: 'user',
+    owner: owner ?? 'security_solution',
+  };
+
+  return http.post(apiPath, { body: JSON.stringify(payload) });
+};
