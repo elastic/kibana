@@ -183,7 +183,7 @@ export const SearchSourceExpression = ({
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
-            defaultMessage="When number of matches"
+            defaultMessage="When the number of matches"
           />
         </h5>
       </EuiTitle>
