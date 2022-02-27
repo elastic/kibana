@@ -17,10 +17,10 @@ export interface Labels {
   [key: string]: LabelValue;
 }
 
-/** 
+/**
  * Kibana execution context.
  * Used to provide execution context to Elasticsearch, reporting, performance monitoring, etc.
- * @public 
+ * @public
  **/
 export interface ExecutionContextSetup {
   /**
