@@ -57,6 +57,7 @@ run(
         tsconfigPath: config.tsconfigPath,
         repoRelativePackageDir: config.repoRelativePackageDir,
       });
+      log.success('type summary created for', config.repoRelativePackageDir);
     } else {
       await runApiExtractor(
         config.tsconfigPath,

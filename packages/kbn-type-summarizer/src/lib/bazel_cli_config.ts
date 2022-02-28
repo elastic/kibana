@@ -12,7 +12,7 @@ import Fs from 'fs';
 import { CliError } from './cli_error';
 import { parseCliFlags } from './cli_flags';
 
-const TYPE_SUMMARIZER_PACKAGES = ['@kbn/crypto'];
+const TYPE_SUMMARIZER_PACKAGES = ['@kbn/type-summarizer', '@kbn/crypto'];
 
 const isString = (i: any): i is string => typeof i === 'string' && i.length > 0;
 

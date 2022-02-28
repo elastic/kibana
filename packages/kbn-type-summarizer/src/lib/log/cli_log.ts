@@ -90,4 +90,10 @@ export class CliLog implements Logger {
       this.writeTo.write(`${dim('verbose')}: ${format(msg, ...args)}\n`);
     }
   }
+
+  success(msg: string, ...args: any[]): void {
+    if (this.map.quiet) {
+      this.writeTo.write(`✅ ${format(msg, ...args)}\n`);
+    }
+  }
 }

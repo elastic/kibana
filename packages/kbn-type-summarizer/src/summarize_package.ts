@@ -19,16 +19,45 @@ import { isNodeModule } from './lib/is_node_module';
 import { Printer } from './lib/printer';
 import { Logger } from './lib/log';
 
-interface SummarizePacakgeOptions {
+/**
+ * Options used to customize the summarizePackage function
+ */
+export interface SummarizePacakgeOptions {
+  /**
+   * Absolute path to the directory containing the .d.ts files produced by `tsc`. Maps to the
+   * `declarationDir` compiler option.
+   */
   dtsDir: string;
+  /**
+   * Absolute path to the tsconfig.json file for the project we are summarizing
+   */
   tsconfigPath: string;
+  /**
+   * Array of absolute paths to the .d.ts files which will be summarized. Each file in this
+   * array will cause an output .d.ts summary file to be created containing all the AST nodes
+   * which are exported or referenced by those exports.
+   */
   inputPaths: string[];
+  /**
+   * Absolute path to the output directory where the summary .d.ts files should be written
+   */
   outputDir: string;
+  /**
+   * Repo-relative path to the package source, for example `packages/kbn-type-summarizer` for
+   * this package. This is used to provide the correct `sourceRoot` path in the resulting source
+   * map files.
+   */
   repoRelativePackageDir: string;
-  /** rather than falling back to the TS printer for unexpected AST nodes, throw an error */
+  /**
+   * Should the printer throw an error if it doesn't know how to print an AST node? Primarily
+   * used for testing
+   */
   strictPrinting?: boolean;
 }
 
+/**
+ * Produce summary .d.ts files for a package
+ */
 export async function summarizePackage(log: Logger, options: SummarizePacakgeOptions) {
   const tsConfig = loadTsConfigFile(options.tsconfigPath);
   log.verbose('Created tsconfig', tsConfig);

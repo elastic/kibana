@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-// this package currently provides no exports
+export { Logger } from './lib/log';
+export { summarizePackage, SummarizePacakgeOptions } from './summarize_package';

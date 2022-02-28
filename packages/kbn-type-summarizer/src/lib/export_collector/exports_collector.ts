@@ -191,12 +191,13 @@ export class ExportCollector {
   }
 
   run(): CollectorResults {
+    const results = new CollectorResults(this.sourceMapper);
+
     const moduleSymbol = this.typeChecker.getSymbolAtLocation(this.sourceFile);
     if (!moduleSymbol) {
-      throw new Error('sourceFile not known by typeChecker');
+      this.log.warn('Source file has no symbol in the type checker, is it empty?');
+      return results;
     }
-
-    const results = new CollectorResults(this.sourceMapper);
 
     for (const symbol of this.typeChecker.getExportsOfModule(moduleSymbol)) {
       assertDecSymbol(symbol);

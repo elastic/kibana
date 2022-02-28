@@ -2,9 +2,8 @@
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": false,
-    "sourceMap": true,
-    "sourceRoot": "../../../../../packages/kbn-type-summarizer/src/",
     "outDir": "target_types",
     "types": [
       "jest",

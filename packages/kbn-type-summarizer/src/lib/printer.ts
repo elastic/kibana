@@ -213,12 +213,16 @@ export class Printer {
       case ts.SyntaxKind.NumericLiteral:
       case ts.SyntaxKind.StringKeyword:
         return [this.printNode(node)];
-      case ts.SyntaxKind.FunctionDeclaration:
-        return [this.ensureNewline(this.printNode(node))];
     }
 
-    if (ts.isInterfaceDeclaration(node)) {
-      const text = this.printNode(node);
+    if (ts.isInterfaceDeclaration(node) || ts.isFunctionDeclaration(node)) {
+      // we are just trying to replace the name with a sourceMapped node, so if there
+      // is no name just return the source
+      if (!node.name) {
+        return [node.getFullText()];
+      }
+
+      const text = node.getText();
       const name = node.name.getText();
       const nameI = text.indexOf(name);
       if (nameI === -1) {
