@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'multiple-isolated',
+              namespaceType: 'multiple',
             });
           }));
     });
