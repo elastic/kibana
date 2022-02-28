@@ -10,11 +10,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { flow, get, mapValues } from 'lodash';
-import {
-  mergeSavedObjectMigrationMaps,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
-} from 'kibana/server';
+import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
+import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
 import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/common';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 import type { SavedSearchAttributes } from '../../common/types';

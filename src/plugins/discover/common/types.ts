@@ -17,7 +17,7 @@ export interface DiscoverGridSettingsColumn {
 /** @internal **/
 export interface SavedSearchAttributes extends SavedObjectAttributes {
   title: string;
-  sort: string;
+  sort: string[];
   columns: string[];
   description: string;
   grid: string;
