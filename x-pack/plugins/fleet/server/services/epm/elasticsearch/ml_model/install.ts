@@ -74,13 +74,20 @@ async function handleMlModelInstall({
   try {
     await retryTransientEsErrors(
       () =>
-        esClient.ml.putTrainedModel({
-          model_id: mlModel.installationName,
-          defer_definition_decompression: true,
-          timeout: '45s',
-          // @ts-expect-error expects an object not a string
-          body: mlModel.content,
-        }),
+        esClient.ml.putTrainedModel(
+          {
+            model_id: mlModel.installationName,
+            defer_definition_decompression: true,
+            timeout: '45s',
+            // @ts-expect-error expects an object not a string
+            body: mlModel.content,
+          },
+          {
+            headers: {
+              'content-type': 'application/json',
+            },
+          }
+        ),
       { logger }
     );
   } catch (err) {
