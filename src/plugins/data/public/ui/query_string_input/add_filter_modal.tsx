@@ -77,7 +77,6 @@ export interface FilterGroup {
   id: number;
   relationship?: string;
   subGroupId?: number;
-  groupsCount?: number;
 }
 
 export function AddFilterModal({
@@ -95,11 +94,7 @@ export function AddFilterModal({
   savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (
-    filters: FilterGroup[],
-    buildFilters: Filter[],
-    groupsCount: number
-  ) => void;
+  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -141,7 +136,6 @@ export function AddFilterModal({
         : 0,
       subGroupId: 1,
       relationship: undefined,
-      groupsCount,
     },
   ]);
 
@@ -182,7 +176,6 @@ export function AddFilterModal({
             ) + 1
           : 0,
         subGroupId: 1,
-        groupsCount,
       },
     ]);
     setGroupsCount(1);
@@ -456,7 +449,7 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
 
-        onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
+        onMultipleFiltersSubmit(localFilters, finalFilters);
         if (alias) {
           saveFilters({
             title: customLabel,
@@ -546,7 +539,6 @@ export function AddFilterModal({
                                           groupId: localfilter.groupId,
                                           id: Number(multipleFilters?.length) + localFilters.length,
                                           subGroupId,
-                                          groupsCount,
                                         },
                                       ]);
                                     }}
@@ -589,7 +581,6 @@ export function AddFilterModal({
                                             ? localFilters[localFilters.length - 1].groupId
                                             : localFilters[localFilters.length - 1].groupId + 1,
                                         subGroupId,
-                                        groupsCount,
                                         id: Number(multipleFilters?.length) + localFilters.length,
                                       },
                                     ]);

@@ -152,7 +152,6 @@ export function EditFilterModal({
           id: 0,
           subGroupId: 1,
           relationship: undefined,
-          groupsCount
         },
       ];
     }
@@ -166,7 +165,6 @@ export function EditFilterModal({
         id: convertedfilter.id,
         subGroupId: convertedfilter.subGroupId,
         relationship: convertedfilter.relationship,
-        groupsCount: convertedfilter.groupsCount
       };
     });
   }
