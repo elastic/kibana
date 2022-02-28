@@ -35,7 +35,7 @@ export const deleteExceptionListWithoutRuleReference = () => {
 
 export const deleteExceptionListWithRuleReference = () => {
   cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
+  cy.get(EXCEPTIONS_TABLE_MODAL).should('be.visible');
   cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
 };

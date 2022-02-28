@@ -128,3 +128,30 @@ export const deleteCustomRule = (ruleId = '1') => {
     failOnStatusCode: false,
   });
 };
+
+export const createCustomRuleWithExceptions = (
+  rule: CustomRule,
+  ruleId = 'rule_testing',
+  interval = '100m'
+) =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: ruleId,
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval,
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'query',
+      from: 'now-50000h',
+      index: rule.index,
+      query: rule.customQuery,
+      language: 'kuery',
+      enabled: false,
+      exceptions_list: rule.exceptionList,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });

@@ -6,29 +6,16 @@
  */
 
 import {
-  getException,
   getExceptionList,
+  getEndpointExceptionList,
   expectedExportedExceptionList,
 } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
+import { createCustomRuleWithExceptions } from '../../tasks/api_calls/rules';
+import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { RULE_STATUS } from '../../screens/create_new_rule';
-
-import { createCustomRule } from '../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import {
-  loginAndWaitForPageWithoutDateRange,
-  waitForPageWithoutDateRange,
-} from '../../tasks/login';
-import {
-  addsExceptionFromRuleSettings,
-  goBackToAllRulesTable,
-  goToExceptionsTab,
-} from '../../tasks/rule_details';
-
-import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../urls/navigation';
-import { cleanKibana, reload } from '../../tasks/common';
+import { EXCEPTIONS_URL } from '../../urls/navigation';
+import { cleanKibana } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
@@ -41,106 +28,137 @@ import {
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../screens/exceptions';
-import { createExceptionList } from '../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  createExceptionLists,
+  deleteAllExceptions,
+} from '../../tasks/api_calls/exceptions';
+
+const getExceptionList1 = () => ({
+  ...getExceptionList(),
+  name: 'Test list 1',
+  list_id: 'exception_list_1',
+});
+const getExceptionList2 = () => ({
+  ...getExceptionList(),
+  name: 'New Rule Test',
+  list_id: 'exception_list_2',
+});
 
 describe('Exceptions Table', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule());
-    reload();
-    goToRuleDetails();
-
-    cy.get(RULE_STATUS).should('have.text', '—');
-
-    esArchiverLoad('auditbeat_for_exceptions');
-
-    // Add a detections exception list
-    goToExceptionsTab();
-    addsExceptionFromRuleSettings(getException());
-
-    // Create exception list not used by any rules
-    createExceptionList(getExceptionList(), getExceptionList().list_id).as('exceptionListResponse');
-
-    goBackToAllRulesTable();
-  });
-
-  after(() => {
-    esArchiverUnload('auditbeat_for_exceptions');
+    // delete all exception lists
+    deleteAllExceptions();
   });
 
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL);
+
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
+      'exceptionListResponse1'
+    );
+
     waitForExceptionsTableToBeLoaded();
+
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, 'Showing 1 list');
+
     exportExceptionList();
 
     cy.wait('@export').then(({ response }) =>
       cy
         .wrap(response?.body)
-        .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
+        .should('eql', expectedExportedExceptionList(this.exceptionListResponse1))
     );
   });
 
   it('Filters exception lists on search', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    createExceptionLists([
+      [getExceptionList1(), getExceptionList1().list_id],
+      [getExceptionList2(), getExceptionList2().list_id],
+      [getEndpointExceptionList(), getEndpointExceptionList().list_id],
+    ]);
+
+    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 3 lists`);
 
     // Single word search
     searchForExceptionList('Endpoint');
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 1 list`);
+    cy.contains(EXCEPTIONS_TABLE_LIST_NAME, getEndpointExceptionList().name);
 
     // Multi word search
     clearSearchSelection();
     searchForExceptionList('New Rule Test');
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(0).should('have.text', 'Test exception list');
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(1).should('have.text', 'New Rule Test');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 2 lists`);
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(0).should('have.text', getExceptionList2().name);
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(1).should('have.text', getExceptionList1().name);
 
     // Exact phrase search
     clearSearchSelection();
     searchForExceptionList('"New Rule Test"');
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'New Rule Test');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 1 list`);
+    cy.contains(EXCEPTIONS_TABLE_LIST_NAME, getExceptionList2().name);
 
     // Field search
     clearSearchSelection();
-    searchForExceptionList('list_id:endpoint_list');
+    searchForExceptionList('list_id:endpoint_exception_list');
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 1 list`);
+    cy.contains(EXCEPTIONS_TABLE_LIST_NAME, getEndpointExceptionList().name);
 
     clearSearchSelection();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 3 lists`);
   });
 
   it('Deletes exception list without rule reference', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id).then(() => {
+      loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL);
+      waitForExceptionsTableToBeLoaded();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 1 list`);
 
-    deleteExceptionListWithoutRuleReference();
+      deleteExceptionListWithoutRuleReference();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 0 lists`);
+    });
   });
 
   it('Deletes exception list with rule reference', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
+    createExceptionList(getExceptionList2(), getExceptionList2().list_id)
+      .then((response) =>
+        createCustomRuleWithExceptions({
+          ...getNewRule(),
+          exceptionList: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList2().list_id,
+              type: getExceptionList2().type,
+              namespace_type: getExceptionList2().namespace_type,
+            },
+          ],
+        })
+      )
+      .then(() => {
+        loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL);
+        waitForExceptionsTableToBeLoaded();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
+        // We only created 1, but the call to create a rule
+        // triggers the creation of the Endpoint Security Team
+        // in the background, so 2 lists will show
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 2 lists`);
 
-    deleteExceptionListWithRuleReference();
+        deleteExceptionListWithRuleReference();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 1 list`);
+      });
   });
 });
