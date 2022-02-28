@@ -147,10 +147,9 @@ export const MonitorManagementList = ({
       align: 'left' as const,
       field: ConfigKey.SCHEDULE,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.schedule', {
-        defaultMessage: 'Schedule',
+        defaultMessage: 'Frequency (min)',
       }),
-      render: (schedule: CommonFields[ConfigKey.SCHEDULE]) =>
-        `@every ${schedule?.number}${schedule?.unit}`,
+      render: (schedule: CommonFields[ConfigKey.SCHEDULE]) => schedule?.number,
     },
     {
       align: 'left' as const,
@@ -180,11 +179,17 @@ export const MonitorManagementList = ({
     },
     {
       align: 'left' as const,
-      field: 'id',
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (id: string) => <Actions id={id} isDisabled={!canEdit} onUpdate={onUpdate} />,
+      render: (fields: SyntheticsMonitorWithId) => (
+        <Actions
+          id={fields.id}
+          name={fields[ConfigKey.NAME]}
+          isDisabled={!canEdit}
+          onUpdate={onUpdate}
+        />
+      ),
     },
   ] as Array<EuiBasicTableColumn<SyntheticsMonitorWithId>>;
 
