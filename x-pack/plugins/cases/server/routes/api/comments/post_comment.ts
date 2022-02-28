@@ -6,41 +6,33 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { escapeHatch, wrapError } from '../utils';
-import { RouteDeps } from '../types';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { CommentRequest } from '../../../../common/api';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initPostCommentApi({ router, logger }: RouteDeps) {
-  router.post(
-    {
-      path: CASE_COMMENTS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
-        }),
-        body: escapeHatch,
-      },
-    },
-    async (context, request, response) => {
-      try {
-        if (!context.cases) {
-          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-        }
+export const postCommentRoute = createCasesRoute({
+  method: 'post',
+  path: CASE_COMMENTS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const casesClient = await context.cases.getCasesClient();
+      const caseId = request.params.case_id;
+      const comment = request.body as CommentRequest;
 
-        const casesClient = await context.cases.getCasesClient();
-        const caseId = request.params.case_id;
-        const comment = request.body as CommentRequest;
-
-        return response.ok({
-          body: await casesClient.attachments.add({ caseId, comment }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to post comment in route case id: ${request.params.case_id}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      return response.ok({
+        body: await casesClient.attachments.add({ caseId, comment }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to post comment in route case id: ${request.params.case_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});
