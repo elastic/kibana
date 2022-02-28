@@ -27,7 +27,7 @@ export type ExpressionValueVisDimension = ExpressionValueBoxed<
     accessor: number | DatatableColumn;
     format: {
       id?: string;
-      params: Record<string, any>;
+      params?: Record<string, any>;
     };
   }
 >;
@@ -54,14 +54,12 @@ export const visDimension = (): ExpressionFunctionDefinition<
     },
     format: {
       types: ['string'],
-      default: 'string',
       help: i18n.translate('visualizations.function.visDimension.format.help', {
         defaultMessage: 'Format',
       }),
     },
     formatParams: {
       types: ['string'],
-      default: '"{}"',
       help: i18n.translate('visualizations.function.visDimension.formatParams.help', {
         defaultMessage: 'Format params',
       }),
@@ -69,13 +67,22 @@ export const visDimension = (): ExpressionFunctionDefinition<
   },
   fn: (input, args) => {
     const accessor = findAccessorOrFail(args.accessor, input.columns);
+    const column = typeof accessor === 'number' ? input.columns[accessor] : accessor;
+    const columnFormat = column.meta.params;
+    // if a user hasn't specified the format of the column and its format is not specified at the table columns,
+    // then the default format id ('string') should be used
+    const format =
+      args.format || args.formatParams || !columnFormat
+        ? {
+            id: args.format || 'string',
+            params: JSON.parse(args.formatParams || '{}'),
+          }
+        : columnFormat;
+
     return {
       type: 'vis_dimension',
       accessor,
-      format: {
-        id: args.format,
-        params: JSON.parse(args.formatParams!),
-      },
+      format,
     };
   },
 });
