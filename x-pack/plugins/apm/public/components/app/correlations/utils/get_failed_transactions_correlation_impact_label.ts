@@ -40,3 +40,33 @@ export function getFailedTransactionsCorrelationImpactLabel(
 
   return null;
 }
+
+export function getLatencyCorrelationImpactLabel(
+  pValue: FailedTransactionsCorrelation['pValue']
+): {
+  impact: FailedTransactionsCorrelationsImpactThreshold;
+  color: string;
+} | null {
+  if (pValue === null) {
+    return null;
+  }
+
+  // The lower the p value, the higher the impact
+  if (pValue >= 0 && pValue < 1e-6)
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+      color: 'danger',
+    };
+  if (pValue >= 1e-6 && pValue < 0.001)
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
+      color: 'warning',
+    };
+  if (pValue >= 0.001 && pValue < 0.02)
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+      color: 'default',
+    };
+
+  return null;
+}

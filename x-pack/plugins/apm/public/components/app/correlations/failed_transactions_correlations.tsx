@@ -36,8 +36,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-
-import { ImpactBar } from '../../shared/impact_bar';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -225,28 +223,6 @@ export function FailedTransactionsCorrelations({
         ]
       : [];
     return [
-      {
-        width: '116px',
-        field: 'normalizedScore',
-        name: (
-          <>
-            {i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
-              {
-                defaultMessage: 'Score',
-              }
-            )}
-          </>
-        ),
-        render: (_, { normalizedScore }) => {
-          return (
-            <>
-              <ImpactBar size="m" value={normalizedScore * 100} />
-            </>
-          );
-        },
-        sortable: true,
-      },
       {
         width: '116px',
         field: 'pValue',
