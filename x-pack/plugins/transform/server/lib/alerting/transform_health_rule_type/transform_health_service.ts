@@ -29,7 +29,11 @@ interface TestResult {
   context: TransformHealthAlertContext;
 }
 
-type Transform = estypes.Transform & { id: string; description?: string; sync: object };
+type Transform = estypes.TransformGetTransformTransformSummary & {
+  id: string;
+  description?: string;
+  sync: object;
+};
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 

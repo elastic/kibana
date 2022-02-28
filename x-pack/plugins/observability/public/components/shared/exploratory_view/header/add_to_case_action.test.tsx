@@ -57,7 +57,12 @@ describe('AddToCaseAction', function () {
     const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
 
     const { getByText } = render(
-      <AddToCaseAction lensAttributes={null} timeRange={{ to: '', from: '' }} />
+      <AddToCaseAction
+        lensAttributes={null}
+        timeRange={{ to: '', from: '' }}
+        appId="securitySolutionUI"
+        owner="security"
+      />
     );
 
     expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
@@ -69,6 +74,8 @@ describe('AddToCaseAction', function () {
           from: '',
           to: '',
         },
+        appId: 'securitySolutionUI',
+        owner: 'security',
       })
     );
   });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
@@ -36,16 +36,17 @@ import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
-import {
-  SELECTOR_TIMELINE_GLOBAL_CONTAINER,
-  UpdatedFlexItem,
-  UpdatedFlexGroup,
-  FullWidthFlexGroup,
-} from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
+
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';

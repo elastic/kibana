@@ -10,7 +10,7 @@ import { EuiPageHeader, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';
-import { BadgeOptions, TitleProp } from './types';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface HeaderProps {
   border?: boolean;
@@ -19,32 +19,24 @@ interface HeaderProps {
 
 export interface HeaderPageProps extends HeaderProps {
   showBackButton?: boolean;
-  badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
-  title: TitleProp;
+  title: string | React.ReactNode;
   titleNode?: React.ReactElement;
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
-  showBackButton = false,
-  badgeOptions,
-  border,
   children,
-  isLoading,
   subtitle,
   subtitle2,
   title,
   titleNode,
-  ...rest
 }) => {
+  const { releasePhase } = useCasesContext();
   return (
     <>
-      <EuiPageHeader
-        pageTitle={titleNode || <Title title={title} badgeOptions={badgeOptions} />}
-        {...rest}
-      />
+      <EuiPageHeader pageTitle={titleNode || <Title title={title} releasePhase={releasePhase} />} />
       <EuiSpacer size="m" />
       {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
       {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
