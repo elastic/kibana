@@ -19,6 +19,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiHorizontalRule,
+  EuiAutoRefreshButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,6 +51,7 @@ export function RulesPage() {
   } = core;
   const [rules, setRules] = useState<RuleState>({ data: [], totalItemsCount: 0 });
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
+  const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -205,7 +207,7 @@ export function RulesPage() {
             key="create-alert"
             data-test-subj="createRuleButton"
             fill
-            onClick={() => {}}
+            onClick={() => setRuleFlyoutVisibility(true)}
           >
             <FormattedMessage
               id="xpack.observability.rules.addRuleButtonLabel"
@@ -238,6 +240,14 @@ export function RulesPage() {
               }}
             />
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiAutoRefreshButton
+            isPaused={false}
+            refreshInterval={3000}
+            onRefreshChange={() => {}}
+            shortHand
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
