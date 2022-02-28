@@ -16,6 +16,7 @@ import {
   cleanFilter,
   getFilterParams,
   FieldFilter,
+  buildQueryFromFilters,
 } from '@kbn/es-query';
 import {
   EuiFormRow,
@@ -57,21 +58,9 @@ import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
+import { ITab, QUERY_BUILDER, QUICK_FORM } from './add_filter_modal';
 
-const tabs = [
-  {
-    type: 'quick_form',
-    label: i18n.translate('data.filter.filterEditor.quickFormLabel', {
-      defaultMessage: 'Quick form',
-    }),
-  },
-  {
-    type: 'query_builder',
-    label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
-      defaultMessage: 'Query builder',
-    }),
-  },
-];
+const possibleTabs: ITab[] = [QUICK_FORM, QUERY_BUILDER];
 
 export interface FilterGroup {
   field: IFieldType | undefined;
@@ -88,7 +77,6 @@ export function EditFilterModal({
   onSubmit,
   onMultipleFiltersSubmit,
   onCancel,
-  applySavedQueries,
   filter,
   multipleFilters,
   currentEditFilters,
@@ -98,6 +86,9 @@ export function EditFilterModal({
   onRemoveFilterGroup,
   saveFilters,
   savedQueryService,
+  filters,
+  tabs = possibleTabs,
+  initialLabel,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (
@@ -105,7 +96,6 @@ export function EditFilterModal({
     buildFilters: Filter[],
     groupCount: number
   ) => void;
-  applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
   multipleFilters?: Filter[];
@@ -116,15 +106,43 @@ export function EditFilterModal({
   onRemoveFilterGroup: () => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   savedQueryService: SavedQueryService;
+  filters: Filter[];
+  tabs?: ITab[];
+  initialLabel?: string;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
-  const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
-  const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
-  const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(currentEditFilters?.map(filter => cleanFilter(filter)), null, 2));
+  const [addFilterMode, setAddFilterMode] = useState<string>(
+    initialAddFilterMode ?? QUICK_FORM.type
+  );
+  const [customLabel, setCustomLabel] = useState<string>(initialLabel || '');
+  const [queryDsl, setQueryDsl] = useState<string>(
+    JSON.stringify(
+      // {
+      //   query: {
+      //     bool: buildQueryFromFilters(filters, selectedIndexPattern),
+      //   },
+      // },
+      filters.map((filter) => cleanFilter(filter)),
+      null,
+      2
+    )
+  );
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    convertFilterToFilterGroup(currentEditFilters)
+    tabs.includes(QUICK_FORM)
+      ? convertFilterToFilterGroup(currentEditFilters)
+      : [
+          {
+            field: undefined,
+            operator: undefined,
+            value: undefined,
+            groupId: 1,
+            id: 0,
+            subGroupId: 1,
+            relationship: undefined,
+          },
+        ]
   );
   const [groupsCount, setGroupsCount] = useState<number>(
     (new Set(localFilters.map(filter => filter.groupId))).size
@@ -239,29 +257,31 @@ export function EditFilterModal({
       return '';
     }
     return (
-      <EuiFormRow
-        fullWidth
-        display="columnCompressed"
-        className="kbnQueryBar__dataViewInput"
-        label={i18n.translate('data.filter.filterEditor.dataViewSelectLabel', {
-          defaultMessage: 'Data view',
-        })}
-      >
-        <GenericComboBox
+      tabs.includes(QUICK_FORM) && (
+        <EuiFormRow
           fullWidth
-          compressed
-          placeholder={i18n.translate('data.filter.filterEditor.selectIndexPatternLabel', {
-            defaultMessage: 'Select an index pattern',
+          display="columnCompressed"
+          className="kbnQueryBar__dataViewInput"
+          label={i18n.translate('data.filter.filterEditor.dataViewSelectLabel', {
+            defaultMessage: 'Data view',
           })}
-          options={indexPatterns}
-          selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-          getLabel={(indexPattern: IIndexPattern) => indexPattern.title}
-          onChange={onIndexPatternChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          data-test-subj="filterIndexPatternsSelect"
-        />
-      </EuiFormRow>
+        >
+          <GenericComboBox
+            fullWidth
+            compressed
+            placeholder={i18n.translate('data.filter.filterEditor.selectIndexPatternLabel', {
+              defaultMessage: 'Select an index pattern',
+            })}
+            options={indexPatterns}
+            selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
+            getLabel={(indexPattern: IIndexPattern) => indexPattern.title}
+            onChange={onIndexPatternChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+            data-test-subj="filterIndexPatternsSelect"
+          />
+        </EuiFormRow>
+      )
     );
   };
 
@@ -421,12 +441,12 @@ export function EditFilterModal({
       shouldIncludeTimefilter: false,
       filters,
     };
-    if (!filter.meta.alias) {
+    if (!initialLabel) {
       // if our filters had not alias before then we save them as new fiterSet
       saveFilters(queryMetaObj, true);
     } else {
       const curQuery = savedQueries.find(
-        (existingQuery) => existingQuery.attributes.title === filter.meta.alias
+        (existingQuery) => existingQuery.attributes.title === initialLabel
       );
       saveFilters(
         {
@@ -444,28 +464,30 @@ export function EditFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
-    if (alias && !filter.meta.alias && isLabelDuplicated()) {
+    if (alias && !initialLabel && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
     }
 
-    if (addFilterMode === 'query_builder') {
+    if (addFilterMode === QUERY_BUILDER.type) {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
-      const body = JSON.parse(queryDsl);
-      const builtCustomFilter = buildCustomFilter(
-        newIndex,
-        body,
-        disabled,
-        negate,
-        alias,
-        $state.store
-      );
-      onSubmit([builtCustomFilter]);
-      if (alias) {
-        onSubmitWithLabel([builtCustomFilter]);
+      let builtCustomFilter = [];
+      if (Array.isArray(JSON.parse(queryDsl))) {
+        builtCustomFilter = JSON.parse(queryDsl).map((query) =>
+          buildCustomFilter(newIndex, query, disabled, negate, alias, $state.store)
+        );
+      } else {
+        const body = JSON.parse(queryDsl);
+        builtCustomFilter = [
+          buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store),
+        ];
       }
-    } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
+      onSubmit(builtCustomFilter);
+      if (alias) {
+        onSubmitWithLabel(builtCustomFilter);
+      }
+    } else if (addFilterMode === QUICK_FORM.type && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
           return buildFilter(
@@ -489,8 +511,6 @@ export function EditFilterModal({
           onSubmitWithLabel(finalFilters);
         }
       }
-    } else if (addFilterMode === 'saved_filters') {
-      applySavedQueries();
     }
   };
 
@@ -774,8 +794,8 @@ export function EditFilterModal({
 
       <EuiModalBody className="kbnQueryBar__filterModalWrapper">
         <EuiForm className="kbnQueryBar__filterModalForm">
-          {addFilterMode === 'quick_form' && renderGroupedFilters()}
-          {addFilterMode === 'query_builder' && renderCustomEditor()}
+          {addFilterMode === QUICK_FORM.type && renderGroupedFilters()}
+          {addFilterMode === QUERY_BUILDER.type && renderCustomEditor()}
         </EuiForm>
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />
