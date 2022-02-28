@@ -100,6 +100,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
+    transformLiteralToPath(sexpr);
+
     const name = sexpr.path.parts[0];
     const helper = this.helpers[name];
 
@@ -122,6 +124,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   BlockStatement(block: hbs.AST.BlockStatement) {
+    transformLiteralToPath(block);
+
     const name = block.path.parts[0];
     const helper = this.helpers[name];
 
@@ -182,5 +186,22 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const params = this.values;
     this.values = currentValues;
     return params;
+  }
+}
+
+// liftet from handlebars lib/handlebars/compiler/compiler.js
+function transformLiteralToPath(sexpr: { path: hbs.AST.PathExpression }) {
+  if (!sexpr.path.parts) {
+    const literal = sexpr.path;
+    // Casting to string here to make false and 0 literal values play nicely with the rest
+    // of the system.
+    sexpr.path = {
+      type: 'PathExpression',
+      data: false,
+      depth: 0,
+      parts: [literal.original + ''],
+      original: literal.original + '',
+      loc: literal.loc,
+    };
   }
 }
