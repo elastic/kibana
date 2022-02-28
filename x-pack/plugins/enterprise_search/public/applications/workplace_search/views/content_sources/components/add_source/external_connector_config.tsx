@@ -120,7 +120,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.urlLabel',
+            'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.apiKeyLabel',
             {
               defaultMessage: 'API key',
             }

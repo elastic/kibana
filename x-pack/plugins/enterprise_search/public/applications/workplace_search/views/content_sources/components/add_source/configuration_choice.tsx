@@ -141,7 +141,7 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                   <EuiText size="s">
                     <h3>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
+                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.title',
                         {
                           defaultMessage: 'Custom connector',
                         }
