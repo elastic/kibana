@@ -33,7 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Elasticsearch deprecations', () => {
+  describe('Elasticsearch deprecations', function () {
+    this.onlyEsVersion('<=7');
+
     describe('GET /api/upgrade_assistant/es_deprecations', () => {
       describe('error handling', () => {
         it('handles auth error', async () => {

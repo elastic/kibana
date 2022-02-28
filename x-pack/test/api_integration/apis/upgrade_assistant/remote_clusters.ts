@@ -15,7 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Remote clusters', () => {
+  describe('Remote clusters', function () {
+    this.onlyEsVersion('<=7');
+
     describe('GET /api/upgrade_assistant/remote_clusters', () => {
       before(async () => {
         try {
