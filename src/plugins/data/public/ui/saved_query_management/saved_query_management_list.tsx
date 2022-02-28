@@ -29,8 +29,6 @@ interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
-  onSave: () => void;
-  onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
   onClose: () => void;
