@@ -59,9 +59,12 @@ export function createMockGraphStore({
     createWorkspace: jest.fn((index, advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
     indexPatternProvider: {
-      get: jest.fn(() =>
-        Promise.resolve({ id: '123', title: 'test-pattern' } as unknown as IndexPattern)
-      ),
+      get: jest.fn(async (id: string) => {
+        if (id === 'missing-dataview') {
+          throw Error('No data view with this id');
+        }
+        return { id: '123', title: 'test-pattern' } as unknown as IndexPattern;
+      }),
     },
     I18nContext: jest
       .fn()
