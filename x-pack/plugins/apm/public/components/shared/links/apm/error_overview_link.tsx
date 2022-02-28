@@ -6,34 +6,26 @@
  */
 
 import React from 'react';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APMQueryParams } from '../url_helpers';
-import { APMLink, APMLinkExtendProps } from './apm_link';
+import { EuiLink } from '@elastic/eui';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 
-const persistedFilters: Array<keyof APMQueryParams> = [
-  'host',
-  'containerId',
-  'podName',
-  'serviceVersion',
-];
-
-interface Props extends APMLinkExtendProps {
+interface Props {
+  children: React.ReactNode;
+  title?: string;
   serviceName: string;
-  query?: APMQueryParams;
+  query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
 }
 
 export function ErrorOverviewLink({ serviceName, query, ...rest }: Props) {
-  const { urlParams } = useLegacyUrlParams();
+  const router = useApmRouter();
+  const errorOverviewLink = router.link('/services/{serviceName}/errors', {
+    path: {
+      serviceName,
+    },
+    query,
+  });
 
-  return (
-    <APMLink
-      path={`/services/${serviceName}/errors`}
-      query={{
-        ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
-        ...query,
-      }}
-      {...rest}
-    />
-  );
+  return <EuiLink href={errorOverviewLink} {...rest} />;
 }
