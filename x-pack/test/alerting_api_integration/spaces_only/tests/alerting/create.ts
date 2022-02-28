@@ -306,7 +306,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
       );
 
       expect(response.status).to.eql(200);

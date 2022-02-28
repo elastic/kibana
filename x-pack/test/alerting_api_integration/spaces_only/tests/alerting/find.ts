@@ -106,18 +106,24 @@ const findTestUtils = (
           createAlert(objectRemover, supertest, { params: { strValue: 'my a' } }),
           createAlert(objectRemover, supertest, { params: { strValue: 'my b' } }),
           createAlert(objectRemover, supertest, { params: { strValue: 'my c' } }),
-          createAlert(objectRemover, supertest, { params: {
-            risk_score: 60,
-            severity: 'high'
-          }}),
-          createAlert(objectRemover, supertest, { params: {
-            risk_score: 40,
-            severity: 'medium'
-          }}),
-          createAlert(objectRemover, supertest, { params: {
-            risk_score: 20,
-            severity: 'low',
-          }}),
+          createAlert(objectRemover, supertest, {
+            params: {
+              risk_score: 60,
+              severity: 'high',
+            },
+          }),
+          createAlert(objectRemover, supertest, {
+            params: {
+              risk_score: 40,
+              severity: 'medium',
+            },
+          }),
+          createAlert(objectRemover, supertest, {
+            params: {
+              risk_score: 20,
+              severity: 'low',
+            },
+          }),
         ]);
       });
 
@@ -184,18 +190,18 @@ const findTestUtils = (
         expect(response.body.data[0].params.strValue).to.eql('my b');
       });
 
-      it('should sort by parameters', async() => {
+      it('should sort by parameters', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
-          }/alerting/rules/_find?sort_field=params.severity`
+          }/alerting/rules/_find?sort_field=params.severity&sort_order=asc`
         );
         expect(response.body.data[0].params.severity).to.equal('low');
         expect(response.body.data[1].params.severity).to.equal('medium');
         expect(response.body.data[2].params.severity).to.equal('high');
       });
 
-      it('should search by parameters', async() => {
+      it('should search by parameters', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'

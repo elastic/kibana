@@ -71,7 +71,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       );
 
       response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
       );
 
       expect(response.body.data[0].mapped_params).to.eql({
