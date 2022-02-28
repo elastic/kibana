@@ -69,7 +69,18 @@ export const securitySolutionOnlyRead: Role = {
   name: 'sec_only_read_spaces_space1',
   privileges: {
     elasticsearch: {
-      indices: [],
+      indices: [
+        {
+          names: [
+            '.alerts-security.alerts-space1',
+            '.internal.alerts-security.alerts-space1',
+            '.lists-space1',
+            '.items-space1',
+            '.siem-signals-space1',
+          ],
+          privileges: ['write', 'read', 'view_index_metadata', 'maintenance'],
+        },
+      ],
     },
     kibana: [
       {

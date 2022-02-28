@@ -15,12 +15,13 @@ import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
-  const APM_ALERT_INDEX = '.alerts-observability-apm';
+  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User, space: string, expected: number = 200) => {
@@ -38,12 +39,11 @@ export default ({ getService }: FtrProviderContext) => {
     space: string,
     expectedStatusCode: number = 200
   ) => {
-    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=siem`)
-        .auth(user.username, user.password)
-        .set('kbn-xsrf', 'true')
-        .expect(expectedStatusCode);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } = await supertest
+      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=siem`)
+      .auth(user.username, user.password)
+      .set('kbn-xsrf', 'true')
+      .expect(expectedStatusCode);
     return indexNames;
   };
 
