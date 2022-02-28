@@ -599,13 +599,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
 class ToolingLog {
   constructor(writerConfig, options) {
     (0, _defineProperty2.default)(this, "indentWidth$", void 0);
@@ -622,24 +615,10 @@ class ToolingLog {
     this.written$ = options !== null && options !== void 0 && options.parent ? options.parent.written$ : new Rx.Subject();
     this.type = options === null || options === void 0 ? void 0 : options.type;
   }
-  /**
-   * Get the current indentation level of the ToolingLog
-   */
-
 
   getIndent() {
     return this.indentWidth$.getValue();
   }
-  /**
-   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
-   *
-   * If provided, the `block` function will be executed and once it's promise is resolved
-   * or rejected the indentation will be reset to its original state.
-   *
-   * @param delta the number of spaces to increase/decrease the indentation
-   * @param block a function to run and reset any indentation changes after
-   */
-
 
   indent(delta = 0, block) {
     const originalWidth = this.indentWidth$.getValue();
@@ -697,11 +676,6 @@ class ToolingLog {
   getWritten$() {
     return this.written$.asObservable();
   }
-  /**
-   * Create a new ToolingLog which sets a different "type", allowing messages to be filtered out by "source"
-   * @param type A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`
-   */
-
 
   withType(type) {
     return new ToolingLog(undefined, {
@@ -6570,13 +6544,6 @@ var _chalk = _interopRequireDefault(__webpack_require__(114));
 
 var _log_levels = __webpack_require__(127);
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
 const {
   magentaBright,
   yellow,
@@ -6638,7 +6605,7 @@ class ToolingLogTextWriter {
 
     if (this.ignoreSources && msg.source && this.ignoreSources.includes(msg.source)) {
       if (msg.type === 'write') {
-        const txt = (0, _util.format)(msg.args[0], ...msg.args.slice(1)); // Ensure that Elasticsearch deprecation log messages from Kibana aren't ignored
+        const txt = (0, _util.format)(msg.args[0], ...msg.args.slice(1));
 
         if (!/elasticsearch\.deprecation/.test(txt)) {
           return false;
@@ -6659,14 +6626,11 @@ class ToolingLogTextWriter {
       let lineIndent = '';
 
       if (msg.indent > 0) {
-        // if we are indenting write some spaces followed by a symbol
         lineIndent += ' '.repeat(msg.indent - 1);
         lineIndent += line.startsWith('-') ? '└' : '│';
       }
 
       if (line && prefix && i > 0) {
-        // apply additional indentation to lines after
-        // the first if this message gets a prefix
         lineIndent += PREFIX_INDENT;
       }
 
@@ -8687,14 +8651,6 @@ exports.LOG_LEVEL_FLAGS = exports.DEFAULT_LOG_LEVEL = void 0;
 exports.getLogLevelFlagsHelp = getLogLevelFlagsHelp;
 exports.parseLogLevel = parseLogLevel;
 exports.pickLevelFromFlags = pickLevelFromFlags;
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
 const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
 const DEFAULT_LOG_LEVEL = 'info';
 exports.DEFAULT_LOG_LEVEL = DEFAULT_LOG_LEVEL;
@@ -8770,30 +8726,18 @@ var _defineProperty2 = _interopRequireDefault(__webpack_require__(8));
 
 var _tooling_log_text_writer = __webpack_require__(112);
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
 class ToolingLogCollectingWriter extends _tooling_log_text_writer.ToolingLogTextWriter {
   constructor(level = 'verbose') {
     super({
       level,
       writeTo: {
         write: msg => {
-          // trim trailing new line
           this.messages.push(msg.slice(0, -1));
         }
       }
     });
     (0, _defineProperty2.default)(this, "messages", []);
   }
-  /**
-   * Called by ToolingLog, extends messages with the source if message includes one.
-   */
-
 
   write(msg) {
     if (msg.source) {
@@ -9033,22 +8977,9 @@ var _http = _interopRequireDefault(__webpack_require__(199));
 
 var _ci_stats_config = __webpack_require__(218);
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
-/** A ci-stats metric record */
 
-/** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
-  /**
-   * Create a CiStatsReporter by inspecting the ENV for the necessary config
-   */
   static fromEnv(log) {
     return new CiStatsReporter((0, _ci_stats_config.parseConfig)(log), log);
   }
@@ -9057,33 +8988,16 @@ class CiStatsReporter {
     this.config = config;
     this.log = log;
   }
-  /**
-   * Determine if CI_STATS is explicitly disabled by the environment. To determine
-   * if the CiStatsReporter has enough information in the environment to send metrics
-   * for builds use #hasBuildConfig().
-   */
-
 
   isEnabled() {
     return process.env.CI_STATS_DISABLED !== 'true';
   }
-  /**
-   * Determines if the CiStatsReporter is disabled by the environment, or properly
-   * configured and able to send stats
-   */
-
 
   hasBuildConfig() {
     var _this$config, _this$config2;
 
     return this.isEnabled() && !!((_this$config = this.config) !== null && _this$config !== void 0 && _this$config.apiToken) && !!((_this$config2 = this.config) !== null && _this$config2 !== void 0 && _this$config2.buildId);
   }
-  /**
-   * Report timings data to the ci-stats service. If running in CI then the reporter
-   * will include the buildId in the report with the access token, otherwise the timings
-   * data will be recorded as anonymous timing data.
-   */
-
 
   async timings(options) {
     var _this$config3, _options$upstreamBran, _Os$cpus, _Os$cpus$, _Os$cpus$2;
@@ -9153,11 +9067,6 @@ class CiStatsReporter {
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`
     }));
   }
-  /**
-   * Report metrics data to the ci-stats service. If running outside of CI this method
-   * does nothing as metrics can only be reported when associated with a specific CI build.
-   */
-
 
   async metrics(metrics, options) {
     var _this$config4;
@@ -9187,10 +9096,6 @@ class CiStatsReporter {
       }) => `[${group}/${id}=${value}]`).join(' ')}`
     }));
   }
-  /**
-   * Send test reports to ci-stats
-   */
-
 
   async reportTests({
     group,
@@ -9216,16 +9121,9 @@ class CiStatsReporter {
       }))].join('\n')
     });
   }
-  /**
-   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
-   * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
-   * we rely on @kbn/utils to find the package.json file.
-   */
-
 
   getUpstreamBranch() {
-    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
-    const hideFromWebpack = ['@', 'kbn/utils']; // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const hideFromWebpack = ['@', 'kbn/utils'];
 
     const {
       kibanaPackageJson
@@ -9233,16 +9131,9 @@ class CiStatsReporter {
 
     return kibanaPackageJson.branch;
   }
-  /**
-   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
-   * in the kibanaUuid when calling the timings() method. Outside of @kbn/pm
-   * we rely on @kbn/utils to find the repo root.
-   */
-
 
   getKibanaUuid() {
-    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
-    const hideFromWebpack = ['@', 'kbn/utils']; // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const hideFromWebpack = ['@', 'kbn/utils'];
 
     const {
       REPO_ROOT
@@ -9296,12 +9187,10 @@ class CiStatsReporter {
         var _error$response;
 
         if (!(error !== null && error !== void 0 && error.request)) {
-          // not an axios error, must be a usage error that we should notify user about
           throw error;
         }
 
         if (error !== null && error !== void 0 && error.response && error.response.status < 500) {
-          // error response from service was received so warn the user and move on
           this.log.warning(`error reporting ${bodyDesc} [status=${error.response.status}] [resp=${(0, _util.inspect)(error.response.data)}]`);
           return;
         }
@@ -9309,8 +9198,7 @@ class CiStatsReporter {
         if (attempt === maxAttempts) {
           this.log.warning(`unable to report ${bodyDesc}, failed to reach ci-stats service too many times`);
           return;
-        } // we failed to reach the backend and we have remaining attempts, lets retry after a short delay
-
+        }
 
         const reason = error !== null && error !== void 0 && (_error$response = error.response) !== null && _error$response !== void 0 && _error$response.status ? `${error.response.status} response` : 'no response';
         const seconds = attempt * 10;
@@ -15647,19 +15535,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.parseConfig = parseConfig;
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-/**
- * Information about how CiStatsReporter should talk to the ci-stats service. Normally
- * it is read from a JSON environment variable using the `parseConfig()` function
- * exported by this module.
- */
 function validateConfig(log, config) {
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
 
@@ -15690,8 +15565,7 @@ function parseConfig(log) {
 
   try {
     config = JSON.parse(configJson);
-  } catch (_) {// handled below
-  }
+  } catch (_) {}
 
   if (typeof config === 'object' && config !== null) {
     return validateConfig(log, config);
@@ -58976,24 +58850,8 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
 const SEP = /\r?\n/;
 
-/**
- *  Creates an Observable from a Readable Stream that:
- *   - splits data from `readable` into lines
- *   - completes when `readable` emits "end"
- *   - fails if `readable` emits "errors"
- *
- *  @param  {ReadableStream} readable
- *  @return {Rx.Observable}
- */
 function observeLines(readable) {
   const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
   const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
@@ -59019,17 +58877,12 @@ function observeLines(readable) {
     };
   }, {
     buffer: ''
-  }), // stop if done completes or errors
-  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
-  return Rx.merge( // use done$ to provide completion/errors
-  done$, // merge in the "lines" from each step
-  scan$.pipe((0, _operators.mergeMap)(({
+  }), (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
+  return Rx.merge(done$, scan$.pipe((0, _operators.mergeMap)(({
     lines
-  }) => lines || [])), // inject the "unsplit" data at the end
-  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
+  }) => lines || [])), scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
     buffer
-  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
-  (0, _operators.catchError)(() => Rx.empty())));
+  }) => buffer ? [buffer] : []), (0, _operators.catchError)(() => Rx.empty())));
 }
 
 /***/ }),
@@ -59052,19 +58905,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-/**
- *  Produces an Observable from a ReadableSteam that:
- *   - completes on the first "end" event
- *   - fails on the first "error" event
- */
 function observeReadable(readable) {
   return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
 }
