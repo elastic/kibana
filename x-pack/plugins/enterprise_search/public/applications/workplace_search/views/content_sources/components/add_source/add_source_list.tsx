@@ -17,13 +17,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiEmptyPrompt,
-  EuiFlexGrid,
-  EuiHorizontalRule,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-
-import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 
 import { AppLogic } from '../../../../app_logic';
 import noOrgSourcesIcon from '../../../../assets/share_circle.svg';
@@ -32,10 +26,8 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { ContentSection } from '../../../../components/shared/content_section';
-import { SourceIcon } from '../../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, CUSTOM_SERVICE_TYPE, EXTERNAL_SERVICE_TYPE } from '../../../../constants';
-import { getSourcesPath, ADD_CUSTOM_PATH } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 

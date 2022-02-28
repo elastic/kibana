@@ -42,7 +42,6 @@ import {
   REMOVE_BUTTON,
 } from '../../../constants';
 import { getEditPath } from '../../../routes';
-import { SourceDataItem } from '../../../types';
 import { handlePrivateKeyUpload } from '../../../utils';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
@@ -58,7 +57,6 @@ import {
   SYNC_DIAGNOSTICS_DESCRIPTION,
   SYNC_DIAGNOSTICS_BUTTON,
 } from '../constants';
-import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 import { DownloadDiagnosticsButton } from './download_diagnostics_button';
