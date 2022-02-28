@@ -77,7 +77,7 @@ function createNewIndex({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
-      settings: { 'index.auto_expand_replicas': '0-1' },
+      settings: { index: { auto_expand_replicas: '0-1' } },
       mappings,
     },
   });
