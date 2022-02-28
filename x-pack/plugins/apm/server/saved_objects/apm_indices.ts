@@ -8,7 +8,6 @@
 import { SavedObjectsType } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
-import { ApmIndicesConfigName } from '..';
 
 export interface APMIndices {
   apmIndices?: {
@@ -22,32 +21,14 @@ export interface APMIndices {
   isSpaceAware?: boolean;
 }
 
-const properties: {
-  apmIndices: {
-    properties: {
-      [Property in ApmIndicesConfigName]: { type: 'keyword' };
-    };
-  };
-  isSpaceAware: { type: 'boolean' };
-} = {
-  apmIndices: {
-    properties: {
-      sourcemap: { type: 'keyword' },
-      error: { type: 'keyword' },
-      onboarding: { type: 'keyword' },
-      span: { type: 'keyword' },
-      transaction: { type: 'keyword' },
-      metric: { type: 'keyword' },
-    },
-  },
-  isSpaceAware: { type: 'boolean' },
-};
-
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',
   hidden: false,
   namespaceType: 'single',
-  mappings: { properties },
+  mappings: {
+    dynamic: false,
+    properties: {}, // several fields exist, but we don't need to search or aggregate on them, so we exclude them from the mappings
+  },
   management: {
     importableAndExportable: true,
     icon: 'apmApp',
