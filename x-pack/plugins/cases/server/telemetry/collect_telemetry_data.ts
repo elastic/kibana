@@ -6,20 +6,24 @@
  */
 
 import { getCasesTelemetryData } from './queries/cases';
+import { getUserActionsTelemetryData } from './queries/user_actions';
 import { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry> => {
-  const [cases] = await Promise.all([getCasesTelemetryData({ savedObjectsClient })]);
+  const [cases, userActions] = await Promise.all([
+    getCasesTelemetryData({ savedObjectsClient }),
+    getUserActionsTelemetryData({ savedObjectsClient }),
+  ]);
 
   return {
     cases,
-    userActions: { all: { all: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
-    comments: { all: { all: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
-    alerts: { all: { all: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
+    userActions,
+    comments: { all: { total: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
+    alerts: { all: { total: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
     connectors: {
-      maxAttachedToACase: { all: 0, '1d': 0, '1w': 0, '1m': 0 },
+      maxAttachedToACase: { total: 0, '1d': 0, '1w': 0, '1m': 0 },
       itsm: { totalAttached: 0 },
       sir: { totalAttached: 0 },
       jira: { totalAttached: 0 },

@@ -8,6 +8,13 @@
 import { ISavedObjectsRepository } from 'kibana/server';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 
+export interface Buckets {
+  buckets: Array<{
+    doc_count: number;
+    key: number | string;
+  }>;
+}
+
 export interface CollectTelemetryDataParams {
   savedObjectsClient: ISavedObjectsRepository;
 }
@@ -17,7 +24,7 @@ export interface Long {
 }
 
 export interface Count {
-  all: number;
+  total: number;
   '1m': number;
   '1w': number;
   '1d': number;

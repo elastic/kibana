@@ -6,17 +6,12 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CollectTelemetryDataParams } from '../types';
-import { getCountsAggregationQuery } from './utils';
+import { CollectTelemetryDataParams, Buckets, CasesTelemetry } from '../types';
+import { getCountsAggregationQuery, getCountsFromBuckets } from './utils';
 
-interface Buckets {
-  buckets: Array<{
-    doc_count: number;
-    key: number | string;
-  }>;
-}
-
-export const getCasesTelemetryData = async ({ savedObjectsClient }: CollectTelemetryDataParams) => {
+export const getCasesTelemetryData = async ({
+  savedObjectsClient,
+}: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
   const owners = ['observability', 'securitySolution'] as const;
   const byOwnerAggregationQuery = owners.reduce(
     (aggQuery, owner) => ({
@@ -56,24 +51,20 @@ export const getCasesTelemetryData = async ({ savedObjectsClient }: CollectTelem
 
   return {
     all: {
-      all: res.total,
+      total: res.total,
       '1d': 0,
       '1w': 0,
       '1m': 0,
     },
     sec: {
-      all: 0,
-      '1d': secCountsBuckets?.[2]?.doc_count ?? 0,
-      '1w': secCountsBuckets?.[1]?.doc_count ?? 0,
-      '1m': secCountsBuckets?.[0]?.doc_count ?? 0,
+      total: 0,
+      ...getCountsFromBuckets(secCountsBuckets),
     },
     obs: {
-      all: 0,
-      '1d': obsCountsBuckets?.[2]?.doc_count ?? 0,
-      '1w': obsCountsBuckets?.[1]?.doc_count ?? 0,
-      '1m': obsCountsBuckets?.[0]?.doc_count ?? 0,
+      total: 0,
+      ...getCountsFromBuckets(obsCountsBuckets),
     },
-    main: { all: 0, '1d': 0, '1w': 0, '1m': 0 },
+    main: { total: 0, '1d': 0, '1w': 0, '1m': 0 },
     syncAlertsOn: syncAlertsBuckets.find(({ key }) => key === 1)?.doc_count ?? 0,
     syncAlertsOff: syncAlertsBuckets.find(({ key }) => key === 0)?.doc_count ?? 0,
   };

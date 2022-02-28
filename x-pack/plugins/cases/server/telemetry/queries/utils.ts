@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Buckets } from '../types';
+
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
     date_range: {
@@ -17,4 +19,10 @@ export const getCountsAggregationQuery = (savedObjectType: string) => ({
       ],
     },
   },
+});
+
+export const getCountsFromBuckets = (buckets: Buckets['buckets']) => ({
+  '1d': buckets?.[2]?.doc_count ?? 0,
+  '1w': buckets?.[1]?.doc_count ?? 0,
+  '1m': buckets?.[0]?.doc_count ?? 0,
 });

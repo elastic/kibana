@@ -10,7 +10,7 @@ import { CasesTelemetrySchema, Long, CountSchema } from './types';
 const long: Long = { type: 'long' };
 
 const countSchema: CountSchema = {
-  all: long,
+  total: long,
   '1m': long,
   '1w': long,
   '1d': long,
