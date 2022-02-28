@@ -19,7 +19,6 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
-import { initUiSettings } from './ui_settings';
 
 export class CspPlugin
   implements
@@ -43,7 +42,6 @@ export class CspPlugin
 
     // Register server side APIs
     defineRoutes(router, this.logger);
-    initUiSettings(core.uiSettings);
 
     return {};
   }
