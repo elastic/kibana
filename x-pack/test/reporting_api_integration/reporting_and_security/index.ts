@@ -29,5 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));
     loadTestFile(require.resolve('./ilm_migration_apis'));
+    loadTestFile(require.resolve('./error_codes'));
   });
 }

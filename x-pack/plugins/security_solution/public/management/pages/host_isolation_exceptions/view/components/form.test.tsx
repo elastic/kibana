@@ -144,7 +144,7 @@ describe('When on the host isolation exceptions entry form', () => {
       userEvent.click(renderResult.getByTestId('perPolicy'));
       // the previous selected policy should be selected
       expect(renderResult.getByTestId(`policy-${policyId}`)).toHaveAttribute(
-        'aria-selected',
+        'data-test-selected',
         'true'
       );
       // on change called with the previous policy
@@ -225,11 +225,11 @@ describe('When on the host isolation exceptions entry form', () => {
 
       expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
       expect(renderResult.getByTestId(`policy-${policyId1}`)).toHaveAttribute(
-        'aria-selected',
+        'data-test-selected',
         'true'
       );
       expect(renderResult.getByTestId(`policy-${policyId2}`)).toHaveAttribute(
-        'aria-selected',
+        'data-test-selected',
         'true'
       );
     });
