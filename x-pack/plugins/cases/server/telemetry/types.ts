@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { ISavedObjectsRepository } from 'kibana/server';
+import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+
+export interface CollectTelemetryDataParams {
+  savedObjectsClient: ISavedObjectsRepository;
+}
+
 export interface Long {
   type: 'long';
 }
@@ -44,3 +51,6 @@ export interface CasesTelemetry {
     closeCaseAfterPush: number;
   };
 }
+
+export type CountSchema = MakeSchemaFrom<Count>;
+export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import { CasesTelemetry, Long, Count } from './types';
+import { CasesTelemetrySchema, Long, CountSchema } from './types';
 
 const long: Long = { type: 'long' };
 
-const countSchema: MakeSchemaFrom<Count> = {
+const countSchema: CountSchema = {
   all: long,
   '1m': long,
   '1w': long,
   '1d': long,
 };
 
-export const casesSchema: MakeSchemaFrom<CasesTelemetry> = {
+export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: countSchema,
     sec: countSchema,

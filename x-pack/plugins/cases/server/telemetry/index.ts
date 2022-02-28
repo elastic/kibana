@@ -11,7 +11,7 @@ import {
   Logger,
   PluginInitializerContext,
   SavedObjectsErrorHelpers,
-} from 'src/core/server';
+} from '../../../../../src/core/server';
 import { TaskManagerSetupContract } from '../../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { collectTelemetryData } from './collect_telemetry_data';
@@ -19,6 +19,7 @@ import {
   CASE_TELEMETRY_SAVED_OBJECT,
   CASES_TELEMETRY_TASK_NAME,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
+  SAVED_OBJECT_TYPES,
 } from '../../common/constants';
 import { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
@@ -42,7 +43,7 @@ export const createCasesTelemetry = async ({
 }: CreateCasesTelemetryArgs) => {
   const getInternalSavedObjectClient = async (): Promise<ISavedObjectsRepository> => {
     const [coreStart] = await core.getStartServices();
-    return coreStart.savedObjects.createInternalRepository();
+    return coreStart.savedObjects.createInternalRepository(SAVED_OBJECT_TYPES);
   };
 
   taskManager.registerTaskDefinitions({
@@ -60,7 +61,7 @@ export const createCasesTelemetry = async ({
 
   const collectAndStore = async () => {
     const savedObjectsClient = await getInternalSavedObjectClient();
-    const telemetryData = await collectTelemetryData();
+    const telemetryData = await collectTelemetryData({ savedObjectsClient });
 
     await savedObjectsClient.create(CASE_TELEMETRY_SAVED_OBJECT, telemetryData, {
       id: CASE_TELEMETRY_SAVED_OBJECT_ID,

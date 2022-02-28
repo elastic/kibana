@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { CasesTelemetry } from './types';
+import { getCasesTelemetryData } from './queries/cases';
+import { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
-export const collectTelemetryData = async (): Promise<CasesTelemetry> => {
+export const collectTelemetryData = async ({
+  savedObjectsClient,
+}: CollectTelemetryDataParams): Promise<CasesTelemetry> => {
+  const [cases] = await Promise.all([getCasesTelemetryData({ savedObjectsClient })]);
+
   return {
-    cases: {
-      all: { all: 0, '1d': 0, '1w': 0, '1m': 0 },
-      sec: { all: 0, '1d': 0, '1w': 0, '1m': 0 },
-      obs: { all: 0, '1d': 0, '1w': 0, '1m': 0 },
-      main: { all: 0, '1d': 0, '1w': 0, '1m': 0 },
-      syncAlertsOn: 0,
-      syncAlertsOff: 0,
-    },
+    cases,
     userActions: { all: { all: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
     comments: { all: { all: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
     alerts: { all: { all: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },

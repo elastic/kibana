@@ -8,7 +8,6 @@
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   PluginSetupContract as ActionsPluginSetup,
@@ -36,6 +35,7 @@ import { getExternalRoutes } from './routes/api/get_external_routes';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
+import { collectTelemetryData } from './telemetry/collect_telemetry_data';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
