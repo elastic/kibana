@@ -809,36 +809,7 @@ it('can override ignoring frozen indices', async () => {
 });
 
 describe('error codes', () => {
-  it('returns the expected error code when authentication expires with no results', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() => {
-      throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
-    });
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      logger,
-      stream
-    );
-    const { error_code: errorCode, warnings } = await generateCsv.generateData();
-    expect(errorCode).toBe('authentication_expired');
-    expect(warnings).toMatchInlineSnapshot(`
-      Array [
-        "This report contains no results because authentication failed. Retry the request or increase your authentication timeout.",
-      ]
-    `);
-  });
-
-  it('returns the expected error code when authentication expires with results', async () => {
+  it('returns the expected error code when authentication expires', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {

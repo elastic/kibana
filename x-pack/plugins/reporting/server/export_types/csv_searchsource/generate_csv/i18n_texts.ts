@@ -14,18 +14,13 @@ export const i18nTexts = {
       defaultMessage: 'CSV may contain formulas whose values have been escaped',
     }
   ),
-  partialResultsMessage: i18n.translate(
-    'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.partialResultsMessage',
-    {
-      defaultMessage:
-        'This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.',
-    }
-  ),
-  noResultsMessage: i18n.translate(
-    'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.noResultsMessage`',
-    {
-      defaultMessage:
-        'This report contains no results because authentication failed. Retry the request or increase your authentication timeout.',
-    }
-  ),
+  authenticationError: {
+    partialResultsMessage: i18n.translate(
+      'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.partialResultsMessage',
+      {
+        defaultMessage:
+          'This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.',
+      }
+    ),
+  },
 };

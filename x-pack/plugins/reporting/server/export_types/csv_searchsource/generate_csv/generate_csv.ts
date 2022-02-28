@@ -375,9 +375,7 @@ export class CsvGenerator {
 
       if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
         reportingError = new AuthenticationExpiredError();
-        warnings.push(
-          totalRecords > 0 ? i18nTexts.partialResultsMessage : i18nTexts.noResultsMessage
-        );
+        warnings.push(i18nTexts.authenticationError.partialResultsMessage);
       } else {
         throw new UnknownError(err.message);
       }
