@@ -76,24 +76,24 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   }, [appliedFilterInput, browserFields]);
 
   const newSelectedCategoryId = useMemo(() => {
-    return appliedFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
-      ? DEFAULT_CATEGORY_NAME
-      : Object.keys(newFilteredBrowserFields)
-          .sort()
-          .reduce<string>((selected, category) => {
-            const filteredBrowserFieldsByCategory =
-              (newFilteredBrowserFields[category] && newFilteredBrowserFields[category].fields) ||
-              [];
-            const filteredBrowserFieldsBySelected =
-              (newFilteredBrowserFields[selected] && newFilteredBrowserFields[selected].fields) ||
-              [];
-            return newFilteredBrowserFields[category].fields != null &&
-              newFilteredBrowserFields[selected].fields != null &&
-              Object.keys(filteredBrowserFieldsByCategory).length >
-                Object.keys(filteredBrowserFieldsBySelected).length
-              ? category
-              : selected;
-          }, Object.keys(newFilteredBrowserFields)[0]);
+    if (appliedFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0) {
+      return DEFAULT_CATEGORY_NAME;
+    } else {
+      return Object.keys(newFilteredBrowserFields)
+        .sort()
+        .reduce<string>((selected, category) => {
+          const filteredBrowserFieldsByCategory =
+            (newFilteredBrowserFields[category] && newFilteredBrowserFields[category].fields) || [];
+          const filteredBrowserFieldsBySelected =
+            (newFilteredBrowserFields[selected] && newFilteredBrowserFields[selected].fields) || [];
+          return newFilteredBrowserFields[category].fields != null &&
+            newFilteredBrowserFields[selected].fields != null &&
+            Object.keys(filteredBrowserFieldsByCategory).length >
+              Object.keys(filteredBrowserFieldsBySelected).length
+            ? category
+            : selected;
+        }, Object.keys(newFilteredBrowserFields)[0]);
+    }
   }, [appliedFilterInput, newFilteredBrowserFields]);
 
   /** Invoked when the user types in the filter input */
@@ -116,10 +116,14 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   }, [filterInput]);
 
   useEffect(() => {
+    setIsSearching(false);
     setFilteredBrowserFields(newFilteredBrowserFields);
+  }, [newFilteredBrowserFields]);
+
+  useEffect(() => {
     setIsSearching(false);
     setSelectedCategoryId(newSelectedCategoryId);
-  }, [newSelectedCategoryId, newFilteredBrowserFields]);
+  }, [newSelectedCategoryId]);
 
   // only merge in the default category if the field browser is visible
   const browserFieldsWithDefaultCategory = useMemo(() => {

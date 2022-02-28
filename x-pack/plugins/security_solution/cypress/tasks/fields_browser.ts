@@ -44,6 +44,8 @@ export const closeFieldsBrowser = () => {
 export const filterFieldsBrowser = (fieldName: string) => {
   cy.get(FIELDS_BROWSER_FILTER_INPUT)
     .type(fieldName)
+    // the text filter is debounced by 250 ms, wait 300 ms for changes to be applied
+    .wait(300)
     .should('not.have.class', 'euiFieldSearch-isLoading');
 };
 
