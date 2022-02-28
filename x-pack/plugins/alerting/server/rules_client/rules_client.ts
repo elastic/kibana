@@ -78,6 +78,12 @@ import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
+import {
+  getMappedParams,
+  getModifiedField,
+  getModifiedSearchFields,
+  modifyFilterKueryNode,
+} from './lib/mapped_params_utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -248,7 +254,10 @@ export class RulesClient {
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
   private readonly eventLogger?: IEventLogger;
-  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = ['monitoring'];
+  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
+    'monitoring',
+    'mapped_params',
+  ];
 
   constructor({
     ruleTypeRegistry,
@@ -367,6 +376,12 @@ export class RulesClient {
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
     };
+
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      rawRule.mapped_params = mappedParams;
+    }
 
     this.auditLogger?.log(
       ruleAuditEvent({
@@ -631,9 +646,10 @@ export class RulesClient {
       );
       throw error;
     }
+
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
     const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
-    const sortField = mapSortField(options.sortField);
+    let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
         validateOperationOnAttributes(
@@ -645,6 +661,16 @@ export class RulesClient {
       } catch (error) {
         throw Boom.badRequest(`Error find rules: ${error.message}`);
       }
+    }
+
+    sortField = mapSortField(getModifiedField(options.sortField));
+
+    if (options.searchFields) {
+      options.searchFields = getModifiedSearchFields(options.searchFields);
+    }
+
+    if (filterKueryNode) {
+      modifyFilterKueryNode({ astFilter: filterKueryNode });
     }
 
     const {
@@ -1027,6 +1053,13 @@ export class RulesClient {
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
+
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      createAttributes.mapped_params = mappedParams;
+    }
+
     try {
       updatedObject = await this.unsecuredSavedObjectsClient.create<RawRule>(
         'alert',
