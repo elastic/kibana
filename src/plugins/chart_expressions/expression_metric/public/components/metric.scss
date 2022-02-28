@@ -33,6 +33,16 @@
   color: $euiColorEmptyShade;
 }
 
+.mtrVis__container-isfull {
+  min-height: 100%;
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1 0 100%;
+}
+
 .mtrVis__container-isFilterable {
   cursor: pointer;
   transition: transform $euiAnimSpeedNormal $euiAnimSlightResistance;

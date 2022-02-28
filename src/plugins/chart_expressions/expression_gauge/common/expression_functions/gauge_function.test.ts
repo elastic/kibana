@@ -111,4 +111,20 @@ describe('interpreter/functions#gauge', () => {
       );
     expect(actual).toThrowErrorMatchingSnapshot();
   });
+
+  it('logs correct datatable to inspector', async () => {
+    let loggedTable: Datatable;
+    const handlers = {
+      inspectorAdapters: {
+        tables: {
+          logDatatable: (name: string, datatable: Datatable) => {
+            loggedTable = datatable;
+          },
+        },
+      },
+    };
+    await fn(context, args, handlers as any);
+
+    expect(loggedTable!).toMatchSnapshot();
+  });
 });

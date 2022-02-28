@@ -143,6 +143,9 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
         },
         Object {
           "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
           "excluded": false,
           "format": "",
           "hasRuntime": true,
@@ -219,6 +222,9 @@ exports[`IndexedFieldsTable should filter based on the schema filter 1`] = `
       Array [
         Object {
           "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
           "excluded": false,
           "format": "",
           "hasRuntime": true,
@@ -356,6 +362,9 @@ exports[`IndexedFieldsTable should render normally 1`] = `
         },
         Object {
           "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
           "excluded": false,
           "format": "",
           "hasRuntime": true,

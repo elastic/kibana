@@ -16,10 +16,12 @@ import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/publ
 
 export const DeleteMonitor = ({
   id,
+  name,
   onUpdate,
   isDisabled,
 }: {
   id: string;
+  name: string;
   isDisabled?: boolean;
   onUpdate: () => void;
 }) => {
@@ -70,7 +72,7 @@ export const DeleteMonitor = ({
 
   const destroyModal = (
     <EuiConfirmModal
-      title={DELETE_MONITOR_LABEL}
+      title={`${DELETE_MONITOR_LABEL} ${name}`}
       onCancel={() => setIsDeleteModalVisible(false)}
       onConfirm={onConfirmDelete}
       cancelButtonText={NO_LABEL}
@@ -103,16 +105,17 @@ export const DeleteMonitor = ({
 const DELETE_DESCRIPTION_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.confirmDescriptionLabel',
   {
-    defaultMessage: 'Are you sure you want to do delete the monitor?',
+    defaultMessage:
+      'This action will delete the monitor but keep any data collected. This action cannot be undone.',
   }
 );
 
 const YES_LABEL = i18n.translate('xpack.uptime.monitorManagement.yesLabel', {
-  defaultMessage: 'Yes',
+  defaultMessage: 'Delete',
 });
 
 const NO_LABEL = i18n.translate('xpack.uptime.monitorManagement.noLabel', {
-  defaultMessage: 'No',
+  defaultMessage: 'Cancel',
 });
 
 const DELETE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.deleteMonitorLabel', {
