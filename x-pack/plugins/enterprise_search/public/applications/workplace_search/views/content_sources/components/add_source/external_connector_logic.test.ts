@@ -5,50 +5,21 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  mockKibanaValues,
-} from '../../../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues, mockKibanaValues } from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
-import { i18n } from '@kbn/i18n';
-import { nextTick } from '@kbn/test-jest-helpers';
-
-import { docLinks } from '../../../../../shared/doc_links';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
-import { AppLogic } from '../../../../app_logic';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES } from '../../../../constants';
-import {
-  SOURCES_PATH,
-  PRIVATE_SOURCES_PATH,
-  getSourcesPath,
-  ADD_CUSTOM_PATH,
-} from '../../../../routes';
-import { CustomSource, FeatureIds } from '../../../../types';
-import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
-import { SourcesLogic } from '../../sources_logic';
-
-import {
-  AddSourceLogic,
-  AddSourceSteps,
-  SourceConfigData,
-  SourceConnectData,
-  OrganizationsMap,
-} from './add_source_logic';
 import { ExternalConnectorLogic, ExternalConnectorValues } from './external_connector_logic';
 
 describe('ExternalConnectorLogic', () => {
   const { mount } = new LogicMounter(ExternalConnectorLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  // const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES: ExternalConnectorValues = {
     dataLoading: true,
@@ -62,8 +33,6 @@ describe('ExternalConnectorLogic', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(ExternalConnectorLogic.actions, 'fetchExternalSource');
-
     jest.clearAllMocks();
     mount();
   });
@@ -73,30 +42,83 @@ describe('ExternalConnectorLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onRecieveExternalSource', () => {
-      it('turns off the data loading flag', () => {});
+    describe('fetchExternalSourceSuccess', () => {
+      beforeEach(() => {
+        ExternalConnectorLogic.actions.fetchExternalSourceSuccess(sourceConfigData);
+      });
 
-      it('saves the external url', () => {});
+      it('turns off the data loading flag', () => {
+        expect(ExternalConnectorLogic.values.dataLoading).toEqual(false);
+      });
 
-      it('saves the source config');
+      it('saves the external url', () => {
+        expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual(
+          sourceConfigData.configuredFields.url
+        );
+      });
+
+      it('saves the source config', () => {
+        expect(ExternalConnectorLogic.values.sourceConfigData).toEqual(sourceConfigData);
+      });
+
+      it('sets undefined url to empty string', () => {
+        ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
+          ...sourceConfigData,
+          configuredFields: { ...sourceConfigData.configuredFields, url: undefined },
+        });
+        expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual('');
+      });
+      it('sets undefined api key to empty string', () => {
+        ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
+          ...sourceConfigData,
+          configuredFields: { ...sourceConfigData.configuredFields, apiKey: undefined },
+        });
+        expect(ExternalConnectorLogic.values.externalConnectorApiKey).toEqual('');
+      });
     });
 
-    describe('onSaveExternalConnectorConfigSuccess', () => {
-      it('turns off the button loading flag', () => {});
+    describe('saveExternalConnectorConfigSuccess', () => {
+      it('turns off the button loading flag', () => {
+        mount({
+          buttonLoading: true,
+        });
+
+        ExternalConnectorLogic.actions.saveExternalConnectorConfigSuccess('external');
+
+        expect(ExternalConnectorLogic.values.buttonLoading).toEqual(false);
+      });
     });
 
     describe('setExternalConnectorApiKey', () => {
-      it('updates the api key', () => {});
+      it('updates the api key', () => {
+        ExternalConnectorLogic.actions.setExternalConnectorApiKey('abcd1234');
+
+        expect(ExternalConnectorLogic.values.externalConnectorApiKey).toEqual('abcd1234');
+      });
     });
 
     describe('setExternalConnectorUrl', () => {
-      it('updates the url', () => {});
+      it('updates the url', () => {
+        ExternalConnectorLogic.actions.setExternalConnectorUrl('https://www.elastic.co');
+
+        expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual(
+          'https://www.elastic.co'
+        );
+      });
     });
   });
 
   describe('listeners', () => {
     describe('fetchExternalSource', () => {
-      it('retrieves config info on the "external" connector', () => {});
+      it('retrieves config info on the "external" connector', () => {
+        const promise = Promise.resolve();
+        http.get.mockReturnValue(promise);
+        ExternalConnectorLogic.actions.fetchExternalSource();
+
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/settings/connectors/external'
+        );
+      });
 
       itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
@@ -105,11 +127,17 @@ describe('ExternalConnectorLogic', () => {
     });
 
     describe('saveExternalConnectorConfig', () => {
-      it('saves config info for the new content source ', () => {});
-
-      itShowsServerErrorAsFlashMessage(http.get, () => {
-        mount();
-        ExternalConnectorLogic.actions.fetchExternalSource();
+      it('saves the external connector config', () => {
+        const saveExternalConnectorConfigSuccess = jest.spyOn(
+          ExternalConnectorLogic.actions,
+          'saveExternalConnectorConfigSuccess'
+        );
+        ExternalConnectorLogic.actions.saveExternalConnectorConfig({
+          url: 'url',
+          apiKey: 'apiKey',
+        });
+        expect(saveExternalConnectorConfigSuccess).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/external');
       });
     });
   });

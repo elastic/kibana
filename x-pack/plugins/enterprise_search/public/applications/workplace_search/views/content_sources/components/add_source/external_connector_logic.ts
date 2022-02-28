@@ -24,8 +24,8 @@ import { SourceConfigData } from './add_source_logic';
 
 export interface ExternalConnectorActions {
   fetchExternalSource: () => true;
-  onRecieveExternalSource(sourceConfigData: SourceConfigData): SourceConfigData;
-  onSaveExternalConnectorConfigSuccess(externalConnectorId: string): string;
+  fetchExternalSourceSuccess(sourceConfigData: SourceConfigData): SourceConfigData;
+  saveExternalConnectorConfigSuccess(externalConnectorId: string): string;
   setExternalConnectorApiKey(externalConnectorApiKey: string): string;
   saveExternalConnectorConfig(config: ExternalConnectorConfig): ExternalConnectorConfig;
   setExternalConnectorUrl(externalConnectorUrl: string): string;
@@ -50,10 +50,10 @@ export const ExternalConnectorLogic = kea<
 >({
   path: ['enterprise_search', 'workplace_search', 'external_connector_logic'],
   actions: {
-    fetchExternalSource: () => true,
-    onRecieveExternalSource: (sourceConfigData: SourceConfigData) => sourceConfigData,
-    onSaveExternalConnectorConfigSuccess: () => true,
-    saveExternalConnectorConfig: (config: ExternalConnectorConfig) => config,
+    fetchExternalSource: true,
+    fetchExternalSourceSuccess: (sourceConfigData) => sourceConfigData,
+    saveExternalConnectorConfigSuccess: (externalConnectorId) => externalConnectorId,
+    saveExternalConnectorConfig: (config) => config,
     setExternalConnectorApiKey: (externalConnectorApiKey: string) => externalConnectorApiKey,
     setExternalConnectorUrl: (externalConnectorUrl: string) => externalConnectorUrl,
   },
@@ -61,34 +61,34 @@ export const ExternalConnectorLogic = kea<
     dataLoading: [
       true,
       {
-        onRecieveExternalSource: () => true,
+        fetchExternalSourceSuccess: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
-        onSaveExternalConnectorConfigSuccess: () => false,
+        saveExternalConnectorConfigSuccess: () => false,
         saveExternalConnectorConfig: () => true,
       },
     ],
     externalConnectorUrl: [
       '',
       {
-        onRecieveExternalSource: (_, { configuredFields: { url } }) => url || '',
+        fetchExternalSourceSuccess: (_, { configuredFields: { url } }) => url || '',
         setExternalConnectorUrl: (_, url) => url,
       },
     ],
     externalConnectorApiKey: [
       '',
       {
-        onRecieveExternalSource: (_, { configuredFields: { apiKey } }) => apiKey || '',
+        fetchExternalSourceSuccess: (_, { configuredFields: { apiKey } }) => apiKey || '',
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
       },
     ],
     sourceConfigData: [
       { name: '', categories: [] },
       {
-        onRecieveExternalSource: (_, sourceConfigData) => sourceConfigData,
+        fetchExternalSourceSuccess: (_, sourceConfigData) => sourceConfigData,
       },
     ],
   },
@@ -98,20 +98,20 @@ export const ExternalConnectorLogic = kea<
 
       try {
         const response = await HttpLogic.values.http.get<SourceConfigData>(route);
-        actions.onRecieveExternalSource(response);
+        actions.fetchExternalSourceSuccess(response);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
-    saveExternalConnectorConfig: async ({ url, apiKey }) => {
+    saveExternalConnectorConfig: async () => {
       clearFlashMessages();
-      const route = '/internal/workplace_search/org/settings/connectors';
-      const http = HttpLogic.values.http.post;
-      const params = {
-        url,
-        api_key: apiKey,
-        service_type: 'external',
-      };
+      // const route = '/internal/workplace_search/org/settings/connectors';
+      // const http = HttpLogic.values.http.post;
+      // const params = {
+      //   url,
+      //   api_key: apiKey,
+      //   service_type: 'external',
+      // };
       try {
         // const response = await http<SourceConfigData>(route, {
         //   body: JSON.stringify(params),
@@ -126,7 +126,7 @@ export const ExternalConnectorLogic = kea<
           )
         );
         // TODO: use response data instead
-        actions.onSaveExternalConnectorConfigSuccess('external');
+        actions.saveExternalConnectorConfigSuccess('external');
         KibanaLogic.values.navigateToUrl(
           getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
         );

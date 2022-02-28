@@ -340,6 +340,7 @@ export const sourceConfigData: SourceConfigData = {
     publicKey: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
     consumerKey: 'elastic_enterprise_search_123',
     apiKey: 'asdf1234',
+    url: 'https://www.elastic.co',
   },
 };
 

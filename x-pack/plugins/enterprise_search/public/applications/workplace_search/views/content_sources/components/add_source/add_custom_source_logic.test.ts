@@ -9,7 +9,6 @@ import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  mockKibanaValues,
 } from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
@@ -24,16 +23,8 @@ jest.mock('../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../app_logic';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES } from '../../../../constants';
-import {
-  SOURCES_PATH,
-  PRIVATE_SOURCES_PATH,
-  getSourcesPath,
-  ADD_CUSTOM_PATH,
-} from '../../../../routes';
-import { CustomSource, FeatureIds, SourceDataItem } from '../../../../types';
-import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
-import { SourcesLogic } from '../../sources_logic';
+import { SOURCE_NAMES } from '../../../../constants';
+import { CustomSource, SourceDataItem } from '../../../../types';
 
 import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_logic';
 
@@ -70,7 +61,7 @@ const MOCK_NAME = 'name';
 describe('AddCustomSourceLogic', () => {
   const { mount } = new LogicMounter(AddCustomSourceLogic);
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,38 +73,44 @@ describe('AddCustomSourceLogic', () => {
   });
 
   describe('actions', () => {
-    it('setCustomSourceNameValue', () => {
-      AddCustomSourceLogic.actions.setCustomSourceNameValue('name');
+    describe('setButtonNotLoading', () => {
+      it('turns off the button loading flag', () => {
+        AddCustomSourceLogic.actions.setButtonNotLoading();
 
-      expect(AddCustomSourceLogic.values).toEqual({
-        ...DEFAULT_VALUES,
-        customSourceNameValue: 'name',
+        expect(AddCustomSourceLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          buttonLoading: false,
+        });
       });
     });
 
-    it('setNewCustomSource', () => {
-      const newCustomSource = {
-        accessToken: 'foo',
-        key: 'bar',
-        name: 'source',
-        id: '123key',
-      };
+    describe('setCustomSourceNameValue', () => {
+      it('saves the name', () => {
+        AddCustomSourceLogic.actions.setCustomSourceNameValue('name');
 
-      AddCustomSourceLogic.actions.setNewCustomSource(newCustomSource);
-
-      expect(AddCustomSourceLogic.values).toEqual({
-        ...DEFAULT_VALUES,
-        newCustomSource,
-        currentStep: AddCustomSourceSteps.SaveCustomStep,
+        expect(AddCustomSourceLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          customSourceNameValue: 'name',
+        });
       });
     });
 
-    it('setButtonNotLoading', () => {
-      AddCustomSourceLogic.actions.setButtonNotLoading();
+    describe('setNewCustomSource', () => {
+      it('saves the custom source', () => {
+        const newCustomSource = {
+          accessToken: 'foo',
+          key: 'bar',
+          name: 'source',
+          id: '123key',
+        };
 
-      expect(AddCustomSourceLogic.values).toEqual({
-        ...DEFAULT_VALUES,
-        buttonLoading: false,
+        AddCustomSourceLogic.actions.setNewCustomSource(newCustomSource);
+
+        expect(AddCustomSourceLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          newCustomSource,
+          currentStep: AddCustomSourceSteps.SaveCustomStep,
+        });
       });
     });
   });
@@ -153,13 +150,8 @@ describe('AddCustomSourceLogic', () => {
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
         });
 
-        it('handles error', async () => {
-          http.post.mockReturnValue(Promise.reject('this is an error'));
-
+        itShowsServerErrorAsFlashMessage(http.post, () => {
           AddCustomSourceLogic.actions.createContentSource();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
     });
@@ -169,11 +161,20 @@ describe('AddCustomSourceLogic', () => {
         AppLogic.values.isOrganization = false;
       });
 
-      it('createContentSource', () => {
-        AddCustomSourceLogic.actions.createContentSource();
+      describe('createContentSource', () => {
+        it('sends relevant fields to the API', () => {
+          AddCustomSourceLogic.actions.createContentSource();
 
-        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/account/create_source', {
-          body: JSON.stringify({ service_type: 'custom', name: MOCK_NAME }),
+          expect(http.post).toHaveBeenCalledWith(
+            '/internal/workplace_search/account/create_source',
+            {
+              body: JSON.stringify({ service_type: 'custom', name: MOCK_NAME }),
+            }
+          );
+        });
+
+        itShowsServerErrorAsFlashMessage(http.post, () => {
+          AddCustomSourceLogic.actions.createContentSource();
         });
       });
     });

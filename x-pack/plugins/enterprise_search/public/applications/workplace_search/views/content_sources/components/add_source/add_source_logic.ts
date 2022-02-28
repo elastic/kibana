@@ -110,7 +110,7 @@ export interface SourceConfigData {
     clientId?: string;
     clientSecret?: string;
     url?: string;
-    apiKey: string;
+    apiKey?: string;
   };
   accountContextOnly?: boolean;
 }
