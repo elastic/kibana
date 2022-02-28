@@ -15,7 +15,6 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { DEFAULT_TIMEOUT } from './index';
 
 import { FetchIndexResponse, fetchIndices } from './fetch_indices';
 
@@ -50,7 +49,6 @@ export const initAction = ({
   > = () => {
     return client.cluster
       .getSettings({
-        timeout: DEFAULT_TIMEOUT,
         include_defaults: true,
         flat_settings: true,
       })

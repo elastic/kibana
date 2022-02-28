@@ -59,7 +59,7 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
     INIT: (state: InitState) =>
-      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>

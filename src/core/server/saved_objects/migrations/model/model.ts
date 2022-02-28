@@ -73,7 +73,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     if (Either.isRight(res)) {
-      const indices = res.right;
+      // ideally, this should be an instance of Either.left but, strictly speaking, the response itself is not an error case, so we check the truthiness instead.
+      const clusterRoutingAllocationEnabled = res.right.clusterRoutingAllocationEnabled;
+      if (!clusterRoutingAllocationEnabled) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `Cluster routing allocation is not enabled.`,
+          logs: [...stateP.logs, { level: 'error', message: `You should enable routing` }],
+        };
+      }
+      // cluster routing allocation is enabled and we can continue with the migration as normal
+      const indices = res.right.indices;
       const aliases = getAliases(indices);
 
       if (

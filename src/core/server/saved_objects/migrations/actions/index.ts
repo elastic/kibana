@@ -20,6 +20,9 @@ export {
 export type { RetryableEsClientError };
 
 // actions/* imports
+export type { InitActionParams } from './initialize_action';
+export { initAction } from './initialize_action';
+
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
 
@@ -123,11 +126,6 @@ export interface TargetIndexHadWriteBlock {
 
 export interface RequestEntityTooLargeException {
   type: 'request_entity_too_large_exception';
-}
-
-export interface ClusterRoutingAllocationDisabled {
-  type: 'cluster_routing_allocation_disabled';
-  clusterRoutingAllocationEnabled: boolean;
 }
 
 /** @internal */
