@@ -54,31 +54,29 @@ const primaryButtonConfigs = {
       panelPaddingSize="none"
       primary={true}
     >
-      {() => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: 'Open editor',
-              items: [
-                {
-                  name: 'Lens',
-                  icon: 'lensApp',
-                },
-                {
-                  name: 'Maps',
-                  icon: 'logoMaps',
-                },
-                {
-                  name: 'TSVB',
-                  icon: 'visVisualBuilder',
-                },
-              ],
-            },
-          ]}
-        />
-      )}
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: 'Open editor',
+            items: [
+              {
+                name: 'Lens',
+                icon: 'lensApp',
+              },
+              {
+                name: 'Maps',
+                icon: 'logoMaps',
+              },
+              {
+                name: 'TSVB',
+                icon: 'visVisualBuilder',
+              },
+            ],
+          },
+        ]}
+      />
     </SolutionToolbarPopover>
   ),
   Dashboard: (
@@ -95,31 +93,29 @@ const extraButtonConfigs = {
   Canvas: undefined,
   Dashboard: [
     <SolutionToolbarPopover iconType="visualizeApp" label="All editors" panelPaddingSize="none">
-      {() => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: 'Open editor',
-              items: [
-                {
-                  name: 'Lens',
-                  icon: 'lensApp',
-                },
-                {
-                  name: 'Maps',
-                  icon: 'logoMaps',
-                },
-                {
-                  name: 'TSVB',
-                  icon: 'visVisualBuilder',
-                },
-              ],
-            },
-          ]}
-        />
-      )}
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: 'Open editor',
+            items: [
+              {
+                name: 'Lens',
+                icon: 'lensApp',
+              },
+              {
+                name: 'Maps',
+                icon: 'logoMaps',
+              },
+              {
+                name: 'TSVB',
+                icon: 'visVisualBuilder',
+              },
+            ],
+          },
+        ]}
+      />
     </SolutionToolbarPopover>,
   ],
 };
