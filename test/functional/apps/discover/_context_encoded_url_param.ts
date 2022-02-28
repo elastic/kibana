@@ -20,14 +20,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
-        path: '/includes-plus-symbol-doc-id/_doc/1+1=2',
+        path: '/context-encoded-param/_doc/1+1=2',
         method: 'PUT',
         body: {
           username: 'Dmitry',
           '@timestamp': '2015-09-21T09:30:23',
         },
       });
-      await PageObjects.settings.createIndexPattern('includes-plus-symbol-doc-id');
+      await PageObjects.settings.createIndexPattern('context-encoded-param');
 
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to context page correctly', async () => {
-      await PageObjects.discover.selectIndexPattern('includes-plus-symbol-doc-id');
+      await PageObjects.discover.selectIndexPattern('context-encoded-param');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // navigate to the context view
