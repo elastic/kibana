@@ -49,7 +49,8 @@ export class OptionsListEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => 'Options List Control';
+  public getDisplayName = () => 'Options list';
+  public getIconType = () => 'list';
 
   public inject = createOptionsListInject();
   public extract = createOptionsListExtract();

@@ -13,7 +13,8 @@ import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription } from 'rxjs';
 import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
-import { EuiContextMenuPanel } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import {
   ControlGroupInput,
@@ -35,7 +36,7 @@ import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { EditControlGroup, EditControlGroupButtonTypes } from '../editor/edit_control_group';
+import { EditControlGroup } from '../editor/edit_control_group';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -100,7 +101,9 @@ export class ControlGroupContainer extends Container<
     return (
       <SolutionToolbarPopover
         ownFocus
-        label={'Manage controls'}
+        label={i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+          defaultMessage: 'Manage controls',
+        })}
         iconType="arrowDown"
         iconSide="right"
         panelPaddingSize="none"
@@ -108,7 +111,11 @@ export class ControlGroupContainer extends Container<
         {() => (
           <EuiContextMenuPanel
             size="m"
-            items={[this.getCreateControlButton('toolbar'), this.getEditControlGroupButton()]}
+            items={[
+              this.getCreateControlButton('toolbar'),
+              <EuiHorizontalRule margin="none" />,
+              this.getEditControlGroupButton(),
+            ]}
           />
         )}
       </SolutionToolbarPopover>

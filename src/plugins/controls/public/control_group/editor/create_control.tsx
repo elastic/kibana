@@ -8,7 +8,6 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiButtonIconColor,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -24,7 +23,6 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
 import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
 import { toMountPoint } from '../../../../kibana_react/public';
-import { SolutionToolbarButton } from '../../../../presentation_util/public';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
@@ -114,55 +112,44 @@ export const CreateControlButton = ({
 
   if (getControlTypes().length === 0) return null;
 
-  const onCreateButtonClick = () => {
-    if (getControlTypes().length > 1) {
-      setIsControlTypePopoverOpen(!isControlTypePopoverOpen);
-      return;
-    }
-    createNewControl(getControlTypes()[0]);
-  };
-
   const commonButtonProps = {
-    onClick: onCreateButtonClick,
     color: 'primary' as EuiButtonIconColor,
     'data-test-subj': 'controls-create-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
-  const createControlButton =
-    buttonType === 'callout' ? (
-      <EuiButton {...commonButtonProps} size="s">
-        {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
-      </EuiButton>
-    ) : (
+  const items: ReactElement[] = [];
+  getControlTypes().forEach((type) => {
+    const factory = getControlFactory(type);
+    items.push(
       <EuiContextMenuItem
-        key="addNewControl"
-        icon="controlsHorizontal"
-        onClick={onCreateButtonClick}
+        key={type}
+        icon={factory.getIconType?.()}
+        data-test-subj={`create-${type}-control`}
+        onClick={() => {
+          setIsControlTypePopoverOpen(false);
+          createNewControl(type);
+        }}
       >
-        {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+        {factory.getDisplayName()}
       </EuiContextMenuItem>
     );
+  });
 
-  if (getControlTypes().length > 1) {
-    const items: ReactElement[] = [];
-    getControlTypes().forEach((type) => {
-      const factory = getControlFactory(type);
-      items.push(
-        <EuiContextMenuItem
-          key={type}
-          icon={factory.getIconType?.()}
-          data-test-subj={`create-${type}-control`}
-          onClick={() => {
-            setIsControlTypePopoverOpen(false);
-            createNewControl(type);
-          }}
-        >
-          {factory.getDisplayName()}
-        </EuiContextMenuItem>
-      );
-    });
+  if (buttonType === 'callout') {
+    const onCreateButtonClick = () => {
+      if (getControlTypes().length > 1) {
+        setIsControlTypePopoverOpen(!isControlTypePopoverOpen);
+        return;
+      }
+      createNewControl(getControlTypes()[0]);
+    };
 
+    const createControlButton = (
+      <EuiButton {...commonButtonProps} onClick={onCreateButtonClick} size="s">
+        {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+      </EuiButton>
+    );
     return (
       <EuiPopover
         button={createControlButton}
@@ -175,6 +162,7 @@ export const CreateControlButton = ({
         <EuiContextMenuPanel size="s" items={items} />
       </EuiPopover>
     );
+  } else {
+    return <EuiContextMenuPanel size="s" items={items} />;
   }
-  return createControlButton;
 };
