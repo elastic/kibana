@@ -74,7 +74,7 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
           onClose: closeFlyout,
           className: 'eui-textBreakWord',
           'data-test-subj': 'clusterSettingsDetails',
-          'aria-labelledby': 'clusterSettingsDetailsFlyoutTitle',
+          'aria-labelledby': 'removeClusterSettingsDetailsFlyoutTitle',
         },
       });
     }

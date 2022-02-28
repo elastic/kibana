@@ -22,12 +22,6 @@ describe('Cluster settings deprecation flyout', () => {
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
-      nodeId: 'my_node',
-      snapshotId: MOCK_SNAPSHOT_ID,
-      jobId: MOCK_JOB_ID,
-      status: 'idle',
-    });
     httpRequestsMockHelpers.setReindexStatusResponse({
       reindexOp: null,
       warnings: [],
