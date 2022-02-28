@@ -71,7 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Generating signals from source indexes', () => {
+  // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+  describe.skip('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);
@@ -91,8 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
-      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-      it.skip('should have the specific audit record for _id or none of these tests below will pass', async () => {
+      it('should have the specific audit record for _id or none of these tests below will pass', async () => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -104,8 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
       });
 
-      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-      it.skip('should abide by max_signals > 100', async () => {
+      it('should abide by max_signals > 100', async () => {
         const maxSignals = 500;
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
