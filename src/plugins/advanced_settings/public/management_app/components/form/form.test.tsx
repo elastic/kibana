@@ -127,7 +127,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={true}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -147,7 +147,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -167,7 +167,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={true}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -187,7 +187,7 @@ describe('Form', () => {
         showNoResultsMessage={false}
         enableSaving={true}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -207,7 +207,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -238,7 +238,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={toasts}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -275,7 +275,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -304,7 +304,7 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );

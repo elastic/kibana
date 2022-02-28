@@ -9,11 +9,11 @@
 import { PluginServiceFactory } from '../types';
 import { SharedUXDocLinksService } from '../doc_links';
 
-export type MockDockLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
+export type MockDocLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXDocLinksService`.
  */
-export const docLinksServiceFactory: MockDockLinksServiceFactory = () => ({
+export const docLinksServiceFactory: MockDocLinksServiceFactory = () => ({
   dataViewsDocsLink: 'dummy link',
 });

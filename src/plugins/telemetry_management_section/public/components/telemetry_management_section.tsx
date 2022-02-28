@@ -131,7 +131,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   isCustom: true,
                 }}
                 loading={processing}
-                dockLinks={this.props.docLinks}
+                docLinks={this.props.docLinks}
                 toasts={this.props.toasts}
                 handleChange={this.toggleOptIn}
                 enableSaving={this.props.enableSaving}

@@ -9,11 +9,11 @@
 import { PluginServiceFactory } from '../types';
 import { SharedUXDocLinksService } from '../doc_links';
 
-export type DockLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
+export type DocLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXDocLinksService`.
  */
-export const docLinksServiceFactory: DockLinksServiceFactory = () => ({
+export const docLinksServiceFactory: DocLinksServiceFactory = () => ({
   dataViewsDocsLink: 'docs',
 });

@@ -47,7 +47,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           size="s"
         />
         <lazy
-          dockLinks={Object {}}
+          docLinks={Object {}}
           enableSaving={true}
           handleChange={[Function]}
           loading={false}

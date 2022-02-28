@@ -82,7 +82,7 @@ export async function mountManagementSection(
                 history={params.history}
                 enableSaving={canSave}
                 toasts={notifications.toasts}
-                dockLinks={docLinks.links}
+                docLinks={docLinks.links}
                 uiSettings={uiSettings}
                 theme={params.theme$}
                 componentRegistry={componentRegistry}
