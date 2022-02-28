@@ -12,6 +12,7 @@ import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiButton } from 
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
@@ -90,6 +91,8 @@ export function WorkspacePanelWrapper({
   );
 
   const toggleAutoApply = useCallback(() => {
+    trackUiEvent('toggle_autoapply');
+
     writeToStorage(
       new Storage(localStorage),
       AUTO_APPLY_DISABLED_STORAGE_KEY,
