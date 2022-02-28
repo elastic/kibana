@@ -40,21 +40,6 @@ export const SessionViewSearchBar = ({
     }
   };
 
-  const renderSearchResults = () => {
-    if (searchResults?.length) {
-      return (
-        <EuiPagination
-          data-test-subj="sessionView:searchPagination"
-          css={styles.pagination}
-          pageCount={searchResults.length}
-          activePage={selectedResult}
-          onPageClick={setSelectedResult}
-          compressed
-        />
-      );
-    }
-  };
-
   useEffect(() => {
     if (searchResults) {
       const process = searchResults[selectedResult];
@@ -63,10 +48,21 @@ export const SessionViewSearchBar = ({
     }
   }, [searchResults, setSelectedProcess, selectedResult]);
 
+  const showPagination = searchResults?.length;
+
   return (
     <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
       <EuiSearchBar query={searchQuery} onChange={onSearch} />
-      {renderSearchResults()}
+      {showPagination && (
+        <EuiPagination
+          data-test-subj="sessionView:searchPagination"
+          css={styles.pagination}
+          pageCount={searchResults.length}
+          activePage={selectedResult}
+          onPageClick={setSelectedResult}
+          compressed
+        />
+      )}
     </div>
   );
 };
