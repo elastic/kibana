@@ -20,8 +20,10 @@ import { handleEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (
   indicesList: IndexWithoutIlm[],
-  client: IScopedClusterClient
+  client: IScopedClusterClient,
+  logger: Logger
 ): Promise<Index[]> => {
+  logger.info('TEST_126169__ILM_ENRICHER');
   if (!indicesList || !indicesList.length) {
     return [];
   }

@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient, Logger } from 'kibana/server';
 import { Index } from '../../../plugins/index_management/server';
 
-export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
+export const rollupDataEnricher = async (
+  indicesList: Index[],
+  client: IScopedClusterClient,
+  logger: Logger
+) => {
+  logger.info('TEST_126169__ROLLUP_ENRICHER');
   if (!indicesList || !indicesList.length) {
     return Promise.resolve(indicesList);
   }

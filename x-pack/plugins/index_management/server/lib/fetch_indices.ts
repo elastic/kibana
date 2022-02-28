@@ -17,7 +17,7 @@ async function fetchIndicesCall(
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
-  logger.info('Get Indices request started');
+  logger.info('TEST_126169__GET_INDICES__STARTED');
   // This call retrieves alias and settings (incl. hidden status) information about indices
   const indices = await client.asCurrentUser.indices.get({
     index: indexNamesString,
@@ -36,20 +36,20 @@ async function fetchIndicesCall(
     // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
   });
-  logger.info('Get Indices request completed');
+  logger.info('TEST_126169__GET_INDICES__COMPLETED');
 
   if (!Object.keys(indices).length) {
     return [];
   }
 
-  logger.info('Get Index Stats request started');
+  logger.info('TEST_126169__GET_STATS__STARTED');
   const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     forbid_closed_indices: false,
     metric: ['docs', 'store'],
   });
-  logger.info('Get Index Stats request completed');
+  logger.info('TEST_126169__GET_STATS__COMPLETED');
   const indicesNames = Object.keys(indices);
   return indicesNames.map((indexName: string) => {
     const indexData = indices[indexName];

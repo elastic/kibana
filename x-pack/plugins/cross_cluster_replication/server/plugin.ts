@@ -17,7 +17,12 @@ import { registerApiRoutes } from './routes';
 import { CrossClusterReplicationConfig } from './config';
 import { License, handleEsError } from './shared_imports';
 
-const ccrDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
+const ccrDataEnricher = async (
+  indicesList: Index[],
+  client: IScopedClusterClient,
+  logger: Logger
+) => {
+  logger.info('TEST_126169__CCR_ENRICHER');
   if (!indicesList?.length) {
     return indicesList;
   }
