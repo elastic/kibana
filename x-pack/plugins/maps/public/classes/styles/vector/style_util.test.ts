@@ -87,7 +87,10 @@ describe('assignCategoriesToPalette', () => {
         { stop: 'bravo', style: 'orange' },
         { stop: 'charlie', style: 'yellow' },
       ],
-      fallbackSymbolId: 'green',
+      fallbackSymbol: {
+        style: 'green',
+        stop: null,
+      },
     });
   });
 
@@ -104,7 +107,10 @@ describe('assignCategoriesToPalette', () => {
         { stop: 'alpah', style: 'red' },
         { stop: 'bravo', style: 'orange' },
       ],
-      fallbackSymbolId: 'yellow',
+      fallbackSymbol: {
+        stop: null,
+        style: 'yellow',
+      },
     });
   });
 
@@ -119,7 +125,10 @@ describe('assignCategoriesToPalette', () => {
         { stop: 'alpah', style: 'red' },
         { stop: 'bravo', style: 'orange' },
       ],
-      fallbackSymbolId: 'yellow',
+      fallbackSymbol: {
+        stop: null,
+        style: 'yellow',
+      },
     });
   });
 });

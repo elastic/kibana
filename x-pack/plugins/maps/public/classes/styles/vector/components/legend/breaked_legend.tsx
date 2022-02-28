@@ -17,7 +17,7 @@ export interface Break {
   color: string;
   label: ReactElement<any> | string | number;
   svg?: string;
-  symbolId: string;
+  symbolId?: string;
 }
 
 interface Props {
@@ -67,14 +67,17 @@ export class BreakedLegend extends Component<Props, State> {
       return null;
     }
 
-    const categories = this.props.breaks.map((brk, index) => {
-      const icon = { value: brk.symbolId, svg: brk.svg };
+    const categories = this.props.breaks.map(({ symbolId, svg, label, color }, index) => {
+      let icon = undefined;
+      if (symbolId !== undefined) {
+        icon = { value: symbolId, svg };
+      }
       return (
         <EuiFlexItem key={index}>
           <Category
             styleName={this.props.style.getStyleName()}
-            label={brk.label}
-            color={brk.color}
+            label={label}
+            color={color}
             isLinesOnly={this.props.isLinesOnly}
             isPointsOnly={this.props.isPointsOnly}
             icon={icon}

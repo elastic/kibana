@@ -328,6 +328,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getOrdinalBreaks(icon?: IconStaticOptions): Break[] {
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
+    const { value: symbolId, svg } = icon || {};
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp) {
         return [];
@@ -361,7 +362,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
           {
             color: colors[colors.length - 1],
             label: this.formatField(dynamicRound(rangeFieldMeta.max)),
-            icon,
+            symbolId,
+            svg,
           },
         ];
       }
@@ -414,11 +416,13 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getCategoricalBreaks(icon?: IconStaticOptions): Break[] {
     const breaks: Break[] = [];
     const { stops, defaultColor } = this._getColorPaletteStops();
+    const { value: symbolId, svg } = icon || {};
     stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
       if (stop !== null && color != null) {
         breaks.push({
           color,
-          icon,
+          svg,
+          symbolId,
           label: this.formatField(stop),
         });
       }
@@ -427,7 +431,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       breaks.push({
         color: defaultColor,
         label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
-        icon,
+        symbolId,
+        svg,
       });
     }
     return breaks;

@@ -43,11 +43,16 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <Category
         color="grey"
+        icon={
+          Object {
+            "svg": undefined,
+            "value": "circle",
+          }
+        }
         isLinesOnly={false}
         isPointsOnly={true}
         label="US_format"
         styleName="icon"
-        symbolId="circle"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -55,11 +60,16 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <Category
         color="grey"
+        icon={
+          Object {
+            "svg": undefined,
+            "value": "marker",
+          }
+        }
         isLinesOnly={false}
         isPointsOnly={true}
         label="CN_format"
         styleName="icon"
-        symbolId="marker"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -67,6 +77,12 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <Category
         color="grey"
+        icon={
+          Object {
+            "svg": undefined,
+            "value": "square",
+          }
+        }
         isLinesOnly={false}
         isPointsOnly={true}
         label={
@@ -77,7 +93,88 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
           </EuiTextColor>
         }
         styleName="icon"
-        symbolId="square"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`renderLegendDetailRow Should render categorical legend with custom icons in breaks 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        display="inlineBlock"
+        position="top"
+        title="Icon"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="grey"
+        icon={
+          Object {
+            "svg": undefined,
+            "value": "marker",
+          }
+        }
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="MX_format"
+        styleName="icon"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="grey"
+        icon={
+          Object {
+            "svg": "<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>",
+            "value": "kbn__custom_icon_sdf__foobar",
+          }
+        }
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label={
+          <EuiTextColor
+            color="success"
+          >
+            Other
+          </EuiTextColor>
+        }
+        styleName="icon"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

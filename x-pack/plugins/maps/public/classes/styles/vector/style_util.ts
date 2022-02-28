@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
-import { Category } from '../../../../common/descriptor_types';
+import { Category, IconStop } from '../../../../common/descriptor_types';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 
@@ -64,12 +64,12 @@ export function assignCategoriesToPalette({
   categories: Category[];
   paletteValues: string[];
 }) {
-  const stops = [];
-  let fallbackSymbol = null;
+  const stops: IconStop[] = [];
+  let fallbackSymbol: IconStop | null = null;
 
   if (categories.length && paletteValues.length) {
     const maxLength = Math.min(paletteValues.length, categories.length + 1);
-    fallbackSymbol = { icon: paletteValues[maxLength - 1], stop: null };
+    fallbackSymbol = { style: paletteValues[maxLength - 1], stop: null };
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: categories[i].key,
