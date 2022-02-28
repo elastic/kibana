@@ -51,7 +51,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { DataViewPickerStart } from '../../../plugins/data_view_picker/public';
+import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { useDiscoverServices } from './utils/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
@@ -156,7 +156,7 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
-  dataViewPicker: DataViewPickerStart;
+  dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;

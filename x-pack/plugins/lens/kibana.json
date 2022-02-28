@@ -20,7 +20,7 @@
     "share",
     "presentationUtil",
     "dataViewFieldEditor",
-    "dataViewPicker",
+    "dataViewEditor",
     "expressionGauge",
     "expressionHeatmap"
   ],

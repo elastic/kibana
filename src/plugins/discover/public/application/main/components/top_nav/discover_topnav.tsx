@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -13,7 +13,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataViewType, DataView } from '../../../../../../data_views/common';
+import { DataViewType } from '../../../../../../data_views/common';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -49,7 +49,10 @@ export const DiscoverTopNav = ({
     [indexPattern]
   );
   const services = useDiscoverServices();
-  const { DataViewPickerComponent, navigation } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
+  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
   const { TopNavMenu } = navigation.ui;
 
   const onOpenSavedSearch = useCallback(
@@ -62,6 +65,58 @@ export const DiscoverTopNav = ({
     },
     [history, resetSavedSearch, savedSearch.id]
   );
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editors when unmounting
+      if (closeFieldEditor.current) {
+        closeFieldEditor.current();
+      }
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
+      }
+    };
+  }, []);
+
+  const editField = useMemo(
+    () =>
+      editPermission
+        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+            if (indexPattern?.id) {
+              const indexPatternInstance = await data.dataViews.get(indexPattern?.id);
+              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+                ctx: {
+                  dataView: indexPatternInstance,
+                },
+                fieldName,
+                onSave: async () => {
+                  onEditRuntimeField();
+                },
+              });
+            }
+          }
+        : undefined,
+    [editPermission, indexPattern?.id, data.dataViews, dataViewFieldEditor, onEditRuntimeField]
+  );
+
+  const addField = useMemo(
+    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, editPermission]
+  );
+
+  const createNewDataView = useCallback(() => {
+    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!indexPatternFieldEditPermission) {
+      return;
+    }
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          onChangeIndexPattern(dataView.id);
+        }
+      },
+    });
+  }, [dataViewEditor, onChangeIndexPattern]);
 
   const topNavMenu = useMemo(
     () =>
@@ -111,12 +166,8 @@ export const DiscoverTopNav = ({
       title: indexPattern?.title || '',
     },
     currentDataViewId: indexPattern?.id,
-    onAddField: onEditRuntimeField,
-    onDataViewCreated: (dataView: DataView) => {
-      if (dataView.id) {
-        onChangeIndexPattern(dataView.id);
-      }
-    },
+    onAddField: addField,
+    onDataViewCreated: createNewDataView,
     onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
   };
 
@@ -135,7 +186,7 @@ export const DiscoverTopNav = ({
       showSaveQuery={!!services.capabilities.discover.saveQuery}
       showSearchBar={true}
       useDefaultBehaviors={true}
-      dataViewPickerComponent={<DataViewPickerComponent {...dataViewPickerProps} />}
+      dataViewPickerComponentProps={dataViewPickerProps}
     />
   );
 };

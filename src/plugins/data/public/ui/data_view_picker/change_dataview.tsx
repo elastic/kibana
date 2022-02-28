@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPopover,
   EuiHorizontalRule,
@@ -18,9 +18,10 @@ import {
   EuiContextMenuItem,
   EuiPanel,
 } from '@elastic/eui';
-import type { DataView, DataViewListItem } from 'src/plugins/data_views/public';
-import { useKibana } from '../../../kibana_react/public';
-import type { DataViewPickerContext, ChangeDataViewTriggerProps } from '../types';
+import type { DataViewListItem } from 'src/plugins/data_views/public';
+import { IDataPluginServices } from '../../';
+import { useKibana } from '../../../../kibana_react/public';
+import type { ChangeDataViewTriggerProps } from './index';
 
 import './data_view_picker.scss';
 
@@ -39,75 +40,22 @@ export function ChangeDataView({
   isMissingCurrent?: boolean;
   onChangeDataView: (newId: string) => void;
   onAddField?: () => void;
-  onDataViewCreated?: (dataView: DataView) => void;
+  onDataViewCreated?: () => void;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
-  const kibana = useKibana<DataViewPickerContext>();
-  const { application, dataViewFieldEditor, dataViews, dataViewEditor } = kibana.services;
-  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
-  const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
+  const kibana = useKibana<IDataPluginServices>();
+  const { application, data } = kibana.services;
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs = await dataViews.getIdsWithTitle();
+      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [dataViews]);
-
-  useEffect(() => {
-    return () => {
-      // Make sure to close the editors when unmounting
-      if (closeFieldEditor.current) {
-        closeFieldEditor.current();
-      }
-      if (closeDataViewEditor.current) {
-        closeDataViewEditor.current();
-      }
-    };
-  }, []);
-
-  const editField = useMemo(
-    () =>
-      editPermission
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            if (currentDataViewId) {
-              const indexPatternInstance = await dataViews.get(currentDataViewId);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
-                ctx: {
-                  dataView: indexPatternInstance,
-                },
-                fieldName,
-                onSave: async () => {
-                  onAddField?.();
-                },
-              });
-            }
-          }
-        : undefined,
-    [dataViews, dataViewFieldEditor, currentDataViewId, editPermission, onAddField]
-  );
-
-  const addField = useMemo(
-    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, editPermission]
-  );
-
-  const createNewDataView = useCallback(() => {
-    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!indexPatternFieldEditPermission) {
-      return;
-    }
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        onDataViewCreated?.(dataView);
-      },
-    });
-  }, [dataViewEditor, onDataViewCreated]);
+  }, [data]);
 
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
@@ -138,10 +86,10 @@ export function ChangeDataView({
   return (
     <>
       <EuiPopover
-        panelClassName="lnsChangeDataViewPopover"
+        panelClassName="changeDataViewPopover"
         button={createTrigger()}
         panelProps={{
-          ['data-test-subj']: 'lnsChangeDataViewPopover',
+          ['data-test-subj']: 'changeDataViewPopover',
         }}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
@@ -150,7 +98,7 @@ export function ChangeDataView({
         ownFocus
       >
         <div style={{ width: POPOVER_CONTENT_WIDTH }}>
-          {addField && (
+          {onAddField && (
             <>
               <EuiContextMenuPanel
                 size="s"
@@ -161,7 +109,7 @@ export function ChangeDataView({
                     data-test-subj="indexPattern-add-field"
                     onClick={() => {
                       setPopoverIsOpen(false);
-                      addField();
+                      onAddField();
                     }}
                   >
                     {i18n.translate('data.query.queryBar.indexPattern.addFieldButton', {
@@ -225,7 +173,7 @@ export function ChangeDataView({
               </EuiPanel>
             )}
           </EuiSelectable>
-          {createNewDataView && (
+          {onDataViewCreated && (
             <>
               <EuiHorizontalRule margin="none" />
               <EuiContextMenuPanel
@@ -236,7 +184,7 @@ export function ChangeDataView({
                     icon="plusInCircleFilled"
                     onClick={() => {
                       setPopoverIsOpen(false);
-                      createNewDataView();
+                      onDataViewCreated();
                     }}
                   >
                     {i18n.translate('data.query.queryBar.indexPattern.addNewDataView', {

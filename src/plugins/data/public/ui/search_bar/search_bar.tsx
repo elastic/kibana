@@ -26,6 +26,7 @@ import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
+import type { DataViewPickerProps } from '../data_view_picker';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -49,7 +50,7 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  dataViewPickerComponent?: JSX.Element;
+  dataViewPickerComponentProps?: DataViewPickerProps;
   filters?: Filter[];
   // Date picker
   isRefreshPaused?: boolean;
@@ -392,7 +393,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isRefreshPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
-          dataViewPickerComponent={this.props.dataViewPickerComponent}
+          dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           showQueryInput={this.props.showQueryInput}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}

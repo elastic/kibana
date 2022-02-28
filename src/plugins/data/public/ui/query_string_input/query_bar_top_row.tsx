@@ -33,6 +33,7 @@ import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter';
+import { DataViewPicker, DataViewPickerProps } from '../data_view_picker';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -74,7 +75,7 @@ export interface QueryBarTopRowProps {
   timeRangeForSuggestionsOverride?: boolean;
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
-  dataViewPickerComponent?: JSX.Element;
+  dataViewPickerComponentProps?: DataViewPickerProps;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -371,10 +372,13 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDataViewsPicker() {
-      if (!props.dataViewPickerComponent) return;
-      const DataViewPicker = props.dataViewPickerComponent;
+      if (!props.dataViewPickerComponentProps) return;
 
-      return <EuiFlexItem grow={false}>{DataViewPicker}</EuiFlexItem>;
+      return (
+        <EuiFlexItem grow={false}>
+          <DataViewPicker {...props.dataViewPickerComponentProps} />
+        </EuiFlexItem>
+      );
     }
 
     const classes = classNames('kbnQueryBar', {

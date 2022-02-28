@@ -115,6 +115,7 @@ export interface DataPublicPluginStart {
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
   uiSettings: CoreStart['uiSettings'];
+  application: CoreStart['application'];
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
