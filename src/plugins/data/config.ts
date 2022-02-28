@@ -49,7 +49,7 @@ export const searchSessionsConfigSchema = schema.object({
   /**
    * Turns the feature on \ off (incl. removing indicator and management screens)
    */
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
   /**
    * pageSize controls how many search session objects we load at once while monitoring
    * session completion
