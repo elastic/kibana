@@ -77,7 +77,7 @@ export const createAlertAttachmentUserActionBuilder = ({
         ),
         'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: <EuiAvatar size="s" name="" iconType="bell" color={euiTheme.colors.danger} />,
+        timelineIcon: <EuiAvatar name={userAction.createdBy.username} />,
         actions: (
           <EuiFlexGroup responsive={false} gutterSize="xs">
             <EuiFlexItem grow={false}>

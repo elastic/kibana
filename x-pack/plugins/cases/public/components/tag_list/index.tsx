@@ -89,7 +89,7 @@ export const TagList = React.memo(
                       aria-label={i18n.EDIT_TAGS_ARIA}
                       iconType="gear"
                       color="text"
-                      size="s"
+                      size="xs"
                       onClick={setIsEditTags.bind(null, true)}
                     />
                   }

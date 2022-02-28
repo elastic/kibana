@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../translations';
 
 export const ADD_CONNECTOR = i18n.translate('xpack.cases.addConnector.title', {
-  defaultMessage: 'Add service connection',
+  defaultMessage: 'Add a service connector',
 });
 
 export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
