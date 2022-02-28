@@ -15,7 +15,8 @@ import realHits from '../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { flattenHit, DataViewAttributes } from '../../../../../../data/common';
+import { DataViewAttributes } from '../../../../../../data_views/common';
+import { flattenHit } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,

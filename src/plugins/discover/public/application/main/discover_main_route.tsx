@@ -7,8 +7,8 @@
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-
-import { DataViewAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import { DataViewAttributes } from 'src/plugins/data_views/common';
+import { ISearchSource, SavedObject } from 'src/plugins/data/common';
 import {
   SavedSearch,
   getSavedSearch,

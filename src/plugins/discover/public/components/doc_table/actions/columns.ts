@@ -16,7 +16,7 @@ import {
   GetStateReturn as ContextGetStateReturn,
 } from '../../../application/context/services/context_state';
 import { DataViewsContract } from '../../../../../data/public';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/common';
 import { popularizeField } from '../../../utils/popularize_field';
 
 /**

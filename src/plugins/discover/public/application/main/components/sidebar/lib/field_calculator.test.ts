@@ -11,11 +11,12 @@
 import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-import { flattenHit, DataView } from '../../../../../../../data/common';
+import { flattenHit } from '../../../../../../../data/common';
+import { DataView } from '../../../../../../../data_views/common';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { stubLogstashIndexPattern as indexPattern } from '../../../../../../../data/common/stubs';
+import { stubLogstashDataView as indexPattern } from '../../../../../../../data_views/common/data_view.stub';
 
 describe('fieldCalculator', function () {
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {

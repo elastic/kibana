@@ -8,7 +8,7 @@
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { DataView, DataViewField } from '../../../../../../../data/common';
+import { DataView, DataViewField } from '../../../../../../../data_views/common';
 import { ElasticSearchHit } from '../../../../../types';
 
 export function getDetails(

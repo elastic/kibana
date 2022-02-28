@@ -25,7 +25,7 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { generateFilters } from '../../../../../../data/public';
-import { DataViewField } from '../../../../../../data/common';
+import { DataViewField } from '../../../../../../data_views/common';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';

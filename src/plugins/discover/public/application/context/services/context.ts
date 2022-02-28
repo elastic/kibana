@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import type { Filter } from '@kbn/es-query';
-import { DataView, ISearchSource } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data_views/common';
+import { ISearchSource } from 'src/plugins/data/common';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';

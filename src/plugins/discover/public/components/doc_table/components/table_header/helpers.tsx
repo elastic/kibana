@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/common';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {
