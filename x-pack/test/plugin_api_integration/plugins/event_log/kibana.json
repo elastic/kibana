@@ -1,7 +1,7 @@
 {
   "id": "eventLogFixture",
   "owner": {
-    "name": "Kibana Alerting",
+    "name": "Response Ops",
     "githubTeam": "response-ops"
   },
   "version": "1.0.0",
