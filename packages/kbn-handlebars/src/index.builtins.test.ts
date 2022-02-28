@@ -9,6 +9,32 @@
 import { expectTemplate } from './__jest__/test_bench';
 
 describe('builtin helpers', () => {
+  describe('#each', () => {
+    it('each', () => {
+      const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+
+      expectTemplate(string)
+        .withInput({
+          goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+          world: 'world',
+        })
+        .toCompileTo('goodbye! Goodbye! GOODBYE! cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbyes: [],
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+    });
+
+    it('each without context', () => {
+      expectTemplate('{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!')
+        .withInput(undefined)
+        .toCompileTo('cruel !');
+    });
+  });
+
   describe('#lookup', () => {
     it('should lookup arbitrary content', () => {
       expectTemplate('{{#each goodbyes}}{{lookup ../data .}}{{/each}}')
