@@ -7,7 +7,7 @@
 
 import { Action } from 'redux-actions';
 import { IHttpFetchError } from 'src/core/public';
-import { Alert } from '../../../../alerting/common';
+import type { Rule } from '../../../../triggers_actions_ui/public';
 import { UptimeAlertTypeParams } from '../alerts/alerts';
 
 export interface AsyncAction<Payload, SuccessPayload> {
@@ -63,5 +63,5 @@ export interface AlertsResult {
   page: number;
   perPage: number;
   total: number;
-  data: Array<Alert<UptimeAlertTypeParams>>;
+  data: Array<Rule<UptimeAlertTypeParams>>;
 }

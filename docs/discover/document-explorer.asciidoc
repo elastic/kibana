@@ -6,8 +6,19 @@ beta::[]
 *Discover* has a *Document Explorer* with resizable columns, better data sorting and comparison,
 and a fullscreen view.
 
-[role="screenshot"]
-image::images/document-explorer.png[Document Explorer with improved look over classic view]
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/BgbLpBo3qvPZvtXrwZoNuD.jpg"
+data-uuid="BgbLpBo3qvPZvtXrwZoNuD"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
 
 To use the *Document Explorer* instead of the classic document table:
 
