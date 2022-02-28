@@ -17,12 +17,14 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
@@ -48,6 +50,17 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
+
+export function FallbackCorrelationBadge() {
+  return (
+    <EuiBadge>
+      <FormattedMessage
+        id="xpack.apm.correlations.latencyCorrelations.fallbackCorrelationBadgeMessage"
+        defaultMessage="Very low"
+      />
+    </EuiBadge>
+  );
+}
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -146,7 +159,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               </>
             </EuiToolTip>
           ),
-          render: (_, { correlation }) => {
+          render: (_, { correlation, isFallbackResult }) => {
+            if (isFallbackResult) {
+              return <FallbackCorrelationBadge />;
+            }
+
             return <div>{asPreciseDecimal(correlation, 2)}</div>;
           },
           sortable: true,

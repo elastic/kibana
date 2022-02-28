@@ -12,6 +12,7 @@ export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
   histogram?: HistogramItem[];
   ksTest: number;
+  isFallbackResult?: boolean;
 }
 
 export interface LatencyCorrelationsResponse {

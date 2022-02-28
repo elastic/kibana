@@ -222,12 +222,13 @@ export function useLatencyCorrelations() {
 
       if (latencyCorrelations.length === 0 && fallbackResults.length > 0) {
         // Rank the fallback results and show at least one value
-        const sortedFallbackResults = fallbackResults.sort(
-          (a, b) => b.correlation - a.correlation
-        );
+        const sortedFallbackResults = fallbackResults
+          .filter((r) => r.correlation > 0)
+          .sort((a, b) => b.correlation - a.correlation);
 
-        responseUpdate.latencyCorrelations = sortedFallbackResults.slice(0, 1);
-
+        responseUpdate.latencyCorrelations = sortedFallbackResults
+          .slice(0, 1)
+          .map((r) => ({ ...r, isFallbackResult: true }));
         setResponse({
           ...responseUpdate,
           loaded:
