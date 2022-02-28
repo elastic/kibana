@@ -124,25 +124,40 @@ function validateConnector(
   const { usesBasic, configUrl } = config;
 
   if (usesBasic) {
-    if (user === null) {
+    if (secretsUrl != null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.shouldNotHaveSecretsUrl', {
+        defaultMessage: 'secretsUrl should not be provided when usesBasic is true',
+      });
+    }
+    if (user == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingUser', {
         defaultMessage: 'Username must be provided',
       });
     }
-    if (password === null) {
+    if (password == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingPassword', {
         defaultMessage: 'Password must be provided',
       });
     }
-    if (configUrl === null) {
+    if (configUrl == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingConfigUrl', {
-        defaultMessage: 'Url must be provided',
+        defaultMessage: 'configUrl must be provided',
       });
     }
   } else {
-    if (secretsUrl === null) {
+    if (user != null || password != null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.shouldNotHaveUsernamePassword', {
+        defaultMessage: 'Username and password should not be provided when usesBasic is false',
+      });
+    }
+    if (configUrl != null) {
+      return i18n.translate('xpack.actions.builtin.xmatters.shouldNotHaveConfigUrl', {
+        defaultMessage: 'configUrl should not be provided when usesBasic is false',
+      });
+    }
+    if (secretsUrl == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingSecretsUrl', {
-        defaultMessage: 'Url with API Key must be provided',
+        defaultMessage: 'secretsUrl with API Key must be provided',
       });
     }
   }

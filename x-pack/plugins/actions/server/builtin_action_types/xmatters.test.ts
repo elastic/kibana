@@ -10,7 +10,7 @@ jest.mock('./lib/post_xmatters', () => ({
 }));
 
 import { Services } from '../types';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { validateConfig, validateSecrets, validateParams, validateConnector } from '../lib';
 import { postXmatters } from './lib/post_xmatters';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
@@ -250,6 +250,149 @@ describe('params validation', () => {
     expect(validateParams(actionType, params)).toEqual({
       ...params,
     });
+  });
+});
+
+describe('connector validation', () => {
+  test('connector validation fails when configUrl passed with out user and password', () => {
+    const config: Record<string, string | boolean> = {
+      configUrl: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: true,
+    };
+    const secrets: Record<string, string> = {};
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: Username must be provided"`
+    );
+  });
+
+  test('connector validation fails when configUrl passed with out password', () => {
+    const config: Record<string, string | boolean> = {
+      configUrl: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: true,
+    };
+    const secrets: Record<string, string> = {
+      user: 'bob',
+    };
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: Password must be provided"`
+    );
+  });
+
+  test('connector validation fails when user and password passed with out configUrl', () => {
+    const config: Record<string, string | boolean> = {
+      usesBasic: true,
+    };
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: configUrl must be provided"`
+    );
+  });
+
+  test('connector validation fails when secretsUrl passed with user and password', () => {
+    const config: Record<string, string | boolean> = {
+      usesBasic: false,
+    };
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+      secretsUrl: 'http://mylisteningserver:9200/endpoint',
+    };
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: Username and password should not be provided when usesBasic is false"`
+    );
+  });
+
+  test('connector validation fails when configUrl and secretsUrl passed in', () => {
+    const config: Record<string, string | boolean> = {
+      configUrl: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: true,
+    };
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+      secretsUrl: 'http://mylisteningserver:9200/endpoint',
+    };
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: secretsUrl should not be provided when usesBasic is true"`
+    );
+  });
+
+  test('connector validation fails when usesBasic is true, but url auth used', () => {
+    const config: Record<string, string | boolean> = {
+      usesBasic: true,
+    };
+    const secrets: Record<string, string> = {
+      secretsUrl: 'http://mylisteningserver:9200/endpoint',
+    };
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: secretsUrl should not be provided when usesBasic is true"`
+    );
+  });
+
+  test('connector validation fails when usesBasic is false, but basic auth used', () => {
+    const config: Record<string, string | boolean> = {
+      configUrl: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: false,
+    };
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: Username and password should not be provided when usesBasic is false"`
+    );
+  });
+
+  test('connector validation fails when usesBasic is false, but configUrl passed in', () => {
+    const config: Record<string, string | boolean> = {
+      configUrl: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: false,
+    };
+    const secrets: Record<string, string> = {};
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: configUrl should not be provided when usesBasic is false"`
+    );
+  });
+
+  test('connector validation succeeds with basic auth', () => {
+    const config: Record<string, string | boolean> = {
+      configUrl: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: true,
+    };
+    const secrets: Record<string, string> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    expect(validateConnector(actionType, { config, secrets })).toEqual(null);
+  });
+
+  test('connector validation succeeds with url auth', () => {
+    const config: Record<string, string | boolean> = {
+      usesBasic: false,
+    };
+    const secrets: Record<string, string> = {
+      secretsUrl: 'http://mylisteningserver:9200/endpoint',
+    };
+    expect(validateConnector(actionType, { config, secrets })).toEqual(null);
   });
 });
 
