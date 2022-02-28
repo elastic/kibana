@@ -19,9 +19,8 @@ else
       echo "\$DEPLOYMENT_USERNAME is NOT empty"
 fi
 
-KIBANA_HOST=$(echo "KIBANA_URL" | awk -F/ '{print $3}')
-ELASTIC_HOST=$(echo "ELASTIC_URL" | awk -F/ '{print $3}')
-
+KIBANA_HOST="$(echo $KIBANA_URL | awk -F/ '{print $3}')"
+ELASTIC_HOST="$(echo $ELASTIC_URL | awk -F/ '{print $3}')"
 
 echo "meta CLOUD_DEPLOYMENT_KIBANA_URL"
 echo $KIBANA_URL
