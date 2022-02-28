@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -23,21 +22,13 @@ export const getUserActionsRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
+  options: { deprecated: true },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
-      logDeprecatedEndpoint(
-        logger,
-        request.headers,
-        `The get all cases user actions API '${CASE_USER_ACTIONS_URL}' is deprecated.`
-      );
-
       const casesClient = await context.cases.getCasesClient();
       const caseId = request.params.case_id;
 
       return response.ok({
-        headers: {
-          ...getWarningHeader(kibanaVersion),
-        },
         body: await casesClient.userActions.getAll({ caseId }),
       });
     } catch (error) {

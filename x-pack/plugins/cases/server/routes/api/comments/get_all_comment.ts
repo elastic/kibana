@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -23,20 +22,12 @@ export const getAllCommentsRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
+  options: { deprecated: true },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
-      logDeprecatedEndpoint(
-        logger,
-        request.headers,
-        `The get all cases comments API '${CASE_COMMENTS_URL}' is deprecated.`
-      );
-
       const client = await context.cases.getCasesClient();
 
       return response.ok({
-        headers: {
-          ...getWarningHeader(kibanaVersion),
-        },
         body: await client.attachments.getAll({
           caseID: request.params.case_id,
         }),
