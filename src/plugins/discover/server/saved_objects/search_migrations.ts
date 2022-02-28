@@ -9,9 +9,15 @@
 // TODO: This needs to be removed and properly typed
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { flow, get } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { flow, get, mapValues } from 'lodash';
+import {
+  mergeSavedObjectMigrationMaps,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from 'kibana/server';
+import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/common';
+import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
+import type { SavedSearchAttributes } from '../../common/types';
 
 /**
  * This migration script is related to:
@@ -120,9 +126,44 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
   };
 };
 
+/**
+ * This creates a migration map that applies search source migrations
+ */
+const getSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+  mapValues<MigrateFunctionsObject, MigrateFunction>(
+    searchSourceMigrations,
+    (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
+      (state) => {
+        const _state = state as unknown as { attributes: SavedSearchAttributes };
+
+        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
+
+        if (!parsedSearchSourceJSON) return _state;
+
+        return {
+          ..._state,
+          attributes: {
+            ..._state.attributes,
+            kibanaSavedObjectMeta: {
+              ..._state.attributes.kibanaSavedObjectMeta,
+              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+            },
+          },
+        };
+      }
+  );
+
 export const searchMigrations = {
   '6.7.2': flow(migrateMatchAllQuery),
   '7.0.0': flow(setNewReferences),
   '7.4.0': flow(migrateSearchSortToNestedArray),
   '7.9.3': flow(migrateMatchAllQuery),
 };
+
+export const getAllMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(
+    searchMigrations,
+    getSearchSourceMigrations(searchSourceMigrations) as unknown as SavedObjectMigrationMap
+  );

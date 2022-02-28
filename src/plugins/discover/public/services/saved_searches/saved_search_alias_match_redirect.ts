@@ -10,8 +10,7 @@ import type { History } from 'history';
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getSavedSearchUrl } from './saved_searches_utils';
-
-import type { SavedSearch } from './types';
+import type { SavedSearch } from '../../../common/types';
 import type { SpacesApi } from '../../../../../../x-pack/plugins/spaces/public';
 
 interface SavedSearchAliasMatchRedirectProps {

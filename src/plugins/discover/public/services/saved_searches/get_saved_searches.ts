@@ -8,7 +8,7 @@
 
 import type { SavedObjectsStart } from 'kibana/public';
 import type { DataPublicPluginStart } from '../../../../data/public';
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes, SavedSearch } from '../../../common/types';
 
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';

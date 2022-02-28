@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { SavedObjectsStart } from 'kibana/public';
-import type { SavedSearch, SavedSearchAttributes } from './types';
+import type { SavedSearch, SavedSearchAttributes } from '../../../common/types';
 
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from './saved_searches_utils';

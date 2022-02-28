@@ -12,7 +12,7 @@ import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
-import type { SavedSearch } from './types';
+import type { SavedSearch } from '../../../common/types';
 
 describe('saveSavedSearch', () => {
   let savedObjectsClient: SavedObjectsStart['client'];

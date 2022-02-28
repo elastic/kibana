@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource } from '../../../../data/public';
-import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
-import { VIEW_MODE } from '../../components/view_mode_toggle';
+import type { ISearchSource } from '../../data/common';
+import { SavedObjectAttributes } from '../../../core/types';
+import { VIEW_MODE } from './constants';
+
+export interface DiscoverGridSettingsColumn {
+  width?: number;
+}
 
 /** @internal **/
-export interface SavedSearchAttributes {
+export interface SavedSearchAttributes extends SavedObjectAttributes {
   title: string;
-  sort: Array<[string, string]>;
+  sort: string;
   columns: string[];
   description: string;
-  grid: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
+  grid: string;
   hideChart: boolean;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;

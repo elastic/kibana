@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes, SavedSearch, SortOrder } from '../../../common/types';
+import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 
 export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
 
@@ -36,10 +37,10 @@ export const fromSavedSearchAttributes = (
   searchSource,
   sharingSavedObjectProps,
   title: attributes.title,
-  sort: attributes.sort,
+  sort: attributes.sort as unknown as SortOrder[],
   columns: attributes.columns,
   description: attributes.description,
-  grid: attributes.grid,
+  grid: attributes.grid as unknown as Record<string, DiscoverGridSettingsColumn>,
   hideChart: attributes.hideChart,
   viewMode: attributes.viewMode,
   hideAggregatedPreview: attributes.hideAggregatedPreview,
@@ -52,10 +53,10 @@ export const toSavedSearchAttributes = (
 ): SavedSearchAttributes => ({
   kibanaSavedObjectMeta: { searchSourceJSON },
   title: savedSearch.title ?? '',
-  sort: savedSearch.sort ?? [],
+  sort: (savedSearch.sort as unknown as string) ?? [],
   columns: savedSearch.columns ?? [],
   description: savedSearch.description ?? '',
-  grid: savedSearch.grid ?? {},
+  grid: (savedSearch.grid as unknown as string) ?? {},
   hideChart: savedSearch.hideChart ?? false,
   viewMode: savedSearch.viewMode,
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,

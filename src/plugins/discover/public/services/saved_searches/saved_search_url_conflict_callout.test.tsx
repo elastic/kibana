@@ -11,7 +11,7 @@ import type { History } from 'history';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
-import type { SavedSearch } from './types';
+import type { SavedSearch } from '../../../common/types';
 
 import { spacesPluginMock } from '../../../../../../x-pack/plugins/spaces/public/mocks';
 

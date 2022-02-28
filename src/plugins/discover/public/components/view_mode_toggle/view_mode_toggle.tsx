@@ -10,7 +10,7 @@ import { EuiButtonGroup, EuiBetaBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { VIEW_MODE } from './constants';
+import { VIEW_MODE } from '../../../common/constants';
 import './_index.scss';
 
 export const DocumentViewModeToggle = ({

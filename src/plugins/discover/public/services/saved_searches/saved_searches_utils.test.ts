@@ -16,7 +16,7 @@ import {
 
 import { createSearchSourceMock } from '../../../../data/public/mocks';
 
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes, SavedSearch } from '../../../common/types';
 
 describe('saved_searches_utils', () => {
   describe('getSavedSearchUrl', () => {

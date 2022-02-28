@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { searchSavedObjectType } from './search';
+export { getSavedSearchObjectType } from './search';
