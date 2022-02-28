@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { getCommonControlsService, ControlsService } from '../controls';
+import { CoreSetup } from '../../../../core/public';
 
-export type ControlsServiceFactory = PluginServiceFactory<ControlsService>;
-export const controlsServiceFactory = () => getCommonControlsService();
+export interface ControlsHTTPService {
+  fetch: CoreSetup['http']['fetch'];
+}

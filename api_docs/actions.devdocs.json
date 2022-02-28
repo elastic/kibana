@@ -695,7 +695,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly source?: string | undefined; readonly group?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"info\" | \"warning\" | \"critical\" | undefined; readonly component?: string | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly group?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"info\" | \"warning\" | \"critical\" | undefined; readonly component?: string | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
