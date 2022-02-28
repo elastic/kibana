@@ -12,17 +12,8 @@ import {
   getDefaultChartsData,
   ExplorerChartsData,
 } from '../../explorer_charts/explorer_charts_container_service';
-import {
-  getDefaultSwimlaneData,
-  AnomaliesTableData,
-  ExplorerJob,
-  AppStateSelectedCells,
-  OverallSwimlaneData,
-  SwimlaneData,
-  ViewBySwimLaneData,
-} from '../../explorer_utils';
+import { AnomaliesTableData, ExplorerJob } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
-import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 import { TimeBucketsInterval } from '../../../util/time_buckets';
 
@@ -42,23 +33,15 @@ export interface ExplorerState {
   loading: boolean;
   maskAll: boolean;
   noInfluencersConfigured: boolean;
-  overallSwimlaneData: SwimlaneData | OverallSwimlaneData;
   queryString: string;
-  selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: TimeBucketsInterval | undefined;
   swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneData: SwimlaneData | ViewBySwimLaneData;
-  viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
-  viewByPerPage: number;
-  viewByFromPage: number;
   viewBySwimlaneOptions: string[];
-  swimlaneLimit?: number;
-  swimLaneSeverity?: number;
   showCharts: boolean;
 }
 
@@ -89,9 +72,7 @@ export function getExplorerDefaultState(): ExplorerState {
     loading: true,
     maskAll: false,
     noInfluencersConfigured: true,
-    overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
-    selectedCells: undefined,
     selectedJobs: null,
     swimlaneBucketInterval: undefined,
     swimlaneContainerWidth: 0,
@@ -104,13 +85,8 @@ export function getExplorerDefaultState(): ExplorerState {
     },
     tableQueryString: '',
     viewByLoadedForTimeFormatted: null,
-    viewBySwimlaneData: getDefaultSwimlaneData(),
-    viewBySwimlaneDataLoading: false,
     viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
-    viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
-    viewByFromPage: 1,
-    swimlaneLimit: undefined,
     showCharts: true,
   };
 }
