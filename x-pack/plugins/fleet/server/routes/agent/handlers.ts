@@ -209,8 +209,8 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
     const results = await AgentService.getAgentStatusForAgentPolicy(
       esClient,
       request.query.policyId,
-      request.query.enrolledAt,
-      request.query.kuery
+      request.query.kuery,
+      request.query.enrolledAt
     );
 
     const body: GetAgentStatusResponse = { results };
