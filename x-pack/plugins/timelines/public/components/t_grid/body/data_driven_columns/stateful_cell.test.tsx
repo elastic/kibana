@@ -59,7 +59,8 @@ const RenderCellValue: React.FC<CellValueElementProps> = ({ columnId, data, setC
 };
 
 describe('StatefulCell', () => {
-  const ariaRowindex = 123;
+  const rowIndex = 123;
+  const colIndex = 0;
   const eventId = '_id-123';
   const linkValues = ['foo', 'bar', '@baz'];
   const tabType = TimelineTabs.query;
@@ -77,7 +78,8 @@ describe('StatefulCell', () => {
 
     mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
@@ -98,7 +100,8 @@ describe('StatefulCell', () => {
         isExpanded: false,
         isDetails: false,
         linkValues,
-        rowIndex: ariaRowindex - 1,
+        rowIndex,
+        colIndex,
         timelineId: `${timelineId}-${tabType}`,
       })
     );
@@ -109,7 +112,8 @@ describe('StatefulCell', () => {
 
     mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
@@ -129,7 +133,8 @@ describe('StatefulCell', () => {
         isExpanded: false,
         isDetails: false,
         linkValues,
-        rowIndex: ariaRowindex - 1,
+        rowIndex,
+        colIndex,
         timelineId,
       })
     );
@@ -140,7 +145,8 @@ describe('StatefulCell', () => {
 
     const wrapper = mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
@@ -156,7 +162,8 @@ describe('StatefulCell', () => {
   test("it renders a div with the styles set by `renderCellValue`'s `setCellProps` argument", () => {
     const wrapper = mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
