@@ -10,6 +10,7 @@ import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type {
+  CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -20,8 +21,9 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { EventFilterGenerator } from '../../../common/endpoint/data_generators/event_filter_generator';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
+import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { isArtifactByPolicy } from '../../../common/endpoint/service/artifacts';
 
 export const cli = () => {
   run(
@@ -69,7 +71,7 @@ const handleThrowAxiosHttpError = (err: AxiosError): never => {
 };
 
 const createEventFilters: RunFn = async ({ flags, log }) => {
-  const eventGenerator = new EventFilterGenerator();
+  const eventGenerator = new ExceptionsListItemGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
   await ensureCreateEndpointEventFiltersList(kbn);
@@ -79,7 +81,7 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
   await pMap(
     Array.from({ length: flags.count as unknown as number }),
     () => {
-      let options: Partial<ExceptionListItemSchema> = {};
+      let options: Partial<CreateExceptionListItemSchema> = {};
       const listSize = (flags.count ?? 10) as number;
       const randomN = eventGenerator.randomN(listSize);
       if (randomN > Math.floor(listSize / 2)) {
@@ -96,9 +98,10 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
           ],
         };
       }
-      const body = eventGenerator.generate(options);
 
-      if (body.tags?.length && body.tags[0] !== 'policy:all') {
+      const body = eventGenerator.generateEventFilterForCreate(options);
+
+      if (isArtifactByPolicy(body)) {
         const nmExceptions = Math.floor(Math.random() * 3) || 1;
         body.tags = Array.from({ length: nmExceptions }, () => {
           return `policy:${randomPolicyId()}`;
