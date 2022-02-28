@@ -33,7 +33,7 @@ import { SavedObjectReference } from '../../../../../src/core/types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';
 
-import { setState, LensAppState, selectChangesApplied } from '../state_management/index';
+import { setState, LensAppState, selectTriggerApplyChanges } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -635,23 +635,16 @@ describe('Lens App', () => {
         );
       });
 
-      it('applies changes on success (when auto-apply disabled)', async () => {
+      it('applies all changes on-save', async () => {
         const { lensStore } = await save({
           initialSavedObjectId: undefined,
           newCopyOnSave: false,
           newTitle: 'hello there',
           preloadedState: {
-            appliedState: {
-              activeDatasourceId: null,
-              visualization: {
-                activeId: 'testVis',
-                state: { something: 'changed' },
-              },
-              datasourceStates: {},
-            },
+            applyChangesCounter: 0,
           },
         });
-        expect(selectChangesApplied(lensStore.getState())).toBeTruthy();
+        expect(lensStore.getState().lens.applyChangesCounter).toBe(1);
       });
 
       it('adds to the recently accessed list on save', async () => {

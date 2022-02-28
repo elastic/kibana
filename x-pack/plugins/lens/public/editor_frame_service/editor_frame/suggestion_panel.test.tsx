@@ -23,7 +23,6 @@ import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
 import {
   applyChanges,
-  DatasourceStates,
   LensAppState,
   PreviewState,
   setState,
