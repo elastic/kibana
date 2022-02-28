@@ -371,6 +371,10 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     onFiltersUpdated(updatedFilters);
     props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
     groupRef.current?.focus();
+    const savedFiltersGroupIds = selectedSavedFiltersGroupIds.filter(
+      (gId) => !groupIds.includes(gId)
+    );
+    setSelectedSavedFiltersGroupIds(savedFiltersGroupIds);
   }
 
   function onUpdateFilterGroup(

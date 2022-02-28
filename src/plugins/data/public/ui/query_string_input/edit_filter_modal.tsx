@@ -113,9 +113,7 @@ export function EditFilterModal({
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
-  const [addFilterMode, setAddFilterMode] = useState<string>(
-    initialAddFilterMode ?? QUICK_FORM.type
-  );
+  const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(initialLabel || '');
   const [queryDsl, setQueryDsl] = useState<string>(
     JSON.stringify(
@@ -145,7 +143,7 @@ export function EditFilterModal({
         ]
   );
   const [groupsCount, setGroupsCount] = useState<number>(
-    (new Set(localFilters.map(filter => filter.groupId))).size
+    new Set(localFilters.map((filter) => filter.groupId)).size
   );
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
