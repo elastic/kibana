@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './summarize_package';
-export { CliLog } from './lib/log';
-export type { Logger } from './lib/log';
+// this package currently provides no exports

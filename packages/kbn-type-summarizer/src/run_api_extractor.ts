@@ -8,9 +8,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Extractor, ExtractorConfig } from '@microsoft/api-extractor';
 import Fsp from 'fs/promises';
 import Path from 'path';
+
+import { Extractor, ExtractorConfig } from '@microsoft/api-extractor';
 
 import { readTsConfigFile } from './lib/tsconfig_file';
 import { CliError } from './lib/cli_error';
