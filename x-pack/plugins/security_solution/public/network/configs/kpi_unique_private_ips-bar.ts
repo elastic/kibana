@@ -9,7 +9,7 @@ import {
   SOURCE_CHART_LABEL,
   DESTINATION_CHART_LABEL,
 } from '../components/kpi_network/unique_private_ips/translations';
-import { LensAttributes } from '../../common/components/matrix_histogram/types';
+import { LensAttributes } from '../../common/components/visualization_actions/types';
 
 export const kpiUniquePrivateIpsBar = {
   title: '[Network] KPI Unique private IPs - bar chart',

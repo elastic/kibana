@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/matrix_histogram/types';
+import { LensAttributes } from '../../common/components/visualization_actions/types';
 import {
   SOURCE_CHART_LABEL,
   DESTINATION_CHART_LABEL,

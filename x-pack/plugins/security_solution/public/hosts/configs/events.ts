@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { LensAttributes, GetLensAttributes } from '../../common/components/matrix_histogram/types';
+import {
+  GetLensAttributes,
+  LensAttributes,
+} from '../../common/components/visualization_actions/types';
 
 export const getEventsHistogramCongifs: GetLensAttributes = (stackByField = 'event.action') =>
   ({

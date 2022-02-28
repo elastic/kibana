@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/matrix_histogram/types';
+import { LensAttributes } from '../../common/components/visualization_actions/types';
 
 /* Exported from Kibana Saved Object */
 export const dnsTopDomainsAttrs: LensAttributes = {
