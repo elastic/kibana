@@ -1,0 +1,182 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<QuickButtonGroup /> is rendered 1`] = `
+<ServicesProvider
+  buttons={
+    Array [
+      Object {
+        "createType": "Text",
+        "iconType": "visText",
+        "onClick": [MockFunction],
+      },
+    ]
+  }
+  docLinks={
+    Object {
+      "dataViewsDocsLink": "dummy link",
+    }
+  }
+  editors={
+    Object {
+      "openDataViewEditor": [MockFunction],
+    }
+  }
+  permissions={
+    Object {
+      "canCreateNewDataView": true,
+    }
+  }
+  platform={
+    Object {
+      "setIsFullscreen": [MockFunction],
+    }
+  }
+>
+  <QuickButtonGroup
+    buttons={
+      Array [
+        Object {
+          "createType": "Text",
+          "iconType": "visText",
+          "onClick": [MockFunction],
+        },
+      ]
+    }
+  >
+    <EuiButtonGroup
+      buttonSize="m"
+      className="quickButtonGroup"
+      isIconOnly={true}
+      legend="Quick create"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "aria-label": "Create new Text",
+            "className": "quickButtonGroup__button",
+            "iconType": "visText",
+            "id": "generated-id0",
+            "label": "Text",
+            "onClick": [MockFunction],
+            "title": "Create new Text",
+          },
+        ]
+      }
+      type="multi"
+    >
+      <fieldset
+        className="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text quickButtonGroup"
+        disabled={false}
+      >
+        <EuiScreenReaderOnly>
+          <legend
+            className="euiScreenReaderOnly"
+          >
+            Quick create
+          </legend>
+        </EuiScreenReaderOnly>
+        <div
+          className="euiButtonGroup__buttons"
+        >
+          <EuiButtonGroupButton
+            aria-label="Create new Text"
+            className="quickButtonGroup__button"
+            color="text"
+            element="button"
+            iconType="visText"
+            id="generated-id0"
+            isDisabled={false}
+            isIconOnly={true}
+            key="0"
+            label="Text"
+            name="generated-id"
+            onChange={[Function]}
+            onClick={[MockFunction]}
+            size="m"
+            title="Create new Text"
+          >
+            <EuiButtonDisplay
+              aria-label="Create new Text"
+              baseClassName="euiButtonGroupButton"
+              className="euiButtonGroupButton-isIconOnly quickButtonGroup__button"
+              color="text"
+              data-test-subj="generated-id0"
+              element="button"
+              fill={false}
+              iconType="visText"
+              id="generated-id"
+              isDisabled={false}
+              isSelected={false}
+              onClick={[MockFunction]}
+              size="m"
+              textProps={
+                Object {
+                  "className": "euiScreenReaderOnly",
+                  "data-text": "Text",
+                  "ref": [Function],
+                }
+              }
+              title="Create new Text"
+              type="button"
+            >
+              <button
+                aria-label="Create new Text"
+                aria-pressed={false}
+                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly quickButtonGroup__button"
+                data-test-subj="generated-id0"
+                disabled={false}
+                id="generated-id"
+                onClick={[MockFunction]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                title="Create new Text"
+                type="button"
+              >
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  iconType="visText"
+                  textProps={
+                    Object {
+                      "className": "euiButton__text euiScreenReaderOnly",
+                      "data-text": "Text",
+                      "ref": [Function],
+                    }
+                  }
+                >
+                  <span
+                    className="euiButtonContent euiButton__content"
+                  >
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="visText"
+                    >
+                      <span
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="visText"
+                        size="m"
+                      />
+                    </EuiIcon>
+                    <span
+                      className="euiButton__text euiScreenReaderOnly"
+                      data-text="Text"
+                    >
+                      Text
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
+          </EuiButtonGroupButton>
+        </div>
+      </fieldset>
+    </EuiButtonGroup>
+  </QuickButtonGroup>
+</ServicesProvider>
+`;

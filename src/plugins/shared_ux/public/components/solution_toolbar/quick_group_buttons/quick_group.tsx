@@ -11,10 +11,10 @@ import {
   EuiButtonGroup,
   htmlIdGenerator,
   EuiButtonGroupOptionProps,
-  useEuiTheme,
+  // useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 
 import cx from 'classnames';
 
@@ -47,7 +47,7 @@ export interface Props {
 type Option = EuiButtonGroupOptionProps & Omit<QuickButtonProps, 'createType'>;
 
 export const QuickButtonGroup = ({ buttons }: Props) => {
-  const { euiTheme } = useEuiTheme();
+  // const { euiTheme } = useEuiTheme();
   const buttonGroupOptions: Option[] = buttons.map((button: QuickButtonProps, index) => {
     const { createType: label, ...rest } = button;
     const title = strings.getAriaButtonLabel(label);
@@ -66,25 +66,25 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
     buttonGroupOptions.find((x) => x.id === optionId)?.onClick();
   };
 
-  const quickButtonCSS = css`
-  & .quickButtonGroup {
-    & .euiButtonGroup__buttons {
-    border-radius: ${euiTheme.border.radius};
-      & .quickButtonGroup__button {
-        background-color: ${euiTheme.colors.emptyShade};
-        border-width: ${euiTheme.border.width.thin} !important;
-        border-style: solid !important;
-        border-color: ${euiTheme.border.color} !important;
-      }
-    & .quickButtonGroup__button:first-of-type {
-      border-top-left-radius: ${euiTheme.border.radius} !important;
-      border-bottom-left-radius: ${euiTheme.border.radius} !important;
-    }
-    & .quickButtonGroup__button:last-of-type {
-      border-top-right-radius: ${euiTheme.border.radius} !important;
-      border-bottom-right-radius: ${euiTheme.border.radius} !important;
-    }
-  `;
+  // const quickButtonCSS = css`
+  // & .quickButtonGroup {
+  //   & .euiButtonGroup__buttons {
+  //   border-radius: ${euiTheme.border.radius};
+  //     & .quickButtonGroup__button {
+  //       background-color: ${euiTheme.colors.emptyShade};
+  //       border-width: ${euiTheme.border.width.thin} !important;
+  //       border-style: solid !important;
+  //       border-color: ${euiTheme.border.color} !important;
+  //     }
+  //   & .quickButtonGroup__button:first-of-type {
+  //     border-top-left-radius: ${euiTheme.border.radius} !important;
+  //     border-bottom-left-radius: ${euiTheme.border.radius} !important;
+  //   }
+  //   & .quickButtonGroup__button:last-of-type {
+  //     border-top-right-radius: ${euiTheme.border.radius} !important;
+  //     border-bottom-right-radius: ${euiTheme.border.radius} !important;
+  //   }
+  // `;
 
   return (
     <EuiButtonGroup
@@ -94,7 +94,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
       onChange={onChangeIconsMulti}
       type="multi"
       isIconOnly
-      css={quickButtonCSS}
+      // css={quickButtonCSS}
       className={cx('quickButtonGroup', className)}
     />
   );
