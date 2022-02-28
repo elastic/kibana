@@ -29,7 +29,7 @@ echo "--- Install KBN-ALERT-LOAD"
 
 mkdir kbn-alert-load
 cd kbn-alert-load
-yarn add test-alert-load-kbn@2.6.0
+yarn add test-alert-load-kbn@2.7.0
 
 echo "--- Run IM tests"
 
