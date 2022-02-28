@@ -185,7 +185,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/Error triggering xMatters workflow/);
+      expect(result.message).to.match(/Error triggering xMatters flow: unexpected status 400/);
     });
 
     it('should handle a 429 xmatters error', async () => {
@@ -202,7 +202,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/Error triggering xMatters workflow/);
+      expect(result.message).to.match(
+        /Error triggering xMatters flow: http status 429, retry later/
+      );
     });
 
     it('should handle a 500 xmatters error', async () => {

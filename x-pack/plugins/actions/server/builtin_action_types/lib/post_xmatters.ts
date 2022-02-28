@@ -45,5 +45,6 @@ export async function postXmatters(
     ...basicAuth,
     data,
     configurationUtilities,
+    validateStatus: () => true,
   });
 }

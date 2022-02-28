@@ -266,8 +266,23 @@ export async function executor(
     return successResult(actionId, data);
   }
 
+  if (result.status === 429 || result.status >= 500) {
+    const message = i18n.translate('xpack.actions.builtin.xmatters.postingRetryErrorMessage', {
+      defaultMessage: 'Error triggering xMatters flow: http status {status}, retry later',
+      values: {
+        status: result.status,
+      },
+    });
+
+    return {
+      status: 'error',
+      actionId,
+      message,
+      retry: true,
+    };
+  }
   const message = i18n.translate('xpack.actions.builtin.xmatters.postingRetryErrorMessage', {
-    defaultMessage: 'Error triggering xMatters flow: http status {status}, retry later',
+    defaultMessage: 'Error triggering xMatters flow: unexpected status {status}',
     values: {
       status: result.status,
     },
@@ -277,7 +292,6 @@ export async function executor(
     status: 'error',
     actionId,
     message,
-    retry: true,
   };
 }
 
