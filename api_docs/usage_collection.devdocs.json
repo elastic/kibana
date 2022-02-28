@@ -141,9 +141,7 @@
             "Report whenever a UI event occurs for UI counters to report it"
           ],
           "signature": [
-            "(appName: string, type: ",
-            "UiCounterMetricType",
-            ", eventNames: string | string[], count?: number | undefined) => void"
+            "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
@@ -165,12 +163,12 @@
             {
               "parentPluginId": "usageCollection",
               "id": "def-public.UsageCollectionSetup.reportUiCounter.$2",
-              "type": "CompoundType",
+              "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
               "signature": [
-                "UiCounterMetricType"
+                "string"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
@@ -233,9 +231,7 @@
             "Report whenever a UI event occurs for UI counters to report it"
           ],
           "signature": [
-            "(appName: string, type: ",
-            "UiCounterMetricType",
-            ", eventNames: string | string[], count?: number | undefined) => void"
+            "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
@@ -257,12 +253,12 @@
             {
               "parentPluginId": "usageCollection",
               "id": "def-public.UsageCollectionStart.reportUiCounter.$2",
-              "type": "CompoundType",
+              "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
               "signature": [
-                "UiCounterMetricType"
+                "string"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
@@ -673,7 +669,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"text\" | \"integer\" | \"short\" | \"byte\" | \"float\""
+          "\"boolean\" | \"keyword\" | \"date\" | \"text\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
