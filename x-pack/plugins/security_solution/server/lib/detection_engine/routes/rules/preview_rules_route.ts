@@ -91,12 +91,6 @@ export const previewRulesRoute = async (
           });
         }
 
-        if (request.body.type === 'threat_match') {
-          return response.ok({
-            body: { logs: [{ errors: ['Preview for rule type not supported'], warnings: [] }] },
-          });
-        }
-
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
         const previewRuleParams = internalRule.params;
 
