@@ -4,17 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SPACE_IDS } from '../../common/technical_rule_data_field_names';
 
-import type React from 'react';
-export type TitleProp = string | React.ReactNode;
-
-export interface DraggableArguments {
-  field: string;
-  value: string;
-}
-
-export interface BadgeOptions {
-  beta?: boolean;
-  text: string;
-  tooltip?: string;
+export function getSpacesFilter(spaceId?: string) {
+  return spaceId ? { term: { [SPACE_IDS]: spaceId } } : undefined;
 }
