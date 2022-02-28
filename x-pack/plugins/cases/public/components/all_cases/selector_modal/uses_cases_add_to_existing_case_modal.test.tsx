@@ -65,7 +65,7 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
-  it('should dispatch the close action when invoked', () => {
+  it('should dispatch the close action for modal and flyout when invoked', () => {
     const { result } = renderHook(
       () => {
         return useCasesAddToExistingCaseModal(defaultParams());
@@ -76,6 +76,11 @@ describe('use cases add to existing case modal hook', () => {
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL,
+      })
+    );
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
       })
     );
   });

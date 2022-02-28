@@ -9,7 +9,6 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
 import { Ecs } from '../../common';
 
-// TODO investigate if we really need these types
 type Maybe<T> = T | null;
 interface TimelineItem {
   data: TimelineNonEcsData[];
