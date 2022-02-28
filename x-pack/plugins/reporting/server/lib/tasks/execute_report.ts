@@ -369,7 +369,7 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm()!;
 
             eventLog.logExecutionComplete({
-              ...(report.metrics ?? {}),
+              ...(output.metrics ?? {}),
               byteSize: stream.bytesWritten,
             });
 
