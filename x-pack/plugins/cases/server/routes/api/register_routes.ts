@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { Headers, RouteRegistrar } from 'kibana/server';
 import { CasesRequestHandlerContext } from '../../types';
-import { CaseRoute, RegisterRoutesDeps } from './types';
+import { RegisterRoutesDeps } from './types';
 import {
   escapeHatch,
   getIsKibanaRequest,
