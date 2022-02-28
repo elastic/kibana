@@ -9,8 +9,7 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123556
-  describe.skip('console app', function () {
+  describe('console app', function () {
     this.tags('ciGroup1');
 
     before(async function () {
@@ -18,5 +17,6 @@ export default function ({ getService, loadTestFile }) {
     });
 
     loadTestFile(require.resolve('./_console'));
+    loadTestFile(require.resolve('./_autocomplete'));
   });
 }
