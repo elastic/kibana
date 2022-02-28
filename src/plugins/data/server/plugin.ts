@@ -21,12 +21,14 @@ import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
+import { AutocompleteSetup } from './autocomplete/autocomplete_service';
 
 interface DataEnhancements {
   search: SearchEnhancements;
 }
 
 export interface DataPluginSetup {
+  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
   /**
@@ -91,7 +93,6 @@ export class DataServerPlugin
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
-    this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
     core.uiSettings.register(getUiSettings(core.docLinks));
@@ -103,6 +104,7 @@ export class DataServerPlugin
     });
 
     return {
+      autocomplete: this.autocompleteService.setup(core),
       __enhance: (enhancements: DataEnhancements) => {
         searchSetup.__enhance(enhancements.search);
       },

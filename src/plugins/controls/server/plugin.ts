@@ -7,21 +7,27 @@
  */
 
 import { CoreSetup, Plugin } from 'kibana/server';
+
 import { EmbeddableSetup } from '../../embeddable/server';
+import { PluginSetup as DataSetup } from '../../data/server';
+import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './control_types/options_list/options_list_embeddable_factory';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
+  data: DataSetup;
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  public setup(core: CoreSetup, plugins: SetupDeps) {
-    plugins.embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
+  public setup(core: CoreSetup, { embeddable, data }: SetupDeps) {
+    embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
 
-    plugins.embeddable.registerEmbeddableFactory(
-      controlGroupContainerPersistableStateServiceFactory(plugins.embeddable)
+    embeddable.registerEmbeddableFactory(
+      controlGroupContainerPersistableStateServiceFactory(embeddable)
     );
+
+    setupOptionsListSuggestionsRoute(core, data.autocomplete.getAutocompleteSettings);
     return {};
   }
 
