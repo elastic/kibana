@@ -24,7 +24,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   describe('when passed no filterQuery', () => {
-    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, groupBy);
+    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, 100, groupBy);
     test('includes a range filter', () => {
       expect(
         searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
@@ -47,6 +47,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      100,
       groupBy,
       filterQuery
     );
