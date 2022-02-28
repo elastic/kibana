@@ -2,6 +2,7 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "ts_project")
 load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
+load("@build_bazel_rules_nodejs//:index.bzl", "directory_file_path")
 
 PKG_BASE_NAME = "kbn-type-summarizer"
 PKG_REQUIRE_NAME = "@kbn/type-summarizer"
@@ -60,23 +61,16 @@ ts_config(
   ],
 )
 
-ts_project(
-  name = "tsc",
+jsts_transpiler(
+  name = "target_node",
   srcs = SRCS,
-  deps = TYPES_DEPS,
-  args = ["--pretty"],
-  declaration = True,
-  emit_declaration_only = False,
-  source_map = True,
-  out_dir = "target",
-  root_dir = "src",
-  tsconfig = ":tsconfig",
+  build_pkg_name = package_name(),
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":tsc"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -96,11 +90,17 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
+directory_file_path(
+  name = "bazel-cli-path",
+  directory = ":target_node",
+  path = "bazel_cli.js",
+)
+
 nodejs_binary(
   name = "bazel-cli",
   data = [
     ":%s" % PKG_BASE_NAME
   ],
-  entry_point = ":target/bazel_cli.js",
+  entry_point = ":bazel-cli-path",
   visibility = ["//visibility:public"],
 )
