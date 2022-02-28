@@ -39,7 +39,7 @@ describe('Get artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useGetArtifact(instance, 'fakeId', {
+        useGetArtifact(instance, 'fakeId', undefined, {
           onSuccess: onSuccessMock,
           retry: false,
         }),
@@ -50,7 +50,7 @@ describe('Get artifact hook', () => {
     expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
     expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items', {
       query: {
-        id: 'fakeId',
+        item_id: 'fakeId',
         namespace_type: 'agnostic',
       },
     });
@@ -69,7 +69,7 @@ describe('Get artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useGetArtifact(instance, 'fakeId', {
+        useGetArtifact(instance, undefined, 'fakeId', {
           onError: onErrorMock,
           retry: false,
         }),
