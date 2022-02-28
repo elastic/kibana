@@ -67,8 +67,7 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
-    alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
-      .alertInstanceFactory,
+    alertFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>().alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => shouldWriteAlerts,

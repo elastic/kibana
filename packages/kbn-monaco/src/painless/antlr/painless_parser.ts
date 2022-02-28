@@ -35,83 +35,84 @@ export class painless_parser extends Parser {
 	public static readonly RBRACE = 6;
 	public static readonly LP = 7;
 	public static readonly RP = 8;
-	public static readonly DOT = 9;
-	public static readonly NSDOT = 10;
-	public static readonly COMMA = 11;
-	public static readonly SEMICOLON = 12;
-	public static readonly IF = 13;
-	public static readonly IN = 14;
-	public static readonly ELSE = 15;
-	public static readonly WHILE = 16;
-	public static readonly DO = 17;
-	public static readonly FOR = 18;
-	public static readonly CONTINUE = 19;
-	public static readonly BREAK = 20;
-	public static readonly RETURN = 21;
-	public static readonly NEW = 22;
-	public static readonly TRY = 23;
-	public static readonly CATCH = 24;
-	public static readonly THROW = 25;
-	public static readonly THIS = 26;
-	public static readonly INSTANCEOF = 27;
-	public static readonly BOOLNOT = 28;
-	public static readonly BWNOT = 29;
-	public static readonly MUL = 30;
-	public static readonly DIV = 31;
-	public static readonly REM = 32;
-	public static readonly ADD = 33;
-	public static readonly SUB = 34;
-	public static readonly LSH = 35;
-	public static readonly RSH = 36;
-	public static readonly USH = 37;
-	public static readonly LT = 38;
-	public static readonly LTE = 39;
-	public static readonly GT = 40;
-	public static readonly GTE = 41;
-	public static readonly EQ = 42;
-	public static readonly EQR = 43;
-	public static readonly NE = 44;
-	public static readonly NER = 45;
-	public static readonly BWAND = 46;
-	public static readonly XOR = 47;
-	public static readonly BWOR = 48;
-	public static readonly BOOLAND = 49;
-	public static readonly BOOLOR = 50;
-	public static readonly COND = 51;
-	public static readonly COLON = 52;
-	public static readonly ELVIS = 53;
-	public static readonly REF = 54;
-	public static readonly ARROW = 55;
-	public static readonly FIND = 56;
-	public static readonly MATCH = 57;
-	public static readonly INCR = 58;
-	public static readonly DECR = 59;
-	public static readonly ASSIGN = 60;
-	public static readonly AADD = 61;
-	public static readonly ASUB = 62;
-	public static readonly AMUL = 63;
-	public static readonly ADIV = 64;
-	public static readonly AREM = 65;
-	public static readonly AAND = 66;
-	public static readonly AXOR = 67;
-	public static readonly AOR = 68;
-	public static readonly ALSH = 69;
-	public static readonly ARSH = 70;
-	public static readonly AUSH = 71;
-	public static readonly OCTAL = 72;
-	public static readonly HEX = 73;
-	public static readonly INTEGER = 74;
-	public static readonly DECIMAL = 75;
-	public static readonly STRING = 76;
-	public static readonly REGEX = 77;
-	public static readonly TRUE = 78;
-	public static readonly FALSE = 79;
-	public static readonly NULL = 80;
-	public static readonly PRIMITIVE = 81;
-	public static readonly DEF = 82;
-	public static readonly ID = 83;
-	public static readonly DOTINTEGER = 84;
-	public static readonly DOTID = 85;
+	public static readonly DOLLAR = 9;
+	public static readonly DOT = 10;
+	public static readonly NSDOT = 11;
+	public static readonly COMMA = 12;
+	public static readonly SEMICOLON = 13;
+	public static readonly IF = 14;
+	public static readonly IN = 15;
+	public static readonly ELSE = 16;
+	public static readonly WHILE = 17;
+	public static readonly DO = 18;
+	public static readonly FOR = 19;
+	public static readonly CONTINUE = 20;
+	public static readonly BREAK = 21;
+	public static readonly RETURN = 22;
+	public static readonly NEW = 23;
+	public static readonly TRY = 24;
+	public static readonly CATCH = 25;
+	public static readonly THROW = 26;
+	public static readonly THIS = 27;
+	public static readonly INSTANCEOF = 28;
+	public static readonly BOOLNOT = 29;
+	public static readonly BWNOT = 30;
+	public static readonly MUL = 31;
+	public static readonly DIV = 32;
+	public static readonly REM = 33;
+	public static readonly ADD = 34;
+	public static readonly SUB = 35;
+	public static readonly LSH = 36;
+	public static readonly RSH = 37;
+	public static readonly USH = 38;
+	public static readonly LT = 39;
+	public static readonly LTE = 40;
+	public static readonly GT = 41;
+	public static readonly GTE = 42;
+	public static readonly EQ = 43;
+	public static readonly EQR = 44;
+	public static readonly NE = 45;
+	public static readonly NER = 46;
+	public static readonly BWAND = 47;
+	public static readonly XOR = 48;
+	public static readonly BWOR = 49;
+	public static readonly BOOLAND = 50;
+	public static readonly BOOLOR = 51;
+	public static readonly COND = 52;
+	public static readonly COLON = 53;
+	public static readonly ELVIS = 54;
+	public static readonly REF = 55;
+	public static readonly ARROW = 56;
+	public static readonly FIND = 57;
+	public static readonly MATCH = 58;
+	public static readonly INCR = 59;
+	public static readonly DECR = 60;
+	public static readonly ASSIGN = 61;
+	public static readonly AADD = 62;
+	public static readonly ASUB = 63;
+	public static readonly AMUL = 64;
+	public static readonly ADIV = 65;
+	public static readonly AREM = 66;
+	public static readonly AAND = 67;
+	public static readonly AXOR = 68;
+	public static readonly AOR = 69;
+	public static readonly ALSH = 70;
+	public static readonly ARSH = 71;
+	public static readonly AUSH = 72;
+	public static readonly OCTAL = 73;
+	public static readonly HEX = 74;
+	public static readonly INTEGER = 75;
+	public static readonly DECIMAL = 76;
+	public static readonly STRING = 77;
+	public static readonly REGEX = 78;
+	public static readonly TRUE = 79;
+	public static readonly FALSE = 80;
+	public static readonly NULL = 81;
+	public static readonly PRIMITIVE = 82;
+	public static readonly DEF = 83;
+	public static readonly ID = 84;
+	public static readonly DOTINTEGER = 85;
+	public static readonly DOTID = 86;
 	public static readonly RULE_source = 0;
 	public static readonly RULE_function = 1;
 	public static readonly RULE_parameters = 2;
@@ -164,27 +165,27 @@ export class painless_parser extends Parser {
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, "'{'", "'}'", "'['", "']'", "'('", "')'", 
-		"'.'", "'?.'", "','", "';'", "'if'", "'in'", "'else'", "'while'", "'do'", 
-		"'for'", "'continue'", "'break'", "'return'", "'new'", "'try'", "'catch'", 
-		"'throw'", "'this'", "'instanceof'", "'!'", "'~'", "'*'", "'/'", "'%'", 
-		"'+'", "'-'", "'<<'", "'>>'", "'>>>'", "'<'", "'<='", "'>'", "'>='", "'=='", 
-		"'==='", "'!='", "'!=='", "'&'", "'^'", "'|'", "'&&'", "'||'", "'?'", 
-		"':'", "'?:'", "'::'", "'->'", "'=~'", "'==~'", "'++'", "'--'", "'='", 
-		"'+='", "'-='", "'*='", "'/='", "'%='", "'&='", "'^='", "'|='", "'<<='", 
-		"'>>='", "'>>>='", undefined, undefined, undefined, undefined, undefined, 
-		undefined, "'true'", "'false'", "'null'", undefined, "'def'",
+		"'$'", "'.'", "'?.'", "','", "';'", "'if'", "'in'", "'else'", "'while'", 
+		"'do'", "'for'", "'continue'", "'break'", "'return'", "'new'", "'try'", 
+		"'catch'", "'throw'", "'this'", "'instanceof'", "'!'", "'~'", "'*'", "'/'", 
+		"'%'", "'+'", "'-'", "'<<'", "'>>'", "'>>>'", "'<'", "'<='", "'>'", "'>='", 
+		"'=='", "'==='", "'!='", "'!=='", "'&'", "'^'", "'|'", "'&&'", "'||'", 
+		"'?'", "':'", "'?:'", "'::'", "'->'", "'=~'", "'==~'", "'++'", "'--'", 
+		"'='", "'+='", "'-='", "'*='", "'/='", "'%='", "'&='", "'^='", "'|='", 
+		"'<<='", "'>>='", "'>>>='", undefined, undefined, undefined, undefined, 
+		undefined, undefined, "'true'", "'false'", "'null'", undefined, "'def'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, "WS", "COMMENT", "LBRACK", "RBRACK", "LBRACE", "RBRACE", "LP", 
-		"RP", "DOT", "NSDOT", "COMMA", "SEMICOLON", "IF", "IN", "ELSE", "WHILE", 
-		"DO", "FOR", "CONTINUE", "BREAK", "RETURN", "NEW", "TRY", "CATCH", "THROW", 
-		"THIS", "INSTANCEOF", "BOOLNOT", "BWNOT", "MUL", "DIV", "REM", "ADD", 
-		"SUB", "LSH", "RSH", "USH", "LT", "LTE", "GT", "GTE", "EQ", "EQR", "NE", 
-		"NER", "BWAND", "XOR", "BWOR", "BOOLAND", "BOOLOR", "COND", "COLON", "ELVIS", 
-		"REF", "ARROW", "FIND", "MATCH", "INCR", "DECR", "ASSIGN", "AADD", "ASUB", 
-		"AMUL", "ADIV", "AREM", "AAND", "AXOR", "AOR", "ALSH", "ARSH", "AUSH", 
-		"OCTAL", "HEX", "INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", "FALSE", 
-		"NULL", "PRIMITIVE", "DEF", "ID", "DOTINTEGER", "DOTID",
+		"RP", "DOLLAR", "DOT", "NSDOT", "COMMA", "SEMICOLON", "IF", "IN", "ELSE", 
+		"WHILE", "DO", "FOR", "CONTINUE", "BREAK", "RETURN", "NEW", "TRY", "CATCH", 
+		"THROW", "THIS", "INSTANCEOF", "BOOLNOT", "BWNOT", "MUL", "DIV", "REM", 
+		"ADD", "SUB", "LSH", "RSH", "USH", "LT", "LTE", "GT", "GTE", "EQ", "EQR", 
+		"NE", "NER", "BWAND", "XOR", "BWOR", "BOOLAND", "BOOLOR", "COND", "COLON", 
+		"ELVIS", "REF", "ARROW", "FIND", "MATCH", "INCR", "DECR", "ASSIGN", "AADD", 
+		"ASUB", "AMUL", "ADIV", "AREM", "AAND", "AXOR", "AOR", "ALSH", "ARSH", 
+		"AUSH", "OCTAL", "HEX", "INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", 
+		"FALSE", "NULL", "PRIMITIVE", "DEF", "ID", "DOTINTEGER", "DOTID",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(painless_parser._LITERAL_NAMES, painless_parser._SYMBOLIC_NAMES, []);
 
@@ -236,7 +237,7 @@ export class painless_parser extends Parser {
 			this.state = 87;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.IF - 5)) | (1 << (painless_parser.WHILE - 5)) | (1 << (painless_parser.DO - 5)) | (1 << (painless_parser.FOR - 5)) | (1 << (painless_parser.CONTINUE - 5)) | (1 << (painless_parser.BREAK - 5)) | (1 << (painless_parser.RETURN - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.TRY - 5)) | (1 << (painless_parser.THROW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+			while (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.IF - 5)) | (1 << (painless_parser.WHILE - 5)) | (1 << (painless_parser.DO - 5)) | (1 << (painless_parser.FOR - 5)) | (1 << (painless_parser.CONTINUE - 5)) | (1 << (painless_parser.BREAK - 5)) | (1 << (painless_parser.RETURN - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.TRY - 5)) | (1 << (painless_parser.THROW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.PRIMITIVE - 59)) | (1 << (painless_parser.DEF - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 				{
 				{
 				this.state = 84;
@@ -309,7 +310,7 @@ export class painless_parser extends Parser {
 			this.state = 109;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (painless_parser.PRIMITIVE - 81)) | (1 << (painless_parser.DEF - 81)) | (1 << (painless_parser.ID - 81)))) !== 0)) {
+			if (((((_la - 82)) & ~0x1F) === 0 && ((1 << (_la - 82)) & ((1 << (painless_parser.PRIMITIVE - 82)) | (1 << (painless_parser.DEF - 82)) | (1 << (painless_parser.ID - 82)))) !== 0)) {
 				{
 				this.state = 98;
 				this.decltype();
@@ -375,6 +376,7 @@ export class painless_parser extends Parser {
 				break;
 			case painless_parser.LBRACE:
 			case painless_parser.LP:
+			case painless_parser.DOLLAR:
 			case painless_parser.DO:
 			case painless_parser.CONTINUE:
 			case painless_parser.BREAK:
@@ -501,6 +503,7 @@ export class painless_parser extends Parser {
 				case painless_parser.LBRACK:
 				case painless_parser.LBRACE:
 				case painless_parser.LP:
+				case painless_parser.DOLLAR:
 				case painless_parser.IF:
 				case painless_parser.WHILE:
 				case painless_parser.DO:
@@ -557,7 +560,7 @@ export class painless_parser extends Parser {
 				this.state = 140;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.PRIMITIVE - 59)) | (1 << (painless_parser.DEF - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 					{
 					this.state = 139;
 					this.initializer();
@@ -569,7 +572,7 @@ export class painless_parser extends Parser {
 				this.state = 144;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 					{
 					this.state = 143;
 					this.expression();
@@ -581,7 +584,7 @@ export class painless_parser extends Parser {
 				this.state = 148;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 					{
 					this.state = 147;
 					this.afterthought();
@@ -596,6 +599,7 @@ export class painless_parser extends Parser {
 				case painless_parser.LBRACK:
 				case painless_parser.LBRACE:
 				case painless_parser.LP:
+				case painless_parser.DOLLAR:
 				case painless_parser.IF:
 				case painless_parser.WHILE:
 				case painless_parser.DO:
@@ -795,7 +799,7 @@ export class painless_parser extends Parser {
 				this.state = 193;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 					{
 					this.state = 192;
 					this.expression();
@@ -857,6 +861,7 @@ export class painless_parser extends Parser {
 				break;
 			case painless_parser.LBRACE:
 			case painless_parser.LP:
+			case painless_parser.DOLLAR:
 			case painless_parser.IF:
 			case painless_parser.WHILE:
 			case painless_parser.DO:
@@ -939,7 +944,7 @@ export class painless_parser extends Parser {
 			this.state = 212;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DO - 5)) | (1 << (painless_parser.CONTINUE - 5)) | (1 << (painless_parser.BREAK - 5)) | (1 << (painless_parser.RETURN - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.THROW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.DO - 5)) | (1 << (painless_parser.CONTINUE - 5)) | (1 << (painless_parser.BREAK - 5)) | (1 << (painless_parser.RETURN - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.THROW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.PRIMITIVE - 59)) | (1 << (painless_parser.DEF - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 				{
 				this.state = 211;
 				this.dstatement();
@@ -1332,7 +1337,7 @@ export class painless_parser extends Parser {
 						}
 						this.state = 269;
 						_la = this._input.LA(1);
-						if (!(((((_la - 30)) & ~0x1F) === 0 && ((1 << (_la - 30)) & ((1 << (painless_parser.MUL - 30)) | (1 << (painless_parser.DIV - 30)) | (1 << (painless_parser.REM - 30)))) !== 0))) {
+						if (!(((((_la - 31)) & ~0x1F) === 0 && ((1 << (_la - 31)) & ((1 << (painless_parser.MUL - 31)) | (1 << (painless_parser.DIV - 31)) | (1 << (painless_parser.REM - 31)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1407,7 +1412,7 @@ export class painless_parser extends Parser {
 						}
 						this.state = 278;
 						_la = this._input.LA(1);
-						if (!(((((_la - 35)) & ~0x1F) === 0 && ((1 << (_la - 35)) & ((1 << (painless_parser.LSH - 35)) | (1 << (painless_parser.RSH - 35)) | (1 << (painless_parser.USH - 35)))) !== 0))) {
+						if (!(((((_la - 36)) & ~0x1F) === 0 && ((1 << (_la - 36)) & ((1 << (painless_parser.LSH - 36)) | (1 << (painless_parser.RSH - 36)) | (1 << (painless_parser.USH - 36)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1432,7 +1437,7 @@ export class painless_parser extends Parser {
 						}
 						this.state = 281;
 						_la = this._input.LA(1);
-						if (!(((((_la - 38)) & ~0x1F) === 0 && ((1 << (_la - 38)) & ((1 << (painless_parser.LT - 38)) | (1 << (painless_parser.LTE - 38)) | (1 << (painless_parser.GT - 38)) | (1 << (painless_parser.GTE - 38)))) !== 0))) {
+						if (!(((((_la - 39)) & ~0x1F) === 0 && ((1 << (_la - 39)) & ((1 << (painless_parser.LT - 39)) | (1 << (painless_parser.LTE - 39)) | (1 << (painless_parser.GT - 39)) | (1 << (painless_parser.GTE - 39)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1457,7 +1462,7 @@ export class painless_parser extends Parser {
 						}
 						this.state = 284;
 						_la = this._input.LA(1);
-						if (!(((((_la - 42)) & ~0x1F) === 0 && ((1 << (_la - 42)) & ((1 << (painless_parser.EQ - 42)) | (1 << (painless_parser.EQR - 42)) | (1 << (painless_parser.NE - 42)) | (1 << (painless_parser.NER - 42)))) !== 0))) {
+						if (!(((((_la - 43)) & ~0x1F) === 0 && ((1 << (_la - 43)) & ((1 << (painless_parser.EQ - 43)) | (1 << (painless_parser.EQR - 43)) | (1 << (painless_parser.NE - 43)) | (1 << (painless_parser.NER - 43)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1642,7 +1647,7 @@ export class painless_parser extends Parser {
 				this.noncondexpression(0);
 				this.state = 320;
 				_la = this._input.LA(1);
-				if (!(((((_la - 60)) & ~0x1F) === 0 && ((1 << (_la - 60)) & ((1 << (painless_parser.ASSIGN - 60)) | (1 << (painless_parser.AADD - 60)) | (1 << (painless_parser.ASUB - 60)) | (1 << (painless_parser.AMUL - 60)) | (1 << (painless_parser.ADIV - 60)) | (1 << (painless_parser.AREM - 60)) | (1 << (painless_parser.AAND - 60)) | (1 << (painless_parser.AXOR - 60)) | (1 << (painless_parser.AOR - 60)) | (1 << (painless_parser.ALSH - 60)) | (1 << (painless_parser.ARSH - 60)) | (1 << (painless_parser.AUSH - 60)))) !== 0))) {
+				if (!(((((_la - 61)) & ~0x1F) === 0 && ((1 << (_la - 61)) & ((1 << (painless_parser.ASSIGN - 61)) | (1 << (painless_parser.AADD - 61)) | (1 << (painless_parser.ASUB - 61)) | (1 << (painless_parser.AMUL - 61)) | (1 << (painless_parser.ADIV - 61)) | (1 << (painless_parser.AREM - 61)) | (1 << (painless_parser.AAND - 61)) | (1 << (painless_parser.AXOR - 61)) | (1 << (painless_parser.AOR - 61)) | (1 << (painless_parser.ALSH - 61)) | (1 << (painless_parser.ARSH - 61)) | (1 << (painless_parser.AUSH - 61)))) !== 0))) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -1725,6 +1730,7 @@ export class painless_parser extends Parser {
 				break;
 			case painless_parser.LBRACE:
 			case painless_parser.LP:
+			case painless_parser.DOLLAR:
 			case painless_parser.NEW:
 			case painless_parser.BOOLNOT:
 			case painless_parser.BWNOT:
@@ -2134,7 +2140,7 @@ export class painless_parser extends Parser {
 				{
 				this.state = 400;
 				_la = this._input.LA(1);
-				if (!(((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (painless_parser.OCTAL - 72)) | (1 << (painless_parser.HEX - 72)) | (1 << (painless_parser.INTEGER - 72)) | (1 << (painless_parser.DECIMAL - 72)))) !== 0))) {
+				if (!(((((_la - 73)) & ~0x1F) === 0 && ((1 << (_la - 73)) & ((1 << (painless_parser.OCTAL - 73)) | (1 << (painless_parser.HEX - 73)) | (1 << (painless_parser.INTEGER - 73)) | (1 << (painless_parser.DECIMAL - 73)))) !== 0))) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -2224,7 +2230,17 @@ export class painless_parser extends Parser {
 				this.enterOuterAlt(_localctx, 11);
 				{
 				this.state = 409;
-				this.match(painless_parser.ID);
+				_la = this._input.LA(1);
+				if (!(_la === painless_parser.DOLLAR || _la === painless_parser.ID)) {
+				this._errHandler.recoverInline(this);
+				} else {
+					if (this._input.LA(1) === Token.EOF) {
+						this.matchedEOF = true;
+					}
+
+					this._errHandler.reportMatch(this);
+					this.consume();
+				}
 				this.state = 410;
 				this.arguments();
 				}
@@ -2549,7 +2565,7 @@ export class painless_parser extends Parser {
 				this.state = 469;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 					{
 					this.state = 461;
 					this.expression();
@@ -2777,7 +2793,7 @@ export class painless_parser extends Parser {
 			this.state = 524;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.THIS - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
+			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DOLLAR - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.THIS - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 59)) & ~0x1F) === 0 && ((1 << (_la - 59)) & ((1 << (painless_parser.INCR - 59)) | (1 << (painless_parser.DECR - 59)) | (1 << (painless_parser.OCTAL - 59)) | (1 << (painless_parser.HEX - 59)) | (1 << (painless_parser.INTEGER - 59)) | (1 << (painless_parser.DECIMAL - 59)) | (1 << (painless_parser.STRING - 59)) | (1 << (painless_parser.REGEX - 59)) | (1 << (painless_parser.TRUE - 59)) | (1 << (painless_parser.FALSE - 59)) | (1 << (painless_parser.NULL - 59)) | (1 << (painless_parser.PRIMITIVE - 59)) | (1 << (painless_parser.DEF - 59)) | (1 << (painless_parser.ID - 59)))) !== 0)) {
 				{
 				this.state = 516;
 				this.argument();
@@ -2892,7 +2908,7 @@ export class painless_parser extends Parser {
 				this.state = 543;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (painless_parser.PRIMITIVE - 81)) | (1 << (painless_parser.DEF - 81)) | (1 << (painless_parser.ID - 81)))) !== 0)) {
+				if (((((_la - 82)) & ~0x1F) === 0 && ((1 << (_la - 82)) & ((1 << (painless_parser.PRIMITIVE - 82)) | (1 << (painless_parser.DEF - 82)) | (1 << (painless_parser.ID - 82)))) !== 0)) {
 					{
 					this.state = 535;
 					this.lamtype();
@@ -2935,6 +2951,7 @@ export class painless_parser extends Parser {
 				break;
 			case painless_parser.LBRACE:
 			case painless_parser.LP:
+			case painless_parser.DOLLAR:
 			case painless_parser.NEW:
 			case painless_parser.BOOLNOT:
 			case painless_parser.BWNOT:
@@ -3137,7 +3154,7 @@ export class painless_parser extends Parser {
 
 	private static readonly _serializedATNSegments: number = 2;
 	private static readonly _serializedATNSegment0: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03W\u023E\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03X\u023E\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -3200,63 +3217,63 @@ export class painless_parser extends Parser {
 		"\")\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02" +
 		"\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&\x02" +
 		"(\x02*\x02,\x02.\x020\x022\x024\x026\x028\x02:\x02<\x02>\x02@\x02B\x02" +
-		"D\x02F\x02H\x02J\x02L\x02N\x02\x02\x10\x03\x03\x0E\x0E\x03\x02 \"\x03" +
-		"\x02#$\x03\x02:;\x03\x02%\'\x03\x02(+\x03\x02,/\x03\x02>I\x03\x02<=\x03" +
-		"\x02\x1E\x1F\x03\x02ST\x03\x02JM\x03\x02\v\f\x03\x02VW\x02\u0279\x02S" +
-		"\x03\x02\x02\x02\x04^\x03\x02\x02\x02\x06c\x03\x02\x02\x02\bw\x03\x02" +
-		"\x02\x02\n\xB5\x03\x02\x02\x02\f\xC8\x03\x02\x02\x02\x0E\xCC\x03\x02\x02" +
-		"\x02\x10\xCE\x03\x02\x02\x02\x12\xDA\x03\x02\x02\x02\x14\xDE\x03\x02\x02" +
-		"\x02\x16\xE0\x03\x02\x02\x02\x18\xE2\x03\x02\x02\x02\x1A\xEB\x03\x02\x02" +
-		"\x02\x1C\xFD\x03\x02\x02\x02\x1E\xFF\x03\x02\x02\x02 \u0104\x03\x02\x02" +
-		"\x02\"\u010B\x03\x02\x02\x02$\u0145\x03\x02\x02\x02&\u014C\x03\x02\x02" +
-		"\x02(\u0155\x03\x02\x02\x02*\u0161\x03\x02\x02\x02,\u0163\x03\x02\x02" +
-		"\x02.\u0182\x03\x02\x02\x020\u018C\x03\x02\x02\x022\u01A1\x03\x02\x02" +
-		"\x024\u01A6\x03\x02\x02\x026\u01AA\x03\x02\x02\x028\u01AC\x03\x02\x02" +
-		"\x02:\u01B0\x03\x02\x02\x02<\u01B3\x03\x02\x02\x02>\u01E0\x03\x02\x02" +
-		"\x02@\u01EF\x03\x02\x02\x02B\u01FF\x03\x02\x02\x02D\u0201\x03\x02\x02" +
-		"\x02F\u0205\x03\x02\x02\x02H\u0215\x03\x02\x02\x02J\u0224\x03\x02\x02" +
-		"\x02L\u022C\x03\x02\x02\x02N\u023B\x03\x02\x02\x02PR\x05\x04\x03\x02Q" +
-		"P\x03\x02\x02\x02RU\x03\x02\x02\x02SQ\x03\x02\x02\x02ST\x03\x02\x02\x02" +
+		"D\x02F\x02H\x02J\x02L\x02N\x02\x02\x11\x03\x03\x0F\x0F\x03\x02!#\x03\x02" +
+		"$%\x03\x02;<\x03\x02&(\x03\x02),\x03\x02-0\x03\x02?J\x03\x02=>\x03\x02" +
+		"\x1F \x03\x02TU\x03\x02KN\x04\x02\v\vVV\x03\x02\f\r\x03\x02WX\x02\u0279" +
+		"\x02S\x03\x02\x02\x02\x04^\x03\x02\x02\x02\x06c\x03\x02\x02\x02\bw\x03" +
+		"\x02\x02\x02\n\xB5\x03\x02\x02\x02\f\xC8\x03\x02\x02\x02\x0E\xCC\x03\x02" +
+		"\x02\x02\x10\xCE\x03\x02\x02\x02\x12\xDA\x03\x02\x02\x02\x14\xDE\x03\x02" +
+		"\x02\x02\x16\xE0\x03\x02\x02\x02\x18\xE2\x03\x02\x02\x02\x1A\xEB\x03\x02" +
+		"\x02\x02\x1C\xFD\x03\x02\x02\x02\x1E\xFF\x03\x02\x02\x02 \u0104\x03\x02" +
+		"\x02\x02\"\u010B\x03\x02\x02\x02$\u0145\x03\x02\x02\x02&\u014C\x03\x02" +
+		"\x02\x02(\u0155\x03\x02\x02\x02*\u0161\x03\x02\x02\x02,\u0163\x03\x02" +
+		"\x02\x02.\u0182\x03\x02\x02\x020\u018C\x03\x02\x02\x022\u01A1\x03\x02" +
+		"\x02\x024\u01A6\x03\x02\x02\x026\u01AA\x03\x02\x02\x028\u01AC\x03\x02" +
+		"\x02\x02:\u01B0\x03\x02\x02\x02<\u01B3\x03\x02\x02\x02>\u01E0\x03\x02" +
+		"\x02\x02@\u01EF\x03\x02\x02\x02B\u01FF\x03\x02\x02\x02D\u0201\x03\x02" +
+		"\x02\x02F\u0205\x03\x02\x02\x02H\u0215\x03\x02\x02\x02J\u0224\x03\x02" +
+		"\x02\x02L\u022C\x03\x02\x02\x02N\u023B\x03\x02\x02\x02PR\x05\x04\x03\x02" +
+		"QP\x03\x02\x02\x02RU\x03\x02\x02\x02SQ\x03\x02\x02\x02ST\x03\x02\x02\x02" +
 		"TY\x03\x02\x02\x02US\x03\x02\x02\x02VX\x05\b\x05\x02WV\x03\x02\x02\x02" +
 		"X[\x03\x02\x02\x02YW\x03\x02\x02\x02YZ\x03\x02\x02\x02Z\\\x03\x02\x02" +
 		"\x02[Y\x03\x02\x02\x02\\]\x07\x02\x02\x03]\x03\x03\x02\x02\x02^_\x05\x1A" +
-		"\x0E\x02_`\x07U\x02\x02`a\x05\x06\x04\x02ab\x05\x10\t\x02b\x05\x03\x02" +
-		"\x02\x02co\x07\t\x02\x02de\x05\x1A\x0E\x02el\x07U\x02\x02fg\x07\r\x02" +
-		"\x02gh\x05\x1A\x0E\x02hi\x07U\x02\x02ik\x03\x02\x02\x02jf\x03\x02\x02" +
+		"\x0E\x02_`\x07V\x02\x02`a\x05\x06\x04\x02ab\x05\x10\t\x02b\x05\x03\x02" +
+		"\x02\x02co\x07\t\x02\x02de\x05\x1A\x0E\x02el\x07V\x02\x02fg\x07\x0E\x02" +
+		"\x02gh\x05\x1A\x0E\x02hi\x07V\x02\x02ik\x03\x02\x02\x02jf\x03\x02\x02" +
 		"\x02kn\x03\x02\x02\x02lj\x03\x02\x02\x02lm\x03\x02\x02\x02mp\x03\x02\x02" +
 		"\x02nl\x03\x02\x02\x02od\x03\x02\x02\x02op\x03\x02\x02\x02pq\x03\x02\x02" +
 		"\x02qr\x07\n\x02\x02r\x07\x03\x02\x02\x02sx\x05\n\x06\x02tu\x05\f\x07" +
 		"\x02uv\t\x02\x02\x02vx\x03\x02\x02\x02ws\x03\x02\x02\x02wt\x03\x02\x02" +
-		"\x02x\t\x03\x02\x02\x02yz\x07\x0F\x02\x02z{\x07\t\x02\x02{|\x05$\x13\x02" +
-		"|}\x07\n\x02\x02}\x81\x05\x0E\b\x02~\x7F\x07\x11\x02\x02\x7F\x82\x05\x0E" +
+		"\x02x\t\x03\x02\x02\x02yz\x07\x10\x02\x02z{\x07\t\x02\x02{|\x05$\x13\x02" +
+		"|}\x07\n\x02\x02}\x81\x05\x0E\b\x02~\x7F\x07\x12\x02\x02\x7F\x82\x05\x0E" +
 		"\b\x02\x80\x82\x06\x06\x02\x02\x81~\x03\x02\x02\x02\x81\x80\x03\x02\x02" +
-		"\x02\x82\xB6\x03\x02\x02\x02\x83\x84\x07\x12\x02\x02\x84\x85\x07\t\x02" +
+		"\x02\x82\xB6\x03\x02\x02\x02\x83\x84\x07\x13\x02\x02\x84\x85\x07\t\x02" +
 		"\x02\x85\x86\x05$\x13\x02\x86\x89\x07\n\x02\x02\x87\x8A\x05\x0E\b\x02" +
 		"\x88\x8A\x05\x12\n\x02\x89\x87\x03\x02\x02\x02\x89\x88\x03\x02\x02\x02" +
-		"\x8A\xB6\x03\x02\x02\x02\x8B\x8C\x07\x14\x02\x02\x8C\x8E\x07\t\x02\x02" +
+		"\x8A\xB6\x03\x02\x02\x02\x8B\x8C\x07\x15\x02\x02\x8C\x8E\x07\t\x02\x02" +
 		"\x8D\x8F\x05\x14\v\x02\x8E\x8D\x03\x02\x02\x02\x8E\x8F\x03\x02\x02\x02" +
-		"\x8F\x90\x03\x02\x02\x02\x90\x92\x07\x0E\x02\x02\x91\x93\x05$\x13\x02" +
+		"\x8F\x90\x03\x02\x02\x02\x90\x92\x07\x0F\x02\x02\x91\x93\x05$\x13\x02" +
 		"\x92\x91\x03\x02\x02\x02\x92\x93\x03\x02\x02\x02\x93\x94\x03\x02\x02\x02" +
-		"\x94\x96\x07\x0E\x02\x02\x95\x97\x05\x16\f\x02\x96\x95\x03\x02\x02\x02" +
+		"\x94\x96\x07\x0F\x02\x02\x95\x97\x05\x16\f\x02\x96\x95\x03\x02\x02\x02" +
 		"\x96\x97\x03\x02\x02\x02\x97\x98\x03\x02\x02\x02\x98\x9B\x07\n\x02\x02" +
 		"\x99\x9C\x05\x0E\b\x02\x9A\x9C\x05\x12\n\x02\x9B\x99\x03\x02\x02\x02\x9B" +
-		"\x9A\x03\x02\x02\x02\x9C\xB6\x03\x02\x02\x02\x9D\x9E\x07\x14\x02\x02\x9E" +
-		"\x9F\x07\t\x02\x02\x9F\xA0\x05\x1A\x0E\x02\xA0\xA1\x07U\x02\x02\xA1\xA2" +
-		"\x076\x02\x02\xA2\xA3\x05$\x13\x02\xA3\xA4\x07\n\x02\x02\xA4\xA5\x05\x0E" +
-		"\b\x02\xA5\xB6\x03\x02\x02\x02\xA6\xA7\x07\x14\x02\x02\xA7\xA8\x07\t\x02" +
-		"\x02\xA8\xA9\x07U\x02\x02\xA9\xAA\x07\x10\x02\x02\xAA\xAB\x05$\x13\x02" +
+		"\x9A\x03\x02\x02\x02\x9C\xB6\x03\x02\x02\x02\x9D\x9E\x07\x15\x02\x02\x9E" +
+		"\x9F\x07\t\x02\x02\x9F\xA0\x05\x1A\x0E\x02\xA0\xA1\x07V\x02\x02\xA1\xA2" +
+		"\x077\x02\x02\xA2\xA3\x05$\x13\x02\xA3\xA4\x07\n\x02\x02\xA4\xA5\x05\x0E" +
+		"\b\x02\xA5\xB6\x03\x02\x02\x02\xA6\xA7\x07\x15\x02\x02\xA7\xA8\x07\t\x02" +
+		"\x02\xA8\xA9\x07V\x02\x02\xA9\xAA\x07\x11\x02\x02\xAA\xAB\x05$\x13\x02" +
 		"\xAB\xAC\x07\n\x02\x02\xAC\xAD\x05\x0E\b\x02\xAD\xB6\x03\x02\x02\x02\xAE" +
-		"\xAF\x07\x19\x02\x02\xAF\xB1\x05\x10\t\x02\xB0\xB2\x05 \x11\x02\xB1\xB0" +
+		"\xAF\x07\x1A\x02\x02\xAF\xB1\x05\x10\t\x02\xB0\xB2\x05 \x11\x02\xB1\xB0" +
 		"\x03\x02\x02\x02\xB2\xB3\x03\x02\x02\x02\xB3\xB1\x03\x02\x02\x02\xB3\xB4" +
 		"\x03\x02\x02\x02\xB4\xB6\x03\x02\x02\x02\xB5y\x03\x02\x02\x02\xB5\x83" +
 		"\x03\x02\x02\x02\xB5\x8B\x03\x02\x02\x02\xB5\x9D\x03\x02\x02\x02\xB5\xA6" +
 		"\x03\x02\x02\x02\xB5\xAE\x03\x02\x02\x02\xB6\v\x03\x02\x02\x02\xB7\xB8" +
-		"\x07\x13\x02\x02\xB8\xB9\x05\x10\t\x02\xB9\xBA\x07\x12\x02\x02\xBA\xBB" +
+		"\x07\x14\x02\x02\xB8\xB9\x05\x10\t\x02\xB9\xBA\x07\x13\x02\x02\xBA\xBB" +
 		"\x07\t\x02\x02\xBB\xBC\x05$\x13\x02\xBC\xBD\x07\n\x02\x02\xBD\xC9\x03" +
-		"\x02\x02\x02\xBE\xC9\x05\x18\r\x02\xBF\xC9\x07\x15\x02\x02\xC0\xC9\x07" +
-		"\x16\x02\x02\xC1\xC3\x07\x17\x02\x02\xC2\xC4\x05$\x13\x02\xC3\xC2\x03" +
+		"\x02\x02\x02\xBE\xC9\x05\x18\r\x02\xBF\xC9\x07\x16\x02\x02\xC0\xC9\x07" +
+		"\x17\x02\x02\xC1\xC3\x07\x18\x02\x02\xC2\xC4\x05$\x13\x02\xC3\xC2\x03" +
 		"\x02\x02\x02\xC3\xC4\x03\x02\x02\x02\xC4\xC9\x03\x02\x02\x02\xC5\xC6\x07" +
-		"\x1B\x02\x02\xC6\xC9\x05$\x13\x02\xC7\xC9\x05$\x13\x02\xC8\xB7\x03\x02" +
+		"\x1C\x02\x02\xC6\xC9\x05$\x13\x02\xC7\xC9\x05$\x13\x02\xC8\xB7\x03\x02" +
 		"\x02\x02\xC8\xBE\x03\x02\x02\x02\xC8\xBF\x03\x02\x02\x02\xC8\xC0\x03\x02" +
 		"\x02\x02\xC8\xC1\x03\x02\x02\x02\xC8\xC5\x03\x02\x02\x02\xC8\xC7\x03\x02" +
 		"\x02\x02\xC9\r\x03\x02\x02\x02\xCA\xCD\x05\x10\t\x02\xCB\xCD\x05\b\x05" +
@@ -3265,25 +3282,25 @@ export class painless_parser extends Parser {
 		"\x02\xD1\xD4\x03\x02\x02\x02\xD2\xD0\x03\x02\x02\x02\xD2\xD3\x03\x02\x02" +
 		"\x02\xD3\xD6\x03\x02\x02\x02\xD4\xD2\x03\x02\x02\x02\xD5\xD7\x05\f\x07" +
 		"\x02\xD6\xD5\x03\x02\x02\x02\xD6\xD7\x03\x02\x02\x02\xD7\xD8\x03\x02\x02" +
-		"\x02\xD8\xD9\x07\x06\x02\x02\xD9\x11\x03\x02\x02\x02\xDA\xDB\x07\x0E\x02" +
+		"\x02\xD8\xD9\x07\x06\x02\x02\xD9\x11\x03\x02\x02\x02\xDA\xDB\x07\x0F\x02" +
 		"\x02\xDB\x13\x03\x02\x02\x02\xDC\xDF\x05\x18\r\x02\xDD\xDF\x05$\x13\x02" +
 		"\xDE\xDC\x03\x02\x02\x02\xDE\xDD\x03\x02\x02\x02\xDF\x15\x03\x02\x02\x02" +
 		"\xE0\xE1\x05$\x13\x02\xE1\x17\x03\x02\x02\x02\xE2\xE3\x05\x1A\x0E\x02" +
-		"\xE3\xE8\x05\x1E\x10\x02\xE4\xE5\x07\r\x02\x02\xE5\xE7\x05\x1E\x10\x02" +
+		"\xE3\xE8\x05\x1E\x10\x02\xE4\xE5\x07\x0E\x02\x02\xE5\xE7\x05\x1E\x10\x02" +
 		"\xE6\xE4\x03\x02\x02\x02\xE7\xEA\x03\x02\x02\x02\xE8\xE6\x03\x02\x02\x02" +
 		"\xE8\xE9\x03\x02\x02\x02\xE9\x19\x03\x02\x02\x02\xEA\xE8\x03\x02\x02\x02" +
 		"\xEB\xF0\x05\x1C\x0F\x02\xEC\xED\x07\x07\x02\x02\xED\xEF\x07\b\x02\x02" +
 		"\xEE\xEC\x03\x02\x02\x02\xEF\xF2\x03\x02\x02\x02\xF0\xEE\x03\x02\x02\x02" +
 		"\xF0\xF1\x03\x02\x02\x02\xF1\x1B\x03\x02\x02\x02\xF2\xF0\x03\x02\x02\x02" +
-		"\xF3\xFE\x07T\x02\x02\xF4\xFE\x07S\x02\x02\xF5\xFA\x07U\x02\x02\xF6\xF7" +
-		"\x07\v\x02\x02\xF7\xF9\x07W\x02\x02\xF8\xF6\x03\x02\x02\x02\xF9\xFC\x03" +
+		"\xF3\xFE\x07U\x02\x02\xF4\xFE\x07T\x02\x02\xF5\xFA\x07V\x02\x02\xF6\xF7" +
+		"\x07\f\x02\x02\xF7\xF9\x07X\x02\x02\xF8\xF6\x03\x02\x02\x02\xF9\xFC\x03" +
 		"\x02\x02\x02\xFA\xF8\x03\x02\x02\x02\xFA\xFB\x03\x02\x02\x02\xFB\xFE\x03" +
 		"\x02\x02\x02\xFC\xFA\x03\x02\x02\x02\xFD\xF3\x03\x02\x02\x02\xFD\xF4\x03" +
 		"\x02\x02\x02\xFD\xF5\x03\x02\x02\x02\xFE\x1D\x03\x02\x02\x02\xFF\u0102" +
-		"\x07U\x02\x02\u0100\u0101\x07>\x02\x02\u0101\u0103\x05$\x13\x02\u0102" +
+		"\x07V\x02\x02\u0100\u0101\x07?\x02\x02\u0101\u0103\x05$\x13\x02\u0102" +
 		"\u0100\x03\x02\x02\x02\u0102\u0103\x03\x02\x02\x02\u0103\x1F\x03\x02\x02" +
-		"\x02\u0104\u0105\x07\x1A\x02\x02\u0105\u0106\x07\t\x02\x02\u0106\u0107" +
-		"\x05\x1C\x0F\x02\u0107\u0108\x07U\x02\x02\u0108\u0109\x07\n\x02\x02\u0109" +
+		"\x02\u0104\u0105\x07\x1B\x02\x02\u0105\u0106\x07\t\x02\x02\u0106\u0107" +
+		"\x05\x1C\x0F\x02\u0107\u0108\x07V\x02\x02\u0108\u0109\x07\n\x02\x02\u0109" +
 		"\u010A\x05\x10\t\x02\u010A!\x03\x02\x02\x02\u010B\u010C\b\x12\x01\x02" +
 		"\u010C\u010D\x05&\x14\x02\u010D\u0137\x03\x02\x02\x02\u010E\u010F\f\x0F" +
 		"\x02\x02\u010F\u0110\t\x03\x02\x02\u0110\u0136\x05\"\x12\x10\u0111\u0112" +
@@ -3292,14 +3309,14 @@ export class painless_parser extends Parser {
 		"\u0117\u0118\f\f\x02\x02\u0118\u0119\t\x06\x02\x02\u0119\u0136\x05\"\x12" +
 		"\r\u011A\u011B\f\v\x02\x02\u011B\u011C\t\x07\x02\x02\u011C\u0136\x05\"" +
 		"\x12\f\u011D\u011E\f\t\x02\x02\u011E\u011F\t\b\x02\x02\u011F\u0136\x05" +
-		"\"\x12\n\u0120\u0121\f\b\x02\x02\u0121\u0122\x070\x02\x02\u0122\u0136" +
-		"\x05\"\x12\t\u0123\u0124\f\x07\x02\x02\u0124\u0125\x071\x02\x02\u0125" +
-		"\u0136\x05\"\x12\b\u0126\u0127\f\x06\x02\x02\u0127\u0128\x072\x02\x02" +
-		"\u0128\u0136\x05\"\x12\x07\u0129\u012A\f\x05\x02\x02\u012A\u012B\x073" +
+		"\"\x12\n\u0120\u0121\f\b\x02\x02\u0121\u0122\x071\x02\x02\u0122\u0136" +
+		"\x05\"\x12\t\u0123\u0124\f\x07\x02\x02\u0124\u0125\x072\x02\x02\u0125" +
+		"\u0136\x05\"\x12\b\u0126\u0127\f\x06\x02\x02\u0127\u0128\x073\x02\x02" +
+		"\u0128\u0136\x05\"\x12\x07\u0129\u012A\f\x05\x02\x02\u012A\u012B\x074" +
 		"\x02\x02\u012B\u0136\x05\"\x12\x06\u012C\u012D\f\x04\x02\x02\u012D\u012E" +
-		"\x074\x02\x02\u012E\u0136\x05\"\x12\x05\u012F\u0130\f\x03\x02\x02\u0130" +
-		"\u0131\x077\x02\x02\u0131\u0136\x05\"\x12\x03\u0132\u0133\f\n\x02\x02" +
-		"\u0133\u0134\x07\x1D\x02\x02\u0134\u0136\x05\x1A\x0E\x02\u0135\u010E\x03" +
+		"\x075\x02\x02\u012E\u0136\x05\"\x12\x05\u012F\u0130\f\x03\x02\x02\u0130" +
+		"\u0131\x078\x02\x02\u0131\u0136\x05\"\x12\x03\u0132\u0133\f\n\x02\x02" +
+		"\u0133\u0134\x07\x1E\x02\x02\u0134\u0136\x05\x1A\x0E\x02\u0135\u010E\x03" +
 		"\x02\x02\x02\u0135\u0111\x03\x02\x02\x02\u0135\u0114\x03\x02\x02\x02\u0135" +
 		"\u0117\x03\x02\x02\x02\u0135\u011A\x03\x02\x02\x02\u0135\u011D\x03\x02" +
 		"\x02\x02\u0135\u0120\x03\x02\x02\x02\u0135\u0123\x03\x02\x02\x02\u0135" +
@@ -3307,8 +3324,8 @@ export class painless_parser extends Parser {
 		"\x02\x02\u0135\u012F\x03\x02\x02\x02\u0135\u0132\x03\x02\x02\x02\u0136" +
 		"\u0139\x03\x02\x02\x02\u0137\u0135\x03\x02\x02\x02\u0137\u0138\x03\x02" +
 		"\x02\x02\u0138#\x03\x02\x02\x02\u0139\u0137\x03\x02\x02\x02\u013A\u0146" +
-		"\x05\"\x12\x02\u013B\u013C\x05\"\x12\x02\u013C\u013D\x075\x02\x02\u013D" +
-		"\u013E\x05$\x13\x02\u013E\u013F\x076\x02\x02\u013F\u0140\x05$\x13\x02" +
+		"\x05\"\x12\x02\u013B\u013C\x05\"\x12\x02\u013C\u013D\x076\x02\x02\u013D" +
+		"\u013E\x05$\x13\x02\u013E\u013F\x077\x02\x02\u013F\u0140\x05$\x13\x02" +
 		"\u0140\u0146\x03\x02\x02\x02\u0141\u0142\x05\"\x12\x02\u0142\u0143\t\t" +
 		"\x02\x02\u0143\u0144\x05$\x13\x02\u0144\u0146\x03\x02\x02\x02\u0145\u013A" +
 		"\x03\x02\x02\x02\u0145\u013B\x03\x02\x02\x02\u0145\u0141\x03\x02\x02\x02" +
@@ -3325,14 +3342,14 @@ export class painless_parser extends Parser {
 		"\t\x02\x02\u015D\u015E\x05.\x18\x02\u015E\u015F\x07\n\x02\x02\u015F\u0160" +
 		"\x05(\x15\x02\u0160\u0162\x03\x02\x02\x02\u0161\u0157\x03\x02\x02\x02" +
 		"\u0161\u015C\x03\x02\x02\x02\u0162+\x03\x02\x02\x02\u0163\u0164\t\f\x02" +
-		"\x02\u0164-\x03\x02\x02\x02\u0165\u0168\x07T\x02\x02\u0166\u0167\x07\x07" +
+		"\x02\u0164-\x03\x02\x02\x02\u0165\u0168\x07U\x02\x02\u0166\u0167\x07\x07" +
 		"\x02\x02\u0167\u0169\x07\b\x02\x02\u0168\u0166\x03\x02\x02\x02\u0169\u016A" +
 		"\x03\x02\x02\x02\u016A\u0168\x03\x02\x02\x02\u016A\u016B\x03\x02\x02\x02" +
-		"\u016B\u0183\x03\x02\x02\x02\u016C\u016F\x07S\x02\x02\u016D\u016E\x07" +
+		"\u016B\u0183\x03\x02\x02\x02\u016C\u016F\x07T\x02\x02\u016D\u016E\x07" +
 		"\x07\x02\x02\u016E\u0170\x07\b\x02\x02\u016F\u016D\x03\x02\x02\x02\u0170" +
 		"\u0171\x03\x02\x02\x02\u0171\u016F\x03\x02\x02\x02\u0171\u0172\x03\x02" +
-		"\x02\x02\u0172\u0183\x03\x02\x02\x02\u0173\u0178\x07U\x02\x02\u0174\u0175" +
-		"\x07\v\x02\x02\u0175\u0177\x07W\x02\x02\u0176\u0174\x03\x02\x02\x02\u0177" +
+		"\x02\x02\u0172\u0183\x03\x02\x02\x02\u0173\u0178\x07V\x02\x02\u0174\u0175" +
+		"\x07\f\x02\x02\u0175\u0177\x07X\x02\x02\u0176\u0174\x03\x02\x02\x02\u0177" +
 		"\u017A\x03\x02\x02\x02\u0178\u0176\x03\x02\x02\x02\u0178\u0179\x03\x02" +
 		"\x02\x02\u0179\u017F\x03\x02\x02\x02\u017A\u0178\x03\x02\x02\x02\u017B" +
 		"\u017C\x07\x07\x02\x02\u017C\u017E\x07\b\x02\x02\u017D\u017B\x03\x02\x02" +
@@ -3345,11 +3362,11 @@ export class painless_parser extends Parser {
 		"\x02\x02\x02\u018A\u0188\x03\x02\x02\x02\u018B\u018D\x05> \x02\u018C\u0184" +
 		"\x03\x02\x02\x02\u018C\u018B\x03\x02\x02\x02\u018D1\x03\x02\x02\x02\u018E" +
 		"\u018F\x07\t\x02\x02\u018F\u0190\x05$\x13\x02\u0190\u0191\x07\n\x02\x02" +
-		"\u0191\u01A2\x03\x02\x02\x02\u0192\u01A2\t\r\x02\x02\u0193\u01A2\x07P" +
-		"\x02\x02\u0194\u01A2\x07Q\x02\x02\u0195\u01A2\x07R\x02\x02\u0196\u01A2" +
-		"\x07N\x02\x02\u0197\u01A2\x07O\x02\x02\u0198\u01A2\x05@!\x02\u0199\u01A2" +
-		"\x05B\"\x02\u019A\u01A2\x07U\x02\x02\u019B\u019C\x07U\x02\x02\u019C\u01A2" +
-		"\x05F$\x02\u019D\u019E\x07\x18\x02\x02\u019E\u019F\x05\x1C\x0F\x02\u019F" +
+		"\u0191\u01A2\x03\x02\x02\x02\u0192\u01A2\t\r\x02\x02\u0193\u01A2\x07Q" +
+		"\x02\x02\u0194\u01A2\x07R\x02\x02\u0195\u01A2\x07S\x02\x02\u0196\u01A2" +
+		"\x07O\x02\x02\u0197\u01A2\x07P\x02\x02\u0198\u01A2\x05@!\x02\u0199\u01A2" +
+		"\x05B\"\x02\u019A\u01A2\x07V\x02\x02\u019B\u019C\t\x0E\x02\x02\u019C\u01A2" +
+		"\x05F$\x02\u019D\u019E\x07\x19\x02\x02\u019E\u019F\x05\x1C\x0F\x02\u019F" +
 		"\u01A0\x05F$\x02\u01A0\u01A2\x03\x02\x02\x02\u01A1\u018E\x03\x02\x02\x02" +
 		"\u01A1\u0192\x03\x02\x02\x02\u01A1\u0193\x03\x02\x02\x02\u01A1\u0194\x03" +
 		"\x02\x02\x02\u01A1\u0195\x03\x02\x02\x02\u01A1\u0196\x03\x02\x02\x02\u01A1" +
@@ -3360,11 +3377,11 @@ export class painless_parser extends Parser {
 		"\x02\x02\u01A6\u01A4\x03\x02\x02\x02\u01A6\u01A5\x03\x02\x02\x02\u01A7" +
 		"5\x03\x02\x02\x02\u01A8\u01AB\x058\x1D\x02\u01A9\u01AB\x05:\x1E\x02\u01AA" +
 		"\u01A8\x03\x02\x02\x02\u01AA\u01A9\x03\x02\x02\x02\u01AB7\x03\x02\x02" +
-		"\x02\u01AC\u01AD\t\x0E\x02\x02\u01AD\u01AE\x07W\x02\x02\u01AE\u01AF\x05" +
-		"F$\x02\u01AF9\x03\x02\x02\x02\u01B0\u01B1\t\x0E\x02\x02\u01B1\u01B2\t" +
-		"\x0F\x02\x02\u01B2;\x03\x02\x02\x02\u01B3\u01B4\x07\x07\x02\x02\u01B4" +
+		"\x02\u01AC\u01AD\t\x0F\x02\x02\u01AD\u01AE\x07X\x02\x02\u01AE\u01AF\x05" +
+		"F$\x02\u01AF9\x03\x02\x02\x02\u01B0\u01B1\t\x0F\x02\x02\u01B1\u01B2\t" +
+		"\x10\x02\x02\u01B2;\x03\x02\x02\x02\u01B3\u01B4\x07\x07\x02\x02\u01B4" +
 		"\u01B5\x05$\x13\x02\u01B5\u01B6\x07\b\x02\x02\u01B6=\x03\x02\x02\x02\u01B7" +
-		"\u01B8\x07\x18\x02\x02\u01B8\u01BD\x05\x1C\x0F\x02\u01B9\u01BA\x07\x07" +
+		"\u01B8\x07\x19\x02\x02\u01B8\u01BD\x05\x1C\x0F\x02\u01B9\u01BA\x07\x07" +
 		"\x02\x02\u01BA\u01BB\x05$\x13\x02\u01BB\u01BC\x07\b\x02\x02\u01BC\u01BE" +
 		"\x03\x02\x02\x02\u01BD\u01B9\x03\x02\x02\x02\u01BE\u01BF\x03\x02\x02\x02" +
 		"\u01BF\u01BD\x03\x02\x02\x02\u01BF\u01C0\x03\x02\x02\x02\u01C0\u01C8\x03" +
@@ -3372,63 +3389,63 @@ export class painless_parser extends Parser {
 		"\x03\x02\x02\x02\u01C4\u01C7\x03\x02\x02\x02\u01C5\u01C3\x03\x02\x02\x02" +
 		"\u01C5\u01C6\x03\x02\x02\x02\u01C6\u01C9\x03\x02\x02\x02\u01C7\u01C5\x03" +
 		"\x02\x02\x02\u01C8\u01C1\x03\x02\x02\x02\u01C8\u01C9\x03\x02\x02\x02\u01C9" +
-		"\u01E1\x03\x02\x02\x02\u01CA\u01CB\x07\x18\x02\x02\u01CB\u01CC\x05\x1C" +
+		"\u01E1\x03\x02\x02\x02\u01CA\u01CB\x07\x19\x02\x02\u01CB\u01CC\x05\x1C" +
 		"\x0F\x02\u01CC\u01CD\x07\x07\x02\x02\u01CD\u01CE\x07\b\x02\x02\u01CE\u01D7" +
-		"\x07\x05\x02\x02\u01CF\u01D4\x05$\x13\x02\u01D0\u01D1\x07\r\x02\x02\u01D1" +
-		"\u01D3\x05$\x13\x02\u01D2\u01D0\x03\x02\x02\x02\u01D3\u01D6\x03\x02\x02" +
-		"\x02\u01D4\u01D2\x03\x02\x02\x02\u01D4\u01D5\x03\x02\x02\x02\u01D5\u01D8" +
-		"\x03\x02\x02\x02\u01D6\u01D4\x03\x02\x02\x02\u01D7\u01CF\x03\x02\x02\x02" +
-		"\u01D7\u01D8\x03\x02\x02\x02\u01D8\u01D9\x03\x02\x02\x02\u01D9\u01DD\x07" +
-		"\x06\x02\x02\u01DA\u01DC\x054\x1B\x02\u01DB\u01DA\x03\x02\x02\x02\u01DC" +
-		"\u01DF\x03\x02\x02\x02\u01DD\u01DB\x03\x02\x02\x02\u01DD\u01DE\x03\x02" +
-		"\x02\x02\u01DE\u01E1\x03\x02\x02\x02\u01DF\u01DD\x03\x02\x02\x02\u01E0" +
-		"\u01B7\x03\x02\x02\x02\u01E0\u01CA\x03\x02\x02\x02\u01E1?\x03\x02\x02" +
-		"\x02\u01E2\u01E3\x07\x07\x02\x02\u01E3\u01E8\x05$\x13\x02\u01E4\u01E5" +
-		"\x07\r\x02\x02\u01E5\u01E7\x05$\x13\x02\u01E6\u01E4\x03\x02\x02\x02\u01E7" +
-		"\u01EA\x03\x02\x02\x02\u01E8\u01E6\x03\x02\x02\x02\u01E8\u01E9\x03\x02" +
-		"\x02\x02\u01E9\u01EB\x03\x02\x02\x02\u01EA\u01E8\x03\x02\x02\x02\u01EB" +
+		"\x07\x05\x02\x02\u01CF\u01D4\x05$\x13\x02\u01D0\u01D1\x07\x0E\x02\x02" +
+		"\u01D1\u01D3\x05$\x13\x02\u01D2\u01D0\x03\x02\x02\x02\u01D3\u01D6\x03" +
+		"\x02\x02\x02\u01D4\u01D2\x03\x02\x02\x02\u01D4\u01D5\x03\x02\x02\x02\u01D5" +
+		"\u01D8\x03\x02\x02\x02\u01D6\u01D4\x03\x02\x02\x02\u01D7\u01CF\x03\x02" +
+		"\x02\x02\u01D7\u01D8\x03\x02\x02\x02\u01D8\u01D9\x03\x02\x02\x02\u01D9" +
+		"\u01DD\x07\x06\x02\x02\u01DA\u01DC\x054\x1B\x02\u01DB\u01DA\x03\x02\x02" +
+		"\x02\u01DC\u01DF\x03\x02\x02\x02\u01DD\u01DB\x03\x02\x02\x02\u01DD\u01DE" +
+		"\x03\x02\x02\x02\u01DE\u01E1\x03\x02\x02\x02\u01DF\u01DD\x03\x02\x02\x02" +
+		"\u01E0\u01B7\x03\x02\x02\x02\u01E0\u01CA\x03\x02\x02\x02\u01E1?\x03\x02" +
+		"\x02\x02\u01E2\u01E3\x07\x07\x02\x02\u01E3\u01E8\x05$\x13\x02\u01E4\u01E5" +
+		"\x07\x0E\x02\x02\u01E5\u01E7\x05$\x13\x02\u01E6\u01E4\x03\x02\x02\x02" +
+		"\u01E7\u01EA\x03\x02\x02\x02\u01E8\u01E6\x03\x02\x02\x02\u01E8\u01E9\x03" +
+		"\x02\x02\x02\u01E9\u01EB\x03\x02\x02\x02\u01EA\u01E8\x03\x02\x02\x02\u01EB" +
 		"\u01EC\x07\b\x02\x02\u01EC\u01F0\x03\x02\x02\x02\u01ED\u01EE\x07\x07\x02" +
 		"\x02\u01EE\u01F0\x07\b\x02\x02\u01EF\u01E2\x03\x02\x02\x02\u01EF\u01ED" +
 		"\x03\x02\x02\x02\u01F0A\x03\x02\x02\x02\u01F1\u01F2\x07\x07\x02\x02\u01F2" +
-		"\u01F7\x05D#\x02\u01F3\u01F4\x07\r\x02\x02\u01F4\u01F6\x05D#\x02\u01F5" +
+		"\u01F7\x05D#\x02\u01F3\u01F4\x07\x0E\x02\x02\u01F4\u01F6\x05D#\x02\u01F5" +
 		"\u01F3\x03\x02\x02\x02\u01F6\u01F9\x03\x02\x02\x02\u01F7\u01F5\x03\x02" +
 		"\x02\x02\u01F7\u01F8\x03\x02\x02\x02\u01F8\u01FA\x03\x02\x02\x02\u01F9" +
 		"\u01F7\x03\x02\x02\x02\u01FA\u01FB\x07\b\x02\x02\u01FB\u0200\x03\x02\x02" +
-		"\x02\u01FC\u01FD\x07\x07\x02\x02\u01FD\u01FE\x076\x02\x02\u01FE\u0200" +
+		"\x02\u01FC\u01FD\x07\x07\x02\x02\u01FD\u01FE\x077\x02\x02\u01FE\u0200" +
 		"\x07\b\x02\x02\u01FF\u01F1\x03\x02\x02\x02\u01FF\u01FC\x03\x02\x02\x02" +
-		"\u0200C\x03\x02\x02\x02\u0201\u0202\x05$\x13\x02\u0202\u0203\x076\x02" +
+		"\u0200C\x03\x02\x02\x02\u0201\u0202\x05$\x13\x02\u0202\u0203\x077\x02" +
 		"\x02\u0203\u0204\x05$\x13\x02\u0204E\x03\x02\x02\x02\u0205\u020E\x07\t" +
-		"\x02\x02\u0206\u020B\x05H%\x02\u0207\u0208\x07\r\x02\x02\u0208\u020A\x05" +
-		"H%\x02\u0209\u0207\x03\x02\x02\x02\u020A\u020D\x03\x02\x02\x02\u020B\u0209" +
-		"\x03\x02\x02\x02\u020B\u020C\x03\x02\x02\x02\u020C\u020F\x03\x02\x02\x02" +
-		"\u020D\u020B\x03\x02\x02\x02\u020E\u0206\x03\x02\x02\x02\u020E\u020F\x03" +
-		"\x02\x02\x02\u020F\u0210\x03\x02\x02\x02\u0210\u0211\x07\n\x02\x02\u0211" +
-		"G\x03\x02\x02\x02\u0212\u0216\x05$\x13\x02\u0213\u0216\x05J&\x02\u0214" +
-		"\u0216\x05N(\x02\u0215\u0212\x03\x02\x02\x02\u0215\u0213\x03\x02\x02\x02" +
-		"\u0215\u0214\x03\x02\x02\x02\u0216I\x03\x02\x02\x02\u0217\u0225\x05L\'" +
-		"\x02\u0218\u0221\x07\t\x02\x02\u0219\u021E\x05L\'\x02\u021A\u021B\x07" +
-		"\r\x02\x02\u021B\u021D\x05L\'\x02\u021C\u021A\x03\x02\x02\x02\u021D\u0220" +
-		"\x03\x02\x02\x02\u021E\u021C\x03\x02\x02\x02\u021E\u021F\x03\x02\x02\x02" +
-		"\u021F\u0222\x03\x02\x02\x02\u0220\u021E\x03\x02\x02\x02\u0221\u0219\x03" +
-		"\x02\x02\x02\u0221\u0222\x03\x02\x02\x02\u0222\u0223\x03\x02\x02\x02\u0223" +
-		"\u0225\x07\n\x02\x02\u0224\u0217\x03\x02\x02\x02\u0224\u0218\x03\x02\x02" +
-		"\x02\u0225\u0226";
+		"\x02\x02\u0206\u020B\x05H%\x02\u0207\u0208\x07\x0E\x02\x02\u0208\u020A" +
+		"\x05H%\x02\u0209\u0207\x03\x02\x02\x02\u020A\u020D\x03\x02\x02\x02\u020B" +
+		"\u0209\x03\x02\x02\x02\u020B\u020C\x03\x02\x02\x02\u020C\u020F\x03\x02" +
+		"\x02\x02\u020D\u020B\x03\x02\x02\x02\u020E\u0206\x03\x02\x02\x02\u020E" +
+		"\u020F\x03\x02\x02\x02\u020F\u0210\x03\x02\x02\x02\u0210\u0211\x07\n\x02" +
+		"\x02\u0211G\x03\x02\x02\x02\u0212\u0216\x05$\x13\x02\u0213\u0216\x05J" +
+		"&\x02\u0214\u0216\x05N(\x02\u0215\u0212\x03\x02\x02\x02\u0215\u0213\x03" +
+		"\x02\x02\x02\u0215\u0214\x03\x02\x02\x02\u0216I\x03\x02\x02\x02\u0217" +
+		"\u0225\x05L\'\x02\u0218\u0221\x07\t\x02\x02\u0219\u021E\x05L\'\x02\u021A" +
+		"\u021B\x07\x0E\x02\x02\u021B\u021D\x05L\'\x02\u021C\u021A\x03\x02\x02" +
+		"\x02\u021D\u0220\x03\x02\x02\x02\u021E\u021C\x03\x02\x02\x02\u021E\u021F" +
+		"\x03\x02\x02\x02\u021F\u0222\x03\x02\x02\x02\u0220\u021E\x03\x02\x02\x02" +
+		"\u0221\u0219\x03\x02\x02\x02\u0221\u0222\x03\x02\x02\x02\u0222\u0223\x03" +
+		"\x02\x02\x02\u0223\u0225\x07\n\x02\x02\u0224\u0217\x03\x02\x02\x02\u0224" +
+		"\u0218";
 	private static readonly _serializedATNSegment1: string =
-		"\x03\x02\x02\x02\u0226\u0229\x079\x02\x02\u0227\u022A\x05\x10\t\x02\u0228" +
-		"\u022A\x05$\x13\x02\u0229\u0227\x03\x02\x02\x02\u0229\u0228\x03\x02\x02" +
-		"\x02\u022AK\x03\x02\x02\x02\u022B\u022D\x05\x1A\x0E\x02\u022C\u022B\x03" +
-		"\x02\x02\x02\u022C\u022D\x03\x02\x02\x02\u022D\u022E\x03\x02\x02\x02\u022E" +
-		"\u022F\x07U\x02\x02\u022FM\x03\x02\x02\x02\u0230\u0231\x05\x1A\x0E\x02" +
-		"\u0231\u0232\x078\x02\x02\u0232\u0233\x07U\x02\x02\u0233\u023C\x03\x02" +
-		"\x02\x02\u0234\u0235\x05\x1A\x0E\x02\u0235\u0236\x078\x02\x02\u0236\u0237" +
-		"\x07\x18\x02\x02\u0237\u023C\x03\x02\x02\x02\u0238\u0239\x07\x1C\x02\x02" +
-		"\u0239\u023A\x078\x02\x02\u023A\u023C\x07U\x02\x02\u023B\u0230\x03\x02" +
-		"\x02\x02\u023B\u0234\x03\x02\x02\x02\u023B\u0238\x03\x02\x02\x02\u023C" +
-		"O\x03\x02\x02\x02>SYlow\x81\x89\x8E\x92\x96\x9B\xB3\xB5\xC3\xC8\xCC\xD2" +
-		"\xD6\xDE\xE8\xF0\xFA\xFD\u0102\u0135\u0137\u0145\u014C\u0155\u0161\u016A" +
-		"\u0171\u0178\u017F\u0182\u0188\u018C\u01A1\u01A6\u01AA\u01BF\u01C5\u01C8" +
-		"\u01D4\u01D7\u01DD\u01E0\u01E8\u01EF\u01F7\u01FF\u020B\u020E\u0215\u021E" +
-		"\u0221\u0224\u0229\u022C\u023B";
+		"\x03\x02\x02\x02\u0225\u0226\x03\x02\x02\x02\u0226\u0229\x07:\x02\x02" +
+		"\u0227\u022A\x05\x10\t\x02\u0228\u022A\x05$\x13\x02\u0229\u0227\x03\x02" +
+		"\x02\x02\u0229\u0228\x03\x02\x02\x02\u022AK\x03\x02\x02\x02\u022B\u022D" +
+		"\x05\x1A\x0E\x02\u022C\u022B\x03\x02\x02\x02\u022C\u022D\x03\x02\x02\x02" +
+		"\u022D\u022E\x03\x02\x02\x02\u022E\u022F\x07V\x02\x02\u022FM\x03\x02\x02" +
+		"\x02\u0230\u0231\x05\x1A\x0E\x02\u0231\u0232\x079\x02\x02\u0232\u0233" +
+		"\x07V\x02\x02\u0233\u023C\x03\x02\x02\x02\u0234\u0235\x05\x1A\x0E\x02" +
+		"\u0235\u0236\x079\x02\x02\u0236\u0237\x07\x19\x02\x02\u0237\u023C\x03" +
+		"\x02\x02\x02\u0238\u0239\x07\x1D\x02\x02\u0239\u023A\x079\x02\x02\u023A" +
+		"\u023C\x07V\x02\x02\u023B\u0230\x03\x02\x02\x02\u023B\u0234\x03\x02\x02" +
+		"\x02\u023B\u0238\x03\x02\x02\x02\u023CO\x03\x02\x02\x02>SYlow\x81\x89" +
+		"\x8E\x92\x96\x9B\xB3\xB5\xC3\xC8\xCC\xD2\xD6\xDE\xE8\xF0\xFA\xFD\u0102" +
+		"\u0135\u0137\u0145\u014C\u0155\u0161\u016A\u0171\u0178\u017F\u0182\u0188" +
+		"\u018C\u01A1\u01A6\u01AA\u01BF\u01C5\u01C8\u01D4\u01D7\u01DD\u01E0\u01E8" +
+		"\u01EF\u01F7\u01FF\u020B\u020E\u0215\u021E\u0221\u0224\u0229\u022C\u023B";
 	public static readonly _serializedATN: string = Utils.join(
 		[
 			painless_parser._serializedATNSegment0,
@@ -5184,10 +5201,11 @@ export class VariableContext extends PrimaryContext {
 	}
 }
 export class CalllocalContext extends PrimaryContext {
-	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	public arguments(): ArgumentsContext {
 		return this.getRuleContext(0, ArgumentsContext);
 	}
+	public ID(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ID, 0); }
+	public DOLLAR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DOLLAR, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);

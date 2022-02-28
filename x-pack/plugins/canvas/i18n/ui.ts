@@ -405,7 +405,7 @@ export const DataSourceStrings = {
       }),
     getIndexLabel: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexLabel', {
-        defaultMessage: 'Enter an index name or select an index pattern',
+        defaultMessage: 'Enter an index name or select a data view',
       }),
     getQueryTitle: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.queryTitle', {

@@ -7,10 +7,14 @@
  */
 
 import moment from 'moment-timezone';
-import { UnreachableCaseError, wrapArray } from './util';
+import { wrapArray } from './util';
 import { ApplicationUsageTracker } from './application_usage_tracker';
-import { Metric, UiCounterMetricType, METRIC_TYPE } from './metrics';
+import { Metric, METRIC_TYPE } from './metrics';
 const REPORT_VERSION = 3;
+
+import type { UiCounterMetric, UiCounterMetricType } from './metrics/ui_counter';
+import type { UserAgentMetric } from './metrics/user_agent';
+import type { ApplicationUsageMetric } from './metrics/application_usage';
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
@@ -77,55 +81,35 @@ export class ReportManager {
         const { appName, type } = metric;
         return `${appName}-${type}`;
       }
-      case METRIC_TYPE.CLICK:
-      case METRIC_TYPE.LOADED:
-      case METRIC_TYPE.COUNT: {
-        const { appName, eventName, type } = metric;
-        return `${appName}-${type}-${eventName}`;
-      }
       case METRIC_TYPE.APPLICATION_USAGE: {
-        const { appId, viewId } = metric;
+        const { appId, viewId } = metric as ApplicationUsageMetric;
         return ApplicationUsageTracker.serializeKey({ appId, viewId });
       }
       default:
-        throw new UnreachableCaseError(metric);
+        const { appName, eventName, type } = metric as UiCounterMetric;
+        return `${appName}-${type}-${eventName}`;
     }
   }
   private assignReport(report: Report, metric: Metric) {
     const key = ReportManager.createMetricKey(metric);
     switch (metric.type) {
       case METRIC_TYPE.USER_AGENT: {
-        const { appName, type, userAgent } = metric;
+        const { appName, type, userAgent } = metric as UserAgentMetric;
         if (userAgent) {
           report.userAgent = {
             [key]: {
               key,
               appName,
               type,
-              userAgent: metric.userAgent,
+              userAgent,
             },
           };
         }
 
         return;
       }
-      case METRIC_TYPE.CLICK:
-      case METRIC_TYPE.LOADED:
-      case METRIC_TYPE.COUNT: {
-        const { appName, type, eventName, count } = metric;
-        report.uiCounter = report.uiCounter || {};
-        const currentTotal = report.uiCounter[key]?.total;
-        report.uiCounter[key] = {
-          key,
-          appName,
-          eventName,
-          type,
-          total: this.incrementTotal(count, currentTotal),
-        };
-        return;
-      }
       case METRIC_TYPE.APPLICATION_USAGE: {
-        const { numberOfClicks, startTime, appId, viewId } = metric;
+        const { numberOfClicks, startTime, appId, viewId } = metric as ApplicationUsageMetric;
         const minutesOnScreen = moment().diff(startTime, 'minutes', true);
 
         report.application_usage = report.application_usage || {};
@@ -144,7 +128,17 @@ export class ReportManager {
         return;
       }
       default:
-        throw new UnreachableCaseError(metric);
+        const { appName, type, eventName, count } = metric as UiCounterMetric;
+        report.uiCounter = report.uiCounter || {};
+        const currentTotal = report.uiCounter[key]?.total;
+        report.uiCounter[key] = {
+          key,
+          appName,
+          eventName,
+          type,
+          total: this.incrementTotal(count, currentTotal),
+        };
+        return;
     }
   }
 }

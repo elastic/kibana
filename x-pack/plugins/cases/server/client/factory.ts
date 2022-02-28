@@ -91,24 +91,32 @@ export class CasesClientFactory {
       logger: this.logger,
     });
 
-    const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
+    const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
+      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      // this tells the security plugin to not perform SO authorization and audit logging since we are handling
+      // that manually using our Authorization class and audit logger.
+      excludedWrappers: ['security'],
+    });
+
+    const attachmentService = new AttachmentService(this.logger);
+    const caseService = new CasesService({
+      log: this.logger,
+      authentication: this.options?.securityPluginStart?.authc,
+      unsecuredSavedObjectsClient,
+      attachmentService,
+    });
     const userInfo = caseService.getUser({ request });
 
     return createCasesClient({
       alertsService: new AlertService(scopedClusterClient, this.logger),
-      unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
-        includedHiddenTypes: SAVED_OBJECT_TYPES,
-        // this tells the security plugin to not perform SO authorization and audit logging since we are handling
-        // that manually using our Authorization class and audit logger.
-        excludedWrappers: ['security'],
-      }),
+      unsecuredSavedObjectsClient,
       // We only want these fields from the userInfo object
       user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
       userActionService: new CaseUserActionService(this.logger),
-      attachmentService: new AttachmentService(this.logger),
+      attachmentService,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,

@@ -52,7 +52,7 @@ describe('Policy details host isolation exceptions tab', () => {
     ({ history } = mockedContext);
     render = () =>
       (renderResult = mockedContext.render(
-        <PolicyHostIsolationExceptionsList policyId={policyId} />
+        <PolicyHostIsolationExceptionsList policyId={policyId} policyName="fakeName" />
       ));
 
     act(() => {

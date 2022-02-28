@@ -37,4 +37,5 @@ export interface XYArgs {
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
+  ariaLabel?: string;
 }

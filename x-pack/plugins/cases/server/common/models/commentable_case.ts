@@ -118,7 +118,6 @@ export class CommentableCase {
     try {
       const updatedCase = await this.caseService.patchCase({
         originalCase: this.caseInfo,
-        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseId: this.caseInfo.id,
         updatedAttributes: {
           updated_at: date,
@@ -282,7 +281,6 @@ export class CommentableCase {
   public async encode(): Promise<CaseResponse> {
     try {
       const comments = await this.caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         id: this.caseInfo.id,
         options: {
           fields: [],

@@ -12,7 +12,7 @@ export async function doesClusterExist(
   clusterName: string
 ): Promise<boolean> {
   try {
-    const { body: clusterInfoByName } = await clusterClient.asCurrentUser.cluster.remoteInfo();
+    const clusterInfoByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
     return Boolean(clusterInfoByName && clusterInfoByName[clusterName]);
   } catch (err) {
     throw new Error('Unable to check if cluster already exists.');

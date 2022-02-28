@@ -20,7 +20,6 @@ interface AllRulesProps {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
 }
 
 /**
@@ -41,13 +40,12 @@ export const AllRules = React.memo<AllRulesProps>(
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
-    setRefreshRulesData,
   }) => {
     const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
 
     return (
       <>
-        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
+        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} loading={loading} />
         <EuiSpacer />
         <RulesTables
           createPrePackagedRules={createPrePackagedRules}
@@ -59,7 +57,6 @@ export const AllRules = React.memo<AllRulesProps>(
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
           selectedTab={activeTab}
-          setRefreshRulesData={setRefreshRulesData}
         />
       </>
     );

@@ -82,8 +82,8 @@ export function jobAuditMessagesProvider(
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });
-      if (jobs.body.count > 0 && jobs.body.jobs !== undefined) {
-        gte = moment(jobs.body.jobs[0].create_time).valueOf();
+      if (jobs.count > 0 && jobs.jobs !== undefined) {
+        gte = moment(jobs.jobs[0].create_time).valueOf();
       }
     } else if (from !== undefined) {
       gte = `now-${from}`;
@@ -150,7 +150,7 @@ export function jobAuditMessagesProvider(
       });
     }
 
-    const { body } = await asInternalUser.search<JobMessage>({
+    const body = await asInternalUser.search<JobMessage>({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: SIZE,
@@ -222,7 +222,7 @@ export function jobAuditMessagesProvider(
       },
     };
 
-    const { body } = await asInternalUser.search({
+    const body = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: 0,
@@ -428,7 +428,7 @@ export function jobAuditMessagesProvider(
     jobIds: string[],
     earliestMs?: number
   ): Promise<JobsErrorsResponse> {
-    const { body } = await asInternalUser.search({
+    const body = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: 0,

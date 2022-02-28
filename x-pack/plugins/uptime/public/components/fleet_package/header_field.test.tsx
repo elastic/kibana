@@ -13,7 +13,12 @@ import { Mode } from './types';
 
 describe('<HeaderField />', () => {
   const onChange = jest.fn();
+  const onBlur = jest.fn();
   const defaultValue = {};
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('renders HeaderField', () => {
     const { getByText, getByTestId } = render(
@@ -26,6 +31,20 @@ describe('<HeaderField />', () => {
     const value = getByTestId('keyValuePairsValue0') as HTMLInputElement;
     expect(key.value).toEqual('sample');
     expect(value.value).toEqual('header');
+  });
+
+  it('calls onBlur', () => {
+    const { getByTestId } = render(
+      <HeaderField defaultValue={{ sample: 'header' }} onChange={onChange} onBlur={onBlur} />
+    );
+
+    const key = getByTestId('keyValuePairsKey0') as HTMLInputElement;
+    const value = getByTestId('keyValuePairsValue0') as HTMLInputElement;
+
+    fireEvent.blur(key);
+    fireEvent.blur(value);
+
+    expect(onBlur).toHaveBeenCalledTimes(2);
   });
 
   it('formats headers and handles onChange', async () => {

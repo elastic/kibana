@@ -31,7 +31,7 @@ describe('get_licenses', () => {
 
   describe('getLicenses', () => {
     it('returns clusters', async () => {
-      searchMock.returns(Promise.resolve({ body }));
+      searchMock.returns(Promise.resolve(body));
 
       expect(await getLicenses(clusterUuids, client, 1)).toStrictEqual(expectedLicenses);
     });
@@ -39,7 +39,7 @@ describe('get_licenses', () => {
 
   describe('fetchLicenses', () => {
     it('searches for clusters', async () => {
-      searchMock.returns({ body });
+      searchMock.returns(body);
 
       expect(await fetchLicenses(client, clusterUuids, 1)).toStrictEqual(body);
     });

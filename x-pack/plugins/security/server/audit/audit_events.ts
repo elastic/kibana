@@ -97,12 +97,14 @@ export interface UserLoginParams {
   authenticationResult: AuthenticationResult;
   authenticationProvider?: string;
   authenticationType?: string;
+  sessionId?: string;
 }
 
 export function userLoginEvent({
   authenticationResult,
   authenticationProvider,
   authenticationType,
+  sessionId,
 }: UserLoginParams): AuditEvent {
   return {
     message: authenticationResult.user
@@ -119,6 +121,7 @@ export function userLoginEvent({
     },
     kibana: {
       space_id: undefined, // Ensure this does not get populated by audit service
+      session_id: sessionId,
       authentication_provider: authenticationProvider,
       authentication_type: authenticationType,
       authentication_realm: authenticationResult.user?.authentication_realm.name,

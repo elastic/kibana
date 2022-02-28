@@ -24,7 +24,7 @@ export class ExperimentalFeaturesService {
 
   private static throwUninitializedError(): never {
     throw new Error(
-      'Experimental features services not initialized - are you trying to import this module from outside of the Security Solution app?'
+      'Technical preview features services not initialized - are you trying to import this module from outside of the Security Solution app?'
     );
   }
 }

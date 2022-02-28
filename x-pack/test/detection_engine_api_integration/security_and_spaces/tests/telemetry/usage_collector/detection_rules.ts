@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { DetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/types';
-import {
+import type { DetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/types';
+import type {
   ThreatMatchCreateSchema,
   ThresholdCreateSchema,
 } from '../../../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
   createNewAction,
@@ -33,7 +33,7 @@ import {
   waitForSignalsToBePresent,
   updateRule,
 } from '../../../../utils';
-import { getInitialDetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/detection_rule_helpers';
+import { getInitialDetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/get_initial_usage';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

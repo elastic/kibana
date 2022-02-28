@@ -26,7 +26,7 @@ export const help: FunctionHelp<FunctionFactory<typeof escount>> = {
       },
     }),
     index: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
-      defaultMessage: 'An index or index pattern. For example, {example}.',
+      defaultMessage: 'An index or data view. For example, {example}.',
       values: {
         example: '`"logstash-*"`',
       },

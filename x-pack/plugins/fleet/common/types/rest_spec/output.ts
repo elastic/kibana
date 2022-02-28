@@ -58,3 +58,7 @@ export interface PutOutputResponse {
 }
 
 export type GetOutputsResponse = ListResult<Output>;
+
+export interface PostLogstashApiKeyResponse {
+  api_key: string;
+}

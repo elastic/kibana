@@ -194,6 +194,99 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xAxisColumn = table.columns[xAxisColumnIndex];
     const yAxisColumn = table.columns[yAxisColumnIndex];
     const valueColumn = table.columns.find((v) => v.id === valueAccessor);
+    const xAxisMeta = xAxisColumn?.meta;
+    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+
+    const onElementClick = useCallback(
+      (e: HeatmapElementEvent[]) => {
+        const cell = e[0][0];
+        const { x, y } = cell.datum;
+
+        const points = [
+          {
+            row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
+            column: xAxisColumnIndex,
+            value: x,
+          },
+          ...(yAxisColumn
+            ? [
+                {
+                  row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+                  column: yAxisColumnIndex,
+                  value: y,
+                },
+              ]
+            : []),
+        ];
+
+        const context: FilterEvent['data'] = {
+          data: points.map((point) => ({
+            row: point.row,
+            column: point.column,
+            value: point.value,
+            table,
+          })),
+        };
+        onClickValue(context);
+      },
+      [onClickValue, table, xAxisColumn?.id, xAxisColumnIndex, yAxisColumn, yAxisColumnIndex]
+    );
+
+    const onBrushEnd = useCallback(
+      (e: HeatmapBrushEvent) => {
+        const { x, y } = e;
+
+        if (isTimeBasedSwimLane) {
+          const context: BrushEvent['data'] = {
+            range: x as number[],
+            table,
+            column: xAxisColumnIndex,
+          };
+          onSelectRange(context);
+        } else {
+          const points: Array<{ row: number; column: number; value: string | number }> = [];
+
+          if (yAxisColumn) {
+            (y as string[]).forEach((v) => {
+              points.push({
+                row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+                column: yAxisColumnIndex,
+                value: v,
+              });
+            });
+          }
+          if (xAxisColumn) {
+            (x as string[]).forEach((v) => {
+              points.push({
+                row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+                column: xAxisColumnIndex,
+                value: v,
+              });
+            });
+          }
+
+          const context: FilterEvent['data'] = {
+            data: points.map((point) => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
+          };
+          onClickValue(context);
+        }
+      },
+      [
+        isTimeBasedSwimLane,
+        onClickValue,
+        onSelectRange,
+        table,
+        xAxisColumn,
+        xAxisColumnIndex,
+        yAxisColumn,
+        yAxisColumnIndex,
+      ]
+    );
 
     if (!valueColumn) {
       // Chart is not ready
@@ -216,12 +309,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     }
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
-    const xAxisMeta = xAxisColumn?.meta;
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
     const metricFormatter = formatFactory(
       typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
     );
-    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
     const dateHistogramMeta = xAxisColumn
       ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
       : undefined;
@@ -315,115 +406,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         color: overwriteColor ?? colors[index + 1],
       };
     });
-
-    const onElementClick = useCallback(
-      (e: HeatmapElementEvent[]) => {
-        const cell = e[0][0];
-        const { x, y } = cell.datum;
-
-        const xAxisFieldName = xAxisColumn?.meta?.field;
-        const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-        const points = [
-          {
-            row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
-            column: xAxisColumnIndex,
-            value: x,
-          },
-          ...(yAxisColumn
-            ? [
-                {
-                  row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
-                  column: yAxisColumnIndex,
-                  value: y,
-                },
-              ]
-            : []),
-        ];
-
-        const context: FilterEvent['data'] = {
-          data: points.map((point) => ({
-            row: point.row,
-            column: point.column,
-            value: point.value,
-            table,
-          })),
-          timeFieldName,
-        };
-        onClickValue(context);
-      },
-      [
-        isTimeBasedSwimLane,
-        onClickValue,
-        table,
-        xAxisColumn?.id,
-        xAxisColumn?.meta?.field,
-        xAxisColumnIndex,
-        yAxisColumn,
-        yAxisColumnIndex,
-      ]
-    );
-
-    const onBrushEnd = useCallback(
-      (e: HeatmapBrushEvent) => {
-        const { x, y } = e;
-
-        const xAxisFieldName = xAxisColumn?.meta?.field;
-        const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-        if (isTimeBasedSwimLane) {
-          const context: BrushEvent['data'] = {
-            range: x as number[],
-            table,
-            column: xAxisColumnIndex,
-            timeFieldName,
-          };
-          onSelectRange(context);
-        } else {
-          const points: Array<{ row: number; column: number; value: string | number }> = [];
-
-          if (yAxisColumn) {
-            (y as string[]).forEach((v) => {
-              points.push({
-                row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
-                column: yAxisColumnIndex,
-                value: v,
-              });
-            });
-          }
-          if (xAxisColumn) {
-            (x as string[]).forEach((v) => {
-              points.push({
-                row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
-                column: xAxisColumnIndex,
-                value: v,
-              });
-            });
-          }
-
-          const context: FilterEvent['data'] = {
-            data: points.map((point) => ({
-              row: point.row,
-              column: point.column,
-              value: point.value,
-              table,
-            })),
-            timeFieldName,
-          };
-          onClickValue(context);
-        }
-      },
-      [
-        isTimeBasedSwimLane,
-        onClickValue,
-        onSelectRange,
-        table,
-        xAxisColumn,
-        xAxisColumnIndex,
-        yAxisColumn,
-        yAxisColumnIndex,
-      ]
-    );
 
     const themeOverrides: PartialTheme = {
       legend: {
@@ -521,6 +503,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                     : NaN,
               }}
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
             />
             <Heatmap
               id="heatmap"
@@ -542,10 +526,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               yAxisLabelName={yAxisColumn?.name}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
-              xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
+              xAxisLabelFormatter={(v) =>
+                args.gridConfig.isXAxisLabelVisible ? `${xValuesFormatter.convert(v)}` : ''
+              }
               yAxisLabelFormatter={
                 yAxisColumn
-                  ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                  ? (v) =>
+                      args.gridConfig.isYAxisLabelVisible
+                        ? `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                        : ''
                   : undefined
               }
             />

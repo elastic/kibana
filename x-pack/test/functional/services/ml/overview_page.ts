@@ -13,6 +13,24 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
   const testSubjects = getService('testSubjects');
 
   return {
+    async assertGettingStartedCalloutVisible(expectVisible: boolean = true) {
+      if (expectVisible) {
+        await testSubjects.existOrFail('mlGettingStartedCallout');
+      } else {
+        await testSubjects.missingOrFail('mlGettingStartedCallout');
+      }
+    },
+
+    async dismissGettingStartedCallout() {
+      await this.assertGettingStartedCalloutVisible(true);
+      await testSubjects.click('mlDismissGettingStartedCallout');
+      await this.assertGettingStartedCalloutVisible(false);
+    },
+
+    async assertADEmptyStateExists() {
+      await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
+    },
+
     async assertADCreateJobButtonExists() {
       await testSubjects.existOrFail('mlCreateNewJobButton');
     },
@@ -27,6 +45,14 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       );
     },
 
+    async assertAdJobsOverviewPanelExist() {
+      await testSubjects.existOrFail('mlOverviewTableAnomalyDetection');
+    },
+
+    async assertDFAEmptyStateExists() {
+      await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
+    },
+
     async assertDFACreateJobButtonExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
     },
@@ -39,6 +65,10 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
+    },
+
+    async assertDFAJobsOverviewPanelExist() {
+      await testSubjects.existOrFail('mlOverviewTableAnalytics');
     },
 
     async assertJobSyncRequiredWarningExists() {

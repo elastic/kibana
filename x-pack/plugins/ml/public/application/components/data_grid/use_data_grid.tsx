@@ -87,15 +87,15 @@ export const useDataGrid = (
   const onSort: OnSort = useCallback(
     (sc) => {
       // Check if an unsupported column type for sorting was selected.
-      const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
+      const updatedInvalidSortingColumns = sc.reduce<string[]>((arr, current) => {
         const columnType = columns.find((dgc) => dgc.id === current.id);
         if (columnType?.schema === 'json') {
           arr.push(current.id);
         }
         return arr;
       }, []);
-      setInvalidSortingColumnns(updatedInvalidSortingColumnns);
-      if (updatedInvalidSortingColumnns.length === 0) {
+      setInvalidSortingColumnns(updatedInvalidSortingColumns);
+      if (updatedInvalidSortingColumns.length === 0) {
         setSortingColumns(sc);
       }
     },

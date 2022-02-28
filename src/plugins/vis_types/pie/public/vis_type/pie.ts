@@ -13,11 +13,12 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizati
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
 import { PieTypeProps } from '../types';
 import {
-  PieVisParams,
+  PartitionVisParams,
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
-} from '../../../../chart_expressions/expression_pie/common';
+  LegendDisplay,
+} from '../../../../chart_expressions/expression_partition_vis/common';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
@@ -25,7 +26,7 @@ export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
   trackUiMetric,
-}: PieTypeProps): VisTypeDefinition<PieVisParams> => ({
+}: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -38,7 +39,7 @@ export const getPieVisTypeDefinition = ({
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: !showElasticChartsOptions,
+      legendDisplay: !showElasticChartsOptions ? LegendDisplay.SHOW : LegendDisplay.HIDE,
       legendPosition: Position.Right,
       nestedLegend: false,
       truncateLegend: true,

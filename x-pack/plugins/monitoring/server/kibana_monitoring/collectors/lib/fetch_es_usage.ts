@@ -85,7 +85,7 @@ export async function fetchESUsage(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
+  const response = await callCluster.search(params);
   const esResponse = response as estypes.SearchResponse<ClusterStats>;
   if (esResponse.hits.hits.length === 0) {
     return {
