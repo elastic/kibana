@@ -109,6 +109,5 @@ export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
     kuery: schema.maybe(schema.string()),
-    enrolledAt: schema.maybe(schema.string()),
   }),
 };

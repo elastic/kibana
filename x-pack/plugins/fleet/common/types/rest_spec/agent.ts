@@ -147,7 +147,6 @@ export interface GetAgentStatusRequest {
   query: {
     kuery?: string;
     policyId?: string;
-    enrolledAt?: string;
   };
 }
 

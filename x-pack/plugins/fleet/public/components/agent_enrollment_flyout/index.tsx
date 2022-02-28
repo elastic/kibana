@@ -36,7 +36,6 @@ import { Loading } from '..';
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
-import { ConfirmAgentEnrollment } from './confirm_agent_enrollment';
 import type { BaseProps } from './types';
 
 type FlyoutMode = 'managed' | 'standalone';

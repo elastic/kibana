@@ -50,8 +50,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   agentPolicyId?: string,
-  filterKuery?: string,
-  enrolledAt?: string
+  filterKuery?: string
 ) {
   const [all, allActive, online, error, offline, updating] = await pMap(
     [
@@ -73,7 +72,6 @@ export async function getAgentStatusForAgentPolicy(
             filterKuery,
             `${AGENTS_PREFIX}.attributes.active:true`,
             agentPolicyId ? `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"` : undefined,
-            enrolledAt ? `${AGENTS_PREFIX}.enrolled_at >= "${enrolledAt}"` : undefined,
           ]
         ),
       }),

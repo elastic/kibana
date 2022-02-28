@@ -1102,14 +1102,6 @@
             "name": "kuery",
             "in": "query",
             "required": false
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "enrolledAt",
-            "in": "query",
-            "required": false
           }
         ]
       }
