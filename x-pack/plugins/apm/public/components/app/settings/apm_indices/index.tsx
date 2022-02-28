@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,9 +20,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { ApmPluginStartDeps } from '../../../../plugin';
 import { clearCache } from '../../../../services/rest/call_api';
 import {
   APIReturnType,
@@ -93,6 +97,8 @@ const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
 
 export function ApmIndices() {
   const { core } = useApmPluginContext();
+  const { services } = useKibana<ApmPluginStartDeps>();
+
   const { notifications, application } = core;
   const canSave = application.capabilities.apm.save;
 
@@ -107,6 +113,10 @@ export function ApmIndices() {
     },
     [canSave]
   );
+
+  const { data: space } = useFetcher(() => {
+    return services.spaces?.getActiveSpace();
+  }, [services.spaces]);
 
   useEffect(() => {
     setApmIndices(
@@ -190,6 +200,31 @@ export function ApmIndices() {
       </EuiTitle>
 
       <EuiSpacer size="m" />
+
+      {space?.name && (
+        <>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                color="primary"
+                iconType="spacesApp"
+                title={
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.apm.settings.apmIndices.spaceDescription"
+                      defaultMessage="The index settings apply to the {spaceName} space."
+                      values={{
+                        spaceName: <strong>{space?.name}</strong>,
+                      }}
+                    />
+                  </EuiText>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
