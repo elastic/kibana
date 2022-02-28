@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { HTTPAdvancedFields } from './advanced_fields';
+import {
+  defaultHTTPAdvancedFields as defaultConfig,
+  HTTPAdvancedFieldsContextProvider,
+} from '../contexts';
 import {
   ConfigKey,
   DataStream,
-  HTTPMethod,
   HTTPAdvancedFields as HTTPAdvancedFieldsType,
+  HTTPMethod,
   Validation,
 } from '../types';
-import {
-  HTTPAdvancedFieldsContextProvider,
-  defaultHTTPAdvancedFields as defaultConfig,
-} from '../contexts';
 import { validate as centralValidation } from '../validation';
+import { HTTPAdvancedFields } from './advanced_fields';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
@@ -46,6 +46,8 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
 const defaultValidation = centralValidation[DataStream.HTTP];
 
 describe('<HTTPAdvancedFields />', () => {
+  const onFieldBlur = jest.fn();
+
   const WrappedComponent = ({
     defaultValues,
     validate = defaultValidation,
@@ -57,7 +59,9 @@ describe('<HTTPAdvancedFields />', () => {
   }) => {
     return (
       <HTTPAdvancedFieldsContextProvider defaultValues={defaultValues}>
-        <HTTPAdvancedFields validate={validate}>{children}</HTTPAdvancedFields>
+        <HTTPAdvancedFields validate={validate} onFieldBlur={onFieldBlur}>
+          {children}
+        </HTTPAdvancedFields>
       </HTTPAdvancedFieldsContextProvider>
     );
   };
@@ -127,6 +131,20 @@ describe('<HTTPAdvancedFields />', () => {
     expect(requestHeaders).toBeInTheDocument();
     expect(indexResponseBody.checked).toBe(false);
     expect(indexResponseHeaders.checked).toBe(false);
+  });
+
+  it('calls onBlur', () => {
+    const { getByLabelText } = render(<WrappedComponent />);
+
+    const username = getByLabelText('Username') as HTMLInputElement;
+    const requestMethod = getByLabelText('Request method') as HTMLInputElement;
+    const indexResponseBody = getByLabelText('Index response body') as HTMLInputElement;
+
+    [username, requestMethod, indexResponseBody].forEach((field) => fireEvent.blur(field));
+
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.USERNAME);
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.REQUEST_METHOD_CHECK);
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.RESPONSE_BODY_INDEX);
   });
 
   it('renders upstream fields', () => {

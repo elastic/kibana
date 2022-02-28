@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
-import { fieldList, FieldSpec, RuntimeField } from '../../../../../src/plugins/data/common';
+import { fieldList, FieldSpec } from '../../../../../src/plugins/data/common';
 
 type IndexPatternMock = Pick<
   DataView,
   | 'fields'
   | 'getComputedFields'
+  | 'getRuntimeMappings'
   | 'getFieldByName'
   | 'getTimeField'
   | 'id'
@@ -23,6 +25,7 @@ type IndexPatternMock = Pick<
 >;
 type IndexPatternMockSpec = Pick<DataView, 'id' | 'title' | 'type' | 'timeFieldName'> & {
   fields: FieldSpec[];
+  runtimeFields?: estypes.MappingRuntimeFields;
 };
 
 export const createIndexPatternMock = ({
@@ -30,6 +33,7 @@ export const createIndexPatternMock = ({
   title,
   type = undefined,
   fields,
+  runtimeFields,
   timeFieldName,
 }: IndexPatternMockSpec): IndexPatternMock => {
   const indexPatternFieldList = fieldList(fields);
@@ -43,21 +47,12 @@ export const createIndexPatternMock = ({
     isTimeBased: () => timeFieldName != null,
     getFieldByName: (fieldName) => indexPatternFieldList.find(({ name }) => name === fieldName),
     getComputedFields: () => ({
-      runtimeFields: indexPatternFieldList.reduce<Record<string, RuntimeField>>(
-        (accumulatedFields, { name, runtimeField }) => ({
-          ...accumulatedFields,
-          ...(runtimeField != null
-            ? {
-                [name]: runtimeField,
-              }
-            : {}),
-        }),
-        {}
-      ),
+      runtimeFields: runtimeFields ?? {},
       scriptFields: {},
       storedFields: [],
       docvalueFields: [],
     }),
+    getRuntimeMappings: () => runtimeFields ?? {},
   };
 };
 
