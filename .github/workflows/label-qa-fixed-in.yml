@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run on PRs that were merged for the Fleet team
     if: |
-      github.event.pull_request.merged_at &&
+      github.event.pull_request_target.merged == true &&
       contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
     outputs:
       matrix: ${{ steps.issues_to_label.outputs.value }}
@@ -45,7 +45,7 @@ jobs:
             }
           prnumber: ${{ github.event.number }}
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: sergeysova/jq-action@v2
         id: issues_to_label
         with:
@@ -84,4 +84,4 @@ jobs:
           issueid: ${{ matrix.issueNodeId }}
           labelids: ${{ needs.fetch_issues_to_label.outputs.label_ids }}
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
