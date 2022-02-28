@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { isNumber, isFinite } from 'lodash';
 import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiSelect,
-  EuiFieldNumber,
   EuiExpression,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
 } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+import { i18n } from '@kbn/i18n';
+import { isFinite, isNumber } from 'lodash';
+import React, { useState } from 'react';
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import {
   Comparator,
   ComparatorToi18nMap,

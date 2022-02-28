@@ -79,6 +79,7 @@ describe('getRuleAlertSummaryRoute', () => {
         Object {
           "dateStart": undefined,
           "id": "1",
+          "numberOfExecutions": undefined,
         },
       ]
     `);

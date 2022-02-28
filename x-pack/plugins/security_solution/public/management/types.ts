@@ -36,6 +36,7 @@ export enum AdministrationSubTab {
   trustedApps = 'trusted_apps',
   eventFilters = 'event_filters',
   hostIsolationExceptions = 'host_isolation_exceptions',
+  blocklist = 'blocklist',
 }
 
 /**

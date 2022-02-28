@@ -109,7 +109,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
     });
 
     const responseBody: ResolverEntityIndex = [];
-    for (const hit of queryResponse.body.hits.hits) {
+    for (const hit of queryResponse.hits.hits) {
       for (const supportedSchema of supportedSchemas) {
         let foundSchema = true;
         // check that the constraint and id fields are defined and that the id field is not an empty string

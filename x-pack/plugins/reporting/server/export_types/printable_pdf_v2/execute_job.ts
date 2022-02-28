@@ -11,12 +11,7 @@ import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PDF_JOB_TYPE_V2, REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  omitBlockedHeaders,
-  getCustomLogo,
-} from '../common';
+import { decryptJobHeaders, getCustomLogo } from '../common';
 import { generatePdfObservable } from './lib/generate_pdf';
 import { TaskPayloadPDFV2 } from './types';
 
@@ -33,12 +28,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
-        map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-        mergeMap((conditionalHeaders) =>
-          getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
-        ),
-        mergeMap(({ logo, conditionalHeaders }) => {
+        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = job;
           apmGetAssets?.end();
 
@@ -51,21 +42,22 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             locatorParams,
             {
               browserTimezone,
-              conditionalHeaders,
+              headers,
               layout,
             },
             logo
           );
         }),
-        tap(({ buffer, warnings }) => {
+        tap(({ buffer }) => {
           apmGeneratePdf?.end();
 
           if (buffer) {
             stream.write(buffer);
           }
         }),
-        map(({ warnings }) => ({
+        map(({ metrics, warnings }) => ({
           content_type: 'application/pdf',
+          metrics: { pdf: metrics },
           warnings,
         })),
         catchError((err) => {

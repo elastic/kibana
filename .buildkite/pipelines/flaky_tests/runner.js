@@ -29,7 +29,9 @@ function getTestSuitesFromMetadata() {
     }
 
     const value =
-      overrideCount || execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
+      overrideCount && overrideCount !== '0'
+        ? overrideCount
+        : execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
 
     const count = value === '' ? defaultCount : parseInt(value);
     testSuites.push({

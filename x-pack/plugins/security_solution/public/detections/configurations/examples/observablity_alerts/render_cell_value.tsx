@@ -13,7 +13,7 @@ import { ALERT_DURATION, ALERT_REASON, ALERT_SEVERITY, ALERT_STATUS } from '@kbn
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { Status } from '../../../components/status';
@@ -39,11 +39,12 @@ export const RenderCellValue: React.FC<
   isExpanded,
   linkValues,
   rowIndex,
+  colIndex,
   setCellProps,
   timelineId,
 }) => {
   const value =
-    getMappedNonEcsValue({
+    useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
@@ -81,6 +82,7 @@ export const RenderCellValue: React.FC<
           isExpanded={isExpanded}
           linkValues={linkValues}
           rowIndex={rowIndex}
+          colIndex={colIndex}
           setCellProps={setCellProps}
           timelineId={timelineId}
         />

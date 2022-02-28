@@ -7,18 +7,27 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { install } from '../../../../x-pack/plugins/screenshotting/server/utils';
+import { install, paths } from '../../../../x-pack/plugins/screenshotting/server/utils';
 
 export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
-    for (const platform of config.getNodePlatforms()) {
-      const target = `${platform.getName()}-${platform.getArchitecture()}`;
-      log.info(`Installing Chromium for ${target}`);
+    const preInstalledPackages = paths.packages.filter((p) => p.isPreInstalled);
 
-      // revert after https://github.com/elastic/kibana/issues/109949
-      if (target === 'darwin-arm64') continue;
+    for (const platform of config.getNodePlatforms()) {
+      const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
+      const target = `${platform.getName()}-${platform.getArchitecture()}`;
+
+      if (!pkg) {
+        log.info(`Skipping Chromium install for ${target}`);
+
+        // Unbundled chromium packages (for Darwin): Chromium is downloaded at
+        // server startup, rather than being pre-installed
+        continue;
+      }
+
+      log.info(`Installing Chromium for ${target}`);
 
       const logger = {
         get: log.withType.bind(log),
@@ -31,12 +40,8 @@ export const InstallChromium = {
         log: log.write.bind(log),
       };
 
-      await install(
-        logger,
-        build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium'),
-        platform.getName(),
-        platform.getArchitecture()
-      );
+      const path = build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium');
+      await install(logger, pkg, path);
     }
   },
 };

@@ -13,7 +13,10 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     size: number;
     // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
     // another option or whether the user explicitly chose to make it alphabetical.
-    orderBy: { type: 'alphabetical'; fallback?: boolean } | { type: 'column'; columnId: string };
+    orderBy:
+      | { type: 'alphabetical'; fallback?: boolean }
+      | { type: 'rare'; maxDocCount: number }
+      | { type: 'column'; columnId: string };
     orderDirection: 'asc' | 'desc';
     otherBucket?: boolean;
     missingBucket?: boolean;
@@ -27,10 +30,6 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     };
     parentFormat?: {
       id: string;
-      params?: {
-        id?: string;
-        template?: string;
-      };
     };
   };
 }

@@ -25,16 +25,14 @@ describe('Upgrade Assistant Usage Collector', () => {
   beforeEach(() => {
     clusterClient = elasticsearchServiceMock.createClusterClient();
     (clusterClient.asInternalUser.cluster.getSettings as jest.Mock).mockResolvedValue({
-      body: {
-        persistent: {},
-        transient: {
-          logger: {
-            deprecation: 'WARN',
-          },
-          cluster: {
-            deprecation_indexing: {
-              enabled: 'true',
-            },
+      persistent: {},
+      transient: {
+        logger: {
+          deprecation: 'WARN',
+        },
+        cluster: {
+          deprecation_indexing: {
+            enabled: 'true',
           },
         },
       },

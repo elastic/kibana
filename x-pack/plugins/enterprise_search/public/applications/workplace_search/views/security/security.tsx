@@ -92,7 +92,6 @@ export const Security: React.FC = () => {
     <EuiPanel
       paddingSize="none"
       hasShadow={false}
-      color="subdued"
       className={classNames({
         'euiPanel--disabled': !hasPlatinumLicense,
       })}
@@ -170,7 +169,7 @@ export const Security: React.FC = () => {
         hasUnsavedChanges={unsavedChanges}
         messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
       />
-      <EuiPanel color="subdued" hasBorder={false}>
+      <EuiPanel hasShadow={false} hasBorder>
         {allSourcesToggle}
         {!hasPlatinumLicense && platinumLicenseCallout}
         {sourceTables}

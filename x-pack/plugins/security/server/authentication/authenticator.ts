@@ -90,6 +90,16 @@ export interface AuthenticatorOptions {
   getServerBaseURL: () => string;
 }
 
+/** @internal */
+interface InvalidateSessionValueParams {
+  /** Request instance. */
+  request: KibanaRequest;
+  /** Value of the existing session, if any. */
+  sessionValue: SessionValue | null;
+  /** If enabled, skips writing a `user_logout` audit event for this session. */
+  skipAuditEvent?: boolean;
+}
+
 // Mapping between provider key defined in the config and authentication
 // provider class that can handle specific authentication mechanism.
 const providerMap = new Map<
@@ -325,6 +335,9 @@ export class Authenticator {
           const auditLogger = this.options.audit.asScoped(request);
           auditLogger.log(
             userLoginEvent({
+              // We must explicitly specify the sessionId for login events because we just created the session, so
+              // it won't automatically get included in the audit event from the request context.
+              sessionId: sessionUpdateResult?.value?.sid,
               authenticationResult,
               authenticationProvider: providerName,
               authenticationType: provider.type,
@@ -407,6 +420,34 @@ export class Authenticator {
   }
 
   /**
+   * Tries to reauthenticate request with the existing session.
+   * @param request Request instance.
+   */
+  async reauthenticate(request: KibanaRequest) {
+    assertRequest(request);
+
+    const existingSessionValue = await this.getSessionValue(request);
+    if (!existingSessionValue) {
+      this.logger.warn('Session is no longer available and cannot be re-authenticated.');
+      return AuthenticationResult.notHandled();
+    }
+
+    // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
+    // available then `getSessionValue` should have returned `null`.
+    const provider = this.providers.get(existingSessionValue.provider.name)!;
+    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    if (!authenticationResult.notHandled()) {
+      await this.updateSessionValue(request, {
+        provider: existingSessionValue.provider,
+        authenticationResult,
+        existingSessionValue,
+      });
+    }
+
+    return authenticationResult;
+  }
+
+  /**
    * Deauthenticates current request.
    * @param request Request instance.
    */
@@ -418,7 +459,7 @@ export class Authenticator {
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
-      await this.invalidateSessionValue(request, sessionValue);
+      await this.invalidateSessionValue({ request, sessionValue });
 
       // Provider name may be passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it.
@@ -567,7 +608,7 @@ export class Authenticator {
       this.logger.warn(
         `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
 
@@ -601,7 +642,7 @@ export class Authenticator {
     // attempt didn't fail.
     if (authenticationResult.shouldClearState()) {
       this.logger.debug('Authentication provider requested to invalidate existing session.');
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
 
@@ -615,7 +656,7 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
-        await this.invalidateSessionValue(request, existingSessionValue);
+        await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       }
       return null;
     }
@@ -653,17 +694,21 @@ export class Authenticator {
       this.logger.debug(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({
+        request,
+        sessionValue: existingSessionValue,
+        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fullly authenticated session
+      });
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.debug('Username has changed, existing session will be invalidated.');
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     }
 
@@ -698,11 +743,13 @@ export class Authenticator {
 
   /**
    * Invalidates session value associated with the specified request.
-   * @param request Request instance.
-   * @param sessionValue Value of the existing session if any.
    */
-  private async invalidateSessionValue(request: KibanaRequest, sessionValue: SessionValue | null) {
-    if (sessionValue) {
+  private async invalidateSessionValue({
+    request,
+    sessionValue,
+    skipAuditEvent,
+  }: InvalidateSessionValueParams) {
+    if (sessionValue && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLogoutEvent({

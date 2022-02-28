@@ -72,7 +72,8 @@ describe('get_data_telemetry', () => {
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
-          { name: 'ml_host_risk_score_latest', docCount: 0 },
+          { name: 'ml_host_risk_score_latest_default', docCount: 0 },
+          { name: 'ml_host_risk_score_latest', docCount: 0 }, // This should not match,
           { name: 'ml_host_risk_score', docCount: 0 }, // This should not match
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
@@ -308,11 +309,11 @@ function mockEsClient(
         },
       ])
     );
-    return { body };
+    return body;
   });
   // @ts-expect-error
   esClient.indices.stats.mockImplementationOnce(async () => {
-    return { body: indexStats };
+    return indexStats;
   });
   return esClient;
 }

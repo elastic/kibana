@@ -19,6 +19,7 @@ import {
   UsageCollectionStart,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
+  RuntimeType,
 } from './shared_imports';
 
 import type { PluginStart, InternalFieldType, CloseEditor } from './types';
@@ -104,7 +105,12 @@ export const getFieldEditorOpener =
       }
 
       const isNewRuntimeField = !fieldName;
-      const isExistingRuntimeField = field && field.runtimeField && !field.isMapped;
+      const isExistingRuntimeField =
+        field &&
+        field.runtimeField &&
+        !field.isMapped &&
+        // treat composite field instances as mapped fields for field editing purposes
+        field.runtimeField.type !== ('composite' as RuntimeType);
       const fieldTypeToProcess: InternalFieldType =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
@@ -128,7 +134,8 @@ export const getFieldEditorOpener =
               fieldFormats={fieldFormats}
               uiSettings={uiSettings}
             />
-          </KibanaReactContextProvider>
+          </KibanaReactContextProvider>,
+          { theme$: core.theme.theme$ }
         ),
         {
           className: euiFlyoutClassname,

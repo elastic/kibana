@@ -220,15 +220,22 @@ export function MachineLearningJobTableProvider(
       });
     }
 
-    public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlRefreshJobListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlRefreshJobListButton loaded', { timeout: 30 * 1000 });
+    public async waitForRefreshButtonLoaded(buttonTestSubj: string) {
+      await testSubjects.existOrFail(`~${buttonTestSubj}`, { timeout: 10 * 1000 });
+      await testSubjects.existOrFail(`${buttonTestSubj} loaded`, { timeout: 30 * 1000 });
     }
 
-    public async refreshJobList() {
-      await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlRefreshJobListButton');
-      await this.waitForRefreshButtonLoaded();
+    public async refreshJobList(
+      tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
+    ) {
+      const testSubjStr =
+        tableEnvironment === 'mlAnomalyDetection'
+          ? 'mlRefreshPageButton'
+          : 'mlRefreshJobListButton';
+
+      await this.waitForRefreshButtonLoaded(testSubjStr);
+      await testSubjects.click(`~${testSubjStr}`);
+      await this.waitForRefreshButtonLoaded(testSubjStr);
       await this.waitForJobsToLoad();
     }
 
@@ -237,8 +244,13 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+    public async filterWithSearchString(
+      filter: string,
+      expectedRowCount: number = 1,
+      tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
+    ) {
       await this.waitForJobsToLoad();
+      await this.refreshJobList(tableEnvironment);
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();

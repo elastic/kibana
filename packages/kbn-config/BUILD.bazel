@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-config"
 PKG_REQUIRE_NAME = "@kbn/config"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__config"
 
 SOURCE_FILES = glob(
   [
@@ -34,6 +33,7 @@ RUNTIME_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-config-schema",
   "//packages/kbn-logging",
+  "//packages/kbn-logging-mocks",
   "//packages/kbn-std",
   "//packages/kbn-utility-types",
   "//packages/kbn-i18n",
@@ -45,9 +45,10 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-safer-lodash-set",
+  "//packages/elastic-safer-lodash-set:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
-  "//packages/kbn-logging",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/kbn-logging-mocks:npm_module_types",
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
@@ -81,10 +82,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -116,7 +115,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

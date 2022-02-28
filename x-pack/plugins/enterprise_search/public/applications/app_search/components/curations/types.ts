@@ -6,7 +6,7 @@
  */
 
 import { Meta } from '../../../../../common/types';
-import { Result } from '../result/types';
+import { Result, ResultMeta } from '../result/types';
 
 export interface CurationSuggestion {
   query: string;
@@ -44,5 +44,6 @@ export interface CurationsAPIResponse {
 export interface CurationResult {
   // TODO: Consider updating our internal API to return more standard Result data in the future
   id: string;
-  [key: string]: string | string[];
+  _meta?: ResultMeta;
+  [key: string]: string | string[] | ResultMeta | undefined;
 }

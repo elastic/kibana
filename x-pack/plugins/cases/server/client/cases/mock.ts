@@ -10,7 +10,6 @@ import {
   CommentType,
   ConnectorMappingsAttributes,
   CaseUserActionsResponse,
-  AssociationType,
   CommentResponseAlertsType,
   ConnectorTypes,
   Actions,
@@ -32,7 +31,6 @@ const entity = {
 };
 
 export const comment: CommentResponse = {
-  associationType: AssociationType.case,
   id: 'mock-comment-1',
   comment: 'Wow, good luck catching that bad meanie!',
   type: CommentType.user as const,
@@ -55,7 +53,6 @@ export const comment: CommentResponse = {
 };
 
 export const isolateCommentActions: CommentResponse = {
-  associationType: AssociationType.case,
   id: 'mock-action-comment-1',
   comment: 'Isolating this for investigation',
   type: CommentType.actions as const,
@@ -87,7 +84,6 @@ export const isolateCommentActions: CommentResponse = {
 };
 
 export const releaseCommentActions: CommentResponse = {
-  associationType: AssociationType.case,
   id: 'mock-action-comment-1',
   comment: 'Releasing this for investigation',
   type: CommentType.actions as const,
@@ -119,7 +115,6 @@ export const releaseCommentActions: CommentResponse = {
 };
 
 export const isolateCommentActionsMultipleTargets: CommentResponse = {
-  associationType: AssociationType.case,
   id: 'mock-action-comment-1',
   comment: 'Isolating this for investigation',
   type: CommentType.actions as const,
@@ -155,7 +150,6 @@ export const isolateCommentActionsMultipleTargets: CommentResponse = {
 };
 
 export const commentAlert: CommentResponse = {
-  associationType: AssociationType.case,
   id: 'mock-comment-1',
   alertId: 'alert-id-1',
   index: 'alert-index-1',
@@ -189,12 +183,6 @@ export const commentAlertMultipleIds: CommentResponseAlertsType = {
   index: 'alert-index-1',
   type: CommentType.alert as const,
   owner: SECURITY_SOLUTION_OWNER,
-};
-
-export const commentGeneratedAlert: CommentResponseAlertsType = {
-  ...commentAlertMultipleIds,
-  id: 'mock-comment-3',
-  type: CommentType.generatedAlert as const,
 };
 
 export const defaultPipes = ['informationCreated'];

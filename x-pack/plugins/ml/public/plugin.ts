@@ -36,7 +36,7 @@ import { isFullLicense, isMlEnabled } from '../common/license';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '../../maps/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -49,6 +49,8 @@ import type {
   FieldFormatsSetup,
   FieldFormatsStart,
 } from '../../../../src/plugins/field_formats/public';
+import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
+import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -60,10 +62,13 @@ export interface MlStartDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
   fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
+  charts: ChartsPluginStart;
 }
 
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
+  maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -76,6 +81,7 @@ export interface MlSetupDependencies {
   alerting?: AlertingSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  dashboard: DashboardSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -105,7 +111,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
@@ -155,11 +163,24 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
-        await import('./register_helper');
+      const {
+        registerEmbeddables,
+        registerMlUiActions,
+        registerSearchLinks,
+        registerMlAlerts,
+        registerMapExtension,
+      } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
+
+      if (pluginsSetup.maps) {
+        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
+        const canGetJobs = capabilities.ml?.canGetJobs === true;
+        const canCreateJobs = capabilities.ml?.canCreateJob === true;
+        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
+      }
+
       if (mlEnabled) {
         registerSearchLinks(this.appUpdater$, fullLicense);
 

@@ -7,43 +7,45 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
+import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_COMMENTS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
+/**
+ * @deprecated since version 8.1.0
+ */
+export const getAllCommentsRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_COMMENTS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
+  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+    try {
+      logDeprecatedEndpoint(
+        logger,
+        request.headers,
+        `The get all cases comments API '${CASE_COMMENTS_URL}' is deprecated.`
+      );
+
+      const client = await context.cases.getCasesClient();
+
+      return response.ok({
+        headers: {
+          ...getWarningHeader(kibanaVersion),
+        },
+        body: await client.attachments.getAll({
+          caseID: request.params.case_id,
         }),
-        query: schema.maybe(
-          schema.object({
-            includeSubCaseComments: schema.maybe(schema.boolean()),
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const client = await context.cases.getCasesClient();
-
-        return response.ok({
-          body: await client.attachments.getAll({
-            caseID: request.params.case_id,
-            includeSubCaseComments: request.query?.includeSubCaseComments,
-            subCaseID: request.query?.subCaseId,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to get all comments in route case id: ${request.params.case_id} include sub case comments: ${request.query?.includeSubCaseComments} sub case id: ${request.query?.subCaseId}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get all comments in route case id: ${request.params.case_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

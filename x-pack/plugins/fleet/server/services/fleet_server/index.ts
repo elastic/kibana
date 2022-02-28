@@ -19,5 +19,5 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
   });
 
   // @ts-expect-error value is number | TotalHits
-  return res.body.hits.total.value > 0;
+  return res.hits.total.value > 0;
 }

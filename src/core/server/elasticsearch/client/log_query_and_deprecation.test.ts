@@ -10,13 +10,14 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import {
-  Client,
-  ConnectionRequestParams,
   errors,
-  TransportRequestOptions,
-  TransportRequestParams,
+  type Client,
+  type ConnectionRequestParams,
+  type TransportRequestOptions,
+  type TransportRequestParams,
+  type DiagnosticResult,
+  type RequestBody,
 } from '@elastic/elasticsearch';
-import type { DiagnosticResult, RequestBody } from '@elastic/elasticsearch';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -27,7 +28,7 @@ const createApiResponse = <T>({
   statusCode = 200,
   headers = {},
   warnings = null,
-  params,
+  params = { method: 'GET', path: '/path', querystring: '?wait_for_completion=true' },
   requestOptions = {},
 }: {
   body: T;
@@ -77,10 +78,14 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     jest.clearAllMocks();
   });
 
-  function createResponseWithBody(body?: RequestBody) {
+  function createResponseWithBody(
+    body?: RequestBody,
+    params?: { headers?: Record<string, string> }
+  ) {
     return createApiResponse({
       body: {},
       statusCode: 200,
+      headers: params?.headers ?? {},
       params: {
         method: 'GET',
         path: '/foo',
@@ -107,15 +112,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
 
       client.diagnostic.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
-            undefined,
-          ],
-        ]
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
 
@@ -132,15 +132,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       );
 
       client.diagnostic.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
-            undefined,
-          ],
-        ]
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
 
@@ -159,15 +154,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       );
 
       client.diagnostic.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        [buffer]",
-            undefined,
-          ],
-        ]
+        [buffer]"
       `);
     });
 
@@ -186,15 +176,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       );
 
       client.diagnostic.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        [stream]",
-            undefined,
-          ],
-        ]
+        [stream]"
       `);
     });
 
@@ -204,14 +189,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       const response = createResponseWithBody();
 
       client.diagnostic.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
-        GET /foo?hello=dolly",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
+        GET /foo?hello=dolly"
       `);
     });
 
@@ -230,14 +210,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       client.diagnostic.emit('response', null, response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
-        GET /foo?city=M%C3%BCnich",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
+        GET /foo?city=M%C3%BCnich"
       `);
     });
 
@@ -265,15 +240,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "500
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "500
         GET /foo?hello=dolly
-        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error",
-            undefined,
-          ],
-        ]
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error"
       `);
     });
 
@@ -283,14 +253,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       const response = createApiResponse({ body: {} });
       client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "[TimeoutError]: message",
-            undefined,
-          ],
-        ]
-      `);
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(
+        `"[TimeoutError]: message"`
+      );
     });
 
     it('logs debug when the client emits an ResponseError returned by elasticsearch', () => {
@@ -313,14 +278,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "400
-        GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "400
+        GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]"
       `);
     });
 
@@ -340,14 +300,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "400
-        GET /_path [undefined]: {\\"error\\":{}}",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "400
+        GET /_path [undefined]: {\\"error\\":{}}"
       `);
 
       logger.debug.mockClear();
@@ -363,14 +318,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "400
-        GET /_path [undefined]: Response Error",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "400
+        GET /_path [undefined]: Response Error"
       `);
     });
 
@@ -397,8 +347,21 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         Object {
           "http": Object {
             "request": Object {
+              "headers": Object {},
               "id": "opaque-id",
+              "method": "GET",
             },
+            "response": Object {
+              "body": Object {
+                "bytes": undefined,
+              },
+              "headers": Object {},
+              "status_code": 400,
+            },
+          },
+          "url": Object {
+            "path": "/_path",
+            "query": undefined,
           },
         }
       `);
@@ -423,10 +386,46 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         Object {
           "http": Object {
             "request": Object {
+              "headers": Object {},
               "id": "opaque-id",
+              "method": "GET",
+            },
+            "response": Object {
+              "body": Object {
+                "bytes": undefined,
+              },
+              "headers": Object {},
+              "status_code": 400,
             },
           },
+          "url": Object {
+            "path": "/_path",
+            "query": undefined,
+          },
         }
+      `);
+    });
+
+    it('logs response size', () => {
+      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+
+      const response = createResponseWithBody(
+        {
+          seq_no_primary_term: true,
+          query: {
+            term: { user: 'kimchy' },
+          },
+        },
+        {
+          headers: { 'content-length': '12345678' },
+        }
+      );
+
+      client.diagnostic.emit('response', null, response);
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200 - 11.8MB
+        GET /foo?hello=dolly
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
   });
@@ -541,14 +540,13 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      // One debug log entry from 'elasticsearch.query' context
-      expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:kibana');
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
       );
     });
@@ -574,7 +572,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', null, response);
 
-      expect(loggingSystemMock.collect(logger).info).toEqual([]);
       // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
@@ -609,14 +606,13 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', null, response);
 
-      // One debug log entry from 'elasticsearch.query' context
-      expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:kibana');
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
     });

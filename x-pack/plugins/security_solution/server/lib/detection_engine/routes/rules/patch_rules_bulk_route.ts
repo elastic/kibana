@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
@@ -46,13 +46,9 @@ export const patchRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting?.getRulesClient();
-      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+      const rulesClient = context.alerting.getRulesClient();
+      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = context.core.savedObjects.client;
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
 
       const mlAuthz = buildMlAuthz({
         license: context.licensing.license,
@@ -121,7 +117,7 @@ export const patchRulesBulkRoute = (
           try {
             if (type) {
               // reject an unauthorized "promotion" to ML
-              throwHttpError(await mlAuthz.validateRuleType(type));
+              throwAuthzError(await mlAuthz.validateRuleType(type));
             }
 
             const existingRule = await readRules({
@@ -132,7 +128,7 @@ export const patchRulesBulkRoute = (
             });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
-              throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+              throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
             const migratedRule = await legacyMigrate({
@@ -144,7 +140,6 @@ export const patchRulesBulkRoute = (
             const rule = await patchRules({
               rule: migratedRule,
               rulesClient,
-              savedObjectsClient,
               author,
               buildingBlockType,
               description,
@@ -157,8 +152,6 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              spaceId: context.securitySolution.getSpaceId(),
-              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
@@ -196,11 +189,13 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleStatus = await ruleStatusClient.getCurrentStatus({
-                ruleId: rule.id,
-                spaceId: context.securitySolution.getSpaceId(),
-              });
-              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleExecutionSummary,
+                isRuleRegistryEnabled
+              );
             } else {
               return getIdBulkError({ id, ruleId });
             }

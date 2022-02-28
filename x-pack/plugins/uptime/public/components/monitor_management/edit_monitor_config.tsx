@@ -6,11 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { ConfigKey, MonitorFields, TLSFields, DataStream } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorFields,
+  TLSFields,
+  DataStream,
+  ScheduleUnit,
+} from '../../../common/runtime_types';
 import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
 import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
+import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants';
 
 interface Props {
   monitor: MonitorFields;
@@ -68,9 +75,12 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         defaultIsTLSEnabled: isTLSEnabled,
         defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
         defaultMonitorType: monitorType,
-        defaultName: defaultConfig?.name || '', // TODO - figure out typing concerns for name
-        defaultLocations: defaultConfig.locations,
+        defaultName: defaultConfig?.[ConfigKey.NAME] || '', // TODO - figure out typing concerns for name
+        defaultNamespace: defaultConfig?.[ConfigKey.NAMESPACE] || DEFAULT_NAMESPACE_STRING,
+        defaultLocations: defaultConfig[ConfigKey.LOCATIONS],
         isEditable: true,
+        isZipUrlSourceEnabled: false,
+        allowedScheduleUnits: [ScheduleUnit.MINUTES],
       }}
       httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
       tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}
@@ -78,7 +88,7 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
       browserDefaultValues={fullDefaultConfig[DataStream.BROWSER]}
       tlsDefaultValues={defaultTLSConfig}
     >
-      <MonitorConfig />
+      <MonitorConfig isEdit={true} />
     </SyntheticsProviders>
   );
 };

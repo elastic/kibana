@@ -233,7 +233,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'metric-*' }),
     });
     registerDataHandler({
       appName: 'synthetics',
@@ -267,7 +267,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
 
     return (
@@ -289,7 +289,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
 
       return (
@@ -313,7 +313,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'apm',
@@ -345,7 +345,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
     registerDataHandler({
       appName: 'synthetics',
@@ -377,7 +377,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'synthetics',
@@ -411,7 +411,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'synthetics',
@@ -442,7 +442,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: async () => emptyMetricsResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
     registerDataHandler({
       appName: 'synthetics',
@@ -480,7 +480,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching Metric data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'synthetics',

@@ -93,6 +93,40 @@ export default ({ getService }: FtrProviderContext) => {
         };
         expect(body).to.eql(expected);
       });
+
+      it('should not sum up the items by OS for summary total', async () => {
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        const item = getCreateExceptionListItemMinimalSchemaMock();
+
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...item,
+            os_types: ['windows', 'linux', 'macos'],
+            item_id: `${item.item_id}-some_item_id`,
+          })
+          .expect(200);
+
+        const { body }: SummaryResponseType = await supertest
+          .get(`${EXCEPTION_LIST_URL}/summary?list_id=${LIST_ID}`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        const expected: ExceptionListSummarySchema = {
+          linux: 1,
+          macos: 1,
+          total: 1,
+          windows: 1,
+        };
+        expect(body).to.eql(expected);
+      });
     });
   });
 };

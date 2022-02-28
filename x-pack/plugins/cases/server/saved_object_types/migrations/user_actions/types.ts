@@ -15,7 +15,7 @@ export interface UserActions {
   owner: string;
 }
 
-export interface UserActionUnmigratedConnectorDocument {
+export interface UserActionVersion800 {
   action?: string;
   action_field?: string[];
   new_value?: string | null;

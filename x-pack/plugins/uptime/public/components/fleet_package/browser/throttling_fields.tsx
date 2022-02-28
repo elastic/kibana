@@ -7,14 +7,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDescribedFormGroup,
-  EuiSwitch,
-  EuiSpacer,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSwitch, EuiSpacer, EuiFormRow, EuiFieldNumber, EuiText } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { OptionalLabel } from '../optional_label';
 import { useBrowserAdvancedFieldsContext } from '../contexts';
@@ -22,6 +16,8 @@ import { Validation, ConfigKey } from '../types';
 
 interface Props {
   validate: Validation;
+  minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
 type ThrottlingConfigs =
@@ -30,7 +26,7 @@ type ThrottlingConfigs =
   | ConfigKey.UPLOAD_SPEED
   | ConfigKey.LATENCY;
 
-export const ThrottlingFields = memo<Props>(({ validate }) => {
+export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -69,6 +65,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.DOWNLOAD_SPEED,
             });
           }}
+          onBlur={() => onFieldBlur?.(ConfigKey.DOWNLOAD_SPEED)}
           data-test-subj="syntheticsBrowserDownloadSpeed"
           append={
             <EuiText size="xs">
@@ -103,6 +100,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.UPLOAD_SPEED,
             })
           }
+          onBlur={() => onFieldBlur?.(ConfigKey.UPLOAD_SPEED)}
           data-test-subj="syntheticsBrowserUploadSpeed"
           append={
             <EuiText size="xs">
@@ -120,7 +118,6 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         }
         labelAppend={<OptionalLabel />}
         isInvalid={!!validate[ConfigKey.LATENCY]?.(fields)}
-        data-test-subj="syntheticsBrowserLatency"
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
@@ -137,6 +134,8 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.LATENCY,
             })
           }
+          onBlur={() => onFieldBlur?.(ConfigKey.LATENCY)}
+          data-test-subj="syntheticsBrowserLatency"
           append={
             <EuiText size="xs">
               <strong>ms</strong>
@@ -148,7 +147,8 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
   ) : null;
 
   return (
-    <EuiDescribedFormGroup
+    <DescribedFormGroupWithWrap
+      minColumnWidth={minColumnWidth}
       title={
         <h4>
           <FormattedMessage
@@ -181,8 +181,9 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
             configKey: ConfigKey.IS_THROTTLING_ENABLED,
           })
         }
+        onBlur={() => onFieldBlur?.(ConfigKey.IS_THROTTLING_ENABLED)}
       />
       {throttlingInputs}
-    </EuiDescribedFormGroup>
+    </DescribedFormGroupWithWrap>
   );
 });

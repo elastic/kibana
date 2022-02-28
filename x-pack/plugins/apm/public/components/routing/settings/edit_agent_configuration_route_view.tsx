@@ -8,7 +8,7 @@ import React from 'react';
 import { AgentConfigurationPageStep } from '../../../../common/agent_configuration/constants';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { AgentConfigurationCreateEdit } from '../../app/Settings/agent_configurations/AgentConfigurationCreateEdit';
+import { AgentConfigurationCreateEdit } from '../../app/settings/agent_configurations/agent_configuration_create_edit';
 
 export function EditAgentConfigurationRouteView() {
   const {
@@ -21,8 +21,7 @@ export function EditAgentConfigurationRouteView() {
 
   const res = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /api/apm/settings/agent-configuration/view',
+      return callApmApi('GET /api/apm/settings/agent-configuration/view', {
         params: { query: { name, environment } },
       });
     },

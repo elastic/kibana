@@ -222,7 +222,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel data-test-subj="mlAnomaliesMapContainer">
+      <EuiPanel data-test-subj="mlAnomaliesMapContainer" hasShadow={false} hasBorder>
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}

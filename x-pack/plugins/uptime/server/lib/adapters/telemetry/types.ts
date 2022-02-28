@@ -12,6 +12,7 @@ export interface PageViewParams {
   autoRefreshEnabled: boolean;
   autorefreshInterval: number;
   refreshTelemetryHistory?: boolean;
+  refreshEsData?: boolean;
 }
 
 export interface Stats {

@@ -71,13 +71,13 @@ describe('PreviewQuery', () => {
     ]);
 
     (usePreviewRoute as jest.Mock).mockReturnValue({
+      hasNoiseWarning: false,
       addNoiseWarning: jest.fn(),
       createPreview: jest.fn(),
       clearPreview: jest.fn(),
-      errors: [],
+      logs: [],
       isPreviewRequestInProgress: false,
       previewId: undefined,
-      warnings: [],
     });
   });
 

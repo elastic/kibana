@@ -43,6 +43,19 @@ export const SeriesConfig = (props) => {
   );
   const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
 
+  const { indexPatternForQuery, onChange } = props;
+  const onChangeOverride = useCallback(
+    (partialState) => {
+      const stateUpdate = { ...partialState };
+      const isEnabling = partialState.override_index_pattern;
+      if (isEnabling && !model.series_index_pattern) {
+        stateUpdate.series_index_pattern = indexPatternForQuery;
+      }
+      onChange(stateUpdate);
+    },
+    [model.series_index_pattern, indexPatternForQuery, onChange]
+  );
+
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
@@ -126,12 +139,13 @@ export const SeriesConfig = (props) => {
             <YesNo
               value={model.override_index_pattern}
               name="override_index_pattern"
-              onChange={props.onChange}
+              onChange={onChangeOverride}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <IndexPattern
+            baseIndexPattern={indexPatternForQuery}
             onChange={props.onChange}
             model={props.model}
             fields={props.fields}

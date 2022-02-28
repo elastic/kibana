@@ -117,22 +117,20 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return (
-    await esClient.search<SearchEsListItemSchema>({
-      body: {
-        query: {
-          term: {
-            list_id: listId,
-          },
+  return (await esClient.search<SearchEsListItemSchema>({
+    body: {
+      query: {
+        term: {
+          list_id: listId,
         },
-        search_after: searchAfter,
-        sort: [{ tie_breaker_id: 'asc' }],
       },
-      ignore_unavailable: true,
-      index: listItemIndex,
-      size,
-    })
-  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
+      search_after: searchAfter,
+      sort: [{ tie_breaker_id: 'asc' }],
+    },
+    ignore_unavailable: true,
+    index: listItemIndex,
+    size,
+  })) as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

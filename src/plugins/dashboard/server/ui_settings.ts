@@ -22,7 +22,7 @@ export const getUISettings = (): Record<string, UiSettingsParams<boolean>> => ({
     }),
     description: i18n.translate('dashboard.labs.enableLabsDescription', {
       defaultMessage:
-        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable experimental features in Dashboard.',
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in Dashboard.',
     }),
     value: false,
     type: 'boolean',

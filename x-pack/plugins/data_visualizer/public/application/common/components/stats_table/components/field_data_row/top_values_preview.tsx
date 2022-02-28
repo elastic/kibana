@@ -6,12 +6,16 @@
  */
 
 import React, { FC } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
-import { ChartData, OrdinalDataItem } from './field_histograms';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { ChartData, OrdinalDataItem } from './field_histograms';
 import { ColumnChart } from './column_chart';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 
-export const TopValuesPreview: FC<FieldDataRowProps> = ({ config }) => {
+export interface TopValuesPreviewProps extends FieldDataRowProps {
+  isNumeric?: boolean;
+}
+
+export const TopValuesPreview: FC<TopValuesPreviewProps> = ({ config, isNumeric }) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { topValues, cardinality } = stats;
@@ -39,6 +43,7 @@ export const TopValuesPreview: FC<FieldDataRowProps> = ({ config }) => {
       dataTestSubj={`dataVisualizerDataGridChart-${config.fieldName}`}
       hideLabel={true}
       maxChartColumns={10}
+      isNumeric={isNumeric}
     />
   );
 };

@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
+import moment from 'moment';
+import { difference, first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
 import {
+  Aggregators,
+  Comparator,
   isTooManyBucketsPreviewException,
+  MetricExpressionParams,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
-import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
+import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
+import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
-import { MetricExpressionParams, Comparator, Aggregators } from '../types';
-import { getElasticsearchMetricQuery } from './metric_query';
 import { createTimerange } from './create_timerange';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 interface AggregationWithoutIntervals {
   aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
@@ -66,6 +68,7 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
   params: Params,
   config: InfraSource['configuration'],
   prevGroups: string[],
+  compositeSize: number,
   timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
@@ -78,6 +81,7 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
         config.metricAlias,
         groupBy,
         filterQuery,
+        compositeSize,
         timeframe,
         shouldDropPartialBuckets
       );
@@ -96,27 +100,22 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
       // If any previous groups are no longer being reported, backfill them with null values
       const currentGroups = Object.keys(currentValues);
 
-      const missingGroups = prevGroups.filter((g) => !currentGroups.includes(g));
+      const missingGroups = difference(prevGroups, currentGroups);
+
       if (currentGroups.length === 0 && missingGroups.length === 0) {
         missingGroups.push(UNGROUPED_FACTORY_KEY);
       }
       const backfillTimestamp =
         last(last(Object.values(currentValues)))?.key ?? new Date().toISOString();
-      const backfilledPrevGroups: Record<
-        string,
-        Array<{ key: string; value: number }>
-      > = missingGroups.reduce(
-        (result, group) => ({
-          ...result,
-          [group]: [
-            {
-              key: backfillTimestamp,
-              value: criterion.aggType === Aggregators.COUNT ? 0 : null,
-            },
-          ],
-        }),
-        {}
-      );
+      const backfilledPrevGroups: Record<string, Array<{ key: string; value: number | null }>> = {};
+      for (const group of missingGroups) {
+        backfilledPrevGroups[group] = [
+          {
+            key: backfillTimestamp,
+            value: criterion.aggType === Aggregators.COUNT ? 0 : null,
+          },
+        ];
+      }
       const currentValuesWithBackfilledPrevGroups = {
         ...currentValues,
         ...backfilledPrevGroups,
@@ -150,6 +149,7 @@ const getMetric: (
   index: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
+  compositeSize: number,
   timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
 ) => Promise<Record<string, Array<{ key: string; value: number }>>> = async function (
@@ -158,6 +158,7 @@ const getMetric: (
   index,
   groupBy,
   filterQuery,
+  compositeSize,
   timeframe,
   shouldDropPartialBuckets
 ) {
@@ -172,6 +173,7 @@ const getMetric: (
   const searchBody = getElasticsearchMetricQuery(
     params,
     calculatedTimerange,
+    compositeSize,
     hasGroupBy ? groupBy : undefined,
     filterQuery
   );
@@ -197,30 +199,26 @@ const getMetric: (
       );
       const compositeBuckets = (await getAllCompositeData(
         // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
-        (body) => esClient.search({ body, index }),
+        (body) => esClient.search({ body, index }, { meta: true }),
         searchBody,
         bucketSelector,
         afterKeyHandler
       )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
-      const groupedResults = compositeBuckets.reduce(
-        (result, bucket) => ({
-          ...result,
-          [Object.values(bucket.key)
-            .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(
-            bucket,
-            aggType,
-            dropPartialBucketsOptions,
-            calculatedTimerange,
-            bucket.doc_count
-          ),
-        }),
-        {}
-      );
+      const groupedResults: Record<string, any> = {};
+      for (const bucket of compositeBuckets) {
+        const key = Object.values(bucket.key).join(', ');
+        const value = getValuesFromAggregations(
+          bucket,
+          aggType,
+          dropPartialBucketsOptions,
+          calculatedTimerange,
+          bucket.doc_count
+        );
+        groupedResults[key] = value;
+      }
       return groupedResults;
     }
-    const { body: result } = await esClient.search({
-      // @ts-expect-error buckets_path is not compatible
+    const result = await esClient.search({
       body: searchBody,
       index,
     });

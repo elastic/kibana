@@ -83,7 +83,7 @@ export function jobsHealthServiceProvider(
       await mlClient.getJobs({
         ...(includeAllJobs ? {} : { job_id: jobAndGroupIds }),
       })
-    ).body.jobs;
+    ).jobs;
 
     let resultJobs = jobsResponse;
 
@@ -96,7 +96,7 @@ export function jobsHealthServiceProvider(
         await mlClient.getJobs({
           job_id: excludedJobAndGroupIds,
         })
-      ).body.jobs;
+      ).jobs;
 
       const excludedJobsIds: Set<string> = new Set(excludedJobsResponse.map((v) => v.job_id));
 
@@ -133,7 +133,7 @@ export function jobsHealthServiceProvider(
   const getDatafeeds = memoize(datafeedsService.getDatafeedByJobId);
 
   const getJobStats = memoize(
-    async (jobIds: string[]) => (await mlClient.getJobStats({ job_id: jobIds.join(',') })).body.jobs
+    async (jobIds: string[]) => (await mlClient.getJobStats({ job_id: jobIds.join(',') })).jobs
   );
 
   /** Gets values for translation string */
@@ -158,9 +158,7 @@ export function jobsHealthServiceProvider(
       if (datafeeds) {
         const jobsStats = await getJobStats(jobIds);
 
-        const {
-          body: { datafeeds: datafeedsStats },
-        } = await mlClient.getDatafeedStats({
+        const { datafeeds: datafeedsStats } = await mlClient.getDatafeedStats({
           datafeed_id: datafeeds.map((d) => d.datafeed_id).join(','),
         });
 

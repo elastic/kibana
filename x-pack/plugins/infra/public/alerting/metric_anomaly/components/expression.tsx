@@ -5,34 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiText, EuiLoadingContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
-import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled, EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  WhenExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
 import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/types';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+  WhenExpression,
+} from '../../../../../triggers_actions_ui/public';
+import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
+import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { NodeTypeExpression } from './node_type';
-import { SeverityThresholdExpression } from './severity_threshold';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
-import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
-
-import { InfluencerFilter } from './influencer_filter';
+import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { InfluencerFilter } from './influencer_filter';
+import { NodeTypeExpression } from './node_type';
+import { SeverityThresholdExpression } from './severity_threshold';
 
 export interface AlertContextMeta {
   metric?: InfraWaffleMapOptions['metric'];

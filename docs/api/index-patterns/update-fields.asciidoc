@@ -1,0 +1,102 @@
+[[index-patterns-fields-api-update]]
+=== Update index pattern fields API
+++++
+<titleabbrev>Update index pattern fields metadata</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-fields-api-update>> instead.]
+
+experimental[] Update fields presentation metadata, such as `count`,
+`customLabel`, and `format`. You can update multiple fields in one request. Updates
+are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
+
+[[index-patterns-fields-api-update-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>/fields`
+
+`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>/fields`
+
+[[index-patterns-fields-api-update-path-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+(Required, string) The ID of the index pattern fields you want to update.
+
+[[index-patterns-fields-api-update-request-body]]
+==== Request body
+
+`fields`::
+(Required, object) the field object
+
+
+[[index-patterns-fields-api-update-errors-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+[[index-patterns-fields-api-update-example]]
+==== Examples
+
+Set popularity `count` for field `foo`:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123
+        }
+    }
+}
+--------------------------------------------------
+// KIBANA
+
+Update multiple metadata fields in one request:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123,
+            "customLabel": "Foo"
+        },
+        "bar": {
+            "customLabel": "Bar"
+        }
+    }
+}
+--------------------------------------------------
+// KIBANA
+
+Use `null` value to delete metadata:
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+{
+    "fields": {
+        "foo": {
+            "customLabel": null
+        }
+    }
+}
+--------------------------------------------------
+// KIBANA
+
+
+The endpoint returns the updated index pattern object:
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {
+
+    }
+}
+--------------------------------------------------

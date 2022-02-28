@@ -6,12 +6,12 @@
  */
 
 import { Logger, CoreStart } from 'kibana/server';
+import { nodeBuilder } from '@kbn/es-query';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
 import { ActionTypeRegistryContract } from '../types';
 import { cleanupTasks, CleanupTasksResult } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 export interface FindAndCleanupTasksOpts {
   logger: Logger;
@@ -48,7 +48,7 @@ export async function findAndCleanupTasks({
         actionTypeRegistry
           .list()
           .map((actionType) =>
-            nodeBuilder.is('task.attributes.taskType', `actions:${actionType.id}`)
+            nodeBuilder.is('task.attributes.taskType', `"actions:${actionType.id}"`)
           )
       ),
     ]),

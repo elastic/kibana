@@ -22,8 +22,9 @@ import React, { Fragment, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
+import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
-import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';
 import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
@@ -41,6 +42,17 @@ export interface PrivilegeSummaryTableProps {
 
 function getColumnKey(entry: RoleKibanaPrivilege) {
   return `privilege_entry_${entry.spaces.join('|')}`;
+}
+
+function showPrivilege(allSpacesSelected: boolean, primaryFeature?: PrimaryFeaturePrivilege) {
+  if (
+    primaryFeature?.name == null ||
+    primaryFeature?.disabled ||
+    (primaryFeature.requireAllSpaces && !allSpacesSelected)
+  ) {
+    return 'None';
+  }
+  return primaryFeature?.name;
 }
 
 export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
@@ -145,7 +157,11 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               hasCustomizedSubFeaturePrivileges ? 'additionalPrivilegesGranted' : ''
             }`}
           >
-            {primary?.name ?? 'None'} {iconTip}
+            {showPrivilege(
+              props.spaces.some((space) => space.id === ALL_SPACES_ID),
+              primary
+            )}{' '}
+            {iconTip}
           </span>
         );
       },

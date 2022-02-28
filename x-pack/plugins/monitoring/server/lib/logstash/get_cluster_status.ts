@@ -6,7 +6,6 @@
  */
 
 import { get } from 'lodash';
-import { checkParam } from '../error_missing_required';
 import { getLogstashForClusters } from './get_logstash_for_clusters';
 import { LegacyRequest } from '../../types';
 
@@ -16,18 +15,12 @@ import { LegacyRequest } from '../../types';
  * Shared functionality between the different routes.
  *
  * @param {Object} req The incoming request.
- * @param {String} lsIndexPattern The Logstash pattern to query for the current time range.
  * @param {String} clusterUuid The cluster UUID for the associated Elasticsearch cluster.
  * @returns {Promise} The cluster status object.
  */
-export function getClusterStatus(
-  req: LegacyRequest,
-  lsIndexPattern: string,
-  { clusterUuid }: { clusterUuid: string }
-) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getClusterStatus');
+export function getClusterStatus(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getLogstashForClusters(req, lsIndexPattern, clusters).then((clusterStatus) =>
+  return getLogstashForClusters(req, clusters).then((clusterStatus) =>
     get(clusterStatus, '[0].stats')
   );
 }

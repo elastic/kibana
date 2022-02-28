@@ -33,6 +33,8 @@ describe('interpreter/functions#heatmap', () => {
       isCellLabelVisible: true,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
       type: EXPRESSION_HEATMAP_GRID_NAME,
     },
     palette: {

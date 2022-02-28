@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
-import type { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { nodeBuilder } from '@kbn/es-query';
+import type { Logger, SavedObjectsClientContract } from 'src/core/server';
 
 const MAX_OBJECTS_TO_FIND = 10000; // we only expect up to a few dozen, search for 10k to be safe; anything over this is ignored
 
@@ -95,9 +94,8 @@ function getUniqueTypes(objects: SampleObject[]) {
 }
 
 function createKueryFilter(objects: SampleObject[]) {
-  const { buildNode } = esKuery.nodeTypes.function;
   const kueryNodes = objects.map(({ type, id }) => nodeBuilder.is(`${type}.originId`, id)); // the repository converts this node into "and (type is ..., originId is ...)"
-  return buildNode('or', kueryNodes);
+  return nodeBuilder.or(kueryNodes);
 }
 
 function getObjKey(type: string, id: string) {

@@ -31,7 +31,7 @@ export function useFilterValues(
 
   return useValuesList({
     query,
-    label,
+    label: label ?? field,
     sourceField: field,
     time: series.time,
     keepHistory: true,

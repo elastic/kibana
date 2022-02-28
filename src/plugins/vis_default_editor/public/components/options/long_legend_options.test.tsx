@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LongLegendOptions, LongLegendOptionsProps } from './long_legend_options';
 import { EuiFieldNumber } from '@elastic/eui';
 

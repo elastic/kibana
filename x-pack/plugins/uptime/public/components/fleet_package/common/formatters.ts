@@ -22,7 +22,9 @@ export const commonFormatters: CommonFormatMap = {
     ),
   [ConfigKey.APM_SERVICE_NAME]: null,
   [ConfigKey.TAGS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.TAGS]),
-  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
+  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
+  [ConfigKey.NAMESPACE]: null,
+  [ConfigKey.REVISION]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

@@ -13,7 +13,7 @@ import {
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import defaultIcon from '../span_icon/icons/default.svg';
-import dotNetIcon from './icons/dot-net.svg';
+import dotNetIcon from './icons/dot_net.svg';
 import erlangIcon from './icons/erlang.svg';
 import goIcon from './icons/go.svg';
 import iosIcon from './icons/ios.svg';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../common';
 
 export const isScreenshotMode = (request: KibanaRequest): boolean => {

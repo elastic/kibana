@@ -544,7 +544,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Tx. last week',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                     timeShift: '1w',
                   },
                   'ddc92e50-4d5c-413e-b91b-3e504889fa65': {
@@ -554,7 +554,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Transactions',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'eadae280-2da3-4d1d-a0e1-f9733f89c15b': {
                     customLabel: true,
@@ -743,7 +743,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Count of records',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   '9f61a7df-198e-4754-b34c-81ed544136ba': {
                     dataType: 'string',
@@ -1070,7 +1070,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Items',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'd77cdd24-dedc-48dd-9a4b-d34c6f1a6c46': {
                     customLabel: true,
@@ -1186,7 +1186,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Items',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'd77cdd24-dedc-48dd-9a4b-d34c6f1a6c46': {
                     customLabel: true,

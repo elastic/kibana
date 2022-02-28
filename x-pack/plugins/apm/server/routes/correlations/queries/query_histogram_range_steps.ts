@@ -61,18 +61,18 @@ export const fetchTransactionDurationHistogramRangeSteps = async (
     }
   >(getHistogramIntervalRequest(params));
 
-  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+  if ((resp.hits.total as estypes.SearchTotalHits).value === 0) {
     return getHistogramRangeSteps(0, 1, 100);
   }
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationHistogramRangeSteps failed, did not return aggregations.'
     );
   }
 
-  const min = resp.body.aggregations.transaction_duration_min.value;
-  const max = resp.body.aggregations.transaction_duration_max.value * 2;
+  const min = resp.aggregations.transaction_duration_min.value;
+  const max = resp.aggregations.transaction_duration_max.value * 2;
 
   return getHistogramRangeSteps(min, max, steps);
 };

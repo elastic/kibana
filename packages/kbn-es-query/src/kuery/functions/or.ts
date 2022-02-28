@@ -23,7 +23,8 @@ export function isNode(node: KqlFunctionNode): node is KqlOrFunctionNode {
   return node.function === KQL_FUNCTION_NAME_OR;
 }
 
-export function buildNode(subQueries: KqlFunctionNode[]): KqlOrFunctionNode {
+export function buildNode(subQueries: KqlFunctionNode[]): KqlFunctionNode {
+  if (subQueries.length === 1) return subQueries[0];
   return {
     type: KQL_NODE_TYPE_FUNCTION,
     function: KQL_FUNCTION_NAME_OR,
@@ -40,6 +41,10 @@ export function toElasticsearchQuery(
   const clause = nodes.map((node) => {
     return nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
   });
+
+  // If we have only one query, no need to wrap it in a bool clause
+  if (clause.length === 1) return clause[0];
+
   return {
     bool: {
       should: clause,

@@ -63,3 +63,15 @@ filegroup(
   ],
   visibility = ["//visibility:public"],
 )
+
+alias(
+  name = "npm_module_types",
+  actual = PKG_BASE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "build_types",
+  actual = "build",
+  visibility = ["//visibility:public"],
+)

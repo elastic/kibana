@@ -8,7 +8,6 @@
 import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesItems } from './get_services/get_services_items';
-import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import {
   SearchParamsMock,
@@ -66,16 +65,6 @@ describe('services queries', () => {
     const allParams = mock.spy.mock.calls.map((call) => call[1]);
 
     expect(allParams).toMatchSnapshot();
-  });
-
-  it('fetches the legacy data status', async () => {
-    const start = 1;
-    const end = 50000;
-    mock = await inspectSearchParams((setup) =>
-      getLegacyDataStatus(setup, start, end)
-    );
-
-    expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches the agent status', async () => {

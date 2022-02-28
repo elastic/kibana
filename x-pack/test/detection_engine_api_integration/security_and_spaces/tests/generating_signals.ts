@@ -23,6 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -70,7 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Generating signals from source indexes', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);
@@ -737,7 +739,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -864,7 +866,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -920,10 +922,6 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
-                  field: 'event.module',
-                  value: 'system',
-                },
-                {
                   field: 'host.id',
                   value: '2ab45fc1c41e4c84bbd02202a7e5761f',
                 },
@@ -931,9 +929,13 @@ export default ({ getService }: FtrProviderContext) => {
                   field: 'process.name',
                   value: 'sshd',
                 },
+                {
+                  field: 'event.module',
+                  value: 'system',
+                },
               ],
               count: 21,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T20:22:03.561Z',
             },
           });
         });
@@ -1191,7 +1193,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .query({ id: ruleResponse.id });
-        const initialStatusDate = new Date(statusResponse.body.status_date);
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        const ruleStatusDate = statusResponse.body?.execution_summary?.last_execution.date;
+        const initialStatusDate = new Date(ruleStatusDate);
 
         const initialSignal = signals.hits.hits[0];
 
@@ -1212,7 +1217,7 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           log,
           ruleResponse.id,
-          'succeeded',
+          RuleExecutionStatus.succeeded,
           initialStatusDate
         );
 

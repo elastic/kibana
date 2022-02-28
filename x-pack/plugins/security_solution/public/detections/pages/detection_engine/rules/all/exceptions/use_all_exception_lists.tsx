@@ -95,7 +95,6 @@ export const useAllExceptionLists = ({
           pagination: {
             page: 1,
             perPage: 10000,
-            total: 0,
           },
           signal: abortCtrl.signal,
         });

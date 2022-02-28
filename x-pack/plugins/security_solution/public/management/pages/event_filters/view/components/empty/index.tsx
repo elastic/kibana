@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from '../../../../../components/management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
@@ -21,9 +21,10 @@ export const EventFiltersListEmptyState = memo<{
   onAdd: () => void;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-}>(({ onAdd, isAddDisabled = false }) => {
+  backComponent?: React.ReactNode;
+}>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EmptyPrompt
         data-test-subj="eventFiltersEmpty"
         iconType="plusInCircle"
@@ -41,7 +42,7 @@ export const EventFiltersListEmptyState = memo<{
             defaultMessage="Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             isDisabled={isAddDisabled}
@@ -52,10 +53,11 @@ export const EventFiltersListEmptyState = memo<{
               id="xpack.securitySolution.eventFilters.listEmpty.addButton"
               defaultMessage="Add event filter"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

@@ -17,6 +17,10 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
   });
 
+export const RISK_SCORE = i18n.translate('xpack.securitySolution.hostsRiskTable.tableTitle', {
+  defaultMessage: 'Host risk',
+});
+
 export const NAME = i18n.translate('xpack.securitySolution.hostsTable.nameTitle', {
   defaultMessage: 'Host name',
 });
@@ -37,6 +41,13 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
   {
     defaultMessage:
       'Host risk classifcation is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
+  }
+);
+
+export const OS_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.osLastSeenToolTip',
+  {
+    defaultMessage: 'Last observed operating system',
   }
 );
 

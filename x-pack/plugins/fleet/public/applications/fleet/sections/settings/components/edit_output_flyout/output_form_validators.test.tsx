@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { validateHosts, validateYamlConfig } from './output_form_validators';
+import {
+  validateHosts,
+  validateYamlConfig,
+  validateCATrustedFingerPrint,
+} from './output_form_validators';
 
 describe('Output form validation', () => {
   describe('validateHosts', () => {
@@ -70,6 +74,23 @@ describe('Output form validation', () => {
       if (typeof res !== 'undefined') {
         expect(res[0]).toContain('Invalid YAML: ');
       }
+    });
+  });
+  describe('validate', () => {
+    it('should work with a valid fingerprint', () => {
+      const res = validateCATrustedFingerPrint(
+        '9f0a10411457adde3982ef01df20d2e7aa53a8ef29c50bcbfa3f3e93aebf631b'
+      );
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should return an error with a invalid formatted fingerprint', () => {
+      const res = validateCATrustedFingerPrint(
+        '9F:0A:10:41:14:57:AD:DE:39:82:EF:01:DF:20:D2:E7:AA:53:A8:EF:29:C5:0B:CB:FA:3F:3E:93:AE:BF:63:1B'
+      );
+
+      expect(res).toEqual(['CA trusted fingerprint should be a base64 CA sha256 fingerprint']);
     });
   });
 });

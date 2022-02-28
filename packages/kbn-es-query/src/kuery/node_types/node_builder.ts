@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { functions } from '../functions';
+import { and, exists, is, nested, not, or, range } from '../functions';
 
 export const nodeBuilder = {
-  and: functions.and.buildNode,
-  exists: functions.exists.buildNode,
-  is: functions.is.buildNode,
-  nested: functions.nested.buildNode,
-  not: functions.not.buildNode,
-  or: functions.or.buildNode,
-  range: functions.range.buildNode,
+  and: and.buildNode,
+  exists: exists.buildNode,
+  is: is.buildNode,
+  nested: nested.buildNode,
+  not: not.buildNode,
+  or: or.buildNode,
+  range: range.buildNode,
 };

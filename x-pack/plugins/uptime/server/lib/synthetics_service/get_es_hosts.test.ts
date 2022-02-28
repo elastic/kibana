@@ -25,7 +25,9 @@ describe('getEsHostsTest', () => {
   it('should return expected host in cloud', function () {
     const esHosts = getEsHosts({
       cloud: cloudSetup,
-      config: {},
+      config: {
+        manifestUrl: 'https://testing.com',
+      },
     });
 
     expect(esHosts).toEqual([
@@ -36,11 +38,8 @@ describe('getEsHostsTest', () => {
   it('should return expected host from config', function () {
     const esHosts = getEsHosts({
       config: {
-        unsafe: {
-          service: {
-            hosts: ['http://localhost:9200'],
-          },
-        },
+        manifestUrl: 'https://testing.com',
+        hosts: ['http://localhost:9200'],
       },
     });
 
@@ -50,11 +49,8 @@ describe('getEsHostsTest', () => {
     const esHosts = getEsHosts({
       cloud: cloudSetup,
       config: {
-        unsafe: {
-          service: {
-            hosts: ['http://localhost:9200'],
-          },
-        },
+        manifestUrl: 'https://testing.com',
+        hosts: ['http://localhost:9200'],
       },
     });
 

@@ -34,6 +34,17 @@ describe('ES deprecations table', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
+    httpRequestsMockHelpers.setReindexStatusResponse({
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
+    });
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
     await act(async () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
@@ -95,6 +106,25 @@ describe('ES deprecations table', () => {
     expect(find('warningDeprecationsCount').text()).toContain(warningDeprecations.length);
   });
 
+  describe('remote clusters callout', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(['test_remote_cluster']);
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      });
+
+      testBed.component.update();
+    });
+
+    it('shows a warning message if a user has remote clusters configured', () => {
+      const { exists } = testBed;
+
+      // Verify warning exists
+      expect(exists('remoteClustersWarningCallout')).toBe(true);
+    });
+  });
+
   describe('search bar', () => {
     it('filters results by "critical" status', async () => {
       const { find, actions } = testBed;
@@ -119,10 +149,10 @@ describe('ES deprecations table', () => {
 
       await actions.searchBar.clickTypeFilterDropdownAt(0);
 
-      // We need to read the document "body" as the filter dropdown options are added there and not inside
-      // the component DOM tree.
+      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
+      // is added in a portalled popover and not inside the component DOM tree.
       const clusterTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiFilterSelect__items .euiFilterSelectItem'
+        '.euiSelectableList .euiSelectableListItem'
       );
 
       expect(clusterTypeFilterButton).not.toBeNull();

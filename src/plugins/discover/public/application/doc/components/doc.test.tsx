@@ -9,12 +9,13 @@
 import { throwError, of } from 'rxjs';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 const mockSearchApi = jest.fn();
 
@@ -23,30 +24,6 @@ jest.mock('../../../kibana_services', () => {
   let registry: any[] = [];
 
   return {
-    getServices: () => ({
-      metadata: {
-        branch: 'test',
-      },
-      data: {
-        search: {
-          search: mockSearchApi,
-        },
-      },
-      docLinks: {
-        links: {
-          apis: {
-            indexExists: 'mockUrl',
-          },
-        },
-      },
-      uiSettings: {
-        get: (key: string) => {
-          if (key === mockSearchFieldsFromSource) {
-            return false;
-          }
-        },
-      },
-    }),
     getDocViewsRegistry: () => ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addDocView(view: any) {
@@ -82,8 +59,36 @@ async function mountDoc(update = false) {
     indexPattern: indexPatternMock,
   } as DocProps;
   let comp!: ReactWrapper;
+  const services = {
+    metadata: {
+      branch: 'test',
+    },
+    data: {
+      search: {
+        search: mockSearchApi,
+      },
+    },
+    docLinks: {
+      links: {
+        apis: {
+          indexExists: 'mockUrl',
+        },
+      },
+    },
+    uiSettings: {
+      get: (key: string) => {
+        if (key === mockSearchFieldsFromSource) {
+          return false;
+        }
+      },
+    },
+  };
   await act(async () => {
-    comp = mountWithIntl(<Doc {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={services}>
+        <Doc {...props} />
+      </KibanaContextProvider>
+    );
     if (update) comp.update();
   });
   if (update) {

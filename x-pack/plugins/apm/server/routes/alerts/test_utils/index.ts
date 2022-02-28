@@ -42,7 +42,7 @@ export const createRuleTypeMocks = () => {
     savedObjectsClient: {
       get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },
-    alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    alertFactory: { create: jest.fn(() => ({ scheduleActions })), done: {} },
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,

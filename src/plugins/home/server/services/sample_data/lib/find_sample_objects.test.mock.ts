@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const mockBuildNode = jest.fn();
+export const mockBuildIsNode = jest.fn();
+export const mockBuildOrNode = jest.fn();
 
 jest.mock('@kbn/es-query', () => {
   return {
-    nodeTypes: {
-      function: {
-        buildNode: mockBuildNode,
-      },
+    nodeBuilder: {
+      is: mockBuildIsNode,
+      or: mockBuildOrNode,
     },
   };
 });

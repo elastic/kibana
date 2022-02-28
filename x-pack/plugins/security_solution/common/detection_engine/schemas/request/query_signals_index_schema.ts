@@ -15,6 +15,7 @@ export const querySignalsSchema = t.exact(
     size: PositiveInteger,
     track_total_hits: t.boolean,
     _source: t.array(t.string),
+    runtime_mappings: t.unknown,
   })
 );
 

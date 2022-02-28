@@ -103,8 +103,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.lens.saveAndReturn();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
-        expect(pieExists).to.be(true);
+        const partitionVisExists = await testSubjects.exists('partitionVisChart');
+        expect(partitionVisExists).to.be(true);
       });
 
       it('disables save to library button without visualize save permissions', async () => {

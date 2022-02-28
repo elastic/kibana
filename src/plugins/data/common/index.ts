@@ -35,7 +35,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -43,9 +42,7 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,
@@ -54,7 +51,6 @@ export type {
 export type {
   IndexPatternsContract,
   DataViewsContract,
-  IndexPatternListItem,
   DataViewListItem,
 } from '../../data_views/common';
 export {
@@ -68,7 +64,6 @@ export {
   DataViewField,
   IndexPatternField,
   DataViewType,
-  IndexPatternType,
   IndexPatternsService,
   DataViewsService,
   IndexPattern,

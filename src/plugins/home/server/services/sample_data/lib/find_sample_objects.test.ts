@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockBuildNode } from './find_sample_objects.test.mock';
+import { mockBuildIsNode, mockBuildOrNode } from './find_sample_objects.test.mock';
 
 import type { SavedObject, SavedObjectsFindResponse } from 'src/core/server';
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
@@ -23,7 +23,8 @@ describe('findSampleObjects', () => {
   }
 
   beforeEach(() => {
-    mockBuildNode.mockReset();
+    mockBuildIsNode.mockReset();
+    mockBuildOrNode.mockReset();
   });
 
   it('searches for objects and returns expected results', async () => {
@@ -56,10 +57,11 @@ describe('findSampleObjects', () => {
       { ...obj4, foundObjectId: 'obj-id-x' },
     ]);
     expect(client.bulkGet).toHaveBeenCalledWith(objects);
-    expect(mockBuildNode).toHaveBeenCalledTimes(3);
-    expect(mockBuildNode).toHaveBeenNthCalledWith(1, 'is', `${obj3.type}.originId`, obj3.id);
-    expect(mockBuildNode).toHaveBeenNthCalledWith(2, 'is', `${obj4.type}.originId`, obj4.id);
-    expect(mockBuildNode).toHaveBeenNthCalledWith(3, 'or', expect.any(Array));
+    expect(mockBuildIsNode).toHaveBeenCalledTimes(2);
+    expect(mockBuildIsNode).toHaveBeenNthCalledWith(1, `${obj3.type}.originId`, obj3.id);
+    expect(mockBuildIsNode).toHaveBeenNthCalledWith(2, `${obj4.type}.originId`, obj4.id);
+    expect(mockBuildOrNode).toHaveBeenCalledTimes(1);
+    expect(mockBuildOrNode).toHaveBeenNthCalledWith(1, expect.any(Array));
     expect(client.find).toHaveBeenCalledWith(expect.objectContaining({ type: ['obj-type-3'] })); // obj3 and obj4 have the same type; the type param is deduplicated
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -84,7 +86,7 @@ describe('findSampleObjects', () => {
       { ...obj2, foundObjectId: undefined },
     ]);
     expect(client.bulkGet).toHaveBeenCalledWith(objects);
-    expect(mockBuildNode).not.toHaveBeenCalled();
+    expect(mockBuildIsNode).not.toHaveBeenCalled();
     expect(client.find).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -110,9 +112,10 @@ describe('findSampleObjects', () => {
     const result = await findSampleObjects(params);
     expect(result).toEqual([{ ...obj1, foundObjectId: 'obj-id-x' }]); // obj-id-y is ignored
     expect(client.bulkGet).toHaveBeenCalledWith(objects);
-    expect(mockBuildNode).toHaveBeenCalledTimes(2);
-    expect(mockBuildNode).toHaveBeenNthCalledWith(1, 'is', `${obj1.type}.originId`, obj1.id);
-    expect(mockBuildNode).toHaveBeenNthCalledWith(2, 'or', expect.any(Array));
+    expect(mockBuildIsNode).toHaveBeenCalledTimes(1);
+    expect(mockBuildIsNode).toHaveBeenNthCalledWith(1, `${obj1.type}.originId`, obj1.id);
+    expect(mockBuildOrNode).toHaveBeenCalledTimes(1);
+    expect(mockBuildOrNode).toHaveBeenNthCalledWith(1, expect.any(Array));
     expect(client.find).toHaveBeenCalledWith(expect.objectContaining({ type: ['obj-type-1'] }));
     expect(logger.warn).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(

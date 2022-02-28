@@ -16,7 +16,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Threat Intel Filebeat Module (v8.x) Indicator Match",
-  "note": "## Triage and Analysis\n\n### Investigating Threat Intel Indicator Matches\n\nThreat Intel indicator match rules allow matching from a local observation such as an endpoint event that records a file\nhash with an entry of a file hash stored within the Threat Intel integrations. Other examples of matches can occur on\nan IP address, registry path, URL and imphash.\n\nThe matches will be based on the incoming last 30 days feed data so it's important to validate the data and review the results by\ninvestigating the associated activity to determine if it requires further investigation.\n\nIf an indicator matches a local observation, the following enriched fields will be generated to identify the indicator, field, and type matched.\n\n- `threat.indicator.matched.atomic` - this identifies the atomic indicator that matched the local observation\n- `threat.indicator.matched.field` - this identifies the indicator field that matched the local observation\n- `threat.indicator.matched.type` - this identifies the indicator type that matched the local observation\n\n#### Possible investigation steps:\n- Investigation should be validated and reviewed based on the data (file hash, registry path, URL, imphash) that was matched\nand viewing the source of that activity.\n- Consider the history of the indicator that was matched. Has it happened before? Is it happening on multiple machines?\nThese kinds of questions can help understand if the activity is related to legitimate behavior.\n- Consider the user and their role within the company, is this something related to their job or work function?\n\n### False Positive Analysis\n- For any matches found, it's important to consider the initial release date of that indicator. Threat intelligence can\nbe a great tool for augmenting existing security processes, while at the same time it should be understood that threat\nintelligence can represent a specific set of activity observed at a point in time. For example, an IP address\nmay have hosted malware observed in a Dridex campaign month ago, but it's possible that IP has been remediated and\nno longer represents any threat.\n- Adversaries often use legitimate tools as network administrators such as `PsExec` or `AdFind`, these tools often find their\nway into indicator lists creating the potential for false positives.\n- It's possible after large and publicly written campaigns, curious employees might end up going directly to attacker infrastructure and generating these rules\n\n### Response and Remediation\n- If suspicious or malicious behavior is observed, immediate response should be taken to isolate activity to prevent further\npost-compromise behavior.\n- One example of a response if a machine matched a command and control IP address would be to add an entry to a network\ndevice such as a firewall or proxy appliance to prevent any outbound activity from leaving that machine.\n- Another example of a response with a malicious file hash match would involve validating if the file was properly quarantined,\nreview current running processes looking for any abnormal activity, and investigating for any other follow-up actions such as persistence or lateral movement\n",
+  "note": "## Triage and Analysis\n\n### Investigating Threat Intel Indicator Matches\n\nThreat Intel indicator match rules allow matching from a local observation such as an endpoint event that records a file\nhash with an entry of a file hash stored within the Threat Intel integrations. Matches can also occur on\nan IP address, registry path, URL, or imphash.\n\nThe matches will be based on the incoming last 30 days feed data so it's important to validate the data and review the results by\ninvestigating the associated activity to determine if it requires further investigation.\n\nIf an indicator matches a local observation, the following enriched fields will be generated to identify the indicator, field, and type matched.\n\n- `threat.indicator.matched.atomic` - this identifies the atomic indicator that matched the local observation\n- `threat.indicator.matched.field` - this identifies the indicator field that matched the local observation\n- `threat.indicator.matched.type` - this identifies the indicator type that matched the local observation\n\n#### Possible investigation steps:\n- Investigation should be validated and reviewed based on the data (file hash, registry path, URL, imphash) that was matched\nand by viewing the source of that activity.\n- Consider the history of the indicator that was matched. Has it happened before? Is it happening on multiple machines?\nThese kinds of questions can help understand if the activity is related to legitimate behavior.\n- Consider the user and their role within the company: is this something related to their job or work function?\n\n### False Positive Analysis\n- For any matches found, it's important to consider the initial release date of that indicator. Threat intelligence can\nbe a great tool for augmenting existing security processes, while at the same time it should be understood that threat\nintelligence can represent a specific set of activity observed at a point in time. For example, an IP address\nmay have hosted malware observed in a Dridex campaign months ago, but it's possible that IP has been remediated and\nno longer represents any threat.\n- Adversaries often use legitimate tools as network administrators such as `PsExec` or `AdFind`; these tools often find their\nway into indicator lists creating the potential for false positives.\n- It's possible after large and publicly written campaigns, curious employees might end up going directly to attacker infrastructure and triggering these rules.\n\n### Response and Remediation\n- If suspicious or malicious behavior is observed, take immediate action to isolate activity to prevent further\npost-compromise behavior.\n- One example of a response if a machine matched a command and control IP address would be to add an entry to a network\ndevice such as a firewall or proxy appliance to prevent any outbound activity from leaving that machine.\n- Another example of a response with a malicious file hash match would involve validating if the file was properly quarantined,\nreviewing current running processes for any abnormal activity, and investigating for any other follow-up actions such as persistence or lateral movement.\n",
   "query": "file.hash.*:* or file.pe.imphash:* or source.ip:* or destination.ip:* or url.full:* or registry.path:*\n",
   "references": [
     "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html"
@@ -40,16 +40,16 @@
       },
       "meta": {
         "disabled": false,
-        "key": "event.dataset",
+        "key": "event.module",
         "negate": false,
         "params": {
-          "query": "ti_*"
+          "query": "threatintel"
         },
         "type": "phrase"
       },
       "query": {
         "match_phrase": {
-          "event.dataset": "ti_*"
+          "event.module": "threatintel"
         }
       }
     },
@@ -190,9 +190,9 @@
       ]
     }
   ],
-  "threat_query": "@timestamp >= \"now-30d\" and event.dataset:ti_* and (threat.indicator.file.hash.*:* or threat.indicator.file.pe.imphash:* or threat.indicator.ip:* or threat.indicator.registry.path:* or threat.indicator.url.full:*)",
+  "threat_query": "@timestamp >= \"now-30d/d\" and event.module:threatintel and (threat.indicator.file.hash.*:* or threat.indicator.file.pe.imphash:* or threat.indicator.ip:* or threat.indicator.registry.path:* or threat.indicator.url.full:*)",
   "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
   "timeline_title": "Generic Threat Match Timeline",
   "type": "threat_match",
-  "version": 1
+  "version": 3
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';

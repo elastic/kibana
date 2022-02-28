@@ -162,6 +162,22 @@ describe('Event filter form', () => {
     expect(getState().form.hasNameError).toBeTruthy();
   });
 
+  it('should change description', async () => {
+    component = await renderWithData();
+
+    const nameInput = component.getByTestId('eventFilters-form-description-input');
+
+    act(() => {
+      fireEvent.change(nameInput, {
+        target: {
+          value: 'Exception description',
+        },
+      });
+    });
+
+    expect(getState().form.entry?.description).toBe('Exception description');
+  });
+
   it('should change comments', async () => {
     component = await renderWithData();
 
@@ -221,7 +237,10 @@ describe('Event filter form', () => {
     // move back to per-policy
     userEvent.click(component.getByTestId('perPolicy'));
     // the previous selected policy should be selected
-    expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute('aria-selected', 'true');
+    expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute(
+      'data-test-selected',
+      'true'
+    );
     // on change called with the previous policy
     expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
   });

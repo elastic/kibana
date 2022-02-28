@@ -95,12 +95,12 @@ export class RuleDataClient implements IRuleDataClient {
       search: async (request) => {
         const clusterClient = await waitUntilReady();
 
-        const { body } = (await clusterClient.search({
+        const body = await clusterClient.search({
           ...request,
           index: indexPattern,
-        })) as { body: any };
+        });
 
-        return body;
+        return body as any;
       },
 
       getDynamicIndexPattern: async () => {
@@ -193,13 +193,15 @@ export class RuleDataClient implements IRuleDataClient {
               index: alias,
             };
 
-            return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
-              if (response.body.errors) {
-                const error = new errors.ResponseError(response);
-                this.options.logger.error(error);
-              }
-              return response;
-            });
+            return clusterClient
+              .bulk(requestWithDefaultParameters, { meta: true })
+              .then((response) => {
+                if (response.body.errors) {
+                  const error = new errors.ResponseError(response);
+                  this.options.logger.error(error);
+                }
+                return response;
+              });
           })
           .catch((error) => {
             if (error instanceof RuleDataWriterInitializationError) {

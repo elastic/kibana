@@ -15,7 +15,6 @@ import {
   NewPackagePolicy,
   pagePathGetters,
 } from '../../../../../../../fleet/public';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
@@ -31,6 +30,7 @@ import {
 import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 import { FleetIntegrationHostIsolationExceptionsCard } from './endpoint_package_custom_extension/components/fleet_integration_host_isolation_exceptions_card';
+import { FleetIntegrationEventFiltersCard } from './endpoint_package_custom_extension/components/fleet_integration_event_filters_card';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -57,10 +57,6 @@ const WrappedPolicyDetailsForm = memo<{
   const endpointDetailsLoadingError = usePolicyDetailsSelector(apiError);
   const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
-  // TODO: Remove this and related code when removing FF
-  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-    'trustedAppsByPolicyEnabled'
-  );
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
   // the location information stored via the `userChangedUrl` action.
@@ -163,61 +159,59 @@ const WrappedPolicyDetailsForm = memo<{
 
   return (
     <div data-test-subj="endpointIntegrationPolicyForm">
-      {isTrustedAppsByPolicyEnabled ? (
-        <>
-          <div>
-            <EuiText>
-              <h5>
+      <>
+        <div>
+          <EuiText>
+            <h5>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyDetails.artifacts.title"
+                defaultMessage="Artifacts"
+              />
+            </h5>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <FleetTrustedAppsCard
+            policyId={policyId}
+            cardSize="m"
+            customLink={policyTrustedAppsLink}
+          />
+          <EuiSpacer size="s" />
+          <FleetIntegrationEventFiltersCard policyId={policyId} />
+          <EuiSpacer size="s" />
+          <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
+        </div>
+        <EuiSpacer size="l" />
+        <div>
+          <EuiText>
+            <h5>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyDetails.settings.title"
+                defaultMessage="Policy settings"
+              />
+            </h5>
+          </EuiText>
+          <EuiSpacer size="s" />
+          {endpointDetailsLoadingError ? (
+            <EuiCallOut
+              title={
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyDetails.artifacts.title"
-                  defaultMessage="Artifacts"
+                  id="xpack.securitySolution.endpoint.policyDetails.loadError"
+                  defaultMessage="Failed to load endpoint policy settings"
                 />
-              </h5>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <FleetTrustedAppsCard
-              policyId={policyId}
-              cardSize="m"
-              customLink={policyTrustedAppsLink}
-            />
-            <EuiSpacer size="s" />
-            <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
-          </div>
-          <EuiSpacer size="l" />
-          <div>
-            <EuiText>
-              <h5>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyDetails.settings.title"
-                  defaultMessage="Policy settings"
-                />
-              </h5>
-            </EuiText>
-            <EuiSpacer size="s" />
-            {endpointDetailsLoadingError ? (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyDetails.loadError"
-                    defaultMessage="Failed to load endpoint policy settings"
-                  />
-                }
-                iconType="alert"
-                color="warning"
-                data-test-subj="endpiontPolicySettingsLoadingError"
-              >
-                {endpointDetailsLoadingError.message}
-              </EuiCallOut>
-            ) : !endpointPolicyDetails ? (
-              <EuiLoadingSpinner size="l" className="essentialAnimation" />
-            ) : (
-              <PolicyDetailsForm />
-            )}
-          </div>
-        </>
-      ) : (
-        <PolicyDetailsForm />
-      )}
+              }
+              iconType="alert"
+              color="warning"
+              data-test-subj="endpiontPolicySettingsLoadingError"
+            >
+              {endpointDetailsLoadingError.message}
+            </EuiCallOut>
+          ) : !endpointPolicyDetails ? (
+            <EuiLoadingSpinner size="l" className="essentialAnimation" />
+          ) : (
+            <PolicyDetailsForm />
+          )}
+        </div>
+      </>
     </div>
   );
 });

@@ -15,6 +15,7 @@ const createConfig = (
 ): ElasticsearchClientConfig => {
   return {
     customHeaders: {},
+    compression: false,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
@@ -89,7 +90,7 @@ describe('parseClientOptions', () => {
       );
     });
 
-    describe('`keepAlive option`', () => {
+    describe('`keepAlive` option', () => {
       it('`keepAlive` is true', () => {
         const options = parseClientOptions(createConfig({ keepAlive: true }), false);
         expect(options.agent).toHaveProperty('keepAlive', true);
@@ -103,6 +104,18 @@ describe('parseClientOptions', () => {
       it('`keepAlive` is undefined', () => {
         const options = parseClientOptions(createConfig({}), false);
         expect(options.agent).toHaveProperty('keepAlive', true);
+      });
+    });
+
+    describe('`compression` option', () => {
+      it('`compression` is true', () => {
+        const options = parseClientOptions(createConfig({ compression: true }), false);
+        expect(options.compression).toBe(true);
+      });
+
+      it('`compression` is false', () => {
+        const options = parseClientOptions(createConfig({ compression: false }), false);
+        expect(options.compression).toBe(false);
       });
     });
 

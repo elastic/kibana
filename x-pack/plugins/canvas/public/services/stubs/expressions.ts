@@ -10,11 +10,22 @@ import { plugin } from '../../../../../../src/plugins/expressions/public';
 import { functions as functionDefinitions } from '../../../canvas_plugin_src/functions/common';
 import { renderFunctions } from '../../../canvas_plugin_src/renderers/core';
 import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
-import { CanvasExpressionsService } from '../expressions';
+import {
+  CanvasExpressionsService,
+  CanvasExpressionsServiceRequiredServices,
+  ExpressionsService,
+} from '../kibana/expressions';
 
-type CanvasExpressionsServiceFactory = PluginServiceFactory<CanvasExpressionsService>;
+type CanvasExpressionsServiceFactory = PluginServiceFactory<
+  CanvasExpressionsService,
+  {},
+  CanvasExpressionsServiceRequiredServices
+>;
 
-export const expressionsServiceFactory: CanvasExpressionsServiceFactory = () => {
+export const expressionsServiceFactory: CanvasExpressionsServiceFactory = (
+  params,
+  requiredServices
+) => {
   const placeholder = {} as any;
   const expressionsPlugin = plugin(placeholder);
   const setup = expressionsPlugin.setup(placeholder);
@@ -25,5 +36,5 @@ export const expressionsServiceFactory: CanvasExpressionsServiceFactory = () => 
     expressionsService.registerRenderer(fn as unknown as AnyExpressionRenderDefinition);
   });
 
-  return expressionsService;
+  return new ExpressionsService(expressionsService, requiredServices);
 };

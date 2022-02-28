@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../spaces_manager';

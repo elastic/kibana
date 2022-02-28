@@ -52,8 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickDataTab('metric');
       });
 
-      it('should not have inspector enabled', async () => {
-        await inspector.expectIsNotEnabled();
+      it('should have inspector enabled', async () => {
+        await inspector.expectIsEnabled();
       });
 
       it('should show correct data', async () => {

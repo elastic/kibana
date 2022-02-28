@@ -5,144 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-
-import '../../../../../common/mock/match_media';
-import '../../../../../common/mock/formatted_relative';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { createUseUiSetting$Mock } from '../../../../../common/lib/kibana/kibana_react.mock';
-import {
-  DEFAULT_RULE_REFRESH_INTERVAL_ON,
-  DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
-  DEFAULT_RULES_TABLE_REFRESH_SETTING,
-} from '../../../../../../common/constants';
-
-import { useRulesTable, RulesTableState } from '../../../../containers/detection_engine/rules';
-
+import '../../../../../common/mock/formatted_relative';
+import '../../../../../common/mock/match_media';
 import { AllRules } from './index';
-
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
+import { RulesFeatureTourContextProvider } from './rules_feature_tour_context';
 
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../containers/detection_engine/rules');
+jest.mock('../../../../pages/detection_engine/rules/all/rules_table/rules_table_context');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const mockUseRulesTable = useRulesTable as jest.Mock;
 
 describe('AllRules', () => {
-  const mockRefetchRulesData = jest.fn();
-
   beforeEach(() => {
-    jest.useFakeTimers();
-
-    mockUseUiSetting$.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
-
-      return key === DEFAULT_RULES_TABLE_REFRESH_SETTING
-        ? [
-            {
-              on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
-              value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-              idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
-            },
-            jest.fn(),
-          ]
-        : useUiSetting$Mock(key, defaultValue);
-    });
-
-    mockUseRulesTable.mockImplementation(({ initialStateOverride }) => {
-      const initialState: RulesTableState = {
-        rules: [
-          {
-            actions: [],
-            author: [],
-            created_at: '2020-02-14T19:49:28.178Z',
-            created_by: 'elastic',
-            description: 'jibber jabber',
-            enabled: false,
-            false_positives: [],
-            filters: [],
-            from: 'now-660s',
-            id: 'rule-id-1',
-            immutable: true,
-            index: ['endgame-*'],
-            interval: '10m',
-            language: 'kuery',
-            max_signals: 100,
-            name: 'Credential Dumping - Detected - Elastic Endpoint',
-            output_index: '.siem-signals-default',
-            query: 'host.name:*',
-            references: [],
-            risk_score: 73,
-            risk_score_mapping: [],
-            rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
-            severity: 'high',
-            severity_mapping: [],
-            tags: ['Elastic', 'Endpoint'],
-            threat: [],
-            throttle: null,
-            to: 'now',
-            type: 'query',
-            updated_at: '2020-02-14T19:49:28.320Z',
-            updated_by: 'elastic',
-            version: 1,
-          },
-        ],
-        pagination: {
-          page: 1,
-          perPage: 20,
-          total: 1,
-        },
-        filterOptions: {
-          filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
-          tags: [],
-          showCustomRules: false,
-          showElasticRules: false,
-        },
-        loadingRulesAction: null,
-        loadingRuleIds: [],
-        selectedRuleIds: [],
-        lastUpdated: 0,
-        isRefreshOn: true,
-        isRefreshing: false,
-        isAllSelected: false,
-        showIdleModal: false,
-      };
-
-      return {
-        state: { ...initialState, ...initialStateOverride },
-        dispatch: jest.fn(),
-        reFetchRules: mockRefetchRulesData,
-        setRules: jest.fn(),
-        updateRules: jest.fn(),
-        updateOptions: jest.fn(),
-        actionStarted: jest.fn(),
-        actionStopped: jest.fn(),
-        setShowIdleModal: jest.fn(),
-        setLastRefreshDate: jest.fn(),
-        setAutoRefreshOn: jest.fn(),
-        setIsRefreshing: jest.fn(),
-      };
-    });
-
     useKibanaMock().services.application.capabilities = {
       navLinks: {},
       management: {},
@@ -163,85 +44,14 @@ describe('AllRules', () => {
         hasPermissions
         loading={false}
         loadingCreatePrePackagedRules={false}
-        refetchPrePackagedRulesStatus={jest.fn()}
         rulesCustomInstalled={0}
         rulesInstalled={0}
         rulesNotInstalled={0}
         rulesNotUpdated={0}
-        setRefreshRulesData={jest.fn()}
       />
     );
 
-    expect(wrapper.find('[data-test-subj="allRulesTableTab-rules"]')).toHaveLength(1);
-  });
-
-  it('it pulls from uiSettings to determine default refresh values', async () => {
-    mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasPermissions
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(mockRefetchRulesData).not.toHaveBeenCalled();
-
-      jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
-      expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  // refresh functionality largely tested in cypress tests
-  it('it pulls from storage and does not set an auto refresh interval if storage indicates refresh is paused', async () => {
-    mockUseUiSetting$.mockImplementation(() => [
-      {
-        on: false,
-        value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-        idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
-      },
-      jest.fn(),
-    ]);
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasPermissions
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(mockRefetchRulesData).not.toHaveBeenCalled();
-
-      jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
-      expect(mockRefetchRulesData).not.toHaveBeenCalled();
-
-      wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
-
-      wrapper.find('[data-test-subj="refreshSettingsSwitch"]').first().simulate('click');
-
-      jest.advanceTimersByTime(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
-      expect(mockRefetchRulesData).not.toHaveBeenCalled();
-    });
+    expect(wrapper.find('RulesTables')).toHaveLength(1);
   });
 
   describe('tabs', () => {
@@ -253,14 +63,13 @@ describe('AllRules', () => {
             hasPermissions
             loading={false}
             loadingCreatePrePackagedRules={false}
-            refetchPrePackagedRulesStatus={jest.fn()}
             rulesCustomInstalled={1}
             rulesInstalled={0}
             rulesNotInstalled={0}
             rulesNotUpdated={0}
-            setRefreshRulesData={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { wrappingComponent: RulesFeatureTourContextProvider }
       );
 
       await waitFor(() => {
@@ -278,14 +87,13 @@ describe('AllRules', () => {
           hasPermissions
           loading={false}
           loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
           rulesCustomInstalled={1}
           rulesInstalled={0}
           rulesNotInstalled={0}
           rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
         />
-      </TestProviders>
+      </TestProviders>,
+      { wrappingComponent: RulesFeatureTourContextProvider }
     );
 
     await waitFor(() => {

@@ -11,7 +11,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 import type { ElasticsearchRole } from '.';
-import { GLOBAL_RESOURCE } from '../../../../../common/constants';
+import type { KibanaFeature } from '../../../../../../features/common';
+import { ALL_SPACES_ID, GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';
 
@@ -301,4 +302,51 @@ const transformPrivilegesToElasticsearchPrivileges = (
       ),
     };
   });
+};
+
+export const validateKibanaPrivileges = (
+  kibanaFeatures: KibanaFeature[],
+  kibanaPrivileges: PutPayloadSchemaType['kibana']
+) => {
+  const validationErrors = (kibanaPrivileges ?? []).flatMap((priv) => {
+    const forAllSpaces = priv.spaces.includes(ALL_SPACES_ID);
+
+    return Object.entries(priv.feature ?? {}).flatMap(([featureId, feature]) => {
+      const errors: string[] = [];
+      const kibanaFeature = kibanaFeatures.find((f) => f.id === featureId);
+      if (!kibanaFeature) return errors;
+
+      if (feature.includes('all')) {
+        if (kibanaFeature.privileges?.all.disabled) {
+          errors.push(`Feature [${featureId}] does not support privilege [all].`);
+        }
+
+        if (kibanaFeature.privileges?.all.requireAllSpaces && !forAllSpaces) {
+          errors.push(
+            `Feature privilege [${featureId}.all] requires all spaces to be selected but received [${priv.spaces.join(
+              ','
+            )}]`
+          );
+        }
+      }
+
+      if (feature.includes('read')) {
+        if (kibanaFeature.privileges?.read.disabled) {
+          errors.push(`Feature [${featureId}] does not support privilege [read].`);
+        }
+
+        if (kibanaFeature.privileges?.read.requireAllSpaces && !forAllSpaces) {
+          errors.push(
+            `Feature privilege [${featureId}.read] requires all spaces to be selected but received [${priv.spaces.join(
+              ','
+            )}]`
+          );
+        }
+      }
+
+      return errors;
+    });
+  });
+
+  return { validationErrors };
 };

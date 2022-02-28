@@ -10,5 +10,6 @@ export {
   createMockConfig,
   createMockConfigSchema,
   createMockPluginSetup,
+  createMockPluginStart,
   createMockReportingCore,
 } from './create_mock_reportingplugin';

@@ -26,7 +26,11 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
   const groupedFields = new Map<ConditionEntryField, ConditionEntry[]>();
 
   entries.forEach((entry) => {
-    groupedFields.set(entry.field, [...(groupedFields.get(entry.field) || []), entry]);
+    // With the move to the Exception Lists api, the server side now validates individual
+    // `process.hash.[type]`'s, so we need to account for that here
+    const field = entry.field.startsWith('process.hash') ? ConditionEntryField.HASH : entry.field;
+
+    groupedFields.set(field, [...(groupedFields.get(field) || []), entry]);
   });
 
   return [...groupedFields.entries()]

@@ -10,7 +10,7 @@ import {
   fetchObservabilityOverviewPageData,
   getHasData,
 } from './apm_observability_overview_fetchers';
-import { getCallApmApiSpy } from './callApmApiSpy';
+import { getCallApmApiSpy } from './call_apm_api_spy';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = getCallApmApiSpy();

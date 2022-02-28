@@ -39,10 +39,12 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  headerFilters?: string | React.ReactNode;
   height?: number;
   id?: string;
   isInspectDisabled?: boolean;
   split?: boolean;
+  stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
@@ -55,10 +57,12 @@ export interface HeaderSectionProps extends HeaderProps {
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  headerFilters,
   height,
   id,
   isInspectDisabled,
   split,
+  stackHeader,
   subtitle,
   title,
   titleSize = 'm',
@@ -68,7 +72,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   hideSubtitle = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      alignItems={stackHeader ? undefined : 'center'}
+      direction={stackHeader ? 'column' : 'row'}
+      gutterSize="s"
+    >
       <EuiFlexItem grow={growLeftSplit}>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
@@ -99,6 +107,8 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               />
             </EuiFlexItem>
           )}
+
+          {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
 

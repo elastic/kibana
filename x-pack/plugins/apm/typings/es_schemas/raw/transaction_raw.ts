@@ -19,6 +19,7 @@ import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
 import { UserAgent } from './fields/user_agent';
+import { Faas } from './fields/faas';
 
 interface Processor {
   name: 'transaction';
@@ -69,4 +70,5 @@ export interface TransactionRaw extends APMBaseDoc {
   user?: User;
   user_agent?: UserAgent;
   cloud?: Cloud;
+  faas?: Faas;
 }

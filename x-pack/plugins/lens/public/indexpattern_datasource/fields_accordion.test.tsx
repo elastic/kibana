@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { coreMock } from 'src/core/public/mocks';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { IndexPattern } from './types';
 import { FieldItem } from './field_item';

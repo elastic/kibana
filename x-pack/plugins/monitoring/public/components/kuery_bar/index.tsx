@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-import React, { useEffect, useState } from 'react';
 import { fromKueryExpression } from '@kbn/es-query';
-import { WithKueryAutocompletion } from './with_kuery_autocompletion';
-import { AutocompleteField } from './autocomplete_field';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { AutocompleteField } from './autocomplete_field';
+import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 
 type LoadSuggestionsFn = (
   e: string,

@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
       expect(searchResults[0].interval).to.equal('1 min');
       expect(searchResults[0].tags).to.equal('2');
-      expect(searchResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResults[0].duration).to.match(/\d{2,}:\d{2}/);
     });
 
     it('should update alert list on the search clear button click', async () => {
@@ -103,23 +103,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults[0].name).to.equal('bTest: Noop');
       expect(searchResults[0].interval).to.equal('1 min');
       expect(searchResults[0].tags).to.equal('2');
-      expect(searchResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResults[0].duration).to.match(/\d{2,}:\d{2}/);
 
       const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
       await searchClearButton.click();
       await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
       const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterClear.length).to.equal(2);
       expect(searchResultsAfterClear[0].name).to.equal('bTest: Noop');
       expect(searchResultsAfterClear[0].interval).to.equal('1 min');
       expect(searchResultsAfterClear[0].tags).to.equal('2');
-      expect(searchResultsAfterClear[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResultsAfterClear[0].duration).to.match(/\d{2,}:\d{2}/);
       expect(searchResultsAfterClear[1].name).to.equal('cTest: Noop');
       expect(searchResultsAfterClear[1].interval).to.equal('1 min');
       expect(searchResultsAfterClear[1].tags).to.equal('');
-      expect(searchResultsAfterClear[1].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResultsAfterClear[1].duration).to.match(/\d{2,}:\d{2}/);
     });
 
     it('should search for tags', async () => {
@@ -136,7 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
       expect(searchResults[0].interval).to.equal('1 min');
       expect(searchResults[0].tags).to.equal('3');
-      expect(searchResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResults[0].duration).to.match(/\d{2,}:\d{2}/);
     });
 
     it('should display an empty list when search did not return any alerts', async () => {
@@ -257,7 +257,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await testSubjects.click('deleteAlert');
+      await testSubjects.click('deleteRule');
       await testSubjects.existOrFail('deleteIdsConfirmation');
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
@@ -361,6 +361,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
+    it('should render percentile column and cells correctly', async () => {
+      await createAlert({ supertest, objectRemover });
+      await refreshAlertsList();
+
+      await testSubjects.existOrFail('rulesTable-P50ColumnName');
+      await testSubjects.existOrFail('P50Percentile');
+
+      await retry.try(async () => {
+        const percentileCell = await find.byCssSelector(
+          '[data-test-subj="P50Percentile"]:nth-of-type(1)'
+        );
+        const percentileCellText = await percentileCell.getVisibleText();
+        expect(percentileCellText).to.match(/^N\/A|\d{2,}:\d{2}$/);
+
+        await testSubjects.click('percentileSelectablePopover-iconButton');
+        await testSubjects.existOrFail('percentileSelectablePopover-selectable');
+        const searchClearButton = await find.byCssSelector(
+          '[data-test-subj="percentileSelectablePopover-selectable"] li:nth-child(2)'
+        );
+        const alertResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(alertResults[0].duration).to.match(/^N\/A|\d{2,}:\d{2}$/);
+
+        await searchClearButton.click();
+        await testSubjects.missingOrFail('percentileSelectablePopover-selectable');
+        await testSubjects.existOrFail('rulesTable-P95ColumnName');
+        await testSubjects.existOrFail('P95Percentile');
+      });
+    });
+
     it('should delete all selection', async () => {
       const namePrefix = generateUniqueKey();
       const createdAlert = await createAlertManualCleanup({
@@ -398,8 +427,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
-      await testSubjects.click('alertStatusFilterButton');
-      await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
+      await testSubjects.click('ruleStatusFilterButton');
+      await testSubjects.click('ruleStatuserrorFilerOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =
           await pageObjects.triggersActionsUI.getAlertsListWithStatus();
@@ -407,7 +436,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(filterErrorOnlyResults[0].name).to.equal(`${failingAlert.name}Test: Failing`);
         expect(filterErrorOnlyResults[0].interval).to.equal('30 sec');
         expect(filterErrorOnlyResults[0].status).to.equal('Error');
-        expect(filterErrorOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+        expect(filterErrorOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
     });
 
@@ -420,11 +449,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
         expect(refreshResults[0].interval).to.equal('1 min');
         expect(refreshResults[0].status).to.equal('Ok');
-        expect(refreshResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+        expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
       const alertsErrorBannerWhenNoErrors = await find.allByCssSelector(
-        '[data-test-subj="alertsErrorBanner"]'
+        '[data-test-subj="rulesErrorBanner"]'
       );
       expect(alertsErrorBannerWhenNoErrors).to.have.length(0);
 
@@ -432,7 +461,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await refreshAlertsList();
         const alertsErrorBannerExistErrors = await find.allByCssSelector(
-          '[data-test-subj="alertsErrorBanner"]'
+          '[data-test-subj="rulesErrorBanner"]'
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
@@ -443,28 +472,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await refreshAlertsList();
-      expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be('Showing: 2 of 2 rules.');
-      expect(await testSubjects.getVisibleText('totalActiveAlertsCount')).to.be('Active: 0');
-      expect(await testSubjects.getVisibleText('totalOkAlertsCount')).to.be('Ok: 1');
-      expect(await testSubjects.getVisibleText('totalErrorAlertsCount')).to.be('Error: 1');
-      expect(await testSubjects.getVisibleText('totalPendingAlertsCount')).to.be('Pending: 0');
-      expect(await testSubjects.getVisibleText('totalUnknownAlertsCount')).to.be('Unknown: 0');
+      expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('Showing: 2 of 2 rules.');
+      expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
+      expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
+      expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
+      expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
+      expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
     });
 
     it('should filter alerts by the alert type', async () => {
       await createAlert({ supertest, objectRemover });
       const failingAlert = await createFailingAlert({ supertest, objectRemover });
       await refreshAlertsList();
-      await testSubjects.click('alertTypeFilterButton');
-      expect(await (await testSubjects.find('alertType0Group')).getVisibleText()).to.eql('Alerts');
-      await testSubjects.click('alertTypetest.failingFilterOption');
+      await testSubjects.click('ruleTypeFilterButton');
+      expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).to.eql('Alerts');
+      await testSubjects.click('ruleTypetest.failingFilterOption');
 
       await retry.try(async () => {
         const filterFailingAlertOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
         expect(filterFailingAlertOnlyResults.length).to.equal(1);
         expect(filterFailingAlertOnlyResults[0].name).to.equal(`${failingAlert.name}Test: Failing`);
         expect(filterFailingAlertOnlyResults[0].interval).to.equal('30 sec');
-        expect(filterFailingAlertOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+        expect(filterFailingAlertOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
     });
 
@@ -498,9 +527,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           `${noopAlertWithAction.name}Test: Noop`
         );
         expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
-        expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+        expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
-      await testSubjects.click('alertTypeFilterButton');
+      await testSubjects.click('ruleTypeFilterButton');
 
       // de-select action type filter
       await testSubjects.click('actionTypeFilterButton');
