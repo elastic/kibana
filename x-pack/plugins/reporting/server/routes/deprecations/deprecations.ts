@@ -126,8 +126,10 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         await client.indices.putSettings({
           index: indexPattern,
           body: {
-            'index.lifecycle': {
-              name: ILM_POLICY_NAME,
+            index: {
+              lifecycle: {
+                name: ILM_POLICY_NAME,
+              },
             },
           },
         });
