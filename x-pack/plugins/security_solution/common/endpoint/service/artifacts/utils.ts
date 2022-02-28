@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import uuid from 'uuid';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';
 
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;
@@ -29,4 +33,22 @@ export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'ta
   }
 
   return policyIds;
+};
+
+export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
+  return {
+    comments: [],
+    description: '',
+    entries: [],
+    item_id: undefined,
+    list_id: listId,
+    meta: {
+      temporaryUuid: uuid.v4(),
+    },
+    name: '',
+    namespace_type: 'agnostic',
+    tags: [GLOBAL_ARTIFACT_TAG],
+    type: 'simple',
+    os_types: ['windows'],
+  };
 };

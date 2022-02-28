@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flowRight } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
+import { flowRight } from 'lodash';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
