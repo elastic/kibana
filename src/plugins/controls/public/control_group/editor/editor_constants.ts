@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ControlWidth } from '../../types';
+import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 
 export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
+export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
 
 export const CONTROL_WIDTH_OPTIONS = [
   {

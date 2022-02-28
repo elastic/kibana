@@ -24,7 +24,7 @@ interface NamedSlots {
   primaryActionButton: ReactElement<typeof PrimaryActionButton | typeof PrimaryActionPopover>;
   quickButtonGroup?: ReactElement<typeof QuickButtonGroup>;
   addFromLibraryButton?: ReactElement<typeof AddFromLibraryButton>;
-  addControlButton?: ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>;
+  controlsButton?: ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>;
   extraButtons?: Array<ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>>;
 }
 
@@ -38,7 +38,7 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
     primaryActionButton,
     quickButtonGroup,
     addFromLibraryButton,
-    addControlButton,
+    controlsButton,
     extraButtons = [],
   } = children;
 
@@ -59,6 +59,7 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
+      {controlsButton ? <EuiFlexItem grow={false}>{controlsButton}</EuiFlexItem> : null}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           {quickButtonGroup ? <EuiFlexItem grow={false}>{quickButtonGroup}</EuiFlexItem> : null}
@@ -66,7 +67,6 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
           {addFromLibraryButton ? (
             <EuiFlexItem grow={false}>{addFromLibraryButton}</EuiFlexItem>
           ) : null}
-          {addControlButton ? <EuiFlexItem grow={false}>{addControlButton}</EuiFlexItem> : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

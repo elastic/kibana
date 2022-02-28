@@ -13,6 +13,10 @@ export const ControlGroupStrings = {
     i18n.translate('controls.controlGroup.title', {
       defaultMessage: 'Control group',
     }),
+  getControlButtonTitle: () =>
+    i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
+      defaultMessage: 'Manage controls',
+    }),
   emptyState: {
     getCallToAction: () =>
       i18n.translate('controls.controlGroup.emptyState.callToAction', {

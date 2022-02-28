@@ -13,6 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription } from 'rxjs';
 import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
+import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
   ControlGroupInput,
@@ -24,6 +25,7 @@ import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
+  SolutionToolbarPopover,
 } from '../../../../presentation_util/public';
 import { pluginServices } from '../../services';
 import { DataView } from '../../../../data_views/public';
@@ -33,6 +35,7 @@ import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { EditControlGroup, EditControlGroupButtonTypes } from '../editor/edit_control_group';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -64,7 +67,7 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
-  public getControlButton = (buttonType: CreateControlButtonTypes) => {
+  private getCreateControlButton = (buttonType: CreateControlButtonTypes) => {
     return (
       <CreateControlButton
         buttonType={buttonType}
@@ -72,6 +75,47 @@ export class ControlGroupContainer extends Container<
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
       />
+    );
+  };
+
+  private getEditControlGroupButton = (buttonType: EditControlGroupButtonTypes) => {
+    return (
+      <EditControlGroup
+        buttonType={buttonType}
+        controlStyle={this.getInput().controlStyle}
+        panels={this.getInput().panels}
+        defaultControlWidth={this.getInput().defaultControlWidth}
+        setControlStyle={(controlStyle) => this.updateInput({ controlStyle })}
+        setDefaultControlWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+        setAllControlWidths={(defaultControlWidth) => {
+          Object.keys(this.getInput().panels).forEach(
+            (panelId) => (this.getInput().panels[panelId].width = defaultControlWidth)
+          );
+        }}
+        removeEmbeddable={(id) => this.removeEmbeddable(id)}
+      />
+    );
+  };
+
+  public getToolbarButtons = (isDarkTheme: boolean) => {
+    return (
+      <SolutionToolbarPopover
+        ownFocus
+        label={'Manage controls'}
+        iconType="arrowDown"
+        iconSide="right"
+        panelPaddingSize="none"
+      >
+        {() => (
+          <EuiContextMenuPanel
+            size="m"
+            items={[
+              this.getCreateControlButton('toolbar'),
+              this.getEditControlGroupButton('toolbar'),
+            ]}
+          />
+        )}
+      </SolutionToolbarPopover>
     );
   };
 

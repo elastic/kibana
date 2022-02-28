@@ -137,11 +137,13 @@ export const CreateControlButton = ({
         {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
       </EuiButton>
     ) : (
-      <SolutionToolbarButton
-        {...commonButtonProps}
-        iconType="controlsHorizontal"
-        label={ControlGroupStrings.emptyState.getAddControlButtonTitle()}
-      />
+      <EuiContextMenuItem
+        key="addNewControl"
+        icon="controlsHorizontal"
+        onClick={onCreateButtonClick}
+      >
+        {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+      </EuiContextMenuItem>
     );
 
   if (getControlTypes().length > 1) {

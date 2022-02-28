@@ -120,7 +120,6 @@ export function DashboardTopNav({
   const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const [showToolbarButton, setShowToolbarButton] = useState(false);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
@@ -578,14 +577,6 @@ export function DashboardTopNav({
     .map(getVisTypeQuickButton)
     .filter((button) => button) as QuickButtonProps[];
 
-  const test = dashboardAppState.dashboardContainer.controlGroup?.getInput();
-  useEffect(() => {
-    const shouldShowButton =
-      Boolean(localStorage.getItem('dashboard:controlsCalloutDismissed')) &&
-      Object.keys(test?.panels ?? {}).length === 0;
-    setShowToolbarButton(shouldShowButton);
-  }, [test]);
-
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
@@ -606,6 +597,8 @@ export function DashboardTopNav({
                   data-test-subj="dashboardAddNewPanelButton"
                 />
               ),
+              controlsButton:
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(IS_DARK_THEME),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
               addFromLibraryButton: (
                 <AddFromLibraryButton
@@ -613,9 +606,6 @@ export function DashboardTopNav({
                   data-test-subj="dashboardAddPanelButton"
                 />
               ),
-              addControlButton: showToolbarButton
-                ? dashboardAppState.dashboardContainer.controlGroup?.getControlButton('toolbar')
-                : undefined,
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}

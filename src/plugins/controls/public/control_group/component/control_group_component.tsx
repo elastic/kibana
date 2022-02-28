@@ -9,7 +9,6 @@
 import '../control_group.scss';
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -38,12 +37,10 @@ import {
 } from '@dnd-kit/core';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
 import { ViewMode } from '../../../../embeddable/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { EditControlGroup } from '../editor/edit_control_group';
-import { forwardAllContext } from '../editor/forward_all_context';
+import { EditControlGroup, EditControlGroupButtonTypes } from '../editor/edit_control_group';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
@@ -59,10 +56,6 @@ export const ControlGroup = () => {
   const dismissControls = useCallback(() => {
     setControlsDismissed(true);
   }, [setControlsDismissed]);
-  // Controls Services Context
-  const { overlays } = pluginServices.getHooks();
-  const { openFlyout } = overlays.useService();
-
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
     ControlGroupInput,
@@ -71,8 +64,8 @@ export const ControlGroup = () => {
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { setControlOrders, setDefaultControlWidth },
-    containerActions: { addNewEmbeddable },
+    actions: { setControlOrders, setDefaultControlWidth, setControlStyle, setAllControlWidths },
+    containerActions: { addNewEmbeddable, removeEmbeddable },
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
 
@@ -126,7 +119,7 @@ export const ControlGroup = () => {
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
-  const getControlButton = (buttonType: CreateControlButtonTypes) => {
+  const getCreateControlButton = (buttonType: CreateControlButtonTypes) => {
     return (
       <CreateControlButton
         buttonType={buttonType}
@@ -135,6 +128,23 @@ export const ControlGroup = () => {
           dispatch(setDefaultControlWidth(newDefaultControlWidth))
         }
         addNewEmbeddable={(type, input) => addNewEmbeddable(type, input)}
+      />
+    );
+  };
+
+  const getEditControlGroupButton = (buttonType: EditControlGroupButtonTypes) => {
+    return (
+      <EditControlGroup
+        buttonType={buttonType}
+        controlStyle={controlStyle}
+        panels={panels}
+        defaultControlWidth={defaultControlWidth}
+        setControlStyle={(newControlStyle) => dispatch(setControlStyle(newControlStyle))}
+        setDefaultControlWidth={(newDefaultControlWidth) =>
+          dispatch(setDefaultControlWidth(newDefaultControlWidth))
+        }
+        setAllControlWidths={(newControlStyles) => dispatch(setAllControlWidths(newControlStyles))}
+        removeEmbeddable={(id) => removeEmbeddable(id)}
       />
     );
   };
@@ -204,25 +214,12 @@ export const ControlGroup = () => {
                   <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
                     <EuiFlexItem>
                       <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-                        <EuiButtonIcon
-                          aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-                          iconType="gear"
-                          color="text"
-                          data-test-subj="controls-sorting-button"
-                          onClick={() => {
-                            const flyoutInstance = openFlyout(
-                              forwardAllContext(
-                                <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
-                                reduxContainerContext
-                              )
-                            );
-                          }}
-                        />
+                        {getEditControlGroupButton('icon')}
                       </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                        {getControlButton('icon')}
+                        {getCreateControlButton('icon')}
                       </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -244,7 +241,7 @@ export const ControlGroup = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{getControlButton('callout')}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{getCreateControlButton('callout')}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty size="s" onClick={dismissControls}>
                   {ControlGroupStrings.emptyState.getDismissButton()}
