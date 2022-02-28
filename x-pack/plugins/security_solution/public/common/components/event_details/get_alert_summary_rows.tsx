@@ -62,10 +62,9 @@ function getFieldsByCategory({
         { id: 'destination.port' },
         { id: 'source.address' },
         { id: 'source.port' },
+        { id: 'dns.question.name' },
         { id: 'process.name' },
       ];
-    case EventCategory.DNS:
-      return [{ id: 'dns.question.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     case EventCategory.MALWARE:

@@ -129,7 +129,7 @@ describe('AlertSummaryView', () => {
     });
   });
 
-  test('DNS event renders the correct summary rows', () => {
+  test('DNS network event renders the correct summary rows', () => {
     const renderProps = {
       ...props,
       data: [
@@ -137,8 +137,8 @@ describe('AlertSummaryView', () => {
           if (item.category === 'event' && item.field === 'event.category') {
             return {
               ...item,
-              values: ['dns'],
-              originalValue: ['dns'],
+              values: ['network'],
+              originalValue: ['network'],
             };
           }
           return item;
