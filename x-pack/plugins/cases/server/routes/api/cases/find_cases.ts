@@ -7,32 +7,25 @@
 
 import { CasesFindRequest } from '../../../../common/api';
 import { CASES_URL } from '../../../../common/constants';
-import { wrapError, escapeHatch } from '../utils';
-import { RouteDeps } from '../types';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initFindCasesApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: `${CASES_URL}/_find`,
-      validate: {
-        query: escapeHatch,
-      },
-    },
-    async (context, request, response) => {
-      try {
-        if (!context.cases) {
-          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-        }
-        const casesClient = await context.cases.getCasesClient();
-        const options = request.query as CasesFindRequest;
+export const findCaseRoute = createCasesRoute({
+  method: 'get',
+  path: `${CASES_URL}/_find`,
+  handler: async ({ context, request, response }) => {
+    try {
+      const casesClient = await context.cases.getCasesClient();
+      const options = request.query as CasesFindRequest;
 
-        return response.ok({
-          body: await casesClient.cases.find({ ...options }),
-        });
-      } catch (error) {
-        logger.error(`Failed to find cases in route: ${error}`);
-        return response.customError(wrapError(error));
-      }
+      return response.ok({
+        body: await casesClient.cases.find({ ...options }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to find cases in route: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});
