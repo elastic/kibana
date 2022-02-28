@@ -68,7 +68,7 @@ describe('getPluginsStatusChanges', () => {
       const stop$ = hot<void>('');
       const expected = '----';
 
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected);
+      expectObservable(getPluginsStatusChanges(overall$, stop$, 1)).toBe(expected);
     });
   });
 
