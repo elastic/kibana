@@ -256,25 +256,27 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     });
 
     return (
-      <EuiFlexItem grow={false}>
-        {props.isEditFilterModalOpen && (
-          <EditFilterModal
-            onSubmit={onAddMultipleFilters}
-            onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
-            applySavedQueries={() => props.toggleEditFilterModal?.(false)}
-            onCancel={() => props.toggleEditFilterModal?.(false)}
-            filter={currentEditFilters[0]}
-            currentEditFilters={currentEditFilters}
-            multipleFilters={props.multipleFilters}
-            indexPatterns={props.indexPatterns!}
-            onRemoveFilterGroup={onDeleteFilterGroup}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            initialAddFilterMode={undefined}
-            saveFilters={props.onFilterSave}
-            savedQueryService={props.savedQueryService}
-          />
-        )}
-      </EuiFlexItem>
+      !!currentEditFilters.length && (
+        <EuiFlexItem grow={false}>
+          {props.isEditFilterModalOpen && (
+            <EditFilterModal
+              onSubmit={onAddMultipleFilters}
+              onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
+              applySavedQueries={() => props.toggleEditFilterModal?.(false)}
+              onCancel={() => props.toggleEditFilterModal?.(false)}
+              filter={currentEditFilters[0]}
+              currentEditFilters={currentEditFilters}
+              multipleFilters={props.multipleFilters}
+              indexPatterns={props.indexPatterns!}
+              onRemoveFilterGroup={onDeleteFilterGroup}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              initialAddFilterMode={undefined}
+              saveFilters={props.onFilterSave}
+              savedQueryService={props.savedQueryService}
+            />
+          )}
+        </EuiFlexItem>
+      )
     );
   }
 
