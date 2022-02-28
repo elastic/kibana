@@ -7,7 +7,9 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { StartServicesAccessor } from 'kibana/server';
 import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import type { StartPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -55,7 +57,8 @@ export const previewRulesRoute = async (
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -74,6 +77,8 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
+        const [, { data }] = await getStartServices();
+        const searchSourceClient = data.search.searchSource.asScoped(request);
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
 
@@ -195,6 +200,7 @@ export const previewRulesRoute = async (
                 }),
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
+                searchSourceClient,
               },
               spaceId,
               startedAt: startedAt.toDate(),
