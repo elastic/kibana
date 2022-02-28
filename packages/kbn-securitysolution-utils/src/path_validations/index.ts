@@ -102,7 +102,7 @@ export const isPathValid = ({
   type: TrustedAppEntryTypes;
   value: string;
 }): boolean => {
-  if (field === ConditionEntryField.PATH || 'file.path.text') {
+  if (field === ConditionEntryField.PATH || field === 'file.path.text') {
     if (type === 'wildcard') {
       return os === OperatingSystem.WINDOWS
         ? isWindowsWildcardPathValid(value)

@@ -58,6 +58,28 @@ describe('validateFilePathInput', () => {
   });
 });
 
+describe('No Warnings', () => {
+  it('should not show warnings on non path entries ', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.HASH,
+        type: 'match',
+        value: '5d5b09f6dcb2d53a5fffc60c4ac0d55fabdf556069d6631545f42aa6e3500f2e',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.SIGNER,
+        type: 'match',
+        value: '',
+      })
+    ).toEqual(true);
+  });
+});
+
 describe('Unacceptable Windows wildcard paths', () => {
   it('should not accept paths that do not have a folder name with a wildcard ', () => {
     expect(
