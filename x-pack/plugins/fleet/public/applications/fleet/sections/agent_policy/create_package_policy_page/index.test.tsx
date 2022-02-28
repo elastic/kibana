@@ -20,6 +20,7 @@ import {
   sendGetAgentStatus,
   useIntraAppState,
   useStartServices,
+  useGetPackageInfoByKey,
 } from '../../../hooks';
 
 import { CreatePackagePolicyPage } from './index';
@@ -43,7 +44,72 @@ jest.mock('../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
-    useGetPackageInfoByKey: jest.fn().mockReturnValue({
+    useGetPackageInfoByKey: jest.fn(),
+    sendCreatePackagePolicy: jest
+      .fn()
+      .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
+    sendCreateAgentPolicy: jest.fn().mockResolvedValue({
+      data: { item: { id: 'agent-policy-2', name: 'Agent policy 2', namespace: 'default' } },
+    }),
+    useIntraAppState: jest.fn().mockReturnValue({}),
+    useStartServices: jest.fn().mockReturnValue({
+      application: { navigateToApp: jest.fn() },
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
+        },
+      },
+      docLinks: {
+        links: {
+          fleet: {},
+        },
+      },
+      http: {
+        basePath: {
+          get: () => 'http://localhost:5620',
+          prepend: (url: string) => 'http://localhost:5620' + url,
+        },
+      },
+      chrome: {
+        docTitle: {
+          change: jest.fn(),
+        },
+        setBreadcrumbs: jest.fn(),
+      },
+    }),
+  };
+});
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn().mockReturnValue({ search: '' }),
+  useHistory: jest.fn().mockReturnValue({
+    push: jest.fn(),
+  }),
+}));
+
+describe('when on the package policy create page', () => {
+  const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-1.3.0' })[1];
+
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const render = () =>
+    (renderResult = testRenderer.render(
+      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+        <CreatePackagePolicyPage />
+      </Route>
+    ));
+  let mockPackageInfo: any;
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockApiCalls(testRenderer.startServices.http);
+    testRenderer.mountHistory.push(createPageUrlPath);
+
+    // (useGetPackageInfoByKey as jest.Mock).mockClear();
+
+    mockPackageInfo = {
       data: {
         item: {
           name: 'nginx',
@@ -104,67 +170,9 @@ jest.mock('../../../hooks', () => {
         },
       },
       isLoading: false,
-    }),
-    sendCreatePackagePolicy: jest
-      .fn()
-      .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
-    sendCreateAgentPolicy: jest.fn().mockResolvedValue({
-      data: { item: { id: 'agent-policy-2', name: 'Agent policy 2', namespace: 'default' } },
-    }),
-    useIntraAppState: jest.fn().mockReturnValue({}),
-    useStartServices: jest.fn().mockReturnValue({
-      application: { navigateToApp: jest.fn() },
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-        },
-      },
-      docLinks: {
-        links: {
-          fleet: {},
-        },
-      },
-      http: {
-        basePath: {
-          get: () => 'http://localhost:5620',
-          prepend: (url: string) => 'http://localhost:5620' + url,
-        },
-      },
-      chrome: {
-        docTitle: {
-          change: jest.fn(),
-        },
-        setBreadcrumbs: jest.fn(),
-      },
-    }),
-  };
-});
+    };
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn().mockReturnValue({ search: '' }),
-  useHistory: jest.fn().mockReturnValue({
-    push: jest.fn(),
-  }),
-}));
-
-describe('when on the package policy create page', () => {
-  const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-1.3.0' })[1];
-
-  let testRenderer: TestRenderer;
-  let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () =>
-    (renderResult = testRenderer.render(
-      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicyPage />
-      </Route>
-    ));
-
-  beforeEach(() => {
-    testRenderer = createFleetTestRendererMock();
-    mockApiCalls(testRenderer.startServices.http);
-    testRenderer.mountHistory.push(createPageUrlPath);
+    (useGetPackageInfoByKey as jest.Mock).mockReturnValue(mockPackageInfo);
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -343,6 +351,38 @@ describe('when on the package policy create page', () => {
 
         expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
       });
+    });
+
+    test('should create agent policy without sys monitoring when new hosts is selected for system integration', async () => {
+      (useGetPackageInfoByKey as jest.Mock).mockReturnValue({
+        ...mockPackageInfo,
+        data: {
+          item: {
+            ...mockPackageInfo.data!.item,
+            name: 'system',
+          },
+        },
+      });
+
+      render();
+
+      await waitFor(() => {
+        renderResult.getByDisplayValue('Agent policy 2');
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+      });
+
+      expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        {
+          description: '',
+          monitoring_enabled: ['logs', 'metrics'],
+          name: 'Agent policy 2',
+          namespace: 'default',
+        },
+        { withSysMonitoring: false }
+      );
     });
 
     describe('without query param', () => {

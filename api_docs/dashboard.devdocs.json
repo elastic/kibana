@@ -1093,6 +1093,37 @@
     "functions": [
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.cleanEmptyKeys",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanEmptyKeys",
+        "description": [],
+        "signature": [
+          "(stateObj: Record<string, unknown>) => Record<string, unknown>"
+        ],
+        "path": "src/plugins/dashboard/public/locator.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.cleanEmptyKeys.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "stateObj",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/plugins/dashboard/public/locator.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.createDashboardEditUrl",
         "type": "Function",
         "tags": [],
@@ -1260,6 +1291,16 @@
             "signature": [
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.timeRestore",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeRestore",
+            "description": [],
             "path": "src/plugins/dashboard/public/types.ts",
             "deprecated": false
           },
