@@ -72,9 +72,9 @@ export const loadingSaga = ({
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
-          defaultMessage: 'Data view "{id}" not found',
+          defaultMessage: 'Data view "{name}" not found',
           values: {
-            id: selectedIndexPatternId,
+            name: selectedIndexPatternId,
           },
         })
       );
