@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/126421
+  describe.skip('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
