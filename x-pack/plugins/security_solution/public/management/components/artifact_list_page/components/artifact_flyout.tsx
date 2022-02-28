@@ -117,7 +117,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    */
   flyoutCreateSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
     i18n.translate('xpack.securitySolution.some_page.flyoutCreateSubmitSuccess', {
-      defaultMessage: '"{name}" has been added to your event filters.',
+      defaultMessage: '"{name}" has been added.',
       values: { name },
     }),
 

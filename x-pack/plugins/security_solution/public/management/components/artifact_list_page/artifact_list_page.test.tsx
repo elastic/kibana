@@ -58,8 +58,19 @@ describe('When using the ArtifactListPage component', () => {
     const apiClient = TrustedAppsApiClient.getInstance(coreStart.http);
     const labels = { ...artifactListPageLabels };
 
-    FormComponentMock = jest.fn((() => {
-      return <div data-test-subj="formMock">{'Form here'}</div>;
+    FormComponentMock = jest.fn((({ mode, error, disabled }: ArtifactFormComponentProps) => {
+      return (
+        <div data-test-subj="formMock">
+          <div>{`${mode} form`}</div>
+          <div>{`Is Disabled: ${disabled}`}</div>
+          {error && (
+            <>
+              <div>{error.message}</div>
+              <div>{JSON.stringify(error.body)}</div>
+            </>
+          )}
+        </div>
+      );
     }) as unknown as jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>);
 
     render = (props: Partial<ArtifactListPageProps> = {}) => {
@@ -192,7 +203,7 @@ describe('When using the ArtifactListPage component', () => {
       beforeEach(() => {
         act(() => {
           const lastProps = getLastFormComponentProps();
-          lastProps.onChange({ item: lastProps.item, isValid: true });
+          lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
         });
       });
 
@@ -209,7 +220,7 @@ describe('When using the ArtifactListPage component', () => {
         beforeEach(() => {
           getByTestId = renderResult.getByTestId;
 
-          // Mock a delay into the list results http call
+          // Mock a delay into the create api http call
           const deferrable = getFuture();
           mockedApi.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(deferrable.promise);
           releaseApiUpdateResponse = deferrable.resolve;
@@ -246,13 +257,32 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       describe('and submit is successful', () => {
-        beforeEach(() => {
-          // FIXME:PT  release api response
+        beforeEach(async () => {
+          act(() => {
+            const lastProps = getLastFormComponentProps();
+            lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
+          });
+
+          act(() => {
+            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          });
+
+          await act(async () => {
+            await waitFor(() => {
+              expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
+            });
+          });
         });
 
-        it.todo('should show a success toast');
+        it('should show a success toast', async () => {
+          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+            '"some name" has been added.'
+          );
+        });
 
-        it.todo('should close flyout');
+        it('should clear the URL params', () => {
+          expect(location.search).toBe('');
+        });
       });
 
       describe('and submit fails', () => {

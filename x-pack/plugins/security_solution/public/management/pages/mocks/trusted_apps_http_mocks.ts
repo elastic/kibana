@@ -153,7 +153,7 @@ export type TrustedAppPostHttpMocksInterface = ResponseProvidersInterface<{
   trustedAppCreate: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
 }>;
 /**
- * HTTP mocks that support updating a single Trusted Apps
+ * HTTP mocks that support creating a single Trusted Apps
  */
 export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttpMocksInterface>([
   {
