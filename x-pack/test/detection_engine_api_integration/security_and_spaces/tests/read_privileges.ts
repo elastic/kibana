@@ -533,7 +533,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteUserAndRole(getService, ROLES.platform_engineer);
     });
 
-    it('should return expected privileges for a "detections_admin" user', async () => {
+    // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+    it.skip('should return expected privileges for a "detections_admin" user', async () => {
       await createUserAndRole(getService, ROLES.detections_admin);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
