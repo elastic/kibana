@@ -31,7 +31,7 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
-  const { hasIndexWrite, hasKibanaCRUD } = useAlertsPrivileges();
+  const { hasIndexWrite } = useAlertsPrivileges();
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -66,6 +66,6 @@ export const useAlertsActions = ({
   });
 
   return {
-    actionItems: hasIndexWrite && hasKibanaCRUD ? actionItems : [],
+    actionItems: hasIndexWrite ? actionItems : [],
   };
 };
