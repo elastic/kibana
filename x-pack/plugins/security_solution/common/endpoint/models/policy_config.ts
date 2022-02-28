@@ -198,7 +198,7 @@ export const policyFactoryWithoutPaidFeatures = (
         },
         blocklist: {
           message: '',
-          enabled: false,
+          enabled: true,
         },
       },
     },
@@ -228,7 +228,7 @@ export const policyFactoryWithoutPaidFeatures = (
         },
         blocklist: {
           message: '',
-          enabled: false,
+          enabled: true,
         },
       },
     },
@@ -258,7 +258,7 @@ export const policyFactoryWithoutPaidFeatures = (
         },
         blocklist: {
           message: '',
-          enabled: false,
+          enabled: true,
         },
       },
     },
