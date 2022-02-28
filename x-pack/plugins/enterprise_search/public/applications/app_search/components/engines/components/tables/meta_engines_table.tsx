@@ -21,12 +21,17 @@ import {
   ACTIONS_COLUMN,
   BLANK_COLUMN,
   CREATED_AT_COLUMN,
+  LAST_UPDATED_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
 } from './shared_columns';
 import { EnginesTableProps } from './types';
 import { getConflictingEnginesSet } from './utils';
+
+import { renderLastChangeLink } from './engine_link_helpers';
+
+import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
 
 interface IItemIdToExpandedRowMap {
   [id: string]: ReactNode;
@@ -48,6 +53,8 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
   const {
     myRole: { canManageMetaEngines },
   } = useValues(AppLogic);
+
+  const { showModal: showAuditLogModal } = useActions(AuditLogsModalLogic);
 
   const conflictingEnginesSets: ConflictingEnginesSets = useMemo(
     () =>
@@ -89,6 +96,14 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
       ),
     },
     CREATED_AT_COLUMN,
+    {
+      ...LAST_UPDATED_COLUMN,
+      render: (dateString: string, engineDetails) => {
+        return renderLastChangeLink(dateString, () => {
+          showAuditLogModal(engineDetails.name);
+        });
+      },
+    },
     BLANK_COLUMN,
     DOCUMENT_COUNT_COLUMN,
     FIELD_COUNT_COLUMN,
