@@ -11,15 +11,8 @@ import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subscription, concat } from 'rxjs';
-import {
-  distinctUntilChanged,
-  debounceTime,
-  catchError,
-  switchMap,
-  map,
-  take,
-} from 'rxjs/operators';
+import { EMPTY, merge, pipe, Subscription } from 'rxjs';
+import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
@@ -77,29 +70,34 @@ export class ControlGroupContainer extends Container<
       pluginServices.getServices().controls.getControlFactory,
       parent
     );
-    const anyChildChangePipe = pipe(
-      map(() => this.getChildIds()),
-      distinctUntilChanged(deepEqual),
 
-      // children may change, so make sure we subscribe/unsubscribe with switchMap
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            this.getChild(childId)
-              .getOutput$()
-              // Embeddables often throw errors into their output streams.
-              .pipe(catchError(() => EMPTY))
+    // when all children are ready start recalculating filters when any child's output changes
+    this.untilReady().then(() => {
+      this.recalculateOutput();
+
+      const anyChildChangePipe = pipe(
+        map(() => this.getChildIds()),
+        distinctUntilChanged(deepEqual),
+
+        // children may change, so make sure we subscribe/unsubscribe with switchMap
+        switchMap((newChildIds: string[]) =>
+          merge(
+            ...newChildIds.map((childId) =>
+              this.getChild(childId)
+                .getOutput$()
+                // Embeddables often throw errors into their output streams.
+                .pipe(catchError(() => EMPTY))
+            )
           )
         )
-      )
-    );
+      );
 
-    this.subscriptions.add(
-      concat(
-        merge(this.getOutput$(), this.getOutput$().pipe(anyChildChangePipe)).pipe(take(1)), // the first time filters are built, don't debounce so that initial filters are built immediately
-        merge(this.getOutput$(), this.getOutput$().pipe(anyChildChangePipe)).pipe(debounceTime(10))
-      ).subscribe(this.recalculateOutput)
-    );
+      this.subscriptions.add(
+        merge(this.getOutput$(), this.getOutput$().pipe(anyChildChangePipe))
+          .pipe(debounceTime(10))
+          .subscribe(this.recalculateOutput)
+      );
+    });
   }
 
   private recalculateOutput = () => {

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { AutocompleteService } from './autocomplete_service';
+export { AutocompleteService, type AutocompleteSetup } from './autocomplete_service';

@@ -24,7 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
-import { dataTypes, splitPkgKey } from '../../../../../../common';
+import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../common';
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -386,7 +386,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const createAgentPolicy = useCallback(async (): Promise<string | undefined> => {
     let policyId;
     setFormState('LOADING');
-    const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
+    // do not create agent policy with system integration if package policy already is for system package
+    const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+    const resp = await sendCreateAgentPolicy(newAgentPolicy, {
+      withSysMonitoring: withSysMonitoring && !packagePolicyIsSystem,
+    });
     if (resp.error) {
       setFormState('VALID');
       throw resp.error;
@@ -398,7 +402,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       updatePackagePolicy({ policy_id: policyId });
     }
     return policyId;
-  }, [newAgentPolicy, updatePackagePolicy, withSysMonitoring]);
+  }, [newAgentPolicy, updatePackagePolicy, withSysMonitoring, packagePolicy]);
 
   const onSubmit = useCallback(async () => {
     if (formState === 'VALID' && hasErrors) {
