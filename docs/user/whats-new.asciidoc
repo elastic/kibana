@@ -23,7 +23,7 @@ Previous versions: {kibana-ref-all}/8.0/whats-new.html[8.0]
 Find fields to visualize and learn more about the shape of your data
 with *Field statistics*.  This view
 is similar to the *Index Data Visualizer* in *{ml-app}*.
-For details, check out {kibana-ref}/show-field-statistics.html[Explore the fields in your data].
+For details, check {kibana-ref}/show-field-statistics.html[Explore the fields in your data].
 
 [role="screenshot"]
 image::discover/images/field-statistics-view.png[Filter panel in Canvas]
@@ -31,7 +31,7 @@ image::discover/images/field-statistics-view.png[Filter panel in Canvas]
 [float]
 ==== New $ field syntax for Painless scripts
 Creating runtime fields is now easier and more reliable.
-{kib} now has shortcut for the field method when a script context supports the scripting fields API.
+{kib} has a shortcut for the field method when a script context supports the scripting fields API.
 This shortcut replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
 
 *Before*
@@ -47,6 +47,15 @@ if (!doc.containsKey('myfield') || doc['myfield'].empty) { return "unavailable" 
 ----------------------------------
 $('myfield', 'unavailable')
 ----------------------------------
+
+[float]
+==== Calling all Document Explorers
+
+Elastic is turning on the {kibana-ref}/document-explorer.html[Document Explorer] experience by default, and in preparation,
+we call attention in the product to try it out. Document Explorer is faster, more robust,
+and offers industry leading multi-row analysis. Try Document Explorer,
+and provide feedback.
+
 
 [float]
 === Dashboard
@@ -70,8 +79,8 @@ and visual controls.
 
 [float]
 ==== New filter capabilities
-To help you create workpads with exactly the right behavior, use the new *Filters* on any
-element or object to view the applied filters.
+Use the new *Filter* panel on any object to see which objects are filtering it.
+This can help you author your workpad with the right behavior.
 
 [role="screenshot"]
 image::images/highlights-canvas-filter.png[Filter panel in Canvas]
@@ -82,16 +91,15 @@ image::images/highlights-canvas-filter.png[Filter panel in Canvas]
 [float]
 ==== Combine fields with drag and drop
 
-To view the top combinations in *Lens*, combine multiple fields with drag and drop.
-This helps you to determine the combinations that contribute to your metric performance.
+Combine multiple fields with drag and drop to view the top combinations in *Lens*, .
+This helps you to determine the combinations that contribute to your metrics' performance.
 
 [role="screenshot"]
-image::images/highlights-lens-combine.gif[Drag to combin in Lens]
+image::images/highlights-lens-combine.gif[Drag to combine in Lens]
 
 [float]
 ==== Top values by rarity
 
-When looking for root cause, it is often useful to find the rare values in your data.
 Take advantage of the {es} rare terms aggregations in *Lens* and view the top values by rarity.
 You'll find answers to "What's not normal here?"
 
@@ -126,7 +134,7 @@ image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
 [float]
 ==== Waffle visualization
 
-Create proportional waffle visualizations that make
+Create proportional waffle visualizations, which make
 more efficient use of space than pie charts.
 Waffles are designed for square spaces, which aligns well with how
 most dashboards are created. Because waffles display the data in 1% blocks, they are best for low cardinality breakdowns, and are not recommended for small partitions.
@@ -160,8 +168,8 @@ without copying or pasting to all the aggregations in the formula.
 [float]
 ==== Configurable donut visualizations
 The inner area size (or donut hole) in the donut
-visualization is now configurable&mdash;keeping the default as a smaller size to maximize space for
-labels, but allowing you to change the option in *Lens*.
+visualization is now configurable. Keeping the default to a smaller size allows for maximize space for
+labels. You can change the option in *Lens*.
 
 [role="screenshot"]
 image::images/highlights-lens-donut.png[Inner area size setting in Lens donuts,width=75%]
@@ -178,8 +186,8 @@ your suggestions the next time you use the editor with the same browser.
 
 The revised color stop editing experience offers a more streamlined way to specify
 what happens outside of the defined ranges (above and below the minimum and maximum).
-These revised controls also add the ability to easily distribute color stops
-evenly in one click. Look for the new functionality in *Lens* tables, heatmaps, metrics,
+These revised controls also add the ability to evenly distribute color stops
+in one click. Look for the new functionality in *Lens* tables, heatmaps, metrics,
 and gauges.
 
 [role="screenshot"]
@@ -190,7 +198,7 @@ image::images/highlights-lens-color.png[Color editing in Lens, width=50%]
 
 [float]
 ==== Shapefile upload
-Effortlessly load shapefiles into Elastic with this simple but powerful uploader built
+Load shapefiles into Elastic with this simple but powerful uploader built
 right into the *Maps* application. Easily load local open data and boundaries for analysis and comparison.
 
 [role="screenshot"]
