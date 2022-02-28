@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('context encoded id param', () => {
+  describe('encoded URL params in context page', () => {
     before(async function () {
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
-    it('should navigate to context page correctly', async () => {
+    it('should navigate correctly', async () => {
       await PageObjects.discover.selectIndexPattern('context-encoded-param');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
