@@ -23,7 +23,7 @@ import {
   EuiButtonEmpty,
   EuiIconTip,
 } from '@elastic/eui';
-import { AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { RuleAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
@@ -32,7 +32,7 @@ import { ConnectorsSelection } from './connectors_selection';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   connectors: ActionConnector[];
   index: number;
   onAddConnector: () => void;
@@ -155,7 +155,7 @@ export const AddConnectorInline = ({
                 <div>
                   <FormattedMessage
                     defaultMessage="{actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.connectorAddInline.newAlertActionTypeEditTitle"
+                    id="xpack.triggersActionsUI.sections.connectorAddInline.newRuleActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionTypeRegistered.actionTypeTitle,
                     }}

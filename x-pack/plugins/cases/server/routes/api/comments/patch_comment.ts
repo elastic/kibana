@@ -11,43 +11,39 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { RouteDeps } from '../types';
-import { escapeHatch, wrapError } from '../utils';
 import { CommentPatchRequestRt, throwErrors } from '../../../../common/api';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initPatchCommentApi({ router, logger }: RouteDeps) {
-  router.patch(
-    {
-      path: CASE_COMMENTS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
+export const patchCommentRoute = createCasesRoute({
+  method: 'patch',
+  path: CASE_COMMENTS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const query = pipe(
+        CommentPatchRequestRt.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+
+      const client = await context.cases.getCasesClient();
+
+      return response.ok({
+        body: await client.attachments.update({
+          caseID: request.params.case_id,
+          updateRequest: query,
         }),
-        body: escapeHatch,
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const query = pipe(
-          CommentPatchRequestRt.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-
-        const client = await context.cases.getCasesClient();
-
-        return response.ok({
-          body: await client.attachments.update({
-            caseID: request.params.case_id,
-            updateRequest: query,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to patch comment in route case id: ${request.params.case_id}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to patch comment in route case id: ${request.params.case_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

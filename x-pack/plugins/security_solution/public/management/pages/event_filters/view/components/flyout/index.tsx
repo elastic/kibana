@@ -66,6 +66,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
     // load the list of policies>
     const policiesRequest = useGetEndpointSpecificPolicies({
+      perPage: 1000,
       onError: (error) => {
         toasts.addWarning(getLoadPoliciesError(error));
       },
