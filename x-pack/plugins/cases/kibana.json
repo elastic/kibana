@@ -11,7 +11,8 @@
   "kibanaVersion":"kibana",
   "optionalPlugins":[
      "security",
-     "spaces"
+     "spaces",
+     "usageCollection"
   ],
   "owner":{
      "githubTeam":"response-ops",
