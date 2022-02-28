@@ -25,7 +25,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
 
   const agentStatusRequest = useGetAgentStatus({ policyId, enrolledAt });
   const agentsCount = agentStatusRequest.data?.results?.total;
-  return (
+  return agentsCount ? (
     <EuiCallOut
       data-test-subj="ConfirmAgentEnrollment"
       title={i18n.translate('xpack.fleet.agentEnrollment.confirmation.title', {
@@ -44,5 +44,5 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
         })}
       </EuiButton>
     </EuiCallOut>
-  );
+  ) : null;
 };

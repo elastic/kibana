@@ -99,8 +99,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
-        {/* TODO: component here for testing */}
-        <ConfirmAgentEnrollment policyId={policyId} onButtonClick={onClose} />
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
             <FormattedMessage
