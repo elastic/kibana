@@ -96,6 +96,16 @@ describe('DatatableUtilitiesService', () => {
     });
   });
 
+  describe('getInterval', () => {
+    it('should return a histogram interval', () => {
+      const column = {
+        meta: { sourceParams: { params: { interval: '1d' } } },
+      } as unknown as DatatableColumn;
+
+      expect(datatableUtilitiesService.getInterval(column)).toBe('1d');
+    });
+  });
+
   describe('setFieldFormat', () => {
     it('should set new field format', () => {
       const column = { meta: {} } as DatatableColumn;

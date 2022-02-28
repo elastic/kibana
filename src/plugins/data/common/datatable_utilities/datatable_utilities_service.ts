@@ -71,6 +71,12 @@ export class DatatableUtilitiesService {
     return this.fieldFormats.deserialize(column.meta.params);
   }
 
+  getInterval(column: DatatableColumn): string | undefined {
+    const params = column.meta.sourceParams?.params as { interval: string } | undefined;
+
+    return params?.interval;
+  }
+
   isFilterable(column: DatatableColumn): boolean {
     if (column.meta.source !== 'esaggs') {
       return false;
