@@ -37,6 +37,7 @@ snapshots.js
 /packages/kbn-ui-framework/dist
 /packages/kbn-flot-charts/lib
 /packages/kbn-monaco/src/painless/antlr
+/packages/kbn-type-summarizer/**/__tmp__
 
 # Bazel
 /bazel-*

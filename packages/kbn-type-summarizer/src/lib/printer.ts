@@ -52,7 +52,7 @@ export class Printer {
             .join(', ')} } from ${r.importNode.moduleSpecifier.getText()};\n`;
         }
 
-        return this.toSourceNodes(r.node);
+        return this.toSourceNodes(r.node, r.exported);
       })
     );
 
@@ -71,10 +71,32 @@ export class Printer {
     return output;
   }
 
-  private printModifiers(node: ts.Declaration) {
+  private getDeclarationKeyword(node: ts.Declaration) {
+    if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
+      return 'function';
+    }
+
+    if (node.kind === ts.SyntaxKind.TypeAliasDeclaration) {
+      return 'type';
+    }
+
+    if (node.kind === ts.SyntaxKind.ClassDeclaration) {
+      return 'class';
+    }
+
+    if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
+      return 'interface';
+    }
+
+    if (ts.isVariableDeclaration(node)) {
+      return this.getVariableDeclarationType(node);
+    }
+  }
+
+  private printModifiers(exported: boolean, node: ts.Declaration) {
     const flags = ts.getCombinedModifierFlags(node);
     const modifiers: string[] = [];
-    if (flags & ts.ModifierFlags.Export) {
+    if (exported) {
       modifiers.push('export');
     }
     if (flags & ts.ModifierFlags.Default) {
@@ -101,7 +123,13 @@ export class Printer {
     if (flags & ts.ModifierFlags.Async) {
       modifiers.push('async');
     }
-    return modifiers;
+
+    const keyword = this.getDeclarationKeyword(node);
+    if (keyword) {
+      modifiers.push(keyword);
+    }
+
+    return `${modifiers.join(' ')} `;
   }
 
   private printNode(node: ts.Node) {
@@ -128,8 +156,8 @@ export class Printer {
     return valid ? string : [...string, '\n'];
   }
 
-  private getMappedSourceNode(node: ts.Node, code: string) {
-    return this.sourceMapper.getSourceNode(node, code);
+  private getMappedSourceNode(node: ts.Node, code?: string) {
+    return this.sourceMapper.getSourceNode(node, code ?? node.getText());
   }
 
   private getVariableDeclarationList(node: ts.VariableDeclaration) {
@@ -205,7 +233,23 @@ export class Printer {
     });
   }
 
-  private toSourceNodes(node: ts.Node): SourceNodes {
+  private printTypeParameters(
+    node:
+      | ts.ClassDeclaration
+      | ts.InterfaceDeclaration
+      | ts.FunctionDeclaration
+      | ts.TypeAliasDeclaration
+  ) {
+    const typeParams = node.typeParameters;
+
+    if (!typeParams || !typeParams.length) {
+      return '';
+    }
+
+    return `<${typeParams.map((p) => this.printNode(p)).join(', ')}>`;
+  }
+
+  private toSourceNodes(node: ts.Node, exported = false): SourceNodes {
     switch (node.kind) {
       case ts.SyntaxKind.LiteralType:
       case ts.SyntaxKind.StringLiteral:
@@ -215,13 +259,24 @@ export class Printer {
         return [this.printNode(node)];
     }
 
-    if (ts.isInterfaceDeclaration(node) || ts.isFunctionDeclaration(node)) {
+    if (ts.isFunctionDeclaration(node)) {
       // we are just trying to replace the name with a sourceMapped node, so if there
       // is no name just return the source
       if (!node.name) {
         return [node.getFullText()];
       }
 
+      return [
+        this.getLeadingComments(node),
+        this.printModifiers(exported, node),
+        this.getMappedSourceNode(node.name),
+        this.printTypeParameters(node),
+        `(${node.parameters.map((p) => p.getFullText()).join(', ')})`,
+        node.type ? [': ', this.printNode(node.type), ';'] : ';',
+      ].flat();
+    }
+
+    if (ts.isInterfaceDeclaration(node)) {
       const text = node.getText();
       const name = node.name.getText();
       const nameI = text.indexOf(name);
@@ -240,9 +295,8 @@ export class Printer {
     if (ts.isVariableDeclaration(node)) {
       return [
         ...this.getLeadingComments(node),
-        [...this.printModifiers(node), this.getVariableDeclarationType(node)].join(' '),
-        ' ',
-        this.getMappedSourceNode(node.name, node.name.getText()),
+        this.printModifiers(exported, node),
+        this.getMappedSourceNode(node.name),
         ...(node.type ? [': ', this.printNode(node.type)] : []),
         ';\n',
       ];
@@ -257,9 +311,9 @@ export class Printer {
     if (ts.isTypeAliasDeclaration(node)) {
       return [
         ...this.getLeadingComments(node),
-        [...this.printModifiers(node), 'type'].join(' '),
-        ' ',
-        this.getMappedSourceNode(node.name, node.name.text),
+        this.printModifiers(exported, node),
+        this.getMappedSourceNode(node.name),
+        this.printTypeParameters(node),
         ' = ',
         this.ensureNewline(this.toSourceNodes(node.type)),
       ].flat();
@@ -268,12 +322,9 @@ export class Printer {
     if (ts.isClassDeclaration(node)) {
       return [
         ...this.getLeadingComments(node),
-        [...this.printModifiers(node), 'class'].join(' '),
-        ' ',
-        node.name ? this.getMappedSourceNode(node.name, node.name.text) : [],
-        node.typeParameters
-          ? [`<`, node.typeParameters.map((p) => this.printNode(p)).join(', '), '>']
-          : [],
+        this.printModifiers(exported, node),
+        node.name ? this.getMappedSourceNode(node.name) : [],
+        this.printTypeParameters(node),
         ' {\n',
         node.members.flatMap((m) => {
           const memberText = m.getText();
