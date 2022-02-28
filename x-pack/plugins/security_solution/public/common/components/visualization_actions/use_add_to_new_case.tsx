@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { Case, CommentType } from '../../../../../cases/common';
-import { CasesDeepLinkId, generateCaseViewPath } from '../../../../../cases/public';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 
 import { LensAttributes } from './types';
-import { ADD_TO_CASE_SUCCESS, VIEW_CASE } from './translations';
+import { ADD_TO_CASE_SUCCESS } from './translations';
+import { CasesDeepLinkId, generateCaseViewPath } from '../../../../../cases/public';
+import { ToaseText } from './toast_text';
 
 export interface UseAddToNewCaseProps {
   onClick?: () => void;
@@ -21,8 +21,6 @@ export interface UseAddToNewCaseProps {
   lensAttributes: LensAttributes | null;
   userCanCrud: boolean;
 }
-
-export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 
 const owner = APP_ID;
 const appId = 'securitySolutionUI';
@@ -35,8 +33,8 @@ export const useAddToNewCase = ({
 }: UseAddToNewCaseProps) => {
   const {
     theme,
-    application: { getUrlForApp },
     notifications: { toasts },
+    application: { getUrlForApp },
   } = useKibana().services;
 
   const [isCreateCaseFlyoutOpen, setIsCreateCaseFlyoutOpen] = useState(false);
@@ -52,19 +50,13 @@ export const useAddToNewCase = ({
   const getToastText = useCallback(
     (theCase) =>
       toMountPoint(
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem>
-            <EuiLink
-              href={getUrlForApp(appId, {
-                deepLinkId: CasesDeepLinkId.cases,
-                path: generateCaseViewPath({ detailName: theCase.id }),
-              })}
-              target="_blank"
-            >
-              {VIEW_CASE}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>,
+        <ToaseText
+          caseId={theCase.id}
+          href={getUrlForApp(appId, {
+            deepLinkId: CasesDeepLinkId.cases,
+            path: generateCaseViewPath({ detailName: theCase.id }),
+          })}
+        />,
         { theme$: theme?.theme$ }
       ),
     [getUrlForApp, theme?.theme$]

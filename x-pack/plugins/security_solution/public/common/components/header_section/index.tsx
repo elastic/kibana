@@ -10,8 +10,8 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
-import { HistogramActions } from '../matrix_histogram/histogram_actions';
-import { LensAttributes, GetLensAttributes } from '../matrix_histogram/types';
+import { HistogramActions } from '../visualization_actions';
+import { LensAttributes, GetLensAttributes } from '../visualization_actions/types';
 import { Subtitle } from '../subtitle';
 
 interface HeaderProps {

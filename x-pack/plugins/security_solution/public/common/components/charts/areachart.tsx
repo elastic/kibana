@@ -33,11 +33,9 @@ import {
   useTheme,
   Wrapper,
 } from './common';
-import {
-  HistogramActions,
-  HistogramActionsProps,
-  HISTOGRAM_ACTIONS_BUTTON_CLASS,
-} from '../matrix_histogram/histogram_actions';
+import { HistogramActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { HistogramActionsProps } from '../visualization_actions/types';
+
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 // custom series styles: https://ela.st/areachart-styling
