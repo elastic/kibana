@@ -17,7 +17,15 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Filter, Query, enableFilter, disableFilter, toggleFilterNegated } from '@kbn/es-query';
+import {
+  Filter,
+  Query,
+  enableFilter,
+  disableFilter,
+  toggleFilterNegated,
+  pinFilter,
+  unpinFilter,
+} from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '../../../../kibana_react/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
@@ -129,6 +137,22 @@ export function QueryBarMenu({
     onFiltersUpdated?.([]);
   };
 
+  const onPinAll = () => {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
+    const pinnedFilters = filters?.map(pinFilter);
+    if (pinnedFilters) {
+      onFiltersUpdated?.(pinnedFilters);
+    }
+  };
+
+  const onUnpinAll = () => {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
+    const unPinnedFilters = filters?.map(unpinFilter);
+    if (unPinnedFilters) {
+      onFiltersUpdated?.(unPinnedFilters);
+    }
+  };
+
   const getDateRange = () => {
     const defaultTimeSetting = services.uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
@@ -211,7 +235,10 @@ export function QueryBarMenu({
           icon: 'crossInACircleFilled',
           onClick: () => {
             closePopover();
-            onQueryStringChange('');
+            onQueryBarSubmit({
+              query: { query: '', language },
+              dateRange: getDateRange(),
+            });
             onRemoveAll();
           },
         },
@@ -262,6 +289,26 @@ export function QueryBarMenu({
           onClick: () => {
             closePopover();
             onToggleAllNegated();
+          },
+        },
+        {
+          name: i18n.translate('data.filter.options.pinAllFiltersButtonLabel', {
+            defaultMessage: 'Pin all',
+          }),
+          icon: 'pin',
+          onClick: () => {
+            closePopover();
+            onPinAll();
+          },
+        },
+        {
+          name: i18n.translate('data.filter.options.unpinAllFiltersButtonLabel', {
+            defaultMessage: 'Unpin all',
+          }),
+          icon: 'pin',
+          onClick: () => {
+            closePopover();
+            onUnpinAll();
           },
         },
       ],

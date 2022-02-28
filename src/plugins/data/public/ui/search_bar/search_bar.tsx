@@ -230,11 +230,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
       query: this.state.query,
+      filters: this.props.filters,
     };
-
-    if (savedQueryMeta.shouldIncludeFilters) {
-      savedQueryAttributes.filters = this.props.filters;
-    }
 
     if (
       savedQueryMeta.shouldIncludeTimefilter &&
@@ -365,7 +362,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         savedQueryService={this.savedQueryService}
         onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
         onClose={() => this.setState({ openQueryBarMenu: false })}
-        showFilterOption={this.props.showFilterBar}
         showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
       />
     );
@@ -410,15 +406,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          // prepend={
-          //   this.props.showFilterBar && this.state.query
-          //     ? this.renderSavedQueryManagement(
-          //         this.props.onClearSavedQuery,
-          //         this.props.showSaveQuery,
-          //         this.props.savedQuery
-          //       )
-          //     : undefined
-          // }
           prepend={this.props.showFilterBar && this.state.query ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
@@ -509,7 +496,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         savedQueryService={this.savedQueryService}
         onSave={this.onSave}
         onClose={() => this.setState({ showSaveQueryModal: false })}
-        showFilterOption={this.props.showFilterBar}
         showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
       />
     );
@@ -521,7 +507,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         savedQueryService={this.savedQueryService}
         onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
         onClose={() => this.setState({ showSaveNewQueryModal: false })}
-        showFilterOption={this.props.showFilterBar}
         showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
       />
     );

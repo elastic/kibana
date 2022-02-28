@@ -17,7 +17,6 @@ interface Props {
   savedQueryService: SavedQueryService;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
-  showFilterOption: boolean | undefined;
   showTimeFilterOption: boolean | undefined;
 }
 
@@ -25,7 +24,6 @@ export interface SavedQueryMeta {
   id?: string;
   title: string;
   description: string;
-  shouldIncludeFilters: boolean;
   shouldIncludeTimefilter: boolean;
 }
 
@@ -34,14 +32,10 @@ export function SaveQueryForm({
   savedQueryService,
   onSave,
   onClose,
-  showFilterOption = true,
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
-  const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
-    Boolean(savedQuery?.attributes.filters ?? true)
-  );
   // Defaults to false because saved queries are meant to be as portable as possible and loading
   // a saved query with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
@@ -101,20 +95,11 @@ export function SaveQueryForm({
         id: savedQuery?.id,
         title,
         description: '',
-        shouldIncludeFilters,
         shouldIncludeTimefilter,
       });
     }
     onClose();
-  }, [
-    validate,
-    onClose,
-    onSave,
-    savedQuery?.id,
-    title,
-    shouldIncludeFilters,
-    shouldIncludeTimefilter,
-  ]);
+  }, [validate, onClose, onSave, savedQuery?.id, title, shouldIncludeTimefilter]);
 
   const onInputChange = useCallback((event) => {
     setFormErrors([]);
@@ -154,21 +139,6 @@ export function SaveQueryForm({
           compressed
         />
       </EuiFormRow>
-      {showFilterOption && (
-        <EuiFormRow display="rowCompressed">
-          <EuiSwitch
-            name="shouldIncludeFilters"
-            label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
-              defaultMessage: 'Include filters',
-            })}
-            checked={shouldIncludeFilters}
-            onChange={() => {
-              setShouldIncludeFilters(!shouldIncludeFilters);
-            }}
-            data-test-subj="saveQueryFormIncludeFiltersOption"
-          />
-        </EuiFormRow>
-      )}
 
       {showTimeFilterOption && (
         <EuiFormRow display="rowCompressed">

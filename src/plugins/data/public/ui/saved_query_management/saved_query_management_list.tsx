@@ -92,9 +92,8 @@ export function SavedQueryManagementList({
   const handleSelect = useCallback(
     (savedQueryToSelect) => {
       onLoad(savedQueryToSelect);
-      onClose();
     },
-    [onLoad, onClose]
+    [onLoad]
   );
 
   const handleDelete = useCallback(
