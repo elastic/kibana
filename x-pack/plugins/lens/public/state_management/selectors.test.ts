@@ -5,114 +5,45 @@
  * 2.0.
  */
 
-import { LensAppState, selectAppliedState, selectChangesApplied } from '.';
+import { LensAppState, selectTriggerApplyChanges, selectChangesApplied } from '.';
 
 describe('lens selectors', () => {
-  it('should select applied state', () => {
-    const lensState = {
-      appliedState: {
-        activeDatasourceId: 'foobar',
-        visualization: {
-          activeId: 'some-id',
-          state: {},
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {},
-          },
-        },
-      },
-    } as Partial<LensAppState>;
-
-    expect(selectAppliedState({ lens: lensState as LensAppState })).toStrictEqual(
-      lensState.appliedState
-    );
-  });
-
   describe('selecting changes applied', () => {
-    it('should be true when applied state matches working state', () => {
+    it('should be true when auto-apply disabled and flag is set', () => {
       const lensState = {
-        activeDatasourceId: 'foobar',
-        visualization: {
-          activeId: 'some-id',
-          state: {},
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {},
-          },
-        },
-        appliedState: {
-          activeDatasourceId: 'foobar',
-          visualization: {
-            activeId: 'some-id',
-            state: {},
-          },
-          datasourceStates: {
-            indexpattern: {
-              isLoading: false,
-              state: {},
-            },
-          },
-        },
+        changesApplied: true,
+        autoApplyDisabled: true,
       } as Partial<LensAppState>;
 
       expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
     });
 
-    it('should be true when no applied state (auto-apply enabled)', () => {
+    it('should be false when auto-apply disabled and flag is false', () => {
       const lensState = {
-        visualization: {
-          activeId: 'some-id',
-          state: {},
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {},
-          },
-        },
-        appliedState: undefined,
+        changesApplied: false,
+        autoApplyDisabled: true,
       } as Partial<LensAppState>;
-
-      expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
-    });
-
-    it('should be false when applied state differs from working state', () => {
-      const lensState = {
-        activeDatasourceId: 'foobar',
-        visualization: {
-          activeId: 'some-other-id',
-          state: {
-            something: 'changed',
-          },
-        },
-        datasourceStates: {
-          indexpattern: {
-            isLoading: false,
-            state: {
-              something: 'changed',
-            },
-          },
-        },
-        appliedState: {
-          activeDatasourceId: 'foobar',
-          visualization: {
-            activeId: 'some-id',
-            state: {},
-          },
-          datasourceStates: {
-            indexpattern: {
-              isLoading: false,
-              state: {},
-            },
-          },
-        },
-      } as unknown as LensAppState;
 
       expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeFalsy();
     });
+
+    it('should be true when auto-apply enabled no matter what', () => {
+      const lensState = {
+        changesApplied: false,
+        autoApplyDisabled: false,
+      } as Partial<LensAppState>;
+
+      expect(selectChangesApplied({ lens: lensState as LensAppState })).toBeTruthy();
+    });
+  });
+  it('should select apply changes trigger', () => {
+    selectTriggerApplyChanges({ lens: { applyChangesCounter: 1 } as LensAppState }); // get the counters in sync
+
+    expect(
+      selectTriggerApplyChanges({ lens: { applyChangesCounter: 2 } as LensAppState })
+    ).toBeTruthy();
+    expect(
+      selectTriggerApplyChanges({ lens: { applyChangesCounter: 2 } as LensAppState })
+    ).toBeFalsy();
   });
 });

@@ -7,7 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { cloneDeep, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -85,8 +85,8 @@ export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onAc
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
-// this action is only relevant when auto-apply is disabled
 export const applyChanges = createAction<void>('lens/applyChanges');
+export const setChangesApplied = createAction<boolean>('lens/setChangesApplied');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -169,6 +169,7 @@ export const lensActions = {
   enableAutoApply,
   disableAutoApply,
   applyChanges,
+  setChangesApplied,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -186,14 +187,6 @@ export const lensActions = {
   removeOrClearLayer,
   addLayer,
   setLayerDefaultDimension,
-};
-
-const buildAppliedState = (state: LensAppState) => {
-  return {
-    activeDatasourceId: state.activeDatasourceId,
-    visualization: cloneDeep(state.visualization),
-    datasourceStates: cloneDeep(state.datasourceStates),
-  };
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -218,15 +211,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       };
     },
     [enableAutoApply.type]: (state) => {
-      delete state.appliedState;
+      state.autoApplyDisabled = false;
     },
     [disableAutoApply.type]: (state) => {
-      state.appliedState = buildAppliedState(state);
+      state.autoApplyDisabled = true;
+      state.changesApplied = true;
     },
     [applyChanges.type]: (state) => {
-      if (state.appliedState) {
-        state.appliedState = buildAppliedState(state);
+      if (typeof state.applyChangesCounter === 'undefined') {
+        state.applyChangesCounter = 0;
       }
+      state.applyChangesCounter!++;
+    },
+    [setChangesApplied.type]: (state, { payload: applied }) => {
+      state.changesApplied = applied;
     },
     [updateState.type]: (
       state,

@@ -17,12 +17,13 @@ import {
   removeOrClearLayer,
   addLayer,
   LensRootStore,
-  DatasourceStates,
+  selectTriggerApplyChanges,
+  selectChangesApplied,
 } from '.';
 import { layerTypes } from '../../common';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
 import { DatasourceMap, VisualizationMap } from '../types';
-import { applyChanges, disableAutoApply, enableAutoApply } from './lens_slice';
+import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
 import { LensAppState } from './types';
 
 describe('lensSlice', () => {
@@ -43,59 +44,51 @@ describe('lensSlice', () => {
 
     describe('auto-apply-related actions', () => {
       it('should disable auto apply', () => {
-        expect(store.getState().lens.appliedState).toBeUndefined();
+        expect(store.getState().lens.autoApplyDisabled).toBeUndefined();
+        expect(store.getState().lens.changesApplied).toBeUndefined();
 
         store.dispatch(disableAutoApply());
 
-        const newState = store.getState().lens;
-
-        expect(newState.appliedState).toBeDefined();
-        expect(newState.appliedState).toEqual({
-          activeDatasourceId: newState.activeDatasourceId,
-          visualization: newState.visualization,
-          datasourceStates: newState.datasourceStates,
-        });
-        // check for deep copy
-        expect(newState.appliedState?.visualization).not.toBe(newState.visualization);
-        expect(newState.appliedState?.datasourceStates).not.toBe(newState.datasourceStates);
+        expect(store.getState().lens.autoApplyDisabled).toBe(true);
+        expect(store.getState().lens.changesApplied).toBe(true);
       });
 
       it('should enable auto-apply', () => {
         store.dispatch(disableAutoApply());
 
-        expect(store.getState().lens.appliedState).toBeDefined();
+        expect(store.getState().lens.autoApplyDisabled).toBe(true);
 
         store.dispatch(enableAutoApply());
 
-        expect(store.getState().lens.appliedState).toBeUndefined();
+        expect(store.getState().lens.autoApplyDisabled).toBe(false);
       });
 
       it('applies changes when auto-apply disabled', () => {
         store.dispatch(disableAutoApply());
 
-        const newState = {
-          visualization: { activeId: 'fooid', state: { foo: 'bar' } },
-          datasourceStates: { another: 'foo' } as unknown as DatasourceStates,
-        };
-
-        store.dispatch(setState(newState));
-
         store.dispatch(applyChanges());
 
-        const stateAfterApply = store.getState().lens;
-        expect(stateAfterApply.appliedState?.visualization).toEqual(newState.visualization);
-        expect(stateAfterApply.appliedState?.datasourceStates).toEqual(newState.datasourceStates);
-        // check for deep copy
-        expect(stateAfterApply.appliedState?.visualization).not.toBe(newState.visualization);
-        expect(stateAfterApply.appliedState?.datasourceStates).not.toBe(newState.datasourceStates);
+        expect(selectTriggerApplyChanges(store.getState())).toBe(true);
       });
 
       it('does not apply changes if auto-apply enabled', () => {
-        expect(store.getState().lens.appliedState).toBeUndefined();
+        expect(store.getState().lens.autoApplyDisabled).toBeUndefined();
 
         store.dispatch(applyChanges());
 
-        expect(store.getState().lens.appliedState).toBeUndefined();
+        expect(selectTriggerApplyChanges(store.getState())).toBe(false);
+      });
+
+      it('sets changes-applied flag', () => {
+        expect(store.getState().lens.changesApplied).toBeUndefined();
+
+        store.dispatch(setChangesApplied(true));
+
+        expect(selectChangesApplied(store.getState())).toBe(true);
+
+        store.dispatch(setChangesApplied(false));
+
+        expect(selectChangesApplied(store.getState())).toBe(true);
       });
     });
 

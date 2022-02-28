@@ -8,9 +8,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { SavedObjectReference } from 'kibana/server';
 import { FilterManager } from 'src/plugins/data/public';
-import { isEqual } from 'lodash';
 import { LensState } from './types';
-import { Datasource, DatasourceMap, FramePublicAPI, VisualizationMap } from '../types';
+import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
@@ -20,27 +19,21 @@ export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
-export const selectAppliedState = (state: LensState) => state.lens.appliedState;
+export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
+export const selectChangesApplied = (state: LensState) =>
+  !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
-export const selectChangesApplied = createSelector(
-  [selectAppliedState, selectVisualization, selectDatasourceStates, selectActiveDatasourceId],
-  (appliedState, visualization, datasourceStates, activeDatasourceId) => {
-    if (!appliedState) return true; // auto-apply is enabled
-
-    const workingState = { activeDatasourceId, visualization, datasourceStates };
-    return isEqual(appliedState, workingState);
-  }
-);
-
-export const selectAutoApplyEnabled = createSelector(
-  [selectAppliedState],
-  (appliedState) => !Boolean(appliedState)
-);
+let applyChangesCounter: number | undefined;
+export const selectTriggerApplyChanges = (state: LensState) => {
+  const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;
+  applyChangesCounter = state.lens.applyChangesCounter;
+  return shouldApply;
+};
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
@@ -167,23 +160,13 @@ export const selectDatasourceLayers = createSelector(
 export const selectFramePublicAPI = createSelector(
   [
     selectDatasourceStates,
-    selectAppliedState,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
   ],
-  (datasourceStates, appliedState, activeData, datasourceMap) => {
-    const api: FramePublicAPI = {
+  (datasourceStates, activeData, datasourceMap) => {
+    return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
     };
-
-    if (appliedState) {
-      api.appliedDatasourceLayers = getDatasourceLayers(
-        appliedState.datasourceStates,
-        datasourceMap
-      );
-    }
-
-    return api;
   }
 );
