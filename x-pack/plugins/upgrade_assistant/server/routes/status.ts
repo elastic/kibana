@@ -87,7 +87,7 @@ export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: R
 
             if (kibanaTotalCriticalDeps) {
               upgradeIssues.push(
-                i18n.translate('xpack.upgradeAssistant.status.esTotalCriticalDepsMessage', {
+                i18n.translate('xpack.upgradeAssistant.status.kibanaTotalCriticalDepsMessage', {
                   defaultMessage:
                     '{kibanaTotalCriticalDeps} Kibana deprecation {kibanaTotalCriticalDeps, plural, one {issue} other {issues}}',
                   values: { kibanaTotalCriticalDeps },
