@@ -66,7 +66,7 @@ export const NoDataViews = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
     if (setDataViewEditorRef) {
       setDataViewEditorRef(ref);
     }
-  }, [canCreateNewDataView, openDataViewEditor, setDataViewEditorRef, onDataViewCreated]);
+  }, [canCreateNewDataView, onDataViewCreated, openDataViewEditor, setDataViewEditorRef]);
 
   return <NoDataViewsComponent {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink }} />;
 };

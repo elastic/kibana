@@ -42,3 +42,10 @@ export const LazyNoDataViewsPage = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
+
+export const LazyNoDataViewsComponent = React.lazy(() =>
+  import('./empty_state/no_data_views').then(({ NoDataViewsComponent }) => ({
+    default: NoDataViewsComponent,
+  }))
+);
+export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);

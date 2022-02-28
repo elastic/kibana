@@ -16,9 +16,9 @@ import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } fro
 import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
 import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
+import { NoDataViewsComponent } from '../../../../shared_ux/public';
 
 const removeAliases = (item: MatchedItem) =>
   !(item as unknown as ResolveIndexResponseItemAlias).indices;
@@ -95,10 +95,11 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // first time
       return (
         <>
-          <EmptyIndexPatternPrompt
-            goToCreate={() => setGoToForm(true)}
-            indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-            canSaveIndexPattern={dataViews.getCanSaveSync()}
+          <NoDataViewsComponent
+            onClickCreate={() => setGoToForm(true)}
+            canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+            dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+            emptyPromptColor={'subdued'}
           />
           <PromptFooter onCancel={onCancel} />
         </>

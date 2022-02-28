@@ -4,7 +4,7 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["data", "dataViews"],
-  "requiredBundles": ["kibanaReact", "esUiShared"],
+  "requiredBundles": ["kibanaReact", "esUiShared", "sharedUX"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"
