@@ -139,13 +139,13 @@ export function getMigrations(
       fixInventoryThresholdGroupId
     )
   );
-  
+
   const migrationRules801 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(addSecuritySolutionAADRuleTypeTags)
   );
-  
+
   const migrationRules820 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
