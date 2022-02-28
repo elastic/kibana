@@ -29,11 +29,15 @@ describe('<QuickButtonGroup />', () => {
 
   test('is rendered', () => {
     const component = mount(
-      <QuickButtonGroup buttons={[{
-        createType: 'Text',
-        onClick: jest.fn(),
-        iconType: 'visText',
-      }]} />
+      <QuickButtonGroup
+        buttons={[
+          {
+            createType: 'Text',
+            onClick: jest.fn(),
+            iconType: 'visText',
+          },
+        ]}
+      />
     );
 
     expect(component).toMatchSnapshot();
