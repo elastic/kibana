@@ -386,7 +386,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const createAgentPolicy = useCallback(async (): Promise<string | undefined> => {
     let policyId;
     setFormState('LOADING');
-    // do not create agent policly with system integration if package policy already is for system package
+    // do not create agent policy with system integration if package policy already is for system package
     const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
     const resp = await sendCreateAgentPolicy(newAgentPolicy, {
       withSysMonitoring: withSysMonitoring && !packagePolicyIsSystem,
