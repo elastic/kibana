@@ -27,6 +27,7 @@ import {
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
   getHostIsolationExceptionsList,
+  getEndpointBlocklistsList,
   Manifest,
 } from '../../../lib/artifacts';
 import {
@@ -238,6 +239,47 @@ export class ManifestManager {
     );
   }
 
+  /**
+   * Builds an array of Blocklist entries (one per supported OS) based on the current state of the
+   * Blocklist list
+   * @protected
+   */
+  protected async buildBlocklistArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildBlocklistForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(await this.buildBlocklistForOs(os, policyId));
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildBlocklistForOs(os: string, policyId?: string) {
+    return buildArtifact(
+      await getEndpointBlocklistsList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_BLOCKLISTS_NAME
+    );
+  }
+
+  /**
+   * Builds an array of endpoint host isolation exception (one per supported OS) based on the current state of the
+   * Host Isolation Exception List
+   * @returns
+   */
+
   protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
@@ -413,7 +455,7 @@ export class ManifestManager {
    * Builds a new manifest based on the current user exception list.
    *
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
-   * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
+   * @returns {Promise<Manifest>} A new Manifest object representing the current exception list.
    */
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
@@ -423,6 +465,7 @@ export class ManifestManager {
       this.buildTrustedAppsArtifacts(),
       this.buildEventFiltersArtifacts(),
       this.buildHostIsolationExceptionsArtifacts(),
+      this.buildBlocklistArtifacts(),
     ]);
 
     const manifest = new Manifest({
