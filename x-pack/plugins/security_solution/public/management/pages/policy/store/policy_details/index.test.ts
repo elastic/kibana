@@ -287,6 +287,7 @@ describe('policy details: ', () => {
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
+                    blocklist: { mode: 'prevent' },
                     popup: {
                       malware: {
                         enabled: true,
@@ -304,6 +305,10 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      blocklist: {
+                        enabled: true,
+                        message: '',
+                      },
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
@@ -315,6 +320,7 @@ describe('policy details: ', () => {
                     malware: { mode: 'prevent' },
                     behavior_protection: { mode: 'off', supported: false },
                     memory_protection: { mode: 'off', supported: false },
+                    blocklist: { mode: 'prevent' },
                     popup: {
                       malware: {
                         enabled: true,
@@ -326,6 +332,10 @@ describe('policy details: ', () => {
                       },
                       memory_protection: {
                         enabled: false,
+                        message: '',
+                      },
+                      blocklist: {
+                        enabled: true,
                         message: '',
                       },
                     },
@@ -337,6 +347,7 @@ describe('policy details: ', () => {
                     malware: { mode: 'prevent' },
                     behavior_protection: { mode: 'off', supported: false },
                     memory_protection: { mode: 'off', supported: false },
+                    blocklist: { mode: 'prevent' },
                     popup: {
                       malware: {
                         enabled: true,
@@ -348,6 +359,10 @@ describe('policy details: ', () => {
                       },
                       memory_protection: {
                         enabled: false,
+                        message: '',
+                      },
+                      blocklist: {
+                        enabled: true,
                         message: '',
                       },
                     },

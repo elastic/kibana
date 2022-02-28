@@ -123,6 +123,57 @@ describe('policy_config and licenses', () => {
       expect(valid).toBeTruthy();
     });
 
+    it('allows blocklist notification to be disabled with a Platinum license', () => {
+      const policy = policyFactory();
+      policy.windows.popup.blocklist.enabled = false; // make policy change
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+    it('blocks windows blocklist notification changes below Platinum licenses', () => {
+      const policy = policyFactory();
+      policy.windows.popup.blocklist.enabled = false; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('blocks mac blocklist notification changes below Platinum licenses', () => {
+      const policy = policyFactory();
+      policy.mac.popup.blocklist.enabled = false; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('allows blocklist notification message changes with a Platinum license', () => {
+      const policy = policyFactory();
+      policy.windows.popup.blocklist.message = 'BOOM'; // make policy change
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+    it('blocks windows blocklist notification message changes below Platinum licenses', () => {
+      const policy = policyFactory();
+      policy.windows.popup.blocklist.message = 'BOOM'; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+    it('blocks mac blocklist notification message changes below Platinum licenses', () => {
+      const policy = policyFactory();
+      policy.mac.popup.blocklist.message = 'BOOM'; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
     describe('ransomware protection checks', () => {
       it('blocks ransomware to be turned on for Gold and below licenses', () => {
         const policy = policyFactoryWithoutPaidFeatures();

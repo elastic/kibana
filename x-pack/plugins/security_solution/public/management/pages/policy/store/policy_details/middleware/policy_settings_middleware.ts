@@ -49,6 +49,14 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
         policyItem.inputs[0].config.policy.value.linux.popup.malware.message =
           DefaultPolicyNotificationMessage;
       }
+      if (policyItem.inputs[0].config.policy.value.windows.popup.blocklist.message === '') {
+        policyItem.inputs[0].config.policy.value.windows.popup.blocklist.message =
+          DefaultPolicyNotificationMessage;
+        policyItem.inputs[0].config.policy.value.mac.popup.blocklist.message =
+          DefaultPolicyNotificationMessage;
+        policyItem.inputs[0].config.policy.value.linux.popup.blocklist.message =
+          DefaultPolicyNotificationMessage;
+      }
       if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message =
           DefaultPolicyNotificationMessage;

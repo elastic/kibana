@@ -160,6 +160,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
+        blocklist: windows.blocklist,
       },
       mac: {
         advanced: mac.advanced,
@@ -168,6 +169,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: mac.behavior_protection,
         memory_protection: mac.memory_protection,
         popup: mac.popup,
+        blocklist: mac.blocklist,
       },
       linux: {
         advanced: linux.advanced,
@@ -176,6 +178,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: linux.behavior_protection,
         memory_protection: linux.memory_protection,
         popup: linux.popup,
+        blocklist: linux.blocklist,
       },
     };
   }

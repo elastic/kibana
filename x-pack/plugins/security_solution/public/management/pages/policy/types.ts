@@ -160,6 +160,12 @@ export type BehaviorProtectionOSes = KeysByValueCriteria<
   { behavior_protection: ProtectionFields }
 >;
 
+/** Returns an array of the policy OSes that have a blocklist protection field */
+export type BlocklistProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { blocklist: ProtectionFields }
+>;
+
 /** Returns an array of the policy OSes that have a ransomware protection field */
 export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
@@ -169,10 +175,16 @@ export type RansomwareProtectionOSes = KeysByValueCriteria<
 export type PolicyProtection =
   | keyof Pick<
       UIPolicyConfig['windows'],
-      'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
+      'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection' | 'blocklist'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
+  | keyof Pick<
+      UIPolicyConfig['mac'],
+      'malware' | 'behavior_protection' | 'memory_protection' | 'blocklist'
+    >
+  | keyof Pick<
+      UIPolicyConfig['linux'],
+      'malware' | 'behavior_protection' | 'memory_protection' | 'blocklist'
+    >;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

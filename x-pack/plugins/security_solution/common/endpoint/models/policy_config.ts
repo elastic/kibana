@@ -37,6 +37,9 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      blocklist: {
+        mode: ProtectionModes.prevent,
+      },
       popup: {
         malware: {
           message: '',
@@ -51,6 +54,10 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        blocklist: {
           message: '',
           enabled: true,
         },
@@ -79,6 +86,9 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      blocklist: {
+        mode: ProtectionModes.prevent,
+      },
       popup: {
         malware: {
           message: '',
@@ -89,6 +99,10 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        blocklist: {
           message: '',
           enabled: true,
         },
@@ -114,6 +128,9 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      blocklist: {
+        mode: ProtectionModes.prevent,
+      },
       popup: {
         malware: {
           message: '',
@@ -124,6 +141,10 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        blocklist: {
           message: '',
           enabled: true,
         },
@@ -175,6 +196,10 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: false,
         },
+        blocklist: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     mac: {
@@ -201,6 +226,10 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: false,
         },
+        blocklist: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     linux: {
@@ -224,6 +253,10 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: false,
         },
         behavior_protection: {
+          message: '',
+          enabled: false,
+        },
+        blocklist: {
           message: '',
           enabled: false,
         },

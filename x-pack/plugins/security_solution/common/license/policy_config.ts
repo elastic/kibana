@@ -44,6 +44,35 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
   return true;
 }
 
+function isEndpointBlocklistPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all blocklist features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may disable blocklist notification
+  if (
+    policy.windows.popup.blocklist.enabled !== defaults.windows.popup.blocklist.enabled ||
+    policy.mac.popup.blocklist.enabled !== defaults.mac.popup.blocklist.enabled
+  ) {
+    return false;
+  }
+
+  // Only Platinum or higher may change the blocklist message (which can be blank or what Endpoint defaults)
+  if (
+    [policy.windows, policy.mac, policy.linux].some(
+      (p) =>
+        p.popup.blocklist.message !== '' &&
+        p.popup.blocklist.message !== DefaultPolicyNotificationMessage
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
     const defaults = policyFactoryWithSupportedFeatures();
@@ -214,7 +243,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointMalwarePolicyValidForLicense(policy, license) &&
     isEndpointRansomwarePolicyValidForLicense(policy, license) &&
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
-    isEndpointBehaviorPolicyValidForLicense(policy, license)
+    isEndpointBehaviorPolicyValidForLicense(policy, license) &&
+    isEndpointBlocklistPolicyValidForLicense(policy, license)
   );
 };
 
