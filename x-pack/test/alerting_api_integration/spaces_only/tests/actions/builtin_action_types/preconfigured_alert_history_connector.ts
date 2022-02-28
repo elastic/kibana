@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getTestAlertData, ObjectRemover } from '../../../../common/lib';
+import { getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { AlertHistoryDefaultIndexName } from '../../../../../../plugins/actions/common';
 
 const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
@@ -27,7 +27,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
     const alertId = 'instance';
 
     function getTestData(params = {}) {
-      return getTestAlertData({
+      return getTestRuleData({
         rule_type_id: ruleTypeId,
         schedule: { interval: '1s' },
         params: {

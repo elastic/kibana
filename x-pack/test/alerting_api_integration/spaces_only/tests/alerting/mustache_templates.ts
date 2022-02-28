@@ -19,7 +19,7 @@ import axios from 'axios';
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getWebhookServer,
@@ -88,7 +88,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             name: 'testing variable escapes for webhook',
             rule_type_id: 'test.patternFiring',
             params: {
@@ -139,7 +139,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             name: 'testing variable escapes for slack',
             rule_type_id: 'test.patternFiring',
             params: {
@@ -189,7 +189,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             name: 'testing context variable expansion',
             rule_type_id: 'test.patternFiring',
             params: {
@@ -239,7 +239,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             name: 'testing context variable kibanaBaseUrl',
             rule_type_id: 'test.patternFiring',
             params: {
@@ -290,7 +290,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             name: 'testing variable escapes for webhook',
             rule_type_id: 'test.patternFiring',
             params: {

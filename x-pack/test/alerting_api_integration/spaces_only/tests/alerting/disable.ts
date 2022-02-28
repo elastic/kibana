@@ -12,7 +12,7 @@ import {
   AlertUtils as RuleUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData as getTestRuleData,
+  getTestRuleData,
   ObjectRemover,
   getEventLog,
 } from '../../../common/lib';

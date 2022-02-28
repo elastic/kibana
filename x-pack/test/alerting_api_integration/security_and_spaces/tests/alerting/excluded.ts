@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
-  getTestAlertData,
+  getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
   getEventLog,
@@ -57,7 +57,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .auth(scenario.user.username, scenario.user.password)
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.always-firing',
             schedule: { interval: '1s' },
             throttle: '1s',

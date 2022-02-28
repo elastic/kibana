@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover, getEventLog } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { validateEvent } from '../../../spaces_only/tests/alerting/event_log';
 
@@ -27,7 +27,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
             throttle: null,

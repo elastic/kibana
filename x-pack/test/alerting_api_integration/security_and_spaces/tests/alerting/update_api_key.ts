@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
@@ -50,7 +50,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 actions: [
                   {
                     id: createdAction.id,
@@ -116,7 +116,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -170,7 +170,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
@@ -235,7 +235,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
@@ -299,7 +299,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -363,7 +363,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix('other')}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 

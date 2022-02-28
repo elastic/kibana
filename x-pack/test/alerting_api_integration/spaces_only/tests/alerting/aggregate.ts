@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -239,7 +239,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
     const { body: createdAlert } = await supertest
       .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
-      .send(getTestAlertData(testAlertOverrides))
+      .send(getTestRuleData(testAlertOverrides))
       .expect(200);
 
     await waitForStatus(createdAlert.id, new Set([status]));

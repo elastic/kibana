@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover, getTestAlertData, getEventLog } from '../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
@@ -55,7 +55,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
@@ -131,7 +131,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
@@ -222,7 +222,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
