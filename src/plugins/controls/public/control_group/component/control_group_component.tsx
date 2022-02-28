@@ -132,10 +132,9 @@ export const ControlGroup = () => {
     );
   };
 
-  const getEditControlGroupButton = (buttonType: EditControlGroupButtonTypes) => {
+  const getEditControlGroupButton = () => {
     return (
       <EditControlGroup
-        buttonType={buttonType}
         controlStyle={controlStyle}
         panels={panels}
         defaultControlWidth={defaultControlWidth}
@@ -209,22 +208,6 @@ export const ControlGroup = () => {
                   </DragOverlay>
                 </DndContext>
               </EuiFlexItem>
-              {isEditable && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-                        {getEditControlGroupButton('icon')}
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                        {getCreateControlButton('icon')}
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           ) : (
             <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">

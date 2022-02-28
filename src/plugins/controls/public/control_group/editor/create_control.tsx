@@ -26,7 +26,7 @@ import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types
 import { toMountPoint } from '../../../../kibana_react/public';
 import { SolutionToolbarButton } from '../../../../presentation_util/public';
 
-export type CreateControlButtonTypes = 'icon' | 'toolbar' | 'callout';
+export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
@@ -130,9 +130,7 @@ export const CreateControlButton = ({
   };
 
   const createControlButton =
-    buttonType === 'icon' ? (
-      <EuiButtonIcon {...commonButtonProps} iconType={'plusInCircle'} />
-    ) : buttonType === 'callout' ? (
+    buttonType === 'callout' ? (
       <EuiButton {...commonButtonProps} size="s">
         {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
       </EuiButton>

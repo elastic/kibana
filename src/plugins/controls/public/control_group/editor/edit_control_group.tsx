@@ -18,9 +18,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import { OverlayRef } from '../../../../../core/public';
 import { ControlGroupEditor } from './control_group_editor';
 
-export type EditControlGroupButtonTypes = 'icon' | 'toolbar';
 export interface EditControlGroupButtonProps {
-  buttonType: EditControlGroupButtonTypes;
   controlStyle: ControlStyle;
   panels?: ControlsPanels;
   defaultControlWidth?: ControlWidth;
@@ -31,7 +29,6 @@ export interface EditControlGroupButtonProps {
 }
 
 export const EditControlGroup = ({
-  buttonType,
   panels,
   defaultControlWidth,
   controlStyle,
@@ -88,9 +85,7 @@ export const EditControlGroup = ({
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
-  return buttonType === 'icon' ? (
-    <EuiButtonIcon {...commonButtonProps} iconType="gear" color="text" />
-  ) : (
+  return (
     <EuiContextMenuItem key="manageControls" icon="gear" onClick={commonButtonProps.onClick}>
       {ControlGroupStrings.management.getManageButtonTitle()}
     </EuiContextMenuItem>

@@ -78,10 +78,9 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  private getEditControlGroupButton = (buttonType: EditControlGroupButtonTypes) => {
+  private getEditControlGroupButton = () => {
     return (
       <EditControlGroup
-        buttonType={buttonType}
         controlStyle={this.getInput().controlStyle}
         panels={this.getInput().panels}
         defaultControlWidth={this.getInput().defaultControlWidth}
@@ -109,10 +108,7 @@ export class ControlGroupContainer extends Container<
         {() => (
           <EuiContextMenuPanel
             size="m"
-            items={[
-              this.getCreateControlButton('toolbar'),
-              this.getEditControlGroupButton('toolbar'),
-            ]}
+            items={[this.getCreateControlButton('toolbar'), this.getEditControlGroupButton()]}
           />
         )}
       </SolutionToolbarPopover>
