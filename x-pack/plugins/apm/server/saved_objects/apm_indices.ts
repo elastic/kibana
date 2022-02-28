@@ -10,20 +10,43 @@ import { i18n } from '@kbn/i18n';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 import { ApmIndicesConfigName } from '..';
 
-const properties: { [Property in ApmIndicesConfigName]: { type: 'keyword' } } =
-  {
-    sourcemap: { type: 'keyword' },
-    error: { type: 'keyword' },
-    onboarding: { type: 'keyword' },
-    span: { type: 'keyword' },
-    transaction: { type: 'keyword' },
-    metric: { type: 'keyword' },
+export interface APMIndices {
+  apmIndices?: {
+    sourcemap?: string;
+    error?: string;
+    onboarding?: string;
+    span?: string;
+    transaction?: string;
+    metric?: string;
   };
+  isSpaceAware?: boolean;
+}
+
+const properties: {
+  apmIndices: {
+    properties: {
+      [Property in ApmIndicesConfigName]: { type: 'keyword' };
+    };
+  };
+  isSpaceAware: { type: 'boolean' };
+} = {
+  apmIndices: {
+    properties: {
+      sourcemap: { type: 'keyword' },
+      error: { type: 'keyword' },
+      onboarding: { type: 'keyword' },
+      span: { type: 'keyword' },
+      transaction: { type: 'keyword' },
+      metric: { type: 'keyword' },
+    },
+  },
+  isSpaceAware: { type: 'boolean' },
+};
 
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',
   hidden: false,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   mappings: { properties },
   management: {
     importableAndExportable: true,
