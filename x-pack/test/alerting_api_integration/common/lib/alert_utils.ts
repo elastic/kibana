@@ -9,7 +9,7 @@ import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
 import { ES_TEST_INDEX_NAME } from './es_test_index_tool';
-import { getTestAlertData } from './get_test_alert_data';
+import { getTestRuleData } from './get_test_rule_data';
 
 export interface AlertUtilsOpts {
   user?: User;
@@ -293,7 +293,7 @@ export class AlertUtils {
       request = request.auth(this.user.username, this.user.password);
     }
     const response = await request.send({
-      ...getTestAlertData(),
+      ...getTestRuleData(),
       ...overwrites,
     });
     if (response.statusCode === 200) {

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { getTestAlertData } from '../../../common/lib';
+import { getTestRuleData } from '../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function basicAlertTest({ getService }: FtrProviderContext) {
+export default function basicRuleTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('basic alert', () => {
-    it('should return 200 when creating a basic license alert', async () => {
+  describe('basic rule', () => {
+    it('should return 200 when creating a basic license rule', async () => {
       await supertest
         .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
     });
   });

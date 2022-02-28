@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
   ObjectRemover,
@@ -42,7 +42,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
 
           const response = await supertestWithoutAuth
@@ -91,7 +91,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -144,7 +144,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
@@ -211,7 +211,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.noop',
                 consumer: 'alerts',
               })
@@ -270,7 +270,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -303,7 +303,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
 
           await retry.try(async () => {
