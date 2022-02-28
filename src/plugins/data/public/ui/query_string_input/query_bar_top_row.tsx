@@ -392,30 +392,45 @@ export const QueryBarTopRow = React.memo(
     const onAddFilterClick = () => props.toggleAddFilterModal?.(!props.isAddFilterModalOpen);
 
     function onAddMultipleFilters(selectedFilters: Filter[]) {
-      props.toggleAddFilterModal?.(false);
-
       const filters = [...props.filters, ...selectedFilters];
       props?.onFiltersUpdated?.(filters);
+
+      const maxGroupId = props.multipleFilters.length
+        ? Math.max.apply(
+            Math,
+            props.multipleFilters.map((f) => f.groupId)
+          )
+        : 0;
+      const maxId = props.multipleFilters.length
+        ? Math.max.apply(
+            Math,
+            props.multipleFilters.map((f) => f.id)
+          )
+        : -1;
+      const multipleFilters = [
+        ...props.multipleFilters,
+        ...selectedFilters.map((filter, idx) => ({
+          ...filter,
+          groupId: maxGroupId + 1 + idx,
+          id: maxId + 1 + idx,
+          subGroupId: 1,
+          relationship: undefined,
+          groupsCount: 0,
+        })),
+      ];
+      props?.onMultipleFiltersUpdated?.(multipleFilters);
+      props.toggleAddFilterModal?.(false);
     }
 
-    function onAddMultipleFiltersANDOR(
-      selectedFilters: FilterGroup[],
-      buildFilters: Filter[],
-      groupCount: number
-    ) {
-      let mergedFilters = [];
+    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
       const mappedFilters = mapAndFlattenFilters(buildFilters);
-
-      mergedFilters = mappedFilters.map((filter, idx) => {
-        let groupId = selectedFilters[idx].groupId;
-        let id = selectedFilters[idx].id;
+      const mergedFilters = mappedFilters.map((filter, idx) => {
         return {
           ...filter,
-          groupId,
-          id,
+          groupId: selectedFilters[idx].groupId,
+          id: selectedFilters[idx].id,
           relationship: selectedFilters[idx].relationship,
           subGroupId: selectedFilters[idx].subGroupId,
-          groupCount: selectedFilters[idx].groupsCount,
         };
       });
 
