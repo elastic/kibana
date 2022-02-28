@@ -108,9 +108,9 @@
         "label": "EmptyPlaceholder",
         "description": [],
         "signature": [
-          "({ icon, message, }: { icon: ",
+          "({ icon, iconColor, message, dataTestSubj, }: { icon: ",
           "IconType",
-          "; message?: JSX.Element | undefined; }) => JSX.Element"
+          "; iconColor?: string | undefined; message?: JSX.Element | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
         "deprecated": false,
@@ -120,7 +120,7 @@
             "id": "def-public.EmptyPlaceholder.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  icon,\n  message = <FormattedMessage id=\"charts.noDataLabel\" defaultMessage=\"No results found\" />,\n}",
+            "label": "{\n  icon,\n  iconColor = 'subdued',\n  message = <FormattedMessage id=\"charts.noDataLabel\" defaultMessage=\"No results found\" />,\n  dataTestSubj = 'emptyPlaceholder',\n}",
             "description": [],
             "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
             "deprecated": false,
@@ -140,6 +140,19 @@
               },
               {
                 "parentPluginId": "charts",
+                "id": "def-public.EmptyPlaceholder.$1.iconColor",
+                "type": "string",
+                "tags": [],
+                "label": "iconColor",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
                 "id": "def-public.EmptyPlaceholder.$1.message",
                 "type": "Object",
                 "tags": [],
@@ -147,6 +160,19 @@
                 "description": [],
                 "signature": [
                   "JSX.Element | undefined"
+                ],
+                "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.EmptyPlaceholder.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
                 "deprecated": false
