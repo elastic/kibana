@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run on PRs that were merged for the Fleet team
     if: |
-      github.event.pull_request_target.merged == true &&
+      github.event.pull_request.merged_at &&
       contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
     outputs:
       matrix: ${{ steps.issues_to_label.outputs.value }}
