@@ -136,7 +136,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
 
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
-      <div data-test-subj="fields-browser-container">
+      <div data-test-subj="fields-browser-container" className="eui-yScroll">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <h1>{i18n.FIELDS_BROWSER}</h1>
