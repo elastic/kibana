@@ -12,12 +12,6 @@ export function getUpgradeAssistantHref(basePath: IBasePath) {
   return basePath.prepend('/app/management/stack/upgrade_assistant');
 }
 
-export function useUpgradeAssistantHref() {
-  const { core } = useApmPluginContext();
-
-  return getUpgradeAssistantHref(core.http.basePath);
-}
-
 export function useFleetCloudAgentPolicyHref() {
   const {
     core: {
