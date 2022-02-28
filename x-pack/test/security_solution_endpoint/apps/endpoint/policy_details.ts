@@ -6,15 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { DeepPartial } from 'utility-types';
-import { merge } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
-import { FullAgentPolicyInput } from '../../../../plugins/fleet/common';
-import { PolicyConfig } from '../../../../plugins/security_solution/common/endpoint/types';
-import { ManifestSchema } from '../../../../plugins/security_solution/common/endpoint/schema/manifest';
-import { policyFactory } from '../../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -196,7 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connecton_delay).to.eql(
+        expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connection_delay).to.eql(
           'true'
         );
         expect(agentFullPolicy.inputs[0].policy.linux.events.file).to.eql(false);
@@ -220,7 +214,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connecton_delay).to.eql(
+        expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connection_delay).to.eql(
           'true'
         );
 
