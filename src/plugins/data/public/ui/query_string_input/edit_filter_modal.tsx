@@ -126,7 +126,9 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(currentEditFilters[currentEditFilters?.length - 1].groupCount ?? 0);
+  const [groupsCount, setGroupsCount] = useState<number>(
+    (new Set(localFilters.map(filter => filter.groupId))).size
+  );
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 
