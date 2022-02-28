@@ -86,7 +86,7 @@ export const useAnomaliesTableData = ({
             {
               jobIds,
               criteriaFields: criteriaFieldsInput,
-              filterQuery,
+              influencersFilterQuery: filterQuery,
               aggregationInterval: 'auto',
               threshold: getThreshold(anomalyScore, threshold),
               earliestMs,

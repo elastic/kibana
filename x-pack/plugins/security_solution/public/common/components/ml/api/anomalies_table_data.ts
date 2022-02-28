@@ -20,7 +20,7 @@ export interface Body {
   dateFormatTz: string;
   maxRecords: number;
   maxExamples: number;
-  filterQuery?: estypes.QueryDslQueryContainer;
+  influencersFilterQuery?: estypes.QueryDslQueryContainer;
 }
 
 export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {

@@ -26,7 +26,7 @@ export const anomaliesTableDataSchema = schema.object({
   dateFormatTz: schema.string(),
   maxRecords: schema.number(),
   maxExamples: schema.maybe(schema.number()),
-  filterQuery: schema.maybe(schema.any()),
+  influencersFilterQuery: schema.maybe(schema.any()),
   functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
 
