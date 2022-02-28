@@ -9,6 +9,157 @@
 import { expectTemplate } from './__jest__/test_bench';
 
 describe('basic context', () => {
+  it('most basic', () => {
+    expectTemplate('{{foo}}').withInput({ foo: 'foo' }).toCompileTo('foo');
+  });
+
+  it('escaping', () => {
+    expectTemplate('\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('{{foo}}');
+    expectTemplate('content \\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
+    expectTemplate('\\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('\\food');
+    expectTemplate('content \\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content \\food');
+    expectTemplate('\\\\ {{foo}}').withInput({ foo: 'food' }).toCompileTo('\\\\ food');
+  });
+
+  it('compiling with a basic context', () => {
+    expectTemplate('Goodbye\n{{cruel}}\n{{world}}!')
+      .withInput({
+        cruel: 'cruel',
+        world: 'world',
+      })
+      .toCompileTo('Goodbye\ncruel\nworld!');
+  });
+
+  it('compiling with a string context', () => {
+    expectTemplate('{{.}}{{length}}').withInput('bye').toCompileTo('bye3');
+  });
+
+  it('compiling with an undefined context', () => {
+    expectTemplate('Goodbye\n{{cruel}}\n{{world.bar}}!')
+      .withInput(undefined)
+      .toCompileTo('Goodbye\n\n!');
+
+    expectTemplate('{{#unless foo}}Goodbye{{../test}}{{test2}}{{/unless}}')
+      .withInput(undefined)
+      .toCompileTo('Goodbye');
+  });
+
+  it('comments', () => {
+    expectTemplate('{{! Goodbye}}Goodbye\n{{cruel}}\n{{world}}!')
+      .withInput({
+        cruel: 'cruel',
+        world: 'world',
+      })
+      .toCompileTo('Goodbye\ncruel\nworld!');
+
+    expectTemplate('    {{~! comment ~}}      blah').toCompileTo('blah');
+    expectTemplate('    {{~!-- long-comment --~}}      blah').toCompileTo('blah');
+    expectTemplate('    {{! comment ~}}      blah').toCompileTo('    blah');
+    expectTemplate('    {{!-- long-comment --~}}      blah').toCompileTo('    blah');
+    expectTemplate('    {{~! comment}}      blah').toCompileTo('      blah');
+    expectTemplate('    {{~!-- long-comment --}}      blah').toCompileTo('      blah');
+  });
+
+  it('zeros', () => {
+    expectTemplate('num1: {{num1}}, num2: {{num2}}')
+      .withInput({
+        num1: 42,
+        num2: 0,
+      })
+      .toCompileTo('num1: 42, num2: 0');
+
+    expectTemplate('num: {{.}}').withInput(0).toCompileTo('num: 0');
+
+    expectTemplate('num: {{num1/num2}}')
+      .withInput({ num1: { num2: 0 } })
+      .toCompileTo('num: 0');
+  });
+
+  it('false', () => {
+    /* eslint-disable no-new-wrappers */
+    expectTemplate('val1: {{val1}}, val2: {{val2}}')
+      .withInput({
+        val1: false,
+        val2: new Boolean(false),
+      })
+      .toCompileTo('val1: false, val2: false');
+
+    expectTemplate('val: {{.}}').withInput(false).toCompileTo('val: false');
+
+    expectTemplate('val: {{val1/val2}}')
+      .withInput({ val1: { val2: false } })
+      .toCompileTo('val: false');
+
+    expectTemplate('val1: {{{val1}}}, val2: {{{val2}}}')
+      .withInput({
+        val1: false,
+        val2: new Boolean(false),
+      })
+      .toCompileTo('val1: false, val2: false');
+
+    expectTemplate('val: {{{val1/val2}}}')
+      .withInput({ val1: { val2: false } })
+      .toCompileTo('val: false');
+    /* eslint-enable */
+  });
+
+  it('newlines', () => {
+    expectTemplate("Alan's\nTest").toCompileTo("Alan's\nTest");
+    expectTemplate("Alan's\rTest").toCompileTo("Alan's\rTest");
+  });
+
+  it('escaping text', () => {
+    expectTemplate("Awesome's").toCompileTo("Awesome's");
+    expectTemplate('Awesome\\').toCompileTo('Awesome\\');
+    expectTemplate('Awesome\\\\ foo').toCompileTo('Awesome\\\\ foo');
+    expectTemplate('Awesome {{foo}}').withInput({ foo: '\\' }).toCompileTo('Awesome \\');
+    expectTemplate(" ' ' ").toCompileTo(" ' ' ");
+  });
+
+  it('escaping expressions', () => {
+    expectTemplate('{{awesome}}')
+      .withInput({ awesome: '&"\'`\\<>' })
+      .toCompileTo('&amp;&quot;&#x27;&#x60;\\&lt;&gt;');
+
+    expectTemplate('{{awesome}}')
+      .withInput({ awesome: 'Escaped, <b> looks like: &lt;b&gt;' })
+      .toCompileTo('Escaped, &lt;b&gt; looks like: &amp;lt;b&amp;gt;');
+  });
+
+  it('paths with hyphens', () => {
+    expectTemplate('{{foo-bar}}').withInput({ 'foo-bar': 'baz' }).toCompileTo('baz');
+
+    expectTemplate('{{foo.foo-bar}}')
+      .withInput({ foo: { 'foo-bar': 'baz' } })
+      .toCompileTo('baz');
+
+    expectTemplate('{{foo/foo-bar}}')
+      .withInput({ foo: { 'foo-bar': 'baz' } })
+      .toCompileTo('baz');
+  });
+
+  it('nested paths', () => {
+    expectTemplate('Goodbye {{alan/expression}} world!')
+      .withInput({ alan: { expression: 'beautiful' } })
+      .toCompileTo('Goodbye beautiful world!');
+  });
+
+  it('nested paths with empty string value', () => {
+    expectTemplate('Goodbye {{alan/expression}} world!')
+      .withInput({ alan: { expression: '' } })
+      .toCompileTo('Goodbye  world!');
+  });
+
+  it('literal paths', () => {
+    expectTemplate('Goodbye {{[@alan]/expression}} world!')
+      .withInput({ '@alan': { expression: 'beautiful' } })
+      .toCompileTo('Goodbye beautiful world!');
+
+    expectTemplate('Goodbye {{[foo bar]/expression}} world!')
+      .withInput({ 'foo bar': { expression: 'beautiful' } })
+      .toCompileTo('Goodbye beautiful world!');
+  });
+
   it('literal references', () => {
     expectTemplate('Goodbye {{[foo bar]}} world!')
       .withInput({ 'foo bar': 'beautiful' })
@@ -33,5 +184,51 @@ describe('basic context', () => {
     expectTemplate("Goodbye {{'foo\"bar'}} world!")
       .withInput({ 'foo"bar': 'beautiful' })
       .toCompileTo('Goodbye beautiful world!');
+  });
+
+  it("that current context path ({{.}}) doesn't hit helpers", () => {
+    expectTemplate('test: {{.}}')
+      .withInput(null)
+      // @ts-expect-error TODO: Should `withHelpers` support a strings as helper functions? The code supports it
+      .withHelpers({ helper: 'awesome' })
+      .toCompileTo('test: ');
+  });
+
+  it('complex but empty paths', () => {
+    expectTemplate('{{person/name}}')
+      .withInput({ person: { name: null } })
+      .toCompileTo('');
+
+    expectTemplate('{{person/name}}').withInput({ person: {} }).toCompileTo('');
+  });
+
+  it('this keyword nested inside path', () => {
+    expectTemplate('{{#hellos}}{{text/this/foo}}{{/hellos}}').toThrow(
+      'Invalid path: text/this - 1:13'
+    );
+
+    expectTemplate('{{[this]}}').withInput({ this: 'bar' }).toCompileTo('bar');
+
+    expectTemplate('{{text/[this]}}')
+      .withInput({ text: { this: 'bar' } })
+      .toCompileTo('bar');
+  });
+
+  it('pass string literals', () => {
+    expectTemplate('{{"foo"}}').toCompileTo('');
+    expectTemplate('{{"foo"}}').withInput({ foo: 'bar' }).toCompileTo('bar');
+  });
+
+  it('pass number literals', () => {
+    expectTemplate('{{12}}').toCompileTo('');
+    expectTemplate('{{12}}').withInput({ '12': 'bar' }).toCompileTo('bar');
+    expectTemplate('{{12.34}}').toCompileTo('');
+    expectTemplate('{{12.34}}').withInput({ '12.34': 'bar' }).toCompileTo('bar');
+  });
+
+  it('pass boolean literals', () => {
+    expectTemplate('{{true}}').toCompileTo('');
+    expectTemplate('{{true}}').withInput({ '': 'foo' }).toCompileTo('');
+    expectTemplate('{{false}}').withInput({ false: 'foo' }).toCompileTo('foo');
   });
 });
