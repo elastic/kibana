@@ -1,18 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`KibanaPageTemplate render basic template 1`] = `
-<KibanaPageTemplateInner
-  pageHeader={
-    Object {
-      "description": "test",
-      "iconType": "test",
-      "rightSideItems": Array [
-        "test",
-      ],
-      "title": "test",
-    }
-  }
-/>
+<div
+  class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  style="min-height:460px"
+>
+  <div
+    class="euiPageBody euiPageBody--borderRadiusNone"
+  >
+    <header
+      class="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--restrictWidth-default euiPageHeader--responsive euiPageHeader--center"
+      title="test"
+    >
+      <div
+        class="euiPageHeaderContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiText euiText--medium euiText--constrainedWidth"
+            >
+              <p>
+                test
+              </p>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                test
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      role="main"
+    >
+      <div
+        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+      />
+    </div>
+  </div>
+</div>
 `;
 
 exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
@@ -109,36 +151,50 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
           "items": Array [
             Object {
               "id": "1.1",
+              "items": undefined,
               "name": "Ingest Node Pipelines",
+              "tabIndex": undefined,
             },
             Object {
               "id": "1.2",
+              "items": undefined,
               "name": "Logstash Pipelines",
+              "tabIndex": undefined,
             },
             Object {
               "id": "1.3",
+              "items": undefined,
               "name": "Beats Central Management",
+              "tabIndex": undefined,
             },
           ],
           "name": "Ingest",
+          "tabIndex": undefined,
         },
         Object {
           "id": "2",
           "items": Array [
             Object {
               "id": "2.1",
+              "items": undefined,
               "name": "Index Management",
+              "tabIndex": undefined,
             },
             Object {
               "id": "2.2",
+              "items": undefined,
               "name": "Index Lifecycle Policies",
+              "tabIndex": undefined,
             },
             Object {
               "id": "2.3",
+              "items": undefined,
               "name": "Snapshot and Restore",
+              "tabIndex": undefined,
             },
           ],
           "name": "Data",
+          "tabIndex": undefined,
         },
       ],
       "name": "Solution",
@@ -148,108 +204,66 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
 `;
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
-<WithSolutionNavBar({
-  template,
-  className,
-  pageHeader,
-  children,
-  isEmptyState,
-  ...rest
-}) => {
-  /**
-   * An easy way to create the right content for empty pages
-   */
-  const emptyStateDefaultTemplate = 'centeredBody';
-
-  if (isEmptyState && pageHeader && !children) {
-    var _template;
-
-    template = (_template = template) !== null && _template !== void 0 ? _template : emptyStateDefaultTemplate;
-    const {
-      iconType,
-      pageTitle,
-      description,
-      rightSideItems
-    } = pageHeader;
-    pageHeader = undefined;
-    children = /*#__PURE__*/_react.default.createElement(_eui.EuiEmptyPrompt, {
-      iconType: iconType,
-      iconColor: '' // This is likely a solution or app logo, so keep it multi-color
-      ,
-      title: pageTitle ? /*#__PURE__*/_react.default.createElement("h1", null, pageTitle) : undefined,
-      body: description ? /*#__PURE__*/_react.default.createElement("p", null, description) : undefined,
-      actions: rightSideItems
-    });
-  } else if (isEmptyState && pageHeader && children) {
-    var _template2;
-
-    template = (_template2 = template) !== null && _template2 !== void 0 ? _template2 : 'centeredContent';
-  } else if (isEmptyState && !pageHeader) {
-    var _template3;
-
-    template = (_template3 = template) !== null && _template3 !== void 0 ? _template3 : emptyStateDefaultTemplate;
-  }
-
-  const classes = (0, _util.getClasses)('kbnPageTemplate', className);
-  return /*#__PURE__*/_react.default.createElement(_eui.EuiPageTemplate, (0, _extends2.default)({
-    template: template,
-    className: classes,
-    pageHeader: pageHeader
-  }, rest), children);
-}
-  pageHeader={
-    Object {
-      "description": "test",
-      "iconType": "test",
-      "rightSideItems": Array [
-        "test",
-      ],
-      "title": "test",
-    }
-  }
-  solutionNav={
-    Object {
-      "icon": "solution",
-      "items": Array [
-        Object {
-          "id": "1",
-          "items": Array [
-            Object {
-              "id": "1.1",
-              "name": "Ingest Node Pipelines",
-            },
-            Object {
-              "id": "1.2",
-              "name": "Logstash Pipelines",
-            },
-            Object {
-              "id": "1.3",
-              "name": "Beats Central Management",
-            },
-          ],
-          "name": "Ingest",
-        },
-        Object {
-          "id": "2",
-          "items": Array [
-            Object {
-              "id": "2.1",
-              "name": "Index Management",
-            },
-            Object {
-              "id": "2.2",
-              "name": "Index Lifecycle Policies",
-            },
-            Object {
-              "id": "2.3",
-              "name": "Snapshot and Restore",
-            },
-          ],
-          "name": "Data",
-        },
-      ],
-      "name": "Solution",
-    }
-  }
-/>
+<div
+  class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  solutionnav="[object Object]"
+  style="min-height:460px"
+>
+  <div
+    class="euiPageSideBar euiPageSideBar--sticky kbnPageTemplate__pageSideBar"
+  />
+  <div
+    class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageBody euiPageBody--borderRadiusNone"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
+    >
+      <header
+        class="euiPageHeader euiPageHeader--restrictWidth-default euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+        title="test"
+      >
+        <div
+          class="euiPageHeaderContent"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                class="euiText euiText--medium euiText--constrainedWidth"
+              >
+                <p>
+                  test
+                </p>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  test
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div
+        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+        role="main"
+      >
+        <div
+          class="euiPageContentBody euiPage--restrictWidth-default"
+        />
+      </div>
+    </div>
+  </div>
+</div>
 `;
