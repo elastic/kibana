@@ -8,14 +8,14 @@
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { CASES_TELEMETRY_TASK_NAME } from '../../common/constants';
 
-const MINUTES_ON_A_DAY = 60 * 24;
+const MINUTES_ON_HALF_DAY = 60 * 12;
 
 export const scheduleCasesTelemetryTask = (taskManager: TaskManagerStartContract) => {
   taskManager.ensureScheduled({
     id: CASES_TELEMETRY_TASK_NAME,
     taskType: CASES_TELEMETRY_TASK_NAME,
     schedule: {
-      interval: `${MINUTES_ON_A_DAY}m`,
+      interval: `${MINUTES_ON_HALF_DAY}m`,
     },
     scope: ['cases'],
     params: {},
