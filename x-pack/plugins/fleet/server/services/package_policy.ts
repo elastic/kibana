@@ -28,6 +28,7 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  SO_SEARCH_LIMIT,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -114,7 +115,7 @@ class PackagePolicyService {
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
         throw new IngestManagerError(
-          `There is already an integration policy with the same name: ${packagePolicy.name}`
+          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
         );
       }
     }
@@ -376,13 +377,16 @@ class PackagePolicyService {
     }
     // Check that the name does not exist already but exclude the current package policy
     const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
     });
+
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already an integration policy with the same name');
+      throw new IngestManagerError(
+        `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+      );
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>

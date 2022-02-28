@@ -101,6 +101,7 @@ export interface TGridIntegratedProps {
   createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
@@ -145,6 +146,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   columns,
   data,
   dataProviders,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
@@ -236,6 +238,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
       data,
+      dataViewId,
       docValueFields,
       endDate: end,
       entityType,
