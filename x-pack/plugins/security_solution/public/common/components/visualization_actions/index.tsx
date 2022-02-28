@@ -22,29 +22,13 @@ import {
 import { LensEmbeddableInput } from '../../../../../lens/public';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
-
-import { InputsModelId } from '../../store/inputs/constants';
 import { ModalInspectQuery } from '../inspect/modal';
+
 import { useInspect } from '../inspect/use_inspect';
-import { LensAttributes, GetLensAttributes } from './types';
 import { useLensAttributes } from './use_lens_attributes';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { useAddToNewCase } from './use_add_to_new_case';
-export interface HistogramActionsProps {
-  className?: string;
-  getLensAttributes?: GetLensAttributes;
-  inputId?: InputsModelId;
-  inspectIndex?: number;
-  isInspectButtonDisabled?: boolean;
-  isMultipleQuery?: boolean;
-  lensAttributes?: LensAttributes | null;
-  onCloseInspect?: () => void;
-  queryId: string;
-  timerange: { from: string; to: string };
-  title: React.ReactNode;
-  stackByField?: string;
-}
 
 const Wrapper = styled.div`
   &.kpi-matrix-histogram-actions {

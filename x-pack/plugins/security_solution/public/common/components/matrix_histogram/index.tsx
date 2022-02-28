@@ -18,13 +18,7 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
-import {
-  MatrixHistogramProps,
-  MatrixHistogramOption,
-  MatrixHistogramQueryProps,
-  LensAttributes,
-  GetLensAttributes,
-} from './types';
+import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import {
   MatrixHistogramMappingTypes,
@@ -34,8 +28,9 @@ import {
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import { HISTOGRAM_ACTIONS_BUTTON_CLASS } from './histogram_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {

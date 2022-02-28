@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { Case } from '../../../../../cases/common';
@@ -15,10 +14,11 @@ import {
 } from '../../../../../cases/public';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
-import { ADD_TO_CASE_FAILURE, ADD_TO_CASE_SUCCESS, VIEW_CASE } from './translations';
+import { ADD_TO_CASE_FAILURE, ADD_TO_CASE_SUCCESS } from './translations';
 
 import { LensAttributes } from './types';
 import { addToCase } from './utils';
+import { ToaseText } from './toast_text';
 
 const appId = 'securitySolutionUI';
 const owner = APP_ID;
@@ -55,21 +55,15 @@ export const useAddToExistingCase = ({
   }, [onAddToCaseClicked]);
 
   const getToastText = useCallback(
-    (theCase) =>
+    (theCase: Case) =>
       toMountPoint(
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem>
-            <EuiLink
-              href={getUrlForApp(appId, {
-                deepLinkId: CasesDeepLinkId.cases,
-                path: generateCaseViewPath({ detailName: theCase.id }),
-              })}
-              target="_blank"
-            >
-              {VIEW_CASE}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>,
+        <ToaseText
+          caseId={theCase.id}
+          href={getUrlForApp(appId, {
+            deepLinkId: CasesDeepLinkId.cases,
+            path: generateCaseViewPath({ detailName: theCase.id }),
+          })}
+        />,
         { theme$: theme?.theme$ }
       ),
     [getUrlForApp, theme?.theme$]

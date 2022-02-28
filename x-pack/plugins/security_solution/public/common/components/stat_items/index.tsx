@@ -31,12 +31,9 @@ import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
-import {
-  HistogramActions,
-  HISTOGRAM_ACTIONS_BUTTON_CLASS,
-} from '../matrix_histogram/histogram_actions';
+import { HistogramActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { LensAttributes } from '../matrix_histogram/types';
+import { LensAttributes } from '../visualization_actions/types';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
