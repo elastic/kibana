@@ -621,6 +621,19 @@
                           "type"
                         ]
                       }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": [
+                            "registry",
+                            "upload",
+                            "bundled"
+                          ]
+                        }
+                      }
                     }
                   },
                   "required": [

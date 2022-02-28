@@ -14,6 +14,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./file'));
     loadTestFile(require.resolve('./template'));
     loadTestFile(require.resolve('./ilm'));
+    loadTestFile(require.resolve('./install_bundled'));
     loadTestFile(require.resolve('./install_by_upload'));
     loadTestFile(require.resolve('./install_endpoint'));
     loadTestFile(require.resolve('./install_overrides'));
