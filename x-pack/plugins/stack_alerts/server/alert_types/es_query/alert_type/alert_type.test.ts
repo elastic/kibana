@@ -66,8 +66,8 @@ describe('alertType', () => {
             "name": "conditions",
           },
           Object {
-            "description": "A link to see records that triggered this alert if it created from discover. 
-              In case of Elastic query alert, this link will navigate to stack management.",
+            "description": "A link to the records that triggered this alert, if it was created from Discover. 
+              For Elastic query alerts, this link navigates to Stack Management.",
             "name": "link",
           },
         ],
@@ -85,7 +85,7 @@ describe('alertType', () => {
             "name": "thresholdComparator",
           },
           Object {
-            "description": "The type of search is used.",
+            "description": "The type of search.",
             "name": "searchType",
           },
           Object {

@@ -23,12 +23,14 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+const dataPlugin = dataPluginMock.createStartContract();
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
@@ -76,6 +78,7 @@ describe('Task Runner Factory', () => {
   const rulesClient = rulesClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
+    data: dataPlugin,
     savedObjects: savedObjectsService,
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),

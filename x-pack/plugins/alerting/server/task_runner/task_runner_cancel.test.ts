@@ -34,6 +34,7 @@ import { IEventLogger } from '../../../event_log/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -94,6 +95,7 @@ describe('Task Runner Cancel', () => {
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+  const dataPlugin = dataPluginMock.createStartContract();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -102,6 +104,7 @@ describe('Task Runner Cancel', () => {
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
+    data: dataPlugin,
     savedObjects: savedObjectsService,
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
