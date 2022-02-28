@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlegetTestRuleDatartData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
