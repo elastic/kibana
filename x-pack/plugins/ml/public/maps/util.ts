@@ -26,11 +26,12 @@ export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMA
 const INFLUENCER_LIMIT = 3;
 const INFLUENCER_MAX_VALUES = 3;
 
-function getInfluencersHtmlString(
+export function getInfluencersHtmlString(
   influencers: Array<{ influencer_field_name: string; influencer_field_values: string[] }>,
   splitFields: string[]
 ) {
   let htmlString = '<ul>';
+  let influencerCount = 0;
   for (let i = 0; i < influencers.length; i++) {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { influencer_field_name, influencer_field_values } = influencers[i];
@@ -40,13 +41,13 @@ function getInfluencersHtmlString(
     const fieldValuesString = influencer_field_values.slice(0, INFLUENCER_MAX_VALUES).join(', ');
 
     htmlString += `<li>${influencer_field_name}: ${fieldValuesString}</li>`;
+    influencerCount += 1;
 
-    // Only show top two influencers
-    if (i === INFLUENCER_LIMIT - 1) {
-      htmlString += '</ul>';
+    if (influencerCount === INFLUENCER_LIMIT) {
       break;
     }
   }
+  htmlString += '</ul>';
 
   return htmlString;
 }
@@ -185,7 +186,7 @@ export async function getResultsForJobId(
           timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
           record_score: Math.floor(_source.record_score),
           ...(Object.keys(splitFields).length > 0 ? splitFields : {}),
-          ...(_source.influencers
+          ...(_source.influencers?.length
             ? {
                 influencers: getInfluencersHtmlString(
                   _source.influencers,
