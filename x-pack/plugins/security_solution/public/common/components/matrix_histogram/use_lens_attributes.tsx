@@ -12,7 +12,7 @@ import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
-import { LensAttributes } from './types';
+import { LensAttributes, GetLensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
   filterNetworkExternalAlertData,
@@ -24,8 +24,8 @@ export const useLensAttributes = ({
   getLensAttributes,
   stackByField,
 }: {
-  lensAttributes?: LensAttributes;
-  getLensAttributes?: (params?: { stackByField?: string }) => LensAttributes;
+  lensAttributes?: LensAttributes | null;
+  getLensAttributes?: GetLensAttributes;
   stackByField?: string;
 }): LensAttributes | null => {
   const { dataViewId } = useSourcererDataView();
@@ -65,21 +65,24 @@ export const useLensAttributes = ({
   }, [location.pathname, detailName, filters]);
 
   const lensAttrsWithInjectedData = useMemo(() => {
-    const attrs = lensAttributes ?? (getLensAttributes && getLensAttributes({ stackByField }));
-    return attrs != null
-      ? ({
-          ...attrs,
-          state: {
-            ...attrs.state,
-            query,
-            filters: [...attrs.state.filters, ...pageFilters, ...tabsFilters],
-          },
-          references: attrs.references.map((ref: { id: string; name: string; type: string }) => ({
-            ...ref,
-            id: dataViewId,
-          })),
-        } as LensAttributes)
-      : null;
+    if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
+      return null;
+    }
+    const attrs: LensAttributes =
+      lensAttributes ??
+      ((getLensAttributes && stackByField && getLensAttributes(stackByField)) as LensAttributes);
+    return {
+      ...attrs,
+      state: {
+        ...attrs.state,
+        query,
+        filters: [...attrs.state.filters, ...pageFilters, ...tabsFilters],
+      },
+      references: attrs.references.map((ref: { id: string; name: string; type: string }) => ({
+        ...ref,
+        id: dataViewId,
+      })),
+    } as LensAttributes;
   }, [
     lensAttributes,
     getLensAttributes,

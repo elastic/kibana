@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export const getExternalAlertConfigs = ({
-  stackByField = 'event.module',
-}: {
-  stackByField?: string;
-}) => {
+import { LensAttributes, GetLensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const getExternalAlertConfigs: GetLensAttributes = (stackByField = 'event.module') => {
   return {
     title: 'external alerts',
     description: '',
@@ -148,5 +146,5 @@ export const getExternalAlertConfigs = ({
         id: 'security-solution-default',
       },
     ],
-  };
+  } as LensAttributes;
 };

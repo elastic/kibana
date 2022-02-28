@@ -8,44 +8,37 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { Case, CommentType } from '../../../../../cases/common';
+
 import {
-  CasesDeepLinkId,
-  DRAFT_COMMENT_STORAGE_ID,
-  generateCaseViewPath,
   GetAllCasesSelectorModalProps,
   GetCreateCaseFlyoutProps,
 } from '../../../../../cases/public';
-import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../lens/public';
+import { LensEmbeddableInput } from '../../../../../lens/public';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 
 import { InputsModelId } from '../../store/inputs/constants';
 import { ModalInspectQuery } from '../inspect/modal';
 import { useInspect } from '../inspect/use_inspect';
-import { LensAttributes } from './types';
+import { LensAttributes, GetLensAttributes } from './types';
 import { useLensAttributes } from './use_lens_attributes';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
-import { ADD_TO_CASE_SUCCESS, VIEW_CASE } from './translations';
+import { useAddToNewCase } from './use_add_to_new_case';
 export interface HistogramActionsProps {
   className?: string;
-  getLensAttributes?: (stackByField?: string) => LensAttributes;
+  getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId;
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;
-  lensAttributes: LensAttributes;
+  lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
   timerange: { from: string; to: string };
@@ -53,7 +46,7 @@ export interface HistogramActionsProps {
   stackByField?: string;
 }
 
-const StyledEuiPopover = styled(EuiPopover)`
+const Wrapper = styled.div`
   &.kpi-matrix-histogram-actions {
     position: absolute;
     top: 0;
@@ -64,19 +57,6 @@ const StyledEuiPopover = styled(EuiPopover)`
 export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 
 const owner = APP_ID;
-const appId = 'securitySolutionUI';
-
-export const CaseToastText = ({ linkUrl }: { linkUrl: string }) => {
-  return (
-    <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem>
-        <EuiLink href={linkUrl} target="_blank">
-          {VIEW_CASE}
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 export const HistogramActions = ({
   className,
@@ -92,13 +72,7 @@ export const HistogramActions = ({
   title,
   stackByField,
 }: HistogramActionsProps) => {
-  const {
-    lens,
-    cases,
-    theme,
-    application: { getUrlForApp },
-    notifications: { toasts },
-  } = useKibana<StartServices>().services;
+  const { lens, cases } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
 
@@ -128,9 +102,6 @@ export const HistogramActions = ({
     stackByField,
   });
 
-  const [isCreateCaseFlyoutOpen, setIsCreateCaseFlyoutOpen] = useState(false);
-  // const [isSaving, setIsSaving] = useState(false);
-
   const {
     disabled: isAddToCaseDisabled,
     closeAllCaseModal,
@@ -144,40 +115,18 @@ export const HistogramActions = ({
     userCanCrud,
   });
 
-  const onAddToNewCaseClicked = useCallback(() => {
-    closePopover();
-
-    setIsCreateCaseFlyoutOpen(true);
-  }, []);
-
-  const getToastText = useCallback(
-    (theCase) =>
-      toMountPoint(
-        <CaseToastText
-          linkUrl={getUrlForApp(appId, {
-            deepLinkId: CasesDeepLinkId.cases,
-            path: generateCaseViewPath({ detailName: theCase.id }),
-          })}
-        />,
-        { theme$: theme?.theme$ }
-      ),
-    [getUrlForApp, theme?.theme$]
-  );
-  const onCreateCaseSuccess = useCallback(
-    async (theCase: Case) => {
-      setIsCreateCaseFlyoutOpen(false);
-      toasts.addSuccess(
-        {
-          title: ADD_TO_CASE_SUCCESS(theCase.title),
-          text: getToastText(theCase),
-        },
-        {
-          toastLifeTimeMs: 10000,
-        }
-      );
-    },
-    [getToastText, toasts]
-  );
+  const {
+    onClose: closeCreateCaseFlyout,
+    onSuccess: onCreateCaseSuccess,
+    attachments: chartAddedToCase,
+    onAddToNewCaseClicked,
+    isCreateCaseFlyoutOpen,
+  } = useAddToNewCase({
+    onClick: closePopover,
+    timeRange: timerange,
+    lensAttributes: attributes,
+    userCanCrud,
+  });
 
   const allCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
     onRowClick: onCaseClicked,
@@ -187,31 +136,20 @@ export const HistogramActions = ({
   };
 
   const createCaseFlyoutProps: GetCreateCaseFlyoutProps = useMemo(() => {
-    const attachments = [
-      {
-        comment: `!{lens${JSON.stringify({
-          timeRange: timerange,
-          attributes,
-        })}}`,
-        owner,
-        type: CommentType.user as const,
-      },
-    ];
     return {
-      // afterCaseCreated: onCaseCreated,
-      onClose: () => {
-        setIsCreateCaseFlyoutOpen(false);
-      },
+      onClose: closeCreateCaseFlyout,
       onSuccess: onCreateCaseSuccess,
       owner: [owner],
       userCanCrud,
-      // features: casesFeatures,
-      attachments,
+      attachments: chartAddedToCase,
     };
-  }, [timerange, attributes, onCreateCaseSuccess, userCanCrud]);
+  }, [closeCreateCaseFlyout, onCreateCaseSuccess, userCanCrud, chartAddedToCase]);
 
   const onOpenInLens = useCallback(() => {
     closePopover();
+    if (!timerange || !attributes) {
+      return;
+    }
     navigateToPrefilledEditor(
       {
         id: '',
@@ -223,10 +161,16 @@ export const HistogramActions = ({
       }
     );
   }, [attributes, navigateToPrefilledEditor, timerange]);
+
+  const closeSaveModalVisible = useCallback(() => {
+    setIsSaveModalVisible(false);
+  }, []);
+
   const onSaveVisualization = useCallback(() => {
     setIsSaveModalVisible(true);
     closePopover();
   }, []);
+
   const {
     additionalRequests,
     additionalResponses,
@@ -249,7 +193,7 @@ export const HistogramActions = ({
   const items = [
     <EuiContextMenuItem
       icon="visArea"
-      key="openInLens"
+      key="histogramActionsOpenInLens"
       disabled={!canUseEditor() || attributes == null}
       onClick={onOpenInLens}
     >
@@ -260,7 +204,7 @@ export const HistogramActions = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="save"
-      key="saveVisualization"
+      key="histogramActionsSaveVisualization"
       disabled={!userCanCrud}
       onClick={onSaveVisualization}
     >
@@ -271,7 +215,7 @@ export const HistogramActions = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="search"
-      key="Inspect"
+      key="histogramActionsInspect"
       onClick={handleInspectButtonClick}
       disabled={disableInspectButton}
     >
@@ -282,7 +226,8 @@ export const HistogramActions = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       disabled={attributes == null || !userCanCrud}
-      icon="search"
+      icon="plusInCircle"
+      key="histogramActionsAddToNewCase"
       onClick={onAddToNewCaseClicked}
     >
       <FormattedMessage
@@ -292,7 +237,8 @@ export const HistogramActions = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       disabled={isAddToCaseDisabled}
-      icon="search"
+      icon="plusInCircle"
+      key="histogramActionsAddToExistingCase"
       onClick={onAddToExistingCaseClicked}
     >
       <FormattedMessage
@@ -311,26 +257,24 @@ export const HistogramActions = ({
   );
 
   return (
-    <>
+    <Wrapper className={className}>
       {isSaveModalVisible && (
         <LensSaveModalComponent
           initialInput={attributes as unknown as LensEmbeddableInput}
-          onSave={() => {}}
-          onClose={() => setIsSaveModalVisible(false)}
+          onClose={closeSaveModalVisible}
         />
       )}
-      <StyledEuiPopover
+      <EuiPopover
         id={contextMenuPopoverId}
         button={button}
         isOpen={isPopoverOpen}
-        className={className}
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
         panelClassName="withHoverActions__popover"
       >
         <EuiContextMenuPanel data-test-subj="histogram-actions-panel" size="s" items={items} />
-      </StyledEuiPopover>
+      </EuiPopover>
       {isShowingModal && request !== null && response !== null && (
         <ModalInspectQuery
           additionalRequests={additionalRequests}
@@ -345,6 +289,6 @@ export const HistogramActions = ({
       )}
       {isCreateCaseFlyoutOpen && cases.getCreateCaseFlyout(createCaseFlyoutProps)}
       {isAllCaseModalOpen && cases.getAllCasesSelectorModal(allCasesSelectorModalProps)}
-    </>
+    </Wrapper>
   );
 };

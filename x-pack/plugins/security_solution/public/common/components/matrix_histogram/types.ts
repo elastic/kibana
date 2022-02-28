@@ -31,14 +31,16 @@ export interface MatrixHistogramOption {
 export type GetSubTitle = (count: number) => string;
 export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 
+export type LensAttributes = TypedLensByValueInput['attributes'];
+export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
-  getLensAttributes?: (params: { stackByField?: string }) => TypedLensByValueInput['attributes'];
+  getLensAttributes?: GetLensAttributes;
   hideHistogramIfEmpty?: boolean;
   histogramType: MatrixHistogramType;
   legendPosition?: Position;
-  lensAttributes?: TypedLensByValueInput['attributes'];
+  lensAttributes?: LensAttributes;
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
@@ -145,5 +147,3 @@ export interface BarchartConfigs {
   };
   customHeight: number;
 }
-
-export type LensAttributes = TypedLensByValueInput['attributes'];

@@ -30,13 +30,13 @@ import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from 
 import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
-import { InspectButton, InspectButtonContainer } from '../inspect';
+import { InspectButton } from '../inspect';
 import {
   HistogramActions,
   HISTOGRAM_ACTIONS_BUTTON_CLASS,
-  LensAttributes,
 } from '../matrix_histogram/histogram_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { LensAttributes } from '../matrix_histogram/types';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
