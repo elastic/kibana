@@ -3871,14 +3871,42 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.ExitFullScreenButton",
         "type": "Object",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ExitFullScreenButton",
         "description": [],
         "signature": [
           "typeof ExitFullScreenButtonUi"
         ],
         "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-        "deprecated": false,
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/kibana_react.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/plugin.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/plugin.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/plugin.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/map_container/map_container.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/map_container/map_container.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
