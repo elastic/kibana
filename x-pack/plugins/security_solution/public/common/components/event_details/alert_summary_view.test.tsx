@@ -338,10 +338,14 @@ describe('AlertSummaryView', () => {
       }),
       {
         category: 'kibana',
-        field: 'kibana.alert.rule.threat_index',
+        field: 'kibana.alert.rule.parameters.threat_index',
         values: ['threat_index*'],
       },
-      { category: 'kibana', field: 'kibana.alert.rule.threat_query', values: ['*query*'] },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.parameters.threat_query',
+        values: ['*query*'],
+      },
     ] as TimelineEventsDetailsItem[];
     const renderProps = {
       ...props,

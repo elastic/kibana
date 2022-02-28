@@ -153,11 +153,22 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'threat_match':
       return [
         {
+          id: `${ALERT_RULE_PARAMETERS}.threat_index`,
+        },
+        {
+          id: `${ALERT_RULE_PARAMETERS}.threat_query`,
+        },
+        // <8.x migration fix>
+        // When upgrading to 8.x, `threat_index` and `threat_query` are not available under `ALERT_RULE_PARAMETERS`.
+        // The values are available under `ALERT_RULE_NAMESPACE` however. So as a temporary workaround we'll also
+        // read from `ALERT_RULE_NAMESPACE` here and we'll remove this code when the underlying issue is fixed.
+        {
           id: `${ALERT_RULE_NAMESPACE}.threat_index`,
         },
         {
           id: `${ALERT_RULE_NAMESPACE}.threat_query`,
         },
+        // </8.x migration fix>
       ];
     default:
       return [];
