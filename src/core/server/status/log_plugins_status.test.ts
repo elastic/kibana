@@ -50,7 +50,7 @@ describe('getPluginsStatusChanges', () => {
       const stop$ = hot<void>('');
       const expected = '--';
 
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected);
+      expectObservable(getPluginsStatusChanges(overall$, stop$, 1)).toBe(expected);
     });
   });
 
@@ -90,7 +90,7 @@ describe('getPluginsStatusChanges', () => {
       const stop$ = hot<void>('');
       const expected = '---a';
 
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected, {
+      expectObservable(getPluginsStatusChanges(overall$, stop$, 1)).toBe(expected, {
         a: [
           {
             previousLevel: 'degraded',
@@ -120,7 +120,7 @@ describe('getPluginsStatusChanges', () => {
       const stop$ = hot<void>('');
       const expected = '---a---b';
 
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected, {
+      expectObservable(getPluginsStatusChanges(overall$, stop$, 1)).toBe(expected, {
         a: [
           {
             previousLevel: 'available',
@@ -133,6 +133,46 @@ describe('getPluginsStatusChanges', () => {
             previousLevel: 'degraded',
             nextLevel: 'available',
             impactedServices: ['pluginA'],
+          },
+        ],
+      });
+    });
+  });
+
+  it('throttle events', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const statusesA = createPluginsStatuses({
+        pluginA: ServiceStatusLevels.available,
+        pluginB: ServiceStatusLevels.degraded,
+      });
+      const statusesB = createPluginsStatuses({
+        pluginA: ServiceStatusLevels.available,
+        pluginB: ServiceStatusLevels.available,
+      });
+      const statusesC = createPluginsStatuses({
+        pluginA: ServiceStatusLevels.degraded,
+        pluginB: ServiceStatusLevels.available,
+      });
+
+      const overall$ = hot<ObsInputType>('-a-b--c', {
+        a: statusesA,
+        b: statusesB,
+        c: statusesC,
+      });
+      const stop$ = hot<void>('');
+      const expected = '------a';
+
+      expectObservable(getPluginsStatusChanges(overall$, stop$, 5)).toBe(expected, {
+        a: [
+          {
+            previousLevel: 'available',
+            nextLevel: 'degraded',
+            impactedServices: ['pluginA'],
+          },
+          {
+            previousLevel: 'degraded',
+            nextLevel: 'available',
+            impactedServices: ['pluginB'],
           },
         ],
       });
@@ -162,7 +202,7 @@ describe('getPluginsStatusChanges', () => {
       const stop$ = hot<void>('----(s|)');
       const expected = '---a|';
 
-      expectObservable(getPluginsStatusChanges(overall$, stop$)).toBe(expected, {
+      expectObservable(getPluginsStatusChanges(overall$, stop$, 1)).toBe(expected, {
         a: [
           {
             previousLevel: 'degraded',

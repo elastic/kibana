@@ -7,8 +7,15 @@
  */
 
 import { isDeepStrictEqual } from 'util';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, pairwise, takeUntil, map, filter } from 'rxjs/operators';
+import { Observable, asyncScheduler } from 'rxjs';
+import {
+  distinctUntilChanged,
+  pairwise,
+  takeUntil,
+  map,
+  filter,
+  throttleTime,
+} from 'rxjs/operators';
 import { PluginName } from '../plugins';
 import { ServiceStatus } from './types';
 
@@ -24,13 +31,15 @@ export interface ServiceLevelChange {
 
 export const getPluginsStatusChanges = (
   plugins$: Observable<Record<PluginName, ServiceStatus>>,
-  stop$: Observable<void>
+  stop$: Observable<void>,
+  throttleDuration: number = 250
 ): Observable<ServiceLevelChange[]> => {
   return plugins$.pipe(
     takeUntil(stop$),
     distinctUntilChanged((previous, next) =>
       isDeepStrictEqual(getStatusLevelMap(previous), getStatusLevelMap(next))
     ),
+    throttleTime(throttleDuration, asyncScheduler, { leading: true, trailing: true }),
     pairwise(),
     map(([oldStatus, newStatus]) => {
       return getPluginsStatusDiff(oldStatus, newStatus);
