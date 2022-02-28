@@ -15,18 +15,6 @@
 }
 
 /**
- *  Discover Tweaks
- */
-
-/* hide unusable controls */
-discover-app .dscTimechart,
-discover-app .dscSidebar__container,
-discover-app .dscCollapsibleSidebar__collapseButton,
-discover-app .discover-table-footer {
-  display: none;
-}
-
-/**
  * The global banner (e.g. "Help us improve Elastic...") should not print.
  */
 #globalBannerList {
