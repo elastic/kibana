@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 
-export const kpiUniquePrivateIpsArea = {
+export const kpiUniquePrivateIpsArea: LensAttributes = {
   title: '[Network] KPI Unique private IPs - area chart',
   description: '',
   visualizationType: 'lnsXY',
@@ -170,4 +171,4 @@ export const kpiUniquePrivateIpsArea = {
       name: 'indexpattern-datasource-layer-72dc4b99-b07d-4dc9-958b-081d259e11fa',
     },
   ],
-};
+} as LensAttributes;

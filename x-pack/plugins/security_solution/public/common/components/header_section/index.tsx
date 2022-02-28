@@ -8,10 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle, EuiTitleSize } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { TypedLensByValueInput } from '../../../../../lens/public';
 
 import { InspectButton } from '../inspect';
 import { HistogramActions } from '../matrix_histogram/histogram_actions';
+import { LensAttributes, GetLensAttributes } from '../matrix_histogram/types';
 import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
@@ -41,6 +41,7 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  getLensAttributes?: GetLensAttributes;
   growLeftSplit?: boolean;
   headerFilters?: string | React.ReactNode;
   height?: number;

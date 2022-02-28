@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
 /* Exported from Kibana Saved Object */
-export const dnsTopDomainsAttrs = {
+export const dnsTopDomainsAttrs: LensAttributes = {
   title: 'Top domains by dns.question.registered_domain',
   description: 'Security Solution Network DNS',
   visualizationType: 'lnsXY',
@@ -156,4 +158,4 @@ export const dnsTopDomainsAttrs = {
       id: 'logs-*',
     },
   ],
-};
+} as LensAttributes;

@@ -9,6 +9,7 @@ import {
   SOURCE_CHART_LABEL,
   DESTINATION_CHART_LABEL,
 } from '../components/kpi_network/unique_private_ips/translations';
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 
 export const kpiUniquePrivateIpsBar = {
   title: '[Network] KPI Unique private IPs - bar chart',
@@ -192,4 +193,4 @@ export const kpiUniquePrivateIpsBar = {
       name: 'indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
     },
   ],
-};
+} as LensAttributes;

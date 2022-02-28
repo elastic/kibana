@@ -5,9 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useState } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { Case } from '../../../../../cases/common';
 import {
@@ -16,9 +14,8 @@ import {
   generateCaseViewPath,
 } from '../../../../../cases/public';
 import { APP_ID } from '../../../../common/constants';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { useKibana } from '../../lib/kibana/kibana_react';
-import { VIEW_CASE } from './translations';
+import { ADD_TO_CASE_FAILURE, ADD_TO_CASE_SUCCESS, VIEW_CASE } from './translations';
 
 import { LensAttributes } from './types';
 import { addToCase } from './utils';
@@ -43,7 +40,7 @@ export const useAddToExistingCase = ({
     notifications: { toasts },
     storage,
     theme,
-  } = useKibana<StartServices>().services;
+  } = useKibana().services;
   const [isAllCaseModalOpen, setIsAllCaseModalOpen] = useState(false);
 
   const closeAllCaseModal = useCallback(() => {
@@ -82,13 +79,11 @@ export const useAddToExistingCase = ({
     (theCase?: Case) => {
       if (theCase && lensAttributes) {
         setIsAllCaseModalOpen(false);
-        // setIsSaving(true);
         addToCase(http, theCase, lensAttributes, timeRange, owner).then(
           () => {
-            // setIsSaving(false);
             toasts.addSuccess(
               {
-                title: 'Successfully added visualization to the case: {caseTitle}',
+                title: ADD_TO_CASE_SUCCESS(theCase.title),
                 text: getToastText(theCase),
               },
               {
@@ -98,13 +93,7 @@ export const useAddToExistingCase = ({
           },
           (error) => {
             toasts.addError(error, {
-              // title: i18n.translate(
-              //   'xpack.observability.expView.heading.addToCase.notification.error',
-              //   {
-              //     defaultMessage: 'Failed to add visualization to the selected case.',
-              //   }
-              // ),
-              title: 'Failed to add visualization to the selected case.',
+              title: ADD_TO_CASE_FAILURE,
             });
           }
         );

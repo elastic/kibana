@@ -23,6 +23,13 @@ export const ADD_TO_CASE_SUCCESS = (caseTitle: string) =>
     }
   );
 
+export const ADD_TO_CASE_FAILURE = i18n.translate(
+  'xpack.securitySolution.components.histogramActopms.addToCase.notificationFailure',
+  {
+    defaultMessage: 'Failed to add visualization to the selected case.',
+  }
+);
+
 export const VIEW_CASE = i18n.translate(
   'xpack.securitySolution.components.histogramActopms.addToCase.notification.viewCase',
   {

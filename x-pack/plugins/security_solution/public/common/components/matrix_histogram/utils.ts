@@ -10,9 +10,11 @@ import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { Filter } from '@kbn/es-query';
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
+import { MatrixHistogramMappingTypes, BarchartConfigs, LensAttributes } from './types';
 import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { histogramDateTimeFormatter } from '../utils';
+import { HttpSetup } from '../../../../../../../src/core/public';
+import { Case } from '../../../../../cases/common';
 
 interface GetBarchartConfigsProps {
   chartHeight?: number;

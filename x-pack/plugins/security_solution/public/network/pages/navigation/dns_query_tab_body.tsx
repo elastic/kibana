@@ -23,12 +23,10 @@ import * as i18n from '../translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { dnsTopDomainsAttrs } from '../../configs/dns_top_domains';
 import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
-import { inputsSelectors } from '../../../common/store/inputs';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 

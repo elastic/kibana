@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const kpiUniqueIpsSourceMetric = {
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const kpiUniqueIpsSourceMetric: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -56,4 +58,4 @@ export const kpiUniqueIpsSourceMetric = {
       type: 'tag',
     },
   ],
-};
+} as LensAttributes;

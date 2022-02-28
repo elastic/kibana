@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const kpiUserAuthenticationsMetricFailure = {
+
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const kpiUserAuthenticationsMetricFailure: LensAttributes = {
   title: '[Host] KPI User authentications - metric failure ',
   description: '',
   visualizationType: 'lnsMetric',
@@ -87,4 +90,4 @@ export const kpiUserAuthenticationsMetricFailure = {
       name: 'tag-ref-security-solution-default',
     },
   ],
-};
+} as LensAttributes;

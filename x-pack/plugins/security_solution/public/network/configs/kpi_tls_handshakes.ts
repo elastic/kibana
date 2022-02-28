@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 
-export const kpiTlsHandshakes = {
+export const kpiTlsHandshakes: LensAttributes = {
   title: '[Network] KPI TLS handshakes',
   description: '',
   visualizationType: 'lnsMetric',
@@ -55,4 +56,4 @@ export const kpiTlsHandshakes = {
       name: 'indexpattern-datasource-layer-1f48a633-8eee-45ae-9471-861227e9ca03',
     },
   ],
-};
+} as LensAttributes;

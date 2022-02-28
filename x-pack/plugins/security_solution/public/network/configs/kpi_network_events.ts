@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const kpiNetworkEvents = {
+
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const kpiNetworkEvents: LensAttributes = {
   title: '[Network] KPI Network events',
   description: '',
   visualizationType: 'lnsMetric',
@@ -102,4 +105,4 @@ export const kpiNetworkEvents = {
       id: 'security-solution-default',
     },
   ],
-};
+} as LensAttributes;

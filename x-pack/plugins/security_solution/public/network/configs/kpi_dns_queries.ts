@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const kpiDnsQueries = {
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const kpiDnsQueries: LensAttributes = {
   title: '[Network] KPI Unique private IPs - source metric',
   description: '',
   visualizationType: 'lnsMetric',
@@ -55,4 +57,4 @@ export const kpiDnsQueries = {
       name: 'indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
     },
   ],
-};
+} as LensAttributes;

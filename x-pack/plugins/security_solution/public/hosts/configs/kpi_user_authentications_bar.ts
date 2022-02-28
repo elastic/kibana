@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 import {
   FAIL_CHART_LABEL,
   SUCCESS_CHART_LABEL,
 } from '../components/kpi_hosts/authentications/translations';
 
-export const kpiUserAuthenticationsBar = {
+export const kpiUserAuthenticationsBar: LensAttributes = {
   title: '[Host] KPI User authentications - bar ',
   description: '',
   visualizationType: 'lnsXY',
@@ -205,4 +206,4 @@ export const kpiUserAuthenticationsBar = {
       name: 'tag-ref-security-solution-default',
     },
   ],
-};
+} as LensAttributes;

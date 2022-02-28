@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 
-export const kpiUniquePrivateIpsSourceMetric = {
+export const kpiUniquePrivateIpsSourceMetric: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -55,4 +56,4 @@ export const kpiUniquePrivateIpsSourceMetric = {
       type: 'index-pattern',
     },
   ],
-};
+} as LensAttributes;

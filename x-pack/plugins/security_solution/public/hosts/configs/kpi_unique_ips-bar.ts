@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 import {
   SOURCE_CHART_LABEL,
   DESTINATION_CHART_LABEL,
 } from '../components/kpi_hosts/unique_ips/translations';
 
-export const kpiUniqueIpsBar = {
+export const kpiUniqueIpsBar: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -131,4 +132,4 @@ export const kpiUniqueIpsBar = {
       type: 'tag',
     },
   ],
-};
+} as LensAttributes;

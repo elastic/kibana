@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const kpiUniqueIpsDestinationMetric = {
+
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const kpiUniqueIpsDestinationMetric: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -55,4 +58,4 @@ export const kpiUniqueIpsDestinationMetric = {
       type: 'tag',
     },
   ],
-};
+} as LensAttributes;

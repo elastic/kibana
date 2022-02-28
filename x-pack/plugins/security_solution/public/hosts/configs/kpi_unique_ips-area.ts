@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
 import {
   DESTINATION_CHART_LABEL,
   SOURCE_CHART_LABEL,
 } from '../components/kpi_hosts/unique_ips/translations';
 
-export const kpiUniqueIpsArea = {
+export const kpiUniqueIpsArea: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -133,4 +134,4 @@ export const kpiUniqueIpsArea = {
   type: 'lens',
   updated_at: '2022-02-09T17:44:03.359Z',
   version: 'WzI5MTI5OSwzXQ==',
-};
+} as LensAttributes;

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const kpiUniqueFlowIds = {
+import { LensAttributes } from '../../common/components/matrix_histogram/types';
+
+export const kpiUniqueFlowIds: LensAttributes = {
   title: '[Network] KPI Unique flow IDs',
   description: '',
   visualizationType: 'lnsMetric',
@@ -54,4 +56,4 @@ export const kpiUniqueFlowIds = {
       name: 'indexpattern-datasource-layer-5d46d48f-6ce8-46be-a797-17ad50642564',
     },
   ],
-};
+} as LensAttributes;
