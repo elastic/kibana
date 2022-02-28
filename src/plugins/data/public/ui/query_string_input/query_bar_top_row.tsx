@@ -422,11 +422,7 @@ export const QueryBarTopRow = React.memo(
       props.toggleAddFilterModal?.(false);
     }
 
-    function onAddMultipleFiltersANDOR(
-      selectedFilters: FilterGroup[],
-      buildFilters: Filter[],
-      groupCount: number
-    ) {
+    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
       const mappedFilters = mapAndFlattenFilters(buildFilters);
       const mergedFilters = mappedFilters.map((filter, idx) => {
         return {
@@ -435,7 +431,6 @@ export const QueryBarTopRow = React.memo(
           id: selectedFilters[idx].id,
           relationship: selectedFilters[idx].relationship,
           subGroupId: selectedFilters[idx].subGroupId,
-          groupCount: selectedFilters[idx].groupsCount,
         };
       });
 
