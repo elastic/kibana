@@ -11,7 +11,7 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
-import { emsAutoSuggest } from '../../ems_autosuggest';
+import { getEmsSuggestion } from './get_ems_suggestion';
 
 /**
  * Generate choroplath chart suggestions for buckets that match administrative boundaries from the Elastic Maps Service.
@@ -33,16 +33,7 @@ export function getSuggestions(
     })
     .forEach((bucket) => {
       for (const tableId in activeData) {
-        const sampleValues: string[] = [];
-        const table = activeData[tableId];
-        table.rows.forEach((row) => {
-          const value = row[bucket.columnId];
-          if (value && value !== '__other__' && !sampleValues.includes(value)) {
-            sampleValues.push(value);
-          }
-        });
-
-        const emsSuggestion = emsAutoSuggest({ sampleValues }, emsFileLayers);
+        const emsSuggestion = getEmsSuggestion(emsFileLayers, activeData[tableId], bucket.columnId);
         if (emsSuggestion) {
           metrics.forEach((metric) => {
             suggestions.push({
@@ -58,8 +49,8 @@ export function getSuggestions(
                 layerId: tableId,
                 emsLayerId: emsSuggestion.layerId,
                 emsField: emsSuggestion.field,
-                metricColumnId: metric.columnId,
-                bucketColumnId: bucket.columnId,
+                valueAccessor: metric.columnId,
+                regionAccessor: bucket.columnId,
               },
               previewIcon: Icon,
             });

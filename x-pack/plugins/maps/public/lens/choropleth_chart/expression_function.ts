@@ -27,10 +27,6 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
   type: 'render',
   help: 'A choropleth chart',
   args: {
-    accessor: {
-      types: ['string'],
-      help: 'accessor',
-    },
     title: {
       types: ['string'],
       help: i18n.translate('xpack.lens.metric.title.help', {
@@ -53,13 +49,13 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
       types: ['string'],
       help: 'emsLayerId',
     },
-    bucketColumnId: {
+    regionAccessor: {
       types: ['string'],
-      help: 'bucketColumnId',
+      help: 'regionAccessor',
     },
-    metricColumnId: {
+    valueAccessor: {
       types: ['string'],
-      help: 'metricColumnId',
+      help: 'Metric',
     },
     isPreview: {
       types: ['boolean'],

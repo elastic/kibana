@@ -29,11 +29,13 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       const [coreStart, plugins]: [CoreStart, MapsPluginStartDependencies, unknown] =
         await coreSetup.getStartServices();
       const { ChoroplethChart } = await import('./choropleth_chart');
+      const { getEmsFileLayers } = await import('../../util');
       ReactDOM.render(
         <ChoroplethChart
           {...config}
           formatFactory={plugins.fieldFormats.deserialize}
           uiSettings={coreStart.uiSettings}
+          emsFileLayers={await getEmsFileLayers()}
         />,
         domNode,
         () => {

@@ -19,18 +19,35 @@ import {
 } from '../../../common';
 import { ChoroplethChartProps } from './types';
 import { Icon } from './icon';
+import { getEmsSuggestion } from './get_ems_suggestion';
 
 export function ChoroplethChart({
   data,
   args,
   formatFactory,
   uiSettings,
+  emsFileLayers,
 }: ChoroplethChartProps & {
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
+  emsFileLayers: FileLayer[];
 }) {
+  console.log('data', data);
+  console.log('args', args);
   if (args.isPreview) {
     return <Icon />;
+  }
+
+  const table = data.tables[args.layerId];
+
+  let emsLayerId = args.emsLayerId ? args.emsLayerId : 'world_countries';
+  let emsField = args.emsField ? args.emsField : 'iso2';
+  if (!args.emsLayerId || !args.emsField) {
+    const emsSuggestion = getEmsSuggestion(emsFileLayers, table, args.regionAccessor);
+    if (emsSuggestion) {
+      emsLayerId = emsSuggestion.layerId;
+      emsField = emsSuggestion.field;
+    }
   }
 
   const layerList = args.layerId
@@ -40,29 +57,29 @@ export function ChoroplethChart({
           label: args.title,
           joins: [
             {
-              leftField: args.emsField,
+              leftField: emsField,
               right: {
-                id: args.metricColumnId,
+                id: args.valueAccessor,
                 type: SOURCE_TYPES.TABLE_SOURCE,
-                __rows: data.tables[args.layerId].rows,
+                __rows: table.rows,
                 __columns: [
                   {
-                    name: args.bucketColumnId,
+                    name: args.regionAccessor,
                     type: 'string',
                   },
                   {
-                    name: args.metricColumnId,
+                    name: args.valueAccessor,
                     type: 'number',
                   },
                 ],
                 // Right join/term is the field in the doc you’re trying to join it to (foreign key - e.g. US)
-                term: args.bucketColumnId,
+                term: args.regionAccessor,
               },
             },
           ],
           sourceDescriptor: {
             type: SOURCE_TYPES.EMS_FILE,
-            id: args.emsLayerId,
+            id: emsLayerId,
           },
           style: {
             type: 'VECTOR',
@@ -76,7 +93,7 @@ export function ChoroplethChart({
                   fieldMetaOptions: { isEnabled: true, sigma: 3 },
                   type: COLOR_MAP_TYPE.ORDINAL,
                   field: {
-                    name: args.metricColumnId,
+                    name: args.valueAccessor,
                     origin: FIELD_ORIGIN.JOIN,
                   },
                   useCustomColorRamp: false,

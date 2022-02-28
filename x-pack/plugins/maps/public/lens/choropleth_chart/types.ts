@@ -12,8 +12,8 @@ export interface ChoroplethChartState {
   emsLayerId?: string;
   emsField?: string;
   accessor?: string;
-  bucketColumnId?: string;
-  metricColumnId?: string;
+  regionAccessor?: string;
+  valueAccessor?: string;
   isPreview?: boolean;
 }
 

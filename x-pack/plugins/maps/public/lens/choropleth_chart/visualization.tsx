@@ -19,6 +19,9 @@ import type { OperationMetadata, SuggestionRequest, Visualization } from '../../
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
 
+const REGION_KEY_GROUP_ID = 'region_key';
+const METRIC_GROUP_ID = 'metric';
+
 export const getVisualization = ({
   paletteService,
   theme,
@@ -76,29 +79,34 @@ export const getVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        accessor: undefined,
         layerType: layerTypes.DATA,
       }
     );
   },
 
-  getConfiguration(props) {
+  getConfiguration({ state }) {
     return {
       groups: [
         {
-          groupId: 'choropleth',
-          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
-          layerId: props.state.layerId,
-          accessors: props.state.accessor
-            ? [
-                {
-                  columnId: props.state.accessor,
-                  triggerIcon: undefined,
-                  palette: undefined,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.accessor,
+          groupId: REGION_KEY_GROUP_ID,
+          groupLabel: i18n.translate('xpack.maps.lens.choroplethChart.regionKeyLabel', {
+            defaultMessage: 'Region key',
+          }),
+          layerId: state.layerId,
+          accessors: state.regionAccessor ? [{ columnId: state.regionAccessor }] : [],
+          supportsMoreColumns: !state.regionAccessor,
+          filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
+          enableDimensionEditor: true,
+          required: true,
+        },
+        {
+          groupId: METRIC_GROUP_ID,
+          groupLabel: i18n.translate('xpack.maps.lens.choroplethChart.metricValueLabel', {
+            defaultMessage: 'Metric',
+          }),
+          layerId: state.layerId,
+          accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
+          supportsMoreColumns: !state.valueAccessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
           enableDimensionEditor: true,
           required: true,
@@ -125,12 +133,7 @@ export const getVisualization = ({
   },
 
   toExpression: (state, datasourceLayers, attributes) => {
-    if (
-      !state.emsField ||
-      !state.emsLayerId ||
-      !state.bucketColumnId ||
-      !state.metricColumnId
-    ) {
+    if (!state.regionAccessor || !state.valueAccessor) {
       return null;
     }
 
@@ -144,10 +147,10 @@ export const getVisualization = ({
             title: [attributes?.title || ''],
             isPreview: [false],
             layerId: [state.layerId],
-            emsField: [state.emsField],
-            emsLayerId: [state.emsLayerId],
-            bucketColumnId: [state.bucketColumnId],
-            metricColumnId: [state.metricColumnId],
+            emsField: state.emsField ? [state.emsField] : [],
+            emsLayerId: state.emsLayerId ? [state.emsLayerId] : [],
+            regionAccessor: [state.regionAccessor],
+            valueAccessor: [state.valueAccessor],
           },
         },
       ],
@@ -169,15 +172,36 @@ export const getVisualization = ({
     };
   },
 
-  setDimension({ prevState, columnId }) {
-    return { ...prevState, accessor: columnId };
+  setDimension({ columnId, groupId, prevState, ...rest }) {
+    console.log('rest', rest);
+    const update: Partial<ChoroplethChartState> = {};
+    if (groupId === REGION_KEY_GROUP_ID) {
+      update.regionAccessor = columnId;
+    } else if (groupId === METRIC_GROUP_ID) {
+      update.valueAccessor = columnId;
+    }
+    return {
+      ...prevState,
+      ...update,
+    };
   },
 
-  removeDimension({ prevState }) {
-    return { ...prevState, accessor: undefined };
+  removeDimension({ prevState, layerId, columnId }) {
+    const update = { ...prevState };
+
+    if (prevState.regionAccessor === columnId) {
+      delete update.regionAccessor;
+      delete update.emsLayerId;
+      delete update.emsField;
+    } else if (prevState.valueAccessor === columnId) {
+      delete update.valueAccessor;
+    }
+    
+    return update;
   },
 
   renderDimensionEditor(domElement, props) {
+    console.log(props);
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
