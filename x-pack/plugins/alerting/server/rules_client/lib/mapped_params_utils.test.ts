@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   getMappedParams,
   getModifiedFilter,
   getModifiedField,
   getModifiedSearchFields,
+  getModifiedValue,
+  modifyFilterKueryNode,
 } from './mapped_params_utils';
 
 describe('getModifiedParams', () => {
@@ -24,7 +27,7 @@ describe('getModifiedParams', () => {
 
     expect(getMappedParams(params)).toEqual({
       risk_score: 42,
-      severity: 'medium',
+      severity: '40-medium',
     });
   });
 
@@ -73,5 +76,44 @@ describe('getModifiedSearchFields', () => {
       'params.invalid',
       'invalid',
     ]);
+  });
+
+  describe('getModifiedValue', () => {
+    it('converts severity strings to sortable strings', () => {
+      expect(getModifiedValue('severity', 'low')).toEqual('20-low');
+      expect(getModifiedValue('severity', 'medium')).toEqual('40-medium');
+      expect(getModifiedValue('severity', 'high')).toEqual('60-high');
+      expect(getModifiedValue('severity', 'critical')).toEqual('80-critical');
+    });
+  });
+});
+
+describe('modifyFilterKueryNode', () => {
+  it('modifies the resulting kuery node AST filter for alert params', () => {
+    const astFilter = fromKueryExpression(
+      'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.severity > medium'
+    );
+
+    expect(astFilter.arguments[2].arguments[0]).toEqual({
+      type: 'literal',
+      value: 'alert.attributes.params.severity',
+    });
+
+    expect(astFilter.arguments[2].arguments[2]).toEqual({
+      type: 'literal',
+      value: 'medium',
+    });
+
+    modifyFilterKueryNode({ astFilter });
+
+    expect(astFilter.arguments[2].arguments[0]).toEqual({
+      type: 'literal',
+      value: 'alert.attributes.mapped_params.severity',
+    });
+
+    expect(astFilter.arguments[2].arguments[2]).toEqual({
+      type: 'literal',
+      value: '40-medium',
+    });
   });
 });

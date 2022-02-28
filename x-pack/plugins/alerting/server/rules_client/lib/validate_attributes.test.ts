@@ -13,7 +13,7 @@ import {
 } from './validate_attributes';
 
 describe('Validate attributes', () => {
-  const excludedFieldNames = ['monitoring'];
+  const excludedFieldNames = ['monitoring', 'mapped_params'];
   describe('validateSortField', () => {
     test('should NOT throw an error, when sort field is not part of the field to exclude', () => {
       expect(() => validateSortField('name.keyword', excludedFieldNames)).not.toThrow();
@@ -97,16 +97,6 @@ describe('Validate attributes', () => {
       ).not.toThrow();
     });
 
-    test('should modify the filter when valid mapped params are used', () => {
-      const astFilter = esKuery.fromKueryExpression('alert.attributes.params.risk_score > 50');
-
-      expect(astFilter.arguments[0].value).toEqual('alert.attributes.params.risk_score');
-
-      validateFilterKueryNode({ astFilter, excludedFieldNames });
-
-      expect(astFilter.arguments[0].value).toEqual('alert.attributes.mapped_params.risk_score');
-    });
-
     test('should throw an error, when filter contains the field to exclude', () => {
       expect(() =>
         validateFilterKueryNode({
@@ -133,16 +123,16 @@ describe('Validate attributes', () => {
       );
     });
 
-    test('should throw an error, when the filter contains a params property that is not validate', () => {
+    test('should throw an error, when filtering contains a property that is not valid', () => {
       expect(() =>
         validateFilterKueryNode({
           astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.invalid > 50'
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.mapped_params.risk_score > 50'
           ),
           excludedFieldNames,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Params filter is not support on this field alert.attributes.params.invalid"`
+        `"Filter is not supported on this field alert.attributes.mapped_params.risk_score"`
       );
     });
   });

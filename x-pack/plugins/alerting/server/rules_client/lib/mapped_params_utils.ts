@@ -8,11 +8,24 @@
 import { snakeCase } from 'lodash';
 import { AlertTypeParams, MappedParams, MappedParamsProperties } from '../../types';
 import { SavedObjectAttribute } from '../../../../../../src/core/server';
+import {
+  iterateFilterKureyNode,
+  IterateFilterKureyNodeParams,
+  IterateActionProps,
+  getFieldNameAttribute,
+} from './validate_attributes';
 
 export const MAPPED_PARAMS_PROPERTIES: Array<keyof MappedParamsProperties> = [
   'risk_score',
   'severity',
 ];
+
+const SEVERITY_MAP: Record<string, string> = {
+  low: '20-low',
+  medium: '40-medium',
+  high: '60-high',
+  critical: '80-critical',
+};
 
 /**
  * Returns the mapped_params object when given a params object.
@@ -20,11 +33,14 @@ export const MAPPED_PARAMS_PROPERTIES: Array<keyof MappedParamsProperties> = [
  * return an empty object if nothing is matched.
  */
 export const getMappedParams = (params: AlertTypeParams) => {
-  return Object.keys(params).reduce<MappedParams>((result, key) => {
+  return Object.entries(params).reduce<MappedParams>((result, [key, value]) => {
     const snakeCaseKey = snakeCase(key);
 
     if (MAPPED_PARAMS_PROPERTIES.includes(snakeCaseKey as keyof MappedParamsProperties)) {
-      result[snakeCaseKey] = params[key] as SavedObjectAttribute;
+      result[snakeCaseKey] = getModifiedValue(
+        snakeCaseKey,
+        value as string
+      ) as SavedObjectAttribute;
     }
 
     return result;
@@ -87,4 +103,50 @@ export const getModifiedSearchFields = (searchFields: string[] | undefined) => {
     }
     return result;
   }, []);
+};
+
+export const getModifiedValue = (key: string, value: string) => {
+  if (key === 'severity') {
+    return SEVERITY_MAP[value] || '';
+  }
+  return value;
+};
+
+export const modifyFilterKueryNode = ({
+  astFilter,
+  hasNestedKey = false,
+  nestedKeys,
+  storeValue,
+  path = 'arguments',
+}: IterateFilterKureyNodeParams) => {
+  const action = ({ index, ast, fieldName, localFieldName }: IterateActionProps) => {
+    // First index, assuming ast value is the attribute name
+    if (index === 0) {
+      const firstAttribute = getFieldNameAttribute(fieldName, ['alert', 'attributes']);
+      // Replace the ast.value for params to mapped_params
+      if (firstAttribute === 'params') {
+        ast.value = getModifiedFilter(ast.value);
+      }
+    }
+
+    // Subsequent indices, assuming ast value is the filtering value
+    else {
+      const firstAttribute = getFieldNameAttribute(localFieldName, ['alert', 'attributes']);
+
+      // Replace the ast.value for params value to the modified mapped_params value
+      if (firstAttribute === 'params' && ast.value) {
+        const attribute = getFieldNameAttribute(localFieldName, ['alert', 'attributes', 'params']);
+        ast.value = getModifiedValue(attribute, ast.value);
+      }
+    }
+  };
+
+  iterateFilterKureyNode({
+    astFilter,
+    hasNestedKey,
+    nestedKeys,
+    storeValue,
+    path,
+    action,
+  });
 };

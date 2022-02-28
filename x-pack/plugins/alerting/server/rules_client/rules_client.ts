@@ -82,6 +82,7 @@ import {
   getMappedParams,
   getModifiedField,
   getModifiedSearchFields,
+  modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
@@ -646,15 +647,9 @@ export class RulesClient {
       throw error;
     }
 
-    options = {
-      ...options,
-      sortField: getModifiedField(options.sortField),
-      searchFields: getModifiedSearchFields(options.searchFields),
-    };
-
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
     const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
-    const sortField = mapSortField(options.sortField);
+    let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
         validateOperationOnAttributes(
@@ -666,6 +661,16 @@ export class RulesClient {
       } catch (error) {
         throw Boom.badRequest(`Error find rules: ${error.message}`);
       }
+    }
+
+    sortField = mapSortField(getModifiedField(options.sortField));
+
+    if (options.searchFields) {
+      options.searchFields = getModifiedSearchFields(options.searchFields);
+    }
+
+    if (filterKueryNode) {
+      modifyFilterKueryNode({ astFilter: filterKueryNode });
     }
 
     const {
