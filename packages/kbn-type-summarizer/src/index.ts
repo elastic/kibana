@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Logger } from './lib/log';
-export { summarizePackage, SummarizePacakgeOptions } from './summarize_package';
+export type { Logger } from './lib/log';
+export type { SummarizePacakgeOptions } from './summarize_package';
+export { summarizePackage } from './summarize_package';
