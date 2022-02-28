@@ -1,0 +1,14 @@
+**id:** sharedUX/Components/NoDataViewsPage
+**slug:** /shared-ux/components/no-data-views-page
+**title:** No Data Views Page
+**summary:** A page to be displayed when there is data in Elasticsearch, but no data views
+**tags:** ['shared-ux', 'component']
+**date:** 2022-02-09
+
+---
+
+When there is data in Elasticsearch, but there haven't been any data views created yet, we want to display an appropriate message to the user and facilitate creation of data views (if appropriate permissions are in place).
+
+The pure component, `no_data_views.component.tsx`, is a pre-configured **EuiEmptyPrompt**.
+
+The connected component, `no_data_views.tsx`, uses services from the `shared_ux` plugin to open Data View Editor. You must wrap your plugin app in the `ServicesContext` provided by the start contract of the `shared_ux` plugin to use it.
