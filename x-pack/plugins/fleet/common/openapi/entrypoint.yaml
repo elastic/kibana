@@ -104,6 +104,8 @@ paths:
     $ref: paths/outputs.yaml
   /outputs/{outputId}:
     $ref: paths/outputs@{output_id}.yaml
+  /logstash_api_keys:
+    $ref: paths/logstash_api_keys.yaml
 components:
   securitySchemes:
     basicAuth:

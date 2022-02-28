@@ -178,7 +178,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putIndexTemplate({
         name,
         body: template,
-        // @ts-expect-error doesn't exist in @elastic/elasticsearch
         create: true,
       });
     } catch (err) {
@@ -248,7 +247,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putSettings({
         index: indexName,
         body: {
-          'index.hidden': true,
+          index: { hidden: true },
         },
       });
     } catch (err) {

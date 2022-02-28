@@ -32,6 +32,7 @@ describe('use cases add to existing case modal hook', () => {
             basePath: '/jest',
             dispatch,
             features: { alerts: { sync: true }, metrics: [] },
+            releasePhase: 'ga',
           }}
         >
           {children}
