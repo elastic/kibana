@@ -54,13 +54,13 @@ export interface ControlEditorProps<T extends ControlInput = ControlInput> {
 /**
  * Plugin types
  */
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ControlsPluginSetup {}
+export interface ControlsPluginSetup {
+  registerControlType: ControlsService['registerControlType'];
+}
 
 export interface ControlsPluginStart {
-  controlsService: ControlsService;
-  ContextProvider: React.FC;
+  getControlFactory: ControlsService['getControlFactory'];
+  getControlTypes: ControlsService['getControlTypes'];
 }
 
 export interface ControlsPluginSetupDeps {

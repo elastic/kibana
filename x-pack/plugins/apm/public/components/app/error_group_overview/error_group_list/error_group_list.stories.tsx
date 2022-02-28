@@ -21,7 +21,11 @@ const stories: Meta<Args> = {
   decorators: [
     (StoryComponent) => {
       return (
-        <MemoryRouter>
+        <MemoryRouter
+          initialEntries={[
+            '/services/{serviceName}/errors?rangeFrom=now-15m&rangeTo=now',
+          ]}
+        >
           <MockApmPluginContextWrapper>
             <MockUrlParamsContextProvider>
               <StoryComponent />
