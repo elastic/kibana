@@ -66,7 +66,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('KQL query', () => {
-        it('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
+        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+        it.skip('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
           const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
@@ -97,7 +98,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL query', () => {
-        it('should convert the @timestamp which is epoch_seconds into the correct ISO format for EQL', async () => {
+        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
+        it.skip('should convert the @timestamp which is epoch_seconds into the correct ISO format for EQL', async () => {
           const rule = getEqlRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
