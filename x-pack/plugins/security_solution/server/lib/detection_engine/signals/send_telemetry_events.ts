@@ -23,6 +23,9 @@ interface SearchResultSource {
   _source: SignalSource;
 }
 
+type CreatedSignalId = string;
+type AlertId = string;
+
 type SearchResultWithSource = SearchResultSource & SearchResultWithEventId;
 
 export function selectEvents(
@@ -52,11 +55,15 @@ export function sendAlertTelemetryEvents(
     return;
   }
   // Create map of ancenstor_id -> alert_id
-  let signalIdMap = new Map<string, string>();
-  createdEvents.map(function (obj: SignalSource) {
-    signalIdMap = signalIdMap.set(String(obj['kibana.alert.original_event.id']), String(obj._id));
-    return null;
-  });
+  const signalIdMap = createdEvents.reduce((signalMap, obj) => {
+    const ancestorId = String(obj['kibana.alert.original_event.id']);
+    const alertId = String(obj._id);
+    if (ancestorId !== null && ancestorId !== undefined) {
+      const newsignalMap = signalIdMap.set(ancestorId, alertId);
+    }
+
+    return newsignalMap;
+  }, new Map<CreatedSignalId, AlertId>());
 
   const sources = selectEvents(filteredEvents, signalIdMap);
 
