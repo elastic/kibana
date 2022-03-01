@@ -116,6 +116,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
           }
 
           res.options.headers = {
+            ...res.options.headers,
             ...responseHeaders,
           };
 
