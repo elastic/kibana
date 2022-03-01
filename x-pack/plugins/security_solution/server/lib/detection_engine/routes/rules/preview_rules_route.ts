@@ -48,6 +48,8 @@ import {
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 
+const PREVIEW_TIMEOUT_SECONDS = 60;
+
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -151,6 +153,12 @@ export const previewRulesRoute = async (
           }
         ) => {
           let statePreview = runState as TState;
+          const abortController = new AbortController();
+          let isAborted = false;
+          setTimeout(() => {
+            abortController.abort();
+            isAborted = true;
+          }, PREVIEW_TIMEOUT_SECONDS * 1000);
 
           const startedAt = moment();
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
@@ -169,7 +177,7 @@ export const previewRulesRoute = async (
             updatedBy: username ?? 'preview-updated-by',
           };
 
-          while (invocationCount > 0) {
+          while (invocationCount > 0 && !isAborted) {
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
@@ -185,7 +193,7 @@ export const previewRulesRoute = async (
                 // Just use es client always for preview
                 search: createAbortableEsClientFactory({
                   scopedClusterClient: context.core.elasticsearch.client,
-                  abortController: new AbortController(),
+                  abortController,
                 }),
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
@@ -217,6 +225,14 @@ export const previewRulesRoute = async (
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
+          }
+
+          if (isAborted) {
+            logs.push({
+              warnings: [`Preview timed out after ${PREVIEW_TIMEOUT_SECONDS} seconds`],
+              errors: [],
+              startedAt: moment().toDate().toISOString(),
+            });
           }
         };
 
