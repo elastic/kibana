@@ -104,6 +104,19 @@ describe('fields_utils', () => {
         )
       ).toBe('Label + 1 other');
     });
+
+    test('should return label for multi fields (2 others)', () => {
+      expect(
+        getMultiFieldLabel(
+          ['field', 'field1', 'field2'],
+          [
+            { name: 'field', label: 'Label', type: KBN_FIELD_TYPES.DATE },
+            { name: 'field1', label: 'Label1', type: KBN_FIELD_TYPES.DATE },
+            { name: 'field3', label: 'Label2', type: KBN_FIELD_TYPES.DATE },
+          ]
+        )
+      ).toBe('Label + 2 others');
+    });
   });
 
   describe('createCachedFieldValueFormatter', () => {

@@ -49,7 +49,7 @@ export function FieldSelectItem({
   const isInvalid = Boolean(selectedOptions?.find((item) => item.id === INVALID_FIELD_ID));
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
       <EuiFlexItem grow={true}>
         <EuiComboBox
           placeholder={placeholder}

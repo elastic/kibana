@@ -60,10 +60,10 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
 
   if (fieldForTerms.length > 1) {
     return i18n.translate('visTypeTimeseries.fieldUtils.multiFieldLabel', {
-      defaultMessage: '{firstFieldLabel} + {length} other',
+      defaultMessage: '{firstFieldLabel} + {count} {count, plural, one {other} other {others}}',
       values: {
         firstFieldLabel,
-        length: fieldForTerms.length - 1,
+        count: fieldForTerms.length - 1,
       },
     });
   }
