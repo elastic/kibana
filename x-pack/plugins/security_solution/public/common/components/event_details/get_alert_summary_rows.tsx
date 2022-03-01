@@ -6,7 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import { ALERT_RULE_NAMESPACE, ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
