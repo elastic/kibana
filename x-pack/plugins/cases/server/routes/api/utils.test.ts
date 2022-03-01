@@ -8,7 +8,7 @@
 import { isBoom, boomify } from '@hapi/boom';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HTTPError } from '../../common/error';
-import { logDeprecatedEndpoint, wrapError } from './utils';
+import { extractWarningValueFromWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
 
 describe('Utils', () => {
   describe('wrapError', () => {
@@ -73,6 +73,14 @@ describe('Utils', () => {
     it('does log when the request is NOT from the kibana client', () => {
       logDeprecatedEndpoint(logger, {}, 'test');
       expect(logger.warn).toHaveBeenCalledWith('test');
+    });
+  });
+
+  describe('extractWarningValueFromWarningHeader', () => {
+    it('extracts the warning value from a warning header correctly', () => {
+      expect(extractWarningValueFromWarningHeader(`299 Kibana-8.1.0 "Deprecation endpoint"`)).toBe(
+        'Deprecation endpoint'
+      );
     });
   });
 });
