@@ -65,13 +65,13 @@ describe.skip('Marking alerts as acknowledged', () => {
   });
 });
 
-describe.skip('Marking alerts as acknowledged with read only role', () => {
+describe('Marking alerts as acknowledged with read only role', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
     createCustomRuleActivated(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate(100);
   });
 
   it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
