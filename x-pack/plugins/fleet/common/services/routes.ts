@@ -176,6 +176,7 @@ export const outputRoutesService = {
   getDeletePath: (outputId: string) =>
     OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
   getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
+  getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
 };
 
 export const settingsRoutesService = {

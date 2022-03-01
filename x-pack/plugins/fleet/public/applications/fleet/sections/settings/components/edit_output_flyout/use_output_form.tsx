@@ -102,23 +102,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const isPreconfigured = output?.is_preconfigured ?? false;
 
   // Define inputs
+  // Shared inputs
   const nameInput = useInput(output?.name ?? '', validateName, isPreconfigured);
-  const typeInput = useInput(output?.type ?? '', undefined, isPreconfigured);
-  const elasticsearchUrlInput = useComboInput(
-    'esHostsComboxBox',
-    output?.hosts ?? [],
-    validateHosts,
-    isPreconfigured
-  );
+  const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isPreconfigured);
   const additionalYamlConfigInput = useInput(
     output?.config_yaml ?? '',
     validateYamlConfig,
-    isPreconfigured
-  );
-
-  const caTrustedFingerprintInput = useInput(
-    output?.ca_trusted_fingerprint ?? '',
-    validateCATrustedFingerPrint,
     isPreconfigured
   );
 
@@ -131,14 +120,50 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isPreconfigured || output?.is_default_monitoring
   );
 
+  // ES inputs
+  const caTrustedFingerprintInput = useInput(
+    output?.ca_trusted_fingerprint ?? '',
+    validateCATrustedFingerPrint,
+    isPreconfigured
+  );
+  const elasticsearchUrlInput = useComboInput(
+    'esHostsComboxBox',
+    output?.hosts ?? [],
+    validateHosts,
+    isPreconfigured
+  );
+  // Logstash input
+  const logstashHostsInput = useComboInput(
+    'logstashHostsComboxBox',
+    output?.hosts ?? [],
+    validateHosts,
+    isPreconfigured
+  );
+  const sslCertificateInput = useInput(
+    output?.ssl?.certificate ?? '',
+    undefined, // TODO validate certificate
+    isPreconfigured
+  );
+
+  const sslKeyInput = useInput(
+    output?.ssl?.key ?? '',
+    undefined, // TODO validate certificate
+    isPreconfigured
+  );
+
+  const isLogstash = typeInput.value === 'logstash';
+
   const inputs = {
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    logstashHostsInput,
     additionalYamlConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
+    sslCertificateInput,
+    sslKeyInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -146,20 +171,30 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
 
-    if (
-      !elasticsearchUrlsValid ||
-      !additionalYamlConfigValid ||
-      !nameInputValid ||
-      !caTrustedFingerprintValid
-    ) {
-      return false;
+    if (isLogstash) {
+      // validate logstash
+      return !logstashHostsValid || !additionalYamlConfigValid || !nameInputValid;
+    } else {
+      // validate ES
+      return (
+        !elasticsearchUrlsValid ||
+        !additionalYamlConfigValid ||
+        !nameInputValid ||
+        !caTrustedFingerprintValid
+      );
     }
-
-    return true;
-  }, [nameInput, elasticsearchUrlInput, additionalYamlConfigInput, caTrustedFingerprintInput]);
+  }, [
+    isLogstash,
+    nameInput,
+    elasticsearchUrlInput,
+    logstashHostsInput,
+    additionalYamlConfigInput,
+    caTrustedFingerprintInput,
+  ]);
 
   const submit = useCallback(async () => {
     try {
@@ -168,15 +203,28 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       }
       setIsloading(true);
 
-      const data: PostOutputRequest['body'] = {
-        name: nameInput.value,
-        type: 'elasticsearch',
-        hosts: elasticsearchUrlInput.value,
-        is_default: defaultOutputInput.value,
-        is_default_monitoring: defaultMonitoringOutputInput.value,
-        config_yaml: additionalYamlConfigInput.value,
-        ca_trusted_fingerprint: caTrustedFingerprintInput.value,
-      };
+      const data: PostOutputRequest['body'] = isLogstash
+        ? {
+            name: nameInput.value,
+            type: typeInput.value as 'elasticsearch' | 'logstash',
+            hosts: elasticsearchUrlInput.value,
+            is_default: defaultOutputInput.value,
+            is_default_monitoring: defaultMonitoringOutputInput.value,
+            config_yaml: additionalYamlConfigInput.value,
+            ssl: {
+              certificate: sslCertificateInput.value,
+              key: sslKeyInput.value,
+            },
+          }
+        : {
+            name: nameInput.value,
+            type: typeInput.value as 'elasticsearch' | 'logstash',
+            hosts: elasticsearchUrlInput.value,
+            is_default: defaultOutputInput.value,
+            is_default_monitoring: defaultMonitoringOutputInput.value,
+            config_yaml: additionalYamlConfigInput.value,
+            ca_trusted_fingerprint: caTrustedFingerprintInput.value,
+          };
 
       if (output) {
         // Update
@@ -208,6 +256,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       });
     }
   }, [
+    isLogstash,
     validate,
     confirm,
     additionalYamlConfigInput.value,
@@ -215,7 +264,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     defaultOutputInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
     nameInput.value,
+    typeInput.value,
     notifications.toasts,
     onSucess,
     output,

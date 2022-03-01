@@ -72,6 +72,7 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  PostLogstashApiKeyResponse,
   GetOutputsResponse,
   PutOutputRequest,
   PutOutputResponse,
