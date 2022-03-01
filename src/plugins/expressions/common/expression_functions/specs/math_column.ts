@@ -30,10 +30,10 @@ export const mathColumn: ExpressionFunctionDefinition<
     defaultMessage:
       'Adds a column by evaluating {tinymath} on each row. ' +
       'This function is optimized for math and performs better than using a math expression in {mapColumnFn}.',
-      values: {
-        mapColumnFn: '`mapColumn`',
-        tinymath: '`TinyMath`',
-      },
+    values: {
+      mapColumnFn: '`mapColumn`',
+      tinymath: '`TinyMath`',
+    },
   }),
   args: {
     ...math.args,
