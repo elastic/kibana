@@ -166,7 +166,7 @@ describe('url_params_context helpers', () => {
     });
 
     ['s', 'm', 'h', 'd', 'w'].map((roundingOption) =>
-      it(`removes /${roundingOption} rounding option from relative time`, () => {
+      it(`doesn't remove /${roundingOption} rounding option when time is not added or subtracted`, () => {
         const spy = jest.spyOn(datemath, 'parse');
         helpers.getExactDate(`now/${roundingOption}`);
         expect(spy).toHaveBeenCalledWith(`now/${roundingOption}`, {});
