@@ -179,7 +179,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             tooltipContent={
               !currentIndexPattern
                 ? i18n.translate('xpack.graph.bar.exploreLabelNoIndexPattern', {
-                    defaultMessage: 'Select an indexpattern',
+                    defaultMessage: 'Select a data source',
                   })
                 : i18n.translate('xpack.graph.bar.exploreLabelNoFields', {
                     defaultMessage: 'Select at least one field',
