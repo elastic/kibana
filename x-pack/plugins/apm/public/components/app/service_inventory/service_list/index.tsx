@@ -46,13 +46,10 @@ import {
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { HealthBadge } from './health_badge';
+import { ServiceListItem } from '../../../../../common/service_inventory';
 
-type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
-type Items = ServiceListAPIResponse['items'];
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
-
-type ServiceListItem = ValuesType<Items>;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -239,7 +236,7 @@ export function getServiceColumns({
 }
 
 interface Props {
-  items: Items;
+  items: ServiceListItem[];
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
@@ -338,7 +335,7 @@ export function ServiceList({
           initialSortField={initialSortField}
           initialSortDirection="desc"
           sortFn={(itemsToSort, sortField, sortDirection) => {
-            // For healthStatus, sort items by healthStatus first, then by TPM
+            // For healthStatus, sort items by healthStatus first, then by name
             return sortField === 'healthStatus'
               ? orderBy(
                   itemsToSort,
@@ -348,9 +345,9 @@ export function ServiceList({
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.throughput ?? 0,
+                    (item) => item.serviceName.toLowerCase(),
                   ],
-                  [sortDirection, sortDirection]
+                  [sortDirection, sortDirection === 'asc' ? 'desc' : 'asc']
                 )
               : orderBy(
                   itemsToSort,
