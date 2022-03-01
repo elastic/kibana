@@ -54,6 +54,8 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('installing bundled packages', async () => {
+    skipIfNoDockerRegistry(providerContext);
+
     afterEach(async () => {
       await removeBundledPackages();
     });
@@ -99,8 +101,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('with registry', () => {
-      skipIfNoDockerRegistry(providerContext);
-
       it('allows for updating from registry when outdated package is installed from bundled source', async () => {
         await bundlePackage('elastic_agent-1.2.0');
 
