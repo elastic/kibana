@@ -10,16 +10,16 @@ import { get } from 'lodash/fp';
 import { Ecs } from '../../common';
 
 type Maybe<T> = T | null;
-interface TimelineItem {
-  data: TimelineNonEcsData[];
+interface Event {
+  data: EventNonEcsData[];
   ecs: Ecs;
 }
-interface TimelineNonEcsData {
+interface EventNonEcsData {
   field: string;
   value?: Maybe<string[]>;
 }
 
-export function getRuleIdFromEvent(event: TimelineItem): {
+export function getRuleIdFromEvent(event: Event): {
   id: string;
   name: string;
 } {
