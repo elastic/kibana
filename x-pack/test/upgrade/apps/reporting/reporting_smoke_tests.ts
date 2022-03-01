@@ -75,9 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const isUrlTooLong = await testSubjects.exists('urlTooLongErrorMessage');
             if (isUrlTooLong) {
               // Save dashboard
-              const dashboardName = await PageObjects.dashboard.getDashboardTitle();
               await PageObjects.dashboard.switchToEditMode();
-              await PageObjects.dashboard.saveDashboard(dashboardName);
+              await PageObjects.dashboard.clickQuickSave();
               await PageObjects.share.openShareMenuItem(link);
               if (type === 'pdf_optimize') {
                 await testSubjects.click('usePrintLayout');
