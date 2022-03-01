@@ -30,6 +30,7 @@ export interface CreateControlButtonProps {
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
   buttonType: CreateControlButtonTypes;
+  closePopover: () => void;
 }
 
 export const CreateControlButton = ({
@@ -37,6 +38,7 @@ export const CreateControlButton = ({
   updateDefaultWidth,
   addNewEmbeddable,
   buttonType,
+  closePopover,
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
@@ -127,7 +129,11 @@ export const CreateControlButton = ({
         icon={factory.getIconType?.()}
         data-test-subj={`create-${type}-control`}
         onClick={() => {
-          setIsControlTypePopoverOpen(false);
+          if (buttonType === 'callout' && isControlTypePopoverOpen) {
+            setIsControlTypePopoverOpen(false);
+          } else {
+            closePopover();
+          }
           createNewControl(type);
         }}
       >
@@ -162,7 +168,6 @@ export const CreateControlButton = ({
         <EuiContextMenuPanel size="s" items={items} />
       </EuiPopover>
     );
-  } else {
-    return <EuiContextMenuPanel size="s" items={items} />;
   }
+  return <EuiContextMenuPanel size="s" items={items} />;
 };

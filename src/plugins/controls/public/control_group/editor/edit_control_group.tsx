@@ -26,6 +26,7 @@ export interface EditControlGroupButtonProps {
   setDefaultControlWidth: (defaultControlWidth: ControlWidth) => void;
   setAllControlWidths: (defaultControlWidth: ControlWidth) => void;
   removeEmbeddable?: (panelId: string) => void;
+  closePopover: () => void;
 }
 
 export const EditControlGroup = ({
@@ -36,6 +37,7 @@ export const EditControlGroup = ({
   setDefaultControlWidth,
   setAllControlWidths,
   removeEmbeddable,
+  closePopover,
 }: EditControlGroupButtonProps) => {
   const { overlays } = pluginServices.getServices();
   const { openConfirm, openFlyout } = overlays;
@@ -78,15 +80,18 @@ export const EditControlGroup = ({
   };
 
   const commonButtonProps = {
+    key: 'manageControls',
     onClick: () => {
       editControlGroup();
+      closePopover();
     },
+    icon: 'gear',
     'data-test-subj': 'controls-sorting-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
   return (
-    <EuiContextMenuItem key="manageControls" icon="gear" onClick={commonButtonProps.onClick}>
+    <EuiContextMenuItem {...commonButtonProps}>
       {ControlGroupStrings.management.getManageButtonTitle()}
     </EuiContextMenuItem>
   );

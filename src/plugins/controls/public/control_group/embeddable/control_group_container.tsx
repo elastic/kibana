@@ -68,18 +68,22 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
-  private getCreateControlButton = (buttonType: CreateControlButtonTypes) => {
+  private getCreateControlButton = (
+    buttonType: CreateControlButtonTypes,
+    closePopover: () => void
+  ) => {
     return (
       <CreateControlButton
         buttonType={buttonType}
         defaultControlWidth={this.getInput().defaultControlWidth}
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+        closePopover={closePopover}
       />
     );
   };
 
-  private getEditControlGroupButton = () => {
+  private getEditControlGroupButton = (closePopover: () => void) => {
     return (
       <EditControlGroup
         controlStyle={this.getInput().controlStyle}
@@ -93,6 +97,7 @@ export class ControlGroupContainer extends Container<
           );
         }}
         removeEmbeddable={(id) => this.removeEmbeddable(id)}
+        closePopover={closePopover}
       />
     );
   };
@@ -107,14 +112,15 @@ export class ControlGroupContainer extends Container<
         iconType="arrowDown"
         iconSide="right"
         panelPaddingSize="none"
+        data-test-subj="dashboardControlsMenuButton"
       >
-        {() => (
+        {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             size="m"
             items={[
-              this.getCreateControlButton('toolbar'),
+              this.getCreateControlButton('toolbar', closePopover),
               <EuiHorizontalRule margin="none" />,
-              this.getEditControlGroupButton(),
+              this.getEditControlGroupButton(closePopover),
             ]}
           />
         )}
