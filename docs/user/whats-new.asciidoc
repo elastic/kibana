@@ -33,6 +33,7 @@ image::discover/images/field-statistics-view.png[Filter panel in Canvas]
 Creating runtime fields is now easier and more reliable.
 {kib} has a shortcut for the field method when a script context supports the scripting fields API.
 This shortcut replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
+For more information, check {kibana-ref}/managing-data-views.html#runtime-fields[Explore your data with runtime fields].
 
 *Before*
 
@@ -51,10 +52,9 @@ $('myfield', 'unavailable')
 [float]
 ==== Calling all Document Explorers
 
-Elastic is turning on the {kibana-ref}/document-explorer.html[Document Explorer] experience by default, and in preparation,
-we call attention in the product to try it out. Document Explorer is faster, more robust,
-and offers industry leading multi-row analysis. Try Document Explorer,
-and provide feedback.
+Try the new {kibana-ref}/document-explorer.html[Document Explorer], which
+helps you quickly sort, select, and compare data, resize columns,
+and view documents in fullscreen. The Document Explorer is in beta in 8.1.
 
 
 [float]
@@ -80,7 +80,7 @@ and visual controls.
 [float]
 ==== New filter capabilities
 Use the new *Filter* panel on any object to see which objects are filtering it.
-This can help you author your workpad with the right behavior.
+This helps you author your workpad with the right behavior.
 
 [role="screenshot"]
 image::images/highlights-canvas-filter.png[Filter panel in Canvas]
@@ -91,8 +91,8 @@ image::images/highlights-canvas-filter.png[Filter panel in Canvas]
 [float]
 ==== Combine fields with drag and drop
 
-Combine multiple fields with drag and drop to view the top combinations in *Lens*, .
-This helps you to determine the combinations that contribute to your metrics' performance.
+Combine multiple fields with drag and drop to view the top combinations in *Lens*.
+You'll find the combinations that contribute most to your metrics' performance.
 
 [role="screenshot"]
 image::images/highlights-lens-combine.gif[Drag to combine in Lens]
@@ -109,7 +109,7 @@ image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, w
 [float]
 ==== Horizontal and vertical gauges
 
-The gauge visualization adds extra context to your metrics.
+Use the gauge visualization to add extra context to your metrics.
 Show minimum and maximum values dynamically by using a quick function or custom formula,
 or set a static value for known metric ranges. Include a goal value to see
 if a metric is above or below the goal. Set color bands to show ranges visually&mdash;similar
@@ -122,7 +122,7 @@ image::images/highlights-lens-guage.png[Example horizontal gauge with target val
 [float]
 ==== Mosaic visualization
 
-The mosaic visualization, also known as marimekko or mekko, allows for side-by-side
+Add a mosaic visualization, also known as marimekko or mekko, for side-by-side
 comparison of two dimensions against a single metric. Treemaps and two-layered
 pies do this as well, but the mosaic can be more effective for visual comparisons
 by aligning the colors for the terms side-by-side. For the best mosaic visualizations, create with low cardinality dimensions.
@@ -161,15 +161,14 @@ Enable users with view-only dashboard privileges to sort data tables on the fly,
 [float]
 ==== Filter formulas globally
 
-Bring the familiar *Filter by* option for metrics defined by a formula.
 Filter each part of your formula with KQL
 without copying or pasting to all the aggregations in the formula.
 
 [float]
 ==== Configurable donut visualizations
-The inner area size (or donut hole) in the donut
-visualization is now configurable. Keeping the default to a smaller size allows for maximize space for
-labels. You can change the option in *Lens*.
+Configure the inner area size (or donut hole) in the donut
+visualization. The inner area is a smaller size by default to allow maximize space for
+labels. You can change this option in *Lens*.
 
 [role="screenshot"]
 image::images/highlights-lens-donut.png[Inner area size setting in Lens donuts,width=75%]
