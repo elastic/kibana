@@ -467,6 +467,11 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click('confirmSaveSavedObjectButton');
   }
 
+  public async getDashboardTitle() {
+    const breadcrumb = await this.find.byCssSelector('[data-test-subj="breadcrumb last"]');
+    return await breadcrumb.getVisibleText();
+  }
+
   /**
    *
    * @param dashboardTitle {String}
