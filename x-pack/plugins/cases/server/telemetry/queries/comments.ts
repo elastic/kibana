@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import { buildFilter } from '../../client/utils';
 import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import { getCountsAndMaxData } from './utils';
 
-export const getUserActionsTelemetryData = async ({
+export const getUserCommentsTelemetryData = async ({
   savedObjectsClient,
-}: CollectTelemetryDataParams): Promise<CasesTelemetry['userActions']> => {
+}: CollectTelemetryDataParams): Promise<CasesTelemetry['comments']> => {
+  const onlyUserCommentsFilter = buildFilter({
+    filters: ['user'],
+    field: 'type',
+    operator: 'or',
+    type: CASE_COMMENT_SAVED_OBJECT,
+  });
+
   const res = await getCountsAndMaxData({
     savedObjectsClient,
-    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+    filter: onlyUserCommentsFilter,
   });
 
   return res;
