@@ -18,6 +18,7 @@ import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 import {
   allOption,
+  allOptionText,
   environmentAllOption,
 } from '../shared/select_with_combo_box';
 
@@ -32,7 +33,7 @@ export function ServiceField({
 }) {
   return (
     <PopoverExpression
-      value={currentValue || allOption.label}
+      value={currentValue || allOptionText}
       title={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
       })}
@@ -100,7 +101,7 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={currentValue || allOption.label} title={label}>
+    <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
         allOption={allOption}
         customOptionText={i18n.translate(

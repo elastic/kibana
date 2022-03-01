@@ -11,7 +11,7 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 export const ALL_OPTION_VALUE = 'ALL_OPTION_VALUE';
 
-const allOptionText = i18n.translate('xpack.apm.allOption', {
+export const allOptionText = i18n.translate('xpack.apm.allOption', {
   defaultMessage: 'All',
 });
 
