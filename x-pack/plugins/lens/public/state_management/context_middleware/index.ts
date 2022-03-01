@@ -27,9 +27,9 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     store.getState,
     store.dispatch
   );
-  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
+  return (next: Dispatch) => (action: PayloadAction<unknown>) => {
     if (
-      !action.payload?.searchSessionId &&
+      !(action.payload as Partial<LensAppState>)?.searchSessionId &&
       !onActiveDataChange.match(action) &&
       (selectAutoApplyEnabled(store.getState()) || applyChanges.match(action))
     ) {
