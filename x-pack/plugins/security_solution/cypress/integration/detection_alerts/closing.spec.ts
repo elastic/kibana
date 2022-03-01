@@ -176,7 +176,7 @@ describe.skip('Closing alerts', () => {
   });
 });
 
-describe.skip('Closing alerts with read only role', () => {
+describe('Closing alerts with read only role', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
