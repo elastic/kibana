@@ -111,6 +111,9 @@ export function SaveQueryForm({
 
   const onClickSave = useCallback(() => {
     if (validate()) {
+      filters?.forEach((f) => {
+        f.meta.alias = title;
+      });
       onSave({
         id: savedQuery?.id,
         title,
