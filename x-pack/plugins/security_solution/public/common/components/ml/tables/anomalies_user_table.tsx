@@ -12,15 +12,17 @@ import { HeaderSection } from '../../header_section';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import * as i18n from './translations';
-import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
-import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
+
 import { Loader } from '../../loader';
-import { AnomaliesHostTableProps } from '../types';
+import { AnomaliesUserTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
-import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
+
+import { getCriteriaFromUsersType } from '../criteria/get_criteria_from_users_type';
 import { Panel } from '../../panel';
 import { anomaliesTableDefaultEquality } from './default_equality';
+import { convertAnomaliesToUsers } from './convert_anomalies_to_users';
+import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
 
 const sorting = {
   sort: {
@@ -29,31 +31,32 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
+const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   startDate,
   endDate,
-  hostName,
+  userName,
   skip,
   type,
 }) => {
   const capabilities = useMlCapabilities();
+
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip,
-    criteriaFields: getCriteriaFromHostType(type, hostName),
+    criteriaFields: getCriteriaFromUsersType(type, userName),
     filterQuery: {
-      exists: { field: 'host.name' },
+      exists: { field: 'user.name' },
     },
   });
 
-  const hosts = convertAnomaliesToHosts(tableData, hostName);
+  const users = convertAnomaliesToUsers(tableData, userName);
 
-  const columns = getAnomaliesHostTableColumnsCurated(type, startDate, endDate);
+  const columns = getAnomaliesUserTableColumnsCurated(type, startDate, endDate);
   const pagination = {
     initialPageIndex: 0,
     initialPageSize: 10,
-    totalItemCount: hosts.length,
+    totalItemCount: users.length,
     pageSizeOptions: [5, 10, 20, 50],
     hidePerPageOptions: false,
   };
@@ -75,7 +78,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
         <BasicTable
           // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
           columns={columns}
-          items={hosts}
+          items={users}
           pagination={pagination}
           sorting={sorting}
         />
@@ -88,7 +91,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   }
 };
 
-export const AnomaliesHostTable = React.memo(
-  AnomaliesHostTableComponent,
+export const AnomaliesUserTable = React.memo(
+  AnomaliesUserTableComponent,
   anomaliesTableDefaultEquality
 );
