@@ -25,10 +25,10 @@ export function initPlugin(router: IRouter, path: string) {
         body: schema.object({
           signalId: schema.string(),
           alertActionGroupName: schema.string(),
-          ruleName: schema.maybe(schema.string()),
-          date: schema.maybe(schema.string()),
+          ruleName: schema.string(),
+          date: schema.string(),
           severity: schema.string(),
-          spaceId: schema.maybe(schema.string()),
+          spaceId: schema.string(),
           tags: schema.maybe(schema.string()),
         }),
       },

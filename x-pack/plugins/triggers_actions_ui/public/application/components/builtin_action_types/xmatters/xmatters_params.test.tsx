@@ -28,6 +28,9 @@ describe('XmattersParamsFields renders', () => {
         errors={{
           alertActionGroupName: [],
           signalId: [],
+          ruleName: [],
+          date: [],
+          spaceId: [],
         }}
         editAction={() => {}}
         index={0}

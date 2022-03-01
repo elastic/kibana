@@ -124,40 +124,40 @@ function validateConnector(
   const { usesBasic, configUrl } = config;
 
   if (usesBasic) {
-    if (secretsUrl != null) {
+    if (secretsUrl) {
       return i18n.translate('xpack.actions.builtin.xmatters.shouldNotHaveSecretsUrl', {
         defaultMessage: 'secretsUrl should not be provided when usesBasic is true',
       });
     }
     if (user == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingUser', {
-        defaultMessage: 'Username must be provided',
+        defaultMessage: 'Provide valid Username',
       });
     }
     if (password == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingPassword', {
-        defaultMessage: 'Password must be provided',
+        defaultMessage: 'Provide valid Password',
       });
     }
     if (configUrl == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingConfigUrl', {
-        defaultMessage: 'configUrl must be provided',
+        defaultMessage: 'Provide valid URL',
       });
     }
   } else {
-    if (user != null || password != null) {
+    if (user || password) {
       return i18n.translate('xpack.actions.builtin.xmatters.shouldNotHaveUsernamePassword', {
         defaultMessage: 'Username and password should not be provided when usesBasic is false',
       });
     }
-    if (configUrl != null) {
+    if (configUrl) {
       return i18n.translate('xpack.actions.builtin.xmatters.shouldNotHaveConfigUrl', {
         defaultMessage: 'configUrl should not be provided when usesBasic is false',
       });
     }
     if (secretsUrl == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingSecretsUrl', {
-        defaultMessage: 'secretsUrl with API Key must be provided',
+        defaultMessage: 'Provide valid URL with API Key',
       });
     }
   }
@@ -170,7 +170,7 @@ function validateActionTypeSecrets(
 ): string | undefined {
   if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
     return i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
-      defaultMessage: 'Either user and password or URL authentication must be specified.',
+      defaultMessage: 'Provide either URL link or username/password to authenticate',
     });
   }
 
@@ -180,7 +180,7 @@ function validateActionTypeSecrets(
     if (secretsObject.user || secretsObject.password) {
       return i18n.translate('xpack.actions.builtin.xmatters.noUserPassWhenSecretsUrl', {
         defaultMessage:
-          'Cannot use user and password with URL authentication. Specify user/password or URL.',
+          'Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication.',
       });
     }
 
@@ -311,7 +311,7 @@ interface XmattersPayload {
 }
 
 function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
-  // xMatters will assume the request is a test when the signalId adn alertActionGroupName are not defined
+  // xMatters will assume the request is a test when the signalId and alertActionGroupName are not defined
   const data: XmattersPayload = {
     alertActionGroupName: params.alertActionGroupName,
     signalId: params.signalId,
