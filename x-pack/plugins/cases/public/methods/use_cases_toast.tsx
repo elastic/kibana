@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { Case } from '../../common';
-import { useKibana } from '../common/lib/kibana';
+import { useKibana, useToasts } from '../common/lib/kibana';
 import { CasesDeepLinkId, generateCaseViewPath } from '../common/navigation';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { CASE_SUCCESS_SYNC_TEXT, CASE_SUCCESS_TOAST, VIEW_CASE } from './translations';
@@ -32,9 +32,10 @@ const EuiTextStyled = styled(EuiText)`
 export const useCasesToast = () => {
   const { appId } = useCasesContext();
   const {
-    notifications: { toasts },
     application: { navigateToApp },
   } = useKibana().services;
+
+  const toasts = useToasts();
 
   return {
     showSuccessAttach: (theCase: Case) => {
