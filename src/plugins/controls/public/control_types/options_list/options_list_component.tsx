@@ -10,7 +10,7 @@ import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import classNames from 'classnames';
-import { debounce } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from './options_list_reducers';
@@ -20,11 +20,16 @@ import { useReduxEmbeddableContext } from '../../../../presentation_util/public'
 import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { OptionsListEmbeddableInput } from './types';
+import { DataViewField } from '../../../../data_views/public';
 
-// Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
+// OptionsListComponentState is controlled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {
-  availableOptions?: string[];
   loading: boolean;
+  field?: DataViewField;
+  totalCardinality?: number;
+  availableOptions?: string[];
+  invalidSelections?: string[];
+  validSelections?: string[];
 }
 
 export const OptionsListComponent = ({
@@ -52,10 +57,11 @@ export const OptionsListComponent = ({
   );
 
   // useStateObservable to get component state from Embeddable
-  const { availableOptions, loading } = useStateObservable<OptionsListComponentState>(
-    componentStateSubject,
-    componentStateSubject.getValue()
-  );
+  const { availableOptions, loading, invalidSelections, validSelections, totalCardinality, field } =
+    useStateObservable<OptionsListComponentState>(
+      componentStateSubject,
+      componentStateSubject.getValue()
+    );
 
   // debounce loading state so loading doesn't flash when user types
   const [buttonLoading, setButtonLoading] = useState(true);
@@ -80,12 +86,24 @@ export const OptionsListComponent = ({
     [typeaheadSubject]
   );
 
-  const { selectedOptionsCount, selectedOptionsString } = useMemo(() => {
+  const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
     return {
-      selectedOptionsCount: selectedOptions?.length,
-      selectedOptionsString: selectedOptions?.join(OptionsListStrings.summary.getSeparator()),
+      hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
+      validSelectionsCount: validSelections?.length,
+      selectionDisplayNode: (
+        <>
+          {validSelections && (
+            <span>{validSelections?.join(OptionsListStrings.summary.getSeparator())}</span>
+          )}
+          {invalidSelections && (
+            <span className="optionsList__filterInvalid">
+              {invalidSelections.join(OptionsListStrings.summary.getSeparator())}
+            </span>
+          )}
+        </>
+      ),
     };
-  }, [selectedOptions]);
+  }, [validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
@@ -94,17 +112,15 @@ export const OptionsListComponent = ({
         isLoading={buttonLoading}
         className={classNames('optionsList--filterBtn', {
           'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
-          'optionsList--filterBtnPlaceholder': !selectedOptionsCount,
+          'optionsList--filterBtnPlaceholder': !hasSelections,
         })}
         data-test-subj={`optionsList-control-${id}`}
         onClick={() => setIsPopoverOpen((openState) => !openState)}
         isSelected={isPopoverOpen}
-        numActiveFilters={selectedOptionsCount}
-        hasActiveFilters={(selectedOptionsCount ?? 0) > 0}
+        numActiveFilters={validSelectionsCount}
+        hasActiveFilters={Boolean(validSelectionsCount)}
       >
-        {!selectedOptionsCount
-          ? OptionsListStrings.summary.getPlaceholder()
-          : selectedOptionsString}
+        {hasSelections ? selectionDisplayNode : OptionsListStrings.summary.getPlaceholder()}
       </EuiFilterButton>
     </div>
   );
@@ -127,11 +143,14 @@ export const OptionsListComponent = ({
         repositionOnScroll
       >
         <OptionsListPopover
+          field={field}
           width={dimensions.width}
           loading={loading}
           searchString={searchString}
-          updateSearchString={updateSearchString}
+          totalCardinality={totalCardinality}
           availableOptions={availableOptions}
+          invalidSelections={invalidSelections}
+          updateSearchString={updateSearchString}
         />
       </EuiPopover>
     </EuiFilterGroup>
