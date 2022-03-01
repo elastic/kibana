@@ -16,6 +16,7 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const log = getService('log');
 
   const BUNDLED_PACKAGE_FIXTURES_DIR = path.join(
     path.dirname(__filename),
@@ -47,7 +48,8 @@ export default function (providerContext: FtrProviderContext) {
         await fs.unlink(path.join(BUNDLED_PACKAGES_DIR, file));
       }
     } catch (error) {
-      // ignore
+      log.error('Error removing bundled packages');
+      log.error(error);
     }
   };
 
