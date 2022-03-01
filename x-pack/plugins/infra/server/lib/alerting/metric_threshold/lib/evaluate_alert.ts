@@ -117,7 +117,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         ...backfilledPrevGroups,
       };
 
-      const finalValues = mapValues(
+      return mapValues(
         currentValuesWithBackfilledPrevGroups,
         (points: any[] | typeof NaN | null) => {
           if (isTooManyBucketsPreviewException(points)) throw points;
@@ -135,7 +135,6 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
           };
         }
       );
-      return finalValues;
     })
   );
 };
