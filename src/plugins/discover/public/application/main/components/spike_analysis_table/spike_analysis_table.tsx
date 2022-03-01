@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiSplitPanel,
   EuiStat,
+  EuiTabbedContent,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -271,7 +272,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const cpBarSeries = useMemo(
     () =>
-      pageOfItems.map((cp) => {
+      response.changePoints?.map((cp) => {
         return {
           ...cp,
           data:
@@ -283,12 +284,53 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             }) ?? [],
         };
       }) ?? [],
-    [barSeries, pageOfItems]
+    [barSeries, response.changePoints]
   );
 
-  return (
-    <EuiFlexItem grow={false} style={{ height: '100%', overflow: 'hidden' }}>
-      <div style={{ padding: '16px', overflow: 'scroll' }}>
+  const tabs = [
+    {
+      id: 'saTable',
+      name: 'Tabular',
+      content: (
+        <EuiBasicTable
+          items={pageOfItems ?? []}
+          noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
+          loading={status === FETCH_STATUS.LOADING}
+          // error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
+          columns={columns}
+          rowProps={(term) => {
+            return {
+              onClick: () => {
+                // if (setPinnedSignificantTerm) {
+                //   setPinnedSignificantTerm(term);
+                // }
+              },
+              onMouseEnter: () => {
+                // setSelectedSignificantTerm(term);
+              },
+              onMouseLeave: () => {
+                // setSelectedSignificantTerm(null);
+              },
+              // style:
+              //   selectedTerm &&
+              //   selectedTerm.fieldValue === term.fieldValue &&
+              //   selectedTerm.fieldName === term.fieldName
+              //     ? {
+              //         backgroundColor: euiTheme.eui.euiColorLightestShade,
+              //       }
+              //     : null,
+            };
+          }}
+          pagination={pagination}
+          onChange={onChange}
+          // sorting={sorting}
+        />
+      ),
+    },
+    {
+      id: 'saSmallMultiples',
+      name: 'Time Series Charts',
+      content: (
         <EuiFlexGroup wrap gutterSize="xs">
           {cpBarSeries.map((cp) => {
             return (
@@ -341,39 +383,20 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             );
           })}
         </EuiFlexGroup>
+      ),
+    },
+  ];
 
-        <EuiBasicTable
-          items={pageOfItems ?? []}
-          noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
-          loading={status === FETCH_STATUS.LOADING}
-          // error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
-          columns={columns}
-          rowProps={(term) => {
-            return {
-              onClick: () => {
-                // if (setPinnedSignificantTerm) {
-                //   setPinnedSignificantTerm(term);
-                // }
-              },
-              onMouseEnter: () => {
-                // setSelectedSignificantTerm(term);
-              },
-              onMouseLeave: () => {
-                // setSelectedSignificantTerm(null);
-              },
-              // style:
-              //   selectedTerm &&
-              //   selectedTerm.fieldValue === term.fieldValue &&
-              //   selectedTerm.fieldName === term.fieldName
-              //     ? {
-              //         backgroundColor: euiTheme.eui.euiColorLightestShade,
-              //       }
-              //     : null,
-            };
-          }}
-          pagination={pagination}
-          onChange={onChange}
-          // sorting={sorting}
+  return (
+    <EuiFlexItem grow={false} style={{ height: '100%', overflow: 'hidden' }}>
+      <div style={{ padding: '16px', overflow: 'scroll' }}>
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[1]}
+          autoFocus="selected"
+          // onTabClick={(tab) => {
+          //   console.log('clicked tab', tab);
+          // }}
         />
       </div>
     </EuiFlexItem>

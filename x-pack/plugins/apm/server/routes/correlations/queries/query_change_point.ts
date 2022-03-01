@@ -7,7 +7,7 @@
 import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
-import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
+import { SPIKE_ANALYSIS_THRESHOLD } from '../../../../common/correlations/constants';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { ChangePointParams } from '../../../../common/correlations/change_point/types';
 import { getQueryWithParams } from './get_query_with_params';
@@ -120,7 +120,7 @@ export const fetchChangePointPValues = async (
 
       const pValue = Math.exp(-bucket.score);
 
-      if (typeof pValue === 'number' && pValue < ERROR_CORRELATION_THRESHOLD) {
+      if (typeof pValue === 'number' && pValue < SPIKE_ANALYSIS_THRESHOLD) {
         result.push({
           fieldName,
           fieldValue: bucket.key,

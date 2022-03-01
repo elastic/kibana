@@ -258,10 +258,14 @@ export function useChangePointDetection(
         samplerShardSize: -1,
       });
 
+      responseUpdate.fieldStats = stats;
+
       const overallTimeSeries = await http.post<HistogramResponse>({
         path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
         body,
       });
+
+      responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
 
       // time series filtered by fields
       if (responseUpdate.changePoints) {
@@ -290,12 +294,15 @@ export function useChangePointDetection(
             });
 
             responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
+            setResponse({
+              ...responseUpdate,
+              loaded: 0.99,
+              isRunning: true,
+            });
           }
         });
       }
 
-      responseUpdate.fieldStats = stats;
-      responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,
