@@ -9,7 +9,6 @@
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
