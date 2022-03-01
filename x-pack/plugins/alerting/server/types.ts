@@ -170,7 +170,6 @@ export interface RuleType<
   };
   isExportable: boolean;
   defaultScheduleInterval?: string;
-  minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
