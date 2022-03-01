@@ -46,7 +46,6 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
           await esClient.transport.request(
             {
               method: 'DELETE',
-              // @ts-expect-error @elastic/elasticsearch Transform is empty interface
               path: `/${transform?.dest?.index}`,
             },
             {

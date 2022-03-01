@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { render, cleanup } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';import { HostName } from './host_name';
+import userEvent from '@testing-library/user-event';
+import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { timelineActions } from '../../../../store/timeline';

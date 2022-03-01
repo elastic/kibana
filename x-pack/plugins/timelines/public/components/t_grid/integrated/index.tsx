@@ -334,20 +334,26 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               justifyContent="flexEnd"
               $view={tableView}
             >
-              <UpdatedFlexItem grow={false} $show={!loading}>
-                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-              </UpdatedFlexItem>
-              <UpdatedFlexItem grow={false} $show={!loading}>
-                {!resolverIsShowing(graphEventId) && additionalFilters}
-              </UpdatedFlexItem>
-              {tGridEventRenderedViewEnabled &&
-                ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                  <UpdatedFlexItem grow={false} $show={!loading}>
-                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                  </UpdatedFlexItem>
-                )}
-            </UpdatedFlexGroup>
-            {!graphEventId && graphOverlay == null && (
+              <UpdatedFlexGroup
+                alignItems={alignItems}
+                data-test-subj="updated-flex-group"
+                gutterSize="m"
+                justifyContent="flexEnd"
+                $view={tableView}
+              >
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+                </UpdatedFlexItem>
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
+                </UpdatedFlexItem>
+                {tGridEventRenderedViewEnabled &&
+                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                    <UpdatedFlexItem grow={false} $show={!loading}>
+                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                    </UpdatedFlexItem>
+                  )}
+              </UpdatedFlexGroup>
               <>
                 {!hasAlerts && !loading && <TGridEmpty height="short" />}
                 {hasAlerts && (
@@ -390,7 +396,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   </FullWidthFlexGroup>
                 )}
               </>
-            )}
+            </UpdatedFlexGroup>
           </EventsContainerLoading>
         )}
       </StyledEuiPanel>

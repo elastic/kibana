@@ -28,6 +28,7 @@ export type DynamicPage =
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
+  | 'integration_policy_upgrade'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
@@ -82,6 +83,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
+  integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
 
 export const pagePathGetters: {
@@ -123,6 +125,12 @@ export const pagePathGetters: {
     `/detail/${pkgkey}/custom${integration ? `?integration=${integration}` : ''}`,
   ],
   integration_policy_edit: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
+  // Upgrades happen on the same edit form, just with a flag set. Separate page record here
+  // allows us to set different breadcrumbds for upgrades when needed.
+  integration_policy_upgrade: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],

@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import {
-  TimelineId,
-  TimelineTabs,
-  TimelineExpandedDetailType,
-} from '../../../../../../common/types/timeline';
+import { TimelineTabs, TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
@@ -32,6 +26,8 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  timelineId?: string;
+  tabType?: TimelineTabs;
 }
 
 const UserNameComponent: React.FC<Props> = ({
@@ -43,13 +39,14 @@ const UserNameComponent: React.FC<Props> = ({
   isButton,
   onClick,
   title,
+  tabType,
+  timelineId,
   value,
 }) => {
   const dispatch = useDispatch();
-  const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
 
-  const isInTimelineContext = userName && eventContext?.timelineID;
+  const isInTimeline = timelineId !== undefined;
   const openUserDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -57,8 +54,7 @@ const UserNameComponent: React.FC<Props> = ({
       if (onClick) {
         onClick();
       }
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
+      if (isInTimeline) {
         const updatedExpandedDetail: TimelineExpandedDetailType = {
           panelView: 'userDetail',
           params: {
@@ -69,17 +65,13 @@ const UserNameComponent: React.FC<Props> = ({
         dispatch(
           timelineActions.toggleDetailPanel({
             ...updatedExpandedDetail,
-            timelineId: timelineID,
+            timelineId,
             tabType,
           })
         );
-
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
       }
     },
-    [onClick, eventContext, isInTimelineContext, userName, dispatch]
+    [onClick, userName, dispatch, isInTimeline, tabType, timelineId]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -90,13 +82,13 @@ const UserNameComponent: React.FC<Props> = ({
         Component={Component}
         userName={userName}
         isButton={isButton}
-        onClick={isInTimelineContext ? openUserDetailsSidePanel : undefined}
+        onClick={isInTimeline ? openUserDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{userName}</TruncatableText>
       </UserDetailsLink>
     ),
-    [userName, isButton, isInTimelineContext, openUserDetailsSidePanel, Component, title]
+    [userName, isButton, isInTimeline, openUserDetailsSidePanel, Component, title]
   );
 
   return isString(value) && userName.length > 0 ? (

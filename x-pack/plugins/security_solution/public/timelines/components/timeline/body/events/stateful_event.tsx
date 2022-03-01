@@ -14,7 +14,6 @@ import {
   ControlColumnProps,
   RowRenderer,
   TimelineExpandedDetailType,
-  TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
@@ -33,7 +32,6 @@ import { useEventDetailsWidthContext } from '../../../../../common/components/ev
 import { EventColumnView } from './event_column_view';
 import { appSelectors, inputsModel } from '../../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';

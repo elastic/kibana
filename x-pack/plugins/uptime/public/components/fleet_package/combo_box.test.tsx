@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { ComboBox } from './combo_box';
@@ -19,5 +20,18 @@ describe('<ComboBox />', () => {
     );
 
     expect(getByTestId('syntheticsFleetComboBox')).toBeInTheDocument();
+  });
+
+  it('calls onBlur', () => {
+    const onBlur = jest.fn();
+    const { getByTestId } = render(
+      <ComboBox selectedOptions={selectedOptions} onChange={onChange} onBlur={onBlur} />
+    );
+
+    const combobox = getByTestId('syntheticsFleetComboBox');
+    fireEvent.focus(combobox);
+    fireEvent.blur(combobox);
+
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

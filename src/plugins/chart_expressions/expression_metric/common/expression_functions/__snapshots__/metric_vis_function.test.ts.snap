@@ -41,6 +41,7 @@ Object {
       },
       "metric": Object {
         "autoScale": undefined,
+        "colorFullBackground": false,
         "labels": Object {
           "position": "bottom",
           "show": true,
@@ -100,3 +101,9 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#metric returns error if bucket and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to visualizations that have a bucket specified."`;
+
+exports[`interpreter/functions#metric returns error if data includes several rows and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to a visualization with multiple metrics."`;
+
+exports[`interpreter/functions#metric returns error if several metrics and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to a visualization with multiple metrics."`;

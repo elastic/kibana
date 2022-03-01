@@ -18,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_output_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
@@ -36,6 +37,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
@@ -97,6 +99,56 @@ export default function (providerContext: FtrProviderContext) {
           is_default: false,
           is_default_monitoring: false,
         });
+      });
+
+      it('should allow to create a logstash output ', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'My Logstash Output',
+          type: 'logstash',
+          hosts: ['test.fr:443'],
+          is_default: false,
+          is_default_monitoring: false,
+          ssl: {
+            certificate: 'CERTIFICATE',
+            key: 'KEY',
+            certificate_authorities: ['CA1', 'CA2'],
+          },
+        });
+      });
+
+      it('should not allow to create a logstash output with http hosts ', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['https://test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(400);
+
+        expect(postResponse.message).match(/Invalid logstash host should not start with http\(s\)/);
       });
 
       it('should toggle default output when creating a new default output ', async function () {

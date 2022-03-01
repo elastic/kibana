@@ -176,6 +176,8 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        timelineId={timelineId}
+        tabType={tabType}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {

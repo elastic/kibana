@@ -108,5 +108,38 @@ export default function ({ getService }: FtrProviderContext) {
         retry,
       });
     });
+
+    it('propagates context for Telemetry collection', async () => {
+      await supertest
+        .post('/api/telemetry/v2/clusters/_stats')
+        .set('kbn-xsrf', 'true')
+        .send({ unencrypted: false })
+        .expect(200);
+
+      await assertLogContains({
+        description:
+          'usage_collection execution context propagates to Elasticsearch via "x-opaque-id" header',
+        predicate: (record) =>
+          Boolean(
+            // exclude part with collector types
+            record.http?.request?.id?.includes(
+              `kibana:usage_collection:collector.fetch:application_usage`
+            )
+          ),
+        retry,
+      });
+
+      await assertLogContains({
+        description: 'execution context propagates to Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record?.message, {
+            type: 'usage_collection',
+            name: 'collector.fetch',
+            id: 'application_usage',
+            description: 'Fetch method in the Collector "application_usage"',
+          }),
+        retry,
+      });
+    });
   });
 }

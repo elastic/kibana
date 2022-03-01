@@ -10,11 +10,7 @@ import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import {
-  TimelineId,
-  TimelineTabs,
-  TimelineExpandedDetailType,
-} from '../../../../../../common/types/timeline';
+import { TimelineTabs, TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';

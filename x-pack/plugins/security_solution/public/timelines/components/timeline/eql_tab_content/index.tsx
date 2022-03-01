@@ -33,7 +33,6 @@ import { TimelineRefetch } from '../refetch_timeline';
 import {
   ControlColumnProps,
   RowRenderer,
-  TimelineId,
   TimelineTabs,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';

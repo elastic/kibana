@@ -38,7 +38,6 @@ import {
   ControlColumnProps,
   KueryFilterQueryKind,
   RowRenderer,
-  TimelineId,
   TimelineTabs,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
@@ -53,7 +52,6 @@ import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timel
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { HeaderActions } from '../body/actions/header_actions';
