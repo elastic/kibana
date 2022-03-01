@@ -15,7 +15,7 @@ import { mockAlertDetailsData } from '../../../../common/components/event_detail
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { mockCases } from '../../../../common/mock/mock_cases_plugin';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -115,7 +115,7 @@ describe('event details footer component', () => {
           },
           query: jest.fn(),
         },
-        cases: mockCases,
+        cases: mockCasesContract(),
       },
     });
   });

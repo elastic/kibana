@@ -66,7 +66,7 @@ import { CoreStart } from '../../../../../../../../src/core/public';
 import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
 import { CaseAttachments, CasesUiStart } from '../../../../../../cases/public';
-import { Case, CommentType } from '../../../../../../cases/common';
+import { CommentType } from '../../../../../../cases/common';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';

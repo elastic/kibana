@@ -19,7 +19,11 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
     onClose: props.onClose,
     // TODO there's no need for onSuccess to be async. This will be fixed
     // in a follow up clean up
-    onSuccess: async (theCase?: Case) => props.onRowClick(theCase),
+    onSuccess: async (theCase?: Case) => {
+      if (props.onRowClick) {
+        return props.onRowClick();
+      }
+    },
   });
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();

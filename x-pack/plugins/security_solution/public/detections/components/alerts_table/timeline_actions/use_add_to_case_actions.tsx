@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { Case, CommentType } from '../../../../../../cases/common';
+import { CommentType } from '../../../../../../cases/common';
 import { CaseAttachments } from '../../../../../../cases/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
