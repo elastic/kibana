@@ -4,6 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
+BUILDKITE_PARALLEL_JOB="${BUILDKITE_PARALLEL_JOB:-0}"
 export CI_GROUP=${CI_GROUP:-$((BUILDKITE_PARALLEL_JOB+1))}
 export JOB=kibana-default-ciGroup${CI_GROUP}
 
