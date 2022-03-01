@@ -6,12 +6,15 @@
  */
 
 import { useCallback } from 'react';
+import { Case } from '../../../containers/types';
+import { useCasesToast } from '../../../methods/use_cases_toast';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
 export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
   const { dispatch } = useCasesContext();
+  const casesToasts = useCasesToast();
 
   const closeFlyout = useCallback(() => {
     dispatch({
@@ -28,6 +31,14 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
           closeFlyout();
           if (props.onClose) {
             return props.onClose();
+          }
+        },
+        onSuccess: async (theCase: Case) => {
+          if (theCase) {
+            casesToasts.showSuccessAttach(theCase);
+          }
+          if (props.onSuccess) {
+            return props.onSuccess(theCase);
           }
         },
         afterCaseCreated: async (...args) => {
