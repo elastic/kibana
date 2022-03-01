@@ -20,37 +20,84 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, ElasticsearchClient } from 'src/core/server';
-import { ElasticsearchClientWithChild } from '../types';
+import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClientWithChild, RuleExecutionMetrics } from '../types';
+import { Alert as Rule } from '../types';
 
-export interface WrapScopedClusterClientOpts {
+type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
+interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
-  abortController: AbortController;
+  rule: RuleInfo;
+  logger: Logger;
 }
 
-export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClusterClient {
-  const { scopedClusterClient, abortController } = opts;
+type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
+  logMetricsFn: LogSearchMetricsFn;
+};
+
+type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'> & {
+  esClient: ElasticsearchClient;
+};
+
+interface LogSearchMetricsOpts {
+  esSearchDuration: number;
+  totalSearchDuration: number;
+}
+type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
+
+export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
+  let numSearches: number = 0;
+  let esSearchDurationMs: number = 0;
+  let totalSearchDurationMs: number = 0;
+
+  function logMetrics(metrics: LogSearchMetricsOpts) {
+    numSearches++;
+    esSearchDurationMs += metrics.esSearchDuration;
+    totalSearchDurationMs += metrics.totalSearchDuration;
+  }
+
+  const wrappedClient = wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics });
+
   return {
-    asInternalUser: wrapEsClient(scopedClusterClient.asInternalUser, abortController),
-    asCurrentUser: wrapEsClient(scopedClusterClient.asCurrentUser, abortController),
+    client: () => wrappedClient,
+    getMetrics: (): RuleExecutionMetrics => {
+      return {
+        esSearchDurationMs,
+        totalSearchDurationMs,
+        numSearches,
+      };
+    },
   };
 }
 
-function wrapEsClient(
-  esClient: ElasticsearchClient,
-  abortController: AbortController
-): ElasticsearchClient {
+function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClusterClient {
+  const { scopedClusterClient, ...rest } = opts;
+  return {
+    asInternalUser: wrapEsClient({
+      ...rest,
+      esClient: scopedClusterClient.asInternalUser,
+    }),
+    asCurrentUser: wrapEsClient({
+      ...rest,
+      esClient: scopedClusterClient.asCurrentUser,
+    }),
+  };
+}
+
+function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
+  const { esClient, ...rest } = opts;
+
   // Core hides access to .child via TS
   const wrappedClient = (esClient as ElasticsearchClientWithChild).child({});
 
   // Mutating the functions we want to wrap
-  wrappedClient.search = getWrappedSearchFn(wrappedClient, abortController);
+  wrappedClient.search = getWrappedSearchFn({ esClient: wrappedClient, ...rest });
 
   return wrappedClient;
 }
 
-function getWrappedSearchFn(esClient: ElasticsearchClient, abortController: AbortController) {
-  const originalSearch = esClient.search;
+function getWrappedSearchFn(opts: WrapEsClientOpts) {
+  const originalSearch = opts.esClient.search;
 
   // A bunch of overloads to make TypeScript happy
   async function search<
@@ -86,16 +133,34 @@ function getWrappedSearchFn(esClient: ElasticsearchClient, abortController: Abor
   > {
     try {
       const searchOptions = options ?? {};
-      return (await originalSearch.call(esClient, params, {
+      const start = Date.now();
+      opts.logger.debug(
+        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
+      );
+      const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,
-        signal: abortController.signal,
       })) as
         | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
         | SearchResponse<TDocument, TAggregations>;
-    } catch (e) {
-      if (abortController.signal.aborted) {
-        throw new Error('Search has been aborted due to cancelled execution');
+
+      const end = Date.now();
+      const durationMs = end - start;
+
+      let took = 0;
+      if (searchOptions.meta) {
+        // when meta: true, response is TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
+        took = (result as TransportResult<SearchResponse<TDocument, TAggregations>, unknown>).body
+          .took;
+      } else {
+        // when meta: false, response is SearchResponse<TDocument, TAggregations>
+        took = (result as SearchResponse<TDocument, TAggregations>).took;
       }
+
+      opts.logMetricsFn({ esSearchDuration: took, totalSearchDuration: durationMs });
+      return result;
+    } catch (e) {
       throw e;
     }
   }

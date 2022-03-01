@@ -70,8 +70,10 @@ describe('fetchElasticsearchVersions', () => {
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_stats.nodes.versions',
+        'hits.hits._source.elasticsearch.cluster.stats.nodes.versions',
         'hits.hits._index',
         'hits.hits._source.cluster_uuid',
+        'hits.hits._source.elasticsearch.cluster.id',
       ],
       body: {
         size: 1,
@@ -84,6 +86,7 @@ describe('fetchElasticsearchVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                   ],
                   minimum_should_match: 1,

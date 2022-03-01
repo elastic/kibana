@@ -11,14 +11,15 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
-import { CreateCaseForm, CreateCaseAttachment } from '../form';
+import { CreateCaseForm } from '../form';
 import { UsePostComment } from '../../../containers/use_post_comment';
+import { CaseAttachments } from '../../../types';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  onClose: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
-  attachments?: CreateCaseAttachment;
+  onClose?: () => void;
+  onSuccess?: (theCase: Case) => Promise<void>;
+  attachments?: CaseAttachments;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -66,6 +67,8 @@ const FormWrapper = styled.div`
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   ({ afterCaseCreated, onClose, onSuccess, attachments }) => {
+    const handleCancel = onClose || function () {};
+    const handleOnSuccess = onSuccess || async function () {};
     return (
       <>
         <GlobalStyle />
@@ -85,8 +88,8 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               <CreateCaseForm
                 afterCaseCreated={afterCaseCreated}
                 attachments={attachments}
-                onCancel={onClose}
-                onSuccess={onSuccess}
+                onCancel={handleCancel}
+                onSuccess={handleOnSuccess}
                 withSteps={false}
               />
             </FormWrapper>

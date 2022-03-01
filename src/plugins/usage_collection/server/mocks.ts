@@ -8,6 +8,7 @@
 
 import {
   elasticsearchServiceMock,
+  executionContextServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
@@ -23,6 +24,7 @@ export { Collector };
 export const createUsageCollectionSetupMock = () => {
   const collectorSet = new CollectorSet({
     logger: loggingSystemMock.createLogger(),
+    executionContext: executionContextServiceMock.createSetupContract(),
     maximumWaitTimeForAllCollectorsInS: 1,
   });
   const { createUsageCounter, getUsageCounterByType } =

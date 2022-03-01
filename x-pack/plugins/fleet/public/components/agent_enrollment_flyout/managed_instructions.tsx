@@ -66,6 +66,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     isFleetServerPolicySelected,
     settings,
     refreshAgentPolicies,
+    isLoadingAgentPolicies,
   }) => {
     const fleetStatus = useFleetStatus();
 
@@ -119,7 +120,6 @@ export const ManagedInstructions = React.memo<InstructionProps>(
               selectedApiKeyId,
               setSelectedAPIKeyId,
               setSelectedPolicyId,
-              excludeFleetServer: true,
               refreshAgentPolicies,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
@@ -161,7 +161,10 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       return null;
     }
 
-    if (fleetStatus.isReady && (isLoadingAgents || fleetServers.length > 0)) {
+    if (
+      fleetStatus.isReady &&
+      (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0)
+    ) {
       return (
         <>
           <EuiText>

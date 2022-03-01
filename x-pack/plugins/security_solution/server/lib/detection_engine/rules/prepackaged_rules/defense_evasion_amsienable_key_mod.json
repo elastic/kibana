@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Modification of AmsiEnable Registry Key",
-  "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path: \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows Script\\\\Settings\\\\AmsiEnable\" and\n  registry.data.strings: \"0\"\n",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path : (\n    \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows Script\\\\Settings\\\\AmsiEnable\",\n    \"HKU\\\\*\\\\Software\\\\Microsoft\\\\Windows Script\\\\Settings\\\\AmsiEnable\"\n  ) and\n  registry.data.strings: (\"0\", \"0x00000000\")\n",
   "references": [
     "https://hackinparis.com/data/slides/2019/talks/HIP2019-Dominic_Chell-Cracking_The_Perimeter_With_Sharpshooter.pdf",
     "https://docs.microsoft.com/en-us/windows/win32/amsi/antimalware-scan-interface-portal"
@@ -53,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { Alert } from './alert';
+import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
-import { AlertInstanceContext, AlertInstanceState, ElasticsearchClientWithChild } from './types';
+import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { rulesClientMock };
 
@@ -21,6 +20,7 @@ const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
+    getConfig: jest.fn(),
   };
   return mock;
 };
@@ -65,6 +65,32 @@ const createAlertFactoryMock = {
 
     return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
   },
+  done: <
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = string
+  >() => {
+    const mock: jest.Mocked<AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>> =
+      {
+        getRecoveredAlerts: jest.fn().mockReturnValue([]),
+      };
+    return mock;
+  },
+};
+
+const createAbortableSearchClientMock = () => {
+  const mock = {
+    search: jest.fn(),
+  };
+
+  return mock;
+};
+
+const createAbortableSearchServiceMock = () => {
+  return {
+    asInternalUser: createAbortableSearchClientMock(),
+    asCurrentUser: createAbortableSearchClientMock(),
+  };
 };
 
 const createAlertServicesMock = <
@@ -72,27 +98,17 @@ const createAlertServicesMock = <
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
   const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
-  const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-
-  const childAsInternalUserClient = elasticsearchServiceMock.createElasticsearchClient();
-  const childAsCurrentUserClient = elasticsearchServiceMock.createElasticsearchClient();
-  (
-    scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-  ).child.mockReturnValue(childAsInternalUserClient as unknown as Client);
-  (
-    scopedClusterClient.asCurrentUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-  ).child.mockReturnValue(childAsCurrentUserClient as unknown as Client);
-
+  const alertFactoryMockDone = createAlertFactoryMock.done<InstanceState, InstanceContext, never>();
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
+      done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient,
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
-    childAsInternalUserClient,
-    childAsCurrentUserClient,
+    search: createAbortableSearchServiceMock(),
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

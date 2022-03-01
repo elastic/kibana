@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import { EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { Validation, DataStream } from '../types';
-import { ConfigKey, CommonFields as CommonFieldsType } from '../types';
+import React, { useEffect } from 'react';
 import { ComboBox } from '../combo_box';
-import { OptionalLabel } from '../optional_label';
 import { usePolicyConfigContext } from '../contexts';
+import { OptionalLabel } from '../optional_label';
+import { CommonFields as CommonFieldsType, ConfigKey, DataStream, Validation } from '../types';
 
 interface Props {
   validate: Validation;
@@ -24,9 +23,10 @@ interface Props {
     value: string | string[] | null;
     configKey: ConfigKey;
   }) => void;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
-export function CommonFields({ fields, onChange, validate }: Props) {
+export function CommonFields({ fields, onChange, onFieldBlur, validate }: Props) {
   const { monitorType } = usePolicyConfigContext();
 
   const isBrowser = monitorType === DataStream.BROWSER;
@@ -65,6 +65,7 @@ export function CommonFields({ fields, onChange, validate }: Props) {
               configKey: ConfigKey.APM_SERVICE_NAME,
             })
           }
+          onBlur={() => onFieldBlur?.(ConfigKey.APM_SERVICE_NAME)}
           data-test-subj="syntheticsAPMServiceName"
         />
       </EuiFormRow>
@@ -86,7 +87,7 @@ export function CommonFields({ fields, onChange, validate }: Props) {
             ) : (
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
-                defaultMessage="Timeout must be less than the monitor interval"
+                defaultMessage="Timeout must be less than the monitor frequency"
               />
             )
           }
@@ -106,6 +107,7 @@ export function CommonFields({ fields, onChange, validate }: Props) {
                 configKey: ConfigKey.TIMEOUT,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.TIMEOUT)}
             step={'any'}
           />
         </EuiFormRow>
@@ -128,6 +130,7 @@ export function CommonFields({ fields, onChange, validate }: Props) {
         <ComboBox
           selectedOptions={fields[ConfigKey.TAGS]}
           onChange={(value) => onChange({ value, configKey: ConfigKey.TAGS })}
+          onBlur={() => onFieldBlur?.(ConfigKey.TAGS)}
           data-test-subj="syntheticsTags"
         />
       </EuiFormRow>

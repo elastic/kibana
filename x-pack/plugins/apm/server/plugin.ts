@@ -48,6 +48,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
 export class APMPlugin
   implements
@@ -245,6 +246,11 @@ export class APMPlugin
     createApmCustomLinkIndex({
       client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
+      logger: this.logger,
+    });
+
+    migrateLegacyAPMIndicesToSpaceAware({
+      coreStart: core,
       logger: this.logger,
     });
   }

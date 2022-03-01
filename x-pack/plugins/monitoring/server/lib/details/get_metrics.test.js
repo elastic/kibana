@@ -29,17 +29,9 @@ jest.mock('../../static_globals', () => ({
 }));
 
 function getMockReq(metricsBuckets = []) {
-  const config = {
-    get: sinon.stub(),
-  };
-
-  config.get.withArgs('monitoring.ui.min_interval_seconds').returns(10);
-
   return {
     server: {
-      config() {
-        return config;
-      },
+      config: { ui: { min_interval_seconds: 10 } },
       plugins: {
         elasticsearch: {
           getCluster: sinon

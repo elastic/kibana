@@ -1,8 +1,8 @@
 {
   "id": "stackAlerts",
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
   },
   "server": true,
   "version": "8.2.0",

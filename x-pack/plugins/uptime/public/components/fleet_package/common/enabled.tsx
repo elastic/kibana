@@ -13,9 +13,10 @@ import { ConfigKey, CommonFields } from '../types';
 interface Props {
   fields: CommonFields;
   onChange: ({ value, configKey }: { value: boolean; configKey: ConfigKey }) => void;
+  onBlur?: () => void;
 }
 
-export function Enabled({ fields, onChange }: Props) {
+export function Enabled({ fields, onChange, onBlur }: Props) {
   return (
     <>
       <EuiFormRow
@@ -41,6 +42,7 @@ export function Enabled({ fields, onChange }: Props) {
               configKey: ConfigKey.ENABLED,
             })
           }
+          onBlur={() => onBlur?.()}
         />
       </EuiFormRow>
     </>

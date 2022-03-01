@@ -14,7 +14,7 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -106,7 +106,7 @@ export const previewRulesRoute = async (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
@@ -145,8 +145,15 @@ export const previewRulesRoute = async (
               id: string
             ) => Pick<
               Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
-              'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+              | 'getState'
+              | 'replaceState'
+              | 'scheduleActions'
+              | 'scheduleActionsWithSubGroup'
+              | 'setContext'
+              | 'getContext'
+              | 'hasContext'
             >;
+            done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
           let statePreview = runState as TState;
@@ -223,7 +230,7 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'threshold':
@@ -236,7 +243,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'threat_match':
@@ -249,7 +256,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'eql':
@@ -260,7 +267,7 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'machine_learning':
@@ -271,7 +278,7 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
         }

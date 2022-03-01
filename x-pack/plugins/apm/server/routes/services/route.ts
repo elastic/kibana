@@ -96,7 +96,6 @@ const servicesRoute = createApmServerRoute({
         healthStatus: import('./../../../common/service_health_status').ServiceHealthStatus;
       }
     >;
-    hasLegacyData: boolean;
   }> {
     const setup = await setupRequest(resources);
     const { params, logger } = resources;

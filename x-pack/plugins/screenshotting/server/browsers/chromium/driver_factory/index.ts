@@ -108,7 +108,8 @@ export class HeadlessChromiumDriverFactory {
     private screenshotMode: ScreenshotModePluginSetup,
     private config: ConfigType,
     private logger: Logger,
-    private binaryPath: string
+    private binaryPath: string,
+    private basePath: string
   ) {
     if (this.config.browser.chromium.disableSandbox) {
       logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
@@ -243,7 +244,12 @@ export class HeadlessChromiumDriverFactory {
       this.getProcessLogger(browser, logger).subscribe();
 
       // HeadlessChromiumDriver: object to "drive" a browser page
-      const driver = new HeadlessChromiumDriver(this.screenshotMode, this.config, page);
+      const driver = new HeadlessChromiumDriver(
+        this.screenshotMode,
+        this.config,
+        this.basePath,
+        page
+      );
 
       // Rx.Observable<never>: stream to interrupt page capture
       const unexpectedExit$ = this.getPageExit(browser, page);

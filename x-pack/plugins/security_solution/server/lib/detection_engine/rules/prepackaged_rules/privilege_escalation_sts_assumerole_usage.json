@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the use of AssumeRole. AssumeRole returns a set of temporary security credentials that can be used to access AWS resources. An adversary could use those credentials to move laterally and escalate privileges.",
   "false_positives": [
-    "Automated processes that uses Terraform may lead to false positives."
+    "Automated processes that use Terraform may lead to false positives."
   ],
   "index": [
     "filebeat-*",
@@ -70,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

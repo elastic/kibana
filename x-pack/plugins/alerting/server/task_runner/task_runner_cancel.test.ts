@@ -38,6 +38,9 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
 }));
+jest.mock('../lib/wrap_scoped_cluster_client', () => ({
+  createWrappedScopedClusterClientFactory: jest.fn(),
+}));
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
@@ -85,6 +88,7 @@ describe('Task Runner Cancel', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+  const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -166,8 +170,16 @@ describe('Task Runner Cancel', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    // Important to call alertsMock.createAlertServices after resetting mocks so .child is mocked
-    const services = alertsMock.createAlertServices();
+    jest
+      .requireMock('../lib/wrap_scoped_cluster_client')
+      .createWrappedScopedClusterClientFactory.mockReturnValue({
+        client: () => services.scopedClusterClient,
+        getMetrics: () => ({
+          numSearches: 3,
+          esSearchDurationMs: 33,
+          totalSearchDurationMs: 23423,
+        }),
+      });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
@@ -295,7 +307,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
+                number_of_searches: 3,
                 number_of_triggered_actions: 0,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -473,7 +488,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -558,7 +573,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
+                number_of_searches: 3,
                 number_of_triggered_actions: 0,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -620,7 +638,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -815,7 +833,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
+                number_of_searches: 3,
                 number_of_triggered_actions: 1,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
