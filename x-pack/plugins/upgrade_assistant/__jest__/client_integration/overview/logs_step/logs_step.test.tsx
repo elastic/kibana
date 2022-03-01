@@ -151,7 +151,7 @@ describe('Overview - Logs Step', () => {
     });
 
     test('warns the user of missing index privileges', () => {
-      const { find, exists } = testBed;
+      const { exists } = testBed;
 
       expect(exists('missingPrivilegesCallout')).toBe(true);
     });
