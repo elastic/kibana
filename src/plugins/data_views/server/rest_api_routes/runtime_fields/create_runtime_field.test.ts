@@ -20,8 +20,17 @@ describe('create runtime field', () => {
         ({
           addRuntimeField: jest.fn(),
           fields: {
-            getByName: jest.fn().mockReturnValueOnce(undefined).mockReturnValueOnce({}),
+            getByName: jest
+              .fn()
+              .mockReturnValueOnce(undefined)
+              .mockReturnValueOnce(undefined)
+              .mockReturnValueOnce({}),
           },
+          getRuntimeField: jest
+            .fn()
+            .mockReturnValueOnce(undefined)
+            .mockReturnValueOnce(undefined)
+            .mockReturnValueOnce({}),
         } as unknown as DataView)
     );
 

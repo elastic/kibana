@@ -5,7 +5,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-ui-shared-deps-src"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-src"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__ui-shared-deps-src"
 
 SOURCE_FILES = glob(
   [
@@ -77,11 +76,9 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -130,7 +127,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )
