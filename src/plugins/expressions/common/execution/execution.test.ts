@@ -731,6 +731,64 @@ describe('Execution', () => {
     });
   });
 
+  describe('when arguments are not valid', () => {
+    let executor: ReturnType<typeof createUnitTestExecutor>;
+
+    beforeEach(() => {
+      const validateArg: ExpressionFunctionDefinition<
+        'validateArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
+        name: 'validateArg',
+        args: {
+          arg: {
+            help: '',
+            multi: true,
+            validate(value) {
+              return value === 'valid';
+            },
+          },
+        },
+        help: '',
+        fn: () => 'something',
+      };
+      executor = createUnitTestExecutor();
+      executor.registerFunction(validateArg);
+    });
+
+    it('errors when argument is invalid', async () => {
+      const { result } = await executor.run('validateArg arg="invalid"', null).toPromise();
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: "[validateArg] > Value 'invalid' is not valid for argument 'arg'",
+        },
+      });
+    });
+
+    it('errors when at least one value is invalid', async () => {
+      const { result } = await executor
+        .run('validateArg arg="valid" arg="invalid"', null)
+        .toPromise();
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: "[validateArg] > Value 'invalid' is not valid for argument 'arg'",
+        },
+      });
+    });
+
+    it('does not error when argument is valid', async () => {
+      const { result } = await executor.run('validateArg arg="valid"', null).toPromise();
+
+      expect(result).toBe('something');
+    });
+  });
+
   describe('debug mode', () => {
     test('can execute expression in debug mode', async () => {
       const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);

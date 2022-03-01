@@ -19,6 +19,7 @@ export class ExpressionFunctionParameter<T = unknown> {
   multi: boolean;
   resolve: boolean;
   options: T[];
+  validate?: ArgumentType<T>['validate'];
 
   constructor(name: string, arg: ArgumentType<T>) {
     const { required, help, types, aliases, multi, resolve, options } = arg;
@@ -36,6 +37,7 @@ export class ExpressionFunctionParameter<T = unknown> {
     this.multi = !!multi;
     this.resolve = resolve == null ? true : resolve;
     this.options = options || [];
+    this.validate = arg.validate;
   }
 
   accepts(type: string) {

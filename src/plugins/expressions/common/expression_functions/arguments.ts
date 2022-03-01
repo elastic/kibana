@@ -78,6 +78,15 @@ interface BaseArgumentType<T> {
    * @default false
    */
   multi?: boolean;
+
+  /**
+   * Optional argument value validator.
+   * It is called with the value of the argument and should return true if the value is valid.
+   * The validator can also throw an error with a custom message.
+   * @param value The value to validate.
+   * @returns True if the value is valid.
+   */
+  validate?(value: T): boolean;
 }
 
 /**

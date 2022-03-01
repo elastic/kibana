@@ -38,7 +38,7 @@ import {
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, Datatable } from '../expression_types';
-import { ExpressionFunction } from '../expression_functions';
+import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
@@ -442,6 +442,12 @@ export class Execution<
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
+  validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
+    if (argDef.validate && !argDef.validate(value)) {
+      throw new Error(`Value '${value}' is not valid for argument '${argDef.name}'`);
+    }
+  }
+
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   resolveArgs<Fn extends ExpressionFunction>(
     fnDef: Fn,
@@ -498,7 +504,8 @@ export class Execution<
                   }
 
                   return this.cast(output, argDefs[argName].types);
-                })
+                }),
+                tap((value) => this.validate(value, argDefs[argName]))
               )
         )
       );
