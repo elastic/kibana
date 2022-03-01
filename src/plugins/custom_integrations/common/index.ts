@@ -27,6 +27,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   kubernetes: 'Kubernetes',
   languages: 'Languages',
   message_queue: 'Message queue',
+  microsoft_365: 'Microsoft 365',
   monitoring: 'Monitoring',
   network: 'Network',
   notification: 'Notification',
