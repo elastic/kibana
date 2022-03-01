@@ -49,7 +49,7 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
         },
       },
     });
-  }, [closeFlyout, dispatch, props]);
+  }, [casesToasts, closeFlyout, dispatch, props]);
   return {
     open: openFlyout,
     close: closeFlyout,
