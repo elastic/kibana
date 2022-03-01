@@ -243,14 +243,18 @@ export class CoreSystem {
       };
       document.querySelectorAll('link').forEach(setTargetMedia);
       document.querySelectorAll('style').forEach(setTargetMedia);
-      const originalCreateElement = document.createElement.bind(document);
-      document.createElement = (tagName: string) => {
-        const el = originalCreateElement(tagName);
-        if (tagName === 'link' || tagName === 'style') {
-          setTargetMedia(el);
-        }
-        return el;
-      };
+      new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (
+              node instanceof HTMLElement &&
+              (node.tagName.toLowerCase() === 'link' || node.tagName.toLowerCase() === 'style')
+            ) {
+              setTargetMedia(node);
+            }
+          });
+        });
+      }).observe(document.head, { childList: true, subtree: true });
 
       this.rendering.start({
         application,
