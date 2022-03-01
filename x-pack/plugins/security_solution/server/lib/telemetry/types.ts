@@ -58,6 +58,9 @@ export interface TelemetryEvent {
     };
   };
   license?: ESLicense;
+  event?: {
+    id?: string;
+  };
 }
 
 // EP Policy Response

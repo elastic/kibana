@@ -11,14 +11,6 @@ import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
 import { Logger } from '../../../../../../../src/core/server';
 
-interface SearchResultWithEventId {
-  _source: {
-    event: {
-      id: string;
-    };
-  };
-}
-
 interface SearchResultSource {
   _source: SignalSource;
 }
@@ -26,22 +18,28 @@ interface SearchResultSource {
 type CreatedSignalId = string;
 type AlertId = string;
 
-type SearchResultWithSource = SearchResultSource & SearchResultWithEventId;
-
-export function selectEvents(
-  filteredEvents: SignalSearchResponse,
-  signalIdMap: Map<string, string>
-): TelemetryEvent[] {
+export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
   const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
-    obj: SearchResultWithSource
+    obj: SearchResultSource
   ): TelemetryEvent {
-    obj._source.signal_id = signalIdMap.get(obj._source.event.id);
     return obj._source;
   });
 
   // Filter out non-endpoint alerts
   return sources.filter((obj: TelemetryEvent) => obj.data_stream?.dataset === 'endpoint.alerts');
+}
+
+export function enrichEndpointAlertsSignalID(
+  events: TelemetryEvent[],
+  signalIdMap: Map<string, string>
+): TelemetryEvent[] {
+  return events.map(function (obj: TelemetryEvent): TelemetryEvent {
+    if (obj?.event?.id !== undefined) {
+      obj.signal_id = signalIdMap.get(obj.event.id);
+    }
+    return obj;
+  });
 }
 
 export function sendAlertTelemetryEvents(
@@ -55,21 +53,24 @@ export function sendAlertTelemetryEvents(
     return;
   }
   // Create map of ancenstor_id -> alert_id
+  /* eslint-disable no-param-reassign */
   const signalIdMap = createdEvents.reduce((signalMap, obj) => {
     const ancestorId = String(obj['kibana.alert.original_event.id']);
     const alertId = String(obj._id);
     if (ancestorId !== null && ancestorId !== undefined) {
-      const newsignalMap = signalIdMap.set(ancestorId, alertId);
+      signalMap = signalIdMap.set(ancestorId, alertId);
     }
 
-    return newsignalMap;
+    return signalMap;
   }, new Map<CreatedSignalId, AlertId>());
 
-  const sources = selectEvents(filteredEvents, signalIdMap);
-
-  try {
-    eventsTelemetry.queueTelemetryEvents(sources);
-  } catch (exc) {
-    logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
+  const selectedEvents = selectEvents(filteredEvents);
+  if (selectedEvents.length > 0) {
+    const alertsWithSignalIds = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
+    try {
+      eventsTelemetry.queueTelemetryEvents(alertsWithSignalIds);
+    } catch (exc) {
+      logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
+    }
   }
 }
