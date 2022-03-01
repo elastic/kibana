@@ -40,8 +40,8 @@ type TrustedAppEntryTypes = 'match' | 'wildcard';
  * /home/lib/dmp.dmp
  * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
  */
-export const WIN_EXEC_PATH = /\\(\w+|\w*[\w+|-]+\/ +)+\w+[\w+|-]+\.*\w+$/i;
-export const UNIX_EXEC_PATH = /(\/|\w*[\w+|-]+\\ +)+\w+[\w+|-]+\.*\w*$/i;
+export const WIN_EXEC_PATH = /(\\[-\w]+|\\[-\w]+[\.]+[\w]+)$/i;
+export const UNIX_EXEC_PATH = /(\/[-\w]+|\/[-\w]+[\.]+[\w]+)$/i;
 
 export const validateFilePathInput = ({
   os,
