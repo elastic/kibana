@@ -148,7 +148,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   // a React component.
   const renderLeadingControlColumn = (renderProps: any) => {
     const { isSelectAllChecked, onSelectAll } = renderProps as RenderLeadingControllColumnProps;
-
+    console.log('running');
     return (
       <EuiCheckbox
         id="leading-control-checkbox"
@@ -162,6 +162,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     const { ariaRowindex, eventId, checked, onRowSelected } = actionProps;
 
     const checkboxId = `row-${ariaRowindex}-checkbox`;
+    console.log('render again');
 
     return (
       <div css={rowCheckbox}>

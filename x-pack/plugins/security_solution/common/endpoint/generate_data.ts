@@ -535,12 +535,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateMalwareAlert({
     ts = new Date().getTime(),
+    sessionEntryLeader = this.randomString(10),
     entityID = this.randomString(10),
     parentEntityID,
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
   }: {
     ts?: number;
+    sessionEntryLeader?: string;
     entityID?: string;
     parentEntityID?: string;
     ancestry?: string[];
@@ -608,6 +610,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           sha1: 'fake sha1',
           sha256: 'fake sha256',
         },
+        entry_leader: {
+          entity_id: sessionEntryLeader,
+        },
         Ext: {
           ancestry,
           code_signature: [
@@ -648,6 +653,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateMemoryAlert({
     ts = new Date().getTime(),
+    sessionEntryLeader = this.randomString(10),
     entityID = this.randomString(10),
     parentEntityID,
     ancestry = [],
@@ -655,6 +661,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     alertType,
   }: {
     ts?: number;
+    sessionEntryLeader?: string;
     entityID?: string;
     parentEntityID?: string;
     ancestry?: string[];
@@ -700,6 +707,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           md5: 'fake md5',
           sha1: 'fake sha1',
           sha256: 'fake sha256',
+        },
+        entry_leader: {
+          entity_id: sessionEntryLeader,
         },
         Ext: {
           ancestry,
@@ -758,12 +768,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   public generateAlert({
     ts = new Date().getTime(),
     entityID = this.randomString(10),
+    sessionEntryLeader,
     parentEntityID,
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
   }: {
     ts?: number;
     entityID?: string;
+    sessionEntryLeader?: string;
     parentEntityID?: string;
     ancestry?: string[];
     alertsDataStream?: DataStream;
@@ -773,6 +785,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       case AlertTypes.MALWARE:
         return this.generateMalwareAlert({
           ts,
+          sessionEntryLeader,
           entityID,
           parentEntityID,
           ancestry,
@@ -783,6 +796,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         return this.generateMemoryAlert({
           ts,
           entityID,
+          sessionEntryLeader,
           parentEntityID,
           ancestry,
           alertsDataStream,
@@ -791,6 +805,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       case AlertTypes.BEHAVIOR:
         return this.generateBehaviorAlert({
           ts,
+          sessionEntryLeader,
           entityID,
           parentEntityID,
           ancestry,
@@ -811,12 +826,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateBehaviorAlert({
     ts = new Date().getTime(),
+    sessionEntryLeader = this.randomString(10),
     entityID = this.randomString(10),
     parentEntityID,
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
   }: {
     ts?: number;
+    sessionEntryLeader?: string;
     entityID?: string;
     parentEntityID?: string;
     ancestry?: string[];
@@ -877,6 +894,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         code_signature: {
           status: 'trusted',
           subject_name: 'Microsoft Windows',
+        },
+        entry_leader: {
+          entity_id: sessionEntryLeader,
         },
         parent: parentEntityID
           ? {
@@ -1523,6 +1543,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       yield this.generateAlert({
         ts,
         entityID: entityIDSafeVersion(node),
+        sessionEntryLeader: 'test',
         parentEntityID: parentEntityIDSafeVersion(node),
         ancestry: ancestryArray(node),
         alertsDataStream,
