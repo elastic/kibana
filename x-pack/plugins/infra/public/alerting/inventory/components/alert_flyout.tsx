@@ -34,7 +34,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
         consumer: 'infrastructure',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
-        alertTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+        ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
         metadata: {
           options,
           nodeType,

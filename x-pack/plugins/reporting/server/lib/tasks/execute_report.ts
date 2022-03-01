@@ -227,6 +227,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.size = output.size;
       docOutput.warnings =
         output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
+      docOutput.error_code = output.error_code;
     } else {
       const defaultOutput = null;
       docOutput.content = output.toString() || defaultOutput;
@@ -369,7 +370,7 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm()!;
 
             eventLog.logExecutionComplete({
-              ...(report.metrics ?? {}),
+              ...(output.metrics ?? {}),
               byteSize: stream.bytesWritten,
             });
 
