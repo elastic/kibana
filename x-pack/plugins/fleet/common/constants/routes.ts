@@ -74,6 +74,7 @@ export const OUTPUT_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
+  LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 
 // Settings API routes

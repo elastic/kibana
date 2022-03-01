@@ -19,6 +19,7 @@ import { createLoadedResourceState, isLoadedResourceState } from '../../../../..
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { trustedAppsAllHttpMocks } from '../../../../mocks';
 import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { isArtifactByPolicy } from '../../../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
@@ -36,6 +37,14 @@ describe('Policy trusted apps flyout', () => {
     mockedApis = trustedAppsAllHttpMocks(mockedContext.coreStart.http);
     getState = () => mockedContext.store.getState().management.policyDetails;
     render = () => mockedContext.render(<PolicyTrustedAppsFlyout />);
+
+    const getTaListApiResponseMock =
+      mockedApis.responseProvider.trustedAppsList.getMockImplementation();
+    mockedApis.responseProvider.trustedAppsList.mockImplementation((options) => {
+      const response = getTaListApiResponseMock!(options);
+      response.data = response.data.filter((ta) => isArtifactByPolicy(ta));
+      return response;
+    });
   });
 
   afterEach(() => reactTestingLibrary.cleanup());
@@ -97,7 +106,7 @@ describe('Policy trusted apps flyout', () => {
     });
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
-    expect(component.getByTestId('Generated Exception (u6kh2)_checkbox')).not.toBeNull();
+    expect(component.getByTestId('Generated Exception (nng74)_checkbox')).not.toBeNull();
   });
 
   it('should confirm flyout action', async () => {
@@ -111,7 +120,7 @@ describe('Policy trusted apps flyout', () => {
     });
 
     // TA name below in the selector matches the 3rd generated trusted app which is policy specific
-    const tACardCheckbox = component.getByTestId('Generated Exception (3xnng)_checkbox');
+    const tACardCheckbox = component.getByTestId('Generated Exception (nng74)_checkbox');
 
     act(() => {
       fireEvent.click(tACardCheckbox);

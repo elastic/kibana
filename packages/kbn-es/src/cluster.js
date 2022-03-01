@@ -6,20 +6,29 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const util = require('util');
+const fsp = require('fs/promises');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
+const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles, NativeRealm } = require('./utils');
+const {
+  log: defaultLog,
+  parseEsLog,
+  extractConfigFiles,
+  NativeRealm,
+  parseTimeoutToMs,
+} = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
 const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
-const readFile = util.promisify(fs.readFile);
+
+const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
+
+/** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -38,7 +47,6 @@ exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
     this._log = log.withType('@kbn/es Cluster');
     this._ssl = ssl;
-    this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
   /**
@@ -157,10 +165,8 @@ exports.Cluster = class Cluster {
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
-   * @param {Object} options
-   * @property {Array} options.esArgs
-   * @property {String} options.password - super user password used to bootstrap
-   * @returns {Promise}
+   * @param {ExecOptions} options
+   * @returns {Promise<void>}
    */
   async start(installPath, options = {}) {
     this._exec(installPath, options);
@@ -173,7 +179,7 @@ exports.Cluster = class Cluster {
             return true;
           }
         }),
-        this._nativeRealmSetup,
+        this._setupPromise,
       ]),
 
       // await the outcome of the process in case it exits before starting
@@ -187,15 +193,14 @@ exports.Cluster = class Cluster {
    * Starts Elasticsearch and waits for Elasticsearch to exit
    *
    * @param {String} installPath
-   * @param {Object} options
-   * @property {Array} options.esArgs
-   * @returns {Promise<undefined>}
+   * @param {ExecOptions} options
+   * @returns {Promise<void>}
    */
   async run(installPath, options = {}) {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch((error) => {
+    this._setupPromise.catch((error) => {
       this._log.error(error);
       this.stop();
     });
@@ -233,14 +238,17 @@ exports.Cluster = class Cluster {
    *
    * @private
    * @param {String} installPath
-   * @param {Object} options
-   * @property {string|Array} options.esArgs
-   * @property {string} options.esJavaOpts
-   * @property {Boolean} options.skipNativeRealmSetup
-   * @return {undefined}
+   * @param {ExecOptions} opts
    */
   _exec(installPath, opts = {}) {
-    const { skipNativeRealmSetup = false, reportTime = () => {}, startTime, ...options } = opts;
+    const {
+      skipNativeRealmSetup = false,
+      reportTime = () => {},
+      startTime,
+      skipReadyCheck,
+      readyTimeout,
+      ...options
+    } = opts;
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -252,6 +260,7 @@ exports.Cluster = class Cluster {
     const esArgs = [
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
+      'search.check_ccs_compatibility=true',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
@@ -274,7 +283,7 @@ exports.Cluster = class Cluster {
       []
     );
 
-    this._log.debug('%s %s', ES_BIN, args.join(' '));
+    this._log.info('%s %s', ES_BIN, args.join(' '));
 
     let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
 
@@ -287,7 +296,7 @@ exports.Cluster = class Cluster {
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
 
-    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
+    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts.trim());
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -300,30 +309,49 @@ exports.Cluster = class Cluster {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    // parse log output to find http port
-    const httpPort = first(this._process.stdout, (data) => {
-      const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
+    this._setupPromise = Promise.all([
+      // parse log output to find http port
+      first(this._process.stdout, (data) => {
+        const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
-      if (match) {
-        return match[1];
-      }
-    });
+        if (match) {
+          return match[1];
+        }
+      }),
 
-    // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async (port) => {
-      if (skipNativeRealmSetup) {
-        return;
-      }
-
-      const caCert = await this._caCertPromise;
-      const nativeRealm = new NativeRealm({
-        port,
-        caCert,
-        log: this._log,
-        elasticPassword: options.password,
-        ssl: this._ssl,
+      // load the CA cert from disk if necessary
+      this._ssl ? fsp.readFile(CA_CERT_PATH) : null,
+    ]).then(async ([port, caCert]) => {
+      const client = new Client({
+        node: `${caCert ? 'https:' : 'http:'}//localhost:${port}`,
+        auth: {
+          username: 'elastic',
+          password: options.password,
+        },
+        tls: caCert
+          ? {
+              ca: caCert,
+              rejectUnauthorized: true,
+            }
+          : undefined,
       });
-      await nativeRealm.setPasswords(options);
+
+      if (!skipReadyCheck) {
+        await this._waitForClusterReady(client, readyTimeout);
+      }
+
+      // once the cluster is ready setup the native realm
+      if (!skipNativeRealmSetup) {
+        const nativeRealm = new NativeRealm({
+          log: this._log,
+          elasticPassword: options.password,
+          client,
+        });
+
+        await nativeRealm.setPasswords(options);
+      }
+
+      this._log.success('kbn/es setup complete');
     });
 
     let reportSent = false;
@@ -365,5 +393,44 @@ exports.Cluster = class Cluster {
         });
       }
     });
+  }
+
+  async _waitForClusterReady(client, readyTimeout = DEFAULT_READY_TIMEOUT) {
+    let attempt = 0;
+    const start = Date.now();
+
+    this._log.info('waiting for ES cluster to report a yellow or green status');
+
+    while (true) {
+      attempt += 1;
+
+      try {
+        const resp = await client.cluster.health();
+        if (resp.status !== 'red') {
+          return;
+        }
+
+        throw new Error(`not ready, cluster health is ${resp.status}`);
+      } catch (error) {
+        const timeSinceStart = Date.now() - start;
+        if (timeSinceStart > readyTimeout) {
+          const sec = readyTimeout / 1000;
+          throw new Error(`ES cluster failed to come online with the ${sec} second timeout`);
+        }
+
+        if (error.message.startsWith('not ready,')) {
+          if (timeSinceStart > 10_000) {
+            this._log.warning(error.message);
+          }
+        } else {
+          this._log.warning(
+            `waiting for ES cluster to come online, attempt ${attempt} failed with: ${error.message}`
+          );
+        }
+
+        const waitSec = attempt * 1.5;
+        await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
+      }
+    }
   }
 };

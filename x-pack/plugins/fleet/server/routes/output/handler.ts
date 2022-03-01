@@ -18,10 +18,12 @@ import type {
   DeleteOutputResponse,
   GetOneOutputResponse,
   GetOutputsResponse,
+  PostLogstashApiKeyResponse,
 } from '../../../common';
 import { outputService } from '../../services/output';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultIngestErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
+import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -139,6 +141,27 @@ export const deleteOutputHandler: RequestHandler<
       });
     }
 
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const postLogstashApiKeyHandler: RequestHandler = async (context, request, response) => {
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  try {
+    const hasCreatePrivileges = await canCreateLogstashApiKey(esClient);
+    if (!hasCreatePrivileges) {
+      throw new FleetUnauthorizedError('Missing permissions to create logstash API key');
+    }
+
+    const apiKey = await generateLogstashApiKey(esClient);
+
+    const body: PostLogstashApiKeyResponse = {
+      // Logstash expect the key to be formatted like this id:key
+      api_key: `${apiKey.id}:${apiKey.api_key}`,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
 };
