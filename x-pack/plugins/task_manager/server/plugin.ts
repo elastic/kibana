@@ -22,7 +22,7 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -189,6 +189,7 @@ export class TaskManagerPlugin
     this.taskPollingLifecycle = new TaskPollingLifecycle({
       config: this.config!,
       definitions: this.definitions,
+      unusedTypes: REMOVED_TYPES,
       logger: this.logger,
       executionContext,
       taskStore,

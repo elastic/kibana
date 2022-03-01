@@ -186,7 +186,35 @@ describe('heatmap suggestions', () => {
           table: {
             layerId: 'first',
             isMultiRow: true,
-            columns: [],
+            columns: [
+              {
+                columnId: 'date-column-01',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'another-bucket-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'string',
+                  scale: 'ratio',
+                  label: 'Bucket',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                },
+              },
+            ],
             changeType: 'initial',
           },
           state: {
@@ -208,7 +236,35 @@ describe('heatmap suggestions', () => {
           table: {
             layerId: 'first',
             isMultiRow: true,
-            columns: [],
+            columns: [
+              {
+                columnId: 'date-column-01',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'another-bucket-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'string',
+                  scale: 'ratio',
+                  label: 'Bucket',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                },
+              },
+            ],
             changeType: 'reduced',
           },
           state: {
@@ -223,6 +279,9 @@ describe('heatmap suggestions', () => {
             layerId: 'first',
             layerType: layerTypes.DATA,
             shape: 'heatmap',
+            valueAccessor: 'metric-column',
+            xAccessor: 'date-column-01',
+            yAccessor: 'another-bucket-column',
             gridConfig: {
               type: HEATMAP_GRID_FUNCTION,
               isCellLabelVisible: false,
@@ -240,7 +299,7 @@ describe('heatmap suggestions', () => {
           title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
-          score: 0,
+          score: 0.3,
         },
       ]);
     });

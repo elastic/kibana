@@ -112,7 +112,7 @@ or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, 
 . Click a pack name to view the status.
 +
 Details include the last time each query ran, how many results were returned, and the number of agents the query ran against.
-If there are errors, expand the row to view the details.
+If there are errors, expand the row to view the details, including an option to view more information in the Logs.
 +
 [role="screenshot"]
 image::images/scheduled-pack.png[Shows queries in the pack and details about each query, including the last time it ran, how many results were returned, the number of agents it ran against, and if there are errors]

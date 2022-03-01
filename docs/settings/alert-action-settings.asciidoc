@@ -194,3 +194,10 @@ For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.cancelAlertsOnRuleTimeout`::
 Specifies whether to skip writing alerts and scheduling actions if rule execution is cancelled due to timeout. Default: `true`. This setting can be overridden by individual rule types.
+
+`xpack.alerting.minimumScheduleInterval`::
+Specifies the minimum interval allowed for the all rules. This minimum is enforced for all rules created or updated after the introduction of this setting. The time is formatted as:
++
+`<count>[s,m,h,d]` 
++
+For example, `20m`, `24h`, `7d`. Default: `1m`.

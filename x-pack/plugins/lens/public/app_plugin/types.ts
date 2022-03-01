@@ -31,6 +31,7 @@ import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
 } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/visualizations/public';
 import type {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
@@ -38,6 +39,7 @@ import type {
 import type {
   DatasourceMap,
   EditorFrameInstance,
+  VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
 } from '../types';
@@ -65,9 +67,9 @@ export interface LensAppProps {
   incomingState?: EmbeddableEditorState;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-
+  initialContext?: VisualizeEditorContext | VisualizeFieldContext;
+  contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
-  initialContext?: VisualizeFieldContext;
 }
 
 export type RunSave = (
@@ -97,13 +99,17 @@ export interface LensTopNavMenuProps {
   datasourceMap: DatasourceMap;
   title?: string;
   lensInspector: LensInspector;
+  goBackToOriginatingApp?: () => void;
+  contextOriginatingApp?: string;
+  initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }
 
 export interface HistoryLocationState {
-  type: typeof ACTION_VISUALIZE_LENS_FIELD;
-  payload: VisualizeFieldContext;
+  type: typeof ACTION_VISUALIZE_LENS_FIELD | typeof ACTION_CONVERT_TO_LENS;
+  payload: VisualizeFieldContext | VisualizeEditorContext;
+  originatingApp?: string;
 }
 
 export interface LensAppServices {
@@ -140,6 +146,7 @@ export interface LensTopNavActions {
   inspect: () => void;
   saveAndReturn: () => void;
   showSaveModal: () => void;
+  goBack: () => void;
   cancel: () => void;
   exportToCSV: () => void;
 }

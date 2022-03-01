@@ -216,7 +216,6 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * and no routes defined
  */
 export const FleetAppContext: React.FC<{
-  basepath: string;
   startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];

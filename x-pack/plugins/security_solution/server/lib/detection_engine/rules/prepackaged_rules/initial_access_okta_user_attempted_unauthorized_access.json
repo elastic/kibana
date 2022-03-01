@@ -3,7 +3,7 @@
     "Elastic",
     "Austin Songer"
   ],
-  "description": "Identifies when an unauthorized access attempt is made by a user for an Okta application.",
+  "description": "Identifies unauthorized access attempts to Okta applications.",
   "index": [
     "filebeat-*",
     "logs-okta*"
@@ -70,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -16,13 +16,6 @@ export interface BaseProps {
   agentPolicy?: AgentPolicy;
 
   /**
-   * A selection of policies for the user to choose from, will be ignored if `agentPolicy` has been provided.
-   *
-   * If this value is `undefined` a value must be provided for `agentPolicy`.
-   */
-  agentPolicies?: AgentPolicy[];
-
-  /**
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI
    * in some way. This is an area for consumers to render a button and text explaining how data can be viewed.
    */
@@ -33,4 +26,10 @@ export interface BaseProps {
   setSelectedPolicyId?: (policyId?: string) => void;
 
   isFleetServerPolicySelected?: boolean;
+}
+
+export interface InstructionProps extends BaseProps {
+  agentPolicies: AgentPolicy[];
+  refreshAgentPolicies: () => void;
+  isLoadingAgentPolicies?: boolean;
 }

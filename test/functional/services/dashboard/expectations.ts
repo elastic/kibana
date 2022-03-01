@@ -226,11 +226,20 @@ export class DashboardExpectService extends FtrService {
   async savedSearchRowCount(expectedMinCount: number) {
     this.log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
     await this.retry.try(async () => {
-      const savedSearchRows = await this.testSubjects.findAll(
-        'docTableExpandToggleColumn',
-        this.findTimeout
-      );
-      expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      const gridExists = await this.find.existsByCssSelector('[data-document-number]');
+      if (gridExists) {
+        const grid = await this.find.byCssSelector('[data-document-number]');
+        // in this case it's the document explorer
+        const docNr = Number(await grid.getAttribute('data-document-number'));
+        expect(docNr).to.be.above(expectedMinCount);
+      } else {
+        // in this case it's the classic table
+        const savedSearchRows = await this.testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          this.findTimeout
+        );
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      }
     });
   }
 

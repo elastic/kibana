@@ -101,6 +101,7 @@ describe('fetchDiskUsageNodeStats', () => {
                 bool: {
                   should: [
                     { term: { type: 'node_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
                   ],
                   minimum_should_match: 1,

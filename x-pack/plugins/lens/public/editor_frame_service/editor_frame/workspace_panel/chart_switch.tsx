@@ -26,8 +26,9 @@ import {
   VisualizationType,
   VisualizationMap,
   DatasourceMap,
+  Suggestion,
 } from '../../../types';
-import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {

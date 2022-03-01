@@ -7,7 +7,10 @@
 
 import { isEmpty } from 'lodash/fp';
 
-export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>): string => {
+export const parseQueryFilterToKQL = (
+  filter: string | undefined,
+  fields: Readonly<string[]>
+): string => {
   if (!filter) return '';
   const kuery = fields
     .map(
@@ -66,7 +69,7 @@ export const parsePoliciesAndFilterToKql = ({
   kuery?: string;
 }): string | undefined => {
   if (policies?.length === 0 && excludedPolicies?.length === 0) {
-    return kuery;
+    return kuery ? kuery : undefined;
   }
 
   const policiesKQL = parsePoliciesToKQL(policies, excludedPolicies);

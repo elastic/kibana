@@ -54,7 +54,6 @@ import {
   KueryNode as oldKueryNode,
   FilterMeta as oldFilterMeta,
   FILTERS as oldFILTERS,
-  IFieldSubType as oldIFieldSubType,
   EsQueryConfig as oldEsQueryConfig,
   compareFilters as oldCompareFilters,
   COMPARE_ALL_OPTIONS as OLD_COMPARE_ALL_OPTIONS,
@@ -360,12 +359,6 @@ type FilterMeta = oldFilterMeta;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type IFieldSubType = oldIFieldSubType;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type EsQueryConfig = oldEsQueryConfig;
 
 /**
@@ -385,7 +378,6 @@ export type {
   RangeFilter,
   KueryNode,
   FilterMeta,
-  IFieldSubType,
   EsQueryConfig,
 };
 export {
