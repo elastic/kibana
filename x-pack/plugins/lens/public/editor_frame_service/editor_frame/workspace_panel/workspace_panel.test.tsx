@@ -238,7 +238,9 @@ describe('workspace_panel', () => {
     | testVis"
   `);
 
-    mounted.lensStore.dispatch(applyChanges());
+    act(() => {
+      mounted.lensStore.dispatch(applyChanges());
+    });
     instance.update();
 
     // should update
@@ -249,18 +251,20 @@ describe('workspace_panel', () => {
   `);
 
     mockDatasource.toExpression.mockReturnValue('other-new-datasource');
-    instance.setProps({
-      visualizationMap: {
-        testVis: { ...mockVisualization, toExpression: () => 'other-new-vis' },
-      },
+    act(() => {
+      instance.setProps({
+        visualizationMap: {
+          testVis: { ...mockVisualization, toExpression: () => 'other-new-vis' },
+        },
+      });
     });
 
     // should not update
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
-    | new-vis"
-  `);
+      "kibana
+      | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
+      | new-vis"
+    `);
 
     mounted.lensStore.dispatch(enableAutoApply());
     instance.update();
@@ -879,34 +883,42 @@ describe('workspace_panel', () => {
 
     expect(showingErrors()).toBeFalsy();
 
-    lensStore.dispatch(disableAutoApply());
+    act(() => {
+      lensStore.dispatch(disableAutoApply());
+    });
     instance.update();
 
     expect(showingErrors()).toBeFalsy();
 
     // introduce some issues
-    lensStore.dispatch(
-      updateDatasourceState({
-        datasourceId: 'testDatasource',
-        updater: { hasProblem: true },
-      })
-    );
+    act(() => {
+      lensStore.dispatch(
+        updateDatasourceState({
+          datasourceId: 'testDatasource',
+          updater: { hasProblem: true },
+        })
+      );
+    });
     instance.update();
 
     expect(showingErrors()).toBeFalsy();
 
-    lensStore.dispatch(
-      updateVisualizationState({
-        visualizationId: 'testVis',
-        newState: { activeId: 'testVis', hasProblem: true },
-      })
-    );
+    act(() => {
+      lensStore.dispatch(
+        updateVisualizationState({
+          visualizationId: 'testVis',
+          newState: { activeId: 'testVis', hasProblem: true },
+        })
+      );
+    });
     instance.update();
 
     expect(showingErrors()).toBeFalsy();
 
     // errors should appear when problem changes are applied
-    lensStore.dispatch(applyChanges());
+    act(() => {
+      lensStore.dispatch(applyChanges());
+    });
     instance.update();
 
     expect(showingErrors()).toBeTruthy();

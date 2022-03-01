@@ -259,9 +259,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     expressionToRender.current = _expression;
   }
 
-  if (!autoApplyEnabled) {
-    dispatchLens(setChangesApplied(_expression === expressionToRender.current));
-  }
+  useEffect(() => {
+    if (!autoApplyEnabled) {
+      dispatchLens(setChangesApplied(_expression === expressionToRender.current));
+    }
+  });
 
   const expressionExists = Boolean(expressionToRender.current);
   // null signals an empty workspace which should count as an initial render
