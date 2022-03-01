@@ -152,7 +152,7 @@ describe('Exceptions Table', () => {
         waitForExceptionsTableToBeLoaded();
 
         // We only created 1, but the call to create a rule
-        // triggers the creation of the Endpoint Security Team
+        // triggers the creation of the Endpoint Security Exception List
         // in the background, so 2 lists will show
         cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `Showing 2 lists`);
 
