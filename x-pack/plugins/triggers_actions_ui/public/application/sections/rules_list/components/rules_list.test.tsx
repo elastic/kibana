@@ -38,6 +38,9 @@ jest.mock('../../../lib/rule_api', () => ({
 jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+}));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),

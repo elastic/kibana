@@ -11,6 +11,16 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.users.pageTitle
   defaultMessage: 'Users',
 });
 
-export const ALL_USERS_TITLE = i18n.translate('xpack.securitySolution.users.allUsers', {
-  defaultMessage: 'All users',
-});
+export const NAVIGATION_ALL_USERS_TITLE = i18n.translate(
+  'xpack.securitySolution.users.navigation.allUsersTitle',
+  {
+    defaultMessage: 'All users',
+  }
+);
+
+export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
+  'xpack.securitySolution.users.navigation.anomaliesTitle',
+  {
+    defaultMessage: 'Anomalies',
+  }
+);
