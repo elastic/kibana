@@ -9,7 +9,7 @@
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
-import { startWith, pairwise } from 'rxjs/operators';
+import { startWith, pairwise, skip } from 'rxjs/operators';
 import {
   Embeddable,
   EmbeddableInput,
@@ -39,19 +39,21 @@ export abstract class Container<
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
 
-  private subscription: Subscription;
+  private subscription: Subscription | undefined;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
-    parent?: Container
+    parent?: IContainer,
+    skipFirstChildBuild = false
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
+
     this.subscription = this.getInput$()
       // At each update event, get both the previous and current state
-      .pipe(startWith(input), pairwise())
+      .pipe(startWith(input), pairwise(), skip(skipFirstChildBuild ? 1 : 0))
       .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
@@ -166,7 +168,7 @@ export abstract class Container<
   public destroy() {
     super.destroy();
     Object.values(this.children).forEach((child) => child.destroy());
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public async untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(

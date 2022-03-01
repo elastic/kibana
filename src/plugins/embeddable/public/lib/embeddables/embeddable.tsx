@@ -89,6 +89,15 @@ export abstract class Embeddable<
       );
   }
 
+  public refreshInputFromParent() {
+    if (!this.parent) return;
+    // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
+    if (!this.parent.getInput().panels[this.id]) return;
+
+    const newInput = this.parent.getInputForChild<TEmbeddableInput>(this.id);
+    this.onResetInput(newInput);
+  }
+
   public getIsContainer(): this is IContainer {
     return this.isContainer === true;
   }
