@@ -281,7 +281,7 @@ export async function executor(
       retry: true,
     };
   }
-  const message = i18n.translate('xpack.actions.builtin.xmatters.postingRetryErrorMessage', {
+  const message = i18n.translate('xpack.actions.builtin.xmatters.unexpectedStatusErrorMessage', {
     defaultMessage: 'Error triggering xMatters flow: unexpected status {status}',
     values: {
       status: result.status,
