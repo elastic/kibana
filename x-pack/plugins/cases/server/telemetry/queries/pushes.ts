@@ -10,9 +10,9 @@ import { buildFilter } from '../../client/utils';
 import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import { getMaxBucketOnCaseAggregationQuery } from './utils';
 
-export const getExternalServicesTelemetryData = async ({
+export const getPushedTelemetryData = async ({
   savedObjectsClient,
-}: CollectTelemetryDataParams): Promise<CasesTelemetry['externalServices']> => {
+}: CollectTelemetryDataParams): Promise<CasesTelemetry['pushes']> => {
   const pushFilter = buildFilter({
     filters: ['pushed'],
     field: 'type',
@@ -37,6 +37,6 @@ export const getExternalServicesTelemetryData = async ({
 
   return {
     all: { total: res.total },
-    maxPushesOnACase: maxOnACase,
+    maxOnACase,
   };
 };

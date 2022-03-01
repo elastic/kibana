@@ -57,9 +57,9 @@ export interface CasesTelemetry {
     swimlane: { totalAttached: number };
     maxAttachedToACase: number;
   };
-  externalServices: {
+  pushes: {
     all: { total: number };
-    maxPushesOnACase: number;
+    maxOnACase: number;
   };
   configuration: {
     closure: {

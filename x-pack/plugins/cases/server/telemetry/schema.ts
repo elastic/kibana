@@ -43,9 +43,9 @@ export const casesSchema: CasesTelemetrySchema = {
     swimlane: { totalAttached: long },
     maxAttachedToACase: long,
   },
-  externalServices: {
+  pushes: {
     all: { total: long },
-    maxPushesOnACase: long,
+    maxOnACase: long,
   },
   configuration: {
     closure: {
