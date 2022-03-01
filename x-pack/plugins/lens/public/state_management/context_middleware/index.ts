@@ -8,7 +8,14 @@
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { setState, LensDispatch, LensStoreDeps, navigateAway, selectChangesApplied } from '..';
+import {
+  setState,
+  LensDispatch,
+  LensStoreDeps,
+  navigateAway,
+  applyChanges,
+  selectAutoApplyEnabled,
+} from '..';
 import { LensAppState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
@@ -24,7 +31,7 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     if (
       !action.payload?.searchSessionId &&
       !onActiveDataChange.match(action) &&
-      selectChangesApplied(store.getState())
+      (selectAutoApplyEnabled(store.getState()) || applyChanges.match(action))
     ) {
       updateTimeRange(storeDeps.lensServices.data, store.dispatch);
     }
