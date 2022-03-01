@@ -33,7 +33,6 @@ export const useAddToCaseActions = ({
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
-  const casesToasts = casesUi.hooks.useCasesToast();
   const hasWritePermissions = casePermissions?.crud ?? false;
 
   const caseAttachments: CaseAttachments = useMemo(() => {
@@ -52,19 +51,11 @@ export const useAddToCaseActions = ({
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     attachments: caseAttachments,
-    onSuccess: async (theCase: Case) => {
-      casesToasts.showSuccessAttach(theCase);
-    },
     onClose: onMenuItemClick,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
     attachments: caseAttachments,
-    onRowClick: (theCase?: Case) => {
-      if (theCase !== undefined) {
-        casesToasts.showSuccessAttach(theCase);
-      }
-    },
     onClose: onMenuItemClick,
   });
 

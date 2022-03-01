@@ -152,7 +152,6 @@ function ObservabilityActions({
     cases,
     application: {},
   } = useKibana<CoreStart & { cases: CasesUiStart }>().services;
-  const casesToasts = cases.hooks.useCasesToast();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -190,18 +189,10 @@ function ObservabilityActions({
 
   const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
     attachments: caseAttachments,
-    onSuccess: async (theCase: Case) => {
-      casesToasts.showSuccessAttach(theCase);
-    },
   });
 
   const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
     attachments: caseAttachments,
-    onRowClick: (theCase?: Case) => {
-      if (theCase !== undefined) {
-        casesToasts.showSuccessAttach(theCase);
-      }
-    },
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
