@@ -1063,7 +1063,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricStyle() {
-      const el = await testSubjects.find('lnsVisualizationContainer');
+      const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1152,9 +1152,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       expect(focusedElementText).to.eql(name);
     },
 
-    async waitForVisualization() {
+    async waitForVisualization(visDataTestSubj?: string) {
       async function getRenderingCount() {
-        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const visualizationContainer = await testSubjects.find(
+          visDataTestSubj || 'lnsVisualizationContainer'
+        );
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);
       }

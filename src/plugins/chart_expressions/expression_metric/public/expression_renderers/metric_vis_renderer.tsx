@@ -33,6 +33,7 @@ export const getMetricVisRenderer = (
       render(
         <KibanaThemeProvider theme$={theme.theme$}>
           <VisualizationContainer
+            data-test-subj="mtrVis"
             className="mtrVis"
             showNoResult={!visData.rows?.length}
             handlers={handlers}
