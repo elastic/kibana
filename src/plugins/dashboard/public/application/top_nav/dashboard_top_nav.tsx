@@ -598,7 +598,7 @@ export function DashboardTopNav({
                 />
               ),
               controlsButton:
-                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(IS_DARK_THEME),
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
               addFromLibraryButton: (
                 <AddFromLibraryButton

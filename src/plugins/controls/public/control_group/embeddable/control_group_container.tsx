@@ -102,7 +102,7 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  public getToolbarButtons = (isDarkTheme: boolean) => {
+  public getToolbarButtons = () => {
     return (
       <SolutionToolbarPopover
         ownFocus
