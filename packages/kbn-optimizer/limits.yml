@@ -100,7 +100,7 @@ pageLoadAssetSize:
   bfetch: 22837
   kibanaUtils: 79713
   data: 491273
-  dataViews: 41532
+  dataViews: 42532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422
@@ -116,9 +116,9 @@ pageLoadAssetSize:
   dataViewManagement: 5000
   reporting: 57003
   visTypeHeatmap: 25340
-  screenshotting: 17017
   expressionGauge: 25000
   controls: 34788
   expressionPartitionVis: 26338
   sharedUX: 16225
   ux: 20784
+  cloudSecurityPosture: 19109

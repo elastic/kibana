@@ -58,7 +58,7 @@ async function withDefaultIndexPattern(
   const { indexPatterns } = getDataStart();
 
   const defaultIndex = await indexPatterns.getDefault();
-  if (!defaultIndex || !defaultIndex.id) return vis;
+  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
   };
@@ -166,6 +166,14 @@ export const metricsVisDefinition: VisTypeDefinition<
       return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
     }
     return [];
+  },
+  navigateToLens: async (params?: VisParams) => {
+    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+
+    const triggerConfiguration = params
+      ? await triggerTSVBtoLensConfiguration(params as Panel)
+      : null;
+    return triggerConfiguration;
   },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),

@@ -17,7 +17,6 @@ import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
 import { ObservabilityStatus } from '../../components/app/observability_status';
-
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -32,6 +31,7 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
+
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const { core, ObservabilityPageTemplate } = usePluginContext();

@@ -58,7 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    describe(`when it's false`, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/118432
+    describe.skip(`when it's false`, () => {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
       it('should not fetch data from ES initially', async function () {

@@ -80,7 +80,7 @@ export function initRoutes(initializerContext: PluginInitializerContext, core: C
 
       // 3. Make authentication request once again and return result.
       try {
-        const { body } = await scopedClient.asCurrentUser.security.authenticate();
+        const body = await scopedClient.asCurrentUser.security.authenticate();
         slowLog.info(
           `Successfully performed final authentication request: ${JSON.stringify(body)}`
         );

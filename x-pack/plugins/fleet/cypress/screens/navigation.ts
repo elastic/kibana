@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const TOGGLE_NAVIGATION_BTN = '[data-test-subj="toggleNavButton"]';
+export const TOGGLE_NAVIGATION_BTN = 'toggleNavButton';
+export const NAV_APP_LINK = 'collapsibleNavAppLink';

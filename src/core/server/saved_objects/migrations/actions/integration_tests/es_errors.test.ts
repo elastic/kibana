@@ -65,7 +65,7 @@ describe('Elasticsearch Errors', () => {
       );
 
       // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
-      expect(isWriteBlockException(res.body.error!)).toEqual(true);
+      expect(isWriteBlockException(res.error!)).toEqual(true);
     });
 
     it('correctly identify errors from create operations', async () => {
@@ -81,7 +81,7 @@ describe('Elasticsearch Errors', () => {
       );
 
       // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
-      expect(isWriteBlockException(res.body.error!)).toEqual(true);
+      expect(isWriteBlockException(res.error!)).toEqual(true);
     });
 
     it('correctly identify errors from bulk index operations', async () => {
@@ -100,7 +100,7 @@ describe('Elasticsearch Errors', () => {
         ],
       });
 
-      const cause = res.body.items[0].index!.error! as estypes.ErrorCause;
+      const cause = res.items[0].index!.error! as estypes.ErrorCause;
 
       expect(isWriteBlockException(cause)).toEqual(true);
     });
@@ -122,7 +122,7 @@ describe('Elasticsearch Errors', () => {
         ],
       });
 
-      const cause = res.body.items[0].create!.error! as estypes.ErrorCause;
+      const cause = res.items[0].create!.error! as estypes.ErrorCause;
 
       expect(isWriteBlockException(cause)).toEqual(true);
     });

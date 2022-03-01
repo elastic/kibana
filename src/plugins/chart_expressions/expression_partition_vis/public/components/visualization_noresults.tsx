@@ -6,27 +6,36 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { FC } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EmptyPlaceholder } from '../../../../charts/public';
+import { ChartTypes } from '../../common/types';
+import { getIcon } from '../utils';
 
-export const VisualizationNoResults = ({ hasNegativeValues = false }) => {
-  return (
-    <EuiEmptyPrompt
-      iconType="visualizeApp"
-      iconColor="default"
-      data-test-subj="pieVisualizationError"
-      body={
-        <EuiText size="xs">
-          {hasNegativeValues
-            ? i18n.translate('expressionPartitionVis.negativeValuesFound', {
-                defaultMessage: "Pie/donut charts can't render with negative values.",
-              })
-            : i18n.translate('expressionPartitionVis.noResultsFoundTitle', {
-                defaultMessage: 'No results found',
-              })}
-        </EuiText>
-      }
-    />
-  );
+interface Props {
+  hasNegativeValues?: boolean;
+  chartType: ChartTypes;
+}
+
+export const VisualizationNoResults: FC<Props> = ({ hasNegativeValues = false, chartType }) => {
+  if (hasNegativeValues) {
+    const message = (
+      <FormattedMessage
+        id="expressionPartitionVis.negativeValuesFound"
+        defaultMessage="{chartType} chart can't render with negative values."
+        values={{ chartType: `${chartType[0].toUpperCase()}${chartType.slice(1)}` }}
+      />
+    );
+
+    return (
+      <EmptyPlaceholder
+        dataTestSubj="partitionVisNegativeValues"
+        icon="alert"
+        iconColor="warning"
+        message={message}
+      />
+    );
+  }
+
+  return <EmptyPlaceholder dataTestSubj="partitionVisEmptyValues" icon={getIcon(chartType)} />;
 };

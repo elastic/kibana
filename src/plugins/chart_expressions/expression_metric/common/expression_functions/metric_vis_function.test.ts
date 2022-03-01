@@ -10,6 +10,7 @@ import { metricVisFunction } from './metric_vis_function';
 import type { MetricArguments } from '../../common';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { LabelPosition } from '../constants';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(metricVisFunction());
@@ -18,34 +19,40 @@ describe('interpreter/functions#metric', () => {
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
   };
-  const args: MetricArguments = {
-    percentageMode: false,
-    colorMode: 'None',
-    palette: {
-      type: 'palette',
-      name: '',
-      params: {
-        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
-        stops: [0, 10000],
-        gradient: false,
-        rangeMin: 0,
-        rangeMax: 150,
-        range: 'number',
-      },
-    },
-    showLabels: true,
-    font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
-    metric: [
-      {
-        type: 'vis_dimension',
-        accessor: 0,
-        format: {
-          id: 'number',
-          params: {},
+  let args: MetricArguments;
+  beforeEach(() => {
+    args = {
+      percentageMode: false,
+      colorMode: 'None',
+      palette: {
+        type: 'palette',
+        name: '',
+        params: {
+          colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+          stops: [0, 10000],
+          gradient: false,
+          rangeMin: 0,
+          rangeMax: 150,
+          range: 'number',
         },
       },
-    ],
-  };
+      colorFullBackground: false,
+      showLabels: true,
+      labelFont: { spec: { fontSize: '24px' }, type: 'style', css: '' },
+      labelPosition: LabelPosition.BOTTOM,
+      font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
+      metric: [
+        {
+          type: 'vis_dimension',
+          accessor: 0,
+          format: {
+            id: 'number',
+            params: {},
+          },
+        },
+      ],
+    };
+  });
 
   it('returns an object with the correct structure', () => {
     const actual = fn(context, args, undefined);
@@ -67,5 +74,40 @@ describe('interpreter/functions#metric', () => {
     await fn(context, args, handlers as any);
 
     expect(loggedTable!).toMatchSnapshot();
+  });
+
+  it('returns error if bucket and colorFullBackground specified', () => {
+    args.colorFullBackground = true;
+    args.bucket = {
+      type: 'vis_dimension',
+      accessor: 0,
+      format: {
+        id: 'number',
+        params: {},
+      },
+    };
+
+    expect(() => fn(context, args, undefined)).toThrowErrorMatchingSnapshot();
+  });
+
+  it('returns error if several metrics and colorFullBackground specified', () => {
+    args.colorFullBackground = true;
+    args.metric.push({
+      type: 'vis_dimension',
+      accessor: 0,
+      format: {
+        id: 'number',
+        params: {},
+      },
+    });
+
+    expect(() => fn(context, args, undefined)).toThrowErrorMatchingSnapshot();
+  });
+
+  it('returns error if data includes several rows and colorFullBackground specified', () => {
+    args.colorFullBackground = true;
+    context.rows.push({ 'col-0-1': 0 });
+
+    expect(() => fn(context, args, undefined)).toThrowErrorMatchingSnapshot();
   });
 });

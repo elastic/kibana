@@ -25,7 +25,7 @@ export const AlertFlyout = (props: Props) => {
         consumer: 'logs',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
-        alertTypeId: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+        ruleTypeId: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
         metadata: {
           isInternal: true,
         },

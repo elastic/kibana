@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { throttle } from 'lodash';
+import classNames from 'classnames';
 import { EuiResizeObserver } from '@elastic/eui';
+import { MetricState } from '../../common/expressions';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode | React.ReactNode[];
   minScale?: number;
+  size?: MetricState['size'];
+  titlePosition?: MetricState['titlePosition'];
+  textAlign?: MetricState['textAlign'];
 }
 
 interface State {
@@ -56,7 +61,7 @@ export class AutoScale extends React.Component<Props, State> {
   };
 
   render() {
-    const { children, minScale, ...rest } = this.props;
+    const { children, minScale, size, textAlign, titlePosition, ...rest } = this.props;
     const { scale } = this.state;
     const style = this.props.style || {};
 
@@ -85,6 +90,12 @@ export class AutoScale extends React.Component<Props, State> {
               style={{
                 transform: `scale(${scale})`,
               }}
+              className={classNames('lnsMetricExpression__containerScale', {
+                alignLeft: textAlign === 'left',
+                alignRight: textAlign === 'right',
+                alignCenter: textAlign === 'center',
+                [`titleSize${size?.toUpperCase()}`]: Boolean(size),
+              })}
             >
               {children}
             </div>

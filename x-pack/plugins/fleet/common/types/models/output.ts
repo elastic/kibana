@@ -18,7 +18,6 @@ export interface NewOutput {
   hosts?: string[];
   ca_sha256?: string;
   ca_trusted_fingerprint?: string;
-  api_key?: string;
   config_yaml?: string;
   is_preconfigured?: boolean;
 }

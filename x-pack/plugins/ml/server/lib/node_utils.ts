@@ -9,7 +9,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { MlNodeCount } from '../../common/types/ml_server_info';
 
 export async function getMlNodeCount(client: IScopedClusterClient): Promise<MlNodeCount> {
-  const { body } = await client.asInternalUser.nodes.info({
+  const body = await client.asInternalUser.nodes.info({
     filter_path: 'nodes.*.attributes',
   });
 
@@ -31,7 +31,7 @@ export async function getMlNodeCount(client: IScopedClusterClient): Promise<MlNo
 }
 
 export async function getLazyMlNodeCount(client: IScopedClusterClient) {
-  const { body } = await client.asInternalUser.cluster.getSettings({
+  const body = await client.asInternalUser.cluster.getSettings({
     include_defaults: true,
     filter_path: '**.xpack.ml.max_lazy_ml_nodes',
   });

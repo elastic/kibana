@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
 import sampleAggsJsonResponse from './es_sample_response.json';
 import sampleShapesJsonResponse from './es_sample_response_shapes.json';
@@ -40,6 +40,7 @@ const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => 
     );
     return alertInstance;
   },
+  done: () => ({ getRecoveredAlerts: () => [] }),
 });
 
 describe('geo_containment', () => {
@@ -512,23 +513,25 @@ describe('geo_containment', () => {
     const boundaryCall = jest.fn();
     const esAggCall = jest.fn();
     const contextKeys = Object.keys(expectedAlertResults[0].context);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // @ts-ignore incomplete return type
+    esClient.search.mockResponseImplementation(({ index }) => {
+      if (index === geoContainmentParams.boundaryIndexTitle) {
+        boundaryCall();
+        return sampleShapesJsonResponse;
+      } else {
+        esAggCall();
+        return sampleAggsJsonResponse;
+      }
+    });
+
     const alertServicesWithSearchMock: AlertServicesMock = {
       ...alertsMock.createAlertServices(),
       // @ts-ignore
       alertFactory: alertFactory(contextKeys, testAlertActionArr),
+      // @ts-ignore
       scopedClusterClient: {
-        asCurrentUser: {
-          // @ts-ignore
-          search: jest.fn(({ index }: { index: string }) => {
-            if (index === geoContainmentParams.boundaryIndexTitle) {
-              boundaryCall();
-              return sampleShapesJsonResponse;
-            } else {
-              esAggCall();
-              return sampleAggsJsonResponse;
-            }
-          }),
-        },
+        asCurrentUser: esClient,
       },
     };
 

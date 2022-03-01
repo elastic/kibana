@@ -209,7 +209,7 @@ const executeRulesBulkAction = async ({
     } else {
       const response = await performBulkAction({ ...search, action, edit: payload?.edit });
 
-      onSuccess?.({ rulesCount: response.rules_count });
+      onSuccess?.({ rulesCount: response.attributes.summary.succeeded });
     }
   } catch (e) {
     if (onError) {

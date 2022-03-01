@@ -514,7 +514,7 @@ export function Detail() {
       });
     }
 
-    if (showCustomTab) {
+    if (canReadPackageSettings && showCustomTab) {
       tabs.push({
         id: 'custom',
         name: (

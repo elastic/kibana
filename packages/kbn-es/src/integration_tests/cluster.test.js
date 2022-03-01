@@ -309,6 +309,7 @@ describe('#start(installPath)', () => {
           Array [
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
           ],
           undefined,
           Object {
@@ -387,6 +388,7 @@ describe('#run()', () => {
           Array [
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
           ],
           undefined,
           Object {

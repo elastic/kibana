@@ -42,6 +42,6 @@ export async function sortPackageJson(kbn: Kibana) {
       }),
       null,
       2
-    )
+    ) + '\n'
   );
 }

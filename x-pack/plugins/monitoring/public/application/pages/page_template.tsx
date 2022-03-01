@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiTab,
+  EuiTabs,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
@@ -16,11 +24,13 @@ import { PageLoading } from '../../components';
 import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
+  toggleSetupMode,
   updateSetupModeData,
 } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
+import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
 
@@ -104,34 +114,44 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     return children;
   };
 
+  const { supported, enabled } = getSetupModeState();
+
   return (
-    <div className="app-container" data-test-subj="monitoringAppContainer">
-      {setHeaderActionMenu && theme$ && (
-        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-          <AlertsDropdown />
-        </HeaderMenuPortal>
-      )}
-      <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
-      {tabs && (
-        <EuiTabs>
-          {tabs.map((item, idx) => {
-            return (
-              <EuiTab
-                key={idx}
-                disabled={isDisabledTab(product)}
-                title={item.label}
-                data-test-subj={item.testSubj}
-                href={createHref(item.route)}
-                isSelected={isTabSelected(item.route)}
-              >
-                {item.label}
-              </EuiTab>
-            );
-          })}
-        </EuiTabs>
-      )}
-      <div>{renderContent()}</div>
-    </div>
+    <EuiPage data-test-subj="monitoringAppContainer">
+      <EuiPageBody>
+        <EuiPageContent>
+          {setHeaderActionMenu && theme$ && (
+            <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+              {supported && (
+                <SetupModeToggleButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
+              )}
+              <AlertsDropdown />
+            </HeaderMenuPortal>
+          )}
+          <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+          <EuiSpacer size="m" />
+          {tabs && (
+            <EuiTabs size="l">
+              {tabs.map((item, idx) => {
+                return (
+                  <EuiTab
+                    key={idx}
+                    disabled={isDisabledTab(product)}
+                    title={item.label}
+                    data-test-subj={item.testSubj}
+                    href={createHref(item.route)}
+                    isSelected={isTabSelected(item.route)}
+                  >
+                    {item.label}
+                  </EuiTab>
+                );
+              })}
+            </EuiTabs>
+          )}
+          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };
 

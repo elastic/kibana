@@ -7,8 +7,6 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 8.0.
 
-coming[8.0.0]
-
 See also <<whats-new>> and <<release-notes>>.
 
 * <<breaking_80_index_pattern_changes>>

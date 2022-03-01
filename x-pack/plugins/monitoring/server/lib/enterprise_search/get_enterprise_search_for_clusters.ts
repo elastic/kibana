@@ -33,8 +33,8 @@ export function getEnterpriseSearchForClusters(
 ) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
 
   const indexPatterns = getLegacyIndexPattern({
     moduleType: 'enterprisesearch',
@@ -57,7 +57,7 @@ export function getEnterpriseSearchForClusters(
             uuid: clusterUuid,
             metric: EnterpriseSearchMetric.getMetricFields(),
           }),
-          aggs: entSearchUuidsAgg(maxBucketSize!),
+          aggs: entSearchUuidsAgg(maxBucketSize),
         },
       };
 

@@ -125,11 +125,22 @@ export function useComboInput(
 
   const isInvalid = errors !== undefined;
 
+  const validateCallback = useCallback(() => {
+    if (validate) {
+      const newErrors = validate(value);
+      setErrors(newErrors);
+
+      return newErrors === undefined;
+    }
+
+    return true;
+  }, [validate, value]);
+
   const onChange = useCallback(
     (newValues: string[]) => {
       setValue(newValues);
-      if (errors && validate && validate(newValues) === undefined) {
-        setErrors(undefined);
+      if (errors && validate) {
+        setErrors(validate(newValues));
       }
     },
     [validate, errors]
@@ -149,16 +160,7 @@ export function useComboInput(
       setValue([]);
     },
     setValue,
-    validate: () => {
-      if (validate) {
-        const newErrors = validate(value);
-        setErrors(newErrors);
-
-        return newErrors === undefined;
-      }
-
-      return true;
-    },
+    validate: validateCallback,
     hasChanged,
   };
 }

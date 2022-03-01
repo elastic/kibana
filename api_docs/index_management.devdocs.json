@@ -192,10 +192,30 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-public.Index.documents_deleted",
+            "type": "number",
+            "tags": [],
+            "label": "documents_deleted",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-public.Index.size",
             "type": "string",
             "tags": [],
             "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.primary_size",
+            "type": "string",
+            "tags": [],
+            "label": "primary_size",
             "description": [],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -464,10 +484,30 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-server.Index.documents_deleted",
+            "type": "number",
+            "tags": [],
+            "label": "documents_deleted",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-server.Index.size",
             "type": "string",
             "tags": [],
             "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.primary_size",
+            "type": "string",
+            "tags": [],
+            "label": "primary_size",
             "description": [],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -1536,10 +1576,30 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.Index.documents_deleted",
+            "type": "number",
+            "tags": [],
+            "label": "documents_deleted",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.Index.size",
             "type": "string",
             "tags": [],
             "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.primary_size",
+            "type": "string",
+            "tags": [],
+            "label": "primary_size",
             "description": [],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -2351,7 +2411,7 @@
         "label": "MAJOR_VERSION",
         "description": [],
         "signature": [
-          "\"8.1.0\""
+          "\"8.2.0\""
         ],
         "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
         "deprecated": false,

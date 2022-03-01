@@ -19,6 +19,7 @@ import { notifyFeatureUsage } from '../../../feature';
 import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
+import { ElasticsearchClient } from '../../../../../../../src/core/server';
 
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
@@ -49,7 +50,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 
     return {
       jobs,
-      hasLegacyJobs: jobs.some((job) => job.version === 1),
+      hasLegacyJobs: jobs.some((job): boolean => job.version === 1),
     };
   },
 });
@@ -128,7 +129,10 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
       setupRequest(resources),
       resources.core
         .start()
-        .then((start) => start.elasticsearch.client.asInternalUser),
+        .then(
+          (start): ElasticsearchClient =>
+            start.elasticsearch.client.asInternalUser
+        ),
     ]);
 
     const { logger } = resources;

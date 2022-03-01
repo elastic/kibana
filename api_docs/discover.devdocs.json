@@ -484,262 +484,6 @@
       },
       {
         "parentPluginId": "discover",
-        "id": "def-public.DiscoverUrlGeneratorState",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DiscoverUrlGeneratorState",
-        "description": [],
-        "path": "src/plugins/discover/public/url_generator.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.savedSearchId",
-            "type": "string",
-            "tags": [],
-            "label": "savedSearchId",
-            "description": [
-              "\nOptionally set saved search ID."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.indexPatternId",
-            "type": "string",
-            "tags": [],
-            "label": "indexPatternId",
-            "description": [
-              "\nOptionally set index pattern ID."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [
-              "\nOptionally set the time range in the time picker."
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.refreshInterval",
-            "type": "Object",
-            "tags": [],
-            "label": "refreshInterval",
-            "description": [
-              "\nOptionally set the refresh interval."
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "\nOptionally apply filters."
-            ],
-            "signature": [
-              "Filter",
-              "[] | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [
-              "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
-            ],
-            "signature": [
-              "Query",
-              " | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.useHash",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "useHash",
-            "description": [
-              "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.searchSessionId",
-            "type": "string",
-            "tags": [],
-            "label": "searchSessionId",
-            "description": [
-              "\nBackground search session id"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.columns",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [
-              "\nColumns displayed in the table"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.interval",
-            "type": "string",
-            "tags": [],
-            "label": "interval",
-            "description": [
-              "\nUsed interval of the histogram"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.sort",
-            "type": "Array",
-            "tags": [],
-            "label": "sort",
-            "description": [
-              "\nArray of the used sorting [[field,direction],...]"
-            ],
-            "signature": [
-              "string[][] | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.savedQuery",
-            "type": "string",
-            "tags": [],
-            "label": "savedQuery",
-            "description": [
-              "\nid of the used saved query"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.viewMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "viewMode",
-            "description": [],
-            "signature": [
-              "VIEW_MODE",
-              " | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverUrlGeneratorState.hideAggregatedPreview",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideAggregatedPreview",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/discover/public/url_generator.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
         "id": "def-public.ISearchEmbeddable",
         "type": "Interface",
         "tags": [],
@@ -1171,6 +915,19 @@
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/services/saved_searches/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1282,6 +1039,19 @@
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchInput.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1301,40 +1071,6 @@
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-public.DISCOVER_APP_URL_GENERATOR",
-        "type": "string",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DISCOVER_APP_URL_GENERATOR",
-        "description": [],
-        "signature": [
-          "\"DISCOVER_APP_URL_GENERATOR\""
-        ],
-        "path": "src/plugins/discover/public/url_generator.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -1447,42 +1183,6 @@
       "children": [
         {
           "parentPluginId": "discover",
-          "id": "def-public.DiscoverStart.urlGenerator",
-          "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "urlGenerator",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "share",
-              "scope": "public",
-              "docId": "kibSharePluginApi",
-              "section": "def-public.UrlGeneratorContract",
-              "text": "UrlGeneratorContract"
-            },
-            "<\"DISCOVER_APP_URL_GENERATOR\"> | undefined"
-          ],
-          "path": "src/plugins/discover/public/plugin.tsx",
-          "deprecated": true,
-          "references": [
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx"
-            }
-          ]
-        },
-        {
-          "parentPluginId": "discover",
           "id": "def-public.DiscoverStart.locator",
           "type": "Object",
           "tags": [],
@@ -1522,6 +1222,20 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ID",
+        "description": [],
+        "signature": [
+          "\"discover\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "discover",
         "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
@@ -1643,6 +1357,20 @@
         "description": [],
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.ROW_HEIGHT_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ROW_HEIGHT_OPTION",
+        "description": [],
+        "signature": [
+          "\"discover:rowHeightOption\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

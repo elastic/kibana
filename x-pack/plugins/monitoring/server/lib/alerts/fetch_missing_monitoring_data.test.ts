@@ -67,9 +67,9 @@ describe('fetchMissingMonitoringData', () => {
       },
     ];
 
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: clusters.map((cluster) => ({
@@ -97,7 +97,7 @@ describe('fetchMissingMonitoringData', () => {
             })),
           },
         },
-      })
+      }
     );
     const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
@@ -126,9 +126,9 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: clusters.map((cluster) => ({
@@ -147,7 +147,7 @@ describe('fetchMissingMonitoringData', () => {
             })),
           },
         },
-      })
+      }
     );
     const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
@@ -172,7 +172,7 @@ describe('fetchMissingMonitoringData', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(params).toStrictEqual({
@@ -189,6 +189,7 @@ describe('fetchMissingMonitoringData', () => {
                 bool: {
                   should: [
                     { term: { type: 'node_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -210,7 +211,9 @@ describe('fetchMissingMonitoringData', () => {
                     top_hits: {
                       size: 1,
                       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                      _source: { includes: ['_index', 'source_node.name'] },
+                      _source: {
+                        includes: ['source_node.name', 'elasticsearch.node.name'],
+                      },
                     },
                   },
                 },
@@ -221,7 +224,7 @@ describe('fetchMissingMonitoringData', () => {
       },
     });
   });
-  it('should call ES with correct query  when ccs disabled', async () => {
+  it('should call ES with correct query when ccs disabled', async () => {
     const now = 10;
     const clusters = [
       {
@@ -234,7 +237,7 @@ describe('fetchMissingMonitoringData', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     // @ts-ignore

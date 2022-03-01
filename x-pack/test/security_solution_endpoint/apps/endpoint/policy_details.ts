@@ -337,7 +337,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('and the save button is clicked', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/92567
+    describe.skip('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       beforeEach(async () => {
@@ -493,7 +494,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 version: policyInfo.packageInfo.version,
               },
             },
-            artifact_manifest: agentFullPolicy.inputs[0].artifact_manifest,
+            artifact_manifest: agentFullPolicyUpdated.inputs[0].artifact_manifest,
           }),
         ]);
       });
