@@ -16,6 +16,8 @@ import { AppLogic } from '../../../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../../../constants';
 import { EngineDetails } from '../../../engine/types';
 
+import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
+
 import { renderEngineLink, renderLastChangeLink } from './engine_link_helpers';
 import {
   ACTIONS_COLUMN,
@@ -26,8 +28,6 @@ import {
   NAME_COLUMN,
 } from './shared_columns';
 import { EnginesTableProps } from './types';
-
-import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
 
 const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'language',

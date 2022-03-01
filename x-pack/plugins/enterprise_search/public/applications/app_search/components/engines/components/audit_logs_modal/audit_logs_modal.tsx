@@ -18,6 +18,8 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EntSearchLogStream } from '../../../../../shared/log_stream';
 
 import { AuditLogsModalLogic } from './audit_logs_modal_logic';
@@ -28,6 +30,12 @@ export const AuditLogsModal: React.FC = () => {
   const auditLogsModalLogic = AuditLogsModalLogic();
   const { isModalVisible, engineName } = useValues(auditLogsModalLogic);
   const { hideModal } = useActions(auditLogsModalLogic);
+
+  const filters = [
+    'event.kind: event',
+    'event.dataset: enterprise-search-audit',
+    `enterprisesearch.data_repository.name: ${engineName}`,
+  ];
 
   return !isModalVisible ? null : (
     <EuiModal onClose={hideModal} className="auditLogsModal" maxWidth={false}>
@@ -44,32 +52,58 @@ export const AuditLogsModal: React.FC = () => {
               type: 'timestamp',
             },
             {
-              type: 'message',
+              type: 'field',
+              field: 'user.id',
+              header: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.auditLogsModal.headers.updatedBy',
+                {
+                  defaultMessage: 'Updated By',
+                }
+              ),
+            },
+            {
+              type: 'field',
+              field: 'event.category',
+              header: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.auditLogsModal.headers.eventCategory',
+                {
+                  defaultMessage: 'Event Category',
+                }
+              ),
             },
             {
               type: 'field',
               field: 'event.type',
+              header: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.auditLogsModal.headers.eventType',
+                {
+                  defaultMessage: 'Event Type',
+                }
+              ),
             },
             {
               type: 'field',
-              field: 'user.id',
+              field: 'outcome',
+              header: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.auditLogsModal.headers.outcome',
+                {
+                  defaultMessage: 'Outcome',
+                }
+              ),
             },
             {
-              type: 'field',
-              field: 'event.dataset',
-            },
-            {
-              type: 'field',
-              field: 'enterprisesearch.data_repository.name',
+              type: 'message',
             },
           ]}
-          query={`event.kind: event and event.dataset: enterprise-search-audit and enterprisesearch.data_repository.name: ${engineName}`}
+          query={filters.join(' and ')}
         />
       </EuiModalBody>
 
       <EuiModalFooter>
         <EuiButton onClick={hideModal} fill>
-          Close
+          {i18n.translate('xpack.enterpriseSearch.appSearch.engines.auditLogsModal.closeButton', {
+            defaultMessage: 'Close',
+          })}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

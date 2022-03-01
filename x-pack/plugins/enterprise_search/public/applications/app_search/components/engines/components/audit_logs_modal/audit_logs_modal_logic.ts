@@ -22,9 +22,10 @@ export const AuditLogsModalLogic = kea({
       },
     ],
     engineName: [
-      'elastic-en-us',
+      '',
       {
         showModal: (_, { engineName }) => engineName,
+        hideModal: () => '',
       },
     ],
   }),

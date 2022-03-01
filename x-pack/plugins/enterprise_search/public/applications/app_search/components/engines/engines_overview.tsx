@@ -21,9 +21,9 @@ import { DataPanel } from '../data_panel';
 import { AppSearchPageTemplate } from '../layout';
 
 import { EmptyState, EmptyMetaEnginesState } from './components';
+import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
-import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import {
   ENGINES_OVERVIEW_TITLE,
   CREATE_AN_ENGINE_BUTTON_LABEL,

@@ -50,7 +50,6 @@ export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
 };
 
-
 export const LAST_UPDATED_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'updated_at',
   name: i18n.translate(
