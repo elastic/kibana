@@ -55,12 +55,11 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('installing bundled packages', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
 
     afterEach(async () => {
       await removeBundledPackages();
     });
-
-    setupFleetAndAgents(providerContext);
 
     describe('without registry', () => {
       it('installs from bundled source via api', async () => {
