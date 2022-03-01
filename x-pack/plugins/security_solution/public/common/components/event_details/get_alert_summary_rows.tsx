@@ -145,30 +145,23 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
       return [
         {
           id: `${ALERT_RULE_PARAMETERS}.machine_learning_job_id`,
+          legacyId: 'signal.rule.machine_learning_job_id',
         },
         {
           id: `${ALERT_RULE_PARAMETERS}.anomaly_threshold`,
+          legacyId: 'signal.rule.anomaly_threshold',
         },
       ];
     case 'threat_match':
       return [
         {
           id: `${ALERT_RULE_PARAMETERS}.threat_index`,
+          legacyId: 'signal.rule.threat_index',
         },
         {
           id: `${ALERT_RULE_PARAMETERS}.threat_query`,
+          legacyId: 'signal.rule.threat_query',
         },
-        // <8.x migration fix>
-        // When upgrading to 8.x, `threat_index` and `threat_query` are not available under `ALERT_RULE_PARAMETERS`.
-        // The values are available under `ALERT_RULE_NAMESPACE` however. So as a temporary workaround we'll also
-        // read from `ALERT_RULE_NAMESPACE` here and we'll remove this code when the underlying issue is fixed.
-        {
-          id: `${ALERT_RULE_NAMESPACE}.threat_index`,
-        },
-        {
-          id: `${ALERT_RULE_NAMESPACE}.threat_query`,
-        },
-        // </8.x migration fix>
       ];
     default:
       return [];
@@ -261,9 +254,16 @@ export const getSummaryRows = ({
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, field) => {
-        const item = data.find((d) => d.field === field.id);
-        if (!item || isEmpty(item?.values)) {
+        const item = data.find(
+          (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
+        );
+        if (!item || isEmpty(item.values)) {
           return acc;
+        }
+
+        // If we found the data by its legacy id we swap the ids to display the correct one
+        if (item.field === field.legacyId) {
+          field.id = field.legacyId;
         }
 
         const linkValueField =
