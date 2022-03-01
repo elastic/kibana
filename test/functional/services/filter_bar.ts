@@ -87,6 +87,12 @@ export class FilterBarService extends FtrService {
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
+  public async toggleFilterNegated(key: string): Promise<void> {
+    await this.testSubjects.click(`~filter & ~filter-key-${key}`);
+    await this.testSubjects.click(`negateFilter`);
+    await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
   public async isFilterPinned(key: string): Promise<boolean> {
     const filter = await this.testSubjects.find(`~filter & ~filter-key-${key}`);
     return (await filter.getAttribute('data-test-subj')).includes('filter-pinned');
