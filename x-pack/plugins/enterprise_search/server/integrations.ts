@@ -250,7 +250,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
       }
     ),
-    categories: ['file_storage', 'microsoft_365'],
+    categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
   },
   {
