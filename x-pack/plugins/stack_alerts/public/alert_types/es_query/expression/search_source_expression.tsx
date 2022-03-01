@@ -90,13 +90,7 @@ export const SearchSourceExpression = ({
   if (paramsError) {
     return (
       <>
-        <EuiCallOut
-          title={i18n.translate('xpack.stackAlerts.searchThreshold.ui.searchSourceParamsError', {
-            defaultMessage: 'Alert creation params error',
-          })}
-          color="danger"
-          iconType="alert"
-        >
+        <EuiCallOut color="danger" iconType="alert">
           <p>{paramsError.message}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />

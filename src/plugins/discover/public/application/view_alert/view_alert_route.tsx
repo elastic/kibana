@@ -56,16 +56,13 @@ const displayRuleChangedWarn = (toastNotifications: ToastsStart) => {
 };
 
 const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
-  const infoTitle = i18n.translate('discover.viewAlert.possibleDocsDifferenceInfoTitle', {
-    defaultMessage: 'Possibly different documents',
+  const infoTitle = i18n.translate('discover.viewAlert.documentsMayVaryInfoTitle', {
+    defaultMessage: 'Displayed documents may vary',
   });
-  const infoDescription = i18n.translate(
-    'discover.viewAlert.possibleDocsDifferenceInfoDescription',
-    {
-      defaultMessage: `Displayed documents might not match the documents triggered 
-      notification, since documents might have been deleted or added.`,
-    }
-  );
+  const infoDescription = i18n.translate('discover.viewAlert.documentsMayVaryInfoDescription', {
+    defaultMessage: `The displayed documents might differ from the documents that triggered the alert.
+       Some documents might have been added or deleted.`,
+  });
 
   toastNotifications.addInfo({
     title: infoTitle,
