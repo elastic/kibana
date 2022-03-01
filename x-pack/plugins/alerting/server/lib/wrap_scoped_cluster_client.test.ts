@@ -34,6 +34,7 @@ describe('wrapScopedClusterClient', () => {
   });
 
   test('searches with asInternalUser when specified', async () => {
+    const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -46,6 +47,7 @@ describe('wrapScopedClusterClient', () => {
       scopedClusterClient,
       rule,
       logger,
+      abortController,
     }).client();
     await wrappedSearchClient.asInternalUser.search(esQuery);
 
@@ -55,6 +57,7 @@ describe('wrapScopedClusterClient', () => {
   });
 
   test('searches with asCurrentUser when specified', async () => {
+    const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -67,6 +70,7 @@ describe('wrapScopedClusterClient', () => {
       scopedClusterClient,
       rule,
       logger,
+      abortController,
     }).client();
     await wrappedSearchClient.asCurrentUser.search(esQuery);
 
@@ -76,6 +80,7 @@ describe('wrapScopedClusterClient', () => {
   });
 
   test('uses search options when specified', async () => {
+    const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -88,6 +93,7 @@ describe('wrapScopedClusterClient', () => {
       scopedClusterClient,
       rule,
       logger,
+      abortController,
     }).client();
     await wrappedSearchClient.asInternalUser.search(esQuery, { ignore: [404] });
 
@@ -99,6 +105,7 @@ describe('wrapScopedClusterClient', () => {
   });
 
   test('re-throws error when search throws error', async () => {
+    const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -112,6 +119,7 @@ describe('wrapScopedClusterClient', () => {
       scopedClusterClient,
       rule,
       logger,
+      abortController,
     }).client();
 
     await expect(
@@ -120,6 +128,7 @@ describe('wrapScopedClusterClient', () => {
   });
 
   test('keeps track of number of queries', async () => {
+    const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -134,6 +143,7 @@ describe('wrapScopedClusterClient', () => {
       scopedClusterClient,
       rule,
       logger,
+      abortController,
     });
     const wrappedSearchClient = wrappedSearchClientFactory.client();
     await wrappedSearchClient.asInternalUser.search(esQuery);
