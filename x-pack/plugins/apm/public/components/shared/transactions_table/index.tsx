@@ -229,7 +229,11 @@ export function TransactionsTable({
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="transactionsGroupTable"
+    >
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>

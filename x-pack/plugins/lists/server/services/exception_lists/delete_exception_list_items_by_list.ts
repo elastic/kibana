@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { ListId, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  FoundExceptionListItemSchema,
+  ListId,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { asyncForEach } from '@kbn/std';
+import type { SavedObjectsClientContract } from 'kibana/server';
 
-import { SavedObjectsClientContract } from '../../../../../../src/core/server';
-
-import { findExceptionListItem } from './find_exception_list_item';
-
-const PER_PAGE = 100;
+import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 
 interface DeleteExceptionListItemByListOptions {
   listId: ListId;
@@ -35,35 +36,24 @@ export const getExceptionListItemIds = async ({
   savedObjectsClient,
   namespaceType,
 }: DeleteExceptionListItemByListOptions): Promise<string[]> => {
-  let page = 1;
+  // Stream the results from the Point In Time (PIT) finder into this array
   let ids: string[] = [];
-  let foundExceptionListItems = await findExceptionListItem({
+  const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+    const responseIds = response.data.map((exceptionListItem) => exceptionListItem.id);
+    ids = [...ids, ...responseIds];
+  };
+
+  await findExceptionListItemPointInTimeFinder({
+    executeFunctionOnStream,
     filter: undefined,
     listId,
+    maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
     namespaceType,
-    page,
-    perPage: PER_PAGE,
+    perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
     sortField: 'tie_breaker_id',
     sortOrder: 'desc',
   });
-  while (foundExceptionListItems != null && foundExceptionListItems.data.length > 0) {
-    ids = [
-      ...ids,
-      ...foundExceptionListItems.data.map((exceptionListItem) => exceptionListItem.id),
-    ];
-    page += 1;
-    foundExceptionListItems = await findExceptionListItem({
-      filter: undefined,
-      listId,
-      namespaceType,
-      page,
-      perPage: PER_PAGE,
-      savedObjectsClient,
-      sortField: 'tie_breaker_id',
-      sortOrder: 'desc',
-    });
-  }
   return ids;
 };
 

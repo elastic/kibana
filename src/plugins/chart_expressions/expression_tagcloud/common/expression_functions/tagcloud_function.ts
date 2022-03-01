@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME } from '../constants';

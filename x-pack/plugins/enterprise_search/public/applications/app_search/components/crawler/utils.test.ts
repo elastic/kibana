@@ -36,6 +36,7 @@ import {
   getDeleteDomainSuccessMessage,
   getCrawlRulePathPatternTooltip,
   crawlRequestStatsServerToClient,
+  domainConfigServerToClient,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -497,5 +498,23 @@ describe('getCrawlRulePathPatternTooltip', () => {
 
     expect(getCrawlRulePathPatternTooltip(crawlRule)).not.toContain('regular expression');
     expect(getCrawlRulePathPatternTooltip(crawlRule)).toContain('meta');
+  });
+});
+
+describe('domainConfigServerToClient', () => {
+  it('converts the domain config payload into properties matching our code style', () => {
+    expect(
+      domainConfigServerToClient({
+        id: '1234',
+        name: 'https://www.elastic.co',
+        seed_urls: [],
+        sitemap_urls: [],
+      })
+    ).toEqual({
+      id: '1234',
+      name: 'https://www.elastic.co',
+      seedUrls: [],
+      sitemapUrls: [],
+    });
   });
 });

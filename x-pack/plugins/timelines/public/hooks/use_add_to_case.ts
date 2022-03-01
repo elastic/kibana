@@ -9,14 +9,14 @@ import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../cases/common';
+import { Case, CommentType } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
 import { TimelineItem } from '../../common/search_strategy';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
 import { AddToCaseActionProps } from '../components/actions';
-import { CasesDeepLinkId, generateCaseViewPath } from '../../../cases/public';
+import { CaseAttachments, CasesDeepLinkId, generateCaseViewPath } from '../../../cases/public';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
@@ -32,6 +32,7 @@ interface UseAddToCase {
   closePopover: () => void;
   isPopoverOpen: boolean;
   isCreateCaseFlyoutOpen: boolean;
+  caseAttachments?: CaseAttachments;
 }
 
 export const useAddToCase = ({
@@ -39,6 +40,7 @@ export const useAddToCase = ({
   casePermissions,
   appId,
   onClose,
+  owner,
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
   const dispatch = useDispatch();
@@ -109,6 +111,23 @@ export const useAddToCase = ({
     },
     [onViewCaseClick, toasts, dispatch, eventId]
   );
+  const caseAttachments: CaseAttachments = useMemo(() => {
+    const eventIndex = event?.ecs._index ?? '';
+    const { ruleId, ruleName } = normalizedEventFields(event);
+    const attachments = [
+      {
+        alertId: eventId,
+        index: eventIndex ?? '',
+        rule: {
+          id: ruleId,
+          name: ruleName,
+        },
+        owner,
+        type: CommentType.alert as const,
+      },
+    ];
+    return attachments;
+  }, [event, eventId, owner]);
 
   const onCaseClicked = useCallback(
     (theCase?: Case) => {
@@ -140,6 +159,7 @@ export const useAddToCase = ({
     }
   }, [onClose, closePopover, dispatch, eventId]);
   return {
+    caseAttachments,
     addNewCaseClick,
     addExistingCaseClick,
     onCaseClicked,

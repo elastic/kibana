@@ -35,6 +35,7 @@ export const registerCreateRoute = ({
         // Create job.
         await clusterClient.asCurrentUser.rollup.putJob({
           id,
+          // @ts-expect-error type mismatch on RollupPutJobRequest.body
           body: rest,
         });
         // Then request the newly created job.

@@ -40,7 +40,8 @@ describe('Discover cell actions ', function () {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
-          columnId={'extension'}
+          colIndex={1}
+          columnId="extension"
           isExpanded={false}
           closePopover={jest.fn()}
         />
@@ -68,7 +69,8 @@ describe('Discover cell actions ', function () {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
-          columnId={'extension'}
+          colIndex={1}
+          columnId="extension"
           isExpanded={false}
           closePopover={jest.fn()}
         />

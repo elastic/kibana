@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { NewAlertParams } from './alerts';
-import { AlertAction } from '../../../../triggers_actions_ui/public';
+import { RuleAction as RuleActionOrig } from '../../../../triggers_actions_ui/public';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import {
@@ -36,7 +36,7 @@ export const EMAIL_ACTION_ID: ActionTypeId = '.email';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
-export type RuleAction = Omit<AlertAction, 'actionTypeId'>;
+export type RuleAction = Omit<RuleActionOrig, 'actionTypeId'>;
 
 const getRecoveryMessage = (selectedMonitor: Ping) => {
   return i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {

@@ -292,7 +292,7 @@ export type {
 
 export type { AggsStart } from './search/aggs';
 
-export { getTime, getKbnTypeNames } from '../common';
+export { getTime } from '../common';
 
 export { isTimeRange, isQuery } from '../common';
 

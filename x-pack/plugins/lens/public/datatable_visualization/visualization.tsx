@@ -367,6 +367,9 @@ export const getDatatableVisualization = ({
 
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
 
+              const canColor =
+                datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
+
               return {
                 type: 'expression',
                 chain: [
@@ -383,7 +386,7 @@ export const getDatatableVisualization = ({
                         !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                      colorMode: [column.colorMode ?? 'none'],
+                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow

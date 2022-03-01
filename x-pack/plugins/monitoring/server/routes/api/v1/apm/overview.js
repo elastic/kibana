@@ -30,10 +30,10 @@ export function apmOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
 
-      const showCgroupMetrics = config.get('monitoring.ui.container.apm.enabled');
+      const showCgroupMetrics = config.ui.container.apm.enabled;
       if (showCgroupMetrics) {
         const metricCpu = metricSet.find((m) => m.name === 'apm_cpu');
         metricCpu.keys = ['apm_cgroup_cpu'];

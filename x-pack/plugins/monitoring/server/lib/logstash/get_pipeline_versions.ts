@@ -78,7 +78,7 @@ function fetchPipelineVersions({
     moduleType,
     dataset,
   });
-  const config = req.server.config();
+  const config = req.server.config;
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   const filters = [
@@ -120,10 +120,7 @@ function fetchPipelineVersions({
     filters,
   });
 
-  const pipelineAggregation = createScopedAgg(
-    pipelineId,
-    Number(config.get('monitoring.ui.max_bucket_size'))
-  );
+  const pipelineAggregation = createScopedAgg(pipelineId, config.ui.max_bucket_size);
   const aggs = {
     pipelines: pipelineAggregation('logstash_stats'),
     pipelines_mb: pipelineAggregation('logstash.node.stats'),
