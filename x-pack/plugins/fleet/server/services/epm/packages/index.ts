@@ -25,6 +25,8 @@ export {
   getLimitedPackages,
 } from './get';
 
+export { getBundledPackages } from './bundled_packages';
+
 export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';

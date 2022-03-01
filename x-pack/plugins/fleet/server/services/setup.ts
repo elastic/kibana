@@ -10,7 +10,12 @@ import { compact } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
-import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
+import type {
+  DefaultPackagesInstallationError,
+  PreconfigurationError,
+  BundledPackage,
+  Installation,
+} from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
@@ -34,7 +39,7 @@ import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
-
+import { getBundledPackages } from './epm/packages';
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
@@ -151,15 +156,37 @@ export async function ensureFleetGlobalEsAssets(
   const assetResults = globalAssetsRes.flat();
   if (assetResults.some((asset) => asset.isCreated)) {
     // Update existing index template
-    const packages = await getInstallations(soClient);
-
+    const installedPackages = await getInstallations(soClient);
+    const bundledPackages = await getBundledPackages();
+    const findMatchingBundledPkg = (pkg: Installation) =>
+      bundledPackages.find(
+        (bundledPkg: BundledPackage) =>
+          bundledPkg.name === pkg.name && bundledPkg.version === pkg.version
+      );
     await Promise.all(
-      packages.saved_objects.map(async ({ attributes: installation }) => {
+      installedPackages.saved_objects.map(async ({ attributes: installation }) => {
         if (installation.install_source !== 'registry') {
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
-          );
-          return;
+          const matchingBundledPackage = findMatchingBundledPkg(installation);
+          if (!matchingBundledPackage) {
+            logger.error(
+              `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
+            );
+            return;
+          } else {
+            await installPackage({
+              installSource: 'upload',
+              savedObjectsClient: soClient,
+              esClient,
+              spaceId: DEFAULT_SPACE_ID,
+              contentType: 'application/zip',
+              archiveBuffer: matchingBundledPackage.buffer,
+            }).catch((err) => {
+              logger.error(
+                `Bundled package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
+              );
+            });
+            return;
+          }
         }
         await installPackage({
           installSource: installation.install_source,
