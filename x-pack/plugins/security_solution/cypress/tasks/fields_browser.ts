@@ -43,12 +43,11 @@ export const closeFieldsBrowser = () => {
 
 export const filterFieldsBrowser = (fieldName: string) => {
   cy.clock();
-  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName, { delay: 50 });
+  cy.wait(0);
+  cy.tick(300);
   // the text filter is debounced by 250 ms, wait 1s for changes to be applied
-  cy.clock().then((clock) => {
-    clock.tick(1000);
-    cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.have.class', 'euiFieldSearch-isLoading');
-  });
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.have.class', 'euiFieldSearch-isLoading');
 };
 
 export const removesMessageField = () => {

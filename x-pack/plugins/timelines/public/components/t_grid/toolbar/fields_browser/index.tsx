@@ -108,6 +108,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     }
     // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
     inputTimeoutId.current = window.setTimeout(() => {
+      setIsSearching(false);
       setAppliedFilterInput(filterInput);
     }, INPUT_TIMEOUT);
     return () => {
@@ -116,12 +117,10 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   }, [filterInput]);
 
   useEffect(() => {
-    setIsSearching(false);
     setFilteredBrowserFields(newFilteredBrowserFields);
   }, [newFilteredBrowserFields]);
 
   useEffect(() => {
-    setIsSearching(false);
     setSelectedCategoryId(newSelectedCategoryId);
   }, [newSelectedCategoryId]);
 
