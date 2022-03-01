@@ -67,7 +67,7 @@ export function getColorAssignments(
               data.tables[layer.layerId].rows.map((row) => {
                 let value = row[splitAccessor];
                 if (value && !isPrimitive(value)) {
-                  value = columnFormatter?.convert(value) || value;
+                  value = columnFormatter?.convert(value) ?? value;
                 } else {
                   value = String(value);
                 }
