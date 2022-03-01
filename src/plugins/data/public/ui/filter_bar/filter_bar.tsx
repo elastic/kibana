@@ -320,28 +320,28 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       : undefined;
 
     return (
-      !!currentEditFilters.length && (
-      <EuiFlexItem grow={false}>
-        {props.isEditFilterModalOpen && (
-          <EditFilterModal
-            onSubmit={onEditMultipleFilters}
-            onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
-            onCancel={() => props.toggleEditFilterModal?.(false)}
-            filter={saerchedFilters[0]}
-            currentEditFilters={currentEditFilters}
-            filters={saerchedFilters}
-            multipleFilters={props.multipleFilters}
-            indexPatterns={props.indexPatterns!}
-            onRemoveFilterGroup={onDeleteFilterGroup}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            initialAddFilterMode={undefined}
-            saveFilters={props.onFilterSave}
-            savedQueryService={props.savedQueryService}
-            tabs={tabs}
-            initialLabel={saerchedFilters[0].meta.alias!}
-          />
-        )}
-      </EuiFlexItem>
+      !!saerchedFilters.length && (
+        <EuiFlexItem grow={false} className="globalFilterGroup__editFilter">
+          {props.isEditFilterModalOpen && (
+            <EditFilterModal
+              onSubmit={onEditMultipleFilters}
+              onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
+              onCancel={() => props.toggleEditFilterModal?.(false)}
+              filter={saerchedFilters[0]}
+              currentEditFilters={currentEditFilters}
+              filters={saerchedFilters}
+              multipleFilters={props.multipleFilters}
+              indexPatterns={props.indexPatterns!}
+              onRemoveFilterGroup={onDeleteFilterGroup}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              initialAddFilterMode={undefined}
+              saveFilters={props.onFilterSave}
+              savedQueryService={props.savedQueryService}
+              tabs={tabs}
+              initialLabel={saerchedFilters[0].meta.alias!}
+            />
+          )}
+        </EuiFlexItem>
       )
     );
   }

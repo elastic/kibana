@@ -24,10 +24,15 @@
 }
 
 .globalFilterBar {
-  > *:not(:first-child) {
+  & > *:not(:first-child) {
     &:before {
       content: 'AND';
       color: $euiColorPrimaryText;
+    }
+  }
+  & > .globalFilterGroup__editFilter {
+    &:before {
+      content: '';
     }
   }
 }
