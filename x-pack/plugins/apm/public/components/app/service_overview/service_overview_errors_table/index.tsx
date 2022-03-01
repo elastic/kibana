@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
@@ -58,9 +57,6 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
-  const {
-    urlParams: { comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -72,9 +68,16 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
+  const { query } = useApmParams('/services/{serviceName}/overview');
+
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/overview');
+    environment,
+    kuery,
+    rangeFrom,
+    rangeTo,
+    comparisonType,
+    comparisonEnabled,
+  } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -177,6 +180,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     serviceName,
     errorGroupDetailedStatistics,
     comparisonEnabled,
+    query,
   });
 
   return (
@@ -197,7 +201,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ErrorOverviewLink serviceName={serviceName}>
+            <ErrorOverviewLink serviceName={serviceName} query={query}>
               {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
                 defaultMessage: 'View errors',
               })}
