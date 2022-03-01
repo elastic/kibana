@@ -99,7 +99,7 @@ export function getAlertType(
     'xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel',
     {
       defaultMessage:
-        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+        "An array of values to use as the threshold. 'between' and 'notBetween' require two values.",
     }
   );
 
