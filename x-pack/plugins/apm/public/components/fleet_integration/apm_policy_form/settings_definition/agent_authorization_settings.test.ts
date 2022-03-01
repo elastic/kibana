@@ -22,7 +22,6 @@ describe('apm-fleet-apm-integration', () => {
       expect(secretToken).toEqual({
         type: 'text',
         key: 'secret_token',
-        readOnly: true,
         labelAppend: 'Optional',
         label: 'Secret token',
       });
@@ -34,7 +33,6 @@ describe('apm-fleet-apm-integration', () => {
       expect(secretToken).toEqual({
         type: 'text',
         key: 'secret_token',
-        readOnly: false,
         labelAppend: 'Optional',
         label: 'Secret token',
       });
