@@ -10,6 +10,8 @@ import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { PackagePolicy } from '../../../../../../fleet/common/types/models';
@@ -348,14 +350,18 @@ describe('ManifestManager', () => {
     test('Builds fully new manifest if no baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({ os_types: ['windows'] });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const blocklistsListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
+        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
         [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
+        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
       });
       context.savedObjectsClient.create = jest
         .fn()
@@ -382,16 +388,23 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
-      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
-      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1'),
+      });
       expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[11])).toStrictEqual({
         entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
       });
 
       for (const artifact of artifacts) {
@@ -405,6 +418,9 @@ describe('ManifestManager', () => {
     test('Reuses artifacts when baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({ os_types: ['windows'] });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const blocklistsListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
@@ -422,6 +438,9 @@ describe('ManifestManager', () => {
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
+        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
+        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
       });
 
       const manifest = await manifestManager.buildNewManifest(oldManifest);
@@ -445,7 +464,19 @@ describe('ManifestManager', () => {
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
-      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({
+        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+      });
 
       for (const artifact of artifacts) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
