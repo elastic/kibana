@@ -29,6 +29,7 @@ export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
   indexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
+  invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
 }
@@ -51,6 +52,7 @@ export function FieldInputs({
   indexPattern,
   existingFields,
   operationSupportMatrix,
+  invalidFields,
 }: FieldInputsProps) {
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
@@ -90,7 +92,7 @@ export function FieldInputs({
     return (
       <>
         <FieldSelect
-          fieldIsInvalid={false}
+          fieldIsInvalid={Boolean(invalidFields?.[0])}
           currentIndexPattern={indexPattern}
           existingFields={existingFields}
           operationByField={operationSupportMatrix.operationByField}
@@ -142,8 +144,10 @@ export function FieldInputs({
               return memo;
             }, {});
 
-          const shouldShowScriptedFieldError = Boolean(
-            value && indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1
+          const shouldShowError = Boolean(
+            value &&
+              ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
+                invalidFields?.includes(value))
           );
           return (
             <EuiDraggable
@@ -170,7 +174,7 @@ export function FieldInputs({
                   </EuiFlexItem>
                   <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
                     <FieldSelect
-                      fieldIsInvalid={false}
+                      fieldIsInvalid={shouldShowError}
                       currentIndexPattern={indexPattern}
                       existingFields={existingFields}
                       operationByField={filteredOperationByField}
@@ -180,7 +184,7 @@ export function FieldInputs({
                       onChoose={(choice) => {
                         onFieldSelectChange(choice, index);
                       }}
-                      isInvalid={shouldShowScriptedFieldError}
+                      isInvalid={shouldShowError}
                       data-test-subj={`indexPattern-dimension-field-${index}`}
                     />
                   </EuiFlexItem>
@@ -232,4 +236,22 @@ export function FieldInputs({
       />
     </>
   );
+}
+
+export function getInputFieldErrorMessage(isScriptedField: boolean, invalidFields: string[]) {
+  if (isScriptedField) {
+    return i18n.translate('xpack.lens.indexPattern.terms.scriptedFieldErrorShort', {
+      defaultMessage: 'Scripted fields are not supported when using multiple fields',
+    });
+  }
+  if (invalidFields.length) {
+    return i18n.translate('xpack.lens.indexPattern.terms.invalidFieldsErrorShort', {
+      defaultMessage:
+        'Invalid {invalidFieldsCount, plural, one {field} other {fields}}: {invalidFields}. Check your data view or pick another field.',
+      values: {
+        invalidFieldsCount: invalidFields.length,
+        invalidFields: invalidFields.map((fieldName) => `"${fieldName}"`).join(', '),
+      },
+    });
+  }
 }

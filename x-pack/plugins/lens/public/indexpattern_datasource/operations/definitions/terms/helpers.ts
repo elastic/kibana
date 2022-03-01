@@ -19,8 +19,7 @@ import type { FrameDatasourceAPI } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '../index';
 import type { TermsIndexPatternColumn } from './types';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
-
-export const MULTI_KEY_VISUAL_SEPARATOR = '›';
+import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
 
@@ -212,4 +211,28 @@ export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );
+}
+
+export function getNonTransferableFields(
+  column: TermsIndexPatternColumn,
+  newIndexPattern: IndexPattern
+) {
+  const newFieldNames = [column.sourceField, ...(column.params?.secondaryFields ?? [])];
+  const newFields = newFieldNames.map((fieldName) => newIndexPattern.getFieldByName(fieldName));
+
+  return {
+    allFields: newFields,
+    invalidFields: newFields
+      .map((newField, i) =>
+        !(
+          newField &&
+          supportedTypes.has(newField.type) &&
+          newField.aggregatable &&
+          (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+        )
+          ? newFieldNames[i]
+          : null
+      )
+      .filter(Boolean) as string[],
+  };
 }

@@ -12,7 +12,8 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern } from '../../types';
+import { IndexPattern, IndexPatternField } from '../../types';
+import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
@@ -21,25 +22,30 @@ export function getInvalidFieldMessage(
   if (!indexPattern) {
     return;
   }
-  const { sourceField, operationType } = column;
-  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
-  const operationDefinition = operationType && operationDefinitionMap[operationType];
+  const { operationType } = column;
+  const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
+  const fieldNames =
+    hasField(column) && operationDefinition
+      ? operationDefinition?.getCurrentFields?.(column) ?? [column.sourceField]
+      : undefined;
+  const fields = fieldNames?.length
+    ? fieldNames.map((fieldName) => indexPattern.getFieldByName(fieldName))
+    : undefined;
+  const filteredFields = (fields?.filter(Boolean) ?? []) as IndexPatternField[];
 
   const isInvalid = Boolean(
-    sourceField &&
-      operationDefinition &&
+    filteredFields.length &&
       !(
-        field &&
         operationDefinition?.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field) !== undefined
+        filteredFields.every(
+          (field) => operationDefinition.getPossibleOperationForField(field) != null
+        )
       )
   );
 
   const isWrongType = Boolean(
-    sourceField &&
-      operationDefinition &&
-      field &&
-      !operationDefinition.isTransferable(
+    filteredFields.length &&
+      !operationDefinition?.isTransferable(
         column as GenericIndexPatternColumn,
         indexPattern,
         operationDefinitionMap
@@ -47,11 +53,39 @@ export function getInvalidFieldMessage(
   );
   if (isInvalid) {
     if (isWrongType) {
+      // as fallback show all the fields as invalid?
+      const wrongTypeFields =
+        operationDefinition?.getNonTransferableFields?.(column, indexPattern) ??
+        filteredFields.map((field) => field.displayName);
+
+      if (wrongTypeFields.length > 1) {
+        return [
+          i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
+            defaultMessage: 'Fields {invalidFields} are of the wrong type',
+            values: {
+              invalidFields: wrongTypeFields.join(', '),
+            },
+          }),
+        ];
+      }
       return [
         i18n.translate('xpack.lens.indexPattern.fieldWrongType', {
           defaultMessage: 'Field {invalidField} is of the wrong type',
           values: {
-            invalidField: sourceField,
+            invalidField: wrongTypeFields[0],
+          },
+        }),
+      ];
+    }
+    if (fieldNames && fieldNames.length > 1) {
+      return [
+        i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+          defaultMessage: 'Fields {invalidFields} were not found',
+          values: {
+            invalidFields: fieldNames
+              ?.map((fieldName, i) => (!fields?.[i] ? fieldName : null))
+              .filter(Boolean)
+              .join(', '),
           },
         }),
       ];
@@ -59,7 +93,7 @@ export function getInvalidFieldMessage(
     return [
       i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
         defaultMessage: 'Field {invalidField} was not found',
-        values: { invalidField: sourceField },
+        values: { invalidField: filteredFields[0].displayName },
       }),
     ];
   }

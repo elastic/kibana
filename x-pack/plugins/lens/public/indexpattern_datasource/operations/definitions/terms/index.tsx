@@ -27,7 +27,7 @@ import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumnOfType } from '../helpers';
-import { FieldInputs, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
+import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
   getErrorMessage,
@@ -37,8 +37,15 @@ import type { IndexPattern, IndexPatternField } from '../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
+  getNonTransferableFields,
   isSortableByColumn,
 } from './helpers';
+import {
+  DEFAULT_MAX_DOC_COUNT,
+  DEFAULT_SIZE,
+  MAXIMUM_MAX_DOC_COUNT,
+  supportedTypes,
+} from './constants';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -95,11 +102,6 @@ function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) 
 }
 
 const idPrefix = htmlIdGenerator()();
-const DEFAULT_SIZE = 3;
-// Elasticsearch limit
-const MAXIMUM_MAX_DOC_COUNT = 100;
-export const DEFAULT_MAX_DOC_COUNT = 1;
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
   type: 'terms',
@@ -209,14 +211,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     ].filter(Boolean);
     return messages.length ? messages : undefined;
   },
+  getNonTransferableFields: (column, newIndexPattern) => {
+    return getNonTransferableFields(column, newIndexPattern).invalidFields;
+  },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.getFieldByName(column.sourceField);
+    const { allFields, invalidFields } = getNonTransferableFields(column, newIndexPattern);
 
     return Boolean(
-      newField &&
-        supportedTypes.has(newField.type) &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
+      allFields.length &&
+        invalidFields.length === 0 &&
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
@@ -442,6 +445,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const showScriptedFieldError = Boolean(
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern)
     );
+    const { invalidFields } = getNonTransferableFields(selectedColumn, indexPattern);
 
     return (
       <EuiFormRow
@@ -453,14 +457,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           },
         })}
         fullWidth
-        isInvalid={Boolean(showScriptedFieldError)}
-        error={
-          showScriptedFieldError
-            ? i18n.translate('xpack.lens.indexPattern.terms.scriptedFieldErrorShort', {
-                defaultMessage: 'Scripted fields are not supported when using multiple fields',
-              })
-            : []
-        }
+        isInvalid={Boolean(showScriptedFieldError || invalidFields.length)}
+        error={getInputFieldErrorMessage(showScriptedFieldError, invalidFields)}
       >
         <FieldInputs
           column={selectedColumn}
@@ -468,6 +466,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
+          invalidFields={invalidFields}
         />
       </EuiFormRow>
     );
