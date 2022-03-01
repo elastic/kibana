@@ -9,7 +9,7 @@ import {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsImpactThreshold,
 } from '../../../../../common/correlations/failed_transactions_correlations/types';
-import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
+import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: FailedTransactionsCorrelation['pValue'],
@@ -24,24 +24,24 @@ export function getFailedTransactionsCorrelationImpactLabel(
 
   if (isFallbackResult)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.VERY_LOW,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.VERY_LOW,
       color: 'default',
     };
 
   // The lower the p value, the higher the impact
   if (pValue >= 0 && pValue < 1e-6)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.HIGH,
       color: 'danger',
     };
   if (pValue >= 1e-6 && pValue < 0.001)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.MEDIUM,
       color: 'warning',
     };
   if (pValue >= 0.001 && pValue < 0.02)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.LOW,
       color: 'default',
     };
 
@@ -62,22 +62,22 @@ export function getLatencyCorrelationImpactLabel(
   // The lower the p value, the higher the impact
   if (isFallbackResult)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.VERY_LOW,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.VERY_LOW,
       color: 'default',
     };
   if (correlation < 0.4)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.LOW,
       color: 'default',
     };
   if (correlation < 0.6)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.MEDIUM,
       color: 'warning',
     };
   if (correlation < 1)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+      impact: CORRELATIONS_IMPACT_THRESHOLD.HIGH,
       color: 'danger',
     };
 
