@@ -8,6 +8,10 @@
 import { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { i18n } from '@kbn/i18n';
 import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import { State } from '../../../../common/store';
@@ -97,6 +101,39 @@ export function usePolicyDetailsHostIsolationExceptionsNavigateCallback() {
         })
       ),
     [history, location, policyId]
+  );
+}
+
+export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const history = useHistory();
+  const policyId = usePolicyDetailsSelector(policyIdFromParams);
+
+  const getPath = useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => {
+      if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
+        return getPolicyDetailsArtifactsListPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
+        return getPolicyEventFiltersPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else {
+        return getPolicyHostIsolationExceptionsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      }
+    },
+    [listId, location, policyId]
+  );
+
+  return useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => history.push(getPath(args)),
+    [getPath, history]
   );
 }
 

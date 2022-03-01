@@ -7,7 +7,7 @@
 
 import { ImmutableMiddlewareFactory } from '../../../../../../common/store';
 import { MiddlewareRunnerContext, PolicyDetailsState } from '../../../types';
-import { policyTrustedAppsMiddlewareRunner } from './policy_trusted_apps_middleware';
+// import { policyTrustedAppsMiddlewareRunner } from './policy_trusted_apps_middleware';
 import { policySettingsMiddlewareRunner } from './policy_settings_middleware';
 import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 
@@ -25,6 +25,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
     next(action);
 
     policySettingsMiddlewareRunner(middlewareContext, store, action);
-    policyTrustedAppsMiddlewareRunner(middlewareContext, store, action);
+    // policyTrustedAppsMiddlewareRunner(middlewareContext, store, action);
   };
 };

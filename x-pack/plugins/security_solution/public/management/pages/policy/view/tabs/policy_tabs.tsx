@@ -9,7 +9,11 @@ import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { PolicyData } from '../../../../../../common/endpoint/types';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
@@ -27,11 +31,9 @@ import {
   policyDetails,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
-import { PolicyEventFiltersLayout } from '../event_filters/layout';
-import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/host_isolation_exceptions_tab';
+import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
 
 const enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -98,7 +100,7 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyTrustedAppsLayout />
+            <PolicyArtifactsLayout policyItem={policyItem} listId={ENDPOINT_TRUSTED_APPS_LIST_ID} />
           </>
         ),
       },
@@ -110,7 +112,10 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyEventFiltersLayout policyItem={policyItem} />
+            <PolicyArtifactsLayout
+              policyItem={policyItem}
+              listId={ENDPOINT_EVENT_FILTERS_LIST_ID}
+            />
           </>
         ),
       },
@@ -126,7 +131,10 @@ export const PolicyTabs = React.memo(() => {
             content: (
               <>
                 <EuiSpacer />
-                <PolicyHostIsolationExceptionsTab policy={policyItem as PolicyData} />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  listId={ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID}
+                />
               </>
             ),
           }

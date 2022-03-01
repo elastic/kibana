@@ -10,6 +10,8 @@ import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
+const DEFAULT_OPTIONS = Object.freeze({});
+
 export function useSummaryArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   searcheableFields: string[],
@@ -20,7 +22,7 @@ export function useSummaryArtifact(
     filter: '',
     policies: [],
   },
-  customQueryOptions: UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>
+  customQueryOptions: UseQueryOptions<ExceptionListSummarySchema, HttpFetchError> = DEFAULT_OPTIONS
 ): QueryObserverResult<ExceptionListSummarySchema, HttpFetchError> {
   const { filter, policies } = options;
 

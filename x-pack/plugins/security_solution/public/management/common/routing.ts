@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { isEmpty } from 'lodash/fp';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';

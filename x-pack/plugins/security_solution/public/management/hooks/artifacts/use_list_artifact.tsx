@@ -11,23 +11,30 @@ import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../com
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
+const DEFAULT_OPTIONS = Object.freeze({});
+
 export function useListArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   searcheableFields: string[],
   options: {
-    filter: string;
-    page: number;
-    perPage: number;
-    policies: string[];
+    filter?: string;
+    page?: number;
+    perPage?: number;
+    policies?: string[];
+    excludedPolicies?: string[];
   } = {
     filter: '',
-    page: MANAGEMENT_DEFAULT_PAGE,
+    page: MANAGEMENT_DEFAULT_PAGE + 1,
     perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies: [],
+    excludedPolicies: [],
   },
-  customQueryOptions: UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
+  customQueryOptions: UseQueryOptions<
+    FoundExceptionListItemSchema,
+    HttpFetchError
+  > = DEFAULT_OPTIONS
 ): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
-  const { filter, page, perPage, policies } = options;
+  const { filter, page, perPage, policies, excludedPolicies } = options;
 
   return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
     ['list', exceptionListApiClient, options],
@@ -35,6 +42,7 @@ export function useListArtifact(
       return exceptionListApiClient.find({
         filter: parsePoliciesAndFilterToKql({
           policies,
+          excludedPolicies,
           kuery: parseQueryFilterToKQL(filter, searcheableFields),
         }),
         perPage,
