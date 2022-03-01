@@ -27,6 +27,27 @@ export interface EsClientForTestingOptions extends Omit<ClientOptions, 'node' | 
   isCloud?: boolean;
 }
 
+export function createRemoteEsClientForFtrConfig(
+  config: Config,
+  overrides?: Omit<EsClientForTestingOptions, 'esUrl'>
+) {
+  const ccsConfig = config.get('esTestCluster.ccs');
+  if (!ccsConfig) {
+    throw new Error('FTR config is missing esTestCluster.ccs');
+  }
+
+  const esUrl = Url.format({
+    ...config.get('servers.elasticsearch'),
+    port: ccsConfig.remoteClusterPort,
+  });
+
+  return createEsClientForTesting({
+    esUrl,
+    requestTimeout: config.get('timeouts.esRequestTimeout'),
+    ...overrides,
+  });
+}
+
 export function createEsClientForFtrConfig(
   config: Config,
   overrides?: Omit<EsClientForTestingOptions, 'esUrl'>

@@ -8,28 +8,15 @@
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
-import * as KibanaServer from '../../common/services/kibana_server';
 
-export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
-  const config = getService('config');
-  const client = getService('es');
-
+export function RemoteEsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
+  const remoteEs = getService('remoteEs');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
 
-  const esArchiver = new EsArchiver({
-    client,
+  return new EsArchiver({
+    client: remoteEs,
     log,
     kbnClient: kibanaServer,
   });
-
-  KibanaServer.extendEsArchiver({
-    esArchiver,
-    kibanaServer,
-    retry,
-    defaults: config.get('uiSettings.defaults'),
-  });
-
-  return esArchiver;
 }

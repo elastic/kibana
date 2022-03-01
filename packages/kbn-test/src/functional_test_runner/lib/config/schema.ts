@@ -176,12 +176,15 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('basic'),
+        license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array(),
+        serverArgs: Joi.array().items(Joi.string()),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
+        ccs: Joi.object().keys({
+          remoteClusterPort: Joi.number(),
+        }),
       })
       .default(),
 
@@ -274,6 +277,7 @@ export const schema = Joi.object()
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),
+        remoteEsRoles: Joi.object(),
         defaultRoles: Joi.array()
           .items(Joi.string())
           .when('$primary', {

@@ -8,12 +8,12 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
+  const remoteEsArchiver = getService('remoteEsArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
@@ -47,8 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/date_nested_ccs.json'
       );
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await remoteEsArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
@@ -61,8 +61,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/date_nested_ccs'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
+      await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.common.unsetTime();
     });
 
@@ -87,12 +87,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('remote:date-nested');
+        await PageObjects.discover.selectIndexPattern('ftr-remote:date-nested');
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('remote:logstash-*');
+        await PageObjects.discover.selectIndexPattern('ftr-remote:logstash-*');
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');

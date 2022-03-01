@@ -2,10 +2,10 @@
   "attributes": {
     "fields": "[]",
     "timeFieldName": "nested.timestamp",
-    "title": "remote:date-nested"
+    "title": "ftr-remote:date-nested"
   },
   "coreMigrationVersion": "8.2.0",
-  "id": "remote:date-nested",
+  "id": "ftr-remote:date-nested",
   "migrationVersion": {
     "index-pattern": "8.0.0"
   },

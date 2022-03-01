@@ -36,6 +36,7 @@ export {
   createTestEsCluster,
   createEsClientForTesting,
   createEsClientForFtrConfig,
+  createRemoteEsClientForFtrConfig,
 } from './es';
 
 export {
