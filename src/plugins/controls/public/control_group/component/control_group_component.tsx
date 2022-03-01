@@ -8,14 +8,7 @@
 
 import '../control_group.scss';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiPanel,
-  EuiText,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { useMemo, useState, useCallback } from 'react';
 import classNames from 'classnames';
 import {
@@ -40,7 +33,6 @@ import { ControlGroupInput } from '../types';
 import { ViewMode } from '../../../../embeddable/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { EditControlGroup, EditControlGroupButtonTypes } from '../editor/edit_control_group';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
@@ -64,8 +56,8 @@ export const ControlGroup = () => {
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { setControlOrders, setDefaultControlWidth, setControlStyle, setAllControlWidths },
-    containerActions: { addNewEmbeddable, removeEmbeddable },
+    actions: { setControlOrders, setDefaultControlWidth },
+    containerActions: { addNewEmbeddable },
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
 
@@ -128,22 +120,6 @@ export const ControlGroup = () => {
           dispatch(setDefaultControlWidth(newDefaultControlWidth))
         }
         addNewEmbeddable={(type, input) => addNewEmbeddable(type, input)}
-      />
-    );
-  };
-
-  const getEditControlGroupButton = () => {
-    return (
-      <EditControlGroup
-        controlStyle={controlStyle}
-        panels={panels}
-        defaultControlWidth={defaultControlWidth}
-        setControlStyle={(newControlStyle) => dispatch(setControlStyle(newControlStyle))}
-        setDefaultControlWidth={(newDefaultControlWidth) =>
-          dispatch(setDefaultControlWidth(newDefaultControlWidth))
-        }
-        setAllControlWidths={(newControlStyles) => dispatch(setAllControlWidths(newControlStyles))}
-        removeEmbeddable={(id) => removeEmbeddable(id)}
       />
     );
   };

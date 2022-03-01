@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 
 import { DEFAULT_CONTROL_WIDTH, DEFAULT_CONTROL_STYLE } from './editor_constants';
 import { ControlsPanels } from '../types';
