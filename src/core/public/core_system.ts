@@ -237,6 +237,21 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
+      // HACKS: scope all current styles to screen or projection media
+      const setTargetMedia = (el: HTMLElement) => {
+        el.setAttribute('media', 'screen, projection');
+      };
+      document.querySelectorAll('link').forEach(setTargetMedia);
+      document.querySelectorAll('style').forEach(setTargetMedia);
+      const originalCreateElement = document.createElement.bind(document);
+      document.createElement = (tagName: string) => {
+        const el = originalCreateElement(tagName);
+        if (tagName === 'link' || tagName === 'style') {
+          setTargetMedia(el);
+        }
+        return el;
+      };
+
       this.rendering.start({
         application,
         chrome,
