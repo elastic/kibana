@@ -12,43 +12,9 @@ import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/cons
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
-  const log = getService('log');
 
-  describe('Node disk spave', () => {
+  describe('Node disk space', () => {
     describe('GET /api/upgrade_assistant/node_disk_space', () => {
-      before(async () => {
-        try {
-          // Configure a low disk watermark setting
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                'cluster.routing.allocation.disk.watermark.low': '60%',
-              },
-            },
-          });
-        } catch (e) {
-          log.debug('Error updating cluster settings');
-          throw e;
-        }
-      });
-
-      after(async () => {
-        try {
-          // Reset low disk watermark setting
-          await es.cluster.putSettings({
-            body: {
-              persistent: {
-                'cluster.routing.allocation.disk.watermark.low': null,
-              },
-            },
-          });
-        } catch (e) {
-          log.debug('Error resetting cluster settings');
-          throw e;
-        }
-      });
-
       it('returns an array of nodes', async () => {
         const { body: apiRequestResponse } = await supertest
           .get(`${API_BASE_PATH}/node_disk_space`)

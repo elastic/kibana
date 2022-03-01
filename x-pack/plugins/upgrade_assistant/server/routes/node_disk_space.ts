@@ -18,7 +18,9 @@ interface NodeWithLowDiskSpace {
   lowDiskWatermarkSetting: string;
 }
 
-const getLowDiskWatermarkSetting = (clusterSettings: ClusterGetSettingsResponse) => {
+const getLowDiskWatermarkSetting = (
+  clusterSettings: ClusterGetSettingsResponse
+): string | undefined => {
   const { defaults, persistent, transient } = clusterSettings;
 
   const defaultLowDiskWatermarkSetting =
