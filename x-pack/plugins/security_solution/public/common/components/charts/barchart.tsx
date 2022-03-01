@@ -210,7 +210,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
         {!isVlidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
         )}
-        {visualizationActionsOptions?.lensAttributes && visualizationActionsOptions?.timerange && (
+        {visualizationActionsOptions != null && (
           <VisualizationActions
             {...visualizationActionsOptions}
             className="kpi-matrix-histogram-actions"

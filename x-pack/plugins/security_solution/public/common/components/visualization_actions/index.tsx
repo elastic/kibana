@@ -4,17 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
 import {
   GetAllCasesSelectorModalProps,
   GetCreateCaseFlyoutProps,
@@ -50,6 +43,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   inspectIndex = 0,
   isInspectButtonDisabled,
   isMultipleQuery,
+  vizType,
   lensAttributes,
   onCloseInspect,
   queryId,
@@ -69,10 +63,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const [isPopoverOpen, setPopover] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
 
-  const contextMenuPopoverId = useGeneratedHtmlId({
-    prefix: 'contextMenuPopover',
-  });
-
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -86,6 +76,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     getLensAttributes,
     stackByField,
   });
+
+  const dataTestSubj = ['stat', queryId, vizType].join('-');
 
   const {
     disabled: isAddToCaseDisabled,
@@ -173,61 +165,67 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     onCloseInspect,
     onClick: closePopover,
     queryId,
+    vizType,
   });
 
   const items = [
     <EuiContextMenuItem
       icon="visArea"
-      key="histogramActionsOpenInLens"
+      key="visualizationActionsOpenInLens"
+      data-test-subj="viz-actions-open-in-lens"
       disabled={!canUseEditor() || attributes == null}
       onClick={onOpenInLens}
     >
       <FormattedMessage
-        id="xpack.securitySolution.histogramActions.openInLens"
+        id="xpack.securitySolution.visualizationActions.openInLens"
         defaultMessage="Open in Lens"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="save"
-      key="histogramActionsSaveVisualization"
+      key="visualizationActionsSaveVisualization"
+      data-test-subj="viz-actions-save"
       disabled={!userCanCrud}
       onClick={onSaveVisualization}
     >
       <FormattedMessage
-        id="xpack.securitySolution.histogramActions.saveVisualization"
+        id="xpack.securitySolution.visualizationActions.saveVisualization"
         defaultMessage="Save Visualization"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="search"
-      key="histogramActionsInspect"
+      key="visualizationActionsInspect"
       onClick={handleInspectButtonClick}
       disabled={disableInspectButton}
+      data-test-subj="viz-actions-inspect"
     >
       <FormattedMessage
-        id="xpack.securitySolution.histogramActions.inspect"
+        id="xpack.securitySolution.visualizationActions.inspect"
         defaultMessage="Inspect"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       disabled={attributes == null || !userCanCrud}
       icon="plusInCircle"
-      key="histogramActionsAddToNewCase"
+      key="visualizationActionsAddToNewCase"
       onClick={onAddToNewCaseClicked}
+      data-test-subj="viz-actions-add-to-new-case"
     >
       <FormattedMessage
-        id="xpack.securitySolution.histogramActions.addToNewCase"
+        id="xpack.securitySolution.visualizationActions.addToNewCase"
         defaultMessage="Add to new Case"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       disabled={isAddToCaseDisabled}
+      data-test-subj="viz-actions-add-to-existing-case"
       icon="plusInCircle"
-      key="histogramActionsAddToExistingCase"
+      key="visualizationActionsAddToExistingCase"
       onClick={onAddToExistingCaseClicked}
     >
       <FormattedMessage
-        id="xpack.securitySolution.histogramActions.addToExistingCase"
+        id="xpack.securitySolution.visualizationActions.addToExistingCase"
         defaultMessage="Add to Existing Case"
       />
     </EuiContextMenuItem>,
@@ -238,11 +236,12 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       className={HISTOGRAM_ACTIONS_BUTTON_CLASS}
       iconType="boxesHorizontal"
       onClick={onButtonClick}
+      data-test-subj={dataTestSubj}
     />
   );
 
   return (
-    <Wrapper className={className}>
+    <Wrapper className={className} data-test-subj={`${dataTestSubj}-wrapper`}>
       {isSaveModalVisible && (
         <LensSaveModalComponent
           initialInput={attributes as unknown as LensEmbeddableInput}
@@ -250,7 +249,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         />
       )}
       <EuiPopover
-        id={contextMenuPopoverId}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -258,14 +256,13 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         anchorPosition="downLeft"
         panelClassName="withHoverActions__popover"
       >
-        <EuiContextMenuPanel data-test-subj="histogram-actions-panel" size="s" items={items} />
+        <EuiContextMenuPanel data-test-subj="viz-actions-panel" size="s" items={items} />
       </EuiPopover>
       {isShowingModal && request !== null && response !== null && (
         <ModalInspectQuery
           additionalRequests={additionalRequests}
           additionalResponses={additionalResponses}
           closeModal={handleCloseInspectModal}
-          data-test-subj="histogram-actions-inspect-modal"
           inputId={inputId}
           request={request}
           response={response}

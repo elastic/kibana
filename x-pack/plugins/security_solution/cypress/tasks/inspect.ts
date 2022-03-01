@@ -8,7 +8,7 @@
 import { INSPECT_BUTTON_ICON, InspectButtonMetadata } from '../screens/inspect';
 
 export const closesModal = () => {
-  cy.get('[data-test-subj="modal-inspect-close"]').click();
+  cy.get('[data-test-subj="modal-inspect-close"]').click({ multiple: true });
 };
 
 export const clickInspectButton = (container: string) => {

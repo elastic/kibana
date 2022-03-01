@@ -20,6 +20,7 @@ interface UseInspectModalProps {
   onClick?: () => void;
   onCloseInspect?: () => void;
   queryId: string;
+  vizType: string;
 }
 
 export const useInspect = ({
@@ -30,12 +31,19 @@ export const useInspect = ({
   onClick,
   onCloseInspect,
   queryId,
+  vizType,
 }: UseInspectModalProps) => {
   const dispatch = useDispatch();
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { loading, inspect, selectedInspectIndex, isInspected } = useDeepEqualSelector((state) =>
+  const {
+    loading,
+    inspect,
+    selectedInspectIndex,
+    isInspected,
+    vizType: activeVizType,
+  } = useDeepEqualSelector((state) =>
     inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
   );
 
@@ -49,9 +57,10 @@ export const useInspect = ({
         inputId,
         isInspected: true,
         selectedInspectIndex: inspectIndex,
+        vizType,
       })
     );
-  }, [onClick, dispatch, queryId, inputId, inspectIndex]);
+  }, [onClick, dispatch, queryId, inputId, inspectIndex, vizType]);
 
   const handleCloseModal = useCallback(() => {
     if (onCloseInspect != null) {
@@ -63,6 +72,7 @@ export const useInspect = ({
         inputId,
         isInspected: false,
         selectedInspectIndex: inspectIndex,
+        vizType: null,
       })
     );
   }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex]);
@@ -88,8 +98,9 @@ export const useInspect = ({
   }
 
   const isShowingModal = useMemo(
-    () => !loading && selectedInspectIndex === inspectIndex && isInspected,
-    [inspectIndex, isInspected, loading, selectedInspectIndex]
+    () =>
+      !loading && selectedInspectIndex === inspectIndex && isInspected && activeVizType === vizType,
+    [activeVizType, vizType, inspectIndex, isInspected, loading, selectedInspectIndex]
   );
 
   const isButtonDisabled = useMemo(

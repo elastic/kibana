@@ -181,10 +181,12 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
         {!isVlidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
         )}
-        <VisualizationActions
-          {...visualizationActionsOptions}
-          className="kpi-matrix-histogram-actions"
-        />
+        {visualizationActionsOptions != null && (
+          <VisualizationActions
+            {...visualizationActionsOptions}
+            className="kpi-matrix-histogram-actions"
+          />
+        )}
       </HoverVisibilityContainer>
     </Wrapper>
   );

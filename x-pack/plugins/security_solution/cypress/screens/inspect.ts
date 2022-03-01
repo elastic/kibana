@@ -47,27 +47,42 @@ export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
 ];
 
+export const VIZ_ACTIONS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
+  {
+    id: '[data-test-subj="stat-networkKpiNetworkEventsQuery-networkEvents-metric"]',
+    title: 'Inspect KPI Network events',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiDnsQuery-dnsQueries-metric"]',
+    title: 'Inspect KPI DNS queries',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiUniqueFlowsQuery-uniqueFlowId-metric"]',
+    title: 'Inspect KPI Unique flow IDs',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiTlsHandshakesQuery-tlsHandshakes-metric"]',
+    title: 'Inspect KPI TLS handshakes',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiUniquePrivateIpsQuery-uniqueSourcePrivateIps-metric"]',
+    title: 'Inspect KPI Unique private IPs - source',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiUniquePrivateIpsQuery-uniqueDestinationPrivateIps-metric"]',
+    title: 'Inspect KPI Unique private IPs - dest.',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiUniquePrivateIpsQuery-bar_horizontal_stacked"]',
+    title: 'Inspect KPI Unique private IPs - bar chart',
+  },
+  {
+    id: '[data-test-subj="stat-networkKpiUniquePrivateIpsQuery-area"]',
+    title: 'Inspect KPI Unique private IPs - area chart',
+  },
+];
+
 export const INSPECT_NETWORK_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
-  {
-    id: '[data-test-subj="stat-networkEvents"]',
-    title: 'Network events Stat',
-  },
-  {
-    id: '[data-test-subj="stat-dnsQueries"]',
-    title: 'DNS queries Stat',
-  },
-  {
-    id: '[data-test-subj="stat-uniqueFlowId"]',
-    title: 'Unique flow IDs Stat',
-  },
-  {
-    id: '[data-test-subj="stat-tlsHandshakes"]',
-    title: 'TLS handshakes Stat',
-  },
-  {
-    id: '[data-test-subj="stat-UniqueIps"]',
-    title: 'Unique private IPs Stat',
-  },
   {
     id: '[data-test-subj="table-topNFlowSource-loading-false"]',
     title: 'Source IPs Table',

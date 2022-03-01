@@ -18,10 +18,11 @@ export interface VisualizationActionsProps {
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;
+  vizType: string;
   lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
+  stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
-  stackByField?: string;
 }

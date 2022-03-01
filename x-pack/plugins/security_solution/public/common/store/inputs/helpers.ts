@@ -121,6 +121,7 @@ export interface SetIsInspectedParams {
   isInspected: boolean;
   selectedInspectIndex: number;
   state: InputsModel;
+  vizType: string | null;
 }
 
 export const setIsInspected = ({
@@ -129,6 +130,7 @@ export const setIsInspected = ({
   isInspected,
   selectedInspectIndex,
   state,
+  vizType,
 }: SetIsInspectedParams): InputsModel => {
   const myQueryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   const myQuery = myQueryIndex > -1 ? state[inputId].queries[myQueryIndex] : null;
@@ -141,7 +143,7 @@ export const setIsInspected = ({
         myQueryIndex > -1
           ? [
               ...state[inputId].queries.slice(0, myQueryIndex),
-              { ...myQuery, isInspected, selectedInspectIndex },
+              { ...myQuery, isInspected, selectedInspectIndex, vizType },
               ...state[inputId].queries.slice(myQueryIndex + 1),
             ]
           : [...state[inputId].queries],

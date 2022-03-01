@@ -26,6 +26,7 @@ const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
     loading: false,
     refetch: null,
     selectedInspectIndex: 0,
+    vizType: null,
   };
 
 const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
@@ -37,6 +38,7 @@ const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
     loading: false,
     refetch: null,
     selectedInspectIndex: 0,
+    vizType: null,
   };
 
 export const inputsSelector = () => createSelector(selectInputs, (inputs) => inputs);
