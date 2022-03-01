@@ -15,6 +15,7 @@ interface TelemetryNotificationsConstructor {
   http: CoreStart['http'];
   overlays: CoreStart['overlays'];
   telemetryService: TelemetryService;
+  docLinks: CoreStart['docLinks'];
 }
 
 /**
@@ -23,14 +24,16 @@ interface TelemetryNotificationsConstructor {
 export class TelemetryNotifications {
   private readonly http: CoreStart['http'];
   private readonly overlays: CoreStart['overlays'];
+  private readonly docLinks: CoreStart['docLinks'];
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;
 
-  constructor({ http, overlays, telemetryService }: TelemetryNotificationsConstructor) {
+  constructor({ http, overlays, telemetryService, docLinks }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
     this.http = http;
     this.overlays = overlays;
+    this.docLinks = docLinks;
   }
 
   /**
@@ -48,6 +51,7 @@ export class TelemetryNotifications {
   public renderOptedInNoticeBanner = (): void => {
     const bannerId = renderOptedInNoticeBanner({
       http: this.http,
+      docLinks: this.docLinks,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
     });
@@ -71,6 +75,7 @@ export class TelemetryNotifications {
     const bannerId = renderOptInBanner({
       setOptIn: this.onSetOptInClick,
       overlays: this.overlays,
+      docLinks: this.docLinks,
     });
 
     this.optInBannerId = bannerId;

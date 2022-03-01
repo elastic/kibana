@@ -11,16 +11,20 @@ import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { overlayServiceMock } from '../../../../../core/public/overlays/overlay_service.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { httpServiceMock } from '../../../../../core/public/http/http_service.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { docLinksServiceMock } from '../../../../../core/public/doc_links/doc_links_service.mock';
 
 describe('renderOptedInNoticeBanner', () => {
   it('adds a banner to banners with priority of 10000', () => {
     const bannerID = 'brucer-wayne';
     const overlays = overlayServiceMock.createStartContract();
     const mockHttp = httpServiceMock.createStartContract();
+    const mockDocLinks = docLinksServiceMock.createStartContract();
     overlays.banners.add.mockReturnValue(bannerID);
 
     const returnedBannerId = renderOptedInNoticeBanner({
       http: mockHttp,
+      docLinks: mockDocLinks,
       onSeen: jest.fn(),
       overlays,
     });

@@ -12,20 +12,25 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { httpServiceMock } from '../../../../core/public/http/http_service.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { docLinksServiceMock } from '../../../../core/public/doc_links/doc_links_service.mock';
 
 const mockHttp = httpServiceMock.createStartContract();
+const mockDocLinks = docLinksServiceMock.createStartContract();
 
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
     expect(
-      shallowWithIntl(<OptedInNoticeBanner onSeenBanner={() => {}} http={mockHttp} />)
+      shallowWithIntl(
+        <OptedInNoticeBanner onSeenBanner={() => {}} http={mockHttp} docLinks={mockDocLinks} />
+      )
     ).toMatchSnapshot();
   });
 
   it('fires the "onSeenBanner" prop when a link is clicked', () => {
     const onLinkClick = jest.fn();
     const component = shallowWithIntl(
-      <OptedInNoticeBanner onSeenBanner={onLinkClick} http={mockHttp} />
+      <OptedInNoticeBanner onSeenBanner={onLinkClick} http={mockHttp} docLinks={mockDocLinks} />
     );
 
     const button = component.findWhere((n) => n.type() === EuiButton);

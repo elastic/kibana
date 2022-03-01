@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { DocLinksStart, ToastsStart } from 'src/core/public';
-import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
 import { TrackApplicationView } from '../../../usage_collection/public';
@@ -174,6 +173,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
   };
 
   renderDescription = () => {
+    const { docLinks } = this.props;
+
     const clusterDataLink = (
       <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
         <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
@@ -199,7 +200,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             See our {privacyStatementLink} for more details."
             values={{
               privacyStatementLink: (
-                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                <EuiLink href={docLinks.legal.privacyStatement} target="_blank">
                   <FormattedMessage
                     id="telemetry.readOurUsageDataPrivacyStatementLinkText"
                     defaultMessage="Privacy Statement"

@@ -9,10 +9,16 @@
 import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { CoreStart } from 'kibana/public';
 
-export class OptInMessage extends React.PureComponent {
+interface Props {
+  docLinks: CoreStart['docLinks'];
+}
+
+export class OptInMessage extends React.PureComponent<Props> {
   render() {
+    const { docLinks } = this.props;
+
     return (
       <React.Fragment>
         <FormattedMessage
@@ -20,7 +26,7 @@ export class OptInMessage extends React.PureComponent {
           defaultMessage="Want to help us improve the Elastic Stack? Data usage collection is currently disabled. Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
           values={{
             privacyStatementLink: (
-              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
+              <EuiLink href={docLinks.links.legal.privacyStatement} target="_blank" rel="noopener">
                 <FormattedMessage
                   id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
                   defaultMessage="Privacy Statement"

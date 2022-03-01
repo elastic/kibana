@@ -15,6 +15,8 @@ import { notificationServiceMock } from '../../../core/public/notifications/noti
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { docLinksServiceMock } from '../../../core/public/doc_links/doc_links_service.mock';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
@@ -69,6 +71,7 @@ export function mockTelemetryNotifications({
   return new TelemetryNotifications({
     http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
     telemetryService,
   });
 }

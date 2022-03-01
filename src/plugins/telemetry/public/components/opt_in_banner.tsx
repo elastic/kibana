@@ -9,15 +9,17 @@
 import * as React from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CoreStart } from 'kibana/public';
 import { OptInMessage } from './opt_in_message';
 
 interface Props {
   onChangeOptInClick: (isOptIn: boolean) => void;
+  docLinks: CoreStart['docLinks'];
 }
 
 export class OptInBanner extends React.PureComponent<Props> {
   render() {
-    const { onChangeOptInClick } = this.props;
+    const { onChangeOptInClick, docLinks } = this.props;
     const title = (
       <FormattedMessage
         id="telemetry.welcomeBanner.title"
@@ -26,7 +28,7 @@ export class OptInBanner extends React.PureComponent<Props> {
     );
     return (
       <EuiCallOut iconType="questionInCircle" title={title}>
-        <OptInMessage />
+        <OptInMessage docLinks={docLinks} />
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

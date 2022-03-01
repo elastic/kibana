@@ -30,7 +30,6 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 /**
  * Publicly exposed APIs from the Telemetry Service
@@ -140,7 +139,13 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({ http, overlays, application, savedObjects }: CoreStart): TelemetryPluginStart {
+  public start({
+    http,
+    overlays,
+    application,
+    savedObjects,
+    docLinks,
+  }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
@@ -150,6 +155,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     const telemetryNotifications = new TelemetryNotifications({
       http,
+      docLinks,
       overlays,
       telemetryService: this.telemetryService,
     });
@@ -181,7 +187,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
       },
       telemetryConstants: {
-        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
+        getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
       },
     };
   }

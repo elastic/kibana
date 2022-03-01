@@ -14,10 +14,11 @@ import { toMountPoint } from '../../../../kibana_react/public';
 interface RenderBannerConfig {
   overlays: CoreStart['overlays'];
   setOptIn: (isOptIn: boolean) => Promise<unknown>;
+  docLinks: CoreStart['docLinks'];
 }
 
-export function renderOptInBanner({ setOptIn, overlays }: RenderBannerConfig) {
-  const mount = toMountPoint(<OptInBanner onChangeOptInClick={setOptIn} />);
+export function renderOptInBanner({ setOptIn, overlays, docLinks }: RenderBannerConfig) {
+  const mount = toMountPoint(<OptInBanner onChangeOptInClick={setOptIn} docLinks={docLinks} />);
   const bannerId = overlays.banners.add(mount, 10000);
 
   return bannerId;
