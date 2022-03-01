@@ -38,4 +38,9 @@ export class Span extends BaseSpan {
 
     return this;
   }
+
+  linkSpans(spansToLink: Array<{ span: { id: string }; trace?: { id: string } }>) {
+    this.fields['span.links'] = spansToLink;
+    return this;
+  }
 }
