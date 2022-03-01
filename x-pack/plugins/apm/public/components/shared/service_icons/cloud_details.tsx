@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
