@@ -139,6 +139,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateHosts,
     isPreconfigured
   );
+  const sslCertificateAuthoritiesInput = useComboInput(
+    'sslCertificateAuthoritiesComboxBox',
+    output?.ssl?.certificate_authorities ?? [],
+    undefined, // TODO validate certificate
+    isPreconfigured
+  );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
     undefined, // TODO validate certificate
@@ -164,6 +170,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     caTrustedFingerprintInput,
     sslCertificateInput,
     sslKeyInput,
+    sslCertificateAuthoritiesInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -207,7 +214,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         ? {
             name: nameInput.value,
             type: typeInput.value as 'elasticsearch' | 'logstash',
-            hosts: elasticsearchUrlInput.value,
+            hosts: logstashHostsInput.value,
             is_default: defaultOutputInput.value,
             is_default_monitoring: defaultMonitoringOutputInput.value,
             config_yaml: additionalYamlConfigInput.value,
@@ -263,6 +270,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     defaultMonitoringOutputInput.value,
     defaultOutputInput.value,
     elasticsearchUrlInput.value,
+    logstashHostsInput.value,
     caTrustedFingerprintInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,

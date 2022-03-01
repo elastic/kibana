@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { HostsInput } from '../hosts_input';
+import { MultiRowInput } from '../multi_row_input';
 import type { Output } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
@@ -149,15 +149,27 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </>
           )}
           {isESOutput && (
-            <HostsInput
+            <MultiRowInput
               label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
                 defaultMessage: 'Hosts',
               })}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
+                {
+                  defaultMessage: 'Specify host URL',
+                }
+              )}
               {...inputs.elasticsearchUrlInput.props}
             />
           )}
           {isLogstashOutput && (
-            <HostsInput
+            <MultiRowInput
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
+                {
+                  defaultMessage: 'Specify host',
+                }
+              )}
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
@@ -200,6 +212,25 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
           {isLogstashOutput && (
+            <MultiRowInput
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
+                {
+                  defaultMessage: 'Specify host',
+                }
+              )}
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+                {
+                  defaultMessage: 'Server SSL certificate authorities',
+                }
+              )}
+              multiline={true}
+              sortable={false}
+              {...inputs.sslCertificateAuthoritiesInput.props}
+            />
+          )}
+          {isLogstashOutput && (
             <EuiFormRow
               fullWidth
               label={
@@ -212,6 +243,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             >
               <EuiTextArea
                 fullWidth
+                rows={5}
                 {...inputs.sslCertificateInput.props}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
@@ -235,6 +267,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             >
               <EuiTextArea
                 fullWidth
+                rows={5}
                 {...inputs.sslKeyInput.props}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',

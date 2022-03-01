@@ -9,7 +9,7 @@ import { useState } from '@storybook/addons';
 import { addParameters } from '@storybook/react';
 import React from 'react';
 
-import { HostsInput as Component } from '.';
+import { MultiRowInput as Component } from '.';
 
 addParameters({
   options: {
@@ -19,7 +19,7 @@ addParameters({
 
 export default {
   component: Component,
-  title: 'Sections/Fleet/Settings/HostInput',
+  title: 'Sections/Fleet/Settings/MultiRowInput',
 };
 
 interface Args {
