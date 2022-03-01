@@ -29,12 +29,13 @@ export const casesSchema: CasesTelemetrySchema = {
   comments: { all: countSchema, maxOnACase: long },
   alerts: { all: countSchema, maxOnACase: long },
   connectors: {
-    maxAttachedToACase: countSchema,
+    all: { totalAttached: long },
     itsm: { totalAttached: long },
     sir: { totalAttached: long },
     jira: { totalAttached: long },
-    ibm: { totalAttached: long },
+    resilient: { totalAttached: long },
     swimlane: { totalAttached: long },
+    maxAttachedToACase: long,
   },
   externalServices: {
     totalPushes: long,

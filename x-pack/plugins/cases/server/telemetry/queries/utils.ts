@@ -7,7 +7,7 @@
 
 import { KueryNode } from '@kbn/es-query';
 import { ISavedObjectsRepository } from 'kibana/server';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { Buckets } from '../types';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
@@ -45,6 +45,30 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
           max: {
             max_bucket: {
               buckets_path: 'ids._count',
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+export const getConnectorsCardinalityAggregationQuery = () => ({
+  references: {
+    nested: {
+      path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+    },
+    aggregations: {
+      connectors: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
+          },
+        },
+        aggregations: {
+          uniqueConnectors: {
+            cardinality: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
             },
           },
         },

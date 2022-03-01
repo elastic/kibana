@@ -5,31 +5,30 @@
  * 2.0.
  */
 
+import { getAlertsTelemetryData } from './queries/alerts';
 import { getCasesTelemetryData } from './queries/cases';
+import { getUserCommentsTelemetryData } from './queries/comments';
+import { getConnectorsTelemetryData } from './queries/connectors';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry> => {
-  const [cases, userActions] = await Promise.all([
+  const [cases, userActions, comments, alerts, connectors] = await Promise.all([
     getCasesTelemetryData({ savedObjectsClient }),
     getUserActionsTelemetryData({ savedObjectsClient }),
+    getUserCommentsTelemetryData({ savedObjectsClient }),
+    getAlertsTelemetryData({ savedObjectsClient }),
+    getConnectorsTelemetryData({ savedObjectsClient }),
   ]);
 
   return {
     cases,
     userActions,
-    comments: { all: { total: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
-    alerts: { all: { total: 0, '1d': 0, '1w': 0, '1m': 0 }, maxOnACase: 0 },
-    connectors: {
-      maxAttachedToACase: { total: 0, '1d': 0, '1w': 0, '1m': 0 },
-      itsm: { totalAttached: 0 },
-      sir: { totalAttached: 0 },
-      jira: { totalAttached: 0 },
-      ibm: { totalAttached: 0 },
-      swimlane: { totalAttached: 0 },
-    },
+    comments,
+    alerts,
+    connectors,
     externalServices: {
       totalPushes: 0,
       maxPushesOnACase: 0,

@@ -43,12 +43,13 @@ export interface CasesTelemetry {
   comments: { all: Count; maxOnACase: number };
   alerts: { all: Count; maxOnACase: number };
   connectors: {
-    maxAttachedToACase: Count;
+    all: { totalAttached: number };
     itsm: { totalAttached: number };
     sir: { totalAttached: number };
     jira: { totalAttached: number };
-    ibm: { totalAttached: number };
+    resilient: { totalAttached: number };
     swimlane: { totalAttached: number };
+    maxAttachedToACase: number;
   };
   externalServices: {
     totalPushes: number;
