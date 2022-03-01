@@ -25,11 +25,7 @@ import {
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import {
-  TimelineExpandedDetailType,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { TimelineExpandedDetailType, TimelineTabs } from '../../../../common/types/timeline';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
 
