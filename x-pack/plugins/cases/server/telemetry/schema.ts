@@ -42,6 +42,9 @@ export const casesSchema: CasesTelemetrySchema = {
     maxPushesOnACase: long,
   },
   configuration: {
-    closeCaseAfterPush: long,
+    closure: {
+      manually: long,
+      automatic: long,
+    },
   },
 };

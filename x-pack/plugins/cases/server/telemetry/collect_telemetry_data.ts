@@ -8,6 +8,7 @@
 import { getAlertsTelemetryData } from './queries/alerts';
 import { getCasesTelemetryData } from './queries/cases';
 import { getUserCommentsTelemetryData } from './queries/comments';
+import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { CasesTelemetry, CollectTelemetryDataParams } from './types';
@@ -15,12 +16,13 @@ import { CasesTelemetry, CollectTelemetryDataParams } from './types';
 export const collectTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry> => {
-  const [cases, userActions, comments, alerts, connectors] = await Promise.all([
+  const [cases, userActions, comments, alerts, connectors, configuration] = await Promise.all([
     getCasesTelemetryData({ savedObjectsClient }),
     getUserActionsTelemetryData({ savedObjectsClient }),
     getUserCommentsTelemetryData({ savedObjectsClient }),
     getAlertsTelemetryData({ savedObjectsClient }),
     getConnectorsTelemetryData({ savedObjectsClient }),
+    getConfigurationTelemetryData({ savedObjectsClient }),
   ]);
 
   return {
@@ -33,8 +35,6 @@ export const collectTelemetryData = async ({
       totalPushes: 0,
       maxPushesOnACase: 0,
     },
-    configuration: {
-      closeCaseAfterPush: 0,
-    },
+    configuration,
   };
 };

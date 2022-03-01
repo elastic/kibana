@@ -56,7 +56,10 @@ export interface CasesTelemetry {
     maxPushesOnACase: number;
   };
   configuration: {
-    closeCaseAfterPush: number;
+    closure: {
+      manually: number;
+      automatic: number;
+    };
   };
 }
 
