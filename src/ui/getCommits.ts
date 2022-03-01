@@ -86,7 +86,11 @@ export async function getCommits(options: ValidConfigOptions) {
       showDetails: options.details,
     });
   } catch (e) {
-    spinner.fail();
+    if (options.ls) {
+      spinner.stop();
+    } else {
+      spinner.fail();
+    }
     throw e;
   }
 }

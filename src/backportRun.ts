@@ -109,29 +109,44 @@ export async function backportRun(
       });
     }
 
-    if (e instanceof HandledError || e instanceof GithubV4Exception) {
-      consoleLog(e.message);
-    } else if (e instanceof Error) {
-      // output
-      consoleLog('\n');
-      consoleLog(chalk.bold('⚠️  Ouch! An unhandled error occured 😿'));
-      consoleLog(e.stack ? e.stack : e.message);
-      consoleLog(
-        'Please open an issue in https://github.com/sqren/backport/issues or contact me directly on https://twitter.com/sorenlouv'
-      );
-
-      consoleLog(
-        chalk.italic(
-          `For additional details see the logs: ${getLogfilePath({
-            logFilePath,
-          })}`
-        )
-      );
+    if (!options?.ls) {
+      outputError({ e, logFilePath });
     }
 
     logger.error('Unhandled exception', e);
     process.exitCode = 1;
 
     return backportResponse;
+  }
+}
+
+function outputError({
+  e,
+  logFilePath,
+}: {
+  e: HandledError | GithubV4Exception<any> | Error;
+  logFilePath?: string;
+}) {
+  if (e instanceof HandledError || e instanceof GithubV4Exception) {
+    consoleLog(e.message);
+    return;
+  }
+
+  if (e instanceof Error) {
+    // output
+    consoleLog('\n');
+    consoleLog(chalk.bold('⚠️  Ouch! An unhandled error occured 😿'));
+    consoleLog(e.stack ? e.stack : e.message);
+    consoleLog(
+      'Please open an issue in https://github.com/sqren/backport/issues or contact me directly on https://twitter.com/sorenlouv'
+    );
+
+    consoleLog(
+      chalk.italic(
+        `For additional details see the logs: ${getLogfilePath({
+          logFilePath,
+        })}`
+      )
+    );
   }
 }
