@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, Redirect } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
-import { last } from 'lodash';
 import { defaultApmServiceEnvironment } from '../../../../../observability/common';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmRouter } from '../../../hooks/use_apm_router';
 
 export function RedirectWithDefaultEnvironment({
   children,
@@ -20,10 +18,7 @@ export function RedirectWithDefaultEnvironment({
   children: React.ReactElement;
 }) {
   const { core } = useApmPluginContext();
-
-  const apmRouter = useApmRouter();
   const location = useLocation();
-  const history = useHistory();
 
   const query = qs.parse(location.search);
 
@@ -31,22 +26,22 @@ export function RedirectWithDefaultEnvironment({
     return children;
   }
 
-  const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
-
-  if (last(matchingRoutes)?.path === '/services') {
+  if (location.pathname === '/services' || location.pathname === '/services/') {
     const defaultServiceEnvironment =
       core.uiSettings.get<string>(defaultApmServiceEnvironment) ||
       ENVIRONMENT_ALL.value;
 
-    history.replace({
-      ...location,
-      search: qs.stringify({
-        ...query,
-        environment: defaultServiceEnvironment,
-      }),
-    });
-
-    return null;
+    return (
+      <Redirect
+        to={qs.stringifyUrl({
+          url: location.pathname,
+          query: {
+            ...query,
+            environment: defaultServiceEnvironment,
+          },
+        })}
+      />
+    );
   }
 
   return children;
