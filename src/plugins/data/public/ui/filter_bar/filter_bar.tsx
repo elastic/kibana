@@ -81,7 +81,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }, []);
 
   useEffect(() => {
-    const savedFiltersGroupIds: number[] = [];
+    const savedFiltersGroupIds: number[] = [...selectedSavedFiltersGroupIds];
     let groupId = getInitForField(props.multipleFilters, 'groupId', 1);
     let id = getInitForField(props.multipleFilters, 'id', 0);
 
