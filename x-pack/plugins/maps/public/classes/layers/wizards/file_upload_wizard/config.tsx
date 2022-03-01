@@ -12,7 +12,7 @@ import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 import { getFileUpload } from '../../../../kibana_services';
 
 export const uploadLayerWizardConfig: LayerWizard = {
-  id: 'upload_geojson',
+  id: 'uploadGeojson',
   order: 10,
   categories: [],
   description: i18n.translate('xpack.maps.fileUploadWizard.description', {

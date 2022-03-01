@@ -24,7 +24,7 @@ import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common/constants';
 import { getLayerWizardId } from '../../selectors/ui_selectors';
-import { UPDATE_WIZARD_LAYER } from '../../actions/ui_actions';
+import { SET_LAYER_WIZARD_ID } from '../../actions/ui_actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -54,7 +54,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     clearLayerWizard: () => {
       dispatch({
-        type: UPDATE_WIZARD_LAYER,
+        type: SET_LAYER_WIZARD_ID,
         layerWizardId: '',
       });
     },

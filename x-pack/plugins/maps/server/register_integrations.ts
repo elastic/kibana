@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'kibana/server';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { APP_ID } from '../common/constants';
+import { APP_ID, OPEN_WIZARD_URL, getFullPath } from '../common/constants';
 
 export function registerIntegrations(
   core: CoreSetup,
@@ -43,7 +43,33 @@ export function registerIntegrations(
     description: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationDescription', {
       defaultMessage: 'Upload GeoJson with Elastic Maps.',
     }),
-    uiInternalPath: core.http.basePath.prepend(`/app/maps/map#?openLayerWizard=upload_geojson`),
+    uiInternalPath: core.http.basePath.prepend(
+      `${getFullPath('?' + OPEN_WIZARD_URL + '=uploadGeojson')}`
+    ),
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoMaps',
+      },
+    ],
+    categories: ['upload_file', 'geo'],
+    shipper: 'other',
+    isBeta: false,
+  });
+  customIntegrations.registerCustomIntegration({
+    id: 'ingest_shape',
+    title: i18n.translate('xpack.maps.registerIntegrations.shapefile.integrationTitle', {
+      defaultMessage: 'Shapefile',
+    }),
+    description: i18n.translate(
+      'xpack.maps.registerIntegrations.shapefile.integrationDescription',
+      {
+        defaultMessage: 'Upload Shapefile with Elastic Maps.',
+      }
+    ),
+    uiInternalPath: core.http.basePath.prepend(
+      `${getFullPath('?' + OPEN_WIZARD_URL + '=uploadGeojson')}`
+    ),
     icons: [
       {
         type: 'eui',

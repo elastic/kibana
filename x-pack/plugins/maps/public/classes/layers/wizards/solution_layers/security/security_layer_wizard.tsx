@@ -13,7 +13,7 @@ import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 import { SecurityLayerTemplate } from './security_layer_template';
 
 export const SecurityLayerWizardConfig: LayerWizard = {
-  id: 'SecurityLayer',
+  id: 'securityLayer',
   order: 20,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
   getIsDisabled: async () => {

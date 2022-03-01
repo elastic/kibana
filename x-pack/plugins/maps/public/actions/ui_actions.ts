@@ -24,7 +24,7 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const SET_DRAW_MODE = 'SET_DRAW_MODE';
-export const UPDATE_WIZARD_LAYER = 'UPDATE_WIZARD_LAYER';
+export const SET_LAYER_WIZARD_ID = 'SET_LAYER_WIZARD_ID';
 
 export function exitFullScreen() {
   return {
@@ -131,7 +131,7 @@ export function openLayerWizard(layerWizardId: string) {
     dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     dispatch(setDrawMode(DRAW_MODE.NONE));
     dispatch({
-      type: UPDATE_WIZARD_LAYER,
+      type: SET_LAYER_WIZARD_ID,
       layerWizardId,
     });
   };

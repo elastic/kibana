@@ -19,7 +19,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
-  UPDATE_WIZARD_LAYER,
+  SET_LAYER_WIZARD_ID,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -85,7 +85,7 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
           return layerId !== action.layerId;
         }),
       };
-    case UPDATE_WIZARD_LAYER:
+    case SET_LAYER_WIZARD_ID:
       return { ...state, layerWizardId: action.layerWizardId };
     default:
       return state;
