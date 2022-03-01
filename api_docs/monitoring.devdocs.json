@@ -76,7 +76,7 @@
               {
                 "parentPluginId": "monitoring",
                 "id": "def-server.IBulkUploader.start.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "esClient",
                 "description": [],
@@ -113,6 +113,46 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "monitoring",
+        "id": "def-server.MonitoringConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MonitoringConfig",
+        "description": [
+          "\nA functional representation of the `monitoring.*` configuration tree passed in from kibana.yml"
+        ],
+        "signature": [
+          {
+            "pluginId": "monitoring",
+            "scope": "server",
+            "docId": "kibMonitoringPluginApi",
+            "section": "def-server.MonitoringConfig",
+            "text": "MonitoringConfig"
+          },
+          " extends MonitoringConfigTypeOverriddenUI"
+        ],
+        "path": "x-pack/plugins/monitoring/server/config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "monitoring",
+            "id": "def-server.MonitoringConfig.ui",
+            "type": "Object",
+            "tags": [],
+            "label": "ui",
+            "description": [
+              "\nA functional representation of the `monitoring.ui.*` configuration tree passed in from kibana.yml"
+            ],
+            "signature": [
+              "MonitoringConfigTypeOverriddenUIElasticsearch"
+            ],
+            "path": "x-pack/plugins/monitoring/server/config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -136,22 +176,6 @@
           "KibanaSettingsCollectorExtraOptions"
         ],
         "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "monitoring",
-        "id": "def-server.MonitoringConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "MonitoringConfig",
-        "description": [],
-        "signature": [
-          "{ ui: { elasticsearch: ",
-          "MonitoringElasticsearchConfig",
-          "; enabled: boolean; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; }>; logs: Readonly<{} & { index: string; }>; debug_mode: boolean; debug_log_path: string; ccs: Readonly<{} & { enabled: boolean; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; kibana: Readonly<{} & { collection: Readonly<{} & { interval: number; enabled: boolean; }>; }>; agent: Readonly<{} & { interval: string; }>; licensing: Readonly<{} & { api_polling_frequency: moment.Duration; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; }"
-        ],
-        "path": "x-pack/plugins/monitoring/server/config.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
