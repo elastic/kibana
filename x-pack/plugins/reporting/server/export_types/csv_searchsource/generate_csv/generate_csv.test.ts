@@ -27,7 +27,7 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
-import { AuthenticationExpiredError } from '../../../../common/errors';
+import { UnknownError } from '../../../../common/errors';
 import {
   createMockConfig,
   createMockConfigSchema,
@@ -808,25 +808,76 @@ it('can override ignoring frozen indices', async () => {
   );
 });
 
-it('throws an AuthenticationExpiredError when ES does not accept credentials', async () => {
-  mockDataClient.search = jest.fn().mockImplementation(() => {
-    throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
+describe('error codes', () => {
+  it('returns the expected error code when authentication expires', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          _scroll_id: 'test',
+          hits: {
+            hits: range(0, 5).map(() => ({
+              fields: {
+                date: ['2020-12-31T00:14:28.000Z'],
+                ip: ['110.135.176.89'],
+                message: ['super cali fragile istic XPLA docious'],
+              },
+            })),
+            total: 10,
+          },
+        },
+      })
+    );
+
+    mockEsClient.asCurrentUser.scroll = jest.fn().mockImplementation(() => {
+      throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
+    });
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger,
+      stream
+    );
+
+    const { error_code: errorCode, warnings } = await generateCsv.generateData();
+    expect(errorCode).toBe('authentication_expired');
+    expect(warnings).toMatchInlineSnapshot(`
+      Array [
+        "This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.",
+      ]
+    `);
   });
-  const generateCsv = new CsvGenerator(
-    createMockJob({ columns: ['date', 'ip', 'message'] }),
-    mockConfig,
-    {
-      es: mockEsClient,
-      data: mockDataClient,
-      uiSettings: uiSettingsClient,
-    },
-    {
-      searchSourceStart: mockSearchSourceService,
-      fieldFormatsRegistry: mockFieldFormatsRegistry,
-    },
-    new CancellationToken(),
-    logger,
-    stream
-  );
-  await expect(generateCsv.generateData()).rejects.toEqual(new AuthenticationExpiredError());
+
+  it('throws for unknown errors', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() => {
+      throw new esErrors.ResponseError({ statusCode: 500, meta: {} as any, warnings: [] });
+    });
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger,
+      stream
+    );
+    await expect(generateCsv.generateData()).rejects.toBeInstanceOf(UnknownError);
+  });
 });
