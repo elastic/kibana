@@ -32,6 +32,7 @@ export const getCasesTelemetryData = async ({
     unknown,
     Record<typeof owners[number], { counts: Buckets }> & {
       syncAlerts: Buckets;
+      status: Buckets;
     }
   >({
     page: 0,
@@ -42,12 +43,18 @@ export const getCasesTelemetryData = async ({
       syncAlerts: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.syncAlerts` },
       },
+      status: {
+        terms: {
+          field: `${CASE_SAVED_OBJECT}.attributes.status`,
+        },
+      },
     },
   });
 
   const obsCountsBuckets = res.aggregations?.observability?.counts?.buckets ?? [];
   const secCountsBuckets = res.aggregations?.securitySolution?.counts?.buckets ?? [];
   const syncAlertsBuckets = res.aggregations?.syncAlerts?.buckets ?? [];
+  const statusBuckets = res.aggregations?.status?.buckets ?? [];
 
   return {
     all: {
@@ -55,6 +62,11 @@ export const getCasesTelemetryData = async ({
       '1d': 0,
       '1w': 0,
       '1m': 0,
+      status: {
+        open: statusBuckets.find(({ key }) => key === 'open')?.doc_count ?? 0,
+        inProgress: statusBuckets.find(({ key }) => key === 'in-progress')?.doc_count ?? 0,
+        closed: statusBuckets.find(({ key }) => key === 'closed')?.doc_count ?? 0,
+      },
     },
     sec: {
       total: 0,

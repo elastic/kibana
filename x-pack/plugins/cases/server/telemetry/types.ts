@@ -30,9 +30,15 @@ export interface Count {
   '1d': number;
 }
 
+export interface Status {
+  open: number;
+  inProgress: number;
+  closed: number;
+}
+
 export interface CasesTelemetry {
   cases: {
-    all: Count;
+    all: Count & { status: Status };
     sec: Count;
     obs: Count;
     main: Count;
@@ -64,4 +70,5 @@ export interface CasesTelemetry {
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
+export type StatusSchema = MakeSchemaFrom<Status>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;

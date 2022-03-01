@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesTelemetrySchema, Long, CountSchema } from './types';
+import { CasesTelemetrySchema, Long, CountSchema, StatusSchema } from './types';
 
 const long: Long = { type: 'long' };
 
@@ -16,9 +16,15 @@ const countSchema: CountSchema = {
   '1d': long,
 };
 
+const statusSchema: StatusSchema = {
+  open: long,
+  inProgress: long,
+  closed: long,
+};
+
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
-    all: countSchema,
+    all: { ...countSchema, status: statusSchema },
     sec: countSchema,
     obs: countSchema,
     main: countSchema,
