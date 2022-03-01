@@ -21,7 +21,7 @@ export const ReportLink = ({ getUrl }: Props) => (
         <a href={getUrl()}>
           <FormattedMessage
             id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-            defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+            defaultMessage="Stack Management &gt; Reporting"
           />
         </a>
       ),
