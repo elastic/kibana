@@ -404,7 +404,6 @@ export const FilterExpressionItem: FC<Props> = ({
     }
     for (const filter of subGroupedFilters) {
       const label = getValueLabel(filter);
-
       const prefixText = filter.meta.negate
         ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
           defaultMessage: 'NOT ',
@@ -421,9 +420,7 @@ export const FilterExpressionItem: FC<Props> = ({
       const filterContent = getFilterContent(filter, label, prefix, relationship);
       filterExpression.push(filterContent);
 
-      const text = label.title;
-      filterText += `${filter?.meta?.key}: ${text} ${groupedFilters.length > 1 ? filter.relationship || '' : ''
-        } `;
+      filterText += `${filter?.meta?.key}: ${filter?.meta?.params?.query} ${relationship} `;
     }
     if (needsParenthesis) {
       filterExpression.push(<EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>);
