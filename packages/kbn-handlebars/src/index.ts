@@ -135,11 +135,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     const [context] = this.scopes;
     const params = this.getParams(block);
-    const options = {
+    const options: Handlebars.HelperOptions = {
       fn: (nextContext: any) => {
         this.scopes.unshift(nextContext);
         this.acceptKey(block, 'program');
         this.scopes.shift();
+        return ''; // TODO: supposed to return a string
       },
       inverse: noop,
       hash: {}, // TODO: Figure out what actual value to put in hash
