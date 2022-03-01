@@ -13,14 +13,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { getEnvironmentLabel } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+  allOptionText,
+} from '../../../common/environment_filter_values';
 import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
-import {
-  allOption,
-  allOptionText,
-  environmentAllOption,
-} from '../shared/select_with_combo_box';
 
 export function ServiceField({
   allowAll = true,
@@ -39,7 +38,7 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        allOption={allowAll ? allOption : undefined}
+        allOption={allowAll ? ENVIRONMENT_ALL : undefined}
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
@@ -72,7 +71,7 @@ export function EnvironmentField({
       })}
     >
       <SuggestionsSelect
-        allOption={environmentAllOption}
+        allOption={ENVIRONMENT_ALL}
         customOptionText={i18n.translate(
           'xpack.apm.environmentsSelectCustomOptionText',
           {
@@ -103,7 +102,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        allOption={allOption}
+        allOption={ENVIRONMENT_ALL}
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {

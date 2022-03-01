@@ -9,7 +9,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SuggestionsSelect } from '../../../../../shared/suggestions_select';
-import { allOption } from '../../../../../shared/select_with_combo_box';
+import { ENVIRONMENT_ALL } from '../../../../../../../common/environment_filter_values';
 
 interface Props {
   title: string;
@@ -38,7 +38,7 @@ export function FormRowSuggestionsSelect({
     >
       <EuiFormRow label={fieldLabel}>
         <SuggestionsSelect
-          allOption={allowAll ? allOption : undefined}
+          allOption={allowAll ? ENVIRONMENT_ALL : undefined}
           defaultValue={value}
           field={field}
           onChange={onChange}
