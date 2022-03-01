@@ -6,6 +6,7 @@
  */
 import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
+import { checkA11y } from '../../support/commands';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -42,6 +43,17 @@ describe('Dependencies', () => {
       cy.contains('postgresql').click({ force: true });
 
       cy.contains('h1', 'postgresql');
+    });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.visit(
+        `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(
+          timeRange
+        )}`
+      );
+      cy.contains('a[role="tab"]', 'Dependencies');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y(true);
     });
   });
 
@@ -93,6 +105,9 @@ describe('Dependencies', () => {
       cy.contains('a', 'postgresql').click({ force: true });
 
       cy.contains('h1', 'postgresql');
+
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y(true);
     });
   });
 });

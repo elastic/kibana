@@ -6,6 +6,11 @@
  */
 import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
+import 'cypress-axe';
+import {
+  AXE_CONFIG,
+  AXE_OPTIONS,
+} from 'test/accessibility/services/a11y/constants';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
@@ -78,3 +83,21 @@ Cypress.Commands.add(
     });
   }
 );
+
+// A11y configuration
+
+const axeConfig = {
+  ...AXE_CONFIG,
+  rules: [...AXE_CONFIG.rules],
+};
+const axeOptions = {
+  ...AXE_OPTIONS,
+  runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
+};
+
+export const checkA11y = (skipFailures: boolean) => {
+  cy.injectAxe();
+  cy.configureAxe(axeConfig);
+  const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
+  cy.checkA11y(context, axeOptions, undefined, skipFailures);
+};
