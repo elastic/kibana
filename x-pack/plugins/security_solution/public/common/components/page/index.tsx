@@ -35,12 +35,13 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9950 !important;
   }
 
-  .euiDataGridRowCell__expandButton .euiDataGridRowCell__actionButtonIcon {
+  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
     display: none;
 
     &:first-child,
     &:nth-child(2),
-    &:nth-child(3) {
+    &:nth-child(3),
+    &:nth-child(6) {
       display: inline-flex;
     }
 
