@@ -35,6 +35,7 @@ export function enrichEndpointAlertsSignalID(
   signalIdMap: Map<string, string>
 ): TelemetryEvent[] {
   return events.map(function (obj: TelemetryEvent): TelemetryEvent {
+    obj.signal_id = undefined;
     if (obj?.event?.id !== undefined) {
       obj.signal_id = signalIdMap.get(obj.event.id);
     }
@@ -52,20 +53,21 @@ export function sendAlertTelemetryEvents(
   if (eventsTelemetry === undefined) {
     return;
   }
-  // Create map of ancenstor_id -> alert_id
-  /* eslint-disable no-param-reassign */
-  const signalIdMap = createdEvents.reduce((signalMap, obj) => {
-    const ancestorId = String(obj['kibana.alert.original_event.id']);
-    const alertId = String(obj._id);
-    if (ancestorId !== null && ancestorId !== undefined) {
-      signalMap = signalIdMap.set(ancestorId, alertId);
-    }
-
-    return signalMap;
-  }, new Map<CreatedSignalId, AlertId>());
 
   const selectedEvents = selectEvents(filteredEvents);
   if (selectedEvents.length > 0) {
+    // Create map of ancenstor_id -> alert_id
+    /* eslint-disable no-param-reassign */
+    const signalIdMap = createdEvents.reduce((signalMap, obj) => {
+      const ancestorId = String(obj['kibana.alert.original_event.id']);
+      const alertId = String(obj._id);
+      if (ancestorId !== null && ancestorId !== undefined) {
+        signalMap = signalIdMap.set(ancestorId, alertId);
+      }
+
+      return signalMap;
+    }, new Map<CreatedSignalId, AlertId>());
+
     const alertsWithSignalIds = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
     try {
       eventsTelemetry.queueTelemetryEvents(alertsWithSignalIds);

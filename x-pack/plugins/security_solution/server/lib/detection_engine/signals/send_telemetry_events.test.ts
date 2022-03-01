@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { selectEvents } from './send_telemetry_events';
+import { selectEvents, enrichEndpointAlertsSignalID } from './send_telemetry_events';
 
 describe('sendAlertTelemetry', () => {
   it('selectEvents', () => {
@@ -69,6 +69,37 @@ describe('sendAlertTelemetry', () => {
               },
             },
           },
+          {
+            _index: 'y',
+            _type: 'y',
+            _id: 'y',
+            _score: 0,
+            _source: {
+              '@timestamp': 'y',
+              key3: 'hello',
+              data_stream: {
+                dataset: 'endpoint.alerts',
+                other: 'y',
+              },
+              event: {
+                id: 'not-in-map',
+              },
+            },
+          },
+          {
+            _index: 'z',
+            _type: 'z',
+            _id: 'z',
+            _score: 0,
+            _source: {
+              '@timestamp': 'z',
+              key3: 'no-event-id',
+              data_stream: {
+                dataset: 'endpoint.alerts',
+                other: 'z',
+              },
+            },
+          },
         ],
       },
     };
@@ -77,7 +108,8 @@ describe('sendAlertTelemetry', () => {
       ['bar', 'abcd'],
       ['baz', '4567'],
     ]);
-    const sources = selectEvents(filteredEvents, joinMap);
+    const subsetEvents = selectEvents(filteredEvents);
+    const sources = enrichEndpointAlertsSignalID(subsetEvents, joinMap);
     expect(sources).toStrictEqual([
       {
         '@timestamp': 'x',
@@ -90,6 +122,27 @@ describe('sendAlertTelemetry', () => {
           id: 'bar',
         },
         signal_id: 'abcd',
+      },
+      {
+        '@timestamp': 'y',
+        key3: 'hello',
+        data_stream: {
+          dataset: 'endpoint.alerts',
+          other: 'y',
+        },
+        event: {
+          id: 'not-in-map',
+        },
+        signal_id: undefined,
+      },
+      {
+        '@timestamp': 'z',
+        key3: 'no-event-id',
+        data_stream: {
+          dataset: 'endpoint.alerts',
+          other: 'z',
+        },
+        signal_id: undefined,
       },
     ]);
   });
