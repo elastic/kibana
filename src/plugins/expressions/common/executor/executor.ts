@@ -152,13 +152,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
-    const fns = Object.entries(this.container.get().functions);
-    const filtered = fns.filter(
-      ([key, value]) => !value.namespace || value.namespace === namespace
-    );
-    return {
-      ...Object.fromEntries(filtered),
-    };
+    if (namespace) {
+      const fns = Object.entries(this.container.get().functions);
+      const filtered = fns.filter(
+        ([key, value]) => !value.namespace || value.namespace === namespace
+      );
+      return Object.fromEntries(filtered);
+    } else {
+      return { ...this.container.get().functions };
+    }
   }
 
   public registerType(
@@ -226,9 +228,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: ExpressionAstExpression,
     action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
   ) {
+    const functions = this.container.get().functions;
     for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
-      const fn = getByAlias(this.getFunctions(), fnName);
+      const fn = getByAlias(functions, fnName);
 
       if (fn) {
         // if any of arguments are expressions we should migrate those first
