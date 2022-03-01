@@ -47,7 +47,6 @@ import {
   PhraseFilter,
   CustomFilter,
   MatchAllFilter,
-  IFieldSubType,
   EsQueryConfig,
   FilterStateStore,
   compareFilters,
@@ -147,7 +146,6 @@ export type {
   PhraseFilter,
   CustomFilter,
   MatchAllFilter,
-  IFieldSubType,
   EsQueryConfig,
 };
 export { isFilter, isFilters };

@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Port Forwarding Rule Addition",
-  "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\PortProxy\\\\v4tov4\\\\*\"\n",
+  "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\PortProxy\\\\v4tov4\\\\*\"\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html"
   ],
@@ -45,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

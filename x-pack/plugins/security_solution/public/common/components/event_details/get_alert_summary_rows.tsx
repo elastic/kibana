@@ -6,11 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import {
-  ALERT_RULE_NAMESPACE,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_DESCRIPTION,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAMESPACE, ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -18,7 +14,6 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
-  ALERTS_HEADERS_TARGET_IMPORT_HASH,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
@@ -41,6 +36,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
+  { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
 ];
 
 /**
@@ -69,7 +65,7 @@ function getFieldsByCategory({
         { id: 'process.name' },
       ];
     case EventCategory.DNS:
-      return [{ id: 'dns.query.name' }, { id: 'process.name' }];
+      return [{ id: 'dns.question.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     case EventCategory.MALWARE:
@@ -107,7 +103,7 @@ function getFieldsByEventCode(
   switch (eventCode) {
     case EventCode.BEHAVIOR:
       return [
-        { id: ALERT_RULE_DESCRIPTION, label: ALERTS_HEADERS_RULE_DESCRIPTION },
+        { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
         // Resolve more fields based on the source event
         ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
       ];
@@ -115,15 +111,16 @@ function getFieldsByEventCode(
       return [
         { id: 'Target.process.executable' },
         {
-          id: 'Target.process.thread.Ext.start_address_detaiuls.memory_pe.imphash',
-          label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
-        },
-        {
           id: 'Memory_protection.unique_key_v1',
         },
       ];
-    case EventCode.MEMORY_SIGNATURE:
     case EventCode.RANSOMWARE:
+      return [
+        { id: 'Ransomware.feature' },
+        { id: 'process.hash.sha256' },
+        ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
+      ];
+    case EventCode.MEMORY_SIGNATURE:
       // Resolve more fields based on the source event
       return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
     default:
@@ -148,10 +145,10 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'machine_learning':
       return [
         {
-          id: `${ALERT_RULE_NAMESPACE}.machine_learning_job_id`,
+          id: `${ALERT_RULE_PARAMETERS}.machine_learning_job_id`,
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.anomaly_threshold`,
+          id: `${ALERT_RULE_PARAMETERS}.anomaly_threshold`,
         },
       ];
     case 'threat_match':
@@ -160,7 +157,7 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
           id: `${ALERT_RULE_NAMESPACE}.threat_index`,
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.index`,
+          id: `${ALERT_RULE_NAMESPACE}.threat_query`,
         },
       ];
     default:

@@ -106,6 +106,7 @@ describe('test transform install', () => {
     esClient.transform.getTransform.mockResponseOnce({
       count: 1,
       transforms: [
+        // @ts-expect-error incomplete data
         {
           dest: {
             index: 'index',
@@ -394,6 +395,7 @@ describe('test transform install', () => {
     esClient.transform.getTransform.mockResponseOnce({
       count: 1,
       transforms: [
+        // @ts-expect-error incomplete data
         {
           dest: {
             index: 'index',

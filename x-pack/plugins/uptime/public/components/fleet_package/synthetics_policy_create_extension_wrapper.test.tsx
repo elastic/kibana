@@ -563,7 +563,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     const urlError = getByText('URL is required');
-    const monitorIntervalError = getByText('Monitor interval is required');
+    const monitorIntervalError = getByText('Monitor frequency is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
     const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
@@ -590,7 +590,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     // expect onChange to be called with isValid true
     await waitFor(() => {
       expect(queryByText('URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -618,7 +618,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host and port are required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
@@ -638,7 +638,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host and port are required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -668,7 +668,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
       const waitError = getByText('Wait must be 0 or greater');
 
@@ -691,7 +691,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -717,7 +717,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Zip URL is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
@@ -734,7 +734,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,

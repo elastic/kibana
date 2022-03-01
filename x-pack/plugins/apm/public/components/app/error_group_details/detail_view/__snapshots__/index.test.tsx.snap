@@ -34,11 +34,7 @@ exports[`DetailView should render Discover button 1`] = `
   }
   kuery=""
 >
-  <EuiButtonEmpty
-    iconType="discoverApp"
-  >
-    View 10 occurrences in Discover.
-  </EuiButtonEmpty>
+  View 10 occurrences in Discover.
 </DiscoverErrorLink>
 `;
 

@@ -34,7 +34,7 @@ export async function getFullAgentPolicy(
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   let agentPolicy;
-  const standalone = options?.standalone;
+  const standalone = options?.standalone ?? false;
 
   try {
     agentPolicy = await agentPolicyService.get(soClient, id);
@@ -171,19 +171,17 @@ export function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, api_key } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint } = output;
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
     type,
     hosts,
     ca_sha256,
-    api_key,
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 
   if (standalone) {
-    delete newOutput.api_key;
     newOutput.username = '{ES_USERNAME}';
     newOutput.password = '{ES_PASSWORD}';
   }

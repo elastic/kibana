@@ -7,7 +7,7 @@
  */
 
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable } from '../../../../visualizations/common/utils';
 import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,

@@ -8,7 +8,6 @@
 import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
 
 export async function getServices({
@@ -29,22 +28,18 @@ export async function getServices({
   end: number;
 }) {
   return withApmSpan('get_services', async () => {
-    const [items, hasLegacyData] = await Promise.all([
-      getServicesItems({
-        environment,
-        kuery,
-        setup,
-        searchAggregatedTransactions,
-        logger,
-        start,
-        end,
-      }),
-      getLegacyDataStatus(setup, start, end),
-    ]);
+    const items = await getServicesItems({
+      environment,
+      kuery,
+      setup,
+      searchAggregatedTransactions,
+      logger,
+      start,
+      end,
+    });
 
     return {
       items,
-      hasLegacyData,
     };
   });
 }

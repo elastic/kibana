@@ -19,6 +19,7 @@ import {
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common/cancellation_token';
+import { ReportingError, UnknownError, QueueTimeoutError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -148,7 +149,9 @@ export class ExecuteReportTask implements ReportingTask {
     // check if job has exceeded the configured maxAttempts
     const maxAttempts = this.config.capture.maxAttempts;
     if (report.attempts >= maxAttempts) {
-      const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
+      const err = new QueueTimeoutError(
+        `Max attempts reached (${maxAttempts}). Queue timeout reached.`
+      );
       await this._failJob(report, err);
       throw err;
     }
@@ -189,7 +192,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private async _failJob(
     report: SavedReport,
-    error?: Error
+    error?: ReportingError
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Failing ${report.jobtype} job ${report._id}`;
 
@@ -213,7 +216,7 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(output: CompletedReportOutput | Error): ReportOutput {
+  private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
     const docOutput = {} as ReportOutput;
     const unknownMime = null;
 
@@ -228,7 +231,8 @@ export class ExecuteReportTask implements ReportingTask {
       const defaultOutput = null;
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
-      docOutput.warnings = [output.toString()];
+      docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.error_code = output.code;
     }
 
     return docOutput;
@@ -365,7 +369,7 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm()!;
 
             eventLog.logExecutionComplete({
-              ...(report.metrics ?? {}),
+              ...(output.metrics ?? {}),
               byteSize: stream.bytesWritten,
             });
 
@@ -409,11 +413,17 @@ export class ExecuteReportTask implements ReportingTask {
             } else {
               // 0 attempts remain - fail the job
               try {
-                const maxAttemptsMsg = `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr}`;
                 if (report == null) {
                   throw new Error(`Report ${jobId} is null!`);
                 }
-                const resp = await this._failJob(report, new Error(maxAttemptsMsg));
+                const error =
+                  failedToExecuteErr instanceof ReportingError
+                    ? failedToExecuteErr
+                    : new UnknownError();
+                error.details =
+                  error.details ||
+                  `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;
+                const resp = await this._failJob(report, error);
                 report._seq_no = resp._seq_no;
                 report._primary_term = resp._primary_term;
               } catch (failedToFailError) {

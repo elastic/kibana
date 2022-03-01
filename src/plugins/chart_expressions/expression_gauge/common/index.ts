@@ -21,6 +21,7 @@ export type {
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeState,
+  Accessors,
 } from './types';
 
 export { gaugeFunction } from './expression_functions';

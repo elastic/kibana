@@ -35,6 +35,7 @@ export type { FindResult } from './rules_client';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
+export type { PublicAlertingConfig } from './config';
 export type {
   IAbortableEsClient,
   IAbortableClusterClient,

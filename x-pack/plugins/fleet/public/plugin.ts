@@ -26,6 +26,8 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 
 import { once } from 'lodash';
 
+import type { SpacesPluginStart } from '../../spaces/public';
+
 import type { CloudStart } from '../../cloud/public';
 
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -36,10 +38,11 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { FieldFormatsStart } from '../../../../src/plugins/field_formats/public/index';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
+import type { LicensingPluginStart } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import {
@@ -82,7 +85,6 @@ export interface FleetStart {
 }
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
@@ -92,7 +94,9 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
@@ -103,6 +107,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup & CloudStart;
+  spaces?: SpacesPluginStart;
   authz: FleetAuthz;
 }
 
@@ -128,9 +133,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // variable from plugin setup.  Refactor to an abstraction, if necessary.
     // Set up http client
     setHttpClient(core.http);
-
-    // Set up license service
-    licenseService.start(deps.licensing.license$);
 
     // Register Integrations app
     core.application.register({
@@ -255,6 +257,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
     );
+
+    // Set up license service
+    licenseService.start(deps.licensing.license$);
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,

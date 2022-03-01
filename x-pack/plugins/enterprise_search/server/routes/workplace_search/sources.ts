@@ -104,9 +104,30 @@ const sourceSettingsSchema = schema.object({
             ),
           })
         ),
+        rules: schema.maybe(
+          schema.arrayOf(
+            schema.object({
+              filter_type: schema.string(),
+              exclude: schema.maybe(schema.string()),
+              include: schema.maybe(schema.string()),
+            })
+          )
+        ),
       })
     ),
   }),
+});
+
+const validateRulesSchema = schema.object({
+  rules: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        filter_type: schema.string(),
+        exclude: schema.maybe(schema.string()),
+        include: schema.maybe(schema.string()),
+      })
+    )
+  ),
 });
 
 // Account routes
@@ -277,6 +298,26 @@ export function registerAccountSourceSettingsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:id/settings',
+    })
+  );
+}
+
+export function registerAccountSourceValidateIndexingRulesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/internal/workplace_search/account/sources/{id}/indexing_rules/validate',
+      validate: {
+        body: validateRulesSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/indexing_rules/validate',
     })
   );
 }
@@ -628,6 +669,26 @@ export function registerOrgSourceSettingsRoute({
   );
 }
 
+export function registerOrgSourceValidateIndexingRulesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/internal/workplace_search/org/sources/{id}/indexing_rules/validate',
+      validate: {
+        body: validateRulesSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/indexing_rules/validate',
+    })
+  );
+}
+
 export function registerOrgPreSourceRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -963,6 +1024,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceFederatedSummaryRoute(dependencies);
   registerAccountSourceReauthPrepareRoute(dependencies);
   registerAccountSourceSettingsRoute(dependencies);
+  registerAccountSourceValidateIndexingRulesRoute(dependencies);
   registerAccountPreSourceRoute(dependencies);
   registerAccountPrepareSourcesRoute(dependencies);
   registerAccountSourceSearchableRoute(dependencies);
@@ -978,6 +1040,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceFederatedSummaryRoute(dependencies);
   registerOrgSourceReauthPrepareRoute(dependencies);
   registerOrgSourceSettingsRoute(dependencies);
+  registerOrgSourceValidateIndexingRulesRoute(dependencies);
   registerOrgPreSourceRoute(dependencies);
   registerOrgPrepareSourcesRoute(dependencies);
   registerOrgSourceSearchableRoute(dependencies);

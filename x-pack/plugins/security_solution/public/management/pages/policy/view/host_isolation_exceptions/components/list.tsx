@@ -51,7 +51,7 @@ export const PolicyHostIsolationExceptionsList = ({
   const { state } = useGetLinkTo(policyId, policyName);
 
   // load the list of policies>
-  const policiesRequest = useGetEndpointSpecificPolicies();
+  const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
   const [exceptionItemToDelete, setExceptionItemToDelete] = useState<

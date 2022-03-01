@@ -31,4 +31,5 @@ export interface BaseProps {
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   refreshAgentPolicies: () => void;
+  isLoadingAgentPolicies?: boolean;
 }

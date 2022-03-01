@@ -44,7 +44,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  describe('create_rules', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('create_rules', () => {
     describe('creating rules', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');

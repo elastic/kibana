@@ -7,6 +7,7 @@
 
 import { groups } from './groups.mock';
 
+import { IndexingRule } from '../types';
 import { SourceConfigData } from '../views/content_sources/components/add_source/add_source_logic';
 import { staticSourceData } from '../views/content_sources/source_data';
 import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
@@ -46,10 +47,25 @@ export const contentSources = [
   },
 ];
 
+const defaultIndexingRules: IndexingRule[] = [
+  {
+    filterType: 'object_type',
+    include: 'value',
+  },
+  {
+    filterType: 'path_template',
+    exclude: 'value',
+  },
+  {
+    filterType: 'file_extension',
+    include: 'value',
+  },
+];
+
 const defaultIndexing = {
   enabled: true,
   defaultAction: 'include',
-  rules: [],
+  rules: defaultIndexingRules,
   schedule: {
     full: 'P1D',
     incremental: 'PT2H',
