@@ -33,6 +33,7 @@ import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -98,14 +99,21 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up initial Fleet packages');
 
-  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput,
-    DEFAULT_SPACE_ID
-  );
+  const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      policies,
+      packages,
+      defaultOutput,
+      DEFAULT_SPACE_ID
+    );
+
+  const packagePolicyUpgradeErrors = (
+    await upgradeManagedPackagePolicies(soClient, esClient)
+  ).filter((result) => (result.errors ?? []).length > 0);
+
+  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
 
   logger.debug('Cleaning up Fleet outputs');
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);

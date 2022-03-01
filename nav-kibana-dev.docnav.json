@@ -46,8 +46,10 @@
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },
+        { "id": "kibDevTutorialCI" },
         { "id": "kibDevTutorialServerEndpoint" },
-        { "id": "kibDevTutorialAdvancedSettings"}
+        { "id": "kibDevTutorialAdvancedSettings"},
+        { "id": "kibDevSharePluginReadme"}
       ]
     },
     {
@@ -65,6 +67,7 @@
     {
       "category": "Contributors Newsletters",
       "items": [
+        { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
         { "id": "kibDecember2021ContributorNewsletter" },
         { "id": "kibNovember2021ContributorNewsletter" },

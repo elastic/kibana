@@ -28,6 +28,8 @@ export type {
   FieldFormatMap,
   RuntimeType,
   RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeFieldSubField,
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,
