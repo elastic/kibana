@@ -13,10 +13,10 @@ import { useNetworkKpiUniquePrivateIps } from '../../../containers/kpi_network/u
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
-import { kpiUniquePrivateIpsSourceMetric } from '../../../configs/kpi_unique_private_ips-source_metric';
-import { kpiUniquePrivateIpsDestinationMetric } from '../../../configs/kpi_unique_private_ips-destination_metric';
-import { kpiUniquePrivateIpsArea } from '../../../configs/kpi_unique_private_ips-area';
-import { kpiUniquePrivateIpsBar } from '../../../configs/kpi_unique_private_ips-bar';
+import { kpiUniquePrivateIpsSourceMetric } from '../../../configs/kpi_unique_private_ips_source_metric';
+import { kpiUniquePrivateIpsDestinationMetric } from '../../../configs/kpi_unique_private_ips_destination_metric';
+import { kpiUniquePrivateIpsArea } from '../../../configs/kpi_unique_private_ips_area';
+import { kpiUniquePrivateIpsBar } from '../../../configs/kpi_unique_private_ips_bar';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
