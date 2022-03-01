@@ -96,7 +96,7 @@ describe('SearchSourceAlertTypeExpression', () => {
     );
 
     const wrapper = await setup(defaultSearchSourceExpressionParams);
-    rerender(wrapper);
+    await rerender(wrapper);
 
     expect(wrapper.find(EuiCallOut).exists()).toBeTruthy();
   });
@@ -107,7 +107,7 @@ describe('SearchSourceAlertTypeExpression', () => {
     );
 
     const wrapper = await setup(defaultSearchSourceExpressionParams);
-    rerender(wrapper);
+    await rerender(wrapper);
 
     expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
