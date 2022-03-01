@@ -10,17 +10,12 @@ import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_
 import { OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
 import { SettingsRow } from '../typings';
 
-export function getApmSettings({
-  isCloudPolicy,
-}: {
-  isCloudPolicy: boolean;
-}): SettingsRow[] {
+export function getApmSettings(): SettingsRow[] {
   return [
     {
       type: 'text',
       key: 'host',
       labelAppend: REQUIRED_LABEL,
-      readOnly: isCloudPolicy,
       label: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.hostLabel',
         { defaultMessage: 'Host' }
@@ -43,7 +38,6 @@ export function getApmSettings({
       type: 'text',
       key: 'url',
       labelAppend: REQUIRED_LABEL,
-      readOnly: isCloudPolicy,
       label: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.urlLabel',
         {

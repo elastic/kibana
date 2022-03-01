@@ -74,7 +74,7 @@ function FormRow({
               row={row}
               onChange={onChange}
               value={value}
-              isDisabled={row.readOnly || frozen}
+              isDisabled={frozen}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

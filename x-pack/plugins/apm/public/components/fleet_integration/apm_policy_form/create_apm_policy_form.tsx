@@ -30,11 +30,5 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
       },
     });
   }
-  return (
-    <APMPolicyForm
-      vars={vars}
-      updateAPMPolicy={updateAPMPolicy}
-      isCloudPolicy={false}
-    />
-  );
+  return <APMPolicyForm vars={vars} updateAPMPolicy={updateAPMPolicy} />;
 }
