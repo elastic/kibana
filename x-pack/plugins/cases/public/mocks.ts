@@ -20,7 +20,6 @@ export const mockCasesContract = (): jest.Mocked<CasesUiStart> => ({
   hooks: {
     getUseCasesAddToNewCaseFlyout: jest.fn(),
     getUseCasesAddToExistingCaseModal: jest.fn(),
-    useCasesToast: jest.fn(),
   },
   helpers: {
     getRuleIdFromEvent: jest.fn(),

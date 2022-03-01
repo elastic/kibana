@@ -27,7 +27,6 @@ import type {
 } from './methods';
 import { GetCasesContextProps } from './methods/get_cases_context';
 import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
-import { useCasesToast } from './methods/use_cases_toast';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -101,10 +100,8 @@ export interface CasesUiStart {
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
-    useCasesToast: typeof useCasesToast;
   };
   helpers: {
-    // TODO use a proper type guard
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
   };
 }

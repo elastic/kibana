@@ -7,8 +7,8 @@
 
 import { useCallback } from 'react';
 import { AllCasesSelectorModalProps } from '.';
+import { useCasesToast } from '../../../common/use_cases_toast';
 import { Case } from '../../../containers/types';
-import { useCasesToast } from '../../../methods/use_cases_toast';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
