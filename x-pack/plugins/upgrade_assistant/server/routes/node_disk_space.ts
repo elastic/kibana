@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/api/types';
+import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
@@ -60,7 +60,7 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
         response
       ) => {
         try {
-          const { body: clusterSettings } = await client.asCurrentUser.cluster.getSettings({
+          const clusterSettings = await client.asCurrentUser.cluster.getSettings({
             flat_settings: true,
             include_defaults: true,
           });
@@ -68,7 +68,7 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
           const lowDiskWatermarkSetting = getLowDiskWatermarkSetting(clusterSettings);
 
           if (lowDiskWatermarkSetting) {
-            const { body: nodeStats } = await client.asCurrentUser.nodes.stats({
+            const nodeStats = await client.asCurrentUser.nodes.stats({
               metric: 'fs',
             });
 
