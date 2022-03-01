@@ -19,7 +19,6 @@ import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-import { useRulesLink } from '../../../../../observability/public';
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
 export const MetricsAlertDropdown = () => {
@@ -87,7 +86,7 @@ export const MetricsAlertDropdown = () => {
     [setVisibleFlyoutType, closePopover]
   );
 
-  const manageRulesLinkProps = useRulesLink(observability.isRuleManagementEnabled());
+  const manageRulesLinkProps = observability.useRulesLink();
 
   const manageAlertsMenuItem = useMemo(
     () => ({
