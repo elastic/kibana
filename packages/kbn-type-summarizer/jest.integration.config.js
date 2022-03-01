@@ -12,5 +12,4 @@ module.exports = {
   preset: '@kbn/test/jest_integration_node',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-type-summarizer'],
-  watchPathIgnorePatterns: ['<rootDir>/packages/kbn-type-summarizer/tests/__tmp__/.*'],
 };
