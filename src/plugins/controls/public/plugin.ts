@@ -30,6 +30,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '.';
+import { TimesliderEmbeddableFactory } from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
 import { EmbeddableFactory } from '../../embeddable/public';
 
@@ -99,6 +100,15 @@ export class ControlsPlugin
       registerControlType(rangeSliderFactory);
     });
 
+    // create time slider embeddable
+    const timeSliderFactory = new TimesliderEmbeddableFactory();
+
+    this.inlineEditors['TIME_SLIDER'] = {
+      controlEditorComponent: timeSliderFactory.controlEditorComponent,
+      presaveTransformFunction: timeSliderFactory.presaveTransformFunction,
+    };
+    embeddable.registerEmbeddableFactory('TIME_SLIDER', timeSliderFactory);
+
     return {
       registerControlType,
     };
@@ -108,7 +118,21 @@ export class ControlsPlugin
     this.startControlsKibanaServices(coreStart, startPlugins);
 
     const { getControlFactory, getControlTypes } = controlsService;
+<<<<<<< HEAD
 
+=======
+    /*
+    const timeSliderFactory = embeddable.getEmbeddableFactory('TIME_SLIDER');
+    const {
+      controlEditorComponent: timeSliderControlEditor,
+      presaveTransformFunction: timeSliderPresaveTransform,
+    } = this.inlineEditors['TIME_SLIDER'];
+    (timeSliderFactory as IEditableControlFactory).controlEditorComponent = timeSliderControlEditor;
+    (timeSliderFactory as IEditableControlFactory).presaveTransformFunction =
+      timeSliderPresaveTransform;
+    if (timeSliderFactory) controlsService.registerControlType(timeSliderFactory);
+*/
+>>>>>>> wip
     return {
       getControlFactory,
       getControlTypes,

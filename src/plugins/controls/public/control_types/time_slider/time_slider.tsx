@@ -7,8 +7,38 @@
  */
 
 import React, { FC } from 'react';
-import { TimeSlider as Component } from './time_slider.component';
+import { BehaviorSubject } from 'rxjs';
+import { useStateObservable } from '../../hooks/use_state_observable';
+import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
+import {
+  TimeSlider as Component,
+  TimeSliderProps as TimeSliderComponentProps,
+} from './time_slider.component';
 
-export const TimeSlider: FC<any> = (props) => {
-  return <Component {...props} />;
+// This is a container component that wraps the TimeSliderComponent
+// It expects a behavior subject
+
+export interface TimeSliderSubjectState {
+  min?: number;
+  max?: number;
+}
+
+interface TimeSliderProps {
+  componentStateSubject: BehaviorSubject<TimeSliderSubjectState>;
+}
+
+export const TimeSlider: FC<TimeSliderProps & TimeSliderControlEmbeddableInput> = ({
+  componentStateSubject,
+  value,
+}) => {
+  const { min, max } = useStateObservable<TimeSliderSubjectState>(
+    componentStateSubject,
+    componentStateSubject.getValue()
+  );
+
+  if (!value) {
+    value = [min || 0, max || 0];
+  }
+
+  return <Component onChange={() => undefined} value={value} range={[min || 0, max || 0]} />;
 };

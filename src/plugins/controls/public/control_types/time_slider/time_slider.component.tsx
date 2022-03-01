@@ -100,6 +100,8 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
   const togglePopover = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen, setIsPopoverOpen]);
+  const [lowerBound, upperBound] = props.range;
+  const [lowerValue, upperValue] = props.value;
 
   const button = (
     <EuiFilterButton
@@ -108,7 +110,9 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       onClick={togglePopover}
       isSelected={true}
     >
-      Some Text
+      <EuiText>
+        {epochToKbnDateFormat(lowerValue)} → {epochToKbnDateFormat(upperValue)}
+      </EuiText>
     </EuiFilterButton>
   );
 

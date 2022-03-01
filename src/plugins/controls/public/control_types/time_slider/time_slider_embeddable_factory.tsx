@@ -16,6 +16,7 @@ import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
+import { TimeSliderEditor } from './time_slider_editor';
 
 export class TimesliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<any>
@@ -26,8 +27,8 @@ export class TimesliderEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: any, parent?: IContainer) {
-    const { TimesliderControlEmbeddable } = await import('./time_slider_embeddable');
-    return Promise.resolve(new TimesliderControlEmbeddable(initialInput, {}, parent));
+    const { TimeSliderControlEmbeddable } = await import('./time_slider_embeddable');
+    return Promise.resolve(new TimeSliderControlEmbeddable(initialInput, {}, parent));
   }
 
   public presaveTransformFunction = (
@@ -45,7 +46,7 @@ export class TimesliderEmbeddableFactory
     return newInput;
   };
 
-  public controlEditorComponent = () => <div>Editor</div>; // OptionsListEditor;
+  public controlEditorComponent = TimeSliderEditor;
 
   public isEditable = () => Promise.resolve(false);
 
