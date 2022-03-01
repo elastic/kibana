@@ -12,7 +12,7 @@ import { ThemeServiceStart } from '../../../../../core/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps } from '../../common';
-import { getFormatService, getThemeService } from '../services';
+import { getFormatService, getPaletteService, getThemeService } from '../services';
 
 interface ExpressionGaugeRendererDependencies {
   theme: ThemeServiceStart;
@@ -39,6 +39,7 @@ export const gaugeRenderer: (
             {...config}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
+            paletteService={getPaletteService()}
           />
         </div>
       </KibanaThemeProvider>,

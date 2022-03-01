@@ -24,6 +24,7 @@ const getColor = (
 ) => {
   const divider = Math.max(elementsCount - 1, 1);
   const value = invertColors ? 1 - index / divider : index / divider;
+
   return getHeatmapColors(value, colorSchema);
 };
 
@@ -34,12 +35,7 @@ export const getStopsWithColorsFromRanges = (
 ) => {
   return ranges.reduce<PaletteConfig>(
     (acc, range, index, rangesArr) => {
-      if (index === 0) {
-        acc.color.push(getColor(index, rangesArr.length, colorSchema, invertColors));
-        acc.stop.push(range.from);
-      }
-
-      if (index && range.from !== rangesArr[index - 1].to) {
+      if ((index && range.from !== rangesArr[index - 1].to) || index === 0) {
         acc.color.push(TRANSPARENT);
         acc.stop.push(range.from);
       }

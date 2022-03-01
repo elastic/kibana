@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, memo } from 'react';
+import React, { FC, memo, useCallback } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CustomPaletteState } from '../../../../charts/public';
+import type { CustomPaletteState, PaletteOutput } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
 import { isVisDimension } from '../../../../visualizations/common/utils';
 import {
@@ -42,37 +42,7 @@ declare global {
   }
 }
 
-function normalizeColors(
-  { colors, stops, range, rangeMin, rangeMax }: CustomPaletteState,
-  min: number,
-  max: number
-) {
-  if (!colors) {
-    return;
-  }
-  const colorsOutOfRangeSmaller = Math.max(
-    stops.filter((stop, i) => (range === 'percent' ? stop < 0 : stop < min)).length,
-    0
-  );
-  let updatedColors = colors.slice(colorsOutOfRangeSmaller);
-
-  let correctMin = rangeMin;
-  let correctMax = rangeMax;
-  if (range === 'percent') {
-    correctMin = min + rangeMin * ((max - min) / 100);
-    correctMax = min + rangeMax * ((max - min) / 100);
-  }
-
-  if (correctMin > min && isFinite(correctMin)) {
-    updatedColors = [`rgba(255,255,255,0)`, ...updatedColors];
-  }
-
-  if (correctMax < max && isFinite(correctMax)) {
-    updatedColors = [...updatedColors, `rgba(255,255,255,0)`];
-  }
-
-  return updatedColors;
-}
+const TRANSPARENT = `rgba(255,255,255,0)`;
 
 function normalizeBands(
   { colors, stops, range, rangeMax, rangeMin }: CustomPaletteState,
@@ -192,8 +162,29 @@ function getTicks(
   return percentageMode ? ticks.map(convertToPercents) : ticks;
 }
 
+const calculateRealRangeValueMin = (
+  relativeRangeValue: number,
+  { min, max }: { min: number; max: number }
+) => {
+  if (isFinite(relativeRangeValue)) {
+    return relativeRangeValue * ((max - min) / 100);
+  }
+  return min;
+};
+
+const calculateRealRangeValueMax = (
+  relativeRangeValue: number,
+  { min, max }: { min: number; max: number }
+) => {
+  if (isFinite(relativeRangeValue)) {
+    return relativeRangeValue * ((max - min) / 100);
+  }
+
+  return max;
+};
+
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, formatFactory, chartsThemeService }) => {
+  ({ data, args, formatFactory, paletteService, chartsThemeService }) => {
     const {
       shape: gaugeType,
       palette,
@@ -205,6 +196,28 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       centralMajorMode,
       ticksPosition,
     } = args;
+
+    const getColor = useCallback(
+      (value, paletteConfig: PaletteOutput<CustomPaletteState>, bands: number[]) => {
+        const { rangeMin, rangeMax, range }: CustomPaletteState = paletteConfig.params!;
+        const minRealValue = bands[0];
+        const maxRealValue = bands[bands.length - 1];
+
+        let min = rangeMin;
+        let max = rangeMax;
+        if (range === 'percent') {
+          const minMax = { min: minRealValue, max: maxRealValue };
+
+          min = calculateRealRangeValueMin(min, minMax);
+          max = calculateRealRangeValueMax(max, minMax);
+        }
+        return paletteService
+          .get(paletteConfig?.name ?? 'custom')
+          .getColorForValue?.(value, paletteConfig.params, { min, max });
+      },
+      [paletteService]
+    );
+
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);
 
@@ -277,7 +290,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       customMetricFormatParams ?? tableMetricFormatParams ?? defaultMetricFormatParams
     );
 
-    const colors = palette?.params?.colors ? normalizeColors(palette.params, min, max) : undefined;
     let bands: number[] = (palette?.params as CustomPaletteState)
       ? normalizeBands(palette?.params as CustomPaletteState, { min, max })
       : [min, max];
@@ -327,16 +339,21 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           bands={bands}
           ticks={ticks}
           bandFillColor={
-            colorMode === GaugeColorModes.PALETTE && colors
+            colorMode === GaugeColorModes.PALETTE
               ? (val) => {
-                  const index = bands && bands.indexOf(val.value) - 1;
-                  return colors && index >= 0 && colors[index]
-                    ? colors[index]
-                    : val.value <= bands[0]
-                    ? colors[0]
-                    : colors[colors.length - 1];
+                  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
+                  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
+                  let value = val.value - 1;
+                  const valueIndex = bands.indexOf(val.value);
+                  if (valueIndex > 0) {
+                    value = val.value - (bands[valueIndex] - bands[valueIndex - 1]) / 2;
+                  }
+
+                  return args.palette
+                    ? getColor(value, args.palette, bands) ?? TRANSPARENT
+                    : TRANSPARENT;
                 }
-              : () => `rgba(255,255,255,0)`
+              : () => TRANSPARENT
           }
           labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
           labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
