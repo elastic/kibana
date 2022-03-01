@@ -38,7 +38,7 @@ export function registerClusterSettingsRoute({
 
           // We need to fetch the current cluster settings in order to determine
           // if the settings to delete were set as transient or persistent settings
-          const { body: currentClusterSettings } = await client.asCurrentUser.cluster.getSettings({
+          const currentClusterSettings = await client.asCurrentUser.cluster.getSettings({
             flat_settings: true,
           });
 
