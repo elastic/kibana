@@ -50,7 +50,7 @@ export const useBulkUpdateCspRules = () => {
       savedObjects.client.bulkUpdate(
         rules.map((rule) => ({
           type: cspRuleAssetSavedObjectType,
-          id: rule.id,
+          id: rule.benchmark_rule_id,
           attributes: rule,
         }))
         // TODO: fix bulkUpdate types in core
