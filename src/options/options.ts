@@ -125,6 +125,12 @@ async function getRequiredOptions(combined: OptionsFromConfigAndCli) {
 
   // require access token
   if (!accessToken) {
+    if (combined.ci) {
+      throw new HandledError(
+        `Access token missing. It must be explicitly supplied when using "--ci" option. Example: --access-token very-secret`
+      );
+    }
+
     const globalConfigPath = getGlobalConfigPath();
     throw new HandledError(
       `Please update your config file: "${globalConfigPath}".\nIt must contain a valid "accessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
@@ -138,15 +144,9 @@ async function getRequiredOptions(combined: OptionsFromConfigAndCli) {
     accessToken,
   });
 
-  if (!gitRemote.repoName) {
+  if (!gitRemote.repoName || !gitRemote.repoOwner) {
     throw new HandledError(
-      `Please specify a repo name: "--repo-name kibana".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
-    );
-  }
-
-  if (!gitRemote.repoOwner) {
-    throw new HandledError(
-      `Please specify a repo owner: "--repo-owner elastic".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
+      `Please specify a repository: "--repo elastic/kibana".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
     );
   }
 

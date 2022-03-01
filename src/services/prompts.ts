@@ -29,7 +29,7 @@ function getPrStateIcon(state: ExpectedTargetPullRequest['state']) {
     return '🟢';
   }
 
-  if (state === 'MISSING') {
+  if (state === 'NOT_CREATED') {
     return '🔴';
   }
 
@@ -46,8 +46,8 @@ function getPrStateText(state: ExpectedTargetPullRequest['state']) {
     return chalk.gray('Merged');
   }
 
-  if (state === 'MISSING') {
-    return chalk.gray('Backport missing');
+  if (state === 'NOT_CREATED') {
+    return chalk.gray('Backport not created');
   }
 
   if (state === 'OPEN') {
@@ -84,7 +84,7 @@ function getSimplePullStatus(c: Commit) {
         return chalk.green(branch);
       }
 
-      if (state === 'MISSING') {
+      if (state === 'NOT_CREATED') {
         return chalk.red(branch);
       }
 

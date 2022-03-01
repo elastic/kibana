@@ -31,7 +31,7 @@ describe('Handle unbackported pull requests', () => {
         },
       },
       sourceBranch: 'main',
-      expectedTargetPullRequests: [{ branch: '7.x', state: 'MISSING' }],
+      expectedTargetPullRequests: [{ branch: '7.x', state: 'NOT_CREATED' }],
     };
 
     expect(commits[0]).toEqual(expectedCommit);

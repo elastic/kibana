@@ -108,7 +108,7 @@ describe('parseSourceCommit', () => {
         },
         {
           branch: '6.1',
-          state: 'MISSING',
+          state: 'NOT_CREATED',
         },
       ]);
     });
@@ -160,7 +160,7 @@ describe('parseSourceCommit', () => {
         },
         {
           branch: '6.1',
-          state: 'MISSING',
+          state: 'NOT_CREATED',
         },
       ]);
     });
@@ -234,7 +234,7 @@ describe('parseSourceCommit', () => {
         },
         {
           branch: '6.1',
-          state: 'MISSING',
+          state: 'NOT_CREATED',
         },
       ],
     };

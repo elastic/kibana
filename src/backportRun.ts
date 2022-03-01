@@ -57,6 +57,14 @@ export async function backportRun(
     commits = await getCommits(options);
     logger.info('Commits', commits);
 
+    if (options.ls) {
+      return {
+        status: 'success',
+        commits,
+        results: [],
+      };
+    }
+
     const targetBranches = await getTargetBranches(options, commits);
     logger.info('Target branches', targetBranches);
 

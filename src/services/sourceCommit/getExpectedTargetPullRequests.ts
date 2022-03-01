@@ -14,7 +14,7 @@ export type ExpectedTargetPullRequest = {
   url?: string;
   number?: number;
   branch: string;
-  state: 'OPEN' | 'CLOSED' | 'MERGED' | 'MISSING';
+  state: 'OPEN' | 'CLOSED' | 'MERGED' | 'NOT_CREATED';
   mergeCommit?: {
     sha: string;
     message: string;
@@ -143,7 +143,7 @@ function getMissingTargetPullRequests(
   return expected
     .filter((targetBranch) => !expectedTargetBranches.includes(targetBranch))
     .map((branch) => {
-      return { branch, state: 'MISSING' as const };
+      return { branch, state: 'NOT_CREATED' as const };
     });
 }
 

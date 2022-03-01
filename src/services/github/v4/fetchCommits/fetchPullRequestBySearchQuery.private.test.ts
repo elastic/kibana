@@ -1,9 +1,8 @@
-import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
-import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
+import { fetchPullRequestsBySearchQuery } from './fetchPullRequestsBySearchQuery';
 
-describe('fetchPullRequestBySearchQuery', () => {
+describe('fetchPullRequestsBySearchQuery', () => {
   let devAccessToken: string;
 
   beforeAll(() => {
@@ -20,11 +19,15 @@ describe('fetchPullRequestBySearchQuery', () => {
         repoOwner: 'backport-org',
         sourceBranch: 'master',
         author: 'sqren',
-      } as ValidConfigOptions;
+      };
 
-      await expect(fetchPullRequestBySearchQuery(options)).rejects.toThrowError(
-        'There are no commits by "sqren" matching the filter "label:non-existing". Try with `--all` for commits by all users or `--author=<username>` for commits from a specific user'
-      );
+      await expect(fetchPullRequestsBySearchQuery(options)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+              "No commits found for query:
+                  type:pr is:merged sort:updated-desc repo:backport-org/backport-e2e author:sqren base:master label:non-existing 
+
+              Use \`--all\` to see commits by all users or \`--author=<username>\` for commits from a specific user"
+            `);
     });
   });
 
@@ -38,7 +41,7 @@ describe('fetchPullRequestBySearchQuery', () => {
         repoOwner: 'backport-org',
         sourceBranch: 'master',
         author: 'sqren',
-      } as ValidConfigOptions;
+      };
 
       const expectedCommits: Commit[] = [
         {
@@ -107,7 +110,7 @@ describe('fetchPullRequestBySearchQuery', () => {
         },
       ];
 
-      expect(await fetchPullRequestBySearchQuery(options)).toEqual(
+      expect(await fetchPullRequestsBySearchQuery(options)).toEqual(
         expectedCommits
       );
     });

@@ -5,7 +5,7 @@ import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommits/fetchCommitByPullNumber';
 import { fetchCommitBySha } from '../services/github/v4/fetchCommits/fetchCommitBySha';
 import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
-import { fetchPullRequestBySearchQuery } from '../services/github/v4/fetchCommits/fetchPullRequestBySearchQuery';
+import { fetchPullRequestsBySearchQuery } from '../services/github/v4/fetchCommits/fetchPullRequestsBySearchQuery';
 import { promptForCommits } from '../services/prompts';
 import { ora } from './ora';
 
@@ -58,7 +58,7 @@ export async function getCommits(options: ValidConfigOptions) {
       return [commit];
     }
 
-    if (options.ci) {
+    if (options.ci && !options.ls) {
       throw new HandledError(
         'When "--ci" flag is enabled either `--sha` or `--pr` must be specified'
       );
@@ -69,10 +69,17 @@ export async function getCommits(options: ValidConfigOptions) {
       : `Loading commits from branch "${options.sourceBranch}"...`;
 
     const commitChoices = options.prFilter
-      ? await fetchPullRequestBySearchQuery(options)
+      ? await fetchPullRequestsBySearchQuery({
+          ...options,
+          prFilter: options.prFilter,
+        })
       : await fetchCommitsByAuthor(options);
-
     spinner.stop();
+
+    if (options.ls) {
+      return commitChoices;
+    }
+
     return promptForCommits({
       commitChoices,
       isMultipleChoice: options.multipleCommits,

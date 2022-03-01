@@ -41,6 +41,7 @@ type Options = Partial<{
   githubApiBaseUrlV3: string;
   githubApiBaseUrlV4: string;
   logFilePath: string;
+  ls: boolean; // only available via cli
   maxNumber: number;
   multiple: boolean;
   multipleBranches: boolean;

@@ -156,6 +156,11 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
+    .option('ls', {
+      description: 'List commits instead of backporting them',
+      type: 'boolean',
+    })
+
     .option('mainline', {
       description:
         'Parent id of merge commit. Defaults to 1 when supplied without arguments',
@@ -226,6 +231,11 @@ export function getOptionsFromCliArgs(
       description: 'Create backports in the origin repo',
       type: 'boolean',
       conflicts: ['fork', 'repoForkOwner'],
+    })
+
+    .option('onlyMissing', {
+      description: 'Only list commits with missing or unmerged backports',
+      type: 'boolean',
     })
 
     .option('path', {

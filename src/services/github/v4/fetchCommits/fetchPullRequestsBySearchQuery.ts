@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import { isEmpty } from 'lodash';
-import { ValidConfigOptions } from '../../../../options/options';
+import { filterUnmergedCommits } from '../../../../utils/filterUnmergedCommits';
 import { HandledError } from '../../../HandledError';
 import { swallowMissingConfigFileException } from '../../../remoteConfig';
 import {
@@ -11,12 +11,20 @@ import {
 } from '../../../sourceCommit/parseSourceCommit';
 import { apiRequestV4 } from '../apiRequestV4';
 
-export async function fetchPullRequestBySearchQuery(
-  options: ValidConfigOptions
-): Promise<Commit[]> {
+export async function fetchPullRequestsBySearchQuery(options: {
+  accessToken: string;
+  author: string | null;
+  githubApiBaseUrlV4?: string;
+  maxNumber?: number;
+  onlyMissing?: boolean;
+  prFilter: string;
+  repoName: string;
+  repoOwner: string;
+  sourceBranch: string;
+}): Promise<Commit[]> {
   const {
     accessToken,
-    githubApiBaseUrlV4,
+    githubApiBaseUrlV4 = 'https://api.github.com/graphql',
     maxNumber = 10,
     prFilter,
     repoName,
@@ -41,12 +49,15 @@ export async function fetchPullRequestBySearchQuery(
     ${SourceCommitWithTargetPullRequestFragment}
   `;
 
-  const authorFilter = author ? ` author:${author}` : '';
-  const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName}${authorFilter} ${prFilter} base:${sourceBranch}`;
+  const authorFilter = options.author ? ` author:${options.author}` : '';
+  const sourceBranchFilter = prFilter.includes('base:')
+    ? ''
+    : ` base:${sourceBranch}`;
+  const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName}${authorFilter}${sourceBranchFilter} ${prFilter} `;
 
   const variables = {
     query: searchQuery,
-    maxNumber: maxNumber,
+    maxNumber,
   };
 
   let res;
@@ -68,11 +79,15 @@ export async function fetchPullRequestBySearchQuery(
 
   // terminate if not commits were found
   if (isEmpty(commits)) {
-    const errorText = options.author
-      ? `There are no commits by "${options.author}" matching the filter "${prFilter}". Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`
-      : `There are no pull requests matching the filter "${prFilter}"`;
+    const errorText = author
+      ? `No commits found for query:\n    ${searchQuery}\n\nUse \`--all\` to see commits by all users or \`--author=<username>\` for commits from a specific user`
+      : `No commits found for query:\n    ${searchQuery}`;
 
     throw new HandledError(errorText);
+  }
+
+  if (options.onlyMissing) {
+    return commits.filter(filterUnmergedCommits);
   }
 
   return commits;

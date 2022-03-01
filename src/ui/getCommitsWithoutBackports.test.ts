@@ -86,9 +86,9 @@ describe('getCommitsWithoutBackports', () => {
       );
     });
 
-    it('should display as missing if a backport is MISSING', async () => {
+    it('should display as missing if a backport is NOT_CREATED', async () => {
       const commitsWithoutBackports = await setupExpectedPullRequests({
-        expectedTargetPullRequests: [{ state: 'MISSING', branch: '7.x' }],
+        expectedTargetPullRequests: [{ state: 'NOT_CREATED', branch: '7.x' }],
       });
       expect(stripAnsi(commitsWithoutBackports[0].formatted)).toEqual(
         ' - First commit (#1) (backport missing)\n   https://www.github.com/foo/bar/pull/123'

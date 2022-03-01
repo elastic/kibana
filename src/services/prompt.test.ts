@@ -27,7 +27,7 @@ describe('prompt', () => {
           expectedTargetPullRequests: [
             { number: 120178, branch: '8.0', state: 'MERGED' },
             { number: 120179, branch: '7.16', state: 'MERGED' },
-            { number: 120179, branch: '7.15', state: 'MISSING' },
+            { number: 120179, branch: '7.15', state: 'NOT_CREATED' },
           ],
         },
       ];

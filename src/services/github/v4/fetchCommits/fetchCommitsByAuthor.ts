@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 import { isEmpty, uniqBy, orderBy } from 'lodash';
 import { ValidConfigOptions } from '../../../../options/options';
 import { filterNil } from '../../../../utils/filterEmpty';
+import { filterUnmergedCommits } from '../../../../utils/filterUnmergedCommits';
 import { HandledError } from '../../../HandledError';
 import { swallowMissingConfigFileException } from '../../../remoteConfig';
 import {
@@ -107,13 +108,14 @@ export async function fetchCommitsByAuthor(options: {
   author: string | null;
   branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
   commitPaths?: string[];
+  dateSince: string | null;
+  dateUntil: string | null;
   githubApiBaseUrlV4?: string;
   maxNumber?: number;
+  onlyMissing?: boolean;
   repoName: string;
   repoOwner: string;
   sourceBranch: string;
-  dateSince: string | null;
-  dateUntil: string | null;
 }): Promise<Commit[]> {
   const { sourceBranch, commitPaths = [] } = options;
 
@@ -160,6 +162,11 @@ export async function fetchCommitsByAuthor(options: {
     (c) => c.sourceCommit.committedDate,
     'desc'
   );
+
+  if (options.onlyMissing) {
+    return commitsSorted.filter(filterUnmergedCommits);
+  }
+
   return commitsSorted;
 }
 

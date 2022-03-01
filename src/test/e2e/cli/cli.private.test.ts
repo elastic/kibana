@@ -60,6 +60,7 @@ describe('backport cli', () => {
                                                                                                  [boolean]
             --gitAuthorName                   Set commit author name                              [string]
             --gitAuthorEmail                  Set commit author email                             [string]
+            --ls                              List commits instead of backporting them           [boolean]
             --mainline                        Parent id of merge commit. Defaults to 1 when supplied
                                               without arguments                                   [number]
         -n, --maxNumber, --number             Number of commits to choose from                    [number]
@@ -71,6 +72,8 @@ describe('backport cli', () => {
             --noStatusComment                 Don't publish status comment to Github             [boolean]
             --noVerify                        Bypass the pre-commit and commit-msg hooks         [boolean]
             --noFork                          Create backports in the origin repo                [boolean]
+            --onlyMissing                     Only list commits with missing or unmerged backports
+                                                                                                 [boolean]
         -p, --path                            Only list commits touching files under the specified path
                                                                                                    [array]
             --prDescription, --description    Description to be added to pull request             [string]

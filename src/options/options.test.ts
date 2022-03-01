@@ -45,13 +45,26 @@ describe('getOptions', () => {
         globalConfig: { accessToken: undefined },
       });
 
-      await expect(() => getOptions([], { ci: true })).rejects
+      await expect(() => getOptions([], {})).rejects
         .toThrowErrorMatchingInlineSnapshot(`
                     "Please update your config file: \\"/myHomeDir/.backport/config.json\\".
                     It must contain a valid \\"accessToken\\".
 
                     Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
                   `);
+    });
+
+    it('when accessToken is missing with --ci', async () => {
+      mockConfigFiles({
+        projectConfig: defaultConfigs.projectConfig,
+        globalConfig: { accessToken: undefined },
+      });
+
+      await expect(() =>
+        getOptions([], { ci: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Access token missing. It must be explicitly supplied when using \\"--ci\\" option. Example: --access-token very-secret"`
+      );
     });
 
     it('when `targetBranches`, `targetBranchChoices` and `branchLabelMapping` are all empty', async () => {
@@ -107,7 +120,7 @@ describe('getOptions', () => {
 
         await expect(() => getOptions([], {})).rejects
           .toThrowErrorMatchingInlineSnapshot(`
-                              "Please specify a repo name: \\"--repo-name kibana\\".
+                              "Please specify a repository: \\"--repo elastic/kibana\\".
 
                               Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#project-config-backportrcjson"
                           `);

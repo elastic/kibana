@@ -1,10 +1,9 @@
-import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { fetchCommitByPullNumber } from './fetchCommitByPullNumber';
 import { fetchCommitBySha } from './fetchCommitBySha';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
-import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
+import { fetchPullRequestsBySearchQuery } from './fetchPullRequestsBySearchQuery';
 
 describe('allFetchers', () => {
   let devAccessToken: string;
@@ -57,7 +56,7 @@ describe('allFetchers', () => {
   });
 
   it('matches commitByAuthor with commitBySearchQuery', async () => {
-    const commitsBySearchQuery = await fetchPullRequestBySearchQuery({
+    const commitsBySearchQuery = await fetchPullRequestsBySearchQuery({
       repoOwner: 'elastic',
       repoName: 'kibana',
       accessToken: devAccessToken,
@@ -65,7 +64,7 @@ describe('allFetchers', () => {
       prFilter: `created:2021-12-20..2021-12-20`,
       sourceBranch: 'main',
       author: 'sqren',
-    } as ValidConfigOptions);
+    });
 
     const commitBySearchQuery = commitsBySearchQuery[0];
 

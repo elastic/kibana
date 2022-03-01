@@ -106,7 +106,7 @@ describe('getTargetBranches', () => {
           expectedTargetPullRequests: [
             { branch: '7.2', state: 'MERGED' },
             { branch: '7.1', state: 'OPEN' },
-            { branch: '7.x', state: 'MISSING' },
+            { branch: '7.x', state: 'NOT_CREATED' },
           ],
         },
       ] as Commit[];
@@ -153,7 +153,7 @@ describe('getTargetBranches', () => {
             },
           },
           sourceBranch: 'master',
-          expectedTargetPullRequests: [{ branch: '7.x', state: 'MISSING' }],
+          expectedTargetPullRequests: [{ branch: '7.x', state: 'NOT_CREATED' }],
         },
       ];
 

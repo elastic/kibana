@@ -225,8 +225,8 @@ describe('getExpectedTargetPullRequests', () => {
       latestBranchLabelMapping: branchLabelMapping,
     });
     expect(expectedTargetPullRequests).toEqual([
-      { branch: '7.2', state: 'MISSING' },
-      { branch: '7.1', state: 'MISSING' },
+      { branch: '7.2', state: 'NOT_CREATED' },
+      { branch: '7.1', state: 'NOT_CREATED' },
     ]);
   });
 
@@ -266,7 +266,7 @@ describe('getExpectedTargetPullRequests', () => {
           sha: 'target-merge-commit-sha',
         },
       },
-      { branch: '7.1', state: 'MISSING' },
+      { branch: '7.1', state: 'NOT_CREATED' },
     ]);
   });
 
@@ -315,28 +315,28 @@ describe('getExpectedTargetPullRequests', () => {
     });
 
     expect(expectedTargetPullRequests).toEqual([
-      { branch: '5.4', state: 'MISSING' },
-      { branch: '5.5', state: 'MISSING' },
-      { branch: '5.6', state: 'MISSING' },
-      { branch: '6.0', state: 'MISSING' },
-      { branch: '6.1', state: 'MISSING' },
-      { branch: '6.2', state: 'MISSING' },
-      { branch: '6.3', state: 'MISSING' },
-      { branch: '6.4', state: 'MISSING' },
-      { branch: '6.5', state: 'MISSING' },
-      { branch: '6.6', state: 'MISSING' },
-      { branch: '6.7', state: 'MISSING' },
-      { branch: '6.8', state: 'MISSING' },
-      { branch: '7.0', state: 'MISSING' },
-      { branch: '7.1', state: 'MISSING' },
-      { branch: '7.2', state: 'MISSING' },
-      { branch: '7.3', state: 'MISSING' },
-      { branch: '7.4', state: 'MISSING' },
-      { branch: '7.5', state: 'MISSING' },
-      { branch: '7.6', state: 'MISSING' },
-      { branch: '7.7', state: 'MISSING' },
-      { branch: '7.x', state: 'MISSING' },
-      { branch: 'master', state: 'MISSING' },
+      { branch: '5.4', state: 'NOT_CREATED' },
+      { branch: '5.5', state: 'NOT_CREATED' },
+      { branch: '5.6', state: 'NOT_CREATED' },
+      { branch: '6.0', state: 'NOT_CREATED' },
+      { branch: '6.1', state: 'NOT_CREATED' },
+      { branch: '6.2', state: 'NOT_CREATED' },
+      { branch: '6.3', state: 'NOT_CREATED' },
+      { branch: '6.4', state: 'NOT_CREATED' },
+      { branch: '6.5', state: 'NOT_CREATED' },
+      { branch: '6.6', state: 'NOT_CREATED' },
+      { branch: '6.7', state: 'NOT_CREATED' },
+      { branch: '6.8', state: 'NOT_CREATED' },
+      { branch: '7.0', state: 'NOT_CREATED' },
+      { branch: '7.1', state: 'NOT_CREATED' },
+      { branch: '7.2', state: 'NOT_CREATED' },
+      { branch: '7.3', state: 'NOT_CREATED' },
+      { branch: '7.4', state: 'NOT_CREATED' },
+      { branch: '7.5', state: 'NOT_CREATED' },
+      { branch: '7.6', state: 'NOT_CREATED' },
+      { branch: '7.7', state: 'NOT_CREATED' },
+      { branch: '7.x', state: 'NOT_CREATED' },
+      { branch: 'master', state: 'NOT_CREATED' },
     ]);
   });
 
@@ -359,8 +359,8 @@ describe('getExpectedTargetPullRequests', () => {
     });
 
     expect(expectedTargetPullRequests).toEqual([
-      { branch: 'dev', state: 'MISSING' },
-      { branch: 'v3.1.0', state: 'MISSING' },
+      { branch: 'dev', state: 'NOT_CREATED' },
+      { branch: 'v3.1.0', state: 'NOT_CREATED' },
     ]);
   });
 
@@ -384,7 +384,7 @@ describe('getExpectedTargetPullRequests', () => {
     });
 
     expect(expectedTargetPullRequests).toEqual([
-      { branch: 'branch-b', state: 'MISSING' },
+      { branch: 'branch-b', state: 'NOT_CREATED' },
     ]);
   });
 
@@ -421,13 +421,13 @@ describe('getExpectedTargetPullRequests', () => {
         state: 'OPEN',
         url: 'https://github.com/elastic/kibana/pull/5678',
       },
-      { branch: 'branch-1', state: 'MISSING' },
-      { branch: 'branch-2', state: 'MISSING' },
-      { branch: 'branch-4', state: 'MISSING' },
+      { branch: 'branch-1', state: 'NOT_CREATED' },
+      { branch: 'branch-2', state: 'NOT_CREATED' },
+      { branch: 'branch-4', state: 'NOT_CREATED' },
     ]);
   });
 
-  it('ignores closed PRs (treats them as MISSING)', () => {
+  it('ignores closed PRs (treats them as NOT_CREATED)', () => {
     const branchLabelMapping = {
       'label-(\\d+)': 'branch-$1',
     };
@@ -454,10 +454,10 @@ describe('getExpectedTargetPullRequests', () => {
     });
 
     expect(expectedTargetPullRequests).toEqual([
-      { branch: 'branch-1', state: 'MISSING' },
-      { branch: 'branch-2', state: 'MISSING' },
-      { branch: 'branch-3', state: 'MISSING' },
-      { branch: 'branch-4', state: 'MISSING' },
+      { branch: 'branch-1', state: 'NOT_CREATED' },
+      { branch: 'branch-2', state: 'NOT_CREATED' },
+      { branch: 'branch-3', state: 'NOT_CREATED' },
+      { branch: 'branch-4', state: 'NOT_CREATED' },
     ]);
   });
 
@@ -498,9 +498,9 @@ describe('getExpectedTargetPullRequests', () => {
           sha: 'target-merge-commit-sha',
         },
       },
-      { branch: 'branch-1', state: 'MISSING' },
-      { branch: 'branch-2', state: 'MISSING' },
-      { branch: 'branch-4', state: 'MISSING' },
+      { branch: 'branch-1', state: 'NOT_CREATED' },
+      { branch: 'branch-2', state: 'NOT_CREATED' },
+      { branch: 'branch-4', state: 'NOT_CREATED' },
     ]);
   });
 });

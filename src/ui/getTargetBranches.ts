@@ -21,7 +21,7 @@ export function getTargetBranches(
   const missingTargetBranches =
     commits.length === 1
       ? commits[0].expectedTargetPullRequests
-          .filter((pr) => pr.state === 'MISSING')
+          .filter((pr) => pr.state === 'NOT_CREATED' || pr.state === 'CLOSED')
           .map((pr) => pr.branch)
       : [];
 

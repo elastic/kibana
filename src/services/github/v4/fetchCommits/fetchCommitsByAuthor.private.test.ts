@@ -198,7 +198,7 @@ describe('fetchCommitsByAuthor', () => {
         (commit) => commit.sourcePullRequest?.number === 8
       );
       expect(commitWithoutPRs?.expectedTargetPullRequests).toEqual([
-        { branch: '7.x', state: 'MISSING' },
+        { branch: '7.x', state: 'NOT_CREATED' },
       ]);
     });
   });

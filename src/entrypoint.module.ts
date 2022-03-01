@@ -4,6 +4,7 @@ import { ValidConfigOptions } from './options/options';
 import { fetchCommitByPullNumber } from './services/github/v4/fetchCommits/fetchCommitByPullNumber';
 import { fetchCommitBySha } from './services/github/v4/fetchCommits/fetchCommitBySha';
 import { fetchCommitsByAuthor } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
+import { fetchPullRequestsBySearchQuery } from './services/github/v4/fetchCommits/fetchPullRequestsBySearchQuery';
 import { getOptionsFromGithub } from './services/github/v4/getOptionsFromGithub/getOptionsFromGithub';
 import { initLogger } from './services/logger';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
@@ -41,6 +42,9 @@ export async function getCommits(options: {
   author?: string;
   branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
   githubApiBaseUrlV4?: string;
+  maxNumber?: number;
+  onlyMissing?: boolean;
+  prFilter?: string;
   pullNumber?: number;
   sha?: string | string[];
   skipRemoteConfig?: boolean;
@@ -72,13 +76,26 @@ export async function getCommits(options: {
     );
   }
 
-  return fetchCommitsByAuthor({
-    ...optionsFromGithub,
-    ...options,
+  if (options.prFilter) {
+    return fetchPullRequestsBySearchQuery({
+      ...optionsFromGithub,
+      ...options,
+      prFilter: options.prFilter,
+      author: options.author ?? null,
+    });
+  }
 
-    // filters
-    author: options.author ?? null,
-    dateSince: options.dateSince ?? null,
-    dateUntil: options.dateUntil ?? null,
-  });
+  if (options.author) {
+    return fetchCommitsByAuthor({
+      ...optionsFromGithub,
+      ...options,
+      author: options.author,
+      dateSince: options.dateSince ?? null,
+      dateUntil: options.dateUntil ?? null,
+    });
+  }
+
+  throw new Error(
+    'Must supply one of: `pullNumber`, `sha`, `prFilter` or `author`'
+  );
 }
