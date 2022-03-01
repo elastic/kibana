@@ -12,7 +12,7 @@ import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
-jest.mock('../../../methods/use_cases_toast');
+jest.mock('../../../common/use_cases_toast');
 
 describe('use cases add to existing case modal hook', () => {
   const dispatch = jest.fn();
