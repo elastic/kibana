@@ -26,7 +26,7 @@ export function throwOnInvalidAccessToken({
     case 200: {
       const repoNotFound = error.githubResponse.data.errors?.some(
         (error) =>
-          error.type === 'NOT_FOUND' && error.path.join('.') === 'repository'
+          error.type === 'NOT_FOUND' && error.path?.join('.') === 'repository'
       );
 
       const grantedScopes =

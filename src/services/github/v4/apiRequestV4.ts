@@ -5,9 +5,9 @@ import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
 
 interface GithubError {
-  type: string;
-  path: string[];
-  locations: {
+  type?: string;
+  path?: string[];
+  locations?: {
     line: number;
     column: number;
   }[];

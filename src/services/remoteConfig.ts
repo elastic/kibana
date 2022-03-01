@@ -57,7 +57,7 @@ export function swallowMissingConfigFileException<T>(
   const { data, errors } = error.githubResponse.data;
 
   const missingConfigError = errors?.some((error) => {
-    return error.path.includes('remoteConfig') && error.type === 'NOT_FOUND';
+    return error.path?.includes('remoteConfig') && error.type === 'NOT_FOUND';
   });
 
   // swallow error if it's just the config file that's missing
