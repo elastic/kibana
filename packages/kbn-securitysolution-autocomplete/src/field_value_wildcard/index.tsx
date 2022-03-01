@@ -130,7 +130,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
   const handleSearchChange = useCallback(
     (searchVal: string): void => {
-      if (searchVal !== '' && selectedField != null) {
+      if (searchVal.trim() !== '' && selectedField != null) {
         const err = paramIsValid(searchVal, selectedField, isRequired, touched);
         handleError(err);
         handleWarning(warning);
