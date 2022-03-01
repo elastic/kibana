@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
-import { ValuesType } from 'utility-types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
