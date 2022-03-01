@@ -42,6 +42,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
 
   // Kibana added
   communications: 'Communications',
+  enterprise_search: 'Enterprise search',
   file_storage: 'File storage',
   language_client: 'Language client',
   upload_file: 'Upload a file',
