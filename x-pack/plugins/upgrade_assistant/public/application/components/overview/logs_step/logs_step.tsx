@@ -121,8 +121,6 @@ const LogsStep = ({ setIsComplete, hasPrivileges, navigateToEsDeprecationLogs }:
           title={i18nTexts.missingPrivilegesTitle}
           data-test-subj="missingPrivilegesCallout"
         />
-
-        <EuiSpacer />
       </>
     );
   }
