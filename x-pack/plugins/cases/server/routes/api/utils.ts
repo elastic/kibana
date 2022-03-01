@@ -52,14 +52,26 @@ export const getWarningHeader = (
  * https://github.com/elastic/kibana/blob/ec30f2aeeb10fb64b507935e558832d3ef5abfaa/x-pack/plugins/spaces/server/usage_stats/usage_stats_client.ts#L113-L118
  */
 
-const getIsKibanaRequest = (headers?: Headers) => {
+export const getIsKibanaRequest = (headers?: Headers): boolean => {
   // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return !!(headers && headers['kbn-version'] && headers.referer);
 };
 
 export const logDeprecatedEndpoint = (logger: Logger, headers: Headers, msg: string) => {
   if (!getIsKibanaRequest(headers)) {
     logger.warn(msg);
   }
+};
+
+/**
+ * Extracts the warning value a warning header that is formatted according to RFC 7234.
+ * For example for the string 299 Kibana-8.1.0 "Deprecation endpoint", the return value is Deprecation endpoint.
+ *
+ */
+export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
+  const firstQuote = warningHeader.indexOf('"');
+  const lastQuote = warningHeader.length - 1;
+  const warningValue = warningHeader.substring(firstQuote + 1, lastQuote);
+  return warningValue;
 };

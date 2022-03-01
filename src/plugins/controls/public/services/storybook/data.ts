@@ -22,4 +22,5 @@ export const dataServiceFactory: DataServiceFactory = () => ({
   autocomplete: {
     getValueSuggestions: valueSuggestionMethod,
   } as unknown as DataPublicPluginStart['autocomplete'],
+  query: {} as unknown as DataPublicPluginStart['query'],
 });

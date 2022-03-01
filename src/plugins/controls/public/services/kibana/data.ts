@@ -17,9 +17,10 @@ export type DataServiceFactory = KibanaPluginServiceFactory<
 
 export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   const {
-    data: { autocomplete },
+    data: { query, autocomplete },
   } = startPlugins;
   return {
     autocomplete,
+    query,
   };
 };
