@@ -33,7 +33,7 @@ import {
   useTheme,
   Wrapper,
 } from './common';
-import { HistogramActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HistogramActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
@@ -181,7 +181,10 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
         {!isVlidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
         )}
-        <HistogramActions {...histogramActionsOptions} className="kpi-matrix-histogram-actions" />
+        <VisualizationActions
+          {...histogramActionsOptions}
+          className="kpi-matrix-histogram-actions"
+        />
       </HoverVisibilityContainer>
     </Wrapper>
   );

@@ -36,7 +36,7 @@ import {
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import type { ChartData } from './common';
-import { HistogramActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HistogramActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
@@ -211,7 +211,10 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
         )}
         {histogramActionsOptions?.lensAttributes && histogramActionsOptions?.timerange && (
-          <HistogramActions {...histogramActionsOptions} className="kpi-matrix-histogram-actions" />
+          <VisualizationActions
+            {...histogramActionsOptions}
+            className="kpi-matrix-histogram-actions"
+          />
         )}
       </HoverVisibilityContainer>
     </Wrapper>

@@ -10,7 +10,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
-import { HistogramActions } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions';
 import { LensAttributes, GetLensAttributes } from '../visualization_actions/types';
 import { Subtitle } from '../subtitle';
 
@@ -123,7 +123,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               )}
               {(getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
-                  <HistogramActions
+                  <VisualizationActions
                     getLensAttributes={getLensAttributes}
                     isInspectButtonDisabled={isInspectDisabled}
                     isMultipleQuery={inspectMultiple}

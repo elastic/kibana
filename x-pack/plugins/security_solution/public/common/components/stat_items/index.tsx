@@ -31,7 +31,7 @@ import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
-import { HistogramActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
 
@@ -278,7 +278,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                         </p>
                       </StatValue>
                       {field.lensAttributes && timerange && (
-                        <HistogramActions
+                        <VisualizationActions
                           lensAttributes={field.lensAttributes}
                           queryId={id}
                           inspectIndex={index}
