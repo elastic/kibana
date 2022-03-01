@@ -2,15 +2,6 @@
 
 exports[`<QuickButtonGroup /> is rendered 1`] = `
 <ServicesProvider
-  buttons={
-    Array [
-      Object {
-        "createType": "Text",
-        "iconType": "visText",
-        "onClick": [MockFunction],
-      },
-    ]
-  }
   docLinks={
     Object {
       "dataViewsDocsLink": "dummy link",
