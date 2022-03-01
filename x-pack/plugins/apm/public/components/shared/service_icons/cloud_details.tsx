@@ -51,32 +51,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
           defaultMessage: 'Cloud service',
         }
       ),
-      description: (
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>{cloud.serviceName}</EuiFlexItem>
-          {isServerless && (
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.apm.serviceIcons.serviceDetails.cloud.betaLabel',
-                  {
-                    defaultMessage: 'Beta',
-                  }
-                )}
-                tooltipContent={i18n.translate(
-                  'xpack.apm.serviceIcons.serviceDetails.cloud.betaTooltip',
-                  {
-                    defaultMessage:
-                      'AWS Lambda support is not GA. Please help us by reporting bugs.',
-                  }
-                )}
-                size="s"
-                iconType="beaker"
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
+      description: cloud.serviceName,
     });
   }
 

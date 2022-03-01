@@ -7295,8 +7295,6 @@
     "xpack.apm.serviceIcons.serverless": "サーバーレス",
     "xpack.apm.serviceIcons.service": "サービス",
     "xpack.apm.serviceIcons.serviceDetails.cloud.availabilityZoneLabel": "{zones, plural, other {可用性ゾーン}} ",
-    "xpack.apm.serviceIcons.serviceDetails.cloud.betaLabel": "ベータ",
-    "xpack.apm.serviceIcons.serviceDetails.cloud.betaTooltip": "AWS Lambdaサポートは一般公開されていません。不具合を報告して支援してください。",
     "xpack.apm.serviceIcons.serviceDetails.cloud.faasTriggerTypeLabel": "{triggerTypes, plural, other  {トリガータイプ}} ",
     "xpack.apm.serviceIcons.serviceDetails.cloud.functionNameLabel": "{functionNames, plural, other  {関数名}} ",
     "xpack.apm.serviceIcons.serviceDetails.cloud.machineTypesLabel": "{machineTypes, plural, other {コンピュータータイプ} }\n ",
