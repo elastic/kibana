@@ -13,13 +13,12 @@ interface TimeRange {
   start: string;
   end: string;
   exactStart: string;
-  exactEnd: string;
   refreshTimeRange: () => void;
   timeRangeId: number;
 }
 
 type PartialTimeRange = Pick<TimeRange, 'refreshTimeRange' | 'timeRangeId'> &
-  Pick<Partial<TimeRange>, 'start' | 'end' | 'exactStart' | 'exactEnd'>;
+  Pick<Partial<TimeRange>, 'start' | 'end' | 'exactStart'>;
 
 export function useTimeRange(range: {
   rangeFrom?: string;
@@ -43,7 +42,7 @@ export function useTimeRange({
 }): TimeRange | PartialTimeRange {
   const { incrementTimeRangeId, timeRangeId } = useTimeRangeId();
 
-  const { start, end, exactStart, exactEnd } = useMemo(() => {
+  const { start, end, exactStart } = useMemo(() => {
     return getDateRange({
       state: {},
       rangeFrom,
@@ -52,7 +51,7 @@ export function useTimeRange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rangeFrom, rangeTo, timeRangeId]);
 
-  if ((!start || !end || !exactStart || !exactEnd) && !optional) {
+  if ((!start || !end || !exactStart) && !optional) {
     throw new Error('start and/or end were unexpectedly not set');
   }
 
@@ -60,7 +59,6 @@ export function useTimeRange({
     start,
     end,
     exactStart,
-    exactEnd,
     refreshTimeRange: incrementTimeRangeId,
     timeRangeId,
   };

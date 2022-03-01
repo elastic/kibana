@@ -27,7 +27,6 @@ describe('url_params_context helpers', () => {
             start: '2021-01-28T05:47:00.000Z',
             end: '2021-01-28T05:48:55.304Z',
             exactStart: '2021-01-28T05:47:52.134Z',
-            exactEnd: '2021-01-28T05:48:55.304Z',
           });
         });
       });
@@ -43,7 +42,6 @@ describe('url_params_context helpers', () => {
             start: '2021-01-27T05:46:00.000Z',
             end: '2021-01-28T05:46:13.367Z',
             exactStart: '2021-01-27T05:46:07.377Z',
-            exactEnd: '2021-01-28T05:46:13.367Z',
           });
         });
       });
@@ -60,7 +58,6 @@ describe('url_params_context helpers', () => {
             start: '2020-01-28T05:52:00.000Z',
             end: '2021-01-28T05:52:39.741Z',
             exactStart: '2020-01-28T05:52:36.290Z',
-            exactEnd: '2021-01-28T05:52:39.741Z',
           });
         });
       });
@@ -76,7 +73,6 @@ describe('url_params_context helpers', () => {
               start: '1970-01-01T00:00:00.000Z',
               end: '1971-01-01T00:00:00.000Z',
               exactStart: '1970-01-01T00:00:00.000Z',
-              exactEnd: '1971-01-01T00:00:00.000Z',
             },
             rangeFrom: 'now-1m',
             rangeTo: 'now',
@@ -85,7 +81,6 @@ describe('url_params_context helpers', () => {
           start: '1970-01-01T00:00:00.000Z',
           end: '1971-01-01T00:00:00.000Z',
           exactStart: '1970-01-01T00:00:00.000Z',
-          exactEnd: '1971-01-01T00:00:00.000Z',
         });
       });
     });
@@ -108,7 +103,6 @@ describe('url_params_context helpers', () => {
           start: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
           exactStart: undefined,
-          exactEnd: undefined,
         });
       });
     });
@@ -128,7 +122,6 @@ describe('url_params_context helpers', () => {
               start: '1972-01-01T00:00:00.000Z',
               end: '1973-01-01T00:00:00.000Z',
               exactStart: '1972-01-01T00:00:00.000Z',
-              exactEnd: '1973-01-01T00:00:00.000Z',
             },
             rangeFrom: 'nope',
             rangeTo: 'now',
@@ -137,7 +130,6 @@ describe('url_params_context helpers', () => {
           start: '1972-01-01T00:00:00.000Z',
           exactStart: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
-          exactEnd: '1973-01-01T00:00:00.000Z',
         });
       });
     });
@@ -161,7 +153,6 @@ describe('url_params_context helpers', () => {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:00:00.000Z',
           exactStart: '1970-01-01T00:00:00.000Z',
-          exactEnd: '1970-01-01T00:00:00.000Z',
         });
       });
     });
@@ -178,7 +169,7 @@ describe('url_params_context helpers', () => {
       it(`removes /${roundingOption} rounding option from relative time`, () => {
         const spy = jest.spyOn(datemath, 'parse');
         helpers.getExactDate(`now/${roundingOption}`);
-        expect(spy).toHaveBeenCalledWith('now', {});
+        expect(spy).toHaveBeenCalledWith(`now/${roundingOption}`, {});
       })
     );
 

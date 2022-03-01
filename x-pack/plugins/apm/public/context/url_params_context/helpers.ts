@@ -20,7 +20,8 @@ function getParsedDate(rawDate?: string, options = {}) {
 }
 
 export function getExactDate(rawDate: string) {
-  const isRelativeDate = rawDate.startsWith('now');
+  const isRelativeDate =
+    rawDate.startsWith('now-') || rawDate.startsWith('now+');
   if (isRelativeDate) {
     // remove rounding from relative dates "Today" (now/d) and "This week" (now/w)
     const rawDateWithouRounding = rawDate.replace(/\/([smhdw])$/, '');
@@ -36,7 +37,7 @@ export function getDateRange({
 }: {
   state?: Pick<
     UrlParams,
-    'rangeFrom' | 'rangeTo' | 'start' | 'end' | 'exactStart' | 'exactEnd'
+    'rangeFrom' | 'rangeTo' | 'start' | 'end' | 'exactStart'
   >;
   rangeFrom?: string;
   rangeTo?: string;
@@ -47,14 +48,12 @@ export function getDateRange({
       start: state.start,
       end: state.end,
       exactStart: state.exactStart,
-      exactEnd: state.exactEnd,
     };
   }
   const start = getParsedDate(rangeFrom);
   const end = getParsedDate(rangeTo, { roundUp: true });
 
   const exactStart = rangeFrom ? getExactDate(rangeFrom) : undefined;
-  const exactEnd = rangeTo ? getExactDate(rangeTo) : undefined;
 
   // `getParsedDate` will return undefined for invalid or empty dates. We return
   // the previous state if either date is undefined.
@@ -63,7 +62,6 @@ export function getDateRange({
       start: state.start,
       end: state.end,
       exactStart: state.exactStart,
-      exactEnd: state.exactEnd,
     };
   }
 
@@ -74,7 +72,6 @@ export function getDateRange({
     start: roundedStart.toISOString(),
     end: end.toISOString(),
     exactStart: exactStart?.toISOString(),
-    exactEnd: exactEnd?.toISOString(),
   };
 }
 

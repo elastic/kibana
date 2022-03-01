@@ -21,7 +21,7 @@ import { UrlParams } from './types';
 
 type TimeUrlParams = Pick<
   UrlParams,
-  'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
+  'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart'
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {

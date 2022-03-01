@@ -123,7 +123,7 @@ export function TimeComparison() {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
-  const { exactStart, exactEnd } = useTimeRange({
+  const { exactStart, end } = useTimeRange({
     rangeFrom,
     rangeTo,
   });
@@ -134,7 +134,7 @@ export function TimeComparison() {
 
   const comparisonTypes = getComparisonTypes({
     start: exactStart,
-    end: exactEnd,
+    end,
   });
 
   // Sets default values
@@ -157,7 +157,7 @@ export function TimeComparison() {
   const selectOptions = getSelectOptions({
     comparisonTypes,
     start: exactStart,
-    end: exactEnd,
+    end,
   });
 
   const isSelectedComparisonTypeAvailable = selectOptions.some(
