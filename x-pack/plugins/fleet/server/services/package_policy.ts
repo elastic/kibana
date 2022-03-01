@@ -28,6 +28,7 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  SO_SEARCH_LIMIT,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -369,9 +370,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     }
     // Check that the name does not exist already but exclude the current package policy
     const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
     });
+
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {

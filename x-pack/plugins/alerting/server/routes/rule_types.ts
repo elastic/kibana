@@ -23,7 +23,6 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       ruleTaskTimeout,
       actionVariables,
       authorizedConsumers,
-      minimumScheduleInterval,
       defaultScheduleInterval,
       doesSetRecoveryContext,
       ...rest
@@ -38,7 +37,6 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       rule_task_timeout: ruleTaskTimeout,
       action_variables: actionVariables,
       authorized_consumers: authorizedConsumers,
-      minimum_schedule_interval: minimumScheduleInterval,
       default_schedule_interval: defaultScheduleInterval,
       does_set_recovery_context: doesSetRecoveryContext,
     })

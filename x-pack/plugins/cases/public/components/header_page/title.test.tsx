@@ -5,41 +5,50 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
-import { TestProviders } from '../../common/mock';
 import { Title } from './title';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('Title', () => {
-  const mount = useMountAppended();
+  it('does not render the badge if the release is ga', () => {
+    render(<Title title="Test title" releasePhase="ga" />);
 
-  test('it renders', () => {
-    const wrapper = shallow(
-      <Title
-        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        title="Test title"
-      />
-    );
-
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.queryByText('Beta')).toBeFalsy();
+    expect(screen.queryByText('Technical preview')).toBeFalsy();
   });
 
-  test('it renders the title', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Title title="Test title" />
-      </TestProviders>
-    );
+  it('does render the beta badge', () => {
+    render(<Title title="Test title" releasePhase="beta" />);
 
-    expect(wrapper.find('[data-test-subj="header-page-title"]').first().exists()).toBe(true);
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 
-  test('it renders the title if is not a string', () => {
-    const wrapper = shallow(<Title title={<span>{'Test title'}</span>} />);
+  it('does render the experimental badge', () => {
+    render(<Title title="Test title" releasePhase="experimental" />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('Technical preview')).toBeInTheDocument();
+  });
+
+  it('renders the title if is not a string', () => {
+    render(<Title title={<span>{'Test title'}</span>} releasePhase="experimental" />);
+
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('Technical preview')).toBeInTheDocument();
+  });
+
+  it('renders the children if provided', () => {
+    render(
+      <Title title="Test title" releasePhase="ga">
+        <span>{'children'}</span>
+      </Title>
+    );
+
+    expect(screen.getByText('Test title')).toBeInTheDocument();
+    expect(screen.getByText('children')).toBeInTheDocument();
   });
 });
