@@ -24,6 +24,7 @@ import {
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../chart_wrapper';
 import { I18LABELS } from '../translations';
+import { getLegendActions } from './get_legend_actions';
 
 const StyleChart = styled.div`
   height: 100%;
@@ -64,6 +65,7 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
             showLegend
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
             theme={theme}
+            legendAction={getLegendActions(false)}
           />
           <Partition
             id="spec_1"

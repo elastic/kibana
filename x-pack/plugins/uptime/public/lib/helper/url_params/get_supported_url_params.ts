@@ -24,6 +24,8 @@ export interface UptimeUrlParams {
   statusFilter: string;
   focusConnectorField?: boolean;
   query?: string;
+  serviceName?: string;
+  monitorType?: string;
 }
 
 const {
@@ -79,6 +81,8 @@ export const getSupportedUrlParams = (params: {
     pagination,
     focusConnectorField,
     query,
+    serviceName,
+    monitorType,
   } = filteredParams;
 
   return {
@@ -102,5 +106,7 @@ export const getSupportedUrlParams = (params: {
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
     query: query || '',
+    serviceName: serviceName || '',
+    monitorType,
   };
 };
