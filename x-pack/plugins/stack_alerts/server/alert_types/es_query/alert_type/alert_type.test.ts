@@ -77,11 +77,11 @@ describe('alertType', () => {
             "name": "size",
           },
           Object {
-            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+            "description": "An array of values to use as the threshold. 'between' and 'notBetween' require two values.",
             "name": "threshold",
           },
           Object {
-            "description": "A function to determine if the threshold has been met.",
+            "description": "A function to determine if the threshold was met.",
             "name": "thresholdComparator",
           },
           Object {
