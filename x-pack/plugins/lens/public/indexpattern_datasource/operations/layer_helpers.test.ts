@@ -17,7 +17,7 @@ import {
   getErrorMessages,
   hasTermsWithManyBuckets,
   isReferenced,
-  getTopColumnFromReference,
+  getReferenceRoot,
 } from './layer_helpers';
 import { operationDefinitionMap, OperationType } from '../operations';
 import { TermsIndexPatternColumn } from './definitions/terms';
@@ -3232,7 +3232,7 @@ describe('state_helpers', () => {
     });
   });
 
-  describe('getTopColumnFromReference', () => {
+  describe('getReferenceRoot', () => {
     it("should just return the column id itself if it's not a referenced column", () => {
       const layer: IndexPatternLayer = {
         indexPatternId: '1',
@@ -3254,7 +3254,7 @@ describe('state_helpers', () => {
           },
         },
       };
-      expect(getTopColumnFromReference(layer, 'col1')).toEqual('col1');
+      expect(getReferenceRoot(layer, 'col1')).toEqual('col1');
     });
 
     it('should return the top column if a referenced column is passed', () => {
@@ -3278,7 +3278,7 @@ describe('state_helpers', () => {
           },
         },
       };
-      expect(getTopColumnFromReference(layer, 'col2')).toEqual('col1');
+      expect(getReferenceRoot(layer, 'col2')).toEqual('col1');
     });
 
     it('should work for a formula chain', () => {
@@ -3336,7 +3336,7 @@ describe('state_helpers', () => {
           } as MathIndexPatternColumn,
         },
       };
-      expect(getTopColumnFromReference(layer, 'formulaX0')).toEqual('source');
+      expect(getReferenceRoot(layer, 'formulaX0')).toEqual('source');
     });
   });
 });

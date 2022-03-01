@@ -1427,7 +1427,14 @@ const computeReferenceLookup = memoizeOne((layer: IndexPatternLayer): Record<str
   return refLookup;
 });
 
-export function getTopColumnFromReference(layer: IndexPatternLayer, columnId: string): string {
+/**
+ * Given a columnId, returns the visible root column id for it
+ * This is useful to map internal properties of referenced columns to the visible column
+ * @param layer
+ * @param columnId
+ * @returns id of the reference root
+ */
+export function getReferenceRoot(layer: IndexPatternLayer, columnId: string): string {
   const refLookup = computeReferenceLookup(layer);
   let currentId = columnId;
   while (isReferenced(layer, currentId)) {

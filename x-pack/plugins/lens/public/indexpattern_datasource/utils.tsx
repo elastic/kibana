@@ -243,6 +243,105 @@ export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
   );
 }
 
+/**
+ * Some utilities to extract queries/filters from specific column types
+ */
+
+/**
+ * Given a Filters column, extract and filter useful queries from it
+ */
+function extractQueriesFromFilters(
+  queries: FiltersIndexPatternColumn['params']['filters'] | undefined
+) {
+  return queries?.map(({ input }) => input).filter(({ query }) => query?.trim() && query !== '*');
+}
+
+/**
+ * Given an Interval column in range mode transform the ranges into KQL queries
+ */
+function extractQueriesFromRanges(column: RangeIndexPatternColumn) {
+  return column.params.ranges
+    .map(({ from, to }) => {
+      let rangeQuery = '';
+      if (from != null && isFinite(from)) {
+        rangeQuery += `${column.sourceField} >= ${from}`;
+      }
+      if (to != null && isFinite(to)) {
+        if (rangeQuery.length) {
+          rangeQuery += ' AND ';
+        }
+        rangeQuery += `${column.sourceField} <= ${to}`;
+      }
+      return {
+        query: rangeQuery,
+        language: 'kuery',
+      };
+    })
+    .filter(({ query }) => query?.trim());
+}
+
+/**
+ * Given an Terms/Top values column transform each entry into a "field: term" KQL query
+ * This works also for multi-terms variant
+ */
+function extractQueriesFromTerms(
+  column: TermsIndexPatternColumn,
+  colId: string,
+  data: NonNullable<FramePublicAPI['activeData']>[string]
+) {
+  const fields = [column.sourceField]
+    .concat(column.params.secondaryFields || [])
+    .filter(Boolean) as string[];
+
+  // extract the filters from the columns of the activeData
+  return data.rows
+    .map(({ [colId]: value }) => {
+      if (value == null) {
+        return;
+      }
+      if (typeof value !== 'string' && Array.isArray(value.keys)) {
+        return {
+          query: value.keys
+            .map((term: string, index: number) => `${fields[index]}: ${term || "''"}`)
+            .join(' AND '),
+          language: 'kuery',
+        };
+      }
+      return { query: `${column.sourceField}: ${value}`, language: 'kuery' };
+    })
+    .filter(Boolean) as Query[];
+}
+
+/**
+ * Used for a Terms column to decide whether to use a simple existence query (fallback) instead
+ * of more specific queries.
+ * The check targets the scenarios where no data is available, or when there's a transposed table
+ * and it's not yet possible to track it back to the original table
+ */
+function shouldUseTermsFallback(
+  data: NonNullable<FramePublicAPI['activeData']>[string] | undefined,
+  colId: string
+) {
+  const dataId = data?.columns.find(({ id }) => getOriginalId(id) === colId)?.id;
+  return !dataId || dataId !== colId;
+}
+
+interface GroupedQueries {
+  kuery?: Query[];
+  lucene?: Query[];
+}
+
+function collectOnlyValidQueries(
+  filteredQueries: GroupedQueries,
+  operationQueries: GroupedQueries[],
+  queryLanguage: 'kuery' | 'lucene'
+) {
+  return [
+    filteredQueries[queryLanguage],
+    ...operationQueries.map(({ [queryLanguage]: filter }) => filter),
+  ].filter((filters) => filters?.length) as Query[][];
+}
+
 export function getFiltersInLayer(
   layer: IndexPatternLayer,
   columnIds: string[],
@@ -268,16 +367,10 @@ export function getFiltersInLayer(
     // filter out empty filters as well
     .filter((filter) => filter?.query?.trim()) as Query[];
 
-  const { kuery: kqlMetricQueries, lucene: luceneMetricQueries } = groupBy(
+  const filteredQueriesByLanguage = groupBy(
     filteredMetrics,
     'language'
-  );
-
-  function extractUsefulQueries(
-    queries: FiltersIndexPatternColumn['params']['filters'] | undefined
-  ) {
-    return queries?.map(({ input }) => input).filter(({ query }) => query?.trim() && query !== '*');
-  }
+  ) as unknown as GroupedQueries;
 
   const filterOperation = columnIds
     .map((colId) => {
@@ -288,40 +381,24 @@ export function getFiltersInLayer(
           column.params.filters,
           ({ input }) => input.language
         ) as Record<'lucene' | 'kuery', FiltersIndexPatternColumn['params']['filters']>;
+
         return {
-          kuery: extractUsefulQueries(groupsByLanguage.kuery),
-          lucene: extractUsefulQueries(groupsByLanguage.lucene),
+          kuery: extractQueriesFromFilters(groupsByLanguage.kuery),
+          lucene: extractQueriesFromFilters(groupsByLanguage.lucene),
         };
       }
+
       if (isColumnOfType<RangeIndexPatternColumn>('range', column) && column.sourceField) {
         return {
-          kuery: column.params.ranges
-            .map(({ from, to }) => {
-              let rangeQuery = '';
-              if (from != null && isFinite(from)) {
-                rangeQuery += `${column.sourceField} >= ${from}`;
-              }
-              if (to != null && isFinite(to)) {
-                if (rangeQuery.length) {
-                  rangeQuery += ' AND ';
-                }
-                rangeQuery += `${column.sourceField} <= ${to}`;
-              }
-              return {
-                query: rangeQuery,
-                language: 'kuery',
-              };
-            })
-            .filter(({ query }) => query?.trim()),
+          kuery: extractQueriesFromRanges(column),
         };
       }
+
       if (
         isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
-        // Fallback in case of no data or transposed data: just return the field existence
-        const dataId = layerData?.columns.find(({ id }) => getOriginalId(id) === colId)?.id;
-        if (!layerData || !dataId || dataId !== colId) {
+        if (!layerData || shouldUseTermsFallback(layerData, colId)) {
           return {
             kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
               column.params.secondaryFields?.map((field) => ({
@@ -331,38 +408,15 @@ export function getFiltersInLayer(
             ),
           };
         }
-        const fields = [column.sourceField]
-          .concat(column.params.secondaryFields || [])
-          .filter(Boolean) as string[];
 
-        // extract the filters from the columns of the activeData
         return {
-          kuery: layerData.rows
-            .map(({ [colId]: value }) => {
-              if (value == null) {
-                return;
-              }
-              if (typeof value !== 'string' && Array.isArray(value.keys)) {
-                return {
-                  query: value.keys
-                    .map((term: string, index: number) => `${fields[index]}: ${term || "''"}`)
-                    .join(' AND '),
-                  language: 'kuery',
-                };
-              }
-              return { query: `${column.sourceField}: ${value}`, language: 'kuery' };
-            })
-            .filter(Boolean) as Query[],
+          kuery: extractQueriesFromTerms(column, colId, layerData),
         };
       }
     })
-    .filter(Boolean) as Array<{ kuery?: Query[]; lucene?: Query[] }>;
+    .filter(Boolean) as GroupedQueries[];
   return {
-    kuery: [kqlMetricQueries, ...filterOperation.map(({ kuery }) => kuery)].filter(
-      (filters) => filters?.length
-    ) as Query[][],
-    lucene: [luceneMetricQueries, ...filterOperation.map(({ lucene }) => lucene)].filter(
-      (filters) => filters?.length
-    ) as Query[][],
+    kuery: collectOnlyValidQueries(filteredQueriesByLanguage, filterOperation, 'kuery'),
+    lucene: collectOnlyValidQueries(filteredQueriesByLanguage, filterOperation, 'lucene'),
   };
 }

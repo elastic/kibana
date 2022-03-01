@@ -129,6 +129,11 @@ export function getLayerMetaInfo(
   };
 }
 
+// This enforces on assignment time that the two props are not the same
+type LanguageAssignments =
+  | { queryLanguage: 'lucene'; filtersLanguage: 'kuery' }
+  | { queryLanguage: 'kuery'; filtersLanguage: 'lucene' };
+
 export function combineQueryAndFilters(
   query: Query | undefined,
   filters: Filter[],
@@ -136,7 +141,7 @@ export function combineQueryAndFilters(
   dataViews: DataViewBase[] | undefined
 ) {
   // Unless a lucene query is already defined, kuery is assigned to it
-  const { queryLanguage, filtersLanguage }: Record<string, 'kuery' | 'lucene'> =
+  const { queryLanguage, filtersLanguage }: LanguageAssignments =
     query?.language === 'lucene'
       ? { queryLanguage: 'lucene', filtersLanguage: 'kuery' }
       : { queryLanguage: 'kuery', filtersLanguage: 'lucene' };

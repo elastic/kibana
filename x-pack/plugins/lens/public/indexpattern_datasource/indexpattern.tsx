@@ -56,7 +56,7 @@ import {
   insertNewColumn,
   TermsIndexPatternColumn,
 } from './operations';
-import { getTopColumnFromReference } from './operations/layer_helpers';
+import { getReferenceRoot } from './operations/layer_helpers';
 import {
   IndexPatternField,
   IndexPatternPrivateState,
@@ -466,7 +466,7 @@ export function getIndexPatternDatasource({
           // but map fields to the top referencing column
           const fieldsPerColumn: Record<string, string[]> = {};
           Object.keys(layer.columns).forEach((colId) => {
-            const visibleColumnId = getTopColumnFromReference(layer, colId);
+            const visibleColumnId = getReferenceRoot(layer, colId);
             fieldsPerColumn[visibleColumnId] = fieldsPerColumn[visibleColumnId] || [];
 
             const column = layer.columns[colId];

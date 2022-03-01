@@ -1294,7 +1294,8 @@ describe('IndexPattern Data Source', () => {
           },
           layerId: 'first',
         });
-
+        // The cumulative sum column has no field, but it references a sum column (hidden) which has it
+        // The getTableSpec() should walk the reference tree and assign all fields to the root column
         expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2', fields: ['test'] }]);
       });
 
