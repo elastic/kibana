@@ -377,7 +377,9 @@ describe('TransactionActionMenu component', () => {
           [(component.getAllByText(key)[0] as HTMLOptionElement).text]: (
             component
               .getByTestId(`${key}.value`)
-              .querySelector('span') as HTMLSpanElement
+              .querySelector(
+                '[data-test-subj="comboBoxInput"] span'
+              ) as HTMLSpanElement
           ).textContent,
         };
       };
