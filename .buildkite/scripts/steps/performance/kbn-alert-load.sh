@@ -8,9 +8,8 @@ CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 KIBANA_URL="$(buildkite-agent meta-data get 'META_CLOUD_DEPLOYMENT_KIBANA_URL')"
 ELASTIC_URL="$(buildkite-agent meta-data get 'META_CLOUD_DEPLOYMENT_ELASTICSEARCH_URL')"
 
-
-DEPLOYMENT_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME)"
-DEPLOYMENT_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME)"
+DEPLOYMENT_USERNAME="$(vault read -field=username secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME | tr -d '"')"
+DEPLOYMENT_PASSWORD="$(vault read -field=password secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME | tr -d '"')"
 
 if [ -z "$DEPLOYMENT_USERNAME" ]
 then
@@ -30,7 +29,7 @@ echo "--- Install KBN-ALERT-LOAD"
 
 mkdir kbn-alert-load
 cd kbn-alert-load
-yarn add test-alert-load-kbn@2.8.0
+yarn add test-alert-load-kbn@2.9.0
 
 echo "--- Run IM tests"
 
