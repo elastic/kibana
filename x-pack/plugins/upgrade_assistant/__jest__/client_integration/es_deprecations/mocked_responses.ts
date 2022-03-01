@@ -6,7 +6,6 @@
  */
 
 import type { ESUpgradeStatus, EnrichedDeprecationInfo } from '../../../common/types';
-import { indexSettingDeprecations } from '../../../common/constants';
 
 export const MOCK_SNAPSHOT_ID = '1';
 export const MOCK_JOB_ID = 'deprecation_check_job';
@@ -43,13 +42,26 @@ const MOCK_INDEX_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
   isCritical: false,
   resolveDuringUpgrade: false,
   type: 'index_settings',
-  message: indexSettingDeprecations.translog.deprecationMessage,
+  message: 'Setting [index.routing.allocation.include._tier] is deprecated',
   details: 'deprecation details',
   url: 'doc_url',
   index: 'my_index',
   correctiveAction: {
     type: 'indexSetting',
-    deprecatedSettings: indexSettingDeprecations.translog.settings,
+    deprecatedSettings: ['index.routing.allocation.include._tier'],
+  },
+};
+
+const MOCK_CLUSTER_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
+  isCritical: false,
+  resolveDuringUpgrade: false,
+  type: 'cluster_settings',
+  message: 'Setting [cluster.routing.allocation.require._tier] is deprecated',
+  details: 'deprecation details',
+  url: 'doc_url',
+  correctiveAction: {
+    type: 'clusterSetting',
+    deprecatedSettings: ['cluster.routing.allocation.require._tier'],
   },
 };
 
@@ -70,6 +82,7 @@ export const esDeprecationsMockResponse: ESUpgradeStatus = {
     MOCK_INDEX_SETTING_DEPRECATION,
     MOCK_DEFAULT_DEPRECATION,
     MOCK_REINDEX_DEPRECATION,
+    MOCK_CLUSTER_SETTING_DEPRECATION,
   ],
 };
 

@@ -225,6 +225,16 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setClusterSettingsResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+    server.respondWith('POST', `${API_BASE_PATH}/cluster_settings`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
     setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
@@ -244,6 +254,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setGetUpgradeStatusResponse,
     setLoadRemoteClustersResponse,
     setLoadNodeDiskSpaceResponse,
+    setClusterSettingsResponse,
   };
 };
 
