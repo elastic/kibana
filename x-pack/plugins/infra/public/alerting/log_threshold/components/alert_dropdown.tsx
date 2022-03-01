@@ -31,13 +31,14 @@ export const AlertDropdown = () => {
   const {
     services: {
       application: { capabilities },
+      observability,
     },
   } = useKibanaContextForPlugin();
   const canCreateAlerts = capabilities?.logs?.save ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
 
-  const manageRulesLinkProps = useRulesLink({
+  const manageRulesLinkProps = useRulesLink(observability.isRuleManagementEnabled(), {
     hrefOnly: true,
   });
 

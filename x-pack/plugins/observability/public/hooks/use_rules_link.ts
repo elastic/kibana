@@ -7,14 +7,16 @@
 
 import { useLinkProps, Options, LinkProps } from './use_link_props';
 
-export function useRulesLink(options?: Options): LinkProps {
-  const manageRulesLinkProps = useLinkProps(
-    {
-      app: 'management',
-      pathname: '/insightsAndAlerting/triggersActions/alerts',
-    },
-    options
-  );
+export function useRulesLink(useNewRulePage = false, options?: Options): LinkProps {
+  const linkProps = useNewRulePage
+    ? {
+        app: 'observability',
+        pathname: '/rules',
+      }
+    : {
+        app: 'management',
+        pathname: '/insightsAndAlerting/triggersActions/alerts',
+      };
 
-  return manageRulesLinkProps;
+  return useLinkProps(linkProps, options);
 }

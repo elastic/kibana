@@ -280,6 +280,7 @@ export class Plugin
       },
       createExploratoryViewUrl,
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      isRuleManagementEnabled: () => config.unsafe.rules.enabled,
     };
   }
 }
