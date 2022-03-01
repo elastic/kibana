@@ -243,7 +243,6 @@ export function createTestServers({
 
   return {
     startES: async () => {
-      log.info('starting elasticsearch');
       await es.start();
 
       if (['gold', 'trial'].includes(license)) {
