@@ -20,7 +20,7 @@ import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { getActionsColumnWidth } from '../../../../../../../timelines/public';
-import { mockCases } from '../../../../../common/mock/mock_cases_plugin';
+import { mockCasesContract } from '../../../../../../../cases/public/mocks';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -41,7 +41,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
           siem: { crud_alerts: true, read_alerts: true },
         },
       },
-      cases: mockCases,
+      cases: mockCasesContract(),
     },
   }),
   useToasts: jest.fn().mockReturnValue({
