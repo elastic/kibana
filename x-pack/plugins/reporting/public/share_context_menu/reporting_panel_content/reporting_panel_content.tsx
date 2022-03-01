@@ -293,7 +293,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
                   <a href={this.props.apiClient.getManagementLink()}>
                     <FormattedMessage
                       id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                      defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+                      defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
                 ),
