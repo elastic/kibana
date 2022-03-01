@@ -51,6 +51,7 @@ describe('/api/stats', () => {
       router,
       collectorSet: new CollectorSet({
         logger: loggingSystemMock.create().asLoggerFactory().get(),
+        executionContext: executionContextServiceMock.createSetupContract(),
       }),
       config: {
         allowAnonymous: true,

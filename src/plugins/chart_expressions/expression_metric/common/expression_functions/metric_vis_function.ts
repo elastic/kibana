@@ -36,6 +36,22 @@ const errors = {
         'Invalid label position is specified. Supported label positions: {labelPosition}',
       values: { labelPosition: Object.values(LabelPosition).join(', ') },
     }),
+  severalMetricsAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
+      {
+        defaultMessage:
+          'Full background coloring cannot be applied to a visualization with multiple metrics.',
+      }
+    ),
+  splitByBucketAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
+      {
+        defaultMessage:
+          'Full background coloring cannot be applied to visualizations that have a bucket specified.',
+      }
+    ),
 };
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
@@ -59,6 +75,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
       help: i18n.translate('expressionMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
+      }),
+    },
+    colorFullBackground: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionMetricVis.function.colorFullBackground.help', {
+        defaultMessage: 'Applies the selected background color to the full visualization container',
       }),
     },
     palette: {
@@ -123,6 +146,17 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       throw new Error('Palette must be provided when using percentageMode');
     }
 
+    // currently we can allow colorize full container only for one metric
+    if (args.colorFullBackground) {
+      if (args.bucket) {
+        throw new Error(errors.splitByBucketAndColorFullBackgroundSpecifiedError());
+      }
+
+      if (args.metric.length > 1 || input.rows.length > 1) {
+        throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
+      }
+    }
+
     validateOptions(args.colorMode, ColorMode, errors.invalidColorModeError);
     validateOptions(args.labelPosition, LabelPosition, errors.invalidLabelPositionError);
 
@@ -165,6 +199,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
                 ...args.labelFont,
               },
             },
+            colorFullBackground: args.colorFullBackground,
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,

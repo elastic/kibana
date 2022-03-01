@@ -258,6 +258,105 @@ describe('AlertSummaryView', () => {
     });
   });
 
+  test('Ransomware event code shows correct fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            ...item,
+            values: ['ransomware'],
+            originalValue: ['ransomware'],
+          };
+        }
+        return item;
+      }),
+      { category: 'Ransomware', field: 'Ransomware.feature', values: ['mbr'] },
+      {
+        category: 'process',
+        field: 'process.hash.sha256',
+        values: ['3287rhf3847gb38fb3o984g9384g7b3b847gb'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['process.hash.sha256', 'Ransomware.feature'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Machine learning events show correct fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['machine_learning'],
+            originalValue: ['machine_learning'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.parameters.machine_learning_job_id',
+        values: ['i_am_the_ml_job_id'],
+      },
+      { category: 'kibana', field: 'kibana.alert.rule.parameters.anomaly_threshold', values: [2] },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['i_am_the_ml_job_id', 'kibana.alert.rule.parameters.anomaly_threshold'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Threat match events show correct fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threat_match'],
+            originalValue: ['threat_match'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.threat_index',
+        values: ['threat_index*'],
+      },
+      { category: 'kibana', field: 'kibana.alert.rule.threat_query', values: ['*query*'] },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['threat_index*', '*query*'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test('Ransomware event code resolves fields from the source event', () => {
     const renderProps = {
       ...props,

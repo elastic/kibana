@@ -37,6 +37,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   defaultScheduleInterval?: string;
   minimumScheduleInterval?: string;
+  doesSetRecoveryContext?: boolean;
   enabledInLicense: boolean;
   authorizedConsumers: Record<string, ConsumerPrivileges>;
 }

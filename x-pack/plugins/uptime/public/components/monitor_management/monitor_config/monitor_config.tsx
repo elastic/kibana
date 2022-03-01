@@ -44,9 +44,14 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
     defaultConfig: defaultConfig[monitorType],
   });
 
+  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
   const [isTestRunInProgress, setIsTestRunInProgress] = useState<boolean>(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+
+  const handleFormSubmit = () => {
+    setHasBeenSubmitted(true);
+  };
 
   const handleTestNow = () => {
     if (config) {
@@ -90,7 +95,7 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
 
   return (
     <>
-      <MonitorFields />
+      <MonitorFields isFormSubmitted={hasBeenSubmitted} />
 
       {flyout}
 
@@ -100,6 +105,7 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
         onTestNow={handleTestNow}
         testRun={testRun}
         isTestRunInProgress={isTestRunInProgress}
+        onSave={handleFormSubmit}
       />
     </>
   );

@@ -65,6 +65,7 @@ const args: GaugeArguments = {
   colorMode: GaugeColorModes.NONE,
   ticksPosition: GaugeTicksPositions.AUTO,
   labelMajorMode: GaugeLabelMajorModes.AUTO,
+  centralMajorMode: GaugeLabelMajorModes.NONE,
 };
 
 const createData = (

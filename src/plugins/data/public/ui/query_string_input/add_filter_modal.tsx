@@ -48,26 +48,31 @@ import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
 
-const tabs = [
-  {
-    type: 'quick_form',
-    label: i18n.translate('data.filter.filterEditor.quickFormLabel', {
-      defaultMessage: 'Quick form',
-    }),
-  },
-  {
-    type: 'query_builder',
-    label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
-      defaultMessage: 'Query builder',
-    }),
-  },
-  {
-    type: 'saved_filters',
-    label: i18n.translate('data.filter.filterEditor.savedFiltersLabel', {
-      defaultMessage: 'Saved filters',
-    }),
-  },
-];
+export interface ITab {
+  type: string;
+  label: string;
+}
+
+export const QUICK_FORM: ITab = {
+  type: 'quick_form',
+  label: i18n.translate('data.filter.filterEditor.quickFormLabel', {
+    defaultMessage: 'Quick form',
+  }),
+};
+export const QUERY_BUILDER: ITab = {
+  type: 'query_builder',
+  label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
+    defaultMessage: 'Query builder',
+  }),
+};
+export const SAVED_FILTERS: ITab = {
+  type: 'saved_filters',
+  label: i18n.translate('data.filter.filterEditor.savedFiltersLabel', {
+    defaultMessage: 'Saved filters',
+  }),
+};
+
+const tabs: ITab[] = [QUICK_FORM, QUERY_BUILDER, SAVED_FILTERS];
 
 export interface FilterGroup {
   field: IFieldType | undefined;
@@ -77,7 +82,6 @@ export interface FilterGroup {
   id: number;
   relationship?: string;
   subGroupId?: number;
-  groupsCount?: number;
 }
 
 export function AddFilterModal({
@@ -95,11 +99,7 @@ export function AddFilterModal({
   savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (
-    filters: FilterGroup[],
-    buildFilters: Filter[],
-    groupsCount: number
-  ) => void;
+  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -114,7 +114,9 @@ export function AddFilterModal({
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
-  const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
+  const [addFilterMode, setAddFilterMode] = useState<string>(
+    initialAddFilterMode ?? QUICK_FORM.type
+  );
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [groupsCount, setGroupsCount] = useState<number>(1);
@@ -141,7 +143,6 @@ export function AddFilterModal({
         : 0,
       subGroupId: 1,
       relationship: undefined,
-      groupsCount,
     },
   ]);
 
@@ -182,7 +183,6 @@ export function AddFilterModal({
             ) + 1
           : 0,
         subGroupId: 1,
-        groupsCount,
       },
     ]);
     setGroupsCount(1);
@@ -413,29 +413,31 @@ export function AddFilterModal({
       return;
     }
 
-    if (addFilterMode === 'query_builder') {
+    if (addFilterMode === QUERY_BUILDER.type) {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
+      let builtCustomFilter = [];
       const body = JSON.parse(queryDsl);
-      const builtCustomFilter = buildCustomFilter(
-        newIndex,
-        body,
-        disabled,
-        negate,
-        alias,
-        $state.store
-      );
-      onSubmit([builtCustomFilter]);
+      if (Array.isArray(body)) {
+        builtCustomFilter = body.map((query) =>
+          buildCustomFilter(newIndex, query, disabled, negate, alias, $state.store)
+        );
+      } else {
+        builtCustomFilter = [
+          buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store),
+        ];
+      }
+      onSubmit(builtCustomFilter);
       if (alias) {
         saveFilters({
           title: customLabel,
           description: '',
           shouldIncludeFilters: false,
           shouldIncludeTimefilter: false,
-          filters: [builtCustomFilter],
+          filters: builtCustomFilter,
         });
       }
-    } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
+    } else if (addFilterMode === QUICK_FORM.type && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
           return buildFilter(
@@ -456,7 +458,7 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
 
-        onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
+        onMultipleFiltersSubmit(localFilters, finalFilters);
         if (alias) {
           saveFilters({
             title: customLabel,
@@ -467,7 +469,7 @@ export function AddFilterModal({
           });
         }
       }
-    } else if (addFilterMode === 'saved_filters') {
+    } else if (addFilterMode === SAVED_FILTERS.type) {
       applySavedQueries();
     }
   };
@@ -546,7 +548,6 @@ export function AddFilterModal({
                                           groupId: localfilter.groupId,
                                           id: Number(multipleFilters?.length) + localFilters.length,
                                           subGroupId,
-                                          groupsCount,
                                         },
                                       ]);
                                     }}
@@ -589,7 +590,6 @@ export function AddFilterModal({
                                             ? localFilters[localFilters.length - 1].groupId
                                             : localFilters[localFilters.length - 1].groupId + 1,
                                         subGroupId,
-                                        groupsCount,
                                         id: Number(multipleFilters?.length) + localFilters.length,
                                       },
                                     ]);
@@ -691,7 +691,12 @@ export function AddFilterModal({
   };
 
   return (
-    <EuiModal style={{ minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal
+      style={{ minWidth: 992 }}
+      maxWidth={992}
+      onClose={onCancel}
+      className="kbnQueryBar--addFilterModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -721,14 +726,14 @@ export function AddFilterModal({
       <EuiHorizontalRule margin="none" />
 
       <EuiModalBody className="kbnQueryBar__filterModalWrapper">
-        {addFilterMode === 'quick_form' && renderGroupedFilters()}
-        {addFilterMode === 'query_builder' && renderCustomEditor()}
-        {addFilterMode === 'saved_filters' && savedQueryManagement}
+        {addFilterMode === QUICK_FORM.type && renderGroupedFilters()}
+        {addFilterMode === QUERY_BUILDER.type && renderCustomEditor()}
+        {addFilterMode === SAVED_FILTERS.type && savedQueryManagement}
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />
       <EuiModalFooter>
         <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-          {addFilterMode !== 'saved_filters' && (
+          {addFilterMode !== SAVED_FILTERS.type && (
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('data.filter.filterEditor.createCustomLabelInputLabel', {

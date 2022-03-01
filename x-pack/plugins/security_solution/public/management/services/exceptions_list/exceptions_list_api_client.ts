@@ -46,27 +46,27 @@ export class ExceptionsListApiClient {
     }
     ExceptionsListApiClient.wasListCreated.set(
       this.listId,
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-            body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-          });
+      new Promise<void>((resolve, reject) => {
+        const asyncFunction = async () => {
+          try {
+            await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+              body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+            });
 
-          resolve();
-        } catch (err) {
-          // Ignore 409 errors. List already created
-          if (err.response?.status !== 409) {
-            reject(err);
+            resolve();
+          } catch (err) {
+            // Ignore 409 errors. List already created
+            if (err.response?.status !== 409) {
+              ExceptionsListApiClient.wasListCreated.delete(this.listId);
+              reject(err);
+            }
+
+            resolve();
           }
-
-          resolve();
-        }
+        };
+        asyncFunction();
       })
     );
-
-    ExceptionsListApiClient.wasListCreated.get(this.listId)?.catch(() => {
-      ExceptionsListApiClient.wasListCreated.delete(this.listId);
-    });
 
     return ExceptionsListApiClient.wasListCreated.get(this.listId);
   }
@@ -117,12 +117,11 @@ export class ExceptionsListApiClient {
     [
       'created_at',
       'created_by',
-      'created_at',
-      'created_by',
       'list_id',
       'tie_breaker_id',
       'updated_at',
       'updated_by',
+      'meta',
     ].forEach((field) => {
       delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
     });
@@ -187,6 +186,7 @@ export class ExceptionsListApiClient {
   async create(exception: CreateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
     this.checkIfIsUsingTheRightInstance(exception.list_id);
+    delete exception.meta;
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
@@ -226,6 +226,7 @@ export class ExceptionsListApiClient {
     return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
       query: {
         filter,
+        list_id: this.listId,
         namespace_type: 'agnostic',
       },
     });

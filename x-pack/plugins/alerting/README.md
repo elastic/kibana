@@ -19,6 +19,7 @@ Table of Contents
 		- [Methods](#methods)
 		- [Executor](#executor)
 		- [Action variables](#action-variables)
+	- [Recovered Alerts](#recovered-alerts)
 	- [Licensing](#licensing)
 	- [Documentation](#documentation)
 	- [Tests](#tests)
@@ -100,6 +101,7 @@ The following table describes the properties of the `options` object.
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 |defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
 |minimumScheduleInterval|The minimum interval that will be allowed for all rules of this rule type.|boolean|
+|doesSetRecoveryContext|Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
 
 ### Executor
 
@@ -170,6 +172,35 @@ This function should take the rule type params as input and extract out any save
 
 
 This function should take the rule type params (with saved object references) and the saved object references array as input and inject the saved object ID in place of any saved object references in the rule type params. Note that any error thrown within this function will be propagated.
+
+## Recovered Alerts
+The Alerting framework automatically determines which alerts are recovered by comparing the active alerts from the previous rule execution to the active alerts in the current rule execution. Alerts that were active previously but not active currently are considered `recovered`. If any actions were specified on the Recovery action group for the rule, they will be scheduled at the end of the execution cycle.
+
+Because this determination occurs after rule type executors have completed execution, the framework provides a mechanism for rule type executors to set contextual information for recovered alerts that can be templated and used inside recovery actions. In order to use this mechanism, the rule type must set the `doesSetRecoveryContext` flag to `true` during rule type registration.
+
+Then, the following code would be added within a rule type executor. As you can see, when the rule type is finished creating and scheduling actions for active alerts, it should call `done()` on the alertFactory. This will give the executor access to the list recovered alerts for this execution cycle, for which it can iterate and set context.
+
+```
+// Create and schedule actions for active alerts
+for (const i = 0; i < 5; ++i) {
+  alertFactory
+    .create('server_1')
+    .scheduleActions('default', {
+      server: 'server_1',
+    });
+}
+
+// Call done() to gain access to recovery utils
+// If `doesSetRecoveryContext` is set to `false`, getRecoveredAlerts() returns an empty list
+const { getRecoveredAlerts } = alertsFactory.done();
+
+for (const alert of getRecoveredAlerts()) {
+	const alertId = alert.getId();
+	alert.setContext({
+		server: <set something useful here>
+	})
+}
+```
 ## Licensing
 
 Currently most rule types are free features. But some rule types are subscription features, such as the tracking containment rule.
@@ -743,6 +774,7 @@ This factory returns an instance of `Alert`. The `Alert` class has the following
 |scheduleActions(actionGroup, context)|Call this to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. `scheduleActions` or `scheduleActionsWithSubGroup` should only be called once per alert.|
 |scheduleActionsWithSubGroup(actionGroup, subgroup, context)|Call this to schedule the execution of actions within a subgroup. The actionGroup is a string `id` that relates to the group of alert `actions` to execute, the `subgroup` is a dynamic string that denotes a subgroup within the actionGroup and the context will be used for templating purposes. `scheduleActions` or `scheduleActionsWithSubGroup` should only be called once per alert.|
 |replaceState(state)|Used to replace the current state of the alert. This doesn't work like React, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between rule executions whenever you re-create an alert with the same id. The alert state will be erased when `scheduleActions` or `scheduleActionsWithSubGroup` aren't called during an execution.|
+|setContext(context)|Call this to set the context for this alert that is used for templating purposes.
 
 ### When should I use `scheduleActions` and `scheduleActionsWithSubGroup`?
 The `scheduleActions` or `scheduleActionsWithSubGroup` methods are both used to achieve the same thing: schedule actions to be run under a specific action group.
@@ -758,13 +790,16 @@ Action Subgroups are dynamic, and can be defined on the fly.
 This approach enables users to specify actions under specific action groups, but they can't specify actions that are specific to subgroups.
 As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the RuleType implementer to reuse the same action group for multiple different active subgroups.
 
+### When should I use `setContext`?
+`setContext` is intended to be used for setting context for recovered alerts. While rule type executors make the determination as to which alerts are active for an execution, the Alerting Framework automatically determines which alerts are recovered for an execution. `setContext` empowers rule type executors to provide additional contextual information for these recovered alerts that will be templated into actions.
+
 ## Templating Actions
 
 There needs to be a way to map rule context into action parameters. For this, we started off by adding template support. Any string within the `params` of a rule saved object's `actions` will be processed as a template and can inject context or state values.
 
 When an alert executes, the first argument is the `group` of actions to execute and the second is the context the rule exposes to templates. We iterate through each action parameter attributes recursively and render templates if they are a string. Templates have access to the following "variables":
 
-- `context` - provided by context argument of `.scheduleActions(...)` and `.scheduleActionsWithSubGroup(...)` on an alert.
+- `context` - provided by context argument of `.scheduleActions(...)`, `.scheduleActionsWithSubGroup(...)` and `setContext(...)` on an alert.
 - `state` - the alert's `state` provided by the most recent `replaceState` call on an alert.
 - `alertId` - the id of the rule
 - `alertInstanceId` - the alert id

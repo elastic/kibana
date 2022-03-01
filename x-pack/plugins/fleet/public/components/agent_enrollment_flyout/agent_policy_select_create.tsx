@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 
+import type { AgentPolicyCreateState } from '../../applications/fleet/sections/agents/components';
 import {
   AgentPolicyCreatedCallOut,
   CREATE_STATUS,
@@ -40,7 +41,9 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
 }) => {
   const [showCreatePolicy, setShowCreatePolicy] = useState(agentPolicies.length === 0);
 
-  const [createStatus, setCreateStatus] = useState(CREATE_STATUS.INITIAL);
+  const [createState, setCreateState] = useState<AgentPolicyCreateState>({
+    status: CREATE_STATUS.INITIAL,
+  });
 
   const [newName, setNewName] = useState(incrementPolicyName(agentPolicies, isFleetServerPolicy));
 
@@ -52,13 +55,13 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   }, [agentPolicies, isFleetServerPolicy]);
 
   const onAgentPolicyCreated = useCallback(
-    async (policy: AgentPolicy | null) => {
+    async (policy: AgentPolicy | null, errorMessage?: JSX.Element) => {
       if (!policy) {
-        setCreateStatus(CREATE_STATUS.FAILED);
+        setCreateState({ status: CREATE_STATUS.FAILED, errorMessage });
         return;
       }
       setShowCreatePolicy(false);
-      setCreateStatus(CREATE_STATUS.CREATED);
+      setCreateState({ status: CREATE_STATUS.CREATED });
       if (onAgentPolicyChange) {
         onAgentPolicyChange(policy.id, policy!);
       }
@@ -88,8 +91,8 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
           isFleetServerPolicy={isFleetServerPolicy}
         />
       )}
-      {createStatus !== CREATE_STATUS.INITIAL && (
-        <AgentPolicyCreatedCallOut createStatus={createStatus} />
+      {createState.status !== CREATE_STATUS.INITIAL && (
+        <AgentPolicyCreatedCallOut createState={createState} />
       )}
     </>
   );

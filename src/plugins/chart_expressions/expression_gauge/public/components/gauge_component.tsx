@@ -16,11 +16,22 @@ import {
   GaugeTicksPosition,
   GaugeLabelMajorModes,
   GaugeColorModes,
+  GaugeShapes,
 } from '../../common';
-import { GaugeShapes, GaugeTicksPositions } from '../../common';
-import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import { getAccessorsFromArgs, getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import { GaugeTicksPositions } from '../../common';
+import {
+  getAccessorsFromArgs,
+  getIcons,
+  getMaxValue,
+  getMinValue,
+  getValueFromAccessor,
+  getSubtypeByGaugeType,
+  getGoalConfig,
+} from './utils';
 import './index.scss';
+import { GaugeCentralMajorMode } from '../../common/types';
+import { isBulletShape, isRoundShape } from '../../common/utils';
+
 declare global {
   interface Window {
     /**
@@ -100,18 +111,18 @@ function normalizeBands(
 }
 
 function getTitle(
-  labelMajorMode: GaugeLabelMajorMode,
-  labelMajor?: string,
+  majorMode?: GaugeLabelMajorMode | GaugeCentralMajorMode,
+  major?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === GaugeLabelMajorModes.NONE) {
+  if (majorMode === GaugeLabelMajorModes.NONE) {
     return '';
   }
 
-  if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
-    return `${fallbackTitle || ''}   `; // added extra space for nice rendering
+  if (majorMode === GaugeLabelMajorModes.AUTO) {
+    return fallbackTitle || '';
   }
-  return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
+  return major || fallbackTitle || '';
 }
 
 // TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
@@ -134,9 +145,14 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
+  if (ticksPosition === GaugeTicksPositions.HIDDEN) {
+    return [];
+  }
+
   if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
+
   const TICKS_NO = 3;
   const min = Math.min(...(colorBands || []), ...range);
   const max = Math.max(...(colorBands || []), ...range);
@@ -152,12 +168,14 @@ function getTicks(
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
-      shape: subtype,
+      shape: gaugeType,
       palette,
       colorMode,
       labelMinor,
       labelMajor,
       labelMajorMode,
+      centralMajor,
+      centralMajorMode,
       ticksPosition,
     } = args;
     const table = data;
@@ -179,8 +197,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
-    const icon =
-      subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
+    const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
       return <EmptyPlaceholder icon={icon} />;
@@ -235,24 +252,41 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     // TODO: format in charts
     const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
+    const goalConfig = getGoalConfig(gaugeType);
+    const totalTicks = getTicks(ticksPosition, [min, max], bands);
+    const ticks =
+      gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
+
+    const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
+
+    // added extra space for nice rendering
+    const majorExtraSpaces = isBulletShape(gaugeType) ? '   ' : '';
+    const minorExtraSpaces = isBulletShape(gaugeType) ? '  ' : '';
+
+    const extraTitles = isRoundShape(gaugeType)
+      ? {
+          centralMinor: tickFormatter.convert(metricValue),
+          centralMajor: getTitle(centralMajorMode, centralMajor, metricColumn?.name),
+        }
+      : {};
 
     return (
       <Chart>
         <Settings
           debugState={window._echDebugStateFlag ?? false}
-          theme={chartTheme}
+          theme={[{ background: { color: 'transparent' } }, chartTheme]}
           ariaLabel={args.ariaLabel}
           ariaUseDefaultSummary={!args.ariaLabel}
         />
         <Goal
           id="goal"
-          subtype={subtype}
+          subtype={getSubtypeByGaugeType(gaugeType)}
           base={bands[0]}
           target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
           actual={formattedActual}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
           bands={bands}
-          ticks={getTicks(ticksPosition, [min, max], bands)}
+          ticks={ticks}
           bandFillColor={
             colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {
@@ -265,8 +299,10 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                 }
               : () => `rgba(255,255,255,0)`
           }
-          labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
-          labelMinor={labelMinor ? labelMinor + '  ' : ''} // added extra space for nice rendering
+          labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
+          labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
+          {...extraTitles}
+          {...goalConfig}
         />
       </Chart>
     );
