@@ -6,15 +6,6 @@
 	<br>
 </div>
 
-## 🎉 New! The Backport Tool as a Github Action 🎉
-
-A [Github Action](https://github.com/elastic/kibana-github-actions/tree/main/backport) around The Backport Tool now exists. It makes it a breeze to get automatic backports when pull requests are merged.
-
-
-# Backport CLI tool
-
-The remaining documentation focuses on the Backport CLI tool (not the Github Action) although all configuration options apply to the Github Action too. The only difference is that the CLI tool is interactive and run manually locally, where the Github Action runs automatically.
-
 ## How it works
 
 1. Select a commit to backport
@@ -51,7 +42,7 @@ Add a [project config](https://github.com/sqren/backport/blob/master/docs/config
   "repoName": "kibana",
 
   // the branches available to backport to
-  "targetBranchChoices": ["main", "production", "staging"],
+  "targetBranchChoices": ["main", "6.3", "6.2", "6.1", "6.0"],
 
   // Optional: Automatically detect which branches a pull request should be backported to based on the pull request labels.
   // In this case, adding the label "backport-to-production" will backport the PR to the "production" branch
@@ -244,6 +235,10 @@ console.log(commits);
 }]
 */
 ```
+
+## The Backport Tool as a Github Action
+
+A [Github Action](https://github.com/elastic/kibana-github-actions/tree/main/backport) around The Backport Tool for automatically creating backports when pull requests are merged.
 
 ## What is backporting?
 
