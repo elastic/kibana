@@ -17,13 +17,13 @@ import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/gene
 
 main();
 
-const handleErr = (err: unknown) => {
+function handleErr(err: unknown) {
   if (err instanceof errors.ResponseError && err.statusCode !== 404) {
     console.log(JSON.stringify(err, null, 2));
     // eslint-disable-next-line no-process-exit
     process.exit(1);
   }
-};
+}
 
 async function deleteIndices(indices: string[], client: Client) {
   for (const index of indices) {
@@ -84,7 +84,7 @@ async function deleteUser(esClient: Client, username: string): Promise<{ found: 
   });
 }
 
-const updateURL = ({
+function updateURL({
   url,
   user,
   protocol,
@@ -92,7 +92,7 @@ const updateURL = ({
   url: string;
   user?: { username: string; password: string };
   protocol?: string;
-}): string => {
+}): string {
   const urlObject = new URL(url);
   if (user) {
     urlObject.username = user.username;
@@ -102,7 +102,7 @@ const updateURL = ({
     urlObject.protocol = protocol;
   }
   return urlObject.href;
-};
+}
 
 async function main() {
   const argv = yargs.help().options({
@@ -247,7 +247,7 @@ async function main() {
       default: false,
     },
     withNewUser: {
-      alias: 'nu',
+      alias: 'wnu',
       describe:
         'If the --fleet flag is enabled, using `--withNewUser=username:password` would add a new user with \
          the given username, password and `superuser`, `kibana_system` roles. Adding a new user would also write \

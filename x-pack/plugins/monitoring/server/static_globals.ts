@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  ElasticsearchClient,
-  Logger,
-  SharedGlobalConfig,
-  PluginInitializerContext,
-} from 'kibana/server';
+import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from 'kibana/server';
 import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringConfig } from './config';
@@ -25,7 +19,6 @@ interface InitSetupOptions {
   config: MonitoringConfig;
   getLogger: GetLogger;
   log: Logger;
-  legacyConfig: SharedGlobalConfig;
   setupPlugins: PluginsSetup;
 }
 

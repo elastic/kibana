@@ -32,7 +32,7 @@ export function clustersRoute(server) {
     },
     handler: async (req) => {
       let clusters = [];
-      const config = server.config();
+      const config = server.config;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
@@ -40,7 +40,7 @@ export function clustersRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server, {
-          filebeatIndexPattern: config.get('monitoring.ui.logs.index'),
+          filebeatIndexPattern: config.ui.logs.index,
         });
         clusters = await getClustersFromRequest(req, indexPatterns, {
           codePaths: req.payload.codePaths,

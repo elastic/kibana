@@ -37,7 +37,7 @@ describe('Screenshot Observable Pipeline', () => {
     } as unknown as jest.Mocked<Logger>;
     options = {
       browserTimezone: 'UTC',
-      conditionalHeaders: {},
+      headers: {},
       layout: {},
       timeouts: {
         loadDelay: 2000,

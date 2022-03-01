@@ -31,6 +31,8 @@ import {
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
+import { Loading } from '..';
+
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
@@ -64,7 +66,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
-  const { agentPolicies, refreshAgentPolicies } = useAgentEnrollmentFlyoutData();
+  const {
+    agentPolicies,
+    isLoadingInitialAgentPolicies,
+    isLoadingAgentPolicies,
+    refreshAgentPolicies,
+  } = useAgentEnrollmentFlyoutData();
 
   useEffect(() => {
     async function checkPolicyIsFleetServer() {
@@ -141,7 +148,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           ) : undefined
         }
       >
-        {mode === 'managed' ? (
+        {isLoadingInitialAgentPolicies ? (
+          <Loading />
+        ) : mode === 'managed' ? (
           <ManagedInstructions
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
@@ -150,6 +159,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             refreshAgentPolicies={refreshAgentPolicies}
+            isLoadingAgentPolicies={isLoadingAgentPolicies}
           />
         ) : (
           <StandaloneInstructions

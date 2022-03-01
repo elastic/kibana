@@ -6,14 +6,15 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertExecutionStatus, RawRuleExecutionStatus, RuleTaskStateWithActions } from '../types';
+import { AlertExecutionStatus, RawRuleExecutionStatus, RuleExecutionState } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { AlertExecutionStatuses } from '../../common';
 
-export function executionStatusFromState(state: RuleTaskStateWithActions): AlertExecutionStatus {
+export function executionStatusFromState(state: RuleExecutionState): AlertExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
   return {
+    metrics: state.metrics,
     numberOfTriggeredActions: state.triggeredActions?.length ?? 0,
     lastExecutionDate: new Date(),
     status: alertIds.length === 0 ? 'ok' : 'active',

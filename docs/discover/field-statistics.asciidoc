@@ -14,11 +14,9 @@ for the data and its cardinality?
 This example explores the fields in
 the <<gs-get-data-into-kibana, sample web logs data>>, or you can use your own data.
 
-. Open the main menu, click *Stack Managment > Advanced Settings*, search for *Show field statistics*,
-and turn on the setting.
+. Open the main menu, and click *Discover*.
 
-. Open the main menu, click *Discover*, expand the {data-source} dropdown,
-and select *kibana_sample_data_logs*.
+. Expand the {data-source} dropdown, and select *kibana_sample_data_logs*.
 
 . If you don’t see any results, expand the time range, for example, to *Last 7 days*.
 

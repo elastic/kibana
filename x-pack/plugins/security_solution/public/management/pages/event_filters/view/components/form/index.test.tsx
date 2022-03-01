@@ -237,7 +237,10 @@ describe('Event filter form', () => {
     // move back to per-policy
     userEvent.click(component.getByTestId('perPolicy'));
     // the previous selected policy should be selected
-    expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute('aria-selected', 'true');
+    expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute(
+      'data-test-selected',
+      'true'
+    );
     // on change called with the previous policy
     expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
   });

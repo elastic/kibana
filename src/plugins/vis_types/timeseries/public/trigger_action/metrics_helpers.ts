@@ -192,20 +192,31 @@ export const getSiblingPipelineSeriesFormula = (
     return null;
   }
   const aggregationMap = SUPPORTED_METRICS[aggregation];
-  const subMetricField = subFunctionMetric.field;
+  const subMetricField = subFunctionMetric.type !== 'count' ? subFunctionMetric.field : '';
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);
   let formula = `${aggregationMap.name}(`;
+  let minMax = '';
   if (additionalSubFunction) {
     const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
     if (!additionalPipelineAggMap) {
       return null;
     }
+    const additionalSubFunctionField =
+      additionalSubFunction.type !== 'count' ? additionalSubFunction.field : '';
+    if (currentMetric.type === 'positive_only') {
+      minMax = `, 0, ${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
+        additionalSubFunctionField ?? ''
+      }))`;
+    }
     formula += `${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
-      additionalSubFunction.field ?? ''
-    })))`;
+      additionalSubFunctionField ?? ''
+    }))${minMax})`;
   } else {
-    formula += `${pipelineAggMap.name}(${subFunctionMetric.field ?? ''}))`;
+    if (currentMetric.type === 'positive_only') {
+      minMax = `, 0, ${pipelineAggMap.name}(${subMetricField ?? ''})`;
+    }
+    formula += `${pipelineAggMap.name}(${subMetricField ?? ''})${minMax})`;
   }
   return formula;
 };
@@ -262,7 +273,8 @@ export const getFormulaEquivalent = (
     case 'avg_bucket':
     case 'max_bucket':
     case 'min_bucket':
-    case 'sum_bucket': {
+    case 'sum_bucket':
+    case 'positive_only': {
       return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
     }
     case 'count': {

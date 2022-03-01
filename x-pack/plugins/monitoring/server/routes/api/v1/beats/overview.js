@@ -32,7 +32,7 @@ export function beatsOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
