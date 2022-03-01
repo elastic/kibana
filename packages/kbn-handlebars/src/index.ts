@@ -12,13 +12,14 @@ import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-a
 import get from 'lodash/get';
 
 export type ExtendedCompileOptions = Pick<CompileOptions, 'noEscape'>;
+export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers'>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
   export function compileAST(
     template: string,
     options?: ExtendedCompileOptions
-  ): (context: any) => string;
+  ): (context: any, options?: ExtendedRuntimeOptions) => string;
   export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
 }
 
@@ -43,7 +44,8 @@ Handlebars.create = create;
 // Custom function to compile only the AST so we don't have to use `eval`
 Handlebars.compileAST = function (template: string, options?: ExtendedCompileOptions) {
   const visitor = new ElasticHandlebarsVisitor(template, options, this.helpers);
-  return (context: any) => visitor.render(context);
+  return (context: any, runtimeOptions?: ExtendedRuntimeOptions) =>
+    visitor.render(context, runtimeOptions);
 };
 
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
@@ -70,6 +72,11 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       return undefined;
     },
   };
+  private container: {
+    helpers: { [name: string]: Handlebars.HelperDelegate };
+  } = {
+    helpers: {},
+  };
 
   constructor(
     template: string,
@@ -82,9 +89,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.helpers = helpers;
   }
 
-  render(context: any): string {
+  render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.scopes = [context];
     this.values = [];
+    this.container = {
+      helpers: Object.assign({}, this.helpers, options.helpers),
+    };
 
     if (!this.ast) {
       this.ast = Handlebars.parse(this.template); // TODO: can we get away with using parseWithoutProcessing instead?
@@ -103,7 +113,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     transformLiteralToPath(sexpr);
 
     const name = sexpr.path.parts[0];
-    const helper = this.helpers[name];
+    const helper = this.container.helpers[name];
 
     if (helper) {
       const [context] = this.scopes;
@@ -127,7 +137,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     transformLiteralToPath(block);
 
     const name = block.path.parts[0];
-    const helper = this.helpers[name];
+    const helper = this.container.helpers[name];
 
     if (!helper) {
       throw new Handlebars.Exception(`Unknown helper ${name}`, block);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Handlebars, { HelperDelegate, ExtendedCompileOptions } from '..';
+import Handlebars, { HelperDelegate, ExtendedCompileOptions, ExtendedRuntimeOptions } from '..';
 
 export function expectTemplate(template: string) {
   return new HandlebarsTestBench(template);
@@ -64,21 +64,19 @@ class HandlebarsTestBench {
 
   private compileAndExecute() {
     const { renderEval, renderAST } = this.compile();
+
+    const runtimeOptions: ExtendedRuntimeOptions = {
+      helpers: this.helpers,
+    };
+
     return {
-      outputEval: renderEval(this.input),
-      outputAST: renderAST(this.input),
+      outputEval: renderEval(this.input, runtimeOptions),
+      outputAST: renderAST(this.input, runtimeOptions),
     };
   }
 
   private compile() {
-    const hasCustomHelpers = Object.keys(this.helpers).length > 0;
     const handlebarsEnv = Handlebars.create();
-
-    if (hasCustomHelpers) {
-      for (const [name, helper] of Object.entries(this.helpers)) {
-        handlebarsEnv.registerHelper(name, helper);
-      }
-    }
 
     return {
       renderEval: handlebarsEnv.compile(this.template, this.compileOptions),
