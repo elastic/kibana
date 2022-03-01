@@ -51,7 +51,9 @@ describe('wrapScopedClusterClient', () => {
     }).client();
     await wrappedSearchClient.asInternalUser.search(esQuery);
 
-    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {});
+    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
+      signal: abortController.signal,
+    });
     expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
@@ -74,7 +76,9 @@ describe('wrapScopedClusterClient', () => {
     }).client();
     await wrappedSearchClient.asCurrentUser.search(esQuery);
 
-    expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {});
+    expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
+      signal: abortController.signal,
+    });
     expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
@@ -99,6 +103,7 @@ describe('wrapScopedClusterClient', () => {
 
     expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
       ignore: [404],
+      signal: abortController.signal,
     });
     expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
