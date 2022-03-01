@@ -261,6 +261,7 @@ exports.Cluster = class Cluster {
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
       'search.check_ccs_compatibility=true',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
