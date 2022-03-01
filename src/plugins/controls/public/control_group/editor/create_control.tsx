@@ -30,7 +30,7 @@ export interface CreateControlButtonProps {
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
   buttonType: CreateControlButtonTypes;
-  closePopover: () => void;
+  closePopover?: () => void;
 }
 
 export const CreateControlButton = ({
@@ -131,7 +131,7 @@ export const CreateControlButton = ({
         onClick={() => {
           if (buttonType === 'callout' && isControlTypePopoverOpen) {
             setIsControlTypePopoverOpen(false);
-          } else {
+          } else if (closePopover) {
             closePopover();
           }
           createNewControl(type);
