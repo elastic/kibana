@@ -37,7 +37,7 @@ import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import type { ChartData } from './common';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
-import { HistogramActionsProps } from '../visualization_actions/types';
+import { VisualizationActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 const LegendFlexItem = styled(EuiFlexItem)`
@@ -148,7 +148,7 @@ interface BarChartComponentProps {
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
   timelineId?: string;
-  histogramActionsOptions?: HistogramActionsProps;
+  visualizationActionsOptions?: VisualizationActionsProps;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -158,7 +158,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   configs,
   stackByField,
   timelineId,
-  histogramActionsOptions,
+  visualizationActionsOptions,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
@@ -210,9 +210,9 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
         {!isVlidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
         )}
-        {histogramActionsOptions?.lensAttributes && histogramActionsOptions?.timerange && (
+        {visualizationActionsOptions?.lensAttributes && visualizationActionsOptions?.timerange && (
           <VisualizationActions
-            {...histogramActionsOptions}
+            {...visualizationActionsOptions}
             className="kpi-matrix-histogram-actions"
           />
         )}

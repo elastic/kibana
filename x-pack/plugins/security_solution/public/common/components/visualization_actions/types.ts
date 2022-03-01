@@ -11,7 +11,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 
-export interface HistogramActionsProps {
+export interface VisualizationActionsProps {
   className?: string;
   getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId;

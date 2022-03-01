@@ -34,7 +34,7 @@ import {
   Wrapper,
 } from './common';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
-import { HistogramActionsProps } from '../visualization_actions/types';
+import { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
@@ -145,13 +145,13 @@ AreaChartBase.displayName = 'AreaChartBase';
 interface AreaChartComponentProps {
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-  histogramActionsOptions?: HistogramActionsProps;
+  visualizationActionsOptions?: VisualizationActionsProps;
 }
 
 export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
   areaChart,
   configs,
-  histogramActionsOptions,
+  visualizationActionsOptions,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const customHeight = get('customHeight', configs);
@@ -182,7 +182,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
         )}
         <VisualizationActions
-          {...histogramActionsOptions}
+          {...visualizationActionsOptions}
           className="kpi-matrix-histogram-actions"
         />
       </HoverVisibilityContainer>

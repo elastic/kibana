@@ -301,7 +301,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 <BarChart
                   barChart={barChart}
                   configs={barchartConfigs()}
-                  histogramActionsOptions={{
+                  visualizationActionsOptions={{
                     lensAttributes: barChartLensAttributes,
                     queryId: id,
                     inspectIndex: index,
@@ -321,7 +321,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       xTickFormatter: histogramDateTimeFormatter([from, to]),
                       onBrushEnd: narrowDateRange,
                     })}
-                    histogramActionsOptions={{
+                    visualizationActionsOptions={{
                       lensAttributes: areaChartLensAttributes,
                       queryId: id,
                       inspectIndex: index,

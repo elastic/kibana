@@ -29,7 +29,7 @@ import { useLensAttributes } from './use_lens_attributes';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { HistogramActionsProps } from './types';
+import { VisualizationActionsProps } from './types';
 
 const Wrapper = styled.div`
   &.kpi-matrix-histogram-actions {
@@ -43,7 +43,7 @@ export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 
 const owner = APP_ID;
 
-const VisualizationActionsComponent: React.FC<HistogramActionsProps> = ({
+const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
   getLensAttributes,
   inputId = 'global',
