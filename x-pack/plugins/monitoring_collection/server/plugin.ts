@@ -9,6 +9,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext, Logger } from 'kibana/server';
 import { registerDynamicRoute } from './routes';
 import { MakeSchemaFrom } from '../../../../src/plugins/usage_collection/server';
+import { TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {
   registerMetric: <T>(metric: Metric<T>) => void;
@@ -65,6 +66,12 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         if (this.metrics.hasOwnProperty(metric.type)) {
           this.logger.warn(
             `Skipping registration of metric type '${metric.type}'. This type has already been registered.`
+          );
+          return;
+        }
+        if (!TYPE_ALLOWLIST.includes(metric.type)) {
+          this.logger.warn(
+            `Skipping registration of metric type '${metric.type}'. This type is not supported in the allowlist.`
           );
           return;
         }

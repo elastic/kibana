@@ -28,7 +28,7 @@ describe('monitoring_collection plugin', () => {
     it('should allow registering a collector and getting data from it', async () => {
       const { registerMetric } = plugin.setup(coreSetup);
       registerMetric<{ name: string }>({
-        type: 'test',
+        type: 'actions',
         schema: {
           name: {
             type: 'text',
@@ -43,14 +43,14 @@ describe('monitoring_collection plugin', () => {
         },
       });
 
-      const metrics = await plugin.getMetric('test');
+      const metrics = await plugin.getMetric('actions');
       expect(metrics).toStrictEqual([{ name: 'foo' }]);
     });
 
     it('should allow registering multiple ollectors and getting data from it', async () => {
       const { registerMetric } = plugin.setup(coreSetup);
       registerMetric<{ name: string }>({
-        type: 'test',
+        type: 'actions',
         schema: {
           name: {
             type: 'text',
@@ -65,7 +65,7 @@ describe('monitoring_collection plugin', () => {
         },
       });
       registerMetric<{ name: string }>({
-        type: 'tester',
+        type: 'rules',
         schema: {
           name: {
             type: 'text',
@@ -86,11 +86,40 @@ describe('monitoring_collection plugin', () => {
         },
       });
 
-      const metrics = await Promise.all([plugin.getMetric('test'), plugin.getMetric('tester')]);
+      const metrics = await Promise.all([plugin.getMetric('actions'), plugin.getMetric('rules')]);
       expect(metrics).toStrictEqual([
         [{ name: 'foo' }],
         [{ name: 'foo' }, { name: 'bar' }, { name: 'foobar' }],
       ]);
+    });
+
+    it('should NOT allow registering a collector that is not in the allowlist', async () => {
+      const logger = context.logger.get();
+      const { registerMetric } = plugin.setup(coreSetup);
+      registerMetric<{ name: string }>({
+        type: 'test',
+        schema: {
+          name: {
+            type: 'text',
+          },
+        },
+        fetch: async () => {
+          return [
+            {
+              name: 'foo',
+            },
+          ];
+        },
+      });
+      const metrics = await plugin.getMetric('test');
+      expect((logger.warn as jest.Mock).mock.calls.length).toBe(2);
+      expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
+        `Skipping registration of metric type 'test'. This type is not supported in the allowlist.`
+      );
+      expect((logger.warn as jest.Mock).mock.calls[1][0]).toBe(
+        `Call to 'getMetric' failed because type 'test' does not exist.`
+      );
+      expect(metrics).toBeUndefined();
     });
   });
 });
