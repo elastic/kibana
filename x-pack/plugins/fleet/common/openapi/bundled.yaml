@@ -672,6 +672,11 @@ paths:
           name: policyId
           in: query
           required: false
+        - schema:
+            type: string
+          name: kuery
+          in: query
+          required: false
   /agents:
     get:
       summary: Agents - List
