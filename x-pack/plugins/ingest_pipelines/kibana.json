@@ -1,6 +1,5 @@
 {
   "id": "ingestPipelines",
-  "version": "8.0.1",
   "server": true,
   "ui": true,
   "owner": {
