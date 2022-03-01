@@ -212,7 +212,10 @@ export class RuleDataClient implements IRuleDataClient {
               this.options.logger.error(error);
             }
             return response;
+          } else {
+            this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
           }
+          return undefined;
         } catch (error) {
           this.options.logger.error(error);
 
