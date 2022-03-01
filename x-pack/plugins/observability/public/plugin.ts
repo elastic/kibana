@@ -247,6 +247,7 @@ export class Plugin
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry,
+      isRuleManagementEnabled: () => config.unsafe.rules.enabled,
       isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
