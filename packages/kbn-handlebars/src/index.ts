@@ -141,6 +141,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         this.acceptKey(block, 'program');
         this.scopes.shift();
       },
+      inverse: noop,
       hash: {}, // TODO: Figure out what actual value to put in hash
     };
     helper.call(context, ...params, options);
@@ -188,6 +189,10 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.values = currentValues;
     return params;
   }
+}
+
+function noop() {
+  return '';
 }
 
 // liftet from handlebars lib/handlebars/compiler/compiler.js
