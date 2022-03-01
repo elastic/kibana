@@ -397,8 +397,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Row: {row}; Column: {col}',
         values: { row, col },
       }),
-    'euiDataGridCellButtons.expandButtonTitle': i18n.translate(
-      'core.euiDataGridCellButtons.expandButtonTitle',
+    'euiDataGridCellActions.expandButtonTitle': i18n.translate(
+      'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
@@ -954,13 +954,37 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
+    'euiSelectable.screenReaderInstructions': i18n.translate(
+      'core.euiSelectable.screenReaderInstructions',
+      {
+        defaultMessage:
+          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+      }
+    ),
+    'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
+      i18n.translate('core.euiSelectable.searchResults', {
+        defaultMessage: '{resultsLength, plural, one {# result} other {# results}}',
+        values: { resultsLength },
+      }),
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
+    'euiSelectableListItem.checkedOption': i18n.translate(
+      'core.euiSelectableListItem.checkedOption',
+      {
+        defaultMessage: 'Checked option.',
+      }
+    ),
+    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkedOptionInstructions',
+      {
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
     'euiSelectableListItem.includedOption': i18n.translate(
       'core.euiSelectableListItem.includedOption',
       {
-        defaultMessage: 'Included option.',
+        defaultMessage: 'Selected option.',
       }
     ),
     'euiSelectableListItem.includedOptionInstructions': i18n.translate(
@@ -978,7 +1002,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
       'core.euiSelectableListItem.excludedOptionInstructions',
       {
-        defaultMessage: 'To deselect this option, press enter.',
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
+    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.unckeckedOptionInstructions',
+      {
+        defaultMessage: 'To select this option, press enter.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1088,6 +1118,28 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
+    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
+      defaultMessage: 'Saved.',
+    }),
+
+    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
+      defaultMessage: 'Changes have not been saved.',
+    }),
+
+    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
+      defaultMessage: 'State: loading.',
+    }),
+
+    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
+      defaultMessage: 'State: saved.',
+    }),
+
+    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
+      defaultMessage: 'State: unsaved.',
+    }),
+    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
+      defaultMessage: 'State: unchanged.',
+    }),
     'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
       'core.euiSuperSelect.screenReaderAnnouncement',
       {

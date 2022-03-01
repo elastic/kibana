@@ -15,7 +15,7 @@ import { pageObjects } from './page_objects';
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:ffcbe0ba25b9bae09a671249cbb1b25af0aa1994';
+  'docker.elastic.co/package-registry/distribution@sha256:8b4ce36ecdf86e6cfdf781d9df8d564a014add9afc9aec21cf2c5a68ff82d3ab';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -53,7 +53,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/api_keys'),
-      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/data_views'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
       resolve(__dirname, './apps/ingest_pipelines'),
@@ -540,6 +540,25 @@ export default async function ({ readConfigFile }) {
                 names: ['*'],
                 privileges: ['all'],
               },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
             ],
           },
           kibana: [

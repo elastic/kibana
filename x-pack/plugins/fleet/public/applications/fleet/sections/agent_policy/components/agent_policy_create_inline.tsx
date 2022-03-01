@@ -39,7 +39,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 interface Props {
-  updateAgentPolicy: (u: AgentPolicy | null) => void;
+  updateAgentPolicy: (u: AgentPolicy | null, errorMessage?: JSX.Element) => void;
   isFleetServerPolicy?: boolean;
   agentPolicyName: string;
 }
@@ -84,11 +84,23 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         updateAgentPolicy(resp.data.item);
       }
     } catch (e) {
-      updateAgentPolicy(null);
+      updateAgentPolicy(null, mapError(e));
     } finally {
       setIsLoading(false);
     }
   }, [newAgentPolicy, withSysMonitoring, updateAgentPolicy]);
+
+  function mapError(e: { statusCode: number }): JSX.Element | undefined {
+    switch (e.statusCode) {
+      case 409:
+        return (
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyCreation.errorMessage"
+            defaultMessage="An agent policy already exists with this name."
+          />
+        );
+    }
+  }
 
   return (
     <EuiForm>

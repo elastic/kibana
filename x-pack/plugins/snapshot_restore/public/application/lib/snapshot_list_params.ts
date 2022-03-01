@@ -6,6 +6,7 @@
  */
 
 import { Direction, Query } from '@elastic/eui';
+import { SchemaType } from '@elastic/eui/src/components/search_bar/search_box';
 
 export type SortField =
   | 'snapshot'
@@ -49,12 +50,15 @@ const resetSearchOptions = (listParams: SnapshotListParams): SnapshotListParams 
 });
 
 // to init the query for repository and policyName search passed via url
-export const getQueryFromListParams = (listParams: SnapshotListParams): Query => {
+export const getQueryFromListParams = (
+  listParams: SnapshotListParams,
+  schema: SchemaType
+): Query => {
   const { searchField, searchValue } = listParams;
   if (!searchField || !searchValue) {
     return Query.MATCH_ALL;
   }
-  return Query.parse(`${searchField}=${searchValue}`);
+  return Query.parse(`${searchField}=${searchValue}`, { schema });
 };
 
 export const getListParams = (listParams: SnapshotListParams, query: Query): SnapshotListParams => {

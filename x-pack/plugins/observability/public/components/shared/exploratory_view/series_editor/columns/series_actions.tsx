@@ -182,7 +182,7 @@ const DELETE_SERIES_TOOLTIP_LABEL = i18n.translate(
 const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
   'xpack.observability.seriesEditor.sampleDocuments',
   {
-    defaultMessage: 'View sample documents',
+    defaultMessage: 'View transaction in Discover',
   }
 );
 

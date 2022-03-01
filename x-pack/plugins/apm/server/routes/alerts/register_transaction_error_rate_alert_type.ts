@@ -83,6 +83,7 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
+          apmActionVariables.reason,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -198,7 +199,14 @@ export function registerTransactionErrorRateAlertType({
         results.forEach((result) => {
           const { serviceName, environment, transactionType, errorRate } =
             result;
-
+          const reasonMessage = formatTransactionErrorRateReason({
+            threshold: ruleParams.threshold,
+            measured: errorRate,
+            asPercent,
+            serviceName,
+            windowSize: ruleParams.windowSize,
+            windowUnit: ruleParams.windowUnit,
+          });
           services
             .alertWithLifecycle({
               id: [
@@ -216,14 +224,7 @@ export function registerTransactionErrorRateAlertType({
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-                [ALERT_REASON]: formatTransactionErrorRateReason({
-                  threshold: ruleParams.threshold,
-                  measured: errorRate,
-                  asPercent,
-                  serviceName,
-                  windowSize: ruleParams.windowSize,
-                  windowUnit: ruleParams.windowUnit,
-                }),
+                [ALERT_REASON]: reasonMessage,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -233,6 +234,7 @@ export function registerTransactionErrorRateAlertType({
               threshold: ruleParams.threshold,
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+              reason: reasonMessage,
             });
         });
 

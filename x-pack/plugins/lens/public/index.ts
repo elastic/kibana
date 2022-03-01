@@ -14,9 +14,6 @@ export type {
 export type { XYState } from './xy_visualization/types';
 export type { DataType, OperationMetadata, Visualization } from './types';
 export type {
-  PieVisualizationState,
-  PieLayerState,
-  SharedPieLayerState,
   MetricState,
   AxesSettingsConfig,
   XYLayerConfig,
@@ -26,7 +23,13 @@ export type {
   XYCurveType,
   YConfig,
 } from '../common/expressions';
-export type { ValueLabelConfig } from '../common/types';
+export type {
+  ValueLabelConfig,
+  PieVisualizationState,
+  PieLayerState,
+  SharedPieLayerState,
+} from '../common/types';
+
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
 export type { HeatmapVisualizationState } from './heatmap_visualization/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';

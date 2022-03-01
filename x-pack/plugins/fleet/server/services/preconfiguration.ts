@@ -22,7 +22,7 @@ import type {
   PackagePolicy,
 } from '../../common';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
-import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
+import { normalizeHostsForAgents } from '../../common';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -32,10 +32,9 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
 interface PreconfigurationResult {
@@ -58,6 +57,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.hosts?.map(normalizeHostsForAgents),
         preconfiguredOutput.hosts.map(normalizeHostsForAgents)
       )) ||
+    (preconfiguredOutput.ssl && !isEqual(preconfiguredOutput.ssl, existingOutput.ssl)) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
     existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
     existingOutput.config_yaml !== preconfiguredOutput.config_yaml
@@ -181,9 +181,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
-    // During setup, we'll try to install preconfigured packages from the versions bundled with Kibana
-    // whenever possible
-    preferredSource: 'bundled',
   });
 
   const fulfilledPackages = [];
@@ -360,18 +357,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  // Handle automatic package policy upgrades for managed packages and package with
-  // the `keep_policies_up_to_date` setting enabled
-  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
-  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
-    soClient,
-    esClient,
-    allPackagePolicyIds.items
-  );
-
   return {
     policies: fulfilledPolicies.map((p) =>
       p.policy
@@ -388,7 +373,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
 }
 

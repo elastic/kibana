@@ -14,7 +14,7 @@ import {
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
@@ -79,7 +79,7 @@ export const createRulesRoute = (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
           esClient.asCurrentUser,

@@ -1,0 +1,125 @@
+[[resolve-migrations-failures]]
+=== Resolve migration failures
+
+Migrating {kib} primarily involves migrating saved object documents to be compatible
+with the new version.
+
+[float]
+==== Saved object migration failures
+
+If {kib} unexpectedly terminates while migrating a saved object index, {kib} automatically attempts to
+perform the migration again when the process restarts. Do not delete any saved objects indices to
+to fix a failed migration. Unlike previous versions, {kib} 7.12.0 and
+later does not require deleting indices to release a failed migration lock.
+
+If upgrade migrations fail repeatedly, refer to
+<<preventing-migration-failures, preparing for migration>>.
+When you address the root cause for the migration failure,
+{kib} automatically retries the migration.
+If you're unable to resolve a failed migration, contact Support.
+
+
+[float]
+[[upgrade-migrations-old-indices]]
+==== Old `.kibana_N` indices
+
+After the migrations complete, multiple {kib} indices are created in {es}: (`.kibana_1`, `.kibana_2`, `.kibana_7.12.0` etc).
+{kib} only uses the index that the `.kibana` and `.kibana_task_manager` aliases point to.
+The other {kib} indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling {kib} back to a previous version.
+
+[float]
+==== Known issues with {fleet} beta
+If you see a`timeout_exception` or `receive_timeout_transport_exception` error,
+it might be from a known known issue in 7.12.0 if you tried the {fleet} beta.
+Upgrade migrations fail because of a large number of documents in the `.kibana` index,
+which causes {kib} to log errors such as:
+
+[source,sh]
+--------------------------------------------
+Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [receive_timeout_transport_exception]: [instance-0000000002][10.32.1.112:19541][cluster:monitor/task/get] request_id [2648] timed out after [59940ms]
+
+Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [timeout_exception]: Timed out waiting for completion of [org.elasticsearch.index.reindex.BulkByScrollTask@6a74c54]
+--------------------------------------------
+
+For instructions on how to mitigate the known issue, refer to https://github.com/elastic/kibana/issues/95321[the GitHub issue].
+
+
+[float]
+==== Corrupt saved objects
+To find and remedy problems caused by corrupt documents, we highly recommend testing your {kib} upgrade in a development cluster,
+especially when there are custom integrations that create saved objects in your environment.
+
+Saved objects that are corrupted through manual editing or integrations cause migration
+failures with a log message, such as `Unable to migrate the corrupt Saved Object document ...`.
+For a successful upgrade migration, you must fix or delete corrupt documents.
+
+For example, you receive the following error message:
+
+[source,sh]
+--------------------------------------------
+Unable to migrate the corrupt saved object document with _id: 'marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275'. To allow migrations to proceed, please delete this document from the [.kibana_7.12.0_001] index.
+--------------------------------------------
+
+To delete the documents that cause migrations to fail, take the following steps:
+
+. Remove the write block which the migration system has placed on the previous index:
++
+[source,sh]
+--------------------------------------------
+PUT .kibana_7.12.1_001/_settings
+{
+  "index": {
+    "blocks.write": false
+  }
+}
+--------------------------------------------
+
+. Delete the corrupt document:
++
+[source,sh]
+--------------------------------------------
+DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275
+--------------------------------------------
+
+. Restart {kib}.
++
+The dashboard with the `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` ID that belongs to the `marketing_space` space **is no longer available**.
+
+[float]
+[[unknown-saved-object-types]]
+==== Documents for unknown saved objects
+Migrations will fail if saved objects belong to an unknown
+saved object type. Unknown saved objects are typically caused by
+to the {es} index, or by disabling a plugin that had previously
+created a saved object.
+
+We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant]
+to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
+object types will also log the following warning message:
+
+[source,sh]
+--------------------------------------------
+CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the ".kibana_7.17.0_001" index after the current upgrade completes.
+--------------------------------------------
+
+If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:
+
+[source,sh]
+--------------------------------------------
+Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents were found for unknown saved object types. To proceed with the migration, please delete these documents from the ".kibana_7.17.0_001" index.
+--------------------------------------------
+
+[float]
+==== Incompatible settings or mappings
+Matching index templates that specify `settings.refresh_interval` or
+`mappings` are known to interfere with {kib} upgrades.
+This can happen when index templates are defined manually.
+
+To make sure the index templates won't apply to new `.kibana*` indices, narrow down the {data-sources} of any user-defined index templates.
+
+[float]
+==== Incompatible `xpack.tasks.index` configuration setting
+In {kib} 7.5.0 and earlier, when the task manager index is set to `.tasks`
+with the configuration setting `xpack.tasks.index: ".tasks"`,
+upgrade migrations fail. In {kib} 7.5.1 and later, the incompatible configuration
+setting prevents upgrade migrations from starting.

@@ -55,6 +55,7 @@ export const getPresentationUtilContext = () => pluginsStart.presentationUtil.Co
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
+export const getUsageCollection = () => pluginsStart.usageCollection;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

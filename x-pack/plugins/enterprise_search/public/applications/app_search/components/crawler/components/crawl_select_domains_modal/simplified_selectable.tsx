@@ -11,6 +11,7 @@ import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/se
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
+  emptyMessage?: string;
   options: string[];
   selectedOptions: string[];
   onChange(selectedOptions: string[]): void;
@@ -20,7 +21,12 @@ export interface OptionMap {
   [key: string]: boolean;
 }
 
-export const SimplifiedSelectable: React.FC<Props> = ({ options, selectedOptions, onChange }) => {
+export const SimplifiedSelectable: React.FC<Props> = ({
+  emptyMessage,
+  options,
+  selectedOptions,
+  onChange,
+}) => {
   const selectedOptionsMap: OptionMap = selectedOptions.reduce(
     (acc, selectedOption) => ({
       ...acc,
@@ -77,6 +83,7 @@ export const SimplifiedSelectable: React.FC<Props> = ({ options, selectedOptions
             newSelectableOptions.filter((option) => option.checked).map((option) => option.label)
           );
         }}
+        emptyMessage={emptyMessage}
       >
         {(list, search) => (
           <>

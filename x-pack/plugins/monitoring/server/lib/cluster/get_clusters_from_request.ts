@@ -54,7 +54,6 @@ export async function getClustersFromRequest(
 ) {
   const { filebeatIndexPattern } = indexPatterns;
 
-  const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   let clusters: Cluster[] = [];
@@ -246,7 +245,7 @@ export async function getClustersFromRequest(
   // check ccr configuration
   const isCcrEnabled = await checkCcrEnabled(req, '*');
 
-  const kibanaUuid = config.get('server.uuid')!;
+  const kibanaUuid = req.server.instanceUuid;
 
   return getClustersSummary(req.server, clusters as EnhancedClusters[], kibanaUuid, isCcrEnabled);
 }

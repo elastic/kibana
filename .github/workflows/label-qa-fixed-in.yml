@@ -1,6 +1,13 @@
 name: Add QA labels to Fleet issues
 on:
-  pull_request:
+  # pull_request_target allows running actions on PRs from forks with a read/write GITHUB_TOKEN, but it will not allow
+  # running workflows defined in the PRs itself, only workflows already merged into the target branch. This avoids
+  # potential vulnerabilities that could allow someone to open a PR and retrieve secrets.
+  # It's important that this workflow never runs any checkout actions which could be used to circumvent this protection.
+  # See these links for more information:
+  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/ 
+  # - https://nathandavison.com/blog/github-actions-and-the-threat-of-malicious-pull-requests
+  pull_request_target:
     types:
       - closed
 
@@ -37,7 +44,8 @@ jobs:
               }
             }
           prnumber: ${{ github.event.number }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: sergeysova/jq-action@v2
         id: issues_to_label
         with:
@@ -75,4 +83,5 @@ jobs:
             }
           issueid: ${{ matrix.issueNodeId }}
           labelids: ${{ needs.fetch_issues_to_label.outputs.label_ids }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

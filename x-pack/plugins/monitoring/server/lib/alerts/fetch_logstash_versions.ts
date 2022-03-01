@@ -41,7 +41,7 @@ export async function fetchLogstashVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('logstash_stats', 'logstash.node_stats'),
+            createDatasetFilter('logstash_stats', 'node_stats', 'logstash.node_stats'),
             {
               range: {
                 timestamp: {
@@ -104,7 +104,7 @@ export async function fetchLogstashVersions(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

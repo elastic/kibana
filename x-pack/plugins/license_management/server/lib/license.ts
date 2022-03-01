@@ -17,7 +17,8 @@ interface PutLicenseArg {
 
 export async function putLicense({ acknowledge, client, licensing, license }: PutLicenseArg) {
   try {
-    const { body: response } = await client.asCurrentUser.license.post({
+    const response = await client.asCurrentUser.license.post({
+      // @ts-expect-error license is not typed in LM code
       body: license,
       acknowledge,
     });

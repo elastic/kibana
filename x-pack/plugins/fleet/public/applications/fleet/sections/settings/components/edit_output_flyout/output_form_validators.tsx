@@ -73,7 +73,7 @@ export function validateName(value: string) {
 }
 
 export function validateCATrustedFingerPrint(value: string) {
-  if (value !== '' && !value.match(/^[a-zA-Z0-9]$/)) {
+  if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.caTrusterdFingerprintInvalidErrorMessage', {
         defaultMessage: 'CA trusted fingerprint should be a base64 CA sha256 fingerprint',

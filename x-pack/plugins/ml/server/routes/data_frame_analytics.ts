@@ -96,7 +96,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       return true;
     }
 
-    const { body } = await client.asCurrentUser.security.hasPrivileges({
+    const body = await client.asCurrentUser.security.hasPrivileges({
       body: {
         index: [
           {
@@ -130,7 +130,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDataFrameAnalytics({
+        const body = await mlClient.getDataFrameAnalytics({
           size: 1000,
         });
         return response.ok({
@@ -167,7 +167,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const { analyticsId } = request.params;
         const { excludeGenerated } = request.query;
 
-        const { body } = await mlClient.getDataFrameAnalytics({
+        const body = await mlClient.getDataFrameAnalytics({
           id: analyticsId,
           ...(excludeGenerated ? { exclude_generated: true } : {}),
         });
@@ -197,7 +197,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDataFrameAnalyticsStats({ size: 1000 });
+        const body = await mlClient.getDataFrameAnalyticsStats({ size: 1000 });
         return response.ok({
           body,
         });
@@ -229,7 +229,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.getDataFrameAnalyticsStats({
+        const body = await mlClient.getDataFrameAnalyticsStats({
           id: analyticsId,
         });
         return response.ok({
@@ -266,7 +266,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.putDataFrameAnalytics(
+        const body = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
             // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
@@ -304,7 +304,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.evaluateDataFrame(
+        const body = await mlClient.evaluateDataFrame(
           {
             // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
@@ -342,7 +342,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.explainDataFrameAnalytics(
+        const body = await mlClient.explainDataFrameAnalytics(
           {
             body: request.body,
           },
@@ -391,7 +391,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
 
           try {
             // Check if analyticsId is valid and get destination index
-            const { body } = await mlClient.getDataFrameAnalytics({
+            const body = await mlClient.getDataFrameAnalytics({
               id: analyticsId,
             });
             if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
@@ -484,7 +484,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.startDataFrameAnalytics({
+        const body = await mlClient.startDataFrameAnalytics({
           id: analyticsId,
         });
         return response.ok({
@@ -519,7 +519,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.stopDataFrameAnalytics({
+        const body = await mlClient.stopDataFrameAnalytics({
           id: request.params.analyticsId,
           force: request.query.force,
         });
@@ -556,7 +556,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.updateDataFrameAnalytics(
+        const body = await mlClient.updateDataFrameAnalytics(
           {
             id: analyticsId,
             body: request.body,
@@ -632,7 +632,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const results: { [id: string]: { exists: boolean } } = {};
         for (const id of analyticsIds) {
           try {
-            const { body } = allSpaces
+            const body = allSpaces
               ? await client.asInternalUser.ml.getDataFrameAnalytics({
                   id,
                 })

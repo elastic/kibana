@@ -27,7 +27,6 @@ export async function getErrorGroupIds({
       query: {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
-        transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         kuery: '',
       },
