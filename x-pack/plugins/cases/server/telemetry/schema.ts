@@ -38,7 +38,7 @@ export const casesSchema: CasesTelemetrySchema = {
     maxAttachedToACase: long,
   },
   externalServices: {
-    totalPushes: long,
+    all: { total: long },
     maxPushesOnACase: long,
   },
   configuration: {

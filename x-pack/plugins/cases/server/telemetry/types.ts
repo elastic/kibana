@@ -52,7 +52,7 @@ export interface CasesTelemetry {
     maxAttachedToACase: number;
   };
   externalServices: {
-    totalPushes: number;
+    all: { total: number };
     maxPushesOnACase: number;
   };
   configuration: {
